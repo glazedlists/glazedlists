@@ -238,6 +238,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                         enqueueEvent(ListEvent.DELETE, compressedIndex, true);
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
                     } else if(oldNeighbourSide == NEIGHBOUR_LEFT) {
+                        if(compressedIndex-1 >= 0) enqueueEvent(ListEvent.UPDATE, compressedIndex-1, false);
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
                     } else if(oldNeighbourSide == NEIGHBOUR_RIGHT) {
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, false);

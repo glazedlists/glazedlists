@@ -467,6 +467,39 @@ public class SortedListTest extends TestCase {
     }
 
     /**
+     * Test that values that are indistinguishable by the SortedList are ordered
+     * by their index.
+     */
+    public void testEqualValuesOrderedByIndex() {
+        // create a sorted list that cannot distinguish between the data items
+        Comparator intCompareAt0 = new StringLengthComparator();
+        sortedList.dispose();
+        sortedList = new SortedList(unsortedList, intCompareAt0);
+
+        // populate the unsorted list
+        unsortedList.add(0, "chaos"); // c
+        unsortedList.add(1, "fiery"); // c f
+        unsortedList.add(2, "gecko"); // c f g
+        unsortedList.add(0, "banjo"); // b c f g
+        unsortedList.add(2, "dingo"); // b c d f g
+        unsortedList.add(5, "hippo"); // b c d f g h
+        unsortedList.add(0, "album"); // a b c d f g h
+        unsortedList.add(4, "eerie"); // a b c d e f g h
+        assertEquals(unsortedList, sortedList);
+    }
+    
+    /**
+     * Compares Strings by their length.
+     */
+    class StringLengthComparator implements Comparator {
+        public int compare(Object a, Object b) {
+            String stringA = (String)a;
+            String stringB = (String)b;
+            return stringA.length() - stringB.length();
+        }
+    }
+
+    /**
      * Explicit comparator for Kevin's sanity!
      */
     class IntegerComparator implements Comparator {

@@ -137,14 +137,14 @@ public class PopularityListTest extends TestCase {
      */
     public void testEdgeSets() {
         EventList source = new BasicEventList();
-        source.add("Audi");
-        source.add("Audi");
-        source.add("Audi");
-        source.add("BMW");
-        source.add("Chevy");
-        source.add("Chevy");
-        source.add("Chevy");
-        source.add("Datsun");
+        source.add("Audi");      // A
+        source.add("Audi");      // A A
+        source.add("Audi");      // A A A
+        source.add("BMW");       // A A A B
+        source.add("Chevy");     // A A A B C
+        source.add("Chevy");     // A A A B C C
+        source.add("Chevy");     // A A A B C C C
+        source.add("Datsun");    // A A A B C C C D
 
         SortedList sortedList = new SortedList(source);
         PopularityList popularityList = new PopularityList(source);
@@ -174,6 +174,23 @@ public class PopularityListTest extends TestCase {
         source.set(7, "Chevy");  // A B B B C C C C
     }
     
+    /**
+     * Tests that the PopularityList can handle edge case sets.
+     */
+    public void testLeftEdgeSet() {
+        EventList source = new BasicEventList();
+        SortedList sortedList = new SortedList(source);
+        PopularityList popularityList = new PopularityList(source);
+        new PopularityListValidator(popularityList, sortedList);
+        
+        // in sorted order changes
+        source.add(0, "Audi");   // A
+        source.add(1, "Audi");   // A A
+        source.add(2, "BMW");    // A A B
+        source.add(3, "BMW");    // A A B B
+        source.set(1, "BMW");    // A B B B
+    }
+
     /**
      * Validates that the state of the PopularityList is correct. Because this class
      * is a Listener, it can detect the exact change that causes the PopularityList

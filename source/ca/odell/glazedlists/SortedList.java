@@ -414,17 +414,22 @@ public final class SortedList extends TransformedList {
         public int compare(Object alpha, Object beta) {
             Object alphaObject = alpha;
             Object betaObject = beta;
+            int alphaIndex = -1;
+            int betaIndex = -1;
             if(alpha instanceof IndexedTreeNode) {
                 IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
-                int alphaIndex = alphaTreeNode.getIndex();
+                alphaIndex = alphaTreeNode.getIndex();
                 alphaObject = source.get(alphaIndex);
             }
             if(beta instanceof IndexedTreeNode) {
                 IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
-                int betaIndex = betaTreeNode.getIndex();
+                betaIndex = betaTreeNode.getIndex();
                 betaObject = source.get(betaIndex);
             }
-            return comparator.compare(alphaObject, betaObject);
+            int result = comparator.compare(alphaObject, betaObject);
+            if(result != 0) return result;
+            if(alphaIndex != -1 && betaIndex != -1) return alphaIndex - betaIndex;
+            return 0;
         }
     }
 
