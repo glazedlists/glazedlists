@@ -30,7 +30,8 @@ public class Demo {
         sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
         
         // everything table
-		Table everythingTable = new Table(sashForm, SWT.MULTI | SWT.FULL_SELECTION | SWT.CHECK);
+		Table everythingTable = new Table(sashForm, SWT.MULTI | SWT.FULL_SELECTION);
+		//Table everythingTable = new Table(sashForm, SWT.MULTI | SWT.FULL_SELECTION | SWT.CHECK);
 
         // checked table
 		Table checkedTable = new Table(sashForm, SWT.MULTI | SWT.FULL_SELECTION | SWT.CHECK);
