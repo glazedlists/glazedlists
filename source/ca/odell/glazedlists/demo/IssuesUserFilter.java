@@ -15,7 +15,6 @@ import javax.swing.event.*;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
 
-import ca.odell.glazedlists.test.*;
 /**
  * An IssuesUserFilter is a filter list that filters based on the selected
  * users.
