@@ -22,6 +22,7 @@
     <delete dir="classes"/>
     <!-- Delete the documentation directories -->
     <delete dir="docs/api"/>
+    <delete dir="docs/impl"/>
     <!-- Delete temporary files from JEdit -->
     <delete>
       <fileset dir="${basedir}" defaultexcludes="no">
