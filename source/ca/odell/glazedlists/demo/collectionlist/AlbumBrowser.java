@@ -6,21 +6,22 @@
  */
 package ca.odell.glazedlists.demo.collectionlist;
 
-import ca.odell.glazedlists.CollectionListModel;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CollectionList;
+import ca.odell.glazedlists.CollectionListModel;
 import ca.odell.glazedlists.swing.EventListModel;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.border.TitledBorder;
-import java.io.*;
-import java.util.*;
-import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.util.AbstractList;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -28,7 +29,7 @@ import java.awt.event.ActionEvent;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-class CollectionListTest {
+public class AlbumBrowser {
 	public static void main(String[] args) throws Exception {
 		File song_file = null;
 		if (args.length > 0) {
@@ -184,7 +185,14 @@ class CollectionListTest {
 		});
 
 		JFrame frame = new JFrame("Test");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		// Make sure we're not running in the launcher
+		if (System.getProperty("in_launcher") == null) {
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		} else {
+			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		}
+
 		frame.setContentPane(panel2);
 		frame.pack();
 		frame.setVisible(true);
@@ -204,7 +212,7 @@ class CollectionListTest {
 			// Load the default file
 			else {
 				try {
-					InputStream is = CollectionListTest.class.getResourceAsStream("Library.txt");
+					InputStream is = AlbumBrowser.class.getResourceAsStream("Library.txt");
 					if (is != null) {
 						in = new InputStreamReader(is);
 					} else {
