@@ -56,6 +56,11 @@ public class IssuesBrowser extends Applet {
             constructStandalone();
         }
         
+        // debug a problem where the thread is getting interrupted
+        if(Thread.currentThread().isInterrupted()) {
+            new Exception("thread has been interrupted").printStackTrace();
+        }
+        
         // start loading the issues
         new Thread(new IssueLoader()).start();
     }
