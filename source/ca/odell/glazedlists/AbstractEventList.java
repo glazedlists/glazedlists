@@ -60,7 +60,7 @@ abstract class AbstractEventList implements EventList, Serializable {
      * Registers the specified listener to receive notification of changes
      * to this list.
      */
-    public final void addListEventListener(ListEventListener listChangeListener) {
+    public void addListEventListener(ListEventListener listChangeListener) {
         updates.addListEventListener(listChangeListener);
     }
     

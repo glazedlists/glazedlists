@@ -29,6 +29,9 @@ import java.util.*;
  * the EventTableViewer. This is because the TableCheckFilterList uses methods on
  * the Table that depend on table indices.
  *
+ * <p>This class is not thread safe. It must be used exclusively with the SWT
+ * event handler thread.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class TableCheckFilterList extends AbstractFilterList implements SelectionListener {
@@ -161,6 +164,41 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
             source.set(sourceIndex, checkable);
         } finally {
             getReadWriteLock().writeLock().unlock();
+        }
+    }
+    
+    /**
+     * Registers the specified listener to receive notification of changes
+     * to this list.
+     *
+     * <p>The only listener added to a TableCheckFilterList may be a EventTableViewer.
+     * This is because the TableCheckFilterList may not have any lists between it
+     * and the EventTableViewer.
+     */
+    public void addListEventListener(ListEventListener listChangeListener) {
+        if(!(listChangeListener instanceof EventTableViewer)) {
+            throw new IllegalArgumentException("TableCheckFilterList only accepts EventTableViewer as a listener");
+        }
+        
+        super.addListEventListener(listChangeListener);
+        super.addListEventListener(new TableChecker());
+    }
+
+    /**
+     * The TableChecker checks the table rows after they have been updated.
+     */
+    class TableChecker implements ListEventListener {
+        public void listChanged(ListEvent listChanges) {
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+                if(changeType == ListEvent.INSERT || changeType == ListEvent.UPDATE) {
+                    int sourceIndex = getSourceIndex(changeIndex);
+                    Checkable checkable = (Checkable)source.get(sourceIndex);
+                    boolean checked = checkable.isChecked();
+                    table.getItem(changeIndex).setChecked(checked);
+                }
+            }
         }
     }
 }

@@ -25,6 +25,9 @@ import java.util.*;
 /**
  * A helper that displays an EventList in an SWT table.
  *
+ * <p>This class is not thread safe. It must be used exclusively with the SWT
+ * event handler thread.
+ *
  * <p><strong>Warning:</strong> This class is a a developer preview and subject to
  * many bugs and API changes.
  *

@@ -27,6 +27,9 @@ import org.eclipse.swt.graphics.*;
 /**
  * A filter list that shows only elements that contain the filter text.
  *
+ * <p>This class is not thread safe. It must be used exclusively with the SWT
+ * event handler thread.
+ *
  * <p><strong>Warning:</strong> This class is a a developer preview and subject to
  * many bugs and API changes.
  *
