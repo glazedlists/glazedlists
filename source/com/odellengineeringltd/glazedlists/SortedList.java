@@ -216,7 +216,7 @@ public final class SortedList extends WritableMutationList implements ListChange
         getReadWriteLock().writeLock().lock();
         try {
 
-            System.out.println("  > Sorting a list of size: " + source.size());
+            //System.out.println("  > Sorting a list of size: " + source.size());
             
             // save this comparator
             this.comparator = comparator;
@@ -243,7 +243,7 @@ public final class SortedList extends WritableMutationList implements ListChange
             updates.appendChange(0, size() - 1, ListChangeBlock.INSERT);
             updates.commitAtomicChange();
             
-            System.out.println("  < Sorted  a list of size: " + source.size());
+            //System.out.println("  < Sorted  a list of size: " + source.size());
 
         } finally {
             getReadWriteLock().writeLock().unlock();
