@@ -31,6 +31,7 @@ public final class ListEventAssembler {
     /** the list of lists of change blocks */
     private ArrayList atomicChanges = new ArrayList();
     private ArrayList reorderMaps = new ArrayList();
+    private int atomicListOffset = 0;
     private int oldestChange = 0;
     
     /** the current working copy of the atomic change */
@@ -128,7 +129,7 @@ public final class ListEventAssembler {
         reorderMap = null;
         
         // calculate the oldest change still needed
-        int oldestRequiredChange = atomicChanges.size(); 
+        int oldestRequiredChange = atomicChanges.size() + atomicListOffset; 
         for(int e = 0; e < listenerEvents.size(); e++) {
             ListEvent listChangeEvent = (ListEvent)listenerEvents.get(e);
             int mark = listChangeEvent.getMark();
@@ -137,9 +138,11 @@ public final class ListEventAssembler {
         }
         // recycle every change that is no longer used
         for(int i = oldestChange; i < oldestRequiredChange; i++) {
-            List recycledChanges = (List)atomicChanges.get(i);
+            List recycledChanges = (List)atomicChanges.get(0);
             changePool.addAll(recycledChanges);
-            atomicChanges.set(i, null);
+            atomicChanges.remove(0);
+            reorderMaps.remove(0);
+            atomicListOffset++;
         }
         oldestChange = oldestRequiredChange;
     }
@@ -327,7 +330,7 @@ public final class ListEventAssembler {
      * Gets the total number of blocks in the specified atomic change.
      */
     int getBlockCount(int atomicCount) {
-        List atomicChange = (List)atomicChanges.get(atomicCount);
+        List atomicChange = (List)atomicChanges.get(atomicCount - atomicListOffset);
         return atomicChange.size();
     }
 
@@ -335,7 +338,7 @@ public final class ListEventAssembler {
      * Gets the total number of atomic changes so far.
      */
     int getAtomicCount() {
-        return atomicChanges.size();
+        return atomicChanges.size() + atomicListOffset;
     }
     
     /**
@@ -344,7 +347,7 @@ public final class ListEventAssembler {
      * monitoring sequences. Such blocks may not be available.
      */
     ListEventBlock getBlock(int atomicCount, int block) {
-        List atomicChange = (List)atomicChanges.get(atomicCount);
+        List atomicChange = (List)atomicChanges.get(atomicCount - atomicListOffset);
         return (ListEventBlock)atomicChange.get(block);
     }
     
@@ -353,7 +356,7 @@ public final class ListEventAssembler {
      * change is not a reordering.
      */
     int[] getReorderMap(int atomicCount) {
-        return (int[])reorderMaps.get(atomicCount);
+        return (int[])reorderMaps.get(atomicCount - atomicListOffset);
     }
     
     /**
