@@ -473,8 +473,6 @@ final class CTPConnection {
             return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
         } catch(ParseException e) {
             return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
-        } catch(IOException e) {
-            return close(e);
         }
     }
 

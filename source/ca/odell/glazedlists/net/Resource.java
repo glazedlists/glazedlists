@@ -10,6 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.*;
 
 /**
  * A resource is a dynamic Object that can publish its changes as a series of deltas.
@@ -22,18 +23,18 @@ public interface Resource {
     /**
      * Get a binary snapshot of this resource in its current state.
      */
-    public List toSnapshot();
+    public Bufferlo toSnapshot();
 
     /**
      * Populate this resource with the data from the specified snapshot.
      */
-    public void fromSnapshot(List snapshot);
+    public void fromSnapshot(Bufferlo snapshot);
     
     /**
      * Apply the specified delta to the binary image of this resource. After the
      * update has been applied, all {@link ResourceListener}s must be notified.
      */
-    public void update(List delta);
+    public void update(Bufferlo delta);
     
     /**
      * Register the {@link ResourceListener} to receive notification when this

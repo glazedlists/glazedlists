@@ -10,6 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.*;
 
 /**
  * A resource that is being published on the network.
@@ -47,6 +48,9 @@ class PeerResource implements ResourceListener {
         // build a factory for data blocks
         peerBlockFactory = new PeerBlockFactory(resourceName);
         peerBlockFactory.setSessionId(new Random(System.currentTimeMillis()).nextInt());
+        
+        // listen for updates
+        resource.addResourceListener(this);
     }
     
     /**
@@ -62,13 +66,21 @@ class PeerResource implements ResourceListener {
         
         // subscribe to this resource
         PeerBlock block = peerBlockFactory.subscribe();
+        publisher.addIncomingSubscription(this);
         publisher.writeBlock(this, block);
+    }
+    
+    /**
+     * Gets the name of this resource.
+     */
+    public String getResourceName() {
+        return resourceName;
     }
     
     /**
      * Handles a change in a local resource contained by the specified delta.
      */
-    public void resourceUpdated(Resource resource, List delta) {
+    public void resourceUpdated(Resource resource, Bufferlo delta) {
         // update the internal state
         updateId++;
         
@@ -82,7 +94,6 @@ class PeerResource implements ResourceListener {
         for(int s = 0; s < subscribers.size(); s++) {
             PeerConnection subscriber = (PeerConnection)subscribers.get(s);
             subscriber.writeBlock(this, block);
-            throw new IllegalStateException("neet to roll back block!");
         }
     }
     

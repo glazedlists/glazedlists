@@ -10,6 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+import java.text.ParseException;
 import ca.odell.glazedlists.util.impl.*;
 
 
@@ -89,13 +90,18 @@ class PeerConnection implements CTPHandler {
         currentBlock.append(data);
         
         // handle all blocks
-        PeerBlock block = null;
-        while((block = PeerBlock.fromBytes(currentBlock)) != null) {
-            if(block.getAction().equals(Peer.ACTION_SUBSCRIBE)) remoteSubscribe(block);
-            else if(block.getAction().equals(Peer.ACTION_SUBSCRIBE_CONFIRM)) remoteSubscribeConfirm(block);
-            else if(block.getAction().equals(Peer.ACTION_UPDATE)) remoteUpdate(block);
-            else if(block.getAction().equals(Peer.ACTION_UNSUBSCRIBE)) remoteUnsubscribe(block);
-            else throw new IllegalStateException();
+        try {
+            PeerBlock block = null;
+            while((block = PeerBlock.fromBytes(currentBlock)) != null) {
+                if(block.getAction().equals(Peer.ACTION_SUBSCRIBE)) remoteSubscribe(block);
+                else if(block.getAction().equals(Peer.ACTION_SUBSCRIBE_CONFIRM)) remoteSubscribeConfirm(block);
+                else if(block.getAction().equals(Peer.ACTION_UPDATE)) remoteUpdate(block);
+                else if(block.getAction().equals(Peer.ACTION_UNSUBSCRIBE)) remoteUnsubscribe(block);
+                else throw new IllegalStateException();
+            }
+        // if the data is corrupted, close the connection
+        } catch(ParseException e) {
+            source.close(e);
         }
     }
     
@@ -123,7 +129,7 @@ class PeerConnection implements CTPHandler {
         // make sure we're not already subscribed
         String resourceName = block.getResourceName();
         PeerResource incomingSubscription = (PeerResource)incomingSubscriptions.get(resourceName);
-        if(incomingSubscription != null) throw new IllegalStateException("Connection already subscribed to " + resourceName);
+        if(incomingSubscription == null) throw new IllegalStateException("Connection not subscribed to " + resourceName);
         
         // handle the confirmation
         incomingSubscription.remoteSubscribeConfirm(this, block);
@@ -155,6 +161,13 @@ class PeerConnection implements CTPHandler {
         // handle the unsubscribe
         localResource.remoteUnsubscribe(this, block);
         outgoingPublications.remove(resourceName);
+    }
+    
+    /**
+     * Addes a subscription to the specified resource.
+     */
+    public void addIncomingSubscription(PeerResource resource) {
+        incomingSubscriptions.put(resource.getResourceName(), resource);
     }
     
     /**

@@ -10,6 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.*;
 
 /**
  * A factory for creating PeerBlocks.
@@ -56,14 +57,14 @@ class PeerBlockFactory {
     /**
      * Create a new subscribe block.
      */
-    public PeerBlock subscribeConfirm(int updateId, List snapshot) {
+    public PeerBlock subscribeConfirm(int updateId, Bufferlo snapshot) {
         return new PeerBlock(resourceName, sessionId, Peer.ACTION_SUBSCRIBE_CONFIRM, updateId, snapshot);
     }
     
     /**
      * Create a new subscribe block.
      */
-    public PeerBlock update(int updateId, List delta) {
+    public PeerBlock update(int updateId, Bufferlo delta) {
         return new PeerBlock(resourceName, sessionId, Peer.ACTION_UPDATE, updateId, delta);
     }
     

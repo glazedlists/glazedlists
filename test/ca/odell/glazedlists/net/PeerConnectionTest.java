@@ -58,16 +58,28 @@ public class PeerConnectionTest extends TestCase {
             peer.subscribe(clone, resourceName, "localhost", serverPort);
             
             try {
-                while(true) {
-                    Object lock = new Object();
-                    synchronized(lock) {
-                        lock.wait(1000);
-                    }
+                Object lock = new Object();
+                synchronized(lock) {
+                    lock.wait(1000);
                 }
             } catch(Exception e) {
                 e.printStackTrace();
             }
             
+            stringResource.setValue("World O Hell");
+            
+            try {
+                Object lock = new Object();
+                synchronized(lock) {
+                    lock.wait(1000);
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            
+            System.out.println("ORIG  VALUE: " + stringResource.getValue());
+            System.out.println("CLONE VALUE: " + clone.getValue());
+
         } catch(Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

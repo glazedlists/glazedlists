@@ -136,6 +136,7 @@ public class Bufferlo implements CharSequence {
      * Read the specified bytes into a new Bufferlo. The returned buffer is read-only.
      */
     public Bufferlo consume(int bytes) {
+        assert(bytes >= 0 && bytes <= length());
         Bufferlo result = duplicate();
         result.limit(bytes);
         skip(bytes);
@@ -211,6 +212,7 @@ public class Bufferlo implements CharSequence {
      * Skips the specified number of bytes.
      */
     public void skip(int bytes) {
+        assert(bytes >= 0 && bytes <= length());
         int bytesLeft = bytes;
         for(ListIterator b = buffers.listIterator(); b.hasNext(); ) {
             ByteBuffer current = (ByteBuffer)b.next();
@@ -394,7 +396,7 @@ public class Bufferlo implements CharSequence {
      *      index is volatile because further operations on this ByteBufferParser
      *      may influence the location of the specified regular expression.
      */
-    public int indexOf(String regex) throws IOException {
+    public int indexOf(String regex) {
         Matcher matcher = Pattern.compile(regex).matcher(this);
         if(!matcher.find()) return -1;
         return matcher.start();
@@ -407,7 +409,7 @@ public class Bufferlo implements CharSequence {
      * @throws ParseException if the specified expression is not in the input buffer
      * @return the number of bytes consumed.
      */
-    public int consume(String regex) throws IOException, ParseException {
+    public int consume(String regex) throws ParseException {
         Matcher matcher = Pattern.compile(regex).matcher(this);
         if(!matcher.find()) throw new ParseException(regex + " is not in current buffer", 0);
         if(matcher.start() != 0) throw new ParseException(regex + " is not a prefix of " + this, 0);
@@ -421,7 +423,7 @@ public class Bufferlo implements CharSequence {
      *
      * @throws ParseException if the specified expression is not in the input buffer
      */
-    public String readUntil(String regex) throws IOException, ParseException {
+    public String readUntil(String regex) throws ParseException {
         return readUntil(regex, true);
     }
     
@@ -432,7 +434,7 @@ public class Bufferlo implements CharSequence {
      *      regular expression, or false to not modify the buffer
      * @throws ParseException if the specified expression is not in the input buffer
      */
-    public String readUntil(String regex, boolean consume) throws IOException, ParseException {
+    public String readUntil(String regex, boolean consume) throws ParseException {
         Matcher matcher = Pattern.compile(regex).matcher(this);
         if(!matcher.find()) throw new ParseException(regex + " is not in current buffer", 0);
         String result = subSequence(0, matcher.start()).toString();

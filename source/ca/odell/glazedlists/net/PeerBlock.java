@@ -11,6 +11,7 @@ import java.util.*;
 import java.nio.*;
 import java.io.*;
 import ca.odell.glazedlists.util.impl.*;
+import java.text.ParseException;
 
 /**
  * A binary message between peers.
@@ -32,12 +33,12 @@ class PeerBlock {
     private int updateId = -1;
     
     /** the binary data of this block */
-    private List payload = null;
+    private Bufferlo payload = null;
     
     /**
      * Create a new PeerBlock.
      */
-    public PeerBlock(String resourceName, int sessionId, String action, int updateId, List payload) {
+    public PeerBlock(String resourceName, int sessionId, String action, int updateId, Bufferlo payload) {
         this.resourceName = resourceName;
         this.sessionId = sessionId;
         this.action = action;
@@ -52,15 +53,92 @@ class PeerBlock {
      *      result may be null indicating an incomplete PeerBlock. There may be
      *      multiple PeerBlocks available in the specified list of bytes.
      */
-    public static PeerBlock fromBytes(Bufferlo bytes) {
-        throw new UnsupportedOperationException();
+    public static PeerBlock fromBytes(Bufferlo bytes) throws ParseException {
+        // if a full block is not loaded
+        int blockEndIndex = bytes.indexOf("\\r\\n");
+        if(blockEndIndex == -1) return null;
+        
+        // read the bytes of the first block
+        String blockSizeInDecimal = bytes.readUntil("\\r\\n", false);
+        int blockSizeWithHeaders = Integer.parseInt(blockSizeInDecimal);
+        
+        // if the full block is not loaded, give up
+        int bytesRequired = blockEndIndex + 2 + blockSizeWithHeaders + 2;
+        if(bytes.length() < bytesRequired) {
+            return null;
+        }
+        
+        // consume the size
+        bytes.consume("[0-9]*\\r\\n");
+        
+        // load the headers
+        int lengthBeforeHeaders = bytes.length();
+        Map headers = new TreeMap();
+        while(true) {
+            if(bytes.indexOf("\\r\\n") == 0) break;
+            String key = bytes.readUntil("\\:( )*");
+            String value = bytes.readUntil("\\r\\n");
+            headers.put(key, value);
+        }
+        bytes.consume("\\r\\n");
+        int lengthAfterHeaders = bytes.length();
+        int headersLength = lengthBeforeHeaders - lengthAfterHeaders;
+        
+        // load the data
+        int payloadLength = blockSizeWithHeaders - headersLength;
+        Bufferlo payload = bytes.consume(payloadLength);
+        bytes.consume("\\r\\n");
+        
+        // parse the headers
+        String resourceName = (String)headers.get(Peer.RESOURCE_NAME);
+        String sessionIdString = (String)headers.get(Peer.SESSION_ID);
+        String action = (String)headers.get(Peer.ACTION);
+        String updateIdString = (String)headers.get(Peer.UPDATE_ID);
+        int sessionId = (sessionIdString != null) ? Integer.parseInt(sessionIdString) : -1;
+        int updateId = (updateIdString != null) ? Integer.parseInt(updateIdString) : -1;
+        
+        // return the result
+        return new PeerBlock(resourceName, sessionId, action, updateId, payload);
     }
 
     /**
      * Get the bytes for this block.
      */
     public Bufferlo getBytes() {
-        throw new UnsupportedOperationException();
+        // the writer with no size info
+        Bufferlo writer = new Bufferlo();
+        
+        // populate the map of headers
+        Map headers = new TreeMap();
+        if(resourceName != null) headers.put(Peer.RESOURCE_NAME, resourceName);
+        if(sessionId != -1) headers.put(Peer.SESSION_ID, new Integer(sessionId));
+        if(action != null) headers.put(Peer.ACTION, action);
+        if(updateId != -1) headers.put(Peer.UPDATE_ID, new Integer(updateId));
+        
+        // write the header values
+        for(Iterator i = headers.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry mapEntry = (Map.Entry)i.next();
+            writer.write(mapEntry.getKey().toString());
+            writer.write(": ");
+            writer.write(mapEntry.getValue().toString());
+            writer.write("\r\n");
+        }
+        writer.write("\r\n");
+
+        // write the payload
+        if(payload != null) {
+            writer.append(payload);
+        }
+        
+        // wrap the size
+        Bufferlo writerWithSize = new Bufferlo();
+        writerWithSize.write("" + writer.length());
+        writerWithSize.write("\r\n");
+        writerWithSize.append(writer);
+        writerWithSize.write("\r\n");
+        
+        // all done
+        return writerWithSize;
     }
     
     /**
@@ -73,7 +151,7 @@ class PeerBlock {
     /**
      * Gets the binary data of this block.
      */
-    public List getPayload() {
+    public Bufferlo getPayload() {
         return payload;
     }
     

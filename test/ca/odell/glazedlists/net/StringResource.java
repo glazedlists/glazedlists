@@ -13,6 +13,7 @@ import junit.framework.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.io.UnsupportedEncodingException;
+import ca.odell.glazedlists.util.impl.Bufferlo;
 
 /**
  * A simple resource for a String.
@@ -22,7 +23,7 @@ import java.io.UnsupportedEncodingException;
 public class StringResource implements Resource {
 
     /** the value of this resource */
-    private String value = null;
+    private String value = "";
     
     /** the listeners to this resource */
     private List listeners = new ArrayList();
@@ -30,17 +31,11 @@ public class StringResource implements Resource {
     /**
      * Get a binary snapshot of this resource in its current state.
      */
-    public List toSnapshot() {
-        throw new IllegalStateException("return a list of bytebuffers");
-        /*
+    public Bufferlo toSnapshot() {
         System.out.println("TO SNAPSHOT: " + value);
-        try {
-            if(value == null) return ByteBuffer.wrap(new byte[0]);
-            byte[] bytes = value.getBytes("US-ASCII");
-            return ByteBuffer.wrap(bytes);
-        } catch(UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }*/
+        Bufferlo result = new Bufferlo();
+        result.write(value);
+        return result;
     }
     
     public String getValue() {
@@ -54,27 +49,17 @@ public class StringResource implements Resource {
     /**
      * Populate this resource with the data from the specified snapshot.
      */
-    public void fromSnapshot(List snapshot) {
-        throw new IllegalStateException("return a list of bytebuffers");
-/*        try {
-            if(snapshot.remaining() == 0) {
-                value = null;
-            } else {
-                byte[] bytes = new byte[snapshot.remaining()];
-                value = new String(bytes, "US-ASCII");
-            }
-            System.out.println("FROM SNAPSHOT: " + value);
-            notifyListeners();
-        } catch(UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }*/
+    public void fromSnapshot(Bufferlo snapshot) {
+        value = snapshot.toString();
+        System.out.println("FROM SNAPSHOT: " + value);
+        notifyListeners();
     }
     
     /**
      * Apply the specified delta to the binary image of this resource. After the
      * update has been applied, all {@link ResourceListener}s must be notified.
      */
-    public void update(List delta) {
+    public void update(Bufferlo delta) {
         fromSnapshot(delta);
         System.out.println("UPDATE: " + value);
     }

@@ -10,6 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.*;
 
 /**
  * A resource listener subscribes to the deltas published by a resource.
@@ -21,6 +22,6 @@ public interface ResourceListener {
     /**
      * Handles a change in a resource contained by the specified delta.
      */
-    public void resourceUpdated(Resource resource, List delta);
+    public void resourceUpdated(Resource resource, Bufferlo delta);
 
 }
