@@ -16,6 +16,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 // regular expressions are used to match case insensitively
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,17 +31,23 @@ import java.util.regex.PatternSyntaxException;
  * all of the tokens are retained, while all others are (temporarily) removed
  * from the list. The list dynamically changes as its tokens are edited.
  *
- * The filter list either requires that a <code>Filterator</code> be specified
+ * <p>The filter list either requires that a <code>Filterator</code> be specified
  * in its constructor, or that every object in the source list implements
  * the <code>filterable</code> interface. This can be compared to the sorted
  * collections (ie. TreeSet) and the Comparable/Comparator interfaces.
+ *
+ * <p>Refiltering the list can be triggered in two ways. They are when the user
+ * explicitly refilters by triggering the refilterActionListener or when the
+ * user implicitly refilters by editing the filter edit field. For a performance
+ * boost, turn off "live" mode that filters automatically as the text field is
+ * edited. To do this, call <code>setLive(false)</code>.
  *
  * @see <a href="https://glazedlists.dev.java.net/tutorial/part2/index.html">Glazed
  * Lists Tutorial Part 2 - Text Filtering</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CaseInsensitiveFilterList extends AbstractFilterList implements DocumentListener {
+public class CaseInsensitiveFilterList extends AbstractFilterList {
 
     /** the filters list is currently just a list of Substrings to include */
     private Matcher[] filters = new Matcher[0];
@@ -48,17 +56,20 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
     /** the filterator is used as an alternative to implementing the Filterable interface */
     private Filterator filterator = null;
     
+    /** the document listener responds to changes, it is null when we're not listening */
+    private FilterEditListener filterEditListener = null;
+    
+    /** the action listener performs a refilter when fired */
+    private FilterActionListener filterActionListener = null;
+    
     /**
      * Creates a new filter list that filters elements out of the
      * specified source list.
      */
     public CaseInsensitiveFilterList(EventList source) {
-        super(source);
-        // construct the filter editor
-        filterEdit.getDocument().addDocumentListener(this);
-        // set up the initial list
-        reFilter();
+        this(source, null);
     }
+
     /**
      * Creates a new filter list that uses a Filterator. A Filterator is something
      * that I made up. It is basically a class that knows how to take an arbitrary
@@ -67,8 +78,12 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
     public CaseInsensitiveFilterList(EventList source, Filterator filterator) {
         super(source);
         this.filterator = filterator;
-        // construct the filter editor
-        filterEdit.getDocument().addDocumentListener(this);
+
+        // listen to filter events
+        filterActionListener = new FilterActionListener();
+        filterEdit.addActionListener(filterActionListener);
+        setLive(true);
+
         // set up the initial list
         reFilter();
     }
@@ -80,18 +95,63 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
         return filterEdit;
     }
     
+    /**
+     * Directs this filter to respond to changes to the FilterEdit as they are
+     * made. This uses a DocumentListener and every time the FilterEdit is
+     * modified, the list is refiltered.
+     *
+     * To avoid the processing overhead of filtering for each keystroke, use
+     * a not-live filter edit and trigger the ActionListener using a Button
+     * or by pressing <code>ENTER</code> in the filter edit field.
+     */
+    public void setLive(boolean live) {
+        if(live) {
+            if(filterEditListener == null) {
+                filterEditListener = new FilterEditListener();
+                filterEdit.getDocument().addDocumentListener(filterEditListener);
+            }
+        } else {
+            if(filterEditListener != null) {
+                filterEdit.getDocument().removeDocumentListener(filterEditListener);
+                filterEditListener = null;
+            }
+        }
+    }
     
     /**
-     * Implement the document listener interface to create a text filter.
+     * Gets an ActionListener that refilters the list when it is fired. This
+     * listener can be used to filter when the user presses a JButton.
      */
-    public void changedUpdate(DocumentEvent e) {
-        reFilter();
+    public ActionListener getFilterActionListener() {
+        return filterActionListener;
     }
-    public void insertUpdate(DocumentEvent e) {
-        reFilter();
+    
+    /**
+     * Implement the DocumentListener interface for text filter updates. When
+     * The user edits the filter text field, this updates the filter to reflect
+     * the current value of that text field.
+     */
+    class FilterEditListener implements DocumentListener {
+        public void changedUpdate(DocumentEvent e) {
+            reFilter();
+        }
+        public void insertUpdate(DocumentEvent e) {
+            reFilter();
+        }
+        public void removeUpdate(DocumentEvent e) {
+            reFilter();
+        }
     }
-    public void removeUpdate(DocumentEvent e) {
-        reFilter();
+    
+    /**
+     * Implement the ActionListener interface for text filter updates. When
+     * the user clicks a button (supplied by external code), this
+     * ActionListener can be used to update the filter in response.
+     */
+    class FilterActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            reFilter();
+        }
     }
     
     /**
