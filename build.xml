@@ -74,9 +74,7 @@
       <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
     </tstamp>
     <jar destfile="glazedlists.jar" update="true" index="true">
-      <fileset dir="classes">
-        <exclude name="**/test/**"/>
-      </fileset>
+      <fileset dir="classes"/>
       <fileset dir=".">
         <include name="resources/**"/>
       </fileset>
@@ -101,7 +99,6 @@
     <mkdir dir="classes"/>
     <!-- Compile the java code from source/ into classes/ -->
     <javac destdir="classes" srcdir="source" debug="on" source="1.4">
-      <exclude name="**/test/**"/>
       <exclude name="**/swt/**"/>
     </javac>
   </target>
