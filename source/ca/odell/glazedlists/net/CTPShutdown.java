@@ -31,8 +31,54 @@ class CTPShutdown implements CTPRunnable {
      *      an unrecoverable failure.
      */
     public void run(Selector selector, CTPConnectionManager manager) {
-        logger.warning("selector not cleaned up!");
-        logger.warning("pending tasks not completed!");
-        manager.keepRunning = false;
+        logger.info("Cleaning up " + (selector.keys().size()-1) + " open connections");
+
+        // kill all connections
+        for(Iterator k = selector.keys().iterator(); k.hasNext(); ) {
+            SelectionKey key = (SelectionKey)k.next();
+
+            // close the server socket
+            if((key.interestOps() & SelectionKey.OP_ACCEPT) != 0) {
+                try {
+                    ServerSocketChannel server = (ServerSocketChannel)key.channel();
+                    server.close();
+                    key.cancel();
+                } catch(IOException e) {
+                    logger.warning("Error closing server socket, " + e.getMessage());
+                }
+                
+            // close a connection socket
+            } else {
+                CTPConnection connection = (CTPConnection)key.attachment();
+                connection.close(new ServerShutdownException());
+            }
+        }
+        
+        // stop the server
+        manager.invokeLater(new CTPStop());
+    }
+    
+    /**
+     * Stops the server.
+     */
+    class CTPStop implements CTPRunnable {
+        public void run(Selector selector, CTPConnectionManager manager) {
+            // warn if unsatisfied keys remain
+            if(selector.keys().size() != 0) {
+                logger.warning("Sever stopping with " + selector.keys() + " open connections");
+            } else {
+                logger.warning("Server stopping with no open connections");
+            }
+
+            // break out of the server dispatch loop
+            manager.keepRunning = false;
+        }
+    }
+    
+    /**
+     * Reason a connection is closed when the server is shutdown.
+     */
+    class ServerShutdownException extends Exception {
+        // just the default constructor
     }
 }

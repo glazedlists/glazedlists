@@ -40,7 +40,6 @@ public class CTPChunkTest extends TestCase {
      * Clean up after the test.
      */
     public void tearDown() {
-        connectionManager.stop();
     }
 
     /**
@@ -56,6 +55,8 @@ public class CTPChunkTest extends TestCase {
         
         handlerFactory.addHandler(server);
         connectionManager.connect("localhost", client);
+        
+        connectionManager.stop();
         
         assertTrue("Server did not complete", server.isDone());
         assertTrue("Client did not complete", client.isDone());
@@ -75,6 +76,8 @@ public class CTPChunkTest extends TestCase {
         
         handlerFactory.addHandler(server);
         connectionManager.connect("localhost", client);
+        
+        connectionManager.stop();
         
         assertTrue("Server did not complete", server.isDone());
         assertTrue("Client did not complete", client.isDone());

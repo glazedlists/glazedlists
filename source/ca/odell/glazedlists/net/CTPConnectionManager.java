@@ -31,9 +31,6 @@ public final class CTPConnectionManager implements Runnable {
     /** default port to bind to */
     private static final int DEFAULT_PORT = 5309;
 
-    /** factory for handlers of incoming connections */
-    private CTPHandlerFactory handlerFactory;
-    
     /** port to listen for incoming connections */
     private int listenPort = -1;
     
@@ -45,6 +42,9 @@ public final class CTPConnectionManager implements Runnable {
     
     /** the only thread that shall access the network resources of this manager */
     private Thread networkThread = null;
+    
+    /** factory for handlers of incoming connections */
+    CTPHandlerFactory handlerFactory;
     
     /** whether the connection manager shall shut down */
     boolean keepRunning = false;
@@ -112,7 +112,7 @@ public final class CTPConnectionManager implements Runnable {
         List toExecute = new ArrayList();
             
         // always run the selector handler
-        CTPSelectorHandler selectorHandler = new CTPSelectorHandler(handlerFactory);
+        CTPSelectorHandler selectorHandler = new CTPSelectorHandler();
 
         // continuously select a socket and action on it
         while(keepRunning) {

@@ -23,16 +23,6 @@ class CTPSelectorHandler implements CTPRunnable {
     /** logging */
     private static Logger logger = Logger.getLogger(CTPSelectorHandler.class.toString());
 
-    /** factory for handlers of incoming connections */
-    private CTPHandlerFactory handlerFactory;
-    
-    /**
-     * Creates a new SelectorHandler for the specified handler factory.
-     */
-    public CTPSelectorHandler(CTPHandlerFactory handlerFactory) {
-        this.handlerFactory = handlerFactory;
-    }
-    
     /**
      * Handle each selection key.
      */
@@ -44,7 +34,15 @@ class CTPSelectorHandler implements CTPRunnable {
         } catch(IOException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
-
+        
+        // handle what's ready
+        handleSelectedKeys(selector, manager);
+    }
+    
+    /**
+     * Handles all keys which are ready to be processed.
+     */
+    static void handleSelectedKeys(Selector selector, CTPConnectionManager manager) {
         // Iterate over the selected keys
         for(Iterator i = selector.selectedKeys().iterator(); i.hasNext(); ) {
             SelectionKey key = (SelectionKey)i.next();
@@ -79,8 +77,10 @@ class CTPSelectorHandler implements CTPRunnable {
      * Handle an incoming connection.
      *
      * <p>This creates a CTPServerProtocol to handle the connection.
+     *
+     * @return the SelectionKey that is attached to the created connection.
      */
-    private void handleAccept(SelectionKey key, Selector selector, CTPConnectionManager manager) {
+    static SelectionKey handleAccept(SelectionKey key, Selector selector, CTPConnectionManager manager) {
         // construct the channels and selectors
         SocketChannel channel = null;
         SelectionKey channelKey = null;
@@ -90,18 +90,19 @@ class CTPSelectorHandler implements CTPRunnable {
             channel = server.accept();
 
             // configure the channel for no-blocking and selection
-            if(channel == null) return;
+            if(channel == null) return null;
             channel.configureBlocking(false);
             channelKey = channel.register(selector, 0);
         } catch(IOException e) {
             // the accept failed, there's nothing to clean up
-            return;
+            return null;
         }
 
         // construct handlers for this connection
-        CTPHandler handler = handlerFactory.constructHandler();
+        CTPHandler handler = manager.handlerFactory.constructHandler();
         CTPConnection server = CTPConnection.server(channelKey, handler, manager);
         channelKey.attach(server);
         server.handleConnect();
+        return channelKey;
     }
 }
