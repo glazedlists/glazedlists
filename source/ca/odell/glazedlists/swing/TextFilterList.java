@@ -284,14 +284,15 @@ public final class TextFilterList extends AbstractFilterList {
      */
     protected TextSearchStrategy selectTextSearchStrategy(String filter) {
         // uncomment me to test the old text search algorithm
-        return new OldCaseInsensitiveTextSearchStrategy();
+        //return new OldCaseInsensitiveTextSearchStrategy();
 
         // if the filter is only 1 character, use the optimized SingleCharacter strategy
-//        if (filter.length() == 1)
-//            return new SingleCharacterCaseInsensitiveTextSearchStrategy();
+        if(filter.length() == 1) {
+            return new SingleCharacterCaseInsensitiveTextSearchStrategy();
+        }
 
         // default the using the Boyer-Moore algorithm
-//        return new BoyerMooreCaseInsensitiveTextSearchStrategy();
+        return new BoyerMooreCaseInsensitiveTextSearchStrategy();
     }
 
     /** {@inheritDoc} */
@@ -310,15 +311,16 @@ public final class TextFilterList extends AbstractFilterList {
 
         // ensure each filter matches at least one field
         filters:
-        for (int f = 0; f < filters.length; f++) {
+        for(int f = 0; f < filters.length; f++) {
             // get the text search strategy for the current filter
             textSearchStrategy = (TextSearchStrategy) this.filterToTextContainmentStrategyMap.get(filters[f]);
 
             // search through all fields for the current filter
-            for (int c = 0; c < filterStrings.size(); c++) {
+            for(int c = 0; c < filterStrings.size(); c++) {
                 filterString = filterStrings.get(c);
-                if (filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1)
+                if(filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1) {
                     continue filters;
+                }
             }
             // no field matched this filter 
             return false;
