@@ -65,8 +65,23 @@ public interface Task {
      * If at any point the task fails, it should throw an exception and the
      * task will be stopped. The exception will be available to the user
      * for their information as to why the task has stopped.
+     *
+     * The call sequence parameter counts how many times the doTask method has
+     * been called in this single execution of the task. For example, if you
+     * have a task that performs background work and then GUI work and then
+     * background work, the first time this method is called it will be called
+     * with a background thread and the callSequence parameter will be 0. The
+     * second time the method is called it will be called on the event dispatch
+     * thread with a callSequence of 1. The third time the method is called it
+     * will be called on a background thread with a callSequence of 2. This can
+     * be used to separate your code into the segments that need to be executed
+     * on different threads by using if/then/else logic on the callSequence
+     * parameter.
+     *
+     * @param callSequence the number of previous calls made to doTask() in
+     *      is execution of this task.
      */
-    public int doTask() throws InterruptedException, Exception;
+    public int doTask(int callSequence) throws InterruptedException, Exception;
     
     /**
      * Gets the name of this task. The task name should be static and represent

@@ -30,6 +30,7 @@ public class TaskRunner implements Runnable {
     /** the current task to execute */
     private Task currentTask = null;
     private TaskContext currentTaskContext = null;
+    private int currentCallSequence = 0;
     
     /**
      * Creates a new TaskRunner that runs tasks on its internal thread.
@@ -53,6 +54,7 @@ public class TaskRunner implements Runnable {
         // set the task and awaken the thread
         currentTask = task;
         currentTaskContext = taskContext;
+        currentCallSequence = 0;
         executeState = EXECUTE_WORKER;
         
         System.out.println("Interrupting worker thread");
@@ -145,7 +147,8 @@ public class TaskRunner implements Runnable {
     private synchronized void doTaskOnce() {
         try {
             // execute the task
-            int taskResult = currentTask.doTask();
+            int taskResult = currentTask.doTask(currentCallSequence);
+            currentCallSequence++;
             
             // prepare for being in the next state
             if(taskResult == Task.COMPLETE) {

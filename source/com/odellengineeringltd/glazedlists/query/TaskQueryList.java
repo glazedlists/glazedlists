@@ -85,7 +85,7 @@ public class TaskQueryList extends QueryList {
          * and performs the query on its background thread. It then
          * sets the query results and sets itself as completed.
          */
-        public int doTask() throws InterruptedException, Exception {
+        public int doTask(int callSequence) throws InterruptedException, Exception {
             // do the query
             taskContext.setBusy(true);
             SortedSet results = query.doQuery();
