@@ -23,11 +23,11 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy implements TextSea
     private boolean subtextInitialized = false;
 
     /**
-     * Sets the subtext to locate found when {@link @indexOf} is called.
+     * Sets the subtext to locate found when {@link #indexOf(String)} is called.
      * This
      *
      * @param subtext the String containing the single character to locate in
-     *      {@link @indexOf}
+     *      {@link #indexOf(String)}
      * @throws IllegalArgumentException if <code>subtext</code> is
      *      <code>null</code> or does not contain precisely <code>1</code>
      *      character

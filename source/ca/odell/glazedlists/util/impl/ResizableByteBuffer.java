@@ -26,6 +26,9 @@ import java.text.ParseException;
  */
 public class ResizableByteBuffer extends AbstractBuffer {
     
+    /** each buffer will be a multiple of this value, to keep things tidy */
+    private static final int BUFFER_MULTIIPLE = 1024;
+    
     /** the hosted byte buffers */
     private List byteBuffers = new ArrayList();
     
@@ -96,7 +99,66 @@ public class ResizableByteBuffer extends AbstractBuffer {
      * except that it first checks that there is sufficient space in this 
      * buffer and it is potentially much more efficient.
      */
-    public void put(ByteBuffer src) {
-        throw new UnsupportedOperationException();
+    public void put(ByteBuffer source) {
+/*        if(source.remaining() > remaining()) throw new BufferOverflowException();
+
+        while(source.hasRemaining()) {
+            ByteBuffer currentBuffer = getBufferAt(position);
+            int writeStart = getOffsetIntoBufferAt(position);
+            if(currentBuffer.remaining() >= source.remaining()) {
+                int bytesToWrite = source.remaining();
+                currentBuffer.put(source);
+                position += bytesToWrite;
+            } else {
+                int bytesToWrite = currentBuffer.remaining();
+                ByteBuffer subSource = source.duplicate();
+                subSource.limit(subSource.position(), subSource.position() + bytesToWrite);
+                currentBuffer.put(subSource);
+                position += bytesToWrite;
+            }
+        }
+*/    }
+    
+    /**
+     * Gets the buffer at the specified index.
+     */
+    private ByteBuffer getBufferAt(int index) {
+/*        int bytesRemaining = index;
+        for(int b = 0; b < byteBuffers.size(); b++) {
+            ByteBuffer currentBuffer = (ByteBuffer)byteBuffers.get(b);
+            if(currentBuffer.capacity() > bytesRemaining) return b;
+            else bytesRemaining -= currentbuffer.capacity();
+        }
+*/        throw new IndexOutOfBoundsException();
+    }
+
+    /**
+     * Gets the offset of the specified index in the resizable buffer into the
+     * applicable buffer.
+     */
+    private int getOffsetIntoBufferAt(int index) {
+/*        int bytesRemaining = index;
+        for(int b = 0; b < byteBuffers.size(); b++) {
+            ByteBuffer currentBuffer = (ByteBuffer)byteBuffers.get(b);
+            if(currentBuffer.capacity() > bytesRemaining) return bytesRemaining;
+            else bytesRemaining -= currentbuffer.capacity();
+        }
+*/        throw new IndexOutOfBoundsException();
+    }
+    
+    /**
+     * Grows this ResizableByteBuffer to the specified minimum size.
+     */
+    public void grow(int minSize) {
+        if(capacity >= minSize) return;
+
+        // calculate the size to grow as a nice round number
+        int requiredSize = Math.max(capacity, (minSize-capacity));
+        int newBufferSize = ((requiredSize+BUFFER_MULTIIPLE-1) / BUFFER_MULTIIPLE) * BUFFER_MULTIIPLE;
+        
+        // create the new buffer
+        ByteBuffer newBuffer = ByteBuffer.allocateDirect(newBufferSize);
+        byteBuffers.add(newBuffer);
+        capacity += newBuffer.capacity();
     }
 }

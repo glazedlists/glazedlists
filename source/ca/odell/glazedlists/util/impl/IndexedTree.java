@@ -17,8 +17,8 @@ import ca.odell.glazedlists.util.*;
  *
  * <p>When an <code>IndexedTree</code> is being used in sorted order, it
  * <strong>must</strong> be accessed using sorted order exclusively.
- * This means that {@link IndexedTreeNode.setValue(int,Object)} shall not be used,
- * and neither should {@link IndexedTree.addByNode(int,Object)}.
+ * This means that {@link IndexedTreeNode#setValue(Object)} shall not be used,
+ * and neither should {@link #addByNode(int,Object)}.
  * Similarly, when an <code>IndexedTree</code> is being used in random order,
  * it does not support {@link #addByNode(Object)} because that
  * method specifies no index.

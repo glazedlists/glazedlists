@@ -44,9 +44,9 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
      * Since the number of collisions encountered is low in practice (based on
      * our assumption that 99% of the alphabet used for most search messages is
      * US-ASCII), it should have little effect on the execution time of
-     * {@link #indexOf}.
+     * {@link #indexOf(String)}.
      *
-     * @param subtext the String to locate in {@link @indexOf}
+     * @param subtext the String to locate in {@link #indexOf(String)}
      */
     public void setSubtext(String subtext) {
         // record the length of the subtext

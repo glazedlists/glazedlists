@@ -20,7 +20,7 @@ import java.util.*;
  * and {@link #previous()} so that if the user calls {@link #hasNext()},
  * the immediately following call to {@link #next()} will not fail,
  * regardless of whether the next element is removed from the source list
- * in the interim. This property also holds for {@link hasPrevious()}.
+ * in the interim. This property also holds for {@link #hasPrevious()}.
  *
  * <p>This iterator simply keeps an index of where it is and what it last
  * saw. It knows nothing about the underlying storage performance of the List
