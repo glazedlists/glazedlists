@@ -52,10 +52,10 @@ public class IssuesBrowser {
         SortedList issuesSortedList = new SortedList(issuesUserFiltered);
         TextFilterList issuesTextFiltered = new TextFilterList(issuesSortedList);
 
-        // A SashFrom to layout the whole demo
-        SashForm demoForm = new SashForm(shell, SWT.VERTICAL);
+        // This is the outer component for the demo
+        SashForm demoForm = new SashForm(shell, SWT.HORIZONTAL);
 
-        // Set the layout of the form
+        // Set the layout of the sash form
         GridData demoFormLayout = new GridData();
         demoFormLayout.horizontalAlignment = GridData.FILL;
         demoFormLayout.verticalAlignment = GridData.FILL;
@@ -63,120 +63,106 @@ public class IssuesBrowser {
         demoFormLayout.grabExcessVerticalSpace = true;
         demoForm.setLayoutData(demoFormLayout);
 
-        // Set the layout for the contents fo the form
-        GridLayout demoFormContentLayout = new GridLayout(1, false);
+        // Set the layout for the contents of the form
+        GridLayout demoFormContentLayout = new GridLayout(2, false);
         demoFormContentLayout.marginHeight = 0;
         demoFormContentLayout.marginWidth = 0;
         demoForm.setLayout(demoFormContentLayout);
 
-        // Layout the top half of the demo
-        SashForm topSash = new SashForm(demoForm, SWT.HORIZONTAL);
+        // A panel containing all of the filters
+        Canvas filterPanel = new Canvas(demoForm, SWT.NONE);
 
-        // Set the layout of the sash form
-        GridData topSashLayout = new GridData();
-        topSashLayout.horizontalAlignment = GridData.FILL;
-        topSashLayout.verticalAlignment = GridData.FILL;
-        topSashLayout.grabExcessHorizontalSpace = true;
-        topSashLayout.grabExcessVerticalSpace = true;
-        topSash.setLayoutData(topSashLayout);
+        // Set the layout for the panel containing all of the filters
+        GridData filterPanelLayout = new GridData();
+        filterPanelLayout.horizontalAlignment = GridData.FILL;
+        filterPanelLayout.verticalAlignment = GridData.FILL;
+        filterPanelLayout.grabExcessHorizontalSpace = true;
+        filterPanelLayout.grabExcessVerticalSpace = true;
+        filterPanel.setLayoutData(filterPanelLayout);
 
-        // Set the layout for the contents of the form
-        GridLayout topSashContentLayout = new GridLayout(2, false);
-        topSashContentLayout.marginHeight = 0;
-        topSashContentLayout.marginWidth = 0;
-        topSash.setLayout(topSashContentLayout);
+        // Set the layout for the contents of that panel
+        GridLayout filterPanelContentLayout = new GridLayout(1, false);
+        filterPanelContentLayout.marginHeight = 0;
+        filterPanelContentLayout.marginWidth = 0;
+        filterPanel.setLayout(filterPanelContentLayout);
 
-        createUsersList(topSash);
-        Canvas topForm = createTopForm(topSash);
-        topSash.setWeights(new int[]{25, 75});
-        createFilterLabel(topForm);
-        Text filterText = createFilterText(topForm);
+        // Add the various filters
+        Text filterText = createFilterText(filterPanel);
         issuesTextFiltered.setFilterEdit(filterText);
-        Table issuesTable = createIssuesTable(topForm);
+        createUsersList(filterPanel);
+
+        // A panel containing the two tables to display Issue data
+        SashForm issuePanel = new SashForm(demoForm, SWT.VERTICAL);
+
+        // Set the layout for the panel containing the issue data
+        GridData issuePanelLayout = new GridData();
+        issuePanelLayout.horizontalAlignment = GridData.FILL;
+        issuePanelLayout.verticalAlignment = GridData.FILL;
+        issuePanelLayout.grabExcessHorizontalSpace = true;
+        issuePanelLayout.grabExcessVerticalSpace = true;
+        issuePanel.setLayoutData(issuePanelLayout);
+
+        // Set the layout for the contents of that panel
+        GridLayout issuePanelContentLayout = new GridLayout(1, false);
+        issuePanelContentLayout.marginHeight = 0;
+        issuePanelContentLayout.marginWidth = 0;
+        issuePanel.setLayout(issuePanelContentLayout);
+
+        // Create the Issues Table
+        Table issuesTable = createIssuesTable(issuePanel);
         EventTableViewer issuesTableViewer = new EventTableViewer(issuesTextFiltered, issuesTable, new IssueTableFormat());
         issuesTable = formatIssuesTable(issuesTable);
         new TableComparatorChooser(issuesTableViewer, issuesSortedList, false);
 
-        // Layout the bottom half of the demo
-        Canvas bottomForm = createBottomForm(demoForm);
-        createDescriptionsHeader(bottomForm);
-        createDescriptionsTable(bottomForm, issuesTableViewer);
-        createStatusBar(bottomForm);
+        // Create the Descriptions Table
+        createDescriptionsTable(issuePanel, issuesTableViewer);
 
-        // Apply weight to the demo form
-        demoForm.setWeights(new int[]{50, 50});
+        // balance the issue table and the descriptions table
+        issuePanel.setWeights(new int[] {50,50});
+
+        // balance the filter panel and the issue panel
+        demoForm.setWeights(new int[]{30, 80});
 
         // Start the demo
         issueLoader.start();
         issueLoader.setProject((Project)Project.getProjects().get(0));
-
     }
 
-    private Canvas createTopForm(Composite parent) {
-        Canvas topForm = new Canvas(parent, 0);
 
-        // Set the layout of the form
-        GridData topFormLayout = new GridData();
-        topFormLayout.horizontalAlignment = GridData.FILL;
-        topFormLayout.verticalAlignment = GridData.FILL;
-        topFormLayout.grabExcessHorizontalSpace = true;
-        topFormLayout.grabExcessVerticalSpace = true;
-        topForm.setLayoutData(topFormLayout);
-
-        // Set the layout for the contents of the form
-        GridLayout topFormContentLayout = new GridLayout(2, false);
-        topFormContentLayout.marginHeight = 0;
-        topFormContentLayout.marginWidth = 0;
-        topForm.setLayout(topFormContentLayout);
-
-        return topForm;
-    }
-
-    private Canvas createBottomForm(Composite parent) {
-        Canvas bottomForm = new Canvas(parent, 0);
-
-        // Set the layout of the form
-        GridData bottomFormLayout = new GridData();
-        bottomFormLayout.horizontalAlignment = GridData.FILL;
-        bottomFormLayout.verticalAlignment = GridData.FILL;
-        bottomFormLayout.grabExcessHorizontalSpace = true;
-        bottomFormLayout.grabExcessVerticalSpace = true;
-        bottomForm.setLayoutData(bottomFormLayout);
-
-        // Set the layout for the contents of the form
-        GridLayout bottomFormContentLayout = new GridLayout(1, false);
-        bottomFormContentLayout.marginHeight = 0;
-        bottomFormContentLayout.marginWidth = 0;
-        bottomForm.setLayout(bottomFormContentLayout);
-
-        return bottomForm;
-    }
 
     private void createUsersList(Composite parent) {
+        // Create the Label first
+        Label filterLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        filterLabel.setText("Issue Owner");
+        GridData filterLabelLayout = new GridData();
+        filterLabelLayout.horizontalAlignment = GridData.CENTER;
+        filterLabelLayout.verticalAlignment = GridData.BEGINNING;
+        filterLabel.setLayoutData(filterLabelLayout);
+
+        // Create the issue owner's list
         usersList = new List(parent, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
         GridData usersListLayout = new GridData();
-        usersListLayout.horizontalSpan = 1;
-        usersListLayout.verticalSpan = 2;
         usersListLayout.horizontalAlignment = GridData.FILL;
         usersListLayout.verticalAlignment = GridData.FILL;
         usersListLayout.grabExcessHorizontalSpace = true;
         usersListLayout.grabExcessVerticalSpace = true;
         usersList.setLayoutData(usersListLayout);
 
+        // Add filtering based on selection of issue owners
         EventListViewer listViewer = new EventListViewer(issuesUserFiltered.getUsersList(), usersList);
         issuesUserFiltered.setSelectionList(listViewer.getSelected());
     }
 
-    private void createFilterLabel(Composite parent) {
+    private Text createFilterText(Composite parent) {
+        // Create the Label first
         Label filterLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
-        filterLabel.setText("Filter: ");
+        filterLabel.setText("Text Filter ");
         GridData filterLabelLayout = new GridData();
         filterLabelLayout.horizontalAlignment = GridData.BEGINNING;
         filterLabelLayout.verticalAlignment = GridData.CENTER;
         filterLabel.setLayoutData(filterLabelLayout);
-    }
 
-    private Text createFilterText(Composite parent) {
+        // Create the actual text bow to user for filtering
         Text filterText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
         GridData filterTextLayout = new GridData();
         filterTextLayout.horizontalAlignment = GridData.FILL;
@@ -235,20 +221,10 @@ public class IssuesBrowser {
         descriptionsTable.setLayoutData(descriptionsTableLayout);
         descriptionsTable.showColumn(new TableColumn(descriptionsTable, SWT.LEFT));
         descriptionsTable.getColumn(0).setWidth(618);
-        descriptionsTable.setHeaderVisible(false);
+        descriptionsTable.getColumn(0).setText("Descriptions");
+        descriptionsTable.setHeaderVisible(true);
         issuesTableViewer.getTable().addSelectionListener(new IssueSelectionListener(issuesTableViewer, descriptionsTable));
 
-    }
-
-    private void createStatusBar(Composite parent) {
-        statusText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
-        GridData statusTextLayout = new GridData();
-        statusTextLayout.horizontalAlignment = GridData.FILL;
-        statusTextLayout.verticalAlignment = GridData.END;
-        statusTextLayout.grabExcessHorizontalSpace = true;
-        statusTextLayout.grabExcessVerticalSpace = false;
-        statusText.setLayoutData(statusTextLayout);
-        statusText.setText("Java Application Window");
     }
 
     /**
