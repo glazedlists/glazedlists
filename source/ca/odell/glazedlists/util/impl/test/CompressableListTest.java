@@ -16,15 +16,15 @@ import ca.odell.glazedlists.util.impl.*;
 import java.util.*;
 
 /**
- * This test verifies that the SparseList works.
+ * This test verifies that the CompressableList works.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SparseListTest extends TestCase {
-    
+public class CompressableListTest extends TestCase {
+
     /** for randomly choosing list indicies */
     private Random random = new Random();
-    
+
     /**
      * Prepare for the test.
      */
@@ -42,15 +42,15 @@ public class SparseListTest extends TestCase {
      * series of list operations.
      */
     public void testListOperations() {
-        SparseList sparseList = new SparseList();
+        CompressableList sparseList = new CompressableList();
         List controlList = new ArrayList();
-        
+
         // apply various operations to both lists
         for(int i = 0; i < 5000; i++) {
             int operation = random.nextInt(5);
             int index = controlList.isEmpty() ? 0 : random.nextInt(controlList.size());
             Object value = new Integer(random.nextInt());
-            
+
             if(operation == 0 || controlList.isEmpty()) {
                 sparseList.add(index, value);
                 controlList.add(index, value);
@@ -68,10 +68,10 @@ public class SparseListTest extends TestCase {
                 controlList.set(index, null);
             }
         }
-        
+
         // verify the lists are equal
         assertEquals(controlList, sparseList);
-        
+
         // obtain the compressed list
         List compressedControlList = new ArrayList();
         for(Iterator i = controlList.iterator(); i.hasNext(); ) {
@@ -82,12 +82,12 @@ public class SparseListTest extends TestCase {
         // verify the compressed lists are equal
         assertEquals(compressedControlList, sparseList.getCompressedList());
     }
-    
+
     /**
      * Verifies that the compressed index works.
      */
     public void testCompressedIndex() {
-        SparseList list = new SparseList();
+        CompressableList list = new CompressableList();
         list.add(null);
         list.add(null);
         list.add("A");
@@ -99,7 +99,7 @@ public class SparseListTest extends TestCase {
         list.add(null);
         list.add(null);
         list.add(null);
-        
+
         // verify the lead works
         assertEquals(0, list.getCompressedIndex(1, false));
         assertEquals(-1, list.getCompressedIndex(1, true));

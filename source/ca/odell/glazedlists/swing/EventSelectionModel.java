@@ -33,7 +33,7 @@ import java.util.*;
  * change. In either case the SelectionModelEventList is responsible for
  * updating its view of the selection and sending SelectionEvents and
  * ListEvents to listeners.
- * 
+ *
  * <p>The EventList aspect of this EventSelectionModel is <strong>not
  * thread-safe</strong> for read access. Like other EventLists, users must
  * obtain the read lock to read it. The SelectionModel aspect is thread-safe
@@ -53,7 +53,7 @@ import java.util.*;
  * one. When a row is inserted immediately before a selected row in the
  * <code>MULTIPLE_INTERVAL_SELECTION</code> mode, it becomes selected. But in
  * the <code>MULTIPLE_INTERVAL_SELECTION_DEFENSIVE</code> mode, it does not
- * become selected. To set this mode, use 
+ * become selected. To set this mode, use
  * <code>setSelectionMode(SelectionModelEventList.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE)</code>.
  * on the ListSelectionModel.
  *
@@ -62,28 +62,28 @@ import java.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class EventSelectionModel {
-    
+
     /** the new selection mode behaves similar to MULTIPLE_INTERVAL_SELECTION */
     public static final int MULTIPLE_INTERVAL_SELECTION_DEFENSIVE = 103;
-    
+
     /** the list selection model handles selection tables */
     private EventListSelectionModel selectionModel;
 
     /** the event list provides an event list view of the selection */
     private SelectionEventList eventList;
-    
+
     /** the flag list contains Boolean.TRUE for selected items and null for others */
-    private SparseList flagList = new SparseList();
-    
+    private CompressableList flagList = new CompressableList();
+
     /** the source event list knows the table dimensions */
     private EventList source;
-    
+
     /** list change updates */
     private ListEventAssembler updates = null;
-    
+
     /** whether the user can modify the selection */
     private boolean enabled = true;
-    
+
     /**
      * Creates a new selection model that also presents a list of the selection.
      */
@@ -95,7 +95,7 @@ public final class EventSelectionModel {
         this.selectionModel = new EventListSelectionModel();
         this.eventList = new SelectionEventList(source);
     }
-    
+
     /**
      * When the FlagList is prepared, it populates it with information from
      * the source list and the initial selection model.
@@ -105,7 +105,7 @@ public final class EventSelectionModel {
             flagList.add(null);
         }
     }
-    
+
     /**
      * Gets the event list that always contains the current selection.
      */
@@ -120,7 +120,7 @@ public final class EventSelectionModel {
     public ListSelectionModel getListSelectionModel() {
         return selectionModel;
     }
-    
+
     /**
      * Set the EventSelectionModel as editable or not. This means that the user cannot
      * manipulate the selection by clicking. The selection can still be changed as
@@ -157,7 +157,7 @@ public final class EventSelectionModel {
      * the internal list model to match.
      */
     class SelectionEventList extends TransformedList implements ListEventListener {
-        
+
         /**
          * Creates a new SelectionEventList that listens to changes from the
          * source event list.
@@ -171,7 +171,7 @@ public final class EventSelectionModel {
             source.addListEventListener(new EventThreadProxy(this));
             EventSelectionModel.this.updates = super.updates;
         }
-    
+
         /**
          * Returns the element at the specified position in this list.
          *
@@ -188,7 +188,7 @@ public final class EventSelectionModel {
          */
         public Object get(int index) {
             int sourceIndex = flagList.getIndex(index);
-    
+
             // ensure that this value still exists before retrieval
             if(sourceIndex < source.size()) {
                 return source.get(sourceIndex);
@@ -206,7 +206,7 @@ public final class EventSelectionModel {
         public int size() {
             return flagList.getCompressedList().size();
         }
-    
+
         /**
          * Gets the index into the source list for the object with the specified
          * index in this list.
@@ -214,7 +214,7 @@ public final class EventSelectionModel {
         protected int getSourceIndex(int mutationIndex) {
             return flagList.getIndex(mutationIndex);
         }
-        
+
         /**
          * Tests if this mutation shall accept calls to <code>add()</code>,
          * <code>remove()</code>, <code>set()</code> etc.
@@ -222,7 +222,7 @@ public final class EventSelectionModel {
         protected boolean isWritable() {
             return true;
         }
-    
+
         /**
          * Notifies this SelectionList about changes to its underlying list store.
          *
@@ -235,79 +235,79 @@ public final class EventSelectionModel {
                 // prepare for notifying ListSelectionListeners
                 int minSelectionIndexBefore = selectionModel.getMinSelectionIndex();
                 int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
-                
+
                 // prepare a sequence of changes
                 updates.beginEvent();
-            
+
                 // handle reordering events
                 if(listChanges.isReordering()) {
                     int[] sourceReorderMap = listChanges.getReorderMap();
                     int[] selectReorderMap = new int[flagList.getCompressedList().size()];
-                    
+
                     // adjust the flaglist & construct a reorder map to propagate
-                    SparseList previousFlagList = flagList;
-                    flagList = new SparseList();
+                    CompressableList previousFlagList = flagList;
+                    flagList = new CompressableList();
                     for(int c = 0; c < sourceReorderMap.length; c++) {
                         Object flag = previousFlagList.get(sourceReorderMap[c]);
                         boolean wasSelected = (flag != null);
                         flagList.add(c, flag);
                         if(wasSelected) {
                             int previousIndex = previousFlagList.getCompressedIndex(sourceReorderMap[c]);
-                            int currentIndex = flagList.getCompressedIndex(c); 
+                            int currentIndex = flagList.getCompressedIndex(c);
                             selectReorderMap[currentIndex] = previousIndex;
                         }
                     }
-                    
+
                     // fire the reorder
                     updates.reorder(selectReorderMap);
-    
+
                 // handle non-reordering events
                 } else {
-    
+
                     // for all changes simply update the flag list
                     while(listChanges.next()) {
                         int index = listChanges.getIndex();
                         int changeType = listChanges.getType();
-                        
+
                         // learn about what it was
                         boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
                         int previousSelectionIndex = -1;
                         if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
-                        
+
                         // when an element is deleted, blow it away
                         if(changeType == ListEvent.DELETE) {
                             flagList.remove(index);
-            
+
                             // fire a change to the selection list if a selected object is changed
                             if(previouslySelected) {
                                 updates.addDelete(previousSelectionIndex);
                             }
-                            
+
                         // when an element is inserted, it is selected if its index was selected
                         } else if(changeType == ListEvent.INSERT) {
-                            
+
                             // when selected, decide based on selection mode
                             if(previouslySelected) {
-        
+
                                 // select the inserted for single interval and multiple interval selection
                                 if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
                                 || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
                                     flagList.add(index, Boolean.TRUE);
                                     updates.addInsert(previousSelectionIndex);
-        
+
                                 // do not select the inserted for single selection and defensive selection
                                 } else {
                                     flagList.add(index, null);
                                 }
-        
+
                             // when not selected, just add the space
                             } else {
                                 flagList.add(index, null);
                             }
-                            
+
                         // when an element is changed, assume selection stays the same
                         } else if(changeType == ListEvent.UPDATE) {
-            
+
                             // fire a change to the selection list if a selected object is changed
                             if(previouslySelected) {
                                 updates.addUpdate(previousSelectionIndex);
@@ -315,10 +315,10 @@ public final class EventSelectionModel {
                         }
                     }
                 }
-        
+
                 // fire the changes to ListEventListeners
                 updates.commitEvent();
-    
+
                 // fire the changes to ListSelectionListeners
                 if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
                     int minSelectionIndexAfter = selectionModel.getMinSelectionIndex();
@@ -334,7 +334,7 @@ public final class EventSelectionModel {
             }
         }
     }
-    
+
     /**
      * Gets this as a string for debugging purposes only.
      */
@@ -347,7 +347,7 @@ public final class EventSelectionModel {
         }
         return result.toString();
     }
-    
+
     /**
      * This model provides a service for the JTable. It listens to changes in
      * the JTable's selection and keeps track of what is selected. It is also
@@ -367,11 +367,11 @@ public final class EventSelectionModel {
         private boolean valueIsAdjusting = false;
         private int fullChangeStart = -1;
         private int fullChangeFinish = -1;
-        
+
         /** the lead and anchor selection index are the first and last in a range */
         private int anchorSelectionIndex = -1;
         private int leadSelectionIndex = -1;
-        
+
         /** the selection mode defines characteristics of the selection */
         private int selectionMode = MULTIPLE_INTERVAL_SELECTION_DEFENSIVE;
 
@@ -387,7 +387,7 @@ public final class EventSelectionModel {
                 if(fullChangeStart == -1 || changeStart < fullChangeStart) fullChangeStart = changeStart;
                 if(fullChangeFinish == -1 || changeFinish > fullChangeFinish) fullChangeFinish = changeFinish;
             }
-            
+
             // fire the change
             ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
             for(Iterator i = listeners.iterator(); i.hasNext(); ) {
@@ -429,7 +429,7 @@ public final class EventSelectionModel {
             || ((invertIndex0 == -1 || invertIndex1 == -1) && invertIndex0 != invertIndex1)) {
                 throw new IndexOutOfBoundsException("Invalid range for invert selection: " + invertIndex0 + "-" + invertIndex1 + ", list size is " + flagList.size());
             }
-            
+
             // when the first range is empty
             if(changeIndex0 == -1 && changeIndex1 == -1) {
                 // if the second range is empty, we're done
@@ -455,11 +455,11 @@ public final class EventSelectionModel {
             // get the union of the two ranges
             int minUnionIndex = Math.min(minChangeIndex, minInvertIndex);
             int maxUnionIndex = Math.max(maxChangeIndex, maxInvertIndex);
-        
+
             // keep track of the minimum and maximum change range
             int minChangedIndex = maxUnionIndex + 1;
             int maxChangedIndex = minUnionIndex - 1;
-            
+
             // prepare a sequence of changes
             updates.beginEvent();
 
@@ -473,7 +473,7 @@ public final class EventSelectionModel {
                     // update change range
                     if(i < minChangedIndex) minChangedIndex = i;
                     if(i > maxChangedIndex) maxChangedIndex = i;
-                    
+
                     // if it is being deselected
                     if(selectedBefore) {
                         int selectionIndex = flagList.getCompressedIndex(i);
@@ -487,10 +487,10 @@ public final class EventSelectionModel {
                     }
                 }
             }
-            
+
             // notify event lists first
             updates.commitEvent();
-            
+
             // notify list selection listeners second
             if(minChangedIndex <= maxChangedIndex) fireSelectionChanged(minChangedIndex, maxChangedIndex);
         }
@@ -501,7 +501,7 @@ public final class EventSelectionModel {
          * <p>First this calculates the smallest range where changes occur. This
          * includes the union of the selection range before and the selection
          * range specified. It then walks through the change and sets each
-         * index as selected or not based on whether the index is in the 
+         * index as selected or not based on whether the index is in the
          * new range. Finally it fires events to both the listening lists and
          * selection listeners about what changes happened.
          *
@@ -511,17 +511,17 @@ public final class EventSelectionModel {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
                 if(!enabled) return;
-                
+
                 // handle a clear
                 if(index0 < 0 || index1 < 0) {
                     clearSelection();
                     return;
                 }
-                
+
                 // update anchor and lead
                 anchorSelectionIndex = index0;
                 leadSelectionIndex = index1;
-                
+
                 // set the selection to the range and nothing else
                 if(selectionMode == SINGLE_SELECTION) {
                     setSubRangeOfRange(true, index0, index0, getMinSelectionIndex(), getMaxSelectionIndex());
@@ -532,7 +532,7 @@ public final class EventSelectionModel {
                 ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
         }
-        
+
         /**
          * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
          */
@@ -549,21 +549,21 @@ public final class EventSelectionModel {
                 // update anchor and lead
                 anchorSelectionIndex = index0;
                 leadSelectionIndex = index1;
-    
+
                 // add this and deselect everything
                 if(selectionMode == SINGLE_SELECTION) {
                     setSubRangeOfRange(true, index0, index0, getMinSelectionIndex(), getMaxSelectionIndex());
-    
+
                 // add this interval and deselect every other interval
                 } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
-    
+
                     // test if the current and new selection overlap
                     boolean overlap = false;
                     int minSelectedIndex = getMinSelectionIndex();
                     int maxSelectedIndex = getMaxSelectionIndex();
                     if(minSelectedIndex - 1 <= index0 && index0 <= maxSelectedIndex + 1) overlap = true;
                     if(minSelectedIndex - 1 <= index1 && index1 <= maxSelectedIndex + 1) overlap = true;
-                    
+
                     // if they overlap, do not clear anything
                     if(overlap) {
                         setSubRangeOfRange(true, index0, index1, -1, -1);
@@ -571,7 +571,7 @@ public final class EventSelectionModel {
                     } else {
                         setSubRangeOfRange(true, index0, index1, minSelectedIndex, maxSelectedIndex);
                     }
-    
+
                 // select the specified interval without deselecting anything
                 } else {
                     setSubRangeOfRange(true, index0, index1, -1, -1);
@@ -596,7 +596,7 @@ public final class EventSelectionModel {
                 // update anchor and lead
                 anchorSelectionIndex = index0;
                 leadSelectionIndex = index1;
-    
+
                 // deselect everything
                 if(selectionMode == SINGLE_SELECTION) {
                     setSubRangeOfRange(false, getMinSelectionIndex(), getMaxSelectionIndex(), -1, -1);
@@ -652,7 +652,7 @@ public final class EventSelectionModel {
                     //throw new ArrayIndexOutOfBoundsException("Cannot get selection index " + index + ", list size " + flagList.size() + " pending " + source.size());
                     return false;
                 }
-                
+
                 // a value is selected if it is not null in the flag list
                 return (flagList.get(index) != null);
             } finally {
@@ -681,13 +681,13 @@ public final class EventSelectionModel {
 
                 // update anchor
                 this.anchorSelectionIndex = anchorSelectionIndex;
-    
+
                 // handle a clear
                 if(anchorSelectionIndex == -1) {
                     clearSelection();
                     return;
                 }
-                
+
                 // select the interval to be the anchor
                 if(selectionMode == SINGLE_SELECTION) {
                     setSubRangeOfRange(true, anchorSelectionIndex, anchorSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
@@ -724,21 +724,21 @@ public final class EventSelectionModel {
                 // update lead
                 int originalLeadIndex = this.leadSelectionIndex;
                 this.leadSelectionIndex = leadSelectionIndex;
-    
+
                 // handle a clear
                 if(leadSelectionIndex == -1) {
                     clearSelection();
                     return;
                 }
-                
+
                 // select the interval to be the lead
                 if(selectionMode == SINGLE_SELECTION) {
                     setSubRangeOfRange(true, leadSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-    
+
                 // select the interval between anchor and lead
                 } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
                     setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-    
+
                 // select the interval between anchor and lead without deselecting anything
                 } else {
                     setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, anchorSelectionIndex, originalLeadIndex);
@@ -780,20 +780,20 @@ public final class EventSelectionModel {
             // these changes are handled by the ListEventListener
         }
         /**
-         * Remove the indices in the interval index0,index1 (inclusive) from  the selection model. 
+         * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
          */
         public void removeIndexInterval(int index0, int index1) {
             // these changes are handled by the ListEventListener
         }
 
         /**
-         * This property is true if upcoming changes to the value  of the model should be considered a single event. 
+         * This property is true if upcoming changes to the value  of the model should be considered a single event.
          */
         public void setValueIsAdjusting(boolean valueIsAdjusting) {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
                 this.valueIsAdjusting = valueIsAdjusting;
-                
+
                 // fire one extra change containing all changes in this set
                 if(!valueIsAdjusting) {
                     if(fullChangeStart != -1 && fullChangeFinish != -1) {
@@ -826,11 +826,11 @@ public final class EventSelectionModel {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
                 this.selectionMode = selectionMode;
-                
+
                 // ensure the selection is no more than a single element
                 if(selectionMode == SINGLE_SELECTION) {
                     setSubRangeOfRange(true, getMinSelectionIndex(), getMinSelectionIndex(), getMinSelectionIndex(), getMaxSelectionIndex());
-    
+
                 // ensure the selection is no more than a single interval
                 } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
                     setSubRangeOfRange(true, getMinSelectionIndex(), getMaxSelectionIndex(), getMinSelectionIndex(), getMaxSelectionIndex());

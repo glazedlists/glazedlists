@@ -20,7 +20,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * {@link EventList} that match the filter.
  *
  * <p>The filter can be static or dynamic. Changing the behaviour of the filter
- * will change which elements of the source list are included. 
+ * will change which elements of the source list are included.
  *
  * <p>Extending classes define the filter by implementing the method
  * {@link #filterMatches(Object)}.
@@ -34,7 +34,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
- * 
+ *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
@@ -44,11 +44,11 @@ import ca.odell.glazedlists.util.concurrent.*;
 public abstract class AbstractFilterList extends TransformedList implements ListEventListener {
 
     /** the flag list contains Boolean.TRUE for selected items and null or others */
-    private SparseList flagList = new SparseList();
+    private CompressableList flagList = new CompressableList();
 
     /**
      * Creates a {@link AbstractFilterList} that includes a subset of the specified
-     * source {@link EventList}. 
+     * source {@link EventList}.
      *
      * <p>Extending classes must call handleFilterChanged().
      */
@@ -86,8 +86,8 @@ public abstract class AbstractFilterList extends TransformedList implements List
             int[] filterReorderMap = new int[flagList.getCompressedList().size()];
 
             // adjust the flaglist & construct a reorder map to propagate
-            SparseList previousFlagList = flagList;
-            flagList = new SparseList();
+            CompressableList previousFlagList = flagList;
+            flagList = new CompressableList();
             for(int i = 0; i < sourceReorderMap.length; i++) {
                 Object flag = previousFlagList.get(sourceReorderMap[i]);
                 flagList.add(flag);

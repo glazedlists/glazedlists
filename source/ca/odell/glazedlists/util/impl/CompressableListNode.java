@@ -8,7 +8,7 @@ package ca.odell.glazedlists.util.impl;
 
 /**
  * This node is a helper class that does all the real work for
- * SparseList.
+ * CompressableList.
  *
  * It is a tree node that can be accessed either by its real index
  * or by a fake index! The fake index includes is the number of
@@ -52,17 +52,17 @@ package ca.odell.glazedlists.util.impl;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SparseListNode {
+public final class CompressableListNode {
 
     /** the parent node, used to delete from leaf up */
-    private SparseListNode parent;
+    private CompressableListNode parent;
 
     /** the sublist that this node is a member of */
-    private SparseList host;
+    private CompressableList host;
 
     /** the left and right child nodes */
-    private SparseListNode left = null;
-    private SparseListNode right = null;
+    private CompressableListNode left = null;
+    private CompressableListNode right = null;
 
     /** the size of the left and right subtrees */
     private int treeLeftSize = 0;
@@ -81,9 +81,9 @@ public final class SparseListNode {
     private Object value = null;
 
     /**
-     * Creates a new SparseListNode with the specified parent node.
+     * Creates a new CompressableListNode with the specified parent node.
      */
-    public SparseListNode(SparseList host, SparseListNode parent) {
+    public CompressableListNode(CompressableList host, CompressableListNode parent) {
         this.host = host;
         this.parent = parent;
     }
@@ -91,7 +91,7 @@ public final class SparseListNode {
     /**
      * Gets the object with the specified index in the tree.
      */
-    public SparseListNode getNodeByCompressedIndex(int index) {
+    public CompressableListNode getNodeByCompressedIndex(int index) {
         // ensure the index value is valid
         if(index >= treeLeftSize + treeRightSize + treeRootSize) {
             throw new IndexOutOfBoundsException("cannot get compressed index from a tree of size " + treeSize() + " at " + index);
@@ -111,7 +111,7 @@ public final class SparseListNode {
      * Gets the object with the specified virtual index in the tree, or
      * null if that node is virtual.
      */
-    public SparseListNode getNodeByIndex(int index) {
+    public CompressableListNode getNodeByIndex(int index) {
         // calculate some convenience sizes
         int allRootSize = treeRootSize + virtualRootSize;
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
@@ -257,14 +257,14 @@ public final class SparseListNode {
     /**
      * Retrieves the subtree node with the largest value.
      */
-    public SparseListNode getLargestChildNode() {
+    public CompressableListNode getLargestChildNode() {
         if(treeRightSize > 0) return right.getLargestChildNode();
         else return this;
     }
     /**
      * Retrieves the subtree node with the smallest value.
      */
-    public SparseListNode getSmallestChildNode() {
+    public CompressableListNode getSmallestChildNode() {
         if(treeLeftSize > 0) return left.getSmallestChildNode();
         else return this;
     }
@@ -276,7 +276,7 @@ public final class SparseListNode {
     public int getCompressedIndex() {
         return getCompressedIndex(null);
     }
-    private int getCompressedIndex(SparseListNode child) {
+    private int getCompressedIndex(CompressableListNode child) {
         // if the child is on the left, return the index recursively
         if(child == left) {
             if(parent != null) return parent.getCompressedIndex(this);
@@ -307,7 +307,7 @@ public final class SparseListNode {
     public int getIndex() {
         return getIndex(null);
     }
-    private int getIndex(SparseListNode child) {
+    private int getIndex(CompressableListNode child) {
         // calculate some convenience sizes
         int allRootSize = treeRootSize + virtualRootSize;
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
@@ -351,13 +351,13 @@ public final class SparseListNode {
 
         // if we can insert on the left, insert there
         } else if(index < totalLeftSize) {
-            if(left == null) left = new SparseListNode(host, this);
+            if(left == null) left = new CompressableListNode(host, this);
             left.insert(index, value);
             doRotationsForThisLevel();
 
         // if the index is in the middle of our virtual space
         } else if(index < (totalLeftSize + allRootSize)) {
-            if(left == null) left = new SparseListNode(host, this);
+            if(left == null) left = new CompressableListNode(host, this);
 
             // firts calculate where the inserts go
             int leftOverSpace = index - totalLeftSize;
@@ -382,7 +382,7 @@ public final class SparseListNode {
 
         // if the index is not on the left side, insert on the right
         } else if(index <= allSubtreeSize) {
-            if(right == null) right = new SparseListNode(host, this);
+            if(right == null) right = new CompressableListNode(host, this);
             right.insert(index - totalLeftSize - allRootSize, value);
             doRotationsForThisLevel();
 
@@ -393,7 +393,7 @@ public final class SparseListNode {
     }
 
     /**
-     * Inserts space into the sparse list at the specified index with
+     * Inserts space into the compressable list at the specified index with
      * the specified length.
      */
     public void insertSpace(int index, int length) {
@@ -411,7 +411,7 @@ public final class SparseListNode {
 
         // if the index is on the left side, insert there
         } else if(index < totalLeftSize) {
-            if(left == null) left = new SparseListNode(host, this);
+            if(left == null) left = new CompressableListNode(host, this);
             left.insertSpace(index, length);
 
         // if the index is in the root, insert there
@@ -421,7 +421,7 @@ public final class SparseListNode {
 
         // if the index is not on the left side, insert on the right
         } else if(index <= allSubtreeSize) {
-            if(right == null) right = new SparseListNode(host, this);
+            if(right == null) right = new CompressableListNode(host, this);
             right.insertSpace(index - totalLeftSize - allRootSize, length);
 
         // if the virtual index is bigger than the tree, complain
@@ -491,7 +491,7 @@ public final class SparseListNode {
             }
         // if this node has two children, replace this node with the best of the biggest
         } else {
-            SparseListNode middle = null;
+            CompressableListNode middle = null;
             // if the left side is larger, use a left side node
             if(treeLeftSize > treeRightSize) {
                 middle = left.getLargestChildNode();
@@ -581,7 +581,7 @@ public final class SparseListNode {
      * @param difference the amount of nodes that the subtree has changed
      *      by. This is positive for adds and negative for removes.
      */
-    private void childSizeChanged(SparseListNode subtree, boolean virtual, int difference) {
+    private void childSizeChanged(CompressableListNode subtree, boolean virtual, int difference) {
         // a child on the left has been removed
         if(subtree == left) {
             if(!virtual) treeLeftSize = treeLeftSize + difference;
@@ -602,7 +602,7 @@ public final class SparseListNode {
     /**
      * Replaces the specified child with a new child.
      */
-    private void replaceChildNode(SparseListNode original, SparseListNode replacement) {
+    private void replaceChildNode(CompressableListNode original, CompressableListNode replacement) {
         if(original == left) left = replacement;
         else if(original == right) right = replacement;
         else throw new IllegalArgumentException(this + " cannot replace a non-existant child");
@@ -736,7 +736,7 @@ public final class SparseListNode {
      */
     private void rotateLeft() {
         if(left == null) throw new IllegalArgumentException("Cannot rotate with a null child");
-        SparseListNode replacement = left;
+        CompressableListNode replacement = left;
         // take the right child of the replacement as my left child
         left = replacement.right;
         treeLeftSize = replacement.treeRightSize;
@@ -767,7 +767,7 @@ public final class SparseListNode {
      */
     private void rotateRight() {
         if(right == null) throw new IllegalArgumentException("Cannot rotate with a null child");
-        SparseListNode replacement = right;
+        CompressableListNode replacement = right;
         // take the left child of the replacement as my right child
         right = replacement.left;
         treeRightSize = replacement.treeLeftSize;

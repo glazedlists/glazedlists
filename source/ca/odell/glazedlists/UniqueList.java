@@ -25,7 +25,7 @@ import java.util.*;
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
- * 
+ *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
@@ -38,7 +38,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
     private Comparator comparator;
 
     /** the sparse list tracks which elements are duplicates */
-    private SparseList duplicatesList = new SparseList();
+    private CompressableList duplicatesList = new CompressableList();
 
     /** a count of the inserts to be processed by an active listChanged() method */
     private int updateIndexOffset = 0;

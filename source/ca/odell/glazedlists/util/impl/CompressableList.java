@@ -10,27 +10,27 @@ package ca.odell.glazedlists.util.impl;
 import java.util.*;
 
 /**
- * A sparse list is a list that is optimized for holding several
+ * A compressable list is a list that is optimized for holding several
  * values that are null.
  *
- * <p>A sparse list can has a compressed view - this is a second list
+ * <p>A compressable list can has a compressed view - this is a second list
  * that contains no null values. It is an error to modify the compressed
  * view.
  *
- * <p>The sparse list also has methods to get the compressed index from
+ * <p>The compressable list also has methods to get the compressed index from
  * the natural index, and the natural index from the compressed
  * index.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SparseList extends AbstractList {
-    
+public final class CompressableList extends AbstractList {
+
     /** the root node of the tree, this may be replaced by a delete */
-    private SparseListNode root = null;
-    
+    private CompressableListNode root = null;
+
     /** a view of this list with no nulls */
     private CompressedList compressedList = new CompressedList();
-    
+
     /** the total size can include trailing nulls beyond the tree */
     private int size = 0;
 
@@ -40,17 +40,17 @@ public final class SparseList extends AbstractList {
     public int size() {
         return size;
     }
-    
+
     /**
-     * Clears the sparse list.
+     * Clears the compressable list.
      */
     public void clear() {
         size = 0;
         root = null;
     }
-    
+
     /**
-     * Sets the value at the specified location. 
+     * Sets the value at the specified location.
      *
      * This lazy implementation simply performs a remove and then
      * an add. This should be sufficient since the tree does not
@@ -65,7 +65,7 @@ public final class SparseList extends AbstractList {
         add(index, value);
         return previous;
     }
-    
+
     /**
      * Deletes the node with the specified sort-order from the tree.
      */
@@ -81,10 +81,10 @@ public final class SparseList extends AbstractList {
         } else {
             size--;
         }
-        
+
         return value;
     }
-    
+
     /**
      * Inserts the specified value at the specified location.
      */
@@ -98,7 +98,7 @@ public final class SparseList extends AbstractList {
         }
         // ensure the node exists
         if(root == null) {
-            root = new SparseListNode(this, null);
+            root = new CompressableListNode(this, null);
         }
 
         // when the insert is within the trailing nulls, remove them and re-insert them
@@ -134,13 +134,13 @@ public final class SparseList extends AbstractList {
         }
         // ensure the node exists
         if(root == null) {
-            root = new SparseListNode(this, null);
+            root = new CompressableListNode(this, null);
         }
-        
+
         // insert in the main tree
         root.insertSpace(index, length);
     }
-    
+
     /**
      * Gets the value at the specified index.
      */
@@ -149,7 +149,7 @@ public final class SparseList extends AbstractList {
 
         // get from the main tree
         if(root != null && index < root.size()) {
-            SparseListNode node = root.getNodeByIndex(index);
+            CompressableListNode node = root.getNodeByIndex(index);
             if(node == null) return null;
             return node.getValue();
 
@@ -158,19 +158,19 @@ public final class SparseList extends AbstractList {
             return null;
         }
     }
-    
+
     /**
      * Sets the root of this tree to be the specified node. This is
-     * used by the owned SparseListNodes when the root changes due to a
+     * used by the owned CompressableListNodes when the root changes due to a
      * rotation.
      */
-    void setRootNode(SparseListNode root) {
+    void setRootNode(CompressableListNode root) {
         this.root = root;
     }
 
     /**
      * Changes the size of the tree. This is used by the owned
-     * SparseListNodes when the tree changes due to a removal.
+     * CompressableListNodes when the tree changes due to a removal.
      *
      * @param difference the amount of nodes that the tree has changed
      *      by. This is positive for adds and negative for removes.
@@ -178,36 +178,36 @@ public final class SparseList extends AbstractList {
     void childSizeChanged(int difference) {
         size = size + difference;
     }
-    
+
     /**
      * Verifies that the tree has a consistent state.
      */
     void validate() {
         if(root != null) root.validate();
     }
-    
+
     /**
      * Gets the compressed view of this list.
      */
     public List getCompressedList() {
         return compressedList;
     }
-    
+
     /**
      * A CompressedList is a read-only view of the list where all the nulls
      * have been removed.
      */
     class CompressedList extends AbstractList {
-        
+
         /**
          * Gets the value at the specified index.
          */
         public Object get(int index) {
             if(root == null) throw new IndexOutOfBoundsException("cannot get from tree of size 0 at " + index);
-            SparseListNode node = root.getNodeByCompressedIndex(index);
+            CompressableListNode node = root.getNodeByCompressedIndex(index);
             return node.getValue();
         }
-        
+
         /**
          * Gets the size of the compressed list. This is a shortcut to
          * the number of non-null elements are in the main list.
@@ -217,7 +217,7 @@ public final class SparseList extends AbstractList {
             return root.treeSize();
         }
     }
-    
+
     /**
      * Gets the index of the node with the specified compressedIndex.
      * Compressed index is defined as the index of that element in
@@ -226,11 +226,11 @@ public final class SparseList extends AbstractList {
      */
     public int getIndex(int compressedIndex) {
         if(root == null) throw new IndexOutOfBoundsException("cannot get from a tree of size 0 at " + compressedIndex);
-        //SparseListNode node = root.getNodeByCompressedIndex(compressedIndex);
+        //CompressableListNode node = root.getNodeByCompressedIndex(compressedIndex);
         //return node.getIndex();
         return root.getIndexByCompressedIndex(compressedIndex);
     }
-    
+
     /**
      * Gets the compressed index of the node with the specified natural
      * index. The parameter index specifies the index in the natural tree
@@ -240,10 +240,10 @@ public final class SparseList extends AbstractList {
      */
     public int getCompressedIndex(int index) {
         if(index >= size) throw new IndexOutOfBoundsException("cannot get from a tree of size " + size + " at " + index);
-        
+
         // get from the main tree
         if(root != null && index < root.size()) {
-            SparseListNode node = root.getNodeByIndex(index);
+            CompressableListNode node = root.getNodeByIndex(index);
             if(node == null) throw new IllegalArgumentException("Cannot get compressed index of " + index + ", that value is compressed out");
             return node.getCompressedIndex();
 
@@ -252,7 +252,7 @@ public final class SparseList extends AbstractList {
             throw new IllegalArgumentException("Cannot get compressed index of " + index + ", that value is compressed out");
         }
     }
-    
+
     /**
      * Gets the compressed index of the specified index into the tree. This
      * is the index of the node that the specified index will be stored in.
@@ -265,23 +265,23 @@ public final class SparseList extends AbstractList {
      */
     public int getCompressedIndex(int index, boolean left) {
         if(index >= size) throw new IndexOutOfBoundsException("cannot get from a tree of size " + size + " at " + index);
-        
+
         // there is no main tree
         if(root == null) {
             if(left) return -1;
             else return 0;
         }
-        
+
         // if it is beyond the main tree
         if(index >= root.size()) {
             if(left) return root.treeSize() - 1;
             return root.treeSize();
         }
-        
+
         // get from the main tree
         return root.getCompressedIndex(index, left);
     }
-    
+
     /**
      * Gets the number of leading nulls on this index. This is the number of
      * nulls between the value at this index and the next lowest index that has
@@ -291,7 +291,7 @@ public final class SparseList extends AbstractList {
      */
     public int getLeadingNulls(int compressedIndex) {
         if(root == null) throw new IndexOutOfBoundsException("cannot get from a tree of size " + size + " at " + compressedIndex);
-        SparseListNode node = root.getNodeByCompressedIndex(compressedIndex);
+        CompressableListNode node = root.getNodeByCompressedIndex(compressedIndex);
         if(node == null) throw new IllegalArgumentException("Cannot get compressed index of " + compressedIndex + ", that value is compressed out");
         return node.getNodeVirtualSize();
     }
