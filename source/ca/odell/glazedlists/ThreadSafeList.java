@@ -50,7 +50,6 @@ public final class ThreadSafeList extends TransformedList {
     public ThreadSafeList(EventList source) {
         super(source);
         source.addListEventListener(this);
-        System.out.println("threadsafe list is broken for write methods");
     }
 
     /** {@inheritDoc} */
@@ -278,14 +277,7 @@ public final class ThreadSafeList extends TransformedList {
     public String toString() {
         getReadWriteLock().readLock().lock();
         try {
-            StringBuffer result = new StringBuffer();
-            result.append("[");
-            for(int i = 0; i < size(); i++) {
-                if(i != 0) result.append(", ");
-                result.append(get(i));
-            }
-            result.append("]");
-            return result.toString();
+            return source.toString();
         } finally {
             getReadWriteLock().readLock().unlock();
         }

@@ -98,8 +98,6 @@ class PeerResource {
          */
         public void resourceUpdated(Resource resource, Bufferlo delta) {
             resourceUpdateId++;
-            if(resourceUri.isLocal()) System.out.println("LOCALLY UPDATED TO " + resourceUpdateId + ", " + resource);
-            else System.err.println("   REMOTELY UPDATED TO " + resourceUpdateId + ", " + resource);
             peer.invokeLater(new UpdatedRunnable(delta, resourceUpdateId));
         }
         private class UpdatedRunnable implements Runnable {
@@ -284,7 +282,6 @@ class PeerResource {
             Bufferlo snapshot = null;
             resource.getReadWriteLock().writeLock().lock();
             try {
-                System.out.println("    TO SNAPSHOT AT " + resourceUpdateId + ", " + resource);
                 updateId = resourceUpdateId;
                 snapshot = resource.toSnapshot();
             } finally {
@@ -316,7 +313,6 @@ class PeerResource {
             // update state and propagate
             resourceUpdateId = block.getUpdateId();
             //resourceListener.resourceUpdated(resource, block.getPayload());
-            System.err.println("CONFIRM: SNAPSHOT AT " + (block.getUpdateId()) + "==" + resourceUpdateId + " " + resource);
         } finally {
             resource.getReadWriteLock().writeLock().unlock();
         }
