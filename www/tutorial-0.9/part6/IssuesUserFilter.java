@@ -50,8 +50,6 @@ public class IssuesUserFilter extends AbstractFilterList implements ListSelectio
         userSelect.addListSelectionListener(this);
 
         handleFilterChanged();
-        this.addListEventListener(new ConsistencyTestList(this, "filter", true));
-        source.addListEventListener(new ConsistencyTestList(source, "source", true));
     }
     
     /**

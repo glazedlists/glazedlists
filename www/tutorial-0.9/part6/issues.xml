@@ -900,7 +900,7 @@ The bug report was very useful in helping me fix this bug quickly!</thetext>
   <status_whiteboard></status_whiteboard>
   <votes></votes>
   <op_sys>All</op_sys>
-  <short_desc>SexedTree insert and remove are too slow</short_desc>
+  <short_desc>IndexedTree insert and remove are too slow</short_desc>
   <keywords></keywords>
   <long_desc>
    <who>jessewilson</who>
