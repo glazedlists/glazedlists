@@ -16,18 +16,11 @@ import ca.odell.glazedlists.util.concurrent.*;
 /**
  * A CompositeList is a list that is composed of one or more lists.
  *
- * <p><strong><font color="#FF0000">Warning</font></strong> this class has
- * major concurrency problems that are not yet resolved. Do not use this class
- * in a multi-threaded environment! Use at your own risk!
- *
- * <p>One difficult problem posed by the implementation of CompositeList is
- * locking. Glazed Lists uses <code>getRootList()</code> in order to provide a
- * single lock for a single source list and all lists that depend upon it. As
- * CompositeList has multiple sources, this solution is not possible.
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=25">Bug 25</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class CompositeList extends AbstractList implements EventList {
+public final class CompositeList extends AbstractEventList {
     
     /** the lists that we are following events on */
     public List memberLists = new ArrayList();
@@ -39,8 +32,21 @@ public final class CompositeList extends AbstractList implements EventList {
      * Creates a new CompositeList.
      */
     public CompositeList() {
+        readWriteLock = new CompositeReadWriteLock();
     }
     
+    /**
+     * For implementing the ListEventListener interface. Extending classes should
+     * adjust in response to this change and forward notifications about that
+     * adjustment to downstream listeners.
+     *
+     * Because the CompositeList uses inner classes, this method throws an
+     * IllegalStateException.
+     */
+    public void listChanged(ListEvent listChanges) {
+        throw new IllegalStateException();
+    }
+
     /**
      * Adds the specified list to the lists that compose this list.
      */
@@ -50,6 +56,9 @@ public final class CompositeList extends AbstractList implements EventList {
             // insert the actual list
             MemberList memberList = new MemberList(list);
             memberLists.add(memberList);
+            
+            // lock this list for consistency with the composite lock
+            list.getReadWriteLock().writeLock().lock();
             
             // get the offset for the elements of this member
             int offset = getListOffset(memberList);
@@ -88,6 +97,9 @@ public final class CompositeList extends AbstractList implements EventList {
             // remove the member list
             memberLists.remove(memberList);
         
+            // unlock this list for consistency with the composite lock
+            list.getReadWriteLock().writeLock().unlock();
+
             // pass on a change for the remove of all this list's elements
             if(memberList.size() > 0) {
                 updates.beginEvent();
@@ -146,37 +158,6 @@ public final class CompositeList extends AbstractList implements EventList {
         throw new RuntimeException();
     }
 
-    
-    /**
-     * Registers the specified listener to receive notification of changes
-     * to this list.
-     */
-    public final void addListEventListener(ListEventListener listChangeListener) {
-        updates.addListEventListener(listChangeListener);
-    }
-
-    /**
-     * Removes the specified listener from receiving change updates for this list.
-     */
-    public void removeListEventListener(ListEventListener listChangeListener) {
-        updates.removeListEventListener(listChangeListener);
-    }
-
-    /**
-     * Gets the lock object in order to access this list in a thread-safe manner.
-     * This will return a <strong>re-entrant</strong> implementation of
-     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
-     */
-    public ReadWriteLock getReadWriteLock() {
-        //return this;
-        if(memberLists.size() == 1) {
-            return ((MemberList)memberLists.get(0)).getSourceList().getReadWriteLock();
-        } else {
-            return new J2SE12ReadWriteLock();
-        }
-    }
-
-    
     /**
      * The member list listener listens to a single list for changes and
      * forwards the changes from that list to all listeners for composed list.
@@ -246,6 +227,134 @@ public final class CompositeList extends AbstractList implements EventList {
                 updates.commitEvent();
             } finally {
                 getReadWriteLock().writeLock().unlock();
+            }
+        }
+    }
+    
+    /**
+     * The CompositeReadWriteLock is a lock that is composed of a list of
+     * source ReadWriteLocks.
+     */
+    class CompositeReadWriteLock implements ReadWriteLock {
+        /** the composite read lock */
+        private Lock compositeReadLock = new CompositeReadLock();
+        /** the composite write lock */
+        private Lock compositeWriteLock = new CompositeWriteLock();
+        
+        /**
+         * Return the lock used for reading.
+         */
+        public Lock readLock() {
+            return compositeReadLock;
+        }
+        /**
+         * Return the lock used for writing.
+         */
+        public Lock writeLock() {
+            return compositeWriteLock;
+        }
+    }
+    
+    /**
+     * The CompositeReadLock is a lock that is composed of a list of source
+     * ReadLocks.
+     */
+    class CompositeReadLock implements Lock {
+        /**
+         * Acquires the lock.
+         */
+        public void lock() {
+            for(int i = 0; i < memberLists.size(); i++) {
+                MemberList current = (MemberList)memberLists.get(i);
+                current.getSourceList().getReadWriteLock().readLock().lock();
+            }
+        }
+        
+        /**
+         * Acquires the lock only if it is free at the time of invocation.
+         */
+        public boolean tryLock() {
+            List locksAquired = new ArrayList();
+            // try to acquire locks in order
+            for(int i = 0; i < memberLists.size(); i++) {
+                MemberList current = (MemberList)memberLists.get(i);
+                boolean success = current.getSourceList().getReadWriteLock().readLock().tryLock();
+
+                // add this lock to the locked list
+                if(success) {
+                    locksAquired.add(current);
+                // release all success locks on a single fail
+                } else {
+                    for(int j = 0; j < locksAquired.size(); j++) {
+                        MemberList listToRelease = (MemberList)locksAquired.get(j);
+                        Lock lockToRelease = listToRelease.getSourceList().getReadWriteLock().readLock();
+                        lockToRelease.unlock();
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        /**
+         * Releases the lock.
+         */
+        public void unlock() {
+            for(int i = 0; i < memberLists.size(); i++) {
+                MemberList current = (MemberList)memberLists.get(i);
+                current.getSourceList().getReadWriteLock().readLock().unlock();
+            }
+        }
+    }
+
+    /**
+     * The CompositeWriteLock is a lock that is composed of a list of source
+     * WriteLocks.
+     */
+    class CompositeWriteLock implements Lock {
+        /**
+         * Acquires the lock.
+         */
+        public void lock() {
+            for(int i = 0; i < memberLists.size(); i++) {
+                MemberList current = (MemberList)memberLists.get(i);
+                current.getSourceList().getReadWriteLock().writeLock().lock();
+            }
+        }
+        
+        /**
+         * Acquires the lock only if it is free at the time of invocation.
+         */
+        public boolean tryLock() {
+            List locksAquired = new ArrayList();
+            // try to acquire locks in order
+            for(int i = 0; i < memberLists.size(); i++) {
+                MemberList current = (MemberList)memberLists.get(i);
+                boolean success = current.getSourceList().getReadWriteLock().writeLock().tryLock();
+
+                // add this lock to the locked list
+                if(success) {
+                    locksAquired.add(current);
+                // release all success locks on a single fail
+                } else {
+                    for(int j = 0; j < locksAquired.size(); j++) {
+                        MemberList listToRelease = (MemberList)locksAquired.get(j);
+                        Lock lockToRelease = listToRelease.getSourceList().getReadWriteLock().writeLock();
+                        lockToRelease.unlock();
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        /**
+         * Releases the lock.
+         */
+        public void unlock() {
+            for(int i = 0; i < memberLists.size(); i++) {
+                MemberList current = (MemberList)memberLists.get(i);
+                current.getSourceList().getReadWriteLock().writeLock().unlock();
             }
         }
     }

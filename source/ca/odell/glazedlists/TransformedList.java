@@ -38,16 +38,10 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class TransformedList implements EventList, ListEventListener {
+public abstract class TransformedList extends AbstractEventList implements ListEventListener {
 
     /** the underlying list */
     protected EventList source;
-    
-    /** the change event and notification system */
-    protected ListEventAssembler updates = new ListEventAssembler(this);
-    
-    /** the read/write lock provides mutual exclusion to access */
-    protected ReadWriteLock readWriteLock;
 
     /**
      * Creates an TransformedList that provides a transformed view of the
@@ -60,30 +54,6 @@ public abstract class TransformedList implements EventList, ListEventListener {
     protected TransformedList(EventList source) {
         this.source = source;
         readWriteLock = source.getReadWriteLock();
-    }
-
-    /**
-     * Gets the lock object in order to access this list in a thread-safe manner.
-     * This will return a <strong>re-entrant</strong> implementation of
-     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
-     */
-    public ReadWriteLock getReadWriteLock() {
-        return readWriteLock;
-    }
-
-    /**
-     * Registers the specified listener to receive notification of changes
-     * to this list.
-     */
-    public final void addListEventListener(ListEventListener listChangeListener) {
-        updates.addListEventListener(listChangeListener);
-    }
-    
-    /**
-     * Removes the specified listener from receiving change updates for this list.
-     */
-    public void removeListEventListener(ListEventListener listChangeListener) {
-        updates.removeListEventListener(listChangeListener);
     }
 
     /**
@@ -247,77 +217,6 @@ public abstract class TransformedList implements EventList, ListEventListener {
     }
     
     /**
-     * Returns true if this list contains the specified element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean contains(Object object) {
-        // for through this, looking for the lucky object
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(a == null && object == null) return true;
-            else if(a.equals(object)) return true;
-        }
-        // not found
-        return false;
-    }
-
-    /**
-     * Returns true if this list contains all of the elements of the specified collection.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean containsAll(Collection collection) {
-        // look for something that is missing
-        for(Iterator i = collection.iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(!contains(a)) return false;
-        }
-        // contained everything we looked for
-        return true;
-    }
-
-    /**
-     * Compares the specified object with this list for equality.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean equals(Object object) {
-        if(object == this) return true;
-        if(object == null) return false;
-        if(!(object instanceof List)) return false;
-        
-        // ensure the lists are the same size
-        List otherList = (List)object;
-        if(otherList.size() != size()) return false;
-        
-        // compare element wise, via iterators
-        ListIterator iterA = listIterator();
-        ListIterator iterB = otherList.listIterator();
-        while(iterA.hasNext() && iterB.hasNext()) {
-            // get the ith object from each list to compare
-            Object a = iterA.next();
-            Object b = iterB.next();
-            
-            // handle the both null case
-            if(a == b) continue;
-            // if one is null and the other is not, die
-            if(a == null || b == null) return false;
-            // if they are not equal die
-            if(!a.equals(b)) return false;
-        }
-        
-        // if we haven't failed yet, they match
-        return true;
-    }
-    
-    /**
      * Returns the element at the specified position in this list.
      *
      * <p>Like all read-only methods, this method <strong>does not</strong> manage
@@ -327,78 +226,6 @@ public abstract class TransformedList implements EventList, ListEventListener {
     public Object get(int index) {
         if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot get at " + index + " on list of size " + size());
         return source.get(getSourceIndex(index));
-    }
-
-    /**
-     * Returns the hash code value for this list.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public int hashCode() {
-        // stolen SHAMELESSLY from the JDK for guaranteed compatibility
-        int hashCode = 1;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            hashCode = 31 * hashCode + (a == null ? 0 : a.hashCode());
-        }
-        return hashCode;
-    }
-
-    /**
-     * Returns the index in this list of the first occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public int indexOf(Object object) {
-        // for through this, looking for the lucky object
-        int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(a == null && object == null) return index;
-            else if(a.equals(object)) return index;
-            index++;
-        }
-        // not found
-        return -1;
-    }
-    
-    /**
-     * Returns true if this list contains no elements.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean isEmpty() {
-        return (size() == 0);
-    }
-    
-    /**
-     * Returns an iterator over the elements in this list in proper sequence.
-     */
-    public Iterator iterator() {
-        return new EventListIterator(this);
-    }
-
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence).
-     */
-    public ListIterator listIterator() {
-        return new EventListIterator(this);
-    }
-
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence), starting at the specified position in this list.
-     */
-    public ListIterator listIterator(int index) {
-        return new EventListIterator(this, index);
     }
 
     /**
@@ -549,98 +376,5 @@ public abstract class TransformedList implements EventList, ListEventListener {
      */
     public int size() {
         return source.size();
-    }
-
-    /**
-     * Returns a view of the portion of this list between the specified
-     * fromIndex, inclusive, and toIndex, exclusive.
-     */
-    public List subList(int fromIndex, int toIndex) {
-        return new SubEventList(this, fromIndex, toIndex, true);
-    }
-
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object[] toArray() {
-        // copy values into the array
-        Object[] array = new Object[size()];
-        int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            array[index] = i.next();
-            index++;
-        }
-        return array;
-    }
-
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence; the runtime type of the returned array is that of the
-     * specified array.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object[] toArray(Object[] array) {
-        // create an array of the same type as the array passed
-        if (array.length < size()) {
-            array = (Object[])java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size());
-        } else if(array.length > size()) {
-            array[size()] = null;
-        }
-        
-        // copy values into the array
-        int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            array[index] = i.next();
-            index++;
-        }
-        return array;
-    }
-
-    /**
-     * Gets this list in String form for debug or display.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append("[");
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            result.append(i.next());
-            if(i.hasNext()) result.append(", ");
-        }
-        result.append("]");
-        return result.toString();
-    }
-    
-
-    /**
-     * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public int lastIndexOf(Object object) {
-        // for through this, looking for the lucky object
-        int index = size() - 1;
-        for(ListIterator i = listIterator(size()); i.hasPrevious(); ) {
-            Object a = i.previous();
-            if(a == null && object == null) return index;
-            else if(a.equals(object)) return index;
-            index--;
-        }
-        // not found
-        return -1;
     }
 }

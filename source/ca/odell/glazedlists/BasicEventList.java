@@ -32,16 +32,10 @@ import java.io.Serializable;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class BasicEventList implements EventList, Serializable {
+public final class BasicEventList extends AbstractEventList {
 
     /** the underlying data list */
     protected List data;
-
-    /** the change event and notification system */
-    protected ListEventAssembler updates = new ListEventAssembler(this);
-    
-    /** the read/write lock provides mutual exclusion to access */
-    private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
 
     /**
      * Creates a new EventArrayList that uses an ArrayList as the source list
@@ -113,7 +107,7 @@ public final class BasicEventList implements EventList, Serializable {
      */
     public boolean addAll(int index, Collection collection) {
         // don't do an add of an empty set
-        if(collection.size() == 0) return true;
+        if(collection.size() == 0) return false;
 
         getReadWriteLock().writeLock().lock();
         try {
@@ -144,7 +138,7 @@ public final class BasicEventList implements EventList, Serializable {
      */
     public boolean addAll(int index, Object[] objects) {
         // don't do an add of an empty set
-        if(objects.length == 0) return true;
+        if(objects.length == 0) return false;
 
         getReadWriteLock().writeLock().lock();
         try {
@@ -242,37 +236,6 @@ public final class BasicEventList implements EventList, Serializable {
         }
     }
           
-
-    /**
-     * Returns true if this list contains the specified element.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean contains(Object object) {
-        return data.contains(object);
-    }
-
-    /**
-     * Returns true if this list contains all of the elements of the specified collection.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean containsAll(Collection collection) {
-        return data.containsAll(collection);
-    }
-    
-    /**
-     * Compares the specified object with this list for equality.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean equals(Object object) {
-        return data.equals(object);
-    }
-    
     /**
      * Returns the element at the specified position in this list.
      *
@@ -281,36 +244,6 @@ public final class BasicEventList implements EventList, Serializable {
      */
     public Object get(int index) {
         return data.get(index);
-    }
-    /**
-     * Returns the hash code value for this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public int hashCode() {
-        return data.hashCode();
-    }
-    /**
-     * Returns the index in this list of the first occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public int indexOf(Object object) {
-        return data.indexOf(object);
-    }
-
-    /**
-     * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public int lastIndexOf(Object object) {
-        return data.lastIndexOf(object);
     }
 
     /**
@@ -322,51 +255,6 @@ public final class BasicEventList implements EventList, Serializable {
     public int size() {
         return data.size();
     }
-
-    /**
-     * Returns true if this list contains no elements.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean isEmpty() {
-        return data.isEmpty();
-    }
-
-    /**
-     * Returns a view of the portion of this list between the specified
-     * fromIndex, inclusive, and toIndex, exclusive.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public List subList(int fromIndex, int toIndex) {
-        return new SubEventList(this, fromIndex, toIndex, true);
-    }
-
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object[] toArray() {
-        return data.toArray();
-    }
-
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence; the runtime type of the returned array is that of the
-     * specified array.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object[] toArray(Object[] array) {
-        return data.toArray(array);
-    }
-
 
     /**
      * Removes from this collection all of its elements that are contained
@@ -419,75 +307,5 @@ public final class BasicEventList implements EventList, Serializable {
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
-    }
-
-    /**
-     * Returns an iterator over the elements in this list in proper sequence.
-     */
-    public Iterator iterator() {
-        return new EventListIterator(this);
-    }
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence).
-     */
-    public ListIterator listIterator() {
-        return new EventListIterator(this);
-    }
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence), starting at the specified position in this list.
-     */
-    public ListIterator listIterator(int index) {
-        return new EventListIterator(this, index);
-    }
-
-
-    /**
-     * Registers the specified listener to receive notification of changes
-     * to this list.
-     */
-    public final void addListEventListener(ListEventListener listChangeListener) {
-        updates.addListEventListener(listChangeListener);
-    }
-    /**
-     * Removes the specified listener from receiving change updates for this list.
-     */
-    public void removeListEventListener(ListEventListener listChangeListener) {
-        updates.removeListEventListener(listChangeListener);
-    }
-
-    /**
-     * For implementing the EventList interface. This returns this list, which does
-     * not depend on another list.
-     */
-    public EventList getRootList() {
-        return this;
-    }
-    
-    /**
-     * Gets the lock object in order to access this list in a thread-safe manner.
-     * This will return a <strong>re-entrant</strong> implementation of
-     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
-     */
-    public ReadWriteLock getReadWriteLock() {
-        return readWriteLock;
-    }
-
-    /**
-     * Gets this list in String form for debug or display.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append("[");
-        for(int i = 0; i < size(); i++) {
-            if(i != 0) result.append(", ");
-            result.append(get(i));
-        }
-        result.append("]");
-        return result.toString();
     }
 }
