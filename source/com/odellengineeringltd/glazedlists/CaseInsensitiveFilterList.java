@@ -101,6 +101,30 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
     }
 
     /**
+     * Creates a matcher for the specified source. The matcher will match all
+     * Strings containing the source and is case insensitive.
+     */
+    private Matcher getMatcher(String source) {
+        // create a pattern for the source string
+        StringBuffer pattern = new StringBuffer();
+        for(int i = 0; i < source.length(); i++) {
+            char c = source.charAt(i);
+
+            // if the current character is plain, append it
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+                pattern.append(c);
+
+            // if the current character is not plain, escape it first
+            } else {
+                pattern.append("\\");
+                pattern.append(c);
+            }
+        }
+        
+        return Pattern.compile(pattern.toString(), Pattern.CASE_INSENSITIVE).matcher("");
+    }
+
+    /**
      * Recompiles the filter regular expression patterns. When the user enters
      * a regular expression that is not recognized, the error is silently ignored
      * and no filters apply.
@@ -110,7 +134,7 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
             String[] filterStrings = filterEdit.getText().toLowerCase().split("[ \t]");
             filters = new Matcher[filterStrings.length];
             for(int i = 0; i < filterStrings.length; i++) {
-                filters[i] = Pattern.compile(filterStrings[i], Pattern.CASE_INSENSITIVE).matcher("");
+                filters[i] = getMatcher(filterStrings[i]);
             }
         } catch(PatternSyntaxException e) {
             filters = new Matcher[0];
