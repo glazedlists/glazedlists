@@ -18,7 +18,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class ListEventCounter implements ListEventListener {
+public class ListEventCounter implements ListEventListener {
     
     /** count the number of changes per event */
     private List changeCounts = new ArrayList();

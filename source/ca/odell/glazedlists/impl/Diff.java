@@ -21,7 +21,7 @@ import ca.odell.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class Diff {
+public final class Diff {
     
     /**
      * Replace the complete contents of the target {@link EventList} with the complete
