@@ -37,7 +37,12 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	/**
 	 * Name of the logo image file.
 	 */
-	private static final String LOGO_FILE = "logoonbrown.gif";
+	private static final String LOGO_FILE = "/resources/demo/logoonbrown.gif";
+
+	/**
+	 * Name of the properties file containing the demos.
+	 */
+	private static final String DEMO_PROPERTY_FILE = "/resources/demo/launcher.properties";
 
 	/**
 	 * Background color
@@ -74,7 +79,6 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	/**
 	 * Color of help text
 	 */
-//	private static final String HELP_TEXT_COLOR = "#ff7700";
 	private static final String HELP_TEXT_COLOR = "#663300";
 
 	/**
@@ -86,9 +90,19 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		"and serve as a guide when creating your own applications.<br><br>" +
 		"Choose a demo from the list below to get started:</html>";
 
+	// URLs for links display when running within WebStart
+	private static final String MAIN_PAGE_URL = "http://publicobject.com/glazedlists/";
+	private static final String JAVA_NET_URL = "http://glazedlists.dev.java.net/";
+	private static final String TUTORIAL_URL = "http://publicobject.com/glazedlists/tutorial/";
+	private static final String JAVADOC_URL = "http://publicobject.com/glazedlists/api/";
+	private static final String FAQ_URL = "http://publicobject.com/glazedlists/faq.html";
+
 
 	private static final Class STRING_ARRAY_CLASS = new String[ 0 ].getClass();
 
+	/**
+	 * @see #runningInLauncher()
+	 */
 	private static boolean in_launcher = false;
 
 
@@ -98,8 +112,8 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 
 	public static void main(String[] args) {
-		// Set this system property so that anything we launch knows not to System.exit().
-//		System.setProperty("in_launcher", "true");
+		// Accessed via runningInLauncher() so that other apps know whether to call
+		// System.exit() or not.
 		in_launcher = true;
 
 		// Use the system look and feel
@@ -254,34 +268,33 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		Method show_document_method;
 		try {
 			// See if we're running in webstart
-			Class service_manager_class = Class.forName( "javax.jnlp.ServiceManager" );
+			Class service_manager_class = Class.forName("javax.jnlp.ServiceManager");
 			Method service_names_method =
-				service_manager_class.getMethod( "getServiceNames", new Class[]{} );
-			String[] service_names = ( String[] ) service_names_method.invoke(
-				service_manager_class, new Object[] {});
+				service_manager_class.getMethod("getServiceNames", new Class[]{});
+			String[] service_names = (String[]) service_names_method.invoke(service_manager_class, new Object[]{});
 
 			// If null or empty, not running in WebStart
-			if ( service_names == null || service_names.length == 0 ) return;
+			if (service_names == null || service_names.length == 0) return;
 
 
 			// Lookup the BasicService (needed to launch URLs)
-			Class basic_service_class = Class.forName( "javax.jnlp.BasicService" );
+			Class basic_service_class = Class.forName("javax.jnlp.BasicService");
 
 			Method lookup_method =
-				service_manager_class.getMethod("lookup",new Class[] {String.class});
+				service_manager_class.getMethod("lookup", new Class[]{String.class});
 
 			basic_service = lookup_method.invoke(service_manager_class,
-				new Object[] {basic_service_class.getName()});
+				new Object[]{basic_service_class.getName()});
 
 			// See if web browsers are supported
 			Method web_browser_supported_method =
 				basic_service_class.getMethod("isWebBrowserSupported", new Class[]{});
 			Boolean bool = (Boolean) web_browser_supported_method.invoke(basic_service,
-				new Object[] {});
-			if ( bool == null || !bool.booleanValue()) return;
+				new Object[]{});
+			if (bool == null || !bool.booleanValue()) return;
 
 			show_document_method = basic_service_class.getMethod("showDocument",
-				new Class[]{URL.class} );
+				new Class[]{URL.class});
 		} catch(Exception ex) {
 			return;
 		}
@@ -290,7 +303,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		gbc.gridy++;
 		try {
 			box.add(createLinkBarLabel("Main Website",
-				new URL("http://publicobject.com/glazedlists/"), basic_service,
+				new URL(MAIN_PAGE_URL), basic_service,
 				show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
@@ -298,7 +311,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		try {
 			box.add(createLinkBarLabel("Java.net",
-				new URL("http://glazedlists.dev.java.net/"), basic_service,
+				new URL(JAVA_NET_URL), basic_service,
 				show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
@@ -317,7 +330,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		gbc.gridy++;
 		try {
 			box.add(createLinkBarLabel("Tutorial",
-				new URL("http://publicobject.com/glazedlists/tutorial/"),
+				new URL(TUTORIAL_URL),
 				basic_service, show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
@@ -325,7 +338,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		try {
 			box.add(createLinkBarLabel("Javadoc API",
-				new URL("http://publicobject.com/glazedlists/api/"),
+				new URL(JAVADOC_URL),
 				basic_service, show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
@@ -333,7 +346,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		try {
 			box.add(createLinkBarLabel("FAQ",
-				new URL("http://publicobject.com/glazedlists/faq.html"), basic_service,
+				new URL(FAQ_URL), basic_service,
 				show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
@@ -377,7 +390,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		Properties props = new Properties();
 		InputStream in = null;
 		try {
-			in = Launcher.class.getResourceAsStream("demos.properties");
+			in = Launcher.class.getResourceAsStream(DEMO_PROPERTY_FILE);
 
 			props.load(in);
 		} catch(Exception ex) {
@@ -394,12 +407,21 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		LinkedList demo_list = new LinkedList();
 
+		boolean is_swt_available = false;
+		try {
+			Class.forName("org.eclipse.swt.SWT");
+			is_swt_available = true;
+		} catch(Exception ex) {
+		}
+
 		Enumeration enum = props.propertyNames();
 		while (enum.hasMoreElements()) {
 			String name = (String) enum.nextElement();
 
 			// Skip anything that's not a "main" element
-			if (name.endsWith(".class") || name.endsWith(".desc")) continue;
+			if (name.endsWith(".class") || name.endsWith(".desc") ||
+				name.endsWith(".requires_swt"))
+				continue;
 
 			String demo_name = props.getProperty(name, null);
 			String demo_class = props.getProperty(name + ".class", null);
@@ -413,6 +435,24 @@ public class Launcher implements ActionListener, ListSelectionListener {
 			if (isEmpty(demo_class)) {
 				System.err.println("Empty class name for property \"" + name +
 					"\". Check format");
+				continue;
+			}
+
+			// Check to see if the demo requires SWT and if it's available
+			boolean requires_swt =
+				props.getProperty(name + ".requires_swt", null) != null;
+			if (requires_swt && !is_swt_available) {
+				System.err.println("Skipping demo \"" + demo_name +
+					"\" because SWT isn't available.");
+				continue;
+			}
+
+			try {
+				Class.forName(demo_class);
+			} catch(Exception ex) {
+				System.err.println("Skipping demo \"" + demo_name +
+					"\" because the class couldn't be loaded:");
+				ex.printStackTrace();
 				continue;
 			}
 
@@ -477,7 +517,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	 * Create a label that looks like a link bar button on the Glazed Lists website.
 	 */
 	private JLabel createLinkBarLabel(String text, final URL url,
-		final Object basic_service, final Method show_document_method ) {
+		final Object basic_service, final Method show_document_method) {
 
 		final JLabel label = new JLabel(text);
 		label.setOpaque(true);
@@ -499,9 +539,9 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 			public void mouseClicked(MouseEvent e) {
 				try {
-					show_document_method.invoke( basic_service, new Object[] { url } );
+					show_document_method.invoke(basic_service, new Object[]{url});
+				} catch(Exception ex) {
 				}
-				catch( Exception ex ) {}
 			}
 		});
 
