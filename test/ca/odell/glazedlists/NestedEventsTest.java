@@ -34,6 +34,7 @@ public class NestedEventsTest extends TestCase {
         nestingList = new ExternalNestingEventList(source);
         counter = new ListEventCounter();
         nestingList.addListEventListener(counter);
+        nestingList.addListEventListener(new ConsistencyTestList(nestingList, "nesting list", false));
     }
 
     /**
@@ -48,7 +49,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
-    public void testSimpleContradictingEventsAllowed() {
+    public void testFullyDeletedInserts() {
         boolean contradictionsAllowed = true;
         nestingList.beginEvent(false);
         source.addAll(Arrays.asList(new String[] { "A", "B", "F", "G" }));
@@ -73,20 +74,121 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that complex contradicting events can be nested.
      */
-    public void testComplexContradictingEventsAllowed() {
+    public void testDeletedInserts() {
         List jesse = Arrays.asList(new Character[] { new Character('J'), new Character('E'), new Character('S'), new Character('S'), new Character('E') });
         List wilson = Arrays.asList(new Character[] { new Character('W'), new Character('I'), new Character('L'), new Character('S'), new Character('O'), new Character('N') });
         boolean contradictionsAllowed = true;
         
-        // test nested events
+        // make nested events
         nestingList.beginEvent(contradictionsAllowed);
         source.addAll(jesse);
         source.removeAll(wilson);
         nestingList.commitEvent();
         
-        System.out.println(nestingList);
+        // ensure the number of changes is limited
         assertEquals(3, nestingList.size());
-        assertEquals(3, counter.getEventCount());
+        assertEquals(1, counter.getEventCount());
+        assertEquals(3, counter.getChangeCount(0));
+    }
+
+    /**
+     * Validates that simple contradicting events can be nested.
+     */
+    public void testFullyUpdatedInserts() {
+        boolean contradictionsAllowed = true;
+        nestingList.beginEvent(false);
+        source.addAll(Arrays.asList(new String[] { "A", "B", "F", "G" }));
+        nestingList.commitEvent();
+        
+        // test nested events: add 3 elements at 2 and delete 3 elements at 1
+        nestingList.beginEvent(contradictionsAllowed);
+        source.add(2, "C");
+        source.add(3, "D");
+        source.add(4, "E");
+        source.set(2, "c");
+        source.set(3, "d");
+        source.set(4, "e");
+        nestingList.commitEvent();
+        
+        // net change is: remove 1 element at 1 and add 1 element at 1
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "b", "c", "d", "E", "F", "G" }));
+        assertEquals(2, counter.getEventCount());
+        assertEquals(3, counter.getChangeCount(1));
+    }
+    
+    /**
+     * Validates that simple contradicting events can be nested.
+     */
+    public void testUpdatedInserts() {
+        boolean contradictionsAllowed = true;
+        nestingList.beginEvent(false);
+        source.addAll(Arrays.asList(new String[] { "A", "B", "F", "G" }));
+        nestingList.commitEvent();
+        
+        // test nested events: add 3 elements at 2 and delete 3 elements at 1
+        nestingList.beginEvent(contradictionsAllowed);
+        source.add(2, "C");
+        source.add(3, "D");
+        source.add(4, "E");
+        source.set(1, "b");
+        source.set(2, "c");
+        source.set(3, "d");
+        nestingList.commitEvent();
+        
+        // net change is: remove 1 element at 1 and add 1 element at 1
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "b", "c", "d", "E", "F", "G" }));
+        assertEquals(2, counter.getEventCount());
+        assertEquals(3, counter.getChangeCount(1));
+    }
+
+    /**
+     * Validates that simple contradicting events can be nested.
+     */
+    public void testFullyDeletedUpdates() {
+        boolean contradictionsAllowed = true;
+        nestingList.beginEvent(false);
+        source.addAll(Arrays.asList(new String[] { "A", "B", "C", "D", "E", "F", "G" }));
+        nestingList.commitEvent();
+        
+        // test nested events: add 3 elements at 2 and delete 3 elements at 1
+        nestingList.beginEvent(contradictionsAllowed);
+        source.set(2, "c");
+        source.set(3, "d");
+        source.set(4, "e");
+        source.remove(2);
+        source.remove(3);
+        source.remove(4);
+        nestingList.commitEvent();
+        
+        // net change is: remove 1 element at 1 and add 1 element at 1
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "B", "F", "G" }));
+        assertEquals(2, counter.getEventCount());
+        assertEquals(3, counter.getChangeCount(1));
+    }
+
+    /**
+     * Validates that simple contradicting events can be nested.
+     */
+    public void testDeletedUpdates() {
+        boolean contradictionsAllowed = true;
+        nestingList.beginEvent(false);
+        source.addAll(Arrays.asList(new String[] { "A", "B", "C", "D", "E", "F", "G" }));
+        nestingList.commitEvent();
+        
+        // test nested events: add 3 elements at 2 and delete 3 elements at 1
+        nestingList.beginEvent(contradictionsAllowed);
+        source.set(2, "c");
+        source.set(3, "d");
+        source.set(4, "e");
+        source.remove(1);
+        source.remove(2);
+        source.remove(3);
+        nestingList.commitEvent();
+        
+        // net change is: remove 1 element at 1 and add 1 element at 1
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "e", "F", "G" }));
+        assertEquals(2, counter.getEventCount());
+        assertEquals(4, counter.getChangeCount(1));
     }
     
     /**
