@@ -3,8 +3,8 @@
 <jnlp 
   spec="1.0+" 
   codebase="https://glazedlists.dev.java.net/" 
-  href="demo.jnlp"> 
-  <information> 
+  href="glazedlists-demo.jnlp"> 
+  <information>
     <title>Glazed Lists Demo</title> 
     <vendor>Jesse Wilson</vendor> 
     <homepage href="index.html"/> 
