@@ -25,7 +25,7 @@ public class PeerConnectionTest extends TestCase {
     private Peer peer;
     
     /** the port to listen on */
-    private int serverPort = 5000;
+    private static int serverPort = 5200;
     
     /**
      * Prepare for the test.

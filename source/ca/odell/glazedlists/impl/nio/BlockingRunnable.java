@@ -17,6 +17,9 @@ import java.util.logging.*;
 
 /**
  * A Runnable that unblocks the calling thread when it finishes executing.
+ *
+ * <p>If this Runnable throws any {@link RuntimeException}s, they can be accessed
+ * via this API. They will not be propagated up.
  */
 class BlockingRunnable implements Runnable {
     
@@ -49,9 +52,6 @@ class BlockingRunnable implements Runnable {
         synchronized(this) {
             notify();
         }
-        
-        // propagate the exception
-        if(problem != null) throw problem;
     }
     
     /**
