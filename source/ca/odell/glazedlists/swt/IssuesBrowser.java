@@ -340,7 +340,7 @@ public class IssuesBrowser {
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class IssueTableFormat implements TableFormat, CheckableTableFormat {
+class IssueTableFormat implements CheckableTableFormat {
 
     public int getColumnCount() {
         return 6;
