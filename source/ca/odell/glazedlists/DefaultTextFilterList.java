@@ -39,8 +39,8 @@ public class DefaultTextFilterList extends AbstractFilterList {
     /** the filters list is currently just a list of Substrings to include */
     private String[] filters = new String[0];
 
-    /** a map from each filter to a Strategy for locating that filter in arbitrary text */
-    private Map filterToTextContainmentStrategyMap = new HashMap();
+    /** a parallel array to locate filter substrings in arbitrary text */
+    private TextSearchStrategy[] filterStrategies = new TextSearchStrategy[0];
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private TextFilterator filterator = null;
@@ -78,33 +78,30 @@ public class DefaultTextFilterList extends AbstractFilterList {
      *
      * @param filters the {@link String}s representing all of the filter values
      */
-    public void setFilterText(final String[] filters) {
+    public void setFilterText(final String[] newFilters) {
         // adjusting the filters and refiltering the source list happens "atomically"
-        this.updates.beginEvent(true);
+        updates.beginEvent(true);
 
         // store the oldFilters so later we can determine the type of change that has occurred
-        final String[] oldFilters = this.filters;
+        final String[] oldFilters = filters;
         // update the filters
-        this.filters = normalizeFilter(filters);
+        filters = normalizeFilter(newFilters);
 
         // rebuild the filter -> TextSearchStrategy map for the new filters
-        filterToTextContainmentStrategyMap.clear();
-        for(int i = 0; i < this.filters.length; i++) {
-            final String filter = this.filters[i];
-            final TextSearchStrategy strategy = this.selectTextSearchStrategy(filter);
-            strategy.setSubtext(filter);
-            filterToTextContainmentStrategyMap.put(filter, strategy);
+        filterStrategies = new TextSearchStrategy[filters.length];
+        for(int i = 0; i < filters.length; i++) {
+            filterStrategies[i] = selectTextSearchStrategy(filters[i]);
         }
 
         // if the new filter may potentially change the current contents of this list
-        if(!isFilterEqual(oldFilters, this.filters)) {
+        if(!isFilterEqual(oldFilters, filters)) {
 
             // classify the change in filter and apply the new filter to this list
-            if(this.filters.length == 0) {
+            if(filters.length == 0) {
                 handleFilterCleared();
-            } else if(isFilterRelaxed(oldFilters, this.filters)) {
+            } else if(isFilterRelaxed(oldFilters, filters)) {
                 handleFilterRelaxed();
-            } else if(isFilterConstrained(oldFilters, this.filters)) {
+            } else if(isFilterConstrained(oldFilters, filters)) {
                 handleFilterConstrained();
             } else {
                 handleFilterChanged();
@@ -112,7 +109,7 @@ public class DefaultTextFilterList extends AbstractFilterList {
         }
 
         // commit the changes and notify listeners
-        this.updates.commitEvent();
+        updates.commitEvent();
     }
 
     /**
@@ -180,16 +177,20 @@ public class DefaultTextFilterList extends AbstractFilterList {
      *      <code>filter</code> within arbitrary text
      */
     protected TextSearchStrategy selectTextSearchStrategy(String filter) {
-        // uncomment me to test the old text search algorithm
-        //return new OldCaseInsensitiveTextSearchStrategy();
-
+        TextSearchStrategy result = null;
+        
         // if the filter is only 1 character, use the optimized SingleCharacter strategy
         if(filter.length() == 1) {
-            return new SingleCharacterCaseInsensitiveTextSearchStrategy();
-        }
-
+            result = new SingleCharacterCaseInsensitiveTextSearchStrategy();
         // default to using the Boyer-Moore algorithm
-        return new BoyerMooreCaseInsensitiveTextSearchStrategy();
+        } else {
+            result = new BoyerMooreCaseInsensitiveTextSearchStrategy();
+        }
+        
+        // apply the subtext
+        result.setSubtext(filter);
+        
+        return result;
     }
 
     /**
@@ -330,7 +331,7 @@ public class DefaultTextFilterList extends AbstractFilterList {
         filters:
         for(int f = 0; f < filters.length; f++) {
             // get the text search strategy for the current filter
-            textSearchStrategy = (TextSearchStrategy)filterToTextContainmentStrategyMap.get(this.filters[f]);
+            textSearchStrategy = filterStrategies[f];
 
             // search through all fields for the current filter
             for(int c = 0; c < filterStrings.size(); c++) {
