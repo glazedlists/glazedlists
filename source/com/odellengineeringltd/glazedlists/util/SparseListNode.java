@@ -81,6 +81,9 @@ class SparseListNode {
     private int totalLeftSize = 0;
     private int virtualRootSize = 0;
     
+    /** the height of this subtree */
+    private int height = 0;
+    
     /** the value at this node */
     private Object value = null;
     
@@ -195,15 +198,15 @@ class SparseListNode {
         return allSubtreeSize;
     }
     
-    /**
+    /*
      * Retrieves the height of this subtree.
      */
-    private int height() {
+    /*private int height() {
         if(left == null && right == null) return 1;
         else if(right == null) return 1 + left.height();
         else if(left == null) return 1 + right.height();
         else return 1 + Math.max(left.height(), right.height());
-    }
+    }*/
 
     /**
      * Retrieves the subtree node with the largest value.
@@ -473,6 +476,8 @@ class SparseListNode {
             if(right != null) right.parent = middle;
             // update the centre space
             middle.virtualRootSize = virtualRootSize;
+            // update the height
+            middle.height = height;
             // update the parent
             middle.parent = parent;
             if(parent != null) {
@@ -515,6 +520,8 @@ class SparseListNode {
         // fire notification at the next level up the tree
         if(parent != null) parent.childSizeChanged(this, virtual, difference);
         else host.childSizeChanged(difference);
+        // fore notification of height changes
+        if(!virtual) recalculateHeight();
     }
     
     /**
@@ -553,6 +560,33 @@ class SparseListNode {
         if(original == left) left = replacement;
         else if(original == right) right = replacement;
         else throw new IllegalArgumentException(this + " cannot replace a non-existant child");
+        
+        // the height may change as a consequence
+        recalculateHeight();
+    }
+    
+    /**
+     * Recalculates the cached height of this node after a child node has been
+     * removed or added.
+     */
+    private void recalculateHeight() {
+        // save the old height to test for a difference
+        int oldHeight = height;
+        
+        // calculate the new height
+        if(left == null && right == null) height = 1;
+        else if(right == null) height = 1 + left.height();
+        else if(left == null) height = 1 + right.height();
+        else height = 1 + Math.max(left.height(), right.height());
+
+        // propagate changes upstream if the height changed
+        if(height != oldHeight && parent != null) parent.recalculateHeight();
+    }
+    /**
+     * Gets the cached value of this nodes height.
+     */
+    private int height() {
+        return height;
     }
     
     /**
@@ -674,6 +708,8 @@ class SparseListNode {
         replacement.right = this;
         replacement.treeRightSize = treeSize();
         replacement.totalRightSize = size();
+        // recalculate heights
+        recalculateHeight();
     }
     /**
      * AVL-Rotates this subtree with its right child.
@@ -703,6 +739,8 @@ class SparseListNode {
         replacement.left = this;
         replacement.treeLeftSize = treeSize();
         replacement.totalLeftSize = size();
+        // recalculate heights
+        recalculateHeight();
     }
 
     
