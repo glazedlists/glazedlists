@@ -58,8 +58,6 @@ public class CompositeList extends AbstractList implements EventList {
     
     /**
      * Adds the specified list to the lists that compose this list.
-     *
-     * @param index the index within the list of lists.
      */
     public void addMemberList(EventList list) {
         synchronized(getRootList()) {
