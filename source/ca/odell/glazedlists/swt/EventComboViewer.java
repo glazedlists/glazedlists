@@ -14,6 +14,8 @@ import org.eclipse.swt.events.SelectionListener;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
+// JFace label providers
+import org.eclipse.jface.viewers.*;
 
 /**
  * A view helper that displays an {@link EventList} in a {@link Combo} component.
@@ -34,8 +36,8 @@ public class EventComboViewer implements ListEventListener {
     /** the EventList to respond to */
     private TransformedList swtSource = null;
 
-    /** the label formatter to pretty print a String representation of each Object */
-    private LabelFormat labelFormat = null;
+    /** the label provider to pretty print a String representation of each Object */
+    private ILabelProvider labelProvider = null;
 
     /**
      * Binds the contents of a {@link Combo} component to an {@link EventList}
@@ -45,7 +47,7 @@ public class EventComboViewer implements ListEventListener {
      * the result of calling toString() on the Objects found in source.
      */
     public EventComboViewer(EventList source, Combo combo) {
-        this(source, combo, GlazedLists.toStringLabelFormat());
+        this(source, combo, new LabelProvider());
     }
 
     /**
@@ -58,10 +60,10 @@ public class EventComboViewer implements ListEventListener {
      * @see LabelFormat
      * @see GlazedLists#beanLabelFormat(String)
      */
-    public EventComboViewer(EventList source, Combo combo, LabelFormat labelFormat) {
+    public EventComboViewer(EventList source, Combo combo, ILabelProvider labelProvider) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, combo.getDisplay());
         this.combo = combo;
-        this.labelFormat = labelFormat;
+        this.labelProvider = labelProvider;
 
         // set the initial data
         for(int i = 0; i < source.size(); i++) {
@@ -83,14 +85,14 @@ public class EventComboViewer implements ListEventListener {
      * Adds the value at the specified row.
      */
     private void addRow(int row, Object value) {
-        combo.add(labelFormat.getText(value), row);
+        combo.add(labelProvider.getText(value), row);
     }
 
     /**
      * Updates the value at the specified row.
      */
     private void updateRow(int row, Object value) {
-        combo.setItem(row, labelFormat.getText(value));
+        combo.setItem(row, labelProvider.getText(value));
     }
 
     /**

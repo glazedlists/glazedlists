@@ -14,6 +14,8 @@ import org.eclipse.swt.events.SelectionListener;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
+// JFace label providers
+import org.eclipse.jface.viewers.*;
 
 /**
  * A view helper that displays an {@link EventList} in a {@link List}.
@@ -35,7 +37,7 @@ public class EventListViewer implements ListEventListener, Selectable {
     private TransformedList swtSource = null;
 
     /** the formatter for list elements */
-    private LabelFormat LabelFormat = null;
+    private ILabelProvider labelProvider = null;
 
     /** For selection management */
     private SelectionList selectionList = null;
@@ -46,17 +48,17 @@ public class EventListViewer implements ListEventListener, Selectable {
      * toString() on the contents of the source list.
      */
     public EventListViewer(EventList source, List list) {
-        this(source, list, GlazedLists.toStringLabelFormat());
+        this(source, list, new LabelProvider());
     }
 
     /**
      * Creates a new List that displays and responds to changes in source.
      * List elements are formatted using the provided {@link LabelFormat}.
      */
-    public EventListViewer(EventList source, List list, LabelFormat LabelFormat) {
+    public EventListViewer(EventList source, List list, ILabelProvider labelProvider) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
         this.list = list;
-        this.LabelFormat = LabelFormat;
+        this.labelProvider = labelProvider;
 
         // Enable the selection lists
         selectionList = new SelectionList(swtSource, this);
@@ -79,10 +81,10 @@ public class EventListViewer implements ListEventListener, Selectable {
     }
 
     /**
-     * Gets the List Format.
+     * Gets the List LabelProvider.
      */
-    public LabelFormat getLabelFormat() {
-        return LabelFormat;
+    public ILabelProvider getLabelProvider() {
+        return labelProvider;
     }
 
     /**
@@ -112,14 +114,14 @@ public class EventListViewer implements ListEventListener, Selectable {
      * Adds the value at the specified row.
      */
     private void addRow(int row, Object value) {
-        list.add(LabelFormat.getText(value), row);
+        list.add(labelProvider.getText(value), row);
     }
 
     /**
      * Updates the value at the specified row.
      */
     private void updateRow(int row, Object value) {
-        list.setItem(row, LabelFormat.getText(value));
+        list.setItem(row, labelProvider.getText(value));
     }
 
     /**

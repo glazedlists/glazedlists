@@ -22,10 +22,10 @@ import ca.odell.glazedlists.impl.swt.*;
 import ca.odell.glazedlists.io.ByteCoder;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.gui.LabelFormat;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
+import org.eclipse.jface.viewers.ILabelProvider;
 // SWT components
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.events.SelectionListener;
@@ -58,6 +58,18 @@ public final class GlazedListsSWT {
     }
 
     
+    // LabelProviders // // // // // // // // // // // // // // // // // // //
+
+    /**
+     * Creates an {@link ILabelProvider} that returns labels for Objects via
+     * Relection. The label returned will be the String value of specified
+     * JavaBean property.
+     */
+    public static ILabelProvider beanLabelProvider(String property) {
+        return new BeanLabelProvider(property);
+    }
+    
+
     // ThresholdViewers // // // // // // // // // // // // // // // // // // //
 
     /**

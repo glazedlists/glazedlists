@@ -18,7 +18,6 @@ import ca.odell.glazedlists.impl.swt.*;
 import ca.odell.glazedlists.io.ByteCoder;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.gui.LabelFormat;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
@@ -131,29 +130,6 @@ public final class GlazedLists {
         return new BeanWritableTableFormat(propertyNames, columnLabels, editable);
     }
 
-
-    // LabelFormats // // // // // // // // // // // // // // // // // // // // //
-
-    /** Provide Singleton access for all LabelFormats with no internal state */
-    private static LabelFormat toStringLabelFormat = null;
-
-    /**
-     * Creates a {@link LabelFormat} that returns labels for Objects by simply
-     * returning the result of their toString() method.
-     */
-    public static LabelFormat toStringLabelFormat() {
-        if(toStringLabelFormat == null) toStringLabelFormat = new ToStringLabelFormat();
-        return toStringLabelFormat;
-    }
-
-    /**
-     * Creates a {@link LabelFormat} that returns labels for Objects via
-     * Relection.  The label returned will be the String value of specified
-     * JavaBean property.
-     */
-    public static LabelFormat beanLabelFormat(String property) {
-        return new BeanLabelFormat(property);
-    }
 
     // TextFilterators // // // // // // // // // // // // // // // // // // //
 

@@ -4,18 +4,20 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.impl.beans;
+package ca.odell.glazedlists.impl.swt;
 
-// to implement the LabelFormat interface
-import ca.odell.glazedlists.gui.LabelFormat;
+// beans
+import ca.odell.glazedlists.impl.beans.*;
+// to implement the LabelProvider interface
+import org.eclipse.jface.viewers.*;
 
 /**
- * A LabelFormat that uses Reflection on JavaBeans to provide a label
+ * A LabelProvider that uses Reflection on JavaBeans to provide a label
  * for an Object.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class BeanLabelFormat implements LabelFormat {
+public final class BeanLabelProvider extends LabelProvider {
 
     /** The name of the JavaBean property to use */
     private String propertyName = null;
@@ -24,10 +26,10 @@ public final class BeanLabelFormat implements LabelFormat {
     private BeanProperty beanProperty = null;
 
     /**
-     * Creates a new LabelFormat that uses the value of a JavaBean property
+     * Creates a new LabelProvider that uses the value of a JavaBean property
      * as the label for an Object.
      */
-    public BeanLabelFormat(String propertyName) {
+    public BeanLabelProvider(String propertyName) {
         this.propertyName = propertyName;
     }
 

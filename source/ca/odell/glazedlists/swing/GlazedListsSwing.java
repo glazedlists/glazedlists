@@ -22,7 +22,6 @@ import ca.odell.glazedlists.impl.swing.*;
 import ca.odell.glazedlists.io.ByteCoder;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.gui.LabelFormat;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
