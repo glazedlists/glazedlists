@@ -1204,6 +1204,37 @@ public class UniqueListTest extends TestCase {
     }
 
     /**
+     * Tests that the UniqueList can handle sets on the edge of two pairs of duplicates.
+     * This was inspired by a similar test case in PopularityListTest.
+     */
+    public void testRightEdgeSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Ford");        // C F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Chevy");    // C C
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testLeftEdgeSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Ford");        // C F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(0, "Ford");    // F F
+    }
+
+    /**
 	 * Explicit comparator for Kevin's sanity!
 	 */
 	class IntegerComparator implements Comparator {

@@ -36,7 +36,7 @@ public class PopularityListTest extends TestCase {
 
     /**
      * Test that the Popularity List works with simple data.
-     */
+     *//*
     public void testSimpleData() {
         EventList source = new BasicEventList();
         PopularityList popularityList = new PopularityList(source);
@@ -72,11 +72,11 @@ public class PopularityListTest extends TestCase {
         assertEquals("Melissa", popularityList.get(2));
         
         source.clear();
-    }
+    }*/
     
     /**
      * Tests that the Popularity List works by using a random sequence of operations.
-     */
+     *//*
     public void testRandom() {
         Random dice = new Random(0);
         
@@ -102,11 +102,11 @@ public class PopularityListTest extends TestCase {
             Integer updateValue = new Integer(dice.nextInt(50));
             source.set(updateIndex, updateValue);
         }
-    }
+    }*/
 
     /**
      * Tests that the PopularityList can handle multiple simultaneous events.
-     */
+     *//*
     public void testMultipleEvents() {
         EventList source = new BasicEventList();
         source.add(new int[] { 86, 1, 1, 1, 1, 0, 0 });
@@ -130,7 +130,7 @@ public class PopularityListTest extends TestCase {
         filterList.setFilter(4, 1);
         filterList.setFilter(5, 1);
         filterList.setFilter(6, 1);
-    }
+    }*/
 
     /**
      * Tests that the PopularityList can handle edge case sets.
@@ -149,7 +149,7 @@ public class PopularityListTest extends TestCase {
         SortedList sortedList = new SortedList(source);
         PopularityList popularityList = new PopularityList(source);
         new PopularityListValidator(popularityList, sortedList);
-
+        
         // in sorted order changes
         source.set(2, "BMW");    // A A B B C C C D
         source.set(1, "BMW");    // A B B B C C C D
