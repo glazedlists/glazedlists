@@ -170,6 +170,8 @@ public class PopularityListTest extends TestCase {
         source.set(4, "BMW");    // A B B B B D F F
         source.set(5, "Chevy");  // A B B B B C F F
         source.set(4, "Chevy");  // A B B B C C F F
+        source.set(6, "Chevy");  // A B B B C C C F
+        source.set(7, "Chevy");  // A B B B C C C C
     }
     
     /**

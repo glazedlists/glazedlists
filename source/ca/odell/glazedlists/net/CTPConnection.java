@@ -89,17 +89,17 @@ public final class CTPConnection {
     static final int STATE_CLOSED_PERMANENTLY = 8;
     
     /** standard HTTP response headers, see HTTP/1.1 RFC, 6.1.1 */
-    private static final int RESPONSE_OK = 200;
-    private static final int RESPONSE_ERROR = 500;
+    static final int RESPONSE_OK = 200;
+    static final int RESPONSE_ERROR = 500;
 
     /** the current state of this protocol */
     int state = -1;
     
     /** the key to this protocol's channel */
-    private SelectionKey selectionKey = null;
+    SelectionKey selectionKey = null;
     
     /** the channel where communication occurs */
-    private SocketChannel socketChannel = null;
+    SocketChannel socketChannel = null;
     
     /** parse the input channel */
     ByteChannelReader parser;
@@ -108,19 +108,19 @@ public final class CTPConnection {
     ByteChannelWriter writer;
 
     /** the handler to delegate data interpretation to */
-    private CTPHandler handler;
+    CTPHandler handler;
     
     /** the manager that owns this connection */
-    private CTPConnectionManager manager;
+    CTPConnectionManager manager;
     
     /** the remote host */
-    private String host = "";
+    String host = "";
     
     /** the only URI allowed by CTPConnection */
-    private static final String CTP_URI = "/glazedlists";
+    static final String CTP_URI = "/glazedlists";
     
     /** if our source is not chunked, we have to break up chunks arbitrarily */
-    private boolean sourceChunked = false;
+    boolean sourceChunked = false;
     
     /**
      * Creates a new CTPConnection.
@@ -235,7 +235,7 @@ public final class CTPConnection {
      * @param headers a Map of HTTP request headers. See HTTP/1.1 RFC, 6.2. This can
      *      be null to indicate no headers.
      */
-    private void sendRequest(String uri, Map headers) {
+    void sendRequest(String uri, Map headers) {
         if(state != STATE_CLIENT_CONSTRUCTING_REQUEST) throw new IllegalStateException();
         
         try {
@@ -313,7 +313,7 @@ public final class CTPConnection {
      * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2. This can
      *      be null to indicate no headers.
      */
-    private void sendResponse(int code, Map headers) {
+    void sendResponse(int code, Map headers) {
         if(state != STATE_SERVER_CONSTRUCTING_RESPONSE) throw new IllegalStateException();
         
         try {
@@ -500,49 +500,7 @@ public final class CTPConnection {
      *      unreadable and unwritable state after a close.
      */
     boolean close(Exception reason) {
-        // if this is already closed, we're done
-        if(state == STATE_CLOSED_PERMANENTLY) return false;
-        
-        // close is not a result of a connection error, so say goodbye
-        if(reason == null || !(reason instanceof IOException)) {
-            
-            // if we haven't yet responded, respond now
-            if(state == STATE_SERVER_AWAITING_REQUEST) {
-                state = STATE_SERVER_CONSTRUCTING_RESPONSE;
-                sendResponse(RESPONSE_ERROR, Collections.EMPTY_MAP);
-            }
-
-            // if we've already responded, send an empty chunk
-            if(state == STATE_READY) {
-                sendChunk(ByteBuffer.wrap(new byte[0]));
-            }
-        }
-        
-        // try to flush what we have left
-        try {
-            writer.flush();
-        } catch(IOException e) {
-            // if this flush failed, there's nothing we can do
-        }
-
-        // close the socket
-        handler.connectionClosed(this, reason);
-        state = STATE_CLOSED_PERMANENTLY;
-        try {
-            socketChannel.close();
-            selectionKey.cancel();
-        } catch(IOException e) {
-            // if this close failed, there's nothing we can do
-        }
-
-        // log the close
-        if(reason != null) {
-            logger.log(Level.FINE, "Closed connection to " + this + " due to " + reason, reason);
-        } else {
-            logger.log(Level.FINE, "Closed connection to " + this);
-        }
-        
-        // all done
+        manager.invokeAndWait(new CTPConnectionToClose(this, reason));
         return false;
     }
     
