@@ -138,17 +138,21 @@ public abstract class TransformedList extends AbstractEventList implements ListE
     }
 
     /** {@inheritDoc} */
-    public boolean removeAll(Collection values) {
+    public boolean removeAll(Collection collection) {
         if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        boolean changed = false;
         // nest changes and let the other methods compose the event
         updates.beginEvent(true);
-        boolean overallChanged = false;
-        for(Iterator i = values.iterator(); i.hasNext(); ) {
-            boolean removeChanged = remove(i.next());
-            if(removeChanged) overallChanged = true;
+        for(Iterator i = collection.iterator(); i.hasNext(); ) {
+            Object value = i.next();
+            int index = -1;
+            while((index = indexOf(value)) != -1) {
+                remove(index);
+                changed = true;
+            }
         }
         updates.commitEvent();
-        return overallChanged;
+        return changed;
     }
 
     /** {@inheritDoc} */

@@ -50,17 +50,26 @@ public class NestedEventsTest extends TestCase {
      */
     public void testSimpleContradictingEventsAllowed() {
         boolean contradictionsAllowed = true;
-        
-        // test nested events
-        nestingList.beginEvent(contradictionsAllowed);
-        source.add("hello");
-        source.remove(0);
+        nestingList.beginEvent(false);
+        source.addAll(Arrays.asList(new String[] { "A", "B", "F", "G" }));
         nestingList.commitEvent();
         
-        assertEquals(0, nestingList.size());
-        assertEquals(0, counter.getEventCount());
+        // test nested events: add 3 elements at 2 and delete 3 elements at 1
+        nestingList.beginEvent(contradictionsAllowed);
+        source.add(2, "C");
+        source.add(3, "D");
+        source.add(4, "E");
+        source.remove(1);
+        source.remove(1);
+        source.remove(1);
+        nestingList.commitEvent();
+        
+        // net change is: remove 1 element at 1 and add 1 element at 1
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "E", "F", "G" }));
+        assertEquals(2, counter.getEventCount());
+        assertEquals(2, counter.getChangeCount(1));
     }
-    
+
     /**
      * Validates that complex contradicting events can be nested.
      */
@@ -75,6 +84,7 @@ public class NestedEventsTest extends TestCase {
         source.removeAll(wilson);
         nestingList.commitEvent();
         
+        System.out.println(nestingList);
         assertEquals(3, nestingList.size());
         assertEquals(3, counter.getEventCount());
     }
@@ -91,8 +101,8 @@ public class NestedEventsTest extends TestCase {
             source.add("hello");
             source.remove(0);
             nestingList.commitEvent();
-            fail("Expected ConcurrentModificationException");
-        } catch(ConcurrentModificationException e) {
+            fail("Expected IllegalStateException");
+        } catch(IllegalStateException e) {
             // expected
         }
     }
@@ -111,8 +121,8 @@ public class NestedEventsTest extends TestCase {
             source.addAll(jesse);
             source.removeAll(wilson);
             nestingList.commitEvent();
-            fail("Expected ConcurrentModificationException");
-        } catch(ConcurrentModificationException e) {
+            fail("Expected IllegalStateException");
+        } catch(IllegalStateException e) {
             // expected
         }
     }
@@ -132,7 +142,14 @@ public class NestedEventsTest extends TestCase {
             updates.commitEvent();
         }
         public void listChanged(ListEvent listChanges) {
-            updates.forwardEvent(listChanges);
+            if(listChanges.isReordering()) {
+                int[] reorderMap = listChanges.getReorderMap();
+                updates.reorder(reorderMap);
+            } else {
+                while(listChanges.next()) {
+                    updates.addChange(listChanges.getType(), listChanges.getIndex());
+                }
+            }
         }
     }
 }

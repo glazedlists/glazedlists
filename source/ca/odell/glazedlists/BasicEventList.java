@@ -221,8 +221,9 @@ public final class BasicEventList extends AbstractEventList {
         boolean changed = false;
         updates.beginEvent();
         for(Iterator i = collection.iterator(); i.hasNext(); ) {
+            Object value = i.next();
             int index = -1;
-            if((index = data.indexOf(i.next())) != -1) {
+            while((index = indexOf(value)) != -1) {
                 updates.addDelete(index);
                 data.remove(index);
                 changed = true;

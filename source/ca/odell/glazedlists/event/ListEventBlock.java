@@ -153,7 +153,10 @@ final class ListEventBlock {
                 ListEventBlock first = (ListEventBlock)changes.get(j);
                 ListEventBlock second = (ListEventBlock)changes.get(j+1);
                 
-                if(requiresSplit(first, second)) {
+                if(blocksContradict(first, second)) {
+                    if(!allowContradictingEvents) throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
+                    simplifyContradiction(changes.subList(j, j+2));
+                } else if(requiresSplit(first, second)) {
                     ListEventBlock third = split(first, second);
                     changes.add(j+2, third);
                 } else if(canBeCombined(first, second)) {
@@ -175,6 +178,58 @@ final class ListEventBlock {
         }
     }
     
+    
+    /**
+     * When one block undoes part of another, we have a contradiction.
+     * Types of contradictions:
+     * <ul>
+     *    <li>an insert is later updated
+     *    <li>an insert is later deleted
+     *    <li>an update is later deleted
+     *    <li>an update is later updated
+     * </ul>
+     *
+     * @return true if the blocks contradict.
+     */
+    private static boolean blocksContradict(ListEventBlock first, ListEventBlock second) {
+        // if the ranges intersect
+        boolean rangesIntersect = (first.endIndex >= second.startIndex && first.startIndex <= second.endIndex);
+        if(!rangesIntersect) return false;
+        
+        // (insert or update) is later (deleted or updated)
+        if(first.type != ListEvent.DELETE && second.type != ListEvent.INSERT) {
+            return true;
+        }
+        
+        // can't be an insert
+        return false;
+    }
+    
+    /**
+     * Removes the contradiction contained within the specified list of two blocks.
+     */
+    private static void simplifyContradiction(List contradictingPair) {
+        assert(contradictingPair.size() == 2);
+        ListEventBlock first = (ListEventBlock)contradictingPair.get(0);
+        ListEventBlock second = (ListEventBlock)contradictingPair.get(1);
+        
+        // get the overlap range
+        int commonStart = Math.max(first.startIndex, second.startIndex);
+        int commonEnd = Math.min(first.endIndex, second.endIndex);
+        int commonLength = (commonEnd - commonStart + 1);
+        
+        // insert and delete kill each other
+        if(first.type == ListEvent.INSERT && second.type == ListEvent.DELETE) {
+            first.endIndex -= commonLength;
+            second.endIndex -= commonLength;
+            if(second.getLength() == 0) contradictingPair.remove(1);
+            if(first.getLength() == 0) contradictingPair.remove(0);
+            return;
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
     /**
      * When there is a sequence of list changes, sometimes these changes are not
      * created in increasing order. Users usually need to receive changes in
@@ -184,11 +239,11 @@ final class ListEventBlock {
      */
     private static boolean requiresSwap(ListEventBlock first, ListEventBlock second) {
         // verify no intersection
-        if(first.type == ListEvent.INSERT && second.type != ListEvent.INSERT) {
+        /*if(first.type == ListEvent.INSERT && second.type != ListEvent.INSERT) {
             if(first.endIndex >= second.startIndex && first.startIndex <= second.endIndex) {
                 throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
             }
-        }
+        }*/
         
         // test if these two require an swap
         if(second.type == ListEvent.INSERT && first.type != ListEvent.DELETE) {
@@ -307,7 +362,6 @@ final class ListEventBlock {
         int part2Offset = -1;
         if(otherBlock.type == ListEvent.DELETE) {
             part2Offset = 0;
-        //} else if(updateIsFirst) {
         } else if(otherBlock.type == ListEvent.INSERT) {
             part2Offset = otherBlock.getLength();
         }

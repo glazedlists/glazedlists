@@ -272,7 +272,10 @@ public final class ListEventAssembler {
      * event exactly once, even if that event includes nested events.
      */
     private void fireEvent() {
-        // bail early on empty changes
+        // sort and simplify this block
+        ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
+        
+        // bail on empty changes
         if(atomicChangeBlocks.size() == 0) {
             atomicChangeBlocks = null;
             atomicLatestBlock = null;
@@ -281,10 +284,9 @@ public final class ListEventAssembler {
             return;
         }
 
-        // sort and simplify this block
-        ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
         // add this to the complete set
         atomicChanges.add(atomicChangeBlocks);
+
         // add the reorder map to the complete set only if it is the only change
         if(reorderMap != null && atomicChangeBlocks.size() == 2) {
             reorderMaps.add(reorderMap);

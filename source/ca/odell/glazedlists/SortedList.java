@@ -345,12 +345,14 @@ public final class SortedList extends TransformedList {
 
     /** {@inheritDoc} */
     public int indexOf(Object object) {
-        return sorted.indexOf(object);
+        if(comparator != null) return sorted.indexOf(object);
+        else return source.indexOf(object);
     }
 
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
-        return sorted.lastIndexOf(object);
+        if(comparator != null) return sorted.lastIndexOf(object);
+        else return source.indexOf(object);
     }
 
     /**
@@ -361,10 +363,11 @@ public final class SortedList extends TransformedList {
      * @return the index in this list of the first occurrence of the specified
      *      element, or the index where that element would be in the list if it
      *      were inserted. This will return a value in <tt>[0, size()]</tt>,
-     * inclusive.
+     *      inclusive.
      */
     public int indexOfSimulated(Object object) {
-        return sorted.indexOfSimulated(object);
+        if(comparator != null) return sorted.indexOfSimulated(object);
+        else return size();
     }
 
     /**
@@ -375,11 +378,17 @@ public final class SortedList extends TransformedList {
          * Compares the alpha object to the beta object by their indicies.
          */
         public int compare(Object alpha, Object beta) {
-            IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
-            IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
-            int alphaIndex = alphaTreeNode.getIndex();
-            int betaIndex = betaTreeNode.getIndex();
-            return alphaIndex - betaIndex;
+            try {
+                IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
+                IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
+                int alphaIndex = alphaTreeNode.getIndex();
+                int betaIndex = betaTreeNode.getIndex();
+                return alphaIndex - betaIndex;
+            } catch(ClassCastException e) {
+                System.out.println(alpha.getClass());
+                System.out.println(beta.getClass());
+                throw e;
+            }
         }
     }
 
