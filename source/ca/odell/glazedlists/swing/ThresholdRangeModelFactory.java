@@ -10,7 +10,6 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 // Swing toolkit stuff for implementing models
 import javax.swing.*;
-import java.util.EventListener;
 // for responding to user actions
 import javax.swing.event.*;
 

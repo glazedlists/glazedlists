@@ -310,7 +310,6 @@ public final class CompressableListNode {
     private int getIndex(CompressableListNode child) {
         // calculate some convenience sizes
         int allRootSize = treeRootSize + virtualRootSize;
-        int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
 
         // if there is no child, get the index of the current node
         if(child == null) {
@@ -643,10 +642,6 @@ public final class CompressableListNode {
      * @throws IllegalStateException if the state of the node is inconsistent.
      */
     public void validate() {
-        // calculate some convenience sizes
-        int allRootSize = treeRootSize + virtualRootSize;
-        int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
-
         if(left != null) left.validate();
         if(right != null) right.validate();
 

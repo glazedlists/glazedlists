@@ -21,9 +21,6 @@ import java.util.logging.*;
  */
 class PeerResource {
 
-    /** logging */
-    private static Logger logger = Logger.getLogger(PeerResource.class.toString());
-    
     /** the peer that owns all connections */
     private Peer peer;
     

@@ -17,10 +17,7 @@ import ca.odell.glazedlists.util.concurrent.*;
 // for keeping lists of comparators
 import java.util.*;
 // SWT toolkit stuff for displaying widgets
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.events.*;
 
 /**
@@ -39,7 +36,6 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
 
     /** the table being sorted */
     private Table table;
-    private EventTableViewer eventTableViewer;
 
     /** listeners to sort change events */
     private List sortListeners = new ArrayList();
@@ -59,7 +55,6 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
         super(sortedList, eventTableViewer.getTableFormat(), multipleColumnSort);
         
         // save the SWT-specific state
-        this.eventTableViewer = eventTableViewer;
         this.table = eventTableViewer.getTable();
 
         // listen for events on the specified table

@@ -10,7 +10,6 @@ package ca.odell.glazedlists.impl.rbp;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
-import ca.odell.glazedlists.impl.io.Bufferlo;
 // logging
 import java.util.logging.*;
 
@@ -21,9 +20,6 @@ import java.util.logging.*;
  */
 class ResourceConnection {
 
-    /** logging */
-    private static Logger logger = Logger.getLogger(ResourceConnection.class.toString());
-    
     /** the connection */
     private PeerConnection connection;
     

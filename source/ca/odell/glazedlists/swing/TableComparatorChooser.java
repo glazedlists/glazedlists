@@ -58,7 +58,6 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
 
     /** the table being sorted */
     private JTable table = null;
-    private EventTableModel eventTableModel = null;
 
     /** listeners to sort change events */
     private ActionListener sortListener = null;

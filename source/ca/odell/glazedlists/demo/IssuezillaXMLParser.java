@@ -111,9 +111,8 @@ public class IssuezillaXMLParser {
      * it for Issuezilla XML and writes the issues to the command line.
      */
     public static void main(String[] args) {
-        List issues = new ArrayList();
         try {
-            issues = parseIssuezillaXML(new FileInputStream(args[0]));
+            parseIssuezillaXML(new FileInputStream(args[0]));
         } catch(IOException e) {
             e.printStackTrace();
             return;

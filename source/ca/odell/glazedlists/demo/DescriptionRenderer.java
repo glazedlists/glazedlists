@@ -17,9 +17,6 @@ import java.awt.Rectangle;
 import javax.swing.*;
 import javax.swing.text.html.*;
 import javax.swing.table.*;
-import javax.swing.text.html.StyleSheet;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.*;
 
 
 /**
@@ -79,11 +76,6 @@ class HTMLRenderer {
 
     /** the view */
     protected JTextPane rendered;
-
-    /** String composition */
-    private StringBuffer stringBuffer = new StringBuffer();
-
-
 
     /**
      * Creates an HTML cell renderer.

@@ -214,7 +214,6 @@ class PeerConnection implements CTPHandler {
      * Prints the current state of this connection.
      */
     void print() {
-        StringBuffer result = new StringBuffer();
         System.out.print(this);
         System.out.print(": ");
         System.out.print("Incoming {");

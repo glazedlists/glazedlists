@@ -7,7 +7,6 @@
 package ca.odell.glazedlists.impl.sort;
 
 // to work with Comparators
-import java.util.List;
 import java.util.Comparator;
 import ca.odell.glazedlists.util.ComparatorFactory;
 // to work with TableFormats

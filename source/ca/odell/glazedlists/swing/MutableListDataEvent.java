@@ -11,13 +11,8 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-import java.awt.GridBagLayout;
-// for responding to user actions
 import java.awt.event.*;
 import javax.swing.event.*;
-// for displaying lists in combo boxes
-import javax.swing.ListModel;
-import javax.swing.ComboBoxModel;
 
 
 /**

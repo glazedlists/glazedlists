@@ -8,8 +8,6 @@ package ca.odell.glazedlists.event;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
-// for when the user asks for a change that's not there
-import java.util.NoSuchElementException;
 // for keeping a list of changes
 import java.util.*;
 

@@ -6,7 +6,6 @@
  */
 package ca.odell.glazedlists.impl.io;
 
-import java.util.List;
 import java.beans.*;
 import java.io.*;
 // Glazed Lists' pluggable object to bytes interface

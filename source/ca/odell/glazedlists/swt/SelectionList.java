@@ -130,7 +130,6 @@ class SelectionList extends TransformedList {
             // get the current change info
             int index = listChanges.getIndex();
             int changeType = listChanges.getType();
-            int lastDeleted = -1;
 
             // process a DELETE event
             if(changeType == ListEvent.DELETE) {

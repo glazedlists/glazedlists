@@ -22,9 +22,6 @@ import java.util.logging.*;
  */
 class SendChunk implements Runnable {
      
-    /** logging */
-    private static Logger logger = Logger.getLogger(SendChunk.class.toString());
-
     /** the destination */
     private CTPConnection connection;
 

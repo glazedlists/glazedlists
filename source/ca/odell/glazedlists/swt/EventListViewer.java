@@ -10,7 +10,6 @@ package ca.odell.glazedlists.swt;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.SelectionEvent;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;

@@ -14,9 +14,6 @@ import ca.odell.glazedlists.event.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.graphics.*;
@@ -274,9 +271,6 @@ class CheckableWrapperList extends TransformedList {
     /** wrapped list contains CheckWrapped elements only */
     private List wrappedSource = new ArrayList();
 
-    /** table which fires check events */
-    private Table table;
-    
     public CheckableWrapperList(EventList source) {
         super(source);
         

@@ -201,7 +201,6 @@ public class BeanProperty {
 
         try {
             // do all the getters in sequence
-            Class currentClass = memberClass;
             Object currentMember = member;
             for(int i = 0; i < getterChain.size(); i++) {
                 Method currentMethod = (Method)getterChain.get(i);
@@ -226,7 +225,6 @@ public class BeanProperty {
 
         try {
             // everything except the last setter chain element is a getter
-            Class currentClass = memberClass;
             Object currentMember = member;
             for(int i = 0; i < setterChain.size() - 1; i++) {
                 Method currentMethod = (Method)setterChain.get(i);

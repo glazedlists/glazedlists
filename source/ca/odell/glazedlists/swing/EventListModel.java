@@ -11,10 +11,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-import java.awt.GridBagLayout;
-// for responding to user actions
 import java.awt.event.*;
-import java.awt.Point;
 import javax.swing.event.*;
 // this class uses tables for displaying message lists
 import java.util.*;

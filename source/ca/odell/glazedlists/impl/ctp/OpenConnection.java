@@ -25,9 +25,6 @@ import java.util.logging.*;
  */
 class OpenConnection implements Runnable {
      
-    /** logging */
-    private static Logger logger = Logger.getLogger(OpenConnection.class.toString());
-
     /** the place to connect to */
     private CTPConnectionManager connectionManager;
     private String host;

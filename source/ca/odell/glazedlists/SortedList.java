@@ -188,7 +188,7 @@ public final class SortedList extends TransformedList {
             // on insert, insert the index node
             if(changeType == ListEvent.UPDATE) {
                 IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
+                deleteByUnsortedNode(unsortedNode);
             }
         }
 
@@ -452,14 +452,13 @@ public final class SortedList extends TransformedList {
 
         /**
          * Adjusts the indices for a delete and an insert at the specified indices. This is
-         * necessary if an event is forwarded be fore this list of delete events is forwarded.
+         * necessary if an event is forwarded before this list of delete events is forwarded.
          *
          * <p>This method can use some optimization.
          */
         public int adjustDeleteAndInsert(int deletedIndex, int insertedIndex) {
             for(Iterator i = indexNodePairs.iterator(); i.hasNext(); ) {
                 IndexNodePair indexNodePair = (IndexNodePair)i.next();
-                int originalIndex = indexNodePair.index;
                 if(deletedIndex < indexNodePair.index) {
                     indexNodePair.index--;
                 }

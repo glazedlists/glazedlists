@@ -26,9 +26,6 @@ import java.util.logging.*;
  */
 public final class CTPConnectionManager implements NIOServer {
     
-    /** logging */
-    private static Logger logger = Logger.getLogger(CTPConnectionManager.class.toString());
-    
     /** default port to bind to */
     private static final int DEFAULT_PORT = 5309;
 
