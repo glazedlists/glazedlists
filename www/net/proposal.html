@@ -8,39 +8,64 @@ O'Dell Engineering Ltd.
 
 <h1>A Case for Glazed Lists on the Network</h1>
 
-<h3>Problem</h3>
-<p>A growing number of client applications are taking advantage of networks
-to share data effectively. A consequence of all of this data-sharing is that
-there is a copy of the data for each of many connected user. If data is
-updated, all copies must be updated so that clients are not viewing stale data. 
+<h3>Purpose</h3>
 
-<h3>Polling Solution</h3>
-<p>This problem is typically solved by clients that query a central server for
-updates on a specified interval. The limitations on this polling approach are
-that the client may ask too frequently and waste network resources, or it may ask
-too infrequently and have stale data.
+<p>To design and implement a protocol for pushing data updates to clients
+connected on a network. For example, multiple users each have a copy
+of a dataset. When one user modifies the dataset, other network connected
+users are notified.
 
-<h3>Push Solution</h3>
-<p>The server can push updates to the client as they arrive. The limitations on this
-are that the cost to notify all clients of all updates is expensive and that clients
-may not all be accessible (addressable) by the server.
+<h3>Rationale</h3>
 
-<h3>Refined Push Solution</h3>
-<p>The server cost problem is solved with peer-to-peer networking such that clients
-propagate updates to each other. The unaddressable client problem is solved with
-HTTP/1.1 such that clients initiate a connection to a server (or peer) and updates
-are pushed back over that connection.  
+<p>Traditional solutions to this problem use a strategy called "polling". This
+involves clients querying a central server for updates on a specified interval.
+Limitations of this approach are that the client may ask too frequently (wasting
+network resources), or it may ask too infrequently (and have stale data).
 
-<h3>Specification</h3>
-<p>Update Subscription Protocol (USP) will be specified as a standard way for
-servers to send updates to interested clients. This protocol specification
-shall include security, peer-to-peer network layout, GIVE connections for
-reaching unaddressable clients, keep-alive messages and timeouts. A reference
-implementation will be created in Java. 
+<p>Our "push" approach does not suffer these problems. This involves a server
+pushing updates to the clients as updates arrive. 
+
+<p>Push suffers some inherent limitations as well. Traditional push requires an
+expensive, high-performance server to notify all clients of all updates.
+Also, some clients may not be accessible (addressable) by the server and
+therefore unable to receive updates.
+
+<p>We can overcome these limitations in our design. To reduce the requirement
+from the server, we will implement peer-to-peer updating. Clients will forward
+updates to other clients without the server's intervention. To address all
+clients, our protocol sits on top of the web protocol, HTTP. Clients requesting
+updates will create a connection to the server or a peer, and the updates will
+be pushed back using that connection.  
+
+<h3>Objectives</h3>
+
+<p><strong>1. Update Subscription Protocol (USP) specification.</strong><br>
+Describe the wire protocol for client connect and server push. This
+includes specification of: 
+<li>security
+<li>peer-to-peer network layout
+<li>GIVE connections for reaching unaddressable clients
+<li>keep-alive messages and timeouts
  
-<h3>Application</h3>
-<p>Glazed Lists will use USP to provide list subscriptions across the network.
-List subscriptions can be used immediately in applications to eliminate stale
-data and polling.
+<p><strong>2. Update Subscription Protocol (USP) implementation.</strong><br>
+<p>Create software client and server capable of communicating with USP using
+the Java programming language. This includes both client and server
+implementation of:
+<li>simplified web protocol (ie. HTTP/1.1) with chunked encoding
+<li>security using Java Cryptography Extension, JCE
+<li>peer to peer strategy using dual-parents and child priorities
+
+<p><strong>3. Glazed Lists on the Network</strong><br>
+Implement a sample application that uses USP to subscribe and publish
+updates to lists of data. This includes the Glazed Lists client and server
+which use the USP implementation. 
+
+<h3>Summary</h3>
+
+<p>Networked client applications maintain private copies of data that have a
+tendancy to become stale. Traditional approaches can suffer from excessive network
+usage, stale data, expensive server requirements and unreachable clients. With
+Glazed Lists on the network we overcome these problems by using peer-to-peer
+networking and web protocols.
 
 </body></html>
