@@ -359,19 +359,7 @@ public class Issue implements TextFilterable, Comparable {
         try {
             IssueHandler issueReader = new IssueHandler();
             SAXParserFactory.newInstance().newSAXParser().parse(source, issueReader);
-            //return issueReader.getIssues();
-            List singleResults = issueReader.getIssues();
-            List results = new ArrayList();
-            Random random = new Random();
-            for(Iterator i = singleResults.iterator(); i.hasNext(); ) {
-                Issue issue = (Issue)i.next();
-                for(int j = 0; j < 100; j++) {
-                    Issue copy = new Issue(issue);
-                    copy.id = new Integer(random.nextInt(10000));
-                    results.add(copy);
-                }
-            }
-            return results;
+            return issueReader.getIssues();
         } catch(SAXException e) {
             e.printStackTrace();
             throw new IOException("Parsing failed " + e.getMessage());
