@@ -126,7 +126,7 @@ public class TextFilterList extends DefaultTextFilterList {
         super(source, filterator);
 
         // listen to filter events
-        this.setFilterEdit(filterEdit);
+        if(filterEdit != null) this.setFilterEdit(filterEdit);
     }
 
     /**
@@ -138,6 +138,9 @@ public class TextFilterList extends DefaultTextFilterList {
 
     /**
      * Sets the Text used to edit the filter search {@link String}.
+     *
+     * <p><strong>Warning:</strong> It is an error to call this method
+     * with a null value for filterEdit.
      */
     public void setFilterEdit(Text filterEdit) {
         boolean live = true;
@@ -166,6 +169,10 @@ public class TextFilterList extends DefaultTextFilterList {
      * <p>To avoid the processing overhead of filtering for each keystroke, use
      * a not-live filter edit and trigger the SelectionListener using a Button
      * or by pressing <code>ENTER</code> in the filter edit Text field.
+     *
+     * <p><strong>Warning:</strong> This method affects listeners on the Text
+     * field that you have specified.  It is an error to call this method before
+     * you set a valid Text field.
      */
     public void setLive(boolean live) {
         if(live) {
