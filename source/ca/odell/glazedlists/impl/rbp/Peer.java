@@ -4,12 +4,14 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.impl.rbp;
 
 // NIO is used for BRP
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+// BRP sits atop Chunk Transfer Protocol
+import ca.odell.glazedlists.impl.ctp.*;
 // logging
 import java.util.logging.*;
 

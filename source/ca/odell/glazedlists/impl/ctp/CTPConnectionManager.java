@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
 import java.util.*;
@@ -23,7 +23,7 @@ import java.util.logging.*;
  * all read and write operations on all connections. A pool of other threads are
  * used to notify the handlers of the data and status of a connection.
  */
-final class CTPConnectionManager implements Runnable {
+public final class CTPConnectionManager implements Runnable {
     
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnectionManager.class.toString());

@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
 import java.util.*;
@@ -34,7 +34,7 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-final class CTPConnection {
+public final class CTPConnection {
     // client:
     // AWAITING_CONNECT
     //   --[connect]-->
@@ -504,7 +504,7 @@ final class CTPConnection {
      * @return This method returns false because the connection is always in an
      *      unreadable and unwritable state after a close.
      */
-    boolean close(Exception reason) {
+    public boolean close(Exception reason) {
         manager.invokeLater(new CTPConnectionToClose(this, reason));
         return false;
     }

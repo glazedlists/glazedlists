@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.impl.ctp;
 
 import java.util.*;
 import java.nio.*;
@@ -12,7 +12,7 @@ import java.nio.*;
 /**
  * The CTPHandlerFactory provides a factory to handle incoming connections.
  */
-interface CTPHandlerFactory {
+public interface CTPHandlerFactory {
     
     /**
      * Upon a connect, a CTPHandler is required to handle the data of this connection.

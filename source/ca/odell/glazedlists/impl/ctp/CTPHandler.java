@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.impl.ctp;
 
 import java.util.*;
 import java.nio.*;
@@ -13,7 +13,7 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
 /**
  * A callback interface for classes that implement a CTPConnection.
  */
-interface CTPHandler {
+public interface CTPHandler {
     
     /**
      * Handles the connection being ready for chunks to be sent.
