@@ -50,7 +50,7 @@
     <javadoc
       destdir="docs/api" author="true" use="true" windowtitle="Glazed Lists" source="1.4">
       <packageset dir="source">
-        <exclude name="**/impl/**"/>
+        <!--<exclude name="**/impl/**"/>-->
         <exclude name="**/demo/**"/>
         <exclude name="**/migrationkit/**"/>
         <exclude name="**/swt/**"/>
