@@ -1331,6 +1331,54 @@ public class UniqueListTest extends TestCase {
     }
 
     /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testRightUpdateSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Ford");        // C F
+        source.add("Ford");        // C F F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Ford");   // C F F
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testRightInsertSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Ford");        // C F
+        source.add("Ford");        // C F F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Datsun");   // C D F
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testRightMoveSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Ford");        // C F
+        source.add("Ford");        // C F F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Chevy");    // C C F
+    }
+
+    /**
 	 * Explicit comparator for Kevin's sanity!
 	 */
 	class IntegerComparator implements Comparator {
