@@ -147,7 +147,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     public void setTableFormat(TableFormat tableFormat) {
         this.tableFormat = tableFormat;
         tableFormat.configureTable(table);
-        tableModelEvent.setValues(0, 0, TableModelEvent.HEADER_ROW);
+        tableModelEvent.setValues(TableModelEvent.ALL_COLUMNS, TableModelEvent.ALL_COLUMNS, TableModelEvent.HEADER_ROW);
         fireTableChanged(tableModelEvent);
     }
     

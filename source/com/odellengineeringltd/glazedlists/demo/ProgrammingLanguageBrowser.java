@@ -75,6 +75,9 @@ public class ProgrammingLanguageBrowser {
         // display the window
         frame.setSize(640, 480);
         frame.show();
+        
+        // change the format
+        listTable.setTableFormat(new ProgrammingLanguageTableCell2());
     }
     
     public static void main(String[] args) {
