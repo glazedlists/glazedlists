@@ -47,17 +47,36 @@ public class CTPChunkTest extends TestCase {
      * Verifies that chunks can be sent from the server to the client. This simply
      * sends data to itself.
      */
-    public void testSimpleChunk() {
-        StaticCTPHandler incoming = new StaticCTPHandler();
-        incoming.addExpected("HELLO WORLD");
+    public void testServerSendChunk() {
+        StaticCTPHandler client = new StaticCTPHandler();
+        client.addExpected("HELLO WORLD");
         
-        StaticCTPHandler outgoing = new StaticCTPHandler();
-        outgoing.addEnqueued("HELLO WORLD");
+        StaticCTPHandler server = new StaticCTPHandler();
+        server.addEnqueued("HELLO WORLD");
         
-        handlerFactory.addHandler(outgoing);
-        connectionManager.connect("localhost", incoming);
+        handlerFactory.addHandler(server);
+        connectionManager.connect("localhost", client);
         
-        assertTrue(outgoing.isDone());
-        assertTrue(incoming.isDone());
+        assertTrue("Server did not complete", server.isDone());
+        assertTrue("Client did not complete", client.isDone());
+    }
+
+
+    /**
+     * Verifies that chunks can be sent from the client to the server. This simply
+     * sends data to itself.
+     */
+    public void testClientSendChunk() {
+        StaticCTPHandler client = new StaticCTPHandler();
+        client.addEnqueued("WORLD O HELL");
+        
+        StaticCTPHandler server = new StaticCTPHandler();
+        server.addExpected("WORLD O HELL");
+        
+        handlerFactory.addHandler(server);
+        connectionManager.connect("localhost", client);
+        
+        assertTrue("Server did not complete", server.isDone());
+        assertTrue("Client did not complete", client.isDone());
     }
 }
