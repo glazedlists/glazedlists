@@ -33,9 +33,9 @@ class CTPStop implements CTPRunnable {
     public void run(Selector selector, CTPConnectionManager manager) {
         // warn if unsatisfied keys remain
         if(selector.keys().size() != 0) {
-            logger.warning("Sever stopping with " + selector.keys().size() + " active connections");
+            logger.warning("Server stopping with " + selector.keys().size() + " active connections");
         } else {
-            logger.info("Sever stopping with " + selector.keys().size() + " active connections");
+            logger.info("Server stopping with " + selector.keys().size() + " active connections");
         }
 
         // break out of the server dispatch loop
