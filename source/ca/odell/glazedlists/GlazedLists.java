@@ -16,8 +16,7 @@ import ca.odell.glazedlists.impl.gui.*;
 import ca.odell.glazedlists.impl.swt.*;
 // implemented interfaces
 import ca.odell.glazedlists.io.ByteCoder;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
@@ -119,16 +118,45 @@ public final class GlazedLists {
      * table columns via Reflection.
      */
     public static TableFormat tableFormat(String[] propertyNames, String[] columnLabels) {
-        return new BeanTableFormat(propertyNames, columnLabels);
+        return new BeanTableFormat(null, propertyNames, columnLabels);
     }
 
+    /**
+     * Creates a {@link TableFormat} that binds JavaBean properties to
+     * table columns via Reflection.
+     *
+     * @param baseClass the class of the Object to divide into columns. If specified,
+     *      the returned class will provide implementation of 
+     *      {@link AdvancedTableFormat#getColumnClass(int)} and
+     *      {@link AdvancedTableFormat#getColumnComparator(int)} by examining the
+     *      classes of the column value.
+     */
+    public static TableFormat tableFormat(Class baseClass, String[] propertyNames, String[] columnLabels) {
+        return new BeanTableFormat(baseClass, propertyNames, columnLabels);
+    }
+    
     /**
      * Creates a {@link TableFormat} that binds JavaBean properties to
      * table columns via Reflection. The returned {@link TableFormat} implements
      * {@link WritableTableFormat} and may be used for an editable table.
      */
     public static TableFormat tableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        return new BeanTableFormat(propertyNames, columnLabels, editable);
+        return new BeanTableFormat(null, propertyNames, columnLabels, editable);
+    }
+
+    /**
+     * Creates a {@link TableFormat} that binds JavaBean properties to
+     * table columns via Reflection. The returned {@link TableFormat} implements
+     * {@link WritableTableFormat} and may be used for an editable table.
+     *
+     * @param baseClass the class of the Object to divide into columns. If specified,
+     *      the returned class will provide implementation of 
+     *      {@link AdvancedTableFormat#getColumnClass(int)} and
+     *      {@link AdvancedTableFormat#getColumnComparator(int)} by examining the
+     *      classes of the column value.
+     */
+    public static TableFormat tableFormat(Class baseClass, String[] propertyNames, String[] columnLabels, boolean[] editable) {
+        return new BeanTableFormat(baseClass, propertyNames, columnLabels, editable);
     }
 
 

@@ -6,8 +6,9 @@
  */
 package ca.odell.glazedlists.impl.beans;
 
-//import java.util.*;
+import java.util.*;
 import ca.odell.glazedlists.gui.*;
+import ca.odell.glazedlists.*;
 
 /**
  * TableFormat implementation that uses reflection to be used for any
@@ -15,13 +16,13 @@ import ca.odell.glazedlists.gui.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class BeanTableFormat implements TableFormat, WritableTableFormat {
-
-    /** Java Beans property names */
-    protected String[] propertyNames;
+public class BeanTableFormat implements TableFormat, WritableTableFormat, AdvancedTableFormat {
 
     /** methods for extracting field values */
     protected BeanProperty[] beanProperties = null;
+
+    /** Java Beans property names */
+    protected String[] propertyNames;
 
     /** column labels are pretty-print column header labels */
     protected String[] columnLabels;
@@ -29,25 +30,53 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat {
     /** whether all columns can be edited */
     private boolean[] editable;
 
+    /** column comparators */
+    protected Comparator[] comparators;
+    
+    /** column classes */
+    protected Class[] classes;
+
     /**
      * Create a BeanTableFormat that uses the specified column names
      * and the specified field names while offering editable columns.
      */
-    public BeanTableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
+    public BeanTableFormat(Class beanClass, String[] propertyNames, String[] columnLabels, boolean[] editable) {
         this.propertyNames = propertyNames;
         this.columnLabels = columnLabels;
         this.editable = editable;
+        
+        // set up the AdvancedTableFormat properties
+        comparators = new Comparator[propertyNames.length];
+        classes = new Class[propertyNames.length];
+
+        // use default properties if no class is specified
+        if(beanClass == null) {
+            for(int c = 0; c < classes.length; c++) {
+                classes[c] = Object.class;
+                comparators[c] = GlazedLists.comparableComparator();
+            }
+
+        // use detected properties if class is specified
+        } else {
+            loadPropertyDescriptors(beanClass);
+            for(int c = 0; c < classes.length; c++) {
+                // class
+                classes[c] = beanProperties[c].getValueClass();
+                // comparator
+                if(Comparable.class.isAssignableFrom(classes[c])) comparators[c] = GlazedLists.comparableComparator();
+                else comparators[c] = null;
+            }
+        }
     }
-    public BeanTableFormat(String[] propertyNames, String[] columnLabels) {
-        this(propertyNames, columnLabels, new boolean[propertyNames.length]);
+    public BeanTableFormat(Class beanClass, String[] propertyNames, String[] columnLabels) {
+        this(beanClass, propertyNames, columnLabels, new boolean[propertyNames.length]);
     }
 
     /**
      * Loads the property descriptors which are used to invoke property
      * access methods using the property names.
      */
-    protected void loadPropertyDescriptors(Object beanObject) {
-        Class beanClass = beanObject.getClass();
+    protected void loadPropertyDescriptors(Class beanClass) {
         beanProperties = new BeanProperty[propertyNames.length];
         for(int p = 0; p < propertyNames.length; p++) {
             beanProperties[p] = new BeanProperty(beanClass, propertyNames[p], true, editable[p]);
@@ -80,7 +109,7 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat {
         if(baseObject == null) return null;
 
         // load the property descriptors on first request
-        if(beanProperties == null) loadPropertyDescriptors(baseObject);
+        if(beanProperties == null) loadPropertyDescriptors(baseObject.getClass());
 
         // get the property
         return beanProperties[column].get(baseObject);
@@ -117,13 +146,32 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat {
      *      the list and overwrite the previous value.
      */
     public Object setColumnValue(Object baseObject, Object editedValue, int column) {
+        if(baseObject == null) return null;
+
         // load the property descriptors on first request
-        if(beanProperties == null) loadPropertyDescriptors(baseObject);
+        if(beanProperties == null) loadPropertyDescriptors(baseObject.getClass());
 
         // set the property
         beanProperties[column].set(baseObject, editedValue);
 
         // return the modified result
         return baseObject;
+    }
+
+    
+    // AdvancedTableFormat // // // // // // // // // // // // // // // // // //
+
+    /**
+     * Get the class of the specified column.
+     */
+    public Class getColumnClass(int column) {
+        return classes[column];
+    }
+
+    /**
+     * Get the comparator for the specified column.
+     */
+    public Comparator getColumnComparator(int column) {
+        return comparators[column];
     }
 }
