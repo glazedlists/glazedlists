@@ -203,6 +203,17 @@ public final class GlazedLists {
         return new BeanThresholdEvaluator(propertyName);
     }
 
+    // CollectionListModels   // // // // // // // // // // // // // // // // //
+
+    /**
+     * Creates a {@link CollectionListModel} that where {@link List}s or {@link EventList}s
+     * are the elements of a parent {@link EventList}. This can be used to compose
+     * {@link EventList}s from other {@link EventList}s.
+     */
+    public static CollectionListModel listCollectionListModel() {
+        return new ListCollectionListModel();
+    }
+
 
     // EventLists // // // // // // // // // // // // // // // // // // // // //
 

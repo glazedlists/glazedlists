@@ -15,11 +15,16 @@ import ca.odell.glazedlists.util.concurrent.*;
 
 /**
  * An {@link EventList} composed of multiple source {@link EventList}s.
+ *
+ * @deprecated As of 2004/02/26, this has been replaced by CollectionList with a
+ *     {@link GlazedLists#listCollectionListModel()}.
+ *
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class CompositeList extends CollectionList {
 
     public CompositeList() {
-        super(new BasicEventList(), new NaturalCollectionListModel());
+        super(new BasicEventList(), GlazedLists.listCollectionListModel());
     }
     
     /**
@@ -41,15 +46,6 @@ public class CompositeList extends CollectionList {
             }
         }
         throw new IllegalArgumentException("Cannot remove list " + list + " which is not in this CompositeList");
-    }
-
-    /**
-     * Returns the List itself for a List of Lists.
-     */
-    private static class NaturalCollectionListModel implements CollectionListModel {
-        public List getChildren(Object parent) {
-            return (List)parent;
-        }
     }
 }
 
