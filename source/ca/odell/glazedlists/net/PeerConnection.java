@@ -26,7 +26,7 @@ class PeerConnection implements CTPHandler {
     private static final String HTTP_URI = "/";
     
     /** our connection to the peer */
-    private CTPProtocol peer;
+    private CTPConnection connection;
 
     /** the source lists this peer is publishing that we are subscribing to */
     private List peerSources = new ArrayList();
@@ -40,8 +40,8 @@ class PeerConnection implements CTPHandler {
      * @todo replace this constructor with one that takes a socket and constructs
      *      the CTPProtocol
      */
-    public PeerConnection(CTPProtocol peer) {
-        this.peer = peer;
+    public PeerConnection(CTPConnection peer) {
+        this.connection = connection;
     }
     
     /**
@@ -70,32 +70,11 @@ class PeerConnection implements CTPHandler {
             }
         }
     }*/
-    
-    /**
-     * Handles an HTTP response from the specified connection.
-     *
-     * @param code the HTTP  response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1.
-     *      This will be null if this is an HTTP request.
-     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
-     */
-    public void receiveResponse(CTPProtocol source, Integer code, Map headers) {
-    }
-
-    /**
-     * Handles an HTTP request from the specified connection.
-     *
-     * @param uri the address requested by the client, in the format of a file
-     *      address. See HTTP/1.1 RFC, 5.1.2. This will be null if this is an
-     *      HTTP response.
-     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
-     */
-    public void receiveRequest(CTPProtocol source, String uri, Map headers) {
-    }
 
     /**
      * Handles reception of the specified chunk of data.
      */
-    public void receiveChunk(CTPProtocol source, ByteBuffer data) {
+    public void receiveChunk(CTPConnection source, ByteBuffer data) {
         System.out.println("Received chunk from " + source + " of size " + data.remaining());
         
         // handle the chunk based on its type
@@ -109,7 +88,7 @@ class PeerConnection implements CTPHandler {
     /**
      * Handles the connection being closed by the remote client.
      */
-    public void connectionClosed(CTPProtocol source, Exception reason) {
+    public void connectionClosed(CTPConnection source, Exception reason) {
         System.out.println("Connection to " + source + " closed, reason: " + reason.getMessage());
     }
     

@@ -81,20 +81,20 @@ final class CTPConnectionManager {
                 }
                 
                 if(key.isConnectable()) {
-                    CTPProtocol protocol = (CTPProtocol)key.attachment();
-                    protocol.handleConnect();
+                    CTPConnection connection = (CTPConnection)key.attachment();
+                    connection.handleConnect();
                     if(!key.isValid()) continue;
                 }
 
                 if(key.isReadable()) {
-                    CTPProtocol protocol = (CTPProtocol)key.attachment();
-                    protocol.handleRead();
+                    CTPConnection connection = (CTPConnection)key.attachment();
+                    connection.handleRead();
                     if(!key.isValid()) continue;
                 }
                 
                 if(key.isWritable()) {
-                    CTPProtocol protocol = (CTPProtocol)key.attachment();
-                    protocol.handleWrite();
+                    CTPConnection connection = (CTPConnection)key.attachment();
+                    connection.handleWrite();
                     if(!key.isValid()) continue;
                 }
                 
@@ -129,9 +129,9 @@ final class CTPConnectionManager {
 
         // construct handlers for this connection
         CTPHandler handler = handlerFactory.constructHandler();
-        CTPProtocol serverProtocol = CTPProtocol.server(channelKey, handler);
-        channelKey.attach(serverProtocol);
-        serverProtocol.handleConnect();
+        CTPConnection server = CTPConnection.server(channelKey, handler);
+        channelKey.attach(server);
+        server.handleConnect();
 
         // document our success
         logger.fine("Accepted connection from " + channel.socket().getRemoteSocketAddress());
@@ -141,17 +141,17 @@ final class CTPConnectionManager {
      * Stops the CTPConnectionManager and closes all connections.
      */
     public void stop() {
-         
+         throw new UnsupportedOperationException();
     }
     
     /**
      * Connect to the specified host.
      */
-    public CTPProtocol connect(String host, CTPHandler handler) throws IOException {
+    public CTPConnection connect(String host, CTPHandler handler) throws IOException {
         InetSocketAddress address = new InetSocketAddress(host, listenPort);
         SocketChannel channel = SocketChannel.open(address);
         SelectionKey selectionKey = channel.register(selector, SelectionKey.OP_CONNECT);
-        CTPProtocol client = CTPProtocol.client(host, selectionKey, handler);
+        CTPConnection client = CTPConnection.client(host, selectionKey, handler);
         return client;
     }
     
@@ -195,7 +195,7 @@ final class CTPConnectionManager {
          *
          * @param data A non-empty array of bytes.
          */
-        public void receiveChunk(CTPProtocol source, ByteBuffer data) {
+        public void receiveChunk(CTPConnection source, ByteBuffer data) {
             logger.info("Received data " + data);
         }
     
@@ -207,7 +207,7 @@ final class CTPConnectionManager {
          * @param reason An exception if the connection was closed as the result of
          *      a failure. This may be null.
          */
-        public void connectionClosed(CTPProtocol source, Exception reason) {
+        public void connectionClosed(CTPConnection source, Exception reason) {
             logger.info("connectionClosed( " + source + " , " + reason + " )");
         }
     }
@@ -225,5 +225,3 @@ interface CTPHandlerFactory {
      */
     public CTPHandler constructHandler();
 }
-
-

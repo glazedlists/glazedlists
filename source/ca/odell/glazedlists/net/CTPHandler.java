@@ -10,30 +10,9 @@ import java.util.*;
 import java.nio.*;
 
 /**
- * A callback interface for classes that implement a CTP Client or Server.
- * The CTPClientProtocol and CTPServerProtocol shall handle the lowest network
- * level of the protocol and handlers are used to interpret the data.
+ * A callback interface for classes that implement a CTPConnection.
  */
 interface CTPHandler {
-    
-    /*
-     * Handles an HTTP response from the specified connection.
-     *
-     * @param code the HTTP  response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1.
-     *      This will be null if this is an HTTP request.
-     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
-     */
-    //public void receiveResponse(CTPProtocol source, Integer code, Map headers);
-
-    /*
-     * Handles an HTTP request from the specified connection.
-     *
-     * @param uri the address requested by the client, in the format of a file
-     *      address. See HTTP/1.1 RFC, 5.1.2. This will be null if this is an
-     *      HTTP response.
-     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
-     */
-    //public void receiveRequest(CTPProtocol source, String uri, Map headers);
     
     /**
      * Handles reception of the specified chunk of data. This chunk should be able
@@ -44,15 +23,15 @@ interface CTPHandler {
      *      relevant bytes start at data.position() and end at data.limit(). This
      *      buffer is only valid for the duration of this method call.
      */
-    public void receiveChunk(CTPProtocol source, ByteBuffer data);
+    public void receiveChunk(CTPConnection source, ByteBuffer data);
 
     /**
      * Handles the connection being closed by the remote client. This will also
-     * be called if there is a connection error, which is the case when a server
-     * sends data that cannot be interpretted by CTPServerProtocol.
+     * be called if there is a connection error, which is the case when a remote
+     * host sends data that cannot be interpretted by CTPConnection.
      *
      * @param reason An exception if the connection was closed as the result of
      *      a failure. This may be null.
      */
-    public void connectionClosed(CTPProtocol source, Exception reason);
+    public void connectionClosed(CTPConnection source, Exception reason);
 }

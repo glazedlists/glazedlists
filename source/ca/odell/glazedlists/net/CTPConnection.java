@@ -19,7 +19,7 @@ import ca.odell.glazedlists.util.impl.ByteChannelWriter;
 import java.util.logging.*;
 
 /**
- * The CTPProtocol is base class for building a client or server implementation
+ * The CTPConnection is base class for building a client or server implementation
  * of Chunked Transfer Protocol. This protocol is a subset of HTTP/1.1 with special
  * interest to chunked encoding.
  *
@@ -62,10 +62,10 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class CTPProtocol {
+class CTPConnection {
 
     /** logging */
-    private static Logger logger = Logger.getLogger(CTPProtocol.class.toString());
+    private static Logger logger = Logger.getLogger(CTPConnection.class.toString());
     
     /** track the current state of this protocol */
     protected static final int STATE_SERVER_AWAITING_CONNECT = 0;
@@ -103,15 +103,15 @@ class CTPProtocol {
     /** the remote host */
     protected String host = "";
     
-    /** the only URI allowed by CTP Protocol */
+    /** the only URI allowed by CTPConnection */
     private static final String CTP_URI = "/glazedlists";
     
     /**
-     * Creates a new CTPProtocol.
+     * Creates a new CTPConnection.
      *
      * @param selectionKey the connection managed by this higher-level protocol.
      */
-    private CTPProtocol(SelectionKey selectionKey, CTPHandler handler) {
+    private CTPConnection(SelectionKey selectionKey, CTPHandler handler) {
         if(selectionKey == null) throw new IllegalArgumentException();
         
         this.selectionKey = selectionKey;
@@ -123,20 +123,20 @@ class CTPProtocol {
     }
     
     /**
-     * Create a new CTPProtocol for use as a client.
+     * Create a new CTPConnection for use as a client.
      */
-    static CTPProtocol client(String host, SelectionKey selectionKey, CTPHandler handler) {
-        CTPProtocol client = new CTPProtocol(selectionKey, handler);
+    static CTPConnection client(String host, SelectionKey selectionKey, CTPHandler handler) {
+        CTPConnection client = new CTPConnection(selectionKey, handler);
         client.host = host;
         client.state = STATE_CLIENT_AWAITING_CONNECT;
         return client;
     }
     
     /**
-     * Create a new CTPProtocol for use as a server.
+     * Create a new CTPConnection for use as a server.
      */
-    static CTPProtocol server(SelectionKey selectionKey, CTPHandler handler) {
-        CTPProtocol server = new CTPProtocol(selectionKey, handler);
+    static CTPConnection server(SelectionKey selectionKey, CTPHandler handler) {
+        CTPConnection server = new CTPConnection(selectionKey, handler);
         server.state = STATE_SERVER_AWAITING_CONNECT;
         return server;
     }
