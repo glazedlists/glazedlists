@@ -10,7 +10,6 @@ import java.util.*;
 import java.io.*;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.swing.*;
 
 
 /**
@@ -40,7 +39,7 @@ public class TextFilterPerformance {
         }
         
         // start reading
-        System.out.println("Reading input");
+        System.out.print("Reading input...");
         BufferedReader in = new BufferedReader(new FileReader(args[0]));
         String line = "";
         
@@ -66,30 +65,36 @@ public class TextFilterPerformance {
         }
         
         // we're done reading
-        System.out.println("Read input, " + elements.size() + " elements");
-        System.out.println("");
+        System.out.println(" done. " + elements.size() + " elements");
         in.close();
 
         // summarize what we've read
         for(int f = 0; f < testFilters.size(); f++) {
-            System.out.println("Filter " + f + ": " + testFilters.get(f) + ", expect: " + testHitCounts.get(f));
+            System.out.println("Filter " + f + ": " + testFilters.get(f) + ", expect: " + testHitCounts.get(f) + " matches");
         }
         
         // prepare the filter list
         BasicEventList unfiltered = new BasicEventList();
         unfiltered.addAll(elements);
-        TextFilterList filtered = new TextFilterList(unfiltered, new CollectionTextFilterator());
+        DefaultTextFilterList filtered = new DefaultTextFilterList(unfiltered, new CollectionTextFilterator());
 
         // track time
-        System.out.println("");
-        System.out.print("Running...");
-        long startTime = System.currentTimeMillis();
+        long startTime = 0;
+        long finishTime = 0;
         
+        System.out.println("");
+        System.out.println("Full Filter");
         // perform the filters
         for(int i = 0; i < testFilters.size(); i++) {
             String filter = (String)testFilters.get(i);
+            System.out.print("Filtering " + i + ", \"" + filter + "\"...");
+
             int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
-            filtered.getFilterEdit().setText(filter);
+            startTime = System.currentTimeMillis();
+            filtered.setFilterText(filter.split("[ \t]"));
+            finishTime = System.currentTimeMillis();
+            long totalFilteringTime = (finishTime - startTime);
+            
             if(filtered.size() != expectedResult) {
                 System.out.println("expected size " + expectedResult + " != actual size " + filtered.size() + " for filter " + filter);
                 for(int j = 0; j < filtered.size(); j++) {
@@ -97,26 +102,24 @@ public class TextFilterPerformance {
                 }
                 return;
             }
+            System.out.println(" done. Total: " + totalFilteringTime);
         }
 
-        // print the total time
-        long finishTime = System.currentTimeMillis();
-        System.out.println(" done. Time: " + (finishTime - startTime) + "ms");
         System.out.println("");
-
+        System.out.println("Character-by-character Filter");
         // perform the filters 1 char at a time (to simulate the user typing)
-        System.out.println("Filter by the character");
         for(int i = 0; i < testFilters.size(); i++) {
-            String filter = (String) testFilters.get(i);
+            String filter = (String)testFilters.get(i);
             long totalFilteringTime = 0;
             long totalUnfilteringTime = 0;
+            System.out.print("Filtering " + i + ", \"" + filter + "\" by character...");
 
             // simulate filter by the keystroke
             for (int j = 1; j <= filter.length(); j++) {
                 String subFilter = filter.substring(0, j);
 
                 startTime = System.currentTimeMillis();
-                filtered.getFilterEdit().setText(subFilter);
+                filtered.setFilterText(subFilter.split("[ \t]"));
                 finishTime = System.currentTimeMillis();
 
                 totalFilteringTime += (finishTime - startTime);
@@ -126,14 +129,13 @@ public class TextFilterPerformance {
             for (int j = 1; j <= filter.length(); j++) {
                 String subFilter = filter.substring(0, filter.length() - j);
                 startTime = System.currentTimeMillis();
-                filtered.getFilterEdit().setText(subFilter);
+                filtered.setFilterText(subFilter.split("[ \t]"));
                 finishTime = System.currentTimeMillis();
 
                 totalUnfilteringTime += (finishTime - startTime);
             }
-            System.out.println("  Filter " + i + ": " + filter + " completed filtering in " + totalFilteringTime + "ms and unfiltering in " + totalUnfilteringTime + "ms");
+            System.out.println(" done. Filter: " + totalFilteringTime + ", Unfilter: " + totalUnfilteringTime + ", Total: " + (totalFilteringTime + totalUnfilteringTime));
         }
-
     }
     
     /**

@@ -35,14 +35,8 @@ import org.eclipse.swt.graphics.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TextFilterList extends AbstractFilterList {
+public class TextFilterList extends DefaultTextFilterList {
 
-    /** the filters list is currently just a list of Substrings to include */
-    private String[] filters = new String[0];
-    
-    /** the filterator is used as an alternative to implementing the TextFilterable interface */
-    private TextFilterator filterator = null;
-    
     /** the filter edit text field */
     private Text filterEdit;
     
@@ -51,9 +45,6 @@ public class TextFilterList extends AbstractFilterList {
     
     ///** the action listener performs a refilter when fired */
     //private FilterActionListener filterActionListener = null;
-    
-    /** a heavily recycled list of filter Strings, call clear() before use */
-    private List filterStrings = new ArrayList();
 
     /**
      * Creates a new filter list that filters elements out of the
@@ -120,65 +111,9 @@ public class TextFilterList extends AbstractFilterList {
     private void reFilter() {
         ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
-            // build the regex pattern from the filter strings
-            updateFilterPattern();
-            // refilter the whole list
-            handleFilterChanged();
+            setFilterText(filterEdit.getText().split("[ \t]"));
         } finally {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
-    }
-
-    /**
-     * Recompiles the filter regular expression patterns. When the user enters
-     * a regular expression that is not recognized, the error is silently ignored
-     * and no filters apply.
-     */
-    private void updateFilterPattern() {
-        filters = filterEdit.getText().toUpperCase().split("[ \t]");
-    }
-
-    /** {@inheritDoc} */
-    public boolean filterMatches(Object element) {
-        // populate the strings for this object
-        filterStrings.clear();
-        if(filterator == null) {
-            TextFilterable item = (TextFilterable)element;
-            item.getFilterStrings(filterStrings);
-        } else {
-            filterator.getFilterStrings(filterStrings, element);
-        }
-        // ensure each filter matches at least one field
-        filters:
-        for(int f = 0; f < filters.length; f++) {
-            for(int c = 0; c < filterStrings.size(); c++) {
-                if(filterStrings.get(c) != null) {
-                    if(caseInsensitiveIndexOf(filterStrings.get(c).toString(), filters[f]) != -1) continue filters;
-                }
-            }
-            // no field matched this filter 
-            return false;
-        }
-        // all filters have been matched
-        return true;
-    }
-
-    /**
-     * Tests if one String contains the other. Originally this task was performed
-     * by Java's regular expressions library, but this is faster and less complex.
-     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=89">Bug 89</a>
-     * @param host the string to search within
-     * @param filter the string to search for, this must be upper case
-     */
-    private static int caseInsensitiveIndexOf(String host, String filter) {
-        int lastFirst = host.length() - filter.length();
-        sourceCharacter:
-        for(int c = 0; c <= lastFirst; c++) {
-            for(int f = 0; f < filter.length(); f++) {
-                if(Character.toUpperCase(host.charAt(c+f)) != filter.charAt(f)) continue sourceCharacter;
-            }
-            return c;
-        }
-        return -1;
     }
 }
