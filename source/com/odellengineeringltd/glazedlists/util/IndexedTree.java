@@ -1,0 +1,142 @@
+/**
+ * Glazed Lists
+ * http://opensource.odellengineeringltd.com/glazedlists/
+ *
+ * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
+ */
+package com.odellengineeringltd.glazedlists.util;
+
+// for specifying a sorting order
+import java.util.Comparator;
+// for iterating the nodes
+import java.util.Iterator;
+import java.util.Collections;
+
+/**
+ * Models a tree which keeps its elements either in sorted order
+ * or by index.
+ *
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ */
+public class IndexedTree {
+    
+    /** a decision maker for ordering elements */
+    private Comparator comparator;
+    
+    /** the root node of the tree, this may be replaced by a delete */
+    private IndexedTreeNode root = null;
+    
+    /**
+     * Creates a new empty tree that uses the specified comparator to sort values.
+     */
+    public IndexedTree(Comparator comparator) {
+        this.comparator = comparator;
+    }
+    
+    /**
+     * Creates a new empty sorted tree that requires that objects in the
+     * tree implement the Comparable interface.
+     */
+    public IndexedTree() {
+        // debug
+        comparator = null;
+        //comparator = new ComparableComparator();
+    }
+
+    /**
+     * Gets the value of the sorted tree node with the specified index.
+     */
+    public Object get(int index) {
+        IndexedTreeNode treeNode = root.getNodeWithIndex(index);
+        return treeNode.getValue();
+    }
+    /**
+     * Gets the tree node with the specified index.
+     */
+    public IndexedTreeNode getNode(int index) {
+        return root.getNodeWithIndex(index);
+    }
+    
+    /**
+     * Gets the size of this tree.
+     */
+    public int size() {
+        if(root == null) return 0;
+        return root.size();
+    }
+    
+    /**
+     * Gets an iterator for this tree. The iterator moves in sorted order
+     * for sorted trees and order of increasing index for indexed trees.
+     */
+    public Iterator iterator() {
+        if(root != null) return root.getSmallestChildNode().iterator();
+        else return Collections.EMPTY_LIST.iterator();
+    }
+    
+    /** 
+     * Gets the comparator used to sort the nodes in this tree.
+     */
+    public Comparator getComparator() {
+        return comparator;
+    }
+
+    /**
+     * Deletes the node with the specified sort-order from the tree.
+     */
+    public void removeByIndex(int index) {
+        IndexedTreeNode treeNode = root.getNodeWithIndex(index);
+        treeNode.removeFromTree();
+    }
+    
+    /**
+     * Inserts the specified object into the tree.
+     *
+     * @return the node object that was added. This object has
+     *      useful methods such as getIndex() to get the dynamic
+     *      index of the node.
+     */
+    public IndexedTreeNode addByNode(Object value) {
+        if(root == null) root = new IndexedTreeNode(this, null);
+        return root.insert(value);
+    }
+    /**
+     * Inserts the specified object into the tree with the specified index.
+     *
+     * @return the node object that was added. This object has
+     *      useful methods such as getIndex() to get the dynamic
+     *      index of the node.
+     */
+    public IndexedTreeNode addByNode(int index, Object value) {
+        if(root == null) root = new IndexedTreeNode(this, null);
+        return root.insert(index, value);
+    }
+    
+    /**
+     * Validates the entire tree by iterating over its nodes and validating
+     * them one at a time.
+     */
+    public void validate() {
+        for(Iterator i = iterator(); i.hasNext();) {
+            IndexedTreeNode node = (IndexedTreeNode)i.next();
+            node.validate();
+        }
+    }
+    
+    /**
+     * Print the tree by its contents
+     */
+    public String toString() {
+        if(root == null) return ".";
+        return root.toString();
+    }
+    
+    /**
+     * Sets the root of this tree to be the specified node. This
+     * method should not be called by client classes as it is an
+     * implementation artifact.
+     */
+    public void setRootNode(IndexedTreeNode root) {
+        this.root = root;
+    }
+}

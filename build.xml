@@ -1,0 +1,98 @@
+<!--
+ ! Glazed Lists
+ ! COPYRIGHT 2003 O'DELL ENGINEERING LTD.
+ !
+ ! see Apache Ant documentation: http://jakarta.apache.org/ant
+-->
+
+<project name="glazedlists" default="jar" basedir=".">
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     BUILD ADMINISTRATION
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <target name="init"
+    description="Create build directories and set up necessary paths">
+  </target>
+
+  <target name="clean"
+    description="clean up generated files so they are rebuilt" >
+    <!-- Delete the directories where generated files fall -->
+    <delete dir="classes"/>
+    <!-- Delete the documentation directories -->
+    <delete dir="docs/api"/>
+    <!-- Delete temporary files from JEdit -->
+    <delete>
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="**/*~"/>
+      </fileset>
+    </delete>
+    <!-- Delete the generated .jar -->
+    <delete file="glazedlists.jar"/>
+    <!-- Delete the generated source -->
+    <delete file="glazedlists-source.zip"/>        
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     JAVADOC & JAVA2HTML
+     Java2HTML is a free tool for putting Java code in a code-coloured, pretty
+     printed form. See http://www.java2html.com/
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    
+  <target name="docs" depends="init"
+    description="Scan the source code to generate the API">
+    <mkdir dir="docs"/>
+    <!-- document all the source with @todo tags -->
+    <javadoc packagenames="com.*" 
+      sourcepath="source" destdir="docs/api"
+      author="true" use="true" windowtitle="Glazed Lists">
+      <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2003 O'Dell Engineering.</i>]]></bottom>
+      <tag name="todo" description="To do:"/>
+      <tag name="comment" description="Implementation Notes:"/> 
+    </javadoc>
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     JAR
+     Construct the .jar file for use in a library.
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <target name="jar" depends="init,compile"
+        description="Creates glazedlists.jar file containing all UI libraries.">
+    <jar destfile="glazedlists.jar" update="true">
+      <fileset dir="classes">
+        <include name="**/*.class"/>
+      </fileset>
+      <manifest>
+        <attribute name="Main-Class" value="com.odellengineeringltd.glazedlists.demo.Demo"/>
+        <attribute name="Sealed" value="true"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     COMPILE
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <target name="compile" depends="init"
+        description="Compile the source">
+    <mkdir dir="classes"/>
+    <!-- Compile the java code from source/ into classes/ -->
+    <javac destdir="classes" srcdir="source" debug="on" source="1.4">
+    </javac>
+  </target>
+  
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     REDISTRIBUTING THE SOURCE
+     Package the entire Glazed Lists source tree in a .zip file.
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <target name="dist" depends="init"
+    description="Create a .zip file of the source for backup or distribution">
+    <zip destfile="glazedlists-source.zip"
+       basedir="${basedir}"
+       excludes="classes/**, glazedlists-source.zip"/>
+  </target>
+  
+</project>
