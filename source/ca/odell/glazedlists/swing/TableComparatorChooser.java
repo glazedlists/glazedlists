@@ -436,6 +436,17 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     }
 
     /**
+     * Creates a {@link Comparator} that can compare list elements
+     * given a {@link Comparator} that can compare column values for the specified
+     * column. This returns a {@link Comparator} that extracts the table values for
+     * the specified column and then delegates the actual comparison to the specified
+     * comparator.
+     */
+    public Comparator createComparatorForElement(Comparator comparatorForColumn, int column) {
+        return new TableColumnComparator(eventTableModel.getTableFormat(), column, comparatorForColumn);
+    }
+
+    /**
      * A ColumnClickTracker monitors the clicks on a specified column
      * and provides access to the most appropriate comparator for that
      * column.
@@ -689,15 +700,24 @@ class TableColumnComparator implements Comparator {
     private int column;
 
     /** comparison is delegated to a ComparableComparator */
-    private static ComparableComparator comparableComparator = new ComparableComparator();
+    private Comparator comparator = null;
 
     /**
      * Creates a new TableColumnComparator that sorts objects by the specified
      * column using the specified table format.
      */
     public TableColumnComparator(TableFormat tableFormat, int column) {
+        this(tableFormat, column, new ComparableComparator());
+    }
+
+    /**
+     * Creates a new TableColumnComparator that sorts objects by the specified
+     * column using the specified table format and the specified comparator.
+     */
+    public TableColumnComparator(TableFormat tableFormat, int column, Comparator comparator) {
         this.column = column;
         this.tableFormat = tableFormat;
+        this.comparator = comparator;
     }
 
     /**
@@ -707,7 +727,7 @@ class TableColumnComparator implements Comparator {
         Object alphaField = tableFormat.getColumnValue(alpha, column);
         Object betaField = tableFormat.getColumnValue(beta, column);
         try {
-            return comparableComparator.compare(alphaField, betaField);
+            return comparator.compare(alphaField, betaField);
         // throw a 'nicer' exception if the class does not implement Comparable
         } catch(ClassCastException e) {
             IllegalStateException illegalStateException = new IllegalStateException("TableComparatorChooser can not sort objects \"" + alphaField + "\", \"" + betaField + "\" that do not implement Comparable");
@@ -726,6 +746,7 @@ class TableColumnComparator implements Comparator {
         TableColumnComparator otherTableColumnComparator = (TableColumnComparator)other;
         if(!otherTableColumnComparator.tableFormat.equals(tableFormat)) return false;
         if(otherTableColumnComparator.column != column) return false;
+        if(!comparator.equals(otherTableColumnComparator.comparator)) return false;
 
         return true;
     }
