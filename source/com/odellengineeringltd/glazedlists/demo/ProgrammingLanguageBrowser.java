@@ -7,6 +7,7 @@
 package com.odellengineeringltd.glazedlists.demo;
 
 import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.jcombobox.*;
 import com.odellengineeringltd.glazedlists.jtable.*;
 import com.odellengineeringltd.glazedlists.jlist.*;
 import com.odellengineeringltd.glazedlists.util.*;
@@ -62,6 +63,11 @@ public class ProgrammingLanguageBrowser {
         EventJList eventJList = new EventJList(customFilteredLanguages);
         listWidgetTabs.addTab("JList", new JScrollPane(eventJList.getJList()));
         
+        // add a JComboBox
+        ListComboBoxModel comboModel = new ListComboBoxModel(customFilteredLanguages);
+        JComboBox eventJComboBox = new JComboBox(comboModel);
+        listWidgetTabs.addTab("JComboBox", new JScrollPane(eventJComboBox));
+
         // assemble the window
         JFrame frame = new JFrame("Programming Languages");
         ExitOnCloseHandler.addToFrame(frame);

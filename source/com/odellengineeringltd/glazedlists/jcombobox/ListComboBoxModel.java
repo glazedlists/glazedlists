@@ -102,12 +102,15 @@ public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
     /**
      * Sets the currently selected item.
      *
-     * The interface API says that this method should notify all listeners
-     * that the selection has changed, however the ListDataListener provides
-     * no selection notification methods.
+     * <p>The selection notification process is very much a hack. This fires
+     * a ListDataEvent where the range is between -1 and -1. This is identical
+     * to the notification process used by the <code>DefaultComboBoxModel</code>.
      */
     public void setSelectedItem(Object selected) {
         this.selected = selected;
+        listDataEvent.setRange(-1, -1);
+        listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
+        fireListDataEvent(listDataEvent);
     }
 
     

@@ -23,7 +23,7 @@ import java.util.*;
 public class IndexOrderTest extends TestCase {
 
     /** for randomly choosing list indicies */
-    private Random random = new Random();
+    private Random random = new Random(3);
     
     /**
      * Prepare for the test.
@@ -54,11 +54,11 @@ public class IndexOrderTest extends TestCase {
         ArrayList controlList = new ArrayList();
         
         // add a block of new elements one hundred times
-        for(int a = 0; a < 10; a++) {
+        for(int a = 0; a < 15; a++) {
 
             // create a block of ten elements
             List currentChange = new ArrayList();
-            for(int b = 0; b < 50; b++) {
+            for(int b = 0; b < controlList.size() || b < 10; b++) {
                 currentChange.add(new int[] { random.nextInt(100), random.nextInt(100) });
             }
             
