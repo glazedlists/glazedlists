@@ -25,10 +25,12 @@ public class ThresholdRangeModelFactory {
         // don't make one of these
         throw new IllegalStateException();
     }
-    
+
     /**
      * Creates a model that manipulates the lower bound of the specified
-     * ThresholdList.
+     * ThresholdList.  The ThresholdList linked to this model type will contain
+     * a range of Objects between the results of getValue() and getMaximum()
+     * on the BoundedRangeModel.
      */
     public static BoundedRangeModel createLower(ThresholdList target) {
         return new LowerThresholdRangeModel(target);
@@ -36,12 +38,14 @@ public class ThresholdRangeModelFactory {
 
     /**
      * Creates a model that manipulates the upper bound of the specified
-     * ThresholdList.
+     * ThresholdList.  The ThresholdList linked to this model type will contain
+     * a range of Objects between the results of getMinimum() and getValue()
+     * on the BoundedRangeModel.
      */
     public static BoundedRangeModel createUpper(ThresholdList target) {
         return new UpperThresholdRangeModel(target);
     }
-    
+
     /**
      * A LowerThresholdRangeModel provides an implementation of a bounded-range
      * model for a slider widget that binds a JSlider to a ThresholdList.  This

@@ -8,8 +8,6 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
-// need access to volatile implementation classes
-import ca.odell.glazedlists.util.impl.*;
 // to use standard collections
 import java.util.*;
 
@@ -17,19 +15,20 @@ import java.util.*;
  * A ThresholdList is a transformation list that provides a dynamic
  * view of a range of values in a list.  This range is defined to
  * contain all elements at or above the lower threshold and all
- * all elements at or below the upper threshold.  This allows a user
- * to filter data from their list in a powerful and sophisticated manner.
+ * elements at or below the upper threshold.  This allows a user
+ * to filter data from their list in a powerful and sophisticated manner
+ * by simply modifying the upper and lower thresholds.
  *
  * <p>This list is designed to respond to a slider widget or combo box
  * that sets either one or both of the thresholds on a range of values.
  * This allows a user to easily refine their view of a list to contain
- * only values in a valid range.  The perfect use case for this list is
+ * only values within a valid range.  The perfect use case for this list is
  * within a media player or P2P application. A user might want to filter
  * out all songs that aren't at least at a bitrate of 192 kbps and at most
- * a bitrate of 320 kbps to eliminate low quality MP3s and WAV files.
+ * a bitrate of 320 kbps to eliminate low quality MP3s and bloated WAV files.
  *
  * <p><strong>Warning:</strong> this is a technology preview and is
- * subject to API changes. 
+ * subject to API changes.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
@@ -56,10 +55,11 @@ public final class ThresholdList extends TransformedList implements ListEventLis
     /** the explicitly sorted sorted list */
     private SortedList sorted = null;
 
+    /** TODO: a flag to put this list in debug mode */
     public boolean debug = false;
 
     /**
-     * Creates a new ThresholdList that is range-filtered view
+     * Creates a new ThresholdList that is a range-filtered view
      * of a specified list.
      */
     public ThresholdList(EventList source, ThresholdEvaluator evaluator) {
