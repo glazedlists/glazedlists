@@ -108,12 +108,12 @@ public class CachingList extends TransformedList implements ListEventListener {
         getReadWriteLock().writeLock().lock();
         try {
             Object value = null;
-    
+
             // attempt to get the element from the cache
             IndexedTreeNode treeNode = indexTree.getNode(index);
             Object nodeValue = treeNode.getValue();
             if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
-                cacheHits ++;
+                if(recordHitsOrMisses) cacheHits ++;
                 Object agedTreeNodeObject = treeNode.getValue();
                 IndexedTreeNode agedTreeNode = (IndexedTreeNode)agedTreeNodeObject;
                 Object agedNodeObject = agedTreeNode.getValue();
@@ -122,7 +122,7 @@ public class CachingList extends TransformedList implements ListEventListener {
                 agedTreeNode.removeFromTree();
                 treeNode.setValue(cache.addByNode(agedNode));
             } else {
-                cacheMisses++;
+                if(recordHitsOrMisses) cacheMisses++;
                 value = source.get(index);
                 if(currentSize < maxSize) {
                     currentSize++;
