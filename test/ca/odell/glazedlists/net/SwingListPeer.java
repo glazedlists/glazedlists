@@ -46,14 +46,14 @@ public class SwingListPeer {
         
         // start the publisher
         if(args.length >= 2) {
-            new PublishFrame(peer, "/slp", localHost, localPort);
+            new PublishFrame(peer, localHost, localPort, "/slp");
         }
         
         // start the subscriber
         if(args.length >= 4) {
             String targetHost = args[2];
             int targetPort = Integer.parseInt(args[3]);
-            new SubscribeFrame(peer, "/slp", targetHost, targetPort);
+            new SubscribeFrame(peer, targetHost, targetPort, "/slp");
         }
     }
 }

@@ -61,12 +61,12 @@ public class PeerConnectionTest extends TestCase {
     public void testPeerConnection() {
         try {
             StringResource stringResource = new StringResource();
-            String resourceName = "glazedlists://localhost:" + serverPort + "/stringResource";
+            String path = "/stringResource";
             stringResource.setValue("Hello World");
-            ResourceStatus status = peer.publish(stringResource, resourceName);
+            ResourceStatus status = peer.publish(stringResource, path);
             
             StringResource clone = new StringResource();
-            peer.subscribe(clone, resourceName, "localhost", serverPort);
+            peer.subscribe(clone, "localhost", serverPort, path);
             
             waitFor(1000);
             assertEquals(stringResource.getValue(), clone.getValue());

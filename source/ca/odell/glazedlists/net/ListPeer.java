@@ -69,9 +69,9 @@ public class ListPeer {
     /**
      * Publish the specified EventList with the specified name.
      */
-    public NetworkList publish(EventList source, String resourceName, ByteCoder byteCoder) {
+    public NetworkList publish(EventList source, String path, ByteCoder byteCoder) {
         NetworkList published = new NetworkList(source, byteCoder);
-        ResourceStatus resourceStatus = peer.publish(published.getResource(), resourceName);
+        ResourceStatus resourceStatus = peer.publish(published.getResource(), path);
         published.setResourceStatus(resourceStatus);
         published.setWritable(true);
         return published;
@@ -80,9 +80,9 @@ public class ListPeer {
     /**
      * Subscribe to the EventList with the specified name.
      */
-    public NetworkList subscribe(String resourceName, String host, int port, ByteCoder byteCoder) {
+    public NetworkList subscribe(String host, int port, String path, ByteCoder byteCoder) {
         NetworkList subscribed = new NetworkList(new BasicEventList(), byteCoder);
-        ResourceStatus resourceStatus = peer.subscribe(subscribed.getResource(), resourceName, host, port);
+        ResourceStatus resourceStatus = peer.subscribe(subscribed.getResource(), host, port, path);
         subscribed.setResourceStatus(resourceStatus);
         return subscribed;
     }

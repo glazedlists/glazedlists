@@ -44,12 +44,11 @@ public class SubscribeFrame implements ActionListener, NetworkListStatusListener
     /**
      * Creates a new SubscribeFrame client.
      */
-    public SubscribeFrame(ListPeer peer, String listUri, String host, int port) throws IOException {
+    public SubscribeFrame(ListPeer peer, String host, int port, String path) throws IOException {
         this.peer = peer;
-        this.resourceName = "glazedlists://" + host + ":" + port + listUri;
         
         // subscribe
-        data = peer.subscribe(resourceName, host, port, ByteCoderFactory.serializable());
+        data = peer.subscribe(host, port, path, ByteCoderFactory.serializable());
         
         // build user interface
         constructStandalone();

@@ -21,7 +21,7 @@ import java.text.ParseException;
 class PeerBlock {
     
     /** constants used in the protocol */
-    private static final String RESOURCE_NAME = "Resource-Name";
+    private static final String RESOURCE_URI = "Resource-Uri";
     private static final String SESSION_ID = "Session-Id";
     private static final String UPDATE_ID = "Update-Id";
     private static final String ACTION = "Action";
@@ -32,7 +32,7 @@ class PeerBlock {
     private static final String ACTION_UNPUBLISH = "Unpublish";
 
     /** the resource this block is concerned with */
-    private String resourceName = null;
+    private ResourceUri resourceUri = null;
     
     /** a check id */
     private int sessionId = -1;
@@ -49,8 +49,8 @@ class PeerBlock {
     /**
      * Create a new PeerBlock.
      */
-    private PeerBlock(String resourceName, int sessionId, String action, int updateId, Bufferlo payload) {
-        this.resourceName = resourceName;
+    private PeerBlock(ResourceUri resourceUri, int sessionId, String action, int updateId, Bufferlo payload) {
+        this.resourceUri = resourceUri;
         this.sessionId = sessionId;
         this.action = action;
         this.updateId = updateId;
@@ -60,36 +60,36 @@ class PeerBlock {
     /**
      * Create a new subscribe block.
      */
-    public static PeerBlock subscribeConfirm(String resourceName, int sessionId, int updateId, Bufferlo snapshot) {
-        return new PeerBlock(resourceName, sessionId, PeerBlock.ACTION_SUBSCRIBE_CONFIRM, updateId, snapshot);
+    public static PeerBlock subscribeConfirm(ResourceUri resourceUri, int sessionId, int updateId, Bufferlo snapshot) {
+        return new PeerBlock(resourceUri, sessionId, PeerBlock.ACTION_SUBSCRIBE_CONFIRM, updateId, snapshot);
     }
     
     /**
      * Create a new subscribe block.
      */
-    public static PeerBlock update(String resourceName, int sessionId, int updateId, Bufferlo delta) {
-        return new PeerBlock(resourceName, sessionId, PeerBlock.ACTION_UPDATE, updateId, delta);
+    public static PeerBlock update(ResourceUri resourceUri, int sessionId, int updateId, Bufferlo delta) {
+        return new PeerBlock(resourceUri, sessionId, PeerBlock.ACTION_UPDATE, updateId, delta);
     }
     
     /**
      * Create a new subscribe block.
      */
-    public static PeerBlock subscribe(String resourceName) {
-        return new PeerBlock(resourceName, -1, PeerBlock.ACTION_SUBSCRIBE, -1, null);
+    public static PeerBlock subscribe(ResourceUri resourceUri) {
+        return new PeerBlock(resourceUri, -1, PeerBlock.ACTION_SUBSCRIBE, -1, null);
     }
 
     /**
      * Create a new subscribe block.
      */
-    public static PeerBlock unsubscribe(String resourceName) {
-        return new PeerBlock(resourceName, -1, PeerBlock.ACTION_UNSUBSCRIBE, -1, null);
+    public static PeerBlock unsubscribe(ResourceUri resourceUri) {
+        return new PeerBlock(resourceUri, -1, PeerBlock.ACTION_UNSUBSCRIBE, -1, null);
     }
 
     /**
      * Create a new subscribe block.
      */
-    public static PeerBlock unpublish(String resourceName) {
-        return new PeerBlock(resourceName, -1, PeerBlock.ACTION_UNPUBLISH, -1, null);
+    public static PeerBlock unpublish(ResourceUri resourceUri) {
+        return new PeerBlock(resourceUri, -1, PeerBlock.ACTION_UNPUBLISH, -1, null);
     }
     
     /**
@@ -134,7 +134,7 @@ class PeerBlock {
      *      result may be null indicating an incomplete PeerBlock. There may be
      *      multiple PeerBlocks available in the specified list of bytes.
      */
-    public static PeerBlock fromBytes(Bufferlo bytes) throws ParseException {
+    public static PeerBlock fromBytes(Bufferlo bytes, String localHost, int localPort) throws ParseException {
         // if a full block is not loaded
         int blockEndIndex = bytes.indexOf("\\r\\n");
         if(blockEndIndex == -1) return null;
@@ -171,7 +171,8 @@ class PeerBlock {
         bytes.consume("\\r\\n");
         
         // parse the headers
-        String resourceName = (String)headers.get(RESOURCE_NAME);
+        String resourceUriString = (String)headers.get(RESOURCE_URI);
+        ResourceUri resourceUri = ResourceUri.localOrRemote(resourceUriString, localHost, localPort);
         String sessionIdString = (String)headers.get(SESSION_ID);
         String action = (String)headers.get(ACTION);
         String updateIdString = (String)headers.get(UPDATE_ID);
@@ -179,19 +180,19 @@ class PeerBlock {
         int updateId = (updateIdString != null) ? Integer.parseInt(updateIdString) : -1;
         
         // return the result
-        return new PeerBlock(resourceName, sessionId, action, updateId, payload);
+        return new PeerBlock(resourceUri, sessionId, action, updateId, payload);
     }
 
     /**
      * Get the bytes for this block.
      */
-    public Bufferlo getBytes() {
+    public Bufferlo toBytes(String localHost, int localPort) {
         // the writer with no size info
         Bufferlo writer = new Bufferlo();
         
         // populate the map of headers
         Map headers = new TreeMap();
-        if(resourceName != null) headers.put(RESOURCE_NAME, resourceName);
+        if(resourceUri != null) headers.put(RESOURCE_URI, resourceUri.toString(localHost, localPort));
         if(sessionId != -1) headers.put(SESSION_ID, new Integer(sessionId));
         if(action != null) headers.put(ACTION, action);
         if(updateId != -1) headers.put(UPDATE_ID, new Integer(updateId));
@@ -253,7 +254,7 @@ class PeerBlock {
     /**
      * Gets the resource that this block is for.
      */
-    public String getResourceName() {
-        return resourceName;
+    public ResourceUri getResourceUri() {
+        return resourceUri;
     }
 }

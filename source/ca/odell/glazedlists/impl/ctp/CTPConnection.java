@@ -113,7 +113,10 @@ public final class CTPConnection {
     CTPConnectionManager manager;
     
     /** the remote host */
-    String host = "";
+    String remoteHost = "remotehost";
+    
+    /** the local host, as known by the client */
+    String localHost = "localhost";
     
     /** the only URI allowed by CTPConnection */
     static final String CTP_URI = "/glazedlists";
@@ -143,7 +146,7 @@ public final class CTPConnection {
     static CTPConnection client(String host, SelectionKey selectionKey, CTPHandler handler, CTPConnectionManager manager) {
         CTPConnection client = new CTPConnection(selectionKey, handler, manager);
         client.state = STATE_CLIENT_AWAITING_CONNECT;
-        client.host = host;
+        client.remoteHost = host;
         return client;
     }
     
@@ -153,8 +156,27 @@ public final class CTPConnection {
     static CTPConnection server(SelectionKey selectionKey, CTPHandler handler, CTPConnectionManager manager) {
         CTPConnection server = new CTPConnection(selectionKey, handler, manager);
         server.state = STATE_SERVER_AWAITING_CONNECT;
-        server.host = ((InetSocketAddress)server.socketChannel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
+        server.remoteHost = ((InetSocketAddress)server.socketChannel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
         return server;
+    }
+    
+    /**
+     * Gets the hostname that the local party is referred to by the remote party.
+     */
+    public String getLocalHost() {
+        return localHost;
+    }
+    public int getLocalPort() {
+        return socketChannel.socket().getLocalPort();
+    }
+    /**
+     * Gets the hostname that the local party uses to refer to the remote party.
+     */
+    public String getRemoteHost() {
+        return remoteHost;
+    }
+    public int getRemotePort() {
+        return socketChannel.socket().getPort();
     }
 
     /**
@@ -254,7 +276,7 @@ public final class CTPConnection {
             Map responseHeaders = new TreeMap();
             responseHeaders.putAll(headers);
             responseHeaders.put("Transfer-Encoding", "chunked");
-            responseHeaders.put("Host", host);
+            responseHeaders.put("Host", remoteHost);
             writeHeaders(responseHeaders);
             writer.write("\r\n");
             writer.writeToChannel(socketChannel, selectionKey);
@@ -479,7 +501,7 @@ public final class CTPConnection {
      * Gets this protocol as a String for debugging.
      */
     public String toString() {
-        return host;
+        return localHost + ":" + getLocalPort() + "<->" + remoteHost + ":" + getRemotePort();
     }
 
     /**
@@ -544,10 +566,15 @@ public final class CTPConnection {
      * <li>Transfer-Encoding, if "chunked", then this expects chunked HTTP transfer.
      */
     private void handleHeaders(Map headers) {
+        // whether this is a chunked conversation
         if("chunked".equals(headers.get("Transfer-Encoding"))) {
             sourceChunked = true;
         } else {
             sourceChunked = false;
         }
+        
+        // the name the remote host uses to refer to this host
+        String headerLocalHost = (String)headers.get("Host");
+        if(headerLocalHost != null) localHost = headerLocalHost;
     }
 }

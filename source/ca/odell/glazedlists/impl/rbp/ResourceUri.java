@@ -19,7 +19,7 @@ import java.text.ParseException;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class ResourceUri {
+class ResourceUri implements Comparable {
     
     /** the resource host */
     private String host;
@@ -86,15 +86,41 @@ class ResourceUri {
     public boolean isLocal() {
         return local;
     }
+    /**
+     * Test if this URI is remote.
+     */
+    public boolean isRemote() {
+        return !local;
+    }
     
     /**
-     * Gets this URI as a fully qualified String.
+     * Get the URI host.
      */
-    public String toString() {
-        if(local) return path;
-        else return "glazedlists://" + host + ":" + port + path;
+    public String getHost() {
+        return host;
     }
-
+    /**
+     * Get the URI port.
+     */
+    public int getPort() {
+        return port;
+    }
+    
+    /**
+     * Gets this resource as a String, substituting the specified local host and
+     * local port as necessary.
+     */
+    public String toString(String localHost, int localPort) {
+        if(local) {
+            return "glazedlists://" + localHost + ":" + localPort + path;
+        } else {
+            return "glazedlists://" + host + ":" + port + path;
+        }
+    }
+    public String toString() {
+        return "Resource URI [local=" + local + ", host=" + host + ", port=" + port + ", path=" + path + "]";
+    }
+    
     /**
      * Computes a hash of this resource uri.
      */

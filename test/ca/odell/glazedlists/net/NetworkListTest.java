@@ -59,8 +59,8 @@ public class NetworkListTest extends TestCase {
     public void testSimpleSubscription() {
         try {
             // prepare the source list
-            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            String path = "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
             assertTrue(sourceListener.isConnected());
             sourceList.add(new Integer(8));
@@ -69,7 +69,7 @@ public class NetworkListTest extends TestCase {
             sourceList.add(new Integer(5));
             
             // prepare the target list
-            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener targetListener = new SimpleNetworkListStatusListener(targetList);
             
             // verify they're equal after a subscribe
@@ -102,13 +102,13 @@ public class NetworkListTest extends TestCase {
     public void testClientDisconnect() {
         try {
             // prepare the source list
-            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            String path = "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
             sourceList.add(new Integer(8));
             sourceList.add(new Integer(6));
             
             // prepare the target list
-            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener targetListener = new SimpleNetworkListStatusListener(targetList);
             
             // verify they're equal after a subscribe
@@ -156,14 +156,14 @@ public class NetworkListTest extends TestCase {
     public void testServerDisconnect() {
         try {
             // prepare the source list
-            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            String path = "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
             sourceList.add(new Integer(8));
             sourceList.add(new Integer(6));
             
             // prepare the target list
-            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener targetListener = new SimpleNetworkListStatusListener(targetList);
             
             // verify they're equal after a subscribe
@@ -219,8 +219,8 @@ public class NetworkListTest extends TestCase {
     public void testManyListeners() {
         try {
             // prepare the source list
-            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            String path = "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
             sourceList.add(new Integer(8));
             sourceList.add(new Integer(6));
             int connectPort = serverPort;
@@ -238,7 +238,7 @@ public class NetworkListTest extends TestCase {
             List listeners = new ArrayList();
             for(Iterator p = peers.iterator(); p.hasNext(); ) {
                 ListPeer listenerPeer = (ListPeer)p.next();
-                NetworkList listener = listenerPeer.subscribe(resourceName, "localhost", connectPort, ByteCoderFactory.serializable());
+                NetworkList listener = listenerPeer.subscribe("localhost", connectPort, path, ByteCoderFactory.serializable());
                 listeners.add(listener);
             }
             
@@ -280,13 +280,13 @@ public class NetworkListTest extends TestCase {
     public void testServerUnpublish() {
         try {
             // prepare the source list
-            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            String path = "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
             sourceList.add(new Integer(8));
             sourceList.add(new Integer(6));
             
             // prepare the target list
-            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
             
             // verify they're equal after a subscribe
             waitFor(1000);
@@ -301,7 +301,7 @@ public class NetworkListTest extends TestCase {
             assertFalse(targetList.isConnected());
             
             // prepare the second source list
-            NetworkList sourceList2 = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            NetworkList sourceList2 = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
             sourceList2.add(new Integer(7));
             sourceList2.add(new Integer(5));
             

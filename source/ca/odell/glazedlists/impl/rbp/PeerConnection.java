@@ -112,24 +112,24 @@ class PeerConnection implements CTPHandler {
         // handle all blocks
         try {
             PeerBlock block = null;
-            while((block = PeerBlock.fromBytes(currentBlock)) != null) {
-                String resourceName = block.getResourceName();
+            while((block = PeerBlock.fromBytes(currentBlock, source.getLocalHost(), source.getLocalPort())) != null) {
+                ResourceUri resourceUri = block.getResourceUri();
                 
                 // get the resource for this connection
                 PeerResource resource = null;
                 if(block.isSubscribe()) {
-                    resource = peer.getPublishedResource(resourceName);
+                    resource = peer.getPublishedResource(resourceUri);
                 } else if(block.isUnsubscribe()) {
-                    resource = (PeerResource)outgoingPublications.get(resourceName);
+                    resource = (PeerResource)outgoingPublications.get(resourceUri);
                 } else if(block.isSubscribeConfirm() || block.isUpdate() || block.isUnpublish()) {
-                    resource = (PeerResource)incomingSubscriptions.get(resourceName);
+                    resource = (PeerResource)incomingSubscriptions.get(resourceUri);
                 } else {
                     throw new UnsupportedOperationException();
                 }
                 
                 // handle an unknown resource name
                 if(resource == null) {
-                    logger.warning("Unknown resource: \"" + resourceName + "\"");
+                    logger.warning("Unknown resource: \"" + resourceUri + "\"");
                     close();
                     return;
                 }
@@ -150,13 +150,6 @@ class PeerConnection implements CTPHandler {
     boolean isIdle() {
         return (incomingSubscriptions.isEmpty() && outgoingPublications.isEmpty());
     }
-    
-    /*
-     * Tests whether this connection is closed.
-     */
-    /*boolean isClosed() {
-        return (state == CLOSED);
-    }*/
 
     /**
      * Close this peer connection.
@@ -177,9 +170,9 @@ class PeerConnection implements CTPHandler {
      */
     public void writeBlock(PeerResource resource, PeerBlock block) {
         if(state == AWAITING_CONNECT) {
-            pendingConnect.append(block.getBytes());
+            pendingConnect.append(block.toBytes(null, -1));
         } else if(state == READY) {
-            connection.sendChunk(block.getBytes());
+            connection.sendChunk(block.toBytes(connection.getLocalHost(), connection.getLocalPort()));
         } else if(state == CLOSED) {
             logger.warning("Write block to closed connection: " + this);
         } else {
@@ -206,15 +199,15 @@ class PeerConnection implements CTPHandler {
         System.out.print(": ");
         System.out.print("Incoming {");
         for(Iterator s = incomingSubscriptions.keySet().iterator(); s.hasNext(); ) {
-            String resourceName = (String)s.next();
-            System.out.print(resourceName);
+            ResourceUri resourceUri = (ResourceUri)s.next();
+            System.out.print(resourceUri);
             if(s.hasNext()) System.out.print(", ");
         }
         System.out.print("}, ");
         System.out.print("Outgoing {");
         for(Iterator s = outgoingPublications.keySet().iterator(); s.hasNext(); ) {
-            String resourceName = (String)s.next();
-            System.out.print(resourceName);
+            ResourceUri resourceUri = (ResourceUri)s.next();
+            System.out.print(resourceUri);
             if(s.hasNext()) System.out.print(", ");
         }
         System.out.println("}");

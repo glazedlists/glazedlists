@@ -115,24 +115,24 @@ public class Peer implements CTPHandlerFactory {
     /**
      * Subscribe to the specified resource.
      */
-    public ResourceStatus subscribe(Resource resource, String resourceName, String host, int port) {
-        PeerResource peerResource = new PeerResource(this, resource, resourceName, host, port);
+    public ResourceStatus subscribe(Resource resource, String host, int port, String path) {
+        PeerResource peerResource = new PeerResource(this, resource, ResourceUri.remote(host, port, path));
         return peerResource.status();
     }
     
     /**
      * Publish the specified resource.
      */
-    public ResourceStatus publish(Resource resource, String resourceName) {
-        PeerResource peerResource = new PeerResource(this, resource, resourceName);
+    public ResourceStatus publish(Resource resource, String path) {
+        PeerResource peerResource = new PeerResource(this, resource, ResourceUri.local(path));
         return peerResource.status();
     }
     
      /**
       * Gets the specified published resource.
       */
-     PeerResource getPublishedResource(String name) {
-         return (PeerResource)published.get(name);
+     PeerResource getPublishedResource(ResourceUri resourceUri) {
+         return (PeerResource)published.get(resourceUri);
      }
      
      /**

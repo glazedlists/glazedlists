@@ -47,13 +47,11 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
     /**
      * Creates a new PublishFrame client.
      */
-    public PublishFrame(ListPeer peer, String listUri, String host, int port) throws IOException {
+    public PublishFrame(ListPeer peer, String host, int port, String path) throws IOException {
         this.peer = peer;
-        this.resourceName = "glazedlists://" + host + ":" + port + listUri;
         
         // publish
-        //data = peer.subscribe(resourceName, host, port, ByteCoderFactory.serializable());
-        data = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+        data = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
         
         // build user interface
         constructStandalone();

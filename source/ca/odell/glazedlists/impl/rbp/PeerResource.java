@@ -29,8 +29,9 @@ class PeerResource {
     
     /** the resource being managed */
     private Resource resource = null;
-    /** the name that this resource is being published as */
-    private String resourceName;
+    
+    /** the address that this resource is being published as */
+    private ResourceUri resourceUri;
     
     /** the publisher of this resource */
     private PeerConnection publisher = null;
@@ -42,10 +43,6 @@ class PeerResource {
     /** the ID of the current update */
     private int updateId = 0;
     
-    /** the host and port of the publisher */
-    private String publisherHost = null;
-    private int publisherPort = -1;
-    
     /** listens to changes in the resource */
     private PrivateResourceListener resourceListener = new PrivateResourceListener();
     
@@ -53,30 +50,17 @@ class PeerResource {
     private PrivateResourceStatus resourceStatus = new PrivateResourceStatus();
     
     /**
-     * Create a new PeerResource for an outgoing resource.
+     * Create a new PeerResource for an incoming or outgoing resource.
      */
-    public PeerResource(Peer peer, Resource resource, String resourceName) {
+    public PeerResource(Peer peer, Resource resource, ResourceUri resourceUri) {
         this.peer = peer;
-        this.publisher = null;
         this.resource = resource;
-        this.resourceName = resourceName;
+        this.resourceUri = resourceUri;
         
         // create a random session ID as a check
-        this.sessionId = new Random(System.currentTimeMillis()).nextInt();
-        
-        // subscribe to the resource
-        resourceStatus.connect();
-    }
-    
-    /**
-     * Create a new PeerResource for an incoming resource.
-     */
-    public PeerResource(Peer peer, Resource resource, String resourceName, String publisherHost, int publisherPort) {
-        this.peer = peer;
-        this.resource = resource;
-        this.resourceName = resourceName;
-        this.publisherHost = publisherHost;
-        this.publisherPort = publisherPort;
+        if(resourceUri.isLocal()) {
+            this.sessionId = new Random(System.currentTimeMillis()).nextInt();
+        }
         
         // subscribe to the resource
         resourceStatus.connect();
@@ -84,10 +68,10 @@ class PeerResource {
     
     
     /**
-     * Gets the name of this resource.
+     * Gets the address of this resource.
      */
-    public String getResourceName() {
-        return resourceName;
+    public ResourceUri getResourceUri() {
+        return resourceUri;
     }
     
     /**
@@ -97,10 +81,10 @@ class PeerResource {
         if(publisher == connection) {
             publisher = null;
             resourceStatus.setConnected(false, reason);
-            connection.incomingSubscriptions.remove(resourceName);
+            connection.incomingSubscriptions.remove(resourceUri);
         } else {
             subscribers.remove(connection);
-            connection.outgoingPublications.remove(resourceName);
+            connection.outgoingPublications.remove(resourceUri);
         }
     }
     
@@ -124,7 +108,7 @@ class PeerResource {
                 if(subscribers.isEmpty()) return;
                 
                 // forward the event to listeners
-                PeerBlock block = PeerBlock.update(resourceName, sessionId, updateId, delta);
+                PeerBlock block = PeerBlock.update(resourceUri, sessionId, updateId, delta);
                 
                 // send the block to interested subscribers
                 for(int s = 0; s < subscribers.size(); s++) {
@@ -164,19 +148,19 @@ class PeerResource {
                 resource.addResourceListener(resourceListener);
                 
                 // if this is remote, subscribe to this resource
-                if(publisherHost != null) {
-                    publisher = peer.getConnection(publisherHost, publisherPort);
+                if(resourceUri.isRemote()) {
+                    publisher = peer.getConnection(resourceUri.getHost(), resourceUri.getPort());
                 
-                    peer.subscribed.put(resourceName, PeerResource.this);
-                    publisher.incomingSubscriptions.put(resourceName, PeerResource.this);
-                    PeerBlock block = PeerBlock.subscribe(resourceName);
+                    peer.subscribed.put(resourceUri, PeerResource.this);
+                    publisher.incomingSubscriptions.put(resourceUri, PeerResource.this);
+                    PeerBlock block = PeerBlock.subscribe(resourceUri);
                     publisher.writeBlock(PeerResource.this, block);
         
                 // if this is local, we're immediately connected
                 } else {
                     resourceStatus.setConnected(true, null);
-                    if(peer.published.get(resourceName) != null) throw new IllegalStateException();
-                    peer.published.put(resourceName, PeerResource.this);
+                    if(peer.published.get(resourceUri) != null) throw new IllegalStateException();
+                    peer.published.put(resourceUri, PeerResource.this);
                 }
             }
         }
@@ -194,27 +178,27 @@ class PeerResource {
                 resource.removeResourceListener(resourceListener);
                 
                 // if this is remote
-                if(publisherHost != null) {
-                    peer.subscribed.remove(resourceName);
+                if(resourceUri.isRemote()) {
+                    peer.subscribed.remove(resourceUri);
                     
                     // clean up the publisher
                     if(publisher != null) {
-                        publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
-                        publisher.incomingSubscriptions.remove(resourceName);
+                        publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceUri));
+                        publisher.incomingSubscriptions.remove(resourceUri);
                         if(publisher.isIdle()) publisher.close();
                         publisher = null;
                     }
     
                 // if this is local
                 } else {
-                    if(peer.published.get(resourceName) == null) throw new IllegalStateException();
-                    peer.published.remove(resourceName);
+                    if(peer.published.get(resourceUri) == null) throw new IllegalStateException();
+                    peer.published.remove(resourceUri);
                     
                     // unpublish the subscribers
                     for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
                         PeerConnection subscriber = (PeerConnection)s.next();
-                        subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceName));
-                        subscriber.outgoingPublications.remove(resourceName);
+                        subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceUri));
+                        subscriber.outgoingPublications.remove(resourceUri);
                         if(subscriber.isIdle()) subscriber.close();
                         s.remove();
                     }
@@ -279,23 +263,23 @@ class PeerResource {
         // we're accepting connections
         if(resourceStatus.isConnected()) {
             // first create the subscription
-            subscriber.outgoingPublications.put(resourceName, this);
+            subscriber.outgoingPublications.put(resourceUri, this);
             subscribers.add(subscriber);
             
             // now send the snapshot to this subscriber
-            PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceName, sessionId, updateId, resource.toSnapshot());
+            PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceUri, sessionId, updateId, resource.toSnapshot());
             subscriber.writeBlock(this, subscribeConfirm);
 
         // we're not accepting connections for now
         } else {
-            PeerBlock unpublish = PeerBlock.unpublish(resourceName);
+            PeerBlock unpublish = PeerBlock.unpublish(resourceUri);
             subscriber.writeBlock(this, unpublish);
             if(subscriber.isIdle()) subscriber.close();
         }
     }
     private void remoteSubscribeConfirm(PeerConnection publisher, PeerBlock block) {
         // update publisher
-        publisher.incomingSubscriptions.put(resourceName, this);
+        publisher.incomingSubscriptions.put(resourceUri, this);
         
         // update state
         updateId = block.getUpdateId();
@@ -308,7 +292,7 @@ class PeerResource {
     private void remoteUnsubscribe(PeerConnection subscriber, PeerBlock block) {
         // remove the subscription
         subscribers.remove(subscriber);
-        subscriber.outgoingPublications.remove(resourceName);
+        subscriber.outgoingPublications.remove(resourceUri);
     }
     private void remoteUnpublish(PeerConnection subscriber, PeerBlock block) {
         // immediately disconnected
@@ -316,7 +300,7 @@ class PeerResource {
         
         // clean up the publisher
         if(publisher != null) {
-            publisher.incomingSubscriptions.remove(resourceName);
+            publisher.incomingSubscriptions.remove(resourceUri);
             if(publisher.isIdle()) publisher.close();
             publisher = null;
         }
@@ -327,7 +311,7 @@ class PeerResource {
      * Gets this resource as a String for debugging.
      */
     public void print() {
-        System.out.print(resourceName);
+        System.out.print(resourceUri);
         System.out.print(" from: ");
         System.out.print(publisher);
         System.out.print(" to: ");
