@@ -29,6 +29,8 @@ class PeerResource {
     
     /** the resource being managed */
     private Resource resource = null;
+    /** the update ID of the resource */
+    private int resourceUpdateId = 0;
     
     /** the address that this resource is being published as */
     private ResourceUri resourceUri;
@@ -40,9 +42,7 @@ class PeerResource {
     
     /** the session ID is a simple validation */
     private int sessionId = -1;
-    /** the ID of the current update */
-    private int updateId = 0;
-    
+
     /** listens to changes in the resource */
     private PrivateResourceListener resourceListener = new PrivateResourceListener();
     
@@ -101,14 +101,13 @@ class PeerResource {
                 this.delta = delta;
             }
             public void run() {
-                // update the internal state
-                if(publisher == null) updateId++;
+                if(resourceUri.isLocal()) resourceUpdateId++;
                 
                 // if nobody's listening, we're done
                 if(subscribers.isEmpty()) return;
                 
                 // forward the event to listeners
-                PeerBlock block = PeerBlock.update(resourceUri, sessionId, updateId, delta);
+                PeerBlock block = PeerBlock.update(resourceUri, sessionId, resourceUpdateId, delta);
                 
                 // send the block to interested subscribers
                 for(int s = 0; s < subscribers.size(); s++) {
@@ -249,26 +248,24 @@ class PeerResource {
         else throw new IllegalStateException();
     }
     private void remoteUpdate(ResourceConnection publisher, PeerBlock block) {
-        // update the internal state
-        updateId++;
-
         // confirm the update is consistent
-        if(block.getUpdateId() != updateId) throw new IllegalStateException("Expected update id " + updateId + " but found " + block.getUpdateId());
+        if(block.getUpdateId() != (resourceUpdateId+1)) throw new IllegalStateException("Expected update id " + (resourceUpdateId+1) + " but found " + block.getUpdateId());
         if(block.getSessionId() != sessionId) throw new IllegalStateException();
 
         // handle the update
         resource.update(block.getPayload());
+        resourceUpdateId++;
     }
     private void remoteSubscribe(ResourceConnection subscriber, PeerBlock block) {
         // we're accepting connections
         if(resourceStatus.isConnected()) {
             // first create the subscription
-            subscriber.setUpdateId(updateId);
+            subscriber.setUpdateId(resourceUpdateId);
             subscriber.getConnection().outgoingPublications.put(resourceUri, subscriber);
             subscribers.add(subscriber);
             
             // now send the snapshot to this subscriber
-            PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceUri, sessionId, updateId, resource.toSnapshot());
+            PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceUri, sessionId, resourceUpdateId, resource.toSnapshot());
             subscriber.getConnection().writeBlock(this, subscribeConfirm);
 
         // we're not accepting connections for now
@@ -281,7 +278,7 @@ class PeerResource {
     private void remoteSubscribeConfirm(ResourceConnection publisher, PeerBlock block) {
         // update state
         resource.fromSnapshot(block.getPayload());
-        updateId = block.getUpdateId();
+        resourceUpdateId = block.getUpdateId();
         sessionId = block.getSessionId();
         
         // finally we're connected
