@@ -273,4 +273,88 @@ public class CachingListTest extends TestCase {
         assertEquals(cacheHitBaseline + 1, cache.getCacheHits());
         assertEquals(cacheMissBaseline, cache.getCacheMisses());
     }
+
+    /**
+     * Validate the proper response to requested an index beyond
+     * <code>source.size() - 1</code>.  This test is included as
+     * a result of CachingList overriding get() from TransformedList.
+     */
+    public void testBoundsErrorBehaviour() {
+         // request beyond bounds with an empty source
+         boolean exceptionThrown = false;
+         try {
+             cache.get(26);
+         } catch(IndexOutOfBoundsException e) {
+             exceptionThrown = true;
+         } catch(Exception e) {
+             exceptionThrown = true;
+             fail("Exception is of inconsistent type " + e.getClass());
+         } finally {
+             if(exceptionThrown == false) {
+                 fail("No exception was thrown when an invalid index was requested on an empty source.");
+             }
+        }
+
+        // Load the source with data
+        for(int i = 0;i < 25;i++) {
+            source.add(new Integer(i));
+        }
+
+        // request beyond bounds with non-empty source and an empty cache
+        exceptionThrown = false;
+        try {
+            cache.get(26);
+        } catch(IndexOutOfBoundsException e) {
+            exceptionThrown = true;
+        } catch(Exception e) {
+            exceptionThrown = true;
+            fail("Exception is of inconsistent type " + e.getClass());
+        } finally {
+            if(exceptionThrown == false) {
+                fail("No exception was thrown when an invalid index was requested on an empty cache.");
+            }
+        }
+
+        // Lookup some values to paritally fill the cache
+        for(int i = 9;i < 15;i++) {
+             Object result = cache.get(i);
+             assertEquals(new Integer(i), (Integer)result);
+        }
+
+        // request beyond bounds with non-empty source and a partially filled cache
+        exceptionThrown = false;
+        try {
+            cache.get(26);
+        } catch(IndexOutOfBoundsException e) {
+            exceptionThrown = true;
+        } catch(Exception e) {
+            exceptionThrown = true;
+            fail("Exception is of inconsistent type " + e.getClass());
+        } finally {
+            if(exceptionThrown == false) {
+                fail("No exception was thrown when an invalid index was requested on a partially full cache.");
+            }
+        }
+
+        // Lookup enough values to fill the cache
+        for(int i = 9;i < 15;i++) {
+            Object result = cache.get(i);
+            assertEquals(new Integer(i), (Integer)result);
+        }
+
+        // request beyond bounds with non-empty source and a full cache
+        exceptionThrown = false;
+        try {
+            cache.get(26);
+        } catch(IndexOutOfBoundsException e) {
+            exceptionThrown = true;
+        } catch(Exception e) {
+            exceptionThrown = true;
+            fail("Exception is of inconsistent type " + e.getClass());
+        } finally {
+            if(exceptionThrown == false) {
+                fail("No exception was thrown when an invalid index was requested on a full cache.");
+            }
+        }
+    }
 }
