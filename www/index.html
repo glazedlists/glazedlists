@@ -1,58 +1,8 @@
 <html>
 <head><title>Glazed Lists</title></head>
+<meta http-equiv="Refresh" content="0; URL=/nonav/home.html"/>
 <body>
 
-<h1>A better way to browse lists</h1>
-<p>Suppose you have a list of 1,000 objects to browse. With Glazed Lists, you can:
-<p><strong>Sort</strong> the list by whichever criterea you specify via either of the Comparable or Comparator interfaces. Sorting criteria can be changed as necessary by the user.
-<p><strong>Filter</strong> the list to display only those that are relevant. You could type "foo" to limit the list to only items containing the string "foo".
-<p><strong>Change</strong> the list to add, update and remove items as the source list changes in real time. If your list contained rows from a dynamic database table, changes to the data would be reflected in your list.
-<p><strong>Display</strong> the list in a JTable or JComboBox. By using Glazed Lists' custom renderers, you can make your Java Swing application look great.
-
-
-<p><h3>How it Works</h3>
-<p>Glazed Lists uses <strong>event-driven lists</strong>. When a change to a list is made, it notifies all <code>ListChangeListeners</code> of the change. This is the same mechanism Swing uses to send events about user activity.
-<p>Start with a <strong>source list</strong>. A <code>BasicEventList</code> can contain all of the unsorted, unfiltered objects. It can be used just like an ArrayList, with all the <code>add()</code>, <code>remove()</code> and <code>get()</code> methods from the <code>List</code> interface.
-<p>Then add a <strong>mutation list</strong>. It provides a mutated view of the source list. When the source list is changed, the mutation list receives a notification to update itself. For example, the <code>SortedList</code> provides a sorted view of a source list. When an object is added to the source list it is simultaneously added to the SortedList in sorted order. The <code>FilterList</code> is a mutation list which views a subset of the source list.
-<p>Finally it is possible to create <strong>widgets</strong> to display the contents of an event list. A <code>ListTable</code> is a <code>JTable</code> that displays the contents of a list. When its source list is modified the <code>ListTable</code> is notified and updates the display table. There is also a <code>JComboBox</code> widget. It is straightforward to create custom Glazed List widgets for Swing, SWT or even Servlets.
-<p><img src="sourcesortfilterdisplay.gif" width="600" height="463" alt="source / sort / filter / display">
-
-
-<p><h3>See it in Action</h3>
-<p><a href="/demo.html"><img src="/tutorial/part5/screenshot.gif" width="431" height="273" alt="Screenshot of Glazed Lists Demo"></a>
-<ul>
-  <li><a href="/demo.html">Demo Applet</a> - a simple demo of filtering, sorting and custom rendering.
-  <li><a href="/sightings/index.html">Sightings</a> - screenshots of applications using Glazed Lists.
-</ul>
-
-
-<p><h3>Download Latest</h3>
-<p>As Glazed Lists is still under heavy development, the latest version is usually the best to download.
-<ul>
-  <li><a href="https://glazedlists.dev.java.net/files/documents/1073/4910/glazedlists-0.9.jar">glazedlists.jar</a> - a compiled jar file ready for your application's classpath.
-  <li><a href="https://glazedlists.dev.java.net/files/documents/1073/4911/glazedlists-0.9-source.zip">glazedlists-source.zip</a> - a recent snapshot of the Glazed Lists source tree. You'll find <a href="http://ant.apache.org/">Ant</a> targets for compiling, jaring, <a href="http://www.junit.org/index.htm">JUnit</a> and generating Javadoc.
-  <li><a href="/source/browse/glazedlists/">CVS</a> - checking out the latest source is the best way to be up-to-date.
-</ul>
-
-
-<p><h3>Getting Started</h3>
-<ul>
-  <li><a href="/tutorial-0.9/index.html">Tutorial</a> - a quick guide to get you up-and-running with Glazed Lists in your Java application.
-  <li><a href="http://publicobject.com/glazedlists/glazedlists-0.9/api/">Javadoc API</a> - generated documentation is a useful reference.
-  <li><a href="/servlets/ProjectMemberList">Membership</a> - join as an Observer to submit issues to our <a href="/issues/buglist.cgi?component=glazedlists">bug database</a> or participate in our <a href="/servlets/ProjectForumView">forums</a>.
-  <li><a href="mailto:users@glazedlists.dev.java.net">Mailing List</a> - questions posted to the users list will be answered promptly.
-</ul>
-
-<p><h3>Releases</h3>
-<ul>
-  <li><a href="/glazedlists-0.9/index.html">Glazed Lists 0.9</a> - released June 3, 2004. 
-  Glazed Lists 0.9 is a major release of Glazed Lists. This release is smaller, easier to use
-  and more flexible than previous releases. It has a new concurrency model and a stable API.
-  <li><a href="/glazedlists-0.8.1/index.html">Glazed Lists 0.8.1</a> - released May 28, 2004. 
-  This is a maintenance release of Glazed Lists 0.8. Glazed Lists 0.8 is the
-  final release of Glazed Lists to use the <code>com.odellengineeringltd.glazedlists</code> package.
-  This release will be available until May 28, 2005. No further maintenance updates to this release
-  are planned.
-</ul>
+<a href="/nonav/home.html"><h1>Glazed Lists</h1></a>
 
 </body></html>
