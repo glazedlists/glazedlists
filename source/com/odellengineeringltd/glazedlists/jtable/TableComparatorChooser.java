@@ -41,43 +41,46 @@ import java.net.URL;
  * In this mode, the user clicks a first column to sort by, and then the user
  * clicks subsequent columns. The list is sorted by the first column and ties
  * are broken by the second column.
- * 
+ *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=4">Issue #4</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=31">Issue #31</a>
- * 
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class TableComparatorChooser extends MouseAdapter implements TableModelListener {
-    
+
     /** the table being sorted */
     private ListTable listTable;
     private JTable table;
-    
+
     /** the sorted list to choose the comparators for */
     private SortedList sortedList;
-    
+
+    /** the potentially foreign comparator associated with the sorted list */
+    private Comparator sortedListComparator = null;
+
     /** the columns and their click counts */
     private ColumnClickTracker[] columnClickTrackers;
     /** the first comparator in the comparator chain */
     private int primaryColumn = -1;
     /** an array that contains all columns with non-zero click counts */
     private ArrayList recentlyClickedColumns = new ArrayList();
-    
+
     /** the sorting style on a column is used for icon choosing */
-    private int COLUMN_UNSORTED = 0;
-    private int COLUMN_PRIMARY_SORTED = 1;
-    private int COLUMN_PRIMARY_SORTED_REVERSE = 2;
-    private int COLUMN_PRIMARY_SORTED_ALTERNATE = 3;
-    private int COLUMN_PRIMARY_SORTED_ALTERNATE_REVERSE = 4;
-    private int COLUMN_SECONDARY_SORTED = 5;
-    private int COLUMN_SECONDARY_SORTED_REVERSE = 6;
-    private int COLUMN_SECONDARY_SORTED_ALTERNATE = 7;
-    private int COLUMN_SECONDARY_SORTED_ALTERNATE_REVERSE = 8;
+    private static final int COLUMN_UNSORTED = 0;
+    private static final int COLUMN_PRIMARY_SORTED = 1;
+    private static final int COLUMN_PRIMARY_SORTED_REVERSE = 2;
+    private static final int COLUMN_PRIMARY_SORTED_ALTERNATE = 3;
+    private static final int COLUMN_PRIMARY_SORTED_ALTERNATE_REVERSE = 4;
+    private static final int COLUMN_SECONDARY_SORTED = 5;
+    private static final int COLUMN_SECONDARY_SORTED_REVERSE = 6;
+    private static final int COLUMN_SECONDARY_SORTED_ALTERNATE = 7;
+    private static final int COLUMN_SECONDARY_SORTED_ALTERNATE_REVERSE = 8;
 
     /** a map of look and feels to resource paths for icons */
-    private static String resourceRoot = "resources";
-    private static String defaultResourcePath = "aqua";
-    private static Map lookAndFeelResourcePathMap = new HashMap();
+    private static final String resourceRoot = "resources";
+    private static final String defaultResourcePath = "aqua";
+    private static final Map lookAndFeelResourcePathMap = new HashMap();
     static {
         lookAndFeelResourcePathMap.put("Mac OS X Aqua", "aqua");
         lookAndFeelResourcePathMap.put("Metal", "metal");
@@ -96,10 +99,10 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
     static {
         loadIcons();
     }
-    
+
     /** whether to support sorting on single or multiple columns */
     private boolean multipleColumnSort;
-    
+
     /**
      * Creates a new TableComparatorChooser that responds to clicks
      * on the specified table and uses them to sort the specified list.
@@ -116,10 +119,10 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         table = listTable.getTable();
         this.sortedList = sortedList;
         this.multipleColumnSort = multipleColumnSort;
-        
+
         // set up the column click listeners
         rebuildColumns();
-        
+
         // set the table header
         table.getTableHeader().setDefaultRenderer(new SortArrowHeaderRenderer());
 
@@ -128,7 +131,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         table.getTableHeader().addMouseListener(this);
         table.getModel().addTableModelListener(this);
     }
-    
+
     /**
      * When the column model is changed, this resets the column clicks and
      * comparator list for each column.
@@ -142,8 +145,8 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         primaryColumn = -1;
         recentlyClickedColumns.clear();
     }
-        
-    
+
+
     /**
      * Gets the list of comparators for the specified column. The user is
      * free to add comparators to this list or clear the list if the specified
@@ -152,7 +155,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
     public List getComparatorsForColumn(int column) {
         return columnClickTrackers[column].getComparators();
     }
-    
+
     /**
      * When the mouse is clicked, this selects the next comparator in
      * sequence for the specified table. This will re-sort the table
@@ -163,14 +166,14 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
      */
     public void mouseClicked(MouseEvent e) {
         TableColumnModel columnModel = table.getColumnModel();
-        int viewColumn = columnModel.getColumnIndexAtX(e.getX()); 
-        int column = table.convertColumnIndexToModel(viewColumn); 
+        int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+        int column = table.convertColumnIndexToModel(viewColumn);
         int clicks = e.getClickCount();
         if(clicks >= 1 && column != -1) {
             columnClicked(column, clicks);
         }
     }
-    
+
     /**
      * When the number of columns changes in the table, we need to
      * clear the comparators and columns.
@@ -180,8 +183,71 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
             rebuildColumns();
         }
+        if(sortedList.getComparator() != sortedListComparator) {
+            redetectComparator();
+        }
     }
-    
+
+    /**
+     * Examines the current <code>Comparator</code> of the SortedList and
+     * adds icons to the <code>TableHeaderRenderer</code>s in response.
+     *
+     * <p>To do this, clicks are injected into each of the
+     * corresponding <code>ColumnClickTracker</code>s.
+     */
+    private void redetectComparator() {
+        sortedListComparator = sortedList.getComparator();
+
+        // Clear the current click counts
+        for(int c = 0; c < columnClickTrackers.length; c++) {
+            columnClickTrackers[c].resetClickCount();
+        }
+        primaryColumn = -1;
+        recentlyClickedColumns.clear();
+
+        // Populate a list of Comparators
+        List comparatorsList = new ArrayList();
+        if(sortedListComparator == null) {
+            // Do Nothing
+        } else if(sortedListComparator instanceof ComparatorChain) {
+            ComparatorChain chain = (ComparatorChain)sortedListComparator;
+            comparatorsList.addAll(chain.getComparators());
+        } else {
+            comparatorsList.add(sortedListComparator);
+        }
+
+        // walk through the list of Comparators and assign click counts
+        walkThroughComparators:
+        for(Iterator i = comparatorsList.iterator(); i.hasNext(); ) {
+            // get the current comparator
+            Comparator comparator = (Comparator)i.next();
+            boolean reverse = false;
+            if(comparator instanceof ReverseComparator) {
+                reverse = true;
+                comparator = ((ReverseComparator)comparator).getSourceComparator();
+            }
+
+            // discover where to add clicks for this comparator
+            for(int c = 0; c < columnClickTrackers.length; c++) {
+                if(recentlyClickedColumns.contains(columnClickTrackers[c])) {
+                    continue;
+                }
+                int comparatorIndex = columnClickTrackers[c].getComparators().indexOf(comparator);
+                if(comparatorIndex != -1) {
+                    columnClickTrackers[c].setComparatorIndex(comparatorIndex);
+                    columnClickTrackers[c].setReverse(reverse);
+                    if(recentlyClickedColumns.isEmpty()) primaryColumn = c;
+                    recentlyClickedColumns.add(columnClickTrackers[c]);
+                    if(!multipleColumnSort) break walkThroughComparators;
+                }
+            }
+        }
+
+        // force the table header to redraw itself
+        table.getTableHeader().revalidate();
+        table.getTableHeader().repaint();
+    }
+
     /**
      * Handle a column being clicked by sorting that column.
      */
@@ -207,7 +273,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
             primaryColumn = -1;
             recentlyClickedColumns.clear();
         }
-        
+
         // add a click to the newly clicked column if it has any comparators
         if(!currentTracker.getComparators().isEmpty()) {
             currentTracker.addClick();
@@ -218,7 +284,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
                 recentlyClickedColumns.add(currentTracker);
             }
         }
-        
+
         // build a new comparator
         if(recentlyClickedColumns.size() > 0) {
             List comparators = new ArrayList();
@@ -228,8 +294,9 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
                 comparators.add(comparator);
             }
             ComparatorChain comparatorChain = new ComparatorChain(comparators);
-            
+
             // select the new comparator
+            sortedListComparator = comparatorChain;
             sortedList.setComparator(comparatorChain);
         }
 
@@ -237,7 +304,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         table.getTableHeader().revalidate();
         table.getTableHeader().repaint();
     }
-    
+
     /**
      * Gets the sorting style currently applied to the specified column.
      */
@@ -245,20 +312,20 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         int modelColumn = table.convertColumnIndexToModel(column);
         return columnClickTrackers[modelColumn].getSortingStyle();
     }
-    
+
     /**
      * A ColumnClickTracker monitors the clicks on a specified column
      * and provides access to the most appropriate comparator for that
      * column.
      */
-    class ColumnClickTracker {
+    private class ColumnClickTracker {
 
         /** the column for this comparator */
         private int column = 0;
         /** the number of repeated clicks on this column header */
         private int clickCount = 0;
         /** the sequence of comparators for this column */
-        private ArrayList comparators = new ArrayList();
+        private List comparators = new ArrayList();
 
         /**
          * Creates a new ColumnClickTracker for the specified column.
@@ -291,6 +358,19 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         }
 
         /**
+         * Sets the sort order to be reverse or not.
+         */
+        public void setReverse(boolean reverse) {
+            if(isReverse() != reverse) {
+                if(reverse) {
+                    clickCount++;
+                } else {
+                    clickCount--;
+                }
+            }
+        }
+
+        /**
          * Returns true if this column is sorted in reverse order.
          */
         public boolean isReverse() {
@@ -300,11 +380,21 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         /**
          * Gets the index of the comparator to use for this column.
          */
+        private void setComparatorIndex(int comparatorIndex) {
+            assert(comparatorIndex < comparators.size());
+            boolean wasReverse = isReverse();
+            clickCount = (comparatorIndex * 2) + 1;
+            if(!wasReverse) clickCount = clickCount + 1;
+        }
+
+        /**
+         * Gets the index of the comparator to use for this column.
+         */
         private int getComparatorIndex() {
             if(comparators.size() == 0 || clickCount == 0) return -1;
             return ((clickCount-1) / 2) % comparators.size();
         }
-        
+
         /**
          * Gets the list of comparators for this column.
          */
@@ -320,7 +410,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
             if(isReverse()) comparator = new ReverseComparator(comparator);
             return comparator;
         }
-        
+
         /**
          * Gets the sorting style for this column.
          */
@@ -355,49 +445,15 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         String lookAndFeelName = UIManager.getLookAndFeel().getName();
         String resourcePath = (String)lookAndFeelResourcePathMap.get(lookAndFeelName);
         if(resourcePath == null) resourcePath = defaultResourcePath;
-        
+
         // use the classloader to look inside this jar file
         ClassLoader jarLoader = TableComparatorChooser.class.getClassLoader();
-    
+
         // load each icon as a resource from the source .jar file
         for(int i = 0; i < icons.length; i++) {
             URL iconLocation = jarLoader.getResource(resourceRoot + "/" + resourcePath + "/" + iconFileNames[i]);
             if(iconLocation != null) icons[i] = new ImageIcon(iconLocation);
             else icons[i] = null;
-        }
-    }
-    
-    /**
-     * A comparator chain compares objects using a list of comparators. The
-     * first comparison where the objects differ is returned.
-     */
-    class ComparatorChain implements Comparator {
-
-        /** the comparators to execute in sequence */
-        private List comparators;
-        
-        /**
-         * Creates a comparator chain that views the specified comparators in
-         * sequence.
-         *
-         * @param comparators a list of classes implementing Comparator. It is
-         *      an error to modify the specified list after using it as an
-         *      argument to comparator chain.
-         */
-        public ComparatorChain(List comparators) {
-            this.comparators = comparators;
-        }
-        
-        /**
-         * Compares the two objects with each comparator in sequence.
-         */
-        public int compare(Object alpha, Object beta) {
-            for(Iterator i = comparators.iterator(); i.hasNext(); ) {
-                Comparator currentComparator = (Comparator)i.next();
-                int compareResult = currentComparator.compare(alpha, beta);
-                if(compareResult != 0) return compareResult;
-            }
-            return 0;
         }
     }
 
@@ -411,43 +467,42 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
      * renderer does not extend DefaultTableCellRenderer.
      */
     class SortArrowHeaderRenderer implements TableCellRenderer {
-        
+
         /** the renderer to delegate */
-        private TableCellRenderer delegate;
-        
+        private TableCellRenderer delegateRenderer;
+
         /** whether we can inject icons into this renderer */
         private boolean iconInjection = false;
-        
+
         /**
          * Creates a new SortArrowHeaderRenderer that delegates most drawing
          * to the tables current header renderer.
          */
         public SortArrowHeaderRenderer() {
             // find the delegate
-            this.delegate = table.getTableHeader().getDefaultRenderer();
-            
+            this.delegateRenderer = table.getTableHeader().getDefaultRenderer();
+
             // determine if we can inject icons into the delegate
-            iconInjection = (delegate instanceof DefaultTableCellRenderer);
+            iconInjection = (delegateRenderer instanceof DefaultTableCellRenderer);
         }
-        
+
         /**
          * Renders the header in the default way but with the addition of an icon.
          */
         public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
         boolean isSelected, boolean hasFocus, int row, int column) {
             if(iconInjection) {
-                DefaultTableCellRenderer jLabelRenderer = (DefaultTableCellRenderer)delegate;
+                DefaultTableCellRenderer jLabelRenderer = (DefaultTableCellRenderer)delegateRenderer;
                 Icon iconToUse = icons[getSortingStyle(column)];
                 jLabelRenderer.setIcon(iconToUse);
                 jLabelRenderer.setHorizontalTextPosition(jLabelRenderer.LEADING);
-                return delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             } else {
-                return delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             }
         }
     }
 }
-
 
 /**
  * A comparator that sorts a table by the column that was clicked.
@@ -459,10 +514,10 @@ class TableFieldComparator implements Comparator {
 
     /** the field of interest */
     private int column;
-    
+
     /** comparison is delegated to a ComparableComparator */
     private static ComparableComparator comparableComparator = new ComparableComparator();
-    
+
     /**
      * Creates a new TableFieldComparator that sorts objects by the specified
      * column using the specified table format.
@@ -471,7 +526,7 @@ class TableFieldComparator implements Comparator {
         this.column = column;
         this.tableFormat = tableFormat;
     }
-    
+
     /**
      * Compares the two objects, returning a result based on how they compare.
      */
@@ -486,5 +541,19 @@ class TableFieldComparator implements Comparator {
             illegalStateException.initCause(e);
             throw illegalStateException;
         }
+    }
+
+    /**
+     * Test if this TableFieldComparator is equal to the other specified
+     * TableFieldComparator.
+     */
+    public boolean equals(Object other) {
+        if(!(other instanceof TableFieldComparator)) return false;
+
+        TableFieldComparator otherTableFieldComparator = (TableFieldComparator)other;
+        if(!otherTableFieldComparator.tableFormat.equals(tableFormat)) return false;
+        if(otherTableFieldComparator.column != column) return false;
+
+        return true;
     }
 }

@@ -16,22 +16,29 @@ import java.util.Comparator;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class ReverseComparator implements Comparator {
-    
+
     /** the normal comparator to flip */
-    private Comparator normal;
-    
+    private Comparator source;
+
     /**
      * Create a new reverse comparator that reverses the sequence
      * of the specified comparator.
      */
-    public ReverseComparator(Comparator normal) {
-        this.normal = normal;
+    public ReverseComparator(Comparator source) {
+        this.source = source;
     }
-    
+
     /**
      * Compares the specified objects and flips the result.
      */
     public int compare(Object alpha, Object beta) {
-        return normal.compare(beta, alpha);
+        return source.compare(beta, alpha);
+    }
+
+    /**
+     * Retrieves the source <code>Comparator</code> for this ReverseComparator
+     */
+    public Comparator getSourceComparator() {
+        return source;
     }
 }
