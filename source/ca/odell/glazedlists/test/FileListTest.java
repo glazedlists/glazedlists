@@ -4,10 +4,10 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.test;
 
+import ca.odell.glazedlists.FileList;
 import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
