@@ -182,6 +182,8 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html#sorting">The Java Tutorial</a>
      */
     public void mouseClicked(MouseEvent e) {
+        if(e.getButton() == MouseEvent.BUTTON1) return;
+        
         TableColumnModel columnModel = table.getColumnModel();
         int viewColumn = columnModel.getColumnIndexAtX(e.getX());
         int column = table.convertColumnIndexToModel(viewColumn);
