@@ -36,8 +36,13 @@ public final class SubList extends WritableMutationList implements ListChangeLis
      * @param startIndex the start index of the source list, inclusive
      * @param endIndex the end index of the source list, exclusive
      * @param source the source list to view
+     * @param automaticallyRemove true if this SubList should deregister itself
+     *      from the ListChangeListener list of the source list once it is
+     *      otherwise out of scope.
+     *
+     * @see com.odellengineeringltd.glazedlists.event.ListChangeListenerWeakReferenceProxy
      */
-    public SubList(EventList source, int startIndex, int endIndex) {
+    public SubList(EventList source, int startIndex, int endIndex, boolean automaticallyRemove) {
         super(source);
         synchronized(getRootList()) {
             // do consistency checking
@@ -47,6 +52,13 @@ public final class SubList extends WritableMutationList implements ListChangeLis
             
             this.startIndex = startIndex;
             this.endIndex = endIndex;
+        }
+        
+        // listen directly or via a proxy that will do garbage collection
+        if(automaticallyRemove) {
+            source.addListChangeListener(new ListChangeListenerWeakReferenceProxy(source, this));
+        } else {
+            source.addListChangeListener(this);
         }
     }
     

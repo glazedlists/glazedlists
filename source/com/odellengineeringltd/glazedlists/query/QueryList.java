@@ -13,6 +13,8 @@ import com.odellengineeringltd.glazedlists.event.*;
 import java.util.*;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
+// for iterating over a mutation list the lazy way
+import com.odellengineeringltd.glazedlists.util.EventListIterator;
 
 
 /**
@@ -175,6 +177,13 @@ public class QueryList extends AbstractList implements EventList {
     }
     
     /**
+     * Gets the current query from the query list.
+     */
+    public Query getQuery() {
+        return query;
+    }
+
+    /**
      * Registers the specified listener to receive notification of changes
      * to this list.
      */
@@ -198,9 +207,41 @@ public class QueryList extends AbstractList implements EventList {
     }
 
     /**
-     * Gets the current query from the query list.
+     * Returns an iterator over the elements in this list in proper sequence.
      */
-    public Query getQuery() {
-        return query;
+    public Iterator iterator() {
+        return new EventListIterator(this);
+    }
+
+    /**
+     * Returns a list iterator of the elements in this list (in proper
+     * sequence).
+     */
+    public ListIterator listIterator() {
+        return new EventListIterator(this);
+    }
+
+    /**
+     * Returns a list iterator of the elements in this list (in proper
+     * sequence), starting at the specified position in this list.
+     */
+    public ListIterator listIterator(int index) {
+        return new EventListIterator(this, index);
+    }
+
+    /**
+     * Gets this list in String form for debug or display.
+     */
+    public String toString() {
+        synchronized(getRootList()) {
+            StringBuffer result = new StringBuffer();
+            result.append("[");
+            for(int i = 0; i < size(); i++) {
+                if(i != 0) result.append(", ");
+                result.append(get(i));
+            }
+            result.append("]");
+            return result.toString();
+        }
     }
 }

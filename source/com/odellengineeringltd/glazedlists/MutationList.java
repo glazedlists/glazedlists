@@ -124,4 +124,20 @@ public abstract class MutationList extends AbstractList implements EventList, Li
     public List subList(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException("The method is not implemented.");
     }
+
+    /**
+     * Gets this list in String form for debug or display.
+     */
+    public String toString() {
+        synchronized(getRootList()) {
+            StringBuffer result = new StringBuffer();
+            result.append("[");
+            for(int i = 0; i < size(); i++) {
+                if(i != 0) result.append(", ");
+                result.append(get(i));
+            }
+            result.append("]");
+            return result.toString();
+        }
+    }
 }

@@ -50,16 +50,12 @@ public final class ListChangeListenerWeakReferenceProxy implements ListChangeLis
      * Creates a new ListChangeListenerWeakReferenceProxy that listens for
      * events from the specified list and forwards them to the specified
      * listener.
-     *
-     * <p>This adds itself as a listener to the source list.
      */
     public ListChangeListenerWeakReferenceProxy(EventList source, ListChangeListener proxyTarget) {
         if(source == null || proxyTarget == null) throw new IllegalArgumentException();
         
         this.source = source;
         proxyTargetReference = new WeakReference(proxyTarget);
-        
-        source.addListChangeListener(this);
     }
 
     /**

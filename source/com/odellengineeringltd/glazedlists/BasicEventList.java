@@ -354,4 +354,20 @@ public class BasicEventList implements EventList, Serializable {
     public EventList getRootList() {
         return this;
     }
+    
+    /**
+     * Gets this list in String form for debug or display.
+     */
+    public String toString() {
+        synchronized(getRootList()) {
+            StringBuffer result = new StringBuffer();
+            result.append("[");
+            for(int i = 0; i < size(); i++) {
+                if(i != 0) result.append(", ");
+                result.append(get(i));
+            }
+            result.append("]");
+            return result.toString();
+        }
+    }
 }

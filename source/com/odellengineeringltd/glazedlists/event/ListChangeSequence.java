@@ -169,7 +169,7 @@ public final class ListChangeSequence {
     /**
      * Gets the total number of blocks in the specified atomic change.
      */
-    int getBlockCount(int atomicCount) {
+    public int getBlockCount(int atomicCount) {
         List atomicChange = (List)atomicChanges.get(atomicCount);
         return atomicChange.size();
     }
@@ -193,7 +193,7 @@ public final class ListChangeSequence {
      * that not blocks may be cleaned up after they are viewed by all
      * monitoring sequences. Such blocks may not be available.
      */
-    ListChangeBlock getBlock(int atomicCount, int block) {
+    public ListChangeBlock getBlock(int atomicCount, int block) {
         List atomicChange = (List)atomicChanges.get(atomicCount);
         return (ListChangeBlock)atomicChange.get(block);
     }

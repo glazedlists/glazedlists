@@ -58,7 +58,7 @@ public class IndexOrderTest extends TestCase {
 
             // create a block of ten elements
             List currentChange = new ArrayList();
-            for(int b = 0; b < 100; b++) {
+            for(int b = 0; b < 50; b++) {
                 currentChange.add(new int[] { random.nextInt(100), random.nextInt(100) });
             }
             

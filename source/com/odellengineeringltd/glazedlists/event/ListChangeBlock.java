@@ -86,20 +86,20 @@ public final class ListChangeBlock {
     /**
      * Get the first index in the range of this change.
      */
-    int getStartIndex() {
+    public int getStartIndex() {
         return startIndex;
     }
     /**
      * Get the last index in the range of this change.
      */
-    int getEndIndex() {
+    public int getEndIndex() {
         return endIndex;
     }
 
     /**
      * Get the type of this change.
      */
-    int getType() {
+    public int getType() {
         return type;
     }
     
