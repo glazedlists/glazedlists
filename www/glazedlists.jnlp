@@ -3,7 +3,7 @@
   <information>
     <title>Glazed Lists Demo</title>
     <vendor>Jesse Wilson</vendor>
-    <homepage href="servlets/ProjectHome"/>
+    <homepage href="https://glazedlists.dev.java.net/"/>
     <description>Event-driven lists for dynamically filtered and sorted tables.</description>
     <!--<icon href="jnlpicon.gif"/>-->
     <offline-allowed/>
@@ -13,7 +13,7 @@
   </security>
   <resources>
     <j2se version="1.4+"/>
-    <jar href="files/documents/1073/1671/glazedlists.jar"/>
+    <jar href="https://glazedlists.dev.java.net/files/documents/1073/1671/glazedlists.jar"/>
   </resources>
   <application-desc main-class="com.odellengineeringltd.glazedlists.demo.ProgrammingLanguageBrowser"></application>
 </jnlp>
