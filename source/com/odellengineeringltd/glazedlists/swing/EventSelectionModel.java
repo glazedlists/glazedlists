@@ -57,7 +57,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventSelectionModel {
+public final class EventSelectionModel {
     
     /** the new selection mode behaves similar to MULTIPLE_INTERVAL_SELECTION */
     public static final int MULTIPLE_INTERVAL_SELECTION_DEFENSIVE = 103;

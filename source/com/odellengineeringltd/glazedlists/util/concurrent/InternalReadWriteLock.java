@@ -25,7 +25,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class InternalReadWriteLock implements ReadWriteLock {
+public final class InternalReadWriteLock implements ReadWriteLock {
     
     /** the locks to delegate to */
     private Lock readLock;

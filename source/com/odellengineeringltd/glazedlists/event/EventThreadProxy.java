@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventThreadProxy implements ListEventListener, Runnable {
+public final class EventThreadProxy implements ListEventListener, Runnable {
 
     /** the list change listener who actually wants notification */
     private ListEventListener proxyTarget;

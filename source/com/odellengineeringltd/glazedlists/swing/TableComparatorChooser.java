@@ -47,7 +47,7 @@ import java.net.URL;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TableComparatorChooser extends MouseAdapter implements TableModelListener {
+public final class TableComparatorChooser extends MouseAdapter implements TableModelListener {
 
     /** the table being sorted */
     private JTable table;

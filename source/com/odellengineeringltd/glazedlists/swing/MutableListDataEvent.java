@@ -27,7 +27,7 @@ import javax.swing.ComboBoxModel;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class MutableListDataEvent extends ListDataEvent {
+final class MutableListDataEvent extends ListDataEvent {
 
     /** what the change is, currently */
     private int index0;

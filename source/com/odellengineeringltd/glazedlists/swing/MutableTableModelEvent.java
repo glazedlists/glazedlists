@@ -21,7 +21,7 @@ import javax.swing.table.TableModel;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class MutableTableModelEvent extends TableModelEvent {
+final class MutableTableModelEvent extends TableModelEvent {
     
     /**
      * Constructors simply call the same on the superclass.
