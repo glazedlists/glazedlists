@@ -18,6 +18,18 @@ import javax.swing.*;
 import javax.swing.text.html.*;
 import javax.swing.table.*;
 
+// for rendering this component inside of a table
+/*import javax.swing.table.TableCellRenderer;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+// for displaying the message as styled text
+import javax.swing.*;
+// the different message fields are distinct via styles
+*/
+import java.awt.SystemColor;
+import java.awt.Color;
+import javax.swing.text.*;
 
 /**
  * A {@link TableCellRenderer} for displaying descriptions in a cell.
@@ -29,188 +41,148 @@ import javax.swing.table.*;
  * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class DescriptionRenderer extends HTMLTableCellRenderer {
+public class DescriptionRenderer extends StyledRenderer {
 
+    private Style whoStyle = null;
+    private Style plain = null;
+    
     public DescriptionRenderer() {
         super(true);
+        
+        plain = styledDocument.addStyle("plain", null);
+        whoStyle = styledDocument.addStyle("boldItalicRed", null);
+        StyleConstants.setBold(whoStyle, true);
+        StyleConstants.setFontSize(whoStyle, 14);
     }
     
-    public void writeObject(StringBuffer buffer, JTable table, Object value,
-    boolean isSelected, boolean hasFocus, int row, int column) {
+    public void writeObject(DefaultStyledDocument doc, JTable table, Object value, 
+        boolean isSelected, boolean hasFocus, int row, int column) {
+
         if(value == null) return;
         Description description = (Description)value;
+        
         // write who
-        buffer.append("<strong>");
-        buffer.append(description.getWho());
-        buffer.append(":</strong><br>");
+        append(doc, description.getWho(), whoStyle);
+        append(doc, "\n", whoStyle);
 
         // write the body
-        String[] lines = description.getText().split("\n");
-        for(int i = 0; i < lines.length; i++) {
-            buffer.append(lines[i]);
-            buffer.append("<br>");
-        }
+        append(doc, description.getText(), plain);
     }
 }
+
 /**
- * Base class for HTML renderers
+ * Base class for styled renderers.
  *
- * <p>It is simple to modify the StyleSheet in the constructor of your derived class:
- * <br><code>styleSheet.addRule("H1 {font-family: sans-serif; font-size: 14; color: rgb(0,0,153) }");</code>
- * <br><code>styleSheet.addRule(".excerpt {font-family: sans-serif; font-size: 12; color: black }");</code>
- * <br><code>styleSheet.addRule(".url {font-family: sans-serif; font-size: 9; color: rgb(0,153,0) }");</code>
- *
- * @see <a href="http://www.htmlhelp.com/reference/html40/">HTML Reference</a>
- * @see <a href="http://www.htmlhelp.com/reference/css/">CSS Reference</a>
- *
- * @author <a href="mailto:jeffa@wolfram.com">Jeff Adams</a>
- * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
- * @author <a href="mailto:dmarquis@neopeak.com">David Marquis</a>
+ * <p>To create styles, use the protected <code>styledDocument</code> variable:
+ * <pre><code>
+ *  boldItalicRed = styledDocument.addStyle("boldItalicRed", null);
+ *  StyleConstants.setFontFamily(boldItalicRed, "sansserif");
+ *  StyleConstants.setItalic(boldItalicRed, true);
+ *  StyleConstants.setBold(boldItalicRed, true);
+ *  StyleConstants.setFontSize(boldItalicRed, 14);
+ *  StyleConstants.setForeground(boldItalicRed, new Color(255, 00, 00));
+ * </code></pre>
+ * 
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class HTMLRenderer {
-    /** the stylesheet of this document */
-    protected StyleSheet styleSheet;
+abstract class StyledRenderer implements TableCellRenderer {
 
-    /** the model */
-    protected HTMLDocument html;
-
-    /** the view */
+    /** The view */
     protected JTextPane rendered;
-
-    /**
-     * Creates an HTML cell renderer.
-     */
-    public HTMLRenderer() {
-
-
-        // prepare the document to display non-editable html
-        rendered = new JTextPane();
-        rendered.setContentType("text/html");
-        rendered.setEditable(false);
-
-        html = (HTMLDocument)rendered.getDocument();
-        styleSheet = html.getStyleSheet();
-    }
-
-    /**
-     * Colours the result component to be the selection colour if isSelected,
-     * or the non-selected color otherwise.
-     */
-    protected void colorSelected(boolean isSelected) {
-        if(isSelected) {
-            rendered.setBackground(UIManager.getColor("Table.selectionBackground"));
-        } else {
-            rendered.setBackground(UIManager.getColor("Table.background"));
-        }
-    }
-}
-
-
-/**
- * Renders a table cell using HTML formatting.
- *
- * <p>It is simple to modify the StyleSheet in the constructor of your derived class:
- * <br><code>styleSheet.addRule("H1 {font-family: sans-serif; font-size: 14; color: rgb(0,0,153) }");</code>
- * <br><code>styleSheet.addRule(".excerpt {font-family: sans-serif; font-size: 12; color: black }");</code>
- * <br><code>styleSheet.addRule(".url {font-family: sans-serif; font-size: 9; color: rgb(0,153,0) }");</code>
- *
- * @see <a href="http://www.htmlhelp.com/reference/html40/">HTML Reference</a>
- * @see <a href="http://www.htmlhelp.com/reference/css/">CSS Reference</a>
- *
- * @author <a href="mailto:jeffa@wolfram.com">Jeff Adams</a>
- * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
- */
-abstract class HTMLTableCellRenderer extends HTMLRenderer implements TableCellRenderer {
-
-    /** String composition */
-    private StringBuffer stringBuffer = new StringBuffer();
-
+    protected DefaultStyledDocument styledDocument;
+    
     /** change the row height upon completion of a render */
     private boolean controlHeight;
 
     /**
-     * Creates an HTML cell renderer.
+     * Creates a message renderer.
      *
      * @param controlHeight True implies that this renderer will update
      *      the table row height whenever a row is updated. There should
      *      only be one such renderer per row.
      */
-    public HTMLTableCellRenderer(boolean controlHeight) {
+    public StyledRenderer(boolean controlHeight) {
         this.controlHeight = controlHeight;
+        styledDocument = new DefaultStyledDocument();
+        rendered = new JTextPane(styledDocument);
+        rendered.setEnabled(false);
     }
-
 
     /**
      * Gets this Component for display in a table. This sets the rendered width,
      * then calls writeObject, and finally sets the table row height.
      */
-    public final Component getTableCellRendererComponent(JTable table, Object value,
-    boolean isSelected, boolean hasFocus, int row, int column) {
-
+    public final Component getTableCellRendererComponent(JTable table, Object value, 
+        boolean isSelected, boolean hasFocus, int row, int column) {
         // match the document width to the column width
-        prepareRendered(table, value, isSelected, hasFocus, row, column);
-
+        beforeWrite(styledDocument, table, value, isSelected, hasFocus, row, column);
         // append the actual contents of this cell
-        stringBuffer.delete(0, stringBuffer.length());
-        writeObject(stringBuffer, table, value, isSelected, hasFocus, row, column);
-        rendered.setText(stringBuffer.toString());
-
+        writeObject(styledDocument, table, value, isSelected, hasFocus, row, column);
         // match the row height to the document height
-        getRendered(table, value, isSelected, hasFocus, row, column);
-
-        // give back the rendered HTML
+        afterWrite(styledDocument, table, value, isSelected, hasFocus, row, column);
+        // give back the rendered textpane
         return rendered;
     }
-
+    
     /**
-     * Implementors of this class should examine the source object and use it to
-     * write HTML for that object to the String buffer. For example:
-     * <br><code>Customer cust = (Customer)value;</code>
-     * <br><code>buffer.append("&lt;h1&gt;");</code>
-     * <br><code>buffer.append(cust.getName());</code>
-     * <br><code>buffer.append("&lt;/h1&gt;");</code>
+     * Implementing classes fill this method with a series of append() calls
+     * to write their message to the textpane.
      */
-    public abstract void writeObject(StringBuffer buffer, JTable table, Object value,
-    boolean isSelected, boolean hasFocus, int row, int column);
-
-
-
+    public abstract void writeObject(DefaultStyledDocument doc, JTable table, Object value, 
+        boolean isSelected, boolean hasFocus, int row, int column);
+        
     /**
      * Prepares the resultant rendered document to the supplied table and selection
      * settings. The rendered document may behave strangely if the resultant
      * rendered document has a height greater than 1000 pixels.
      */
-    protected void prepareRendered(JTable table, Object value,
-    boolean isSelected, boolean hasFocus, int row, int column) {
-    
+    protected void beforeWrite(DefaultStyledDocument doc, JTable table, Object value, 
+        boolean isSelected, boolean hasFocus, int row, int column) {
+        
         // make it look selected
         colorSelected(isSelected);
-        
+
         // compute where to put tabs using the column width
         int columnWidth = table.getColumnModel().getColumn(column).getWidth();
         Rectangle bounds = rendered.getBounds();
         bounds.width = columnWidth;
         bounds.height = 1000;
         rendered.setBounds(bounds);
-        
+
         // clear the old document value
-        rendered.setText("");
+        clear();
     }
 
     /**
+     * Colours the result component to be the selection colour if isSelected,
+     * or the non-selected color otherwise.
+     */
+    private void colorSelected(boolean isSelected) {
+        if(isSelected) {
+            rendered.setBackground(UIManager.getColor("Table.selectionBackground"));
+            //StyleConstants.setBackground(base, UIManager.getColor("Table.selectionBackground"));
+            //StyleConstants.setForeground(base, UIManager.getColor("Table.selectionForeground"));
+        } else {
+            rendered.setBackground(UIManager.getColor("Table.background"));
+            //StyleConstants.setBackground(base, UIManager.getColor("Table.background"));
+            //StyleConstants.setForeground(base, UIManager.getColor("Table.foreground"));
+        }
+    }
+    
+    /**
      * Gets the completely rendered document. This also resizes the table row
-     * of the current row to be the height of this cell.
+     * of the current row to be the height of this cell. 
      *
-     * <p>The table row is resized with the following heuristic: If the column is
+     * The table row is resized with the following heuristic: If the column is
      * zero, the row height is always resized. If the column is non-zero, the
      * row height is only resized if it needs to be increased. This is due
      * to the fact that tables render left to right (0 to n), and so it is only
      * necessary to shrink the table at zero to shrink it at all. This will
      * fail when a row that self-resizes is in a column other than zero.
      */
-    protected void getRendered(JTable table, Object value,
-    boolean isSelected, boolean hasFocus, int row, int column) {
-    
+    protected void afterWrite(DefaultStyledDocument doc, JTable table, Object value, 
+        boolean isSelected, boolean hasFocus, int row, int column) {
+
         // resize the table row to an appropriate height if necessary
         int requiredRowHeight = rendered.getPreferredSize().height;
         int currentRowHeight = table.getRowHeight(row);
@@ -218,4 +190,34 @@ abstract class HTMLTableCellRenderer extends HTMLRenderer implements TableCellRe
             table.setRowHeight(row, requiredRowHeight);
         }
     }
+    
+    /**
+     * Convenience method for appending the specified text to the specified document.
+     *
+     * @param text The text to append. The characters "\n" and "\t" are
+     *      useful for creating newlines.
+     * @param format The format to render text in. This class comes with
+     *      a small set of predefined formats accessible only to extending
+     *      classes via protected members.
+     */
+    public static void append(DefaultStyledDocument targetDocument, String text, Style format) {
+        try {
+            int offset = targetDocument.getLength();
+            targetDocument.insertString(offset, text, format);
+        } catch(BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * Clears the styled document.
+     */
+    protected void clear() {
+        try {
+            styledDocument.remove(0, styledDocument.getLength());
+        } catch(BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+
