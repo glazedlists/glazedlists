@@ -180,7 +180,7 @@ public final class ListEvent extends EventObject {
             if(atomicCount == masterSequence.getAtomicCount()) {
                 return false;
             // there are no more blocks in this atomic change
-            } else if(blockCount == masterSequence.getBlockCount(atomicCount)) {
+            } else if(blockCount == getBlocks().size()) {
                 return false;
             // there are more blocks in this atomic change
             } else {
@@ -197,7 +197,7 @@ public final class ListEvent extends EventObject {
      */
     public boolean nextBlock() {
         // if we have no blocks left in the current atomic change
-        if(blockCount == masterSequence.getBlockCount(atomicCount)) {
+        if(blockCount == getBlocks().size()) {
             // clear the list change
             currentBlock = null;
             rowIndex = -5;
@@ -211,7 +211,7 @@ public final class ListEvent extends EventObject {
             return false;
         // if we have more blocks left
         } else {
-            currentBlock = masterSequence.getBlock(atomicCount, blockCount);
+            currentBlock = (ListEventBlock)getBlocks().get(blockCount);
             blockCount++;
             rowIndex = currentBlock.getStartIndex();
             return true;
@@ -277,6 +277,26 @@ public final class ListEvent extends EventObject {
     public int getType() {
         return currentBlock.getType();
     }
+    
+    /**
+     * Get the List of ListEventBlocks for this change.
+     */
+    List getBlocks() {
+        return masterSequence.getBlocks(atomicCount);
+    }
+    
+    /**
+     * Incrememts this {@link ListEvent} to the next atomic change in sequence,
+     * which may not yet be ready.
+     *
+     * <p>This method is called by the {@link ListEventAssembler} from its
+     * {@link ListEventAssembler#forwardEvent(ListEvent)} method. After a
+     * {@link ListEvent} has been forwarded, it must be incremented to the next
+     * change.
+     */
+    void nextAtomicChange() {
+        atomicCount++;
+    }
 
     /**
      * Gets the number of blocks currently remaining in this atomic change.
@@ -284,9 +304,9 @@ public final class ListEvent extends EventObject {
     public int getBlocksRemaining() {
         // if we're not at the end of the current block, add one for that
         if(currentBlock != null && rowIndex < currentBlock.getEndIndex()) {
-            return masterSequence.getBlockCount(atomicCount) - blockCount + 1;
+            return getBlocks().size() - blockCount + 1;
         } else {
-            return masterSequence.getBlockCount(atomicCount) - blockCount;
+            return getBlocks().size() - blockCount;
         }
     }
 
@@ -311,14 +331,8 @@ public final class ListEvent extends EventObject {
         if(atomicCount < masterSequence.getAtomicCount()) atomicChangeToShow = atomicCount;
         else atomicChangeToShow = masterSequence.getAtomicCount() - 1;
         
-        // figure out how many blocks in that change
-        int blocksToShow = masterSequence.getBlockCount(atomicChangeToShow); 
-        
-        // write out the change
-        for(int b = 0; b < blocksToShow; b++) {
-            if(b != 0) result.append(", ");
-            result.append(masterSequence.getBlock(atomicChangeToShow, b));
-        }
+        // append the blocks
+        result.append(masterSequence.getBlocks(atomicChangeToShow));
 
         return result.toString();
     }

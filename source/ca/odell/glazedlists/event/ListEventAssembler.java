@@ -29,24 +29,21 @@ public final class ListEventAssembler {
     private EventList sourceList;
     
     /** the list of lists of change blocks */
-    private ArrayList atomicChanges = new ArrayList();
-    private ArrayList reorderMaps = new ArrayList();
+    private List atomicChanges = new ArrayList();
+    private List reorderMaps = new ArrayList();
     private int atomicListOffset = 0;
     private int oldestChange = 0;
     
     /** the current working copy of the atomic change */
-    private ArrayList atomicChangeBlocks = null;
+    private List atomicChangeBlocks = null;
     /** the most recent list change; this is the only change we can append to */
     private ListEventBlock atomicLatestBlock = null;
     /** the current reordering array if this change is a reorder */
     private int[] reorderMap = null;
     
-    /** the pool of list change objects */
-    private ArrayList changePool = new ArrayList();
-    
     /** the sequences that provide a view on this queue */
-    private ArrayList listeners = new ArrayList();
-    private ArrayList listenerEvents = new ArrayList();
+    private List listeners = new ArrayList();
+    private List listenerEvents = new ArrayList();
     
     /** the pipeline manages the distribution of events */
     private ListEventPublisher publisher = null;
@@ -128,6 +125,15 @@ public final class ListEventAssembler {
         atomicLatestBlock = null;
         reorderMap = null;
         
+        cleanUpHandledChanges();
+    }
+    
+    /**
+     * Remove old changes which are no longer needed. Since the ListEventAssembler
+     * may potentially stores several changes simultaneously, it is necessary to
+     * periodically clean up the ones that have been handled.
+     */
+    private void cleanUpHandledChanges() {
         // calculate the oldest change still needed
         int oldestRequiredChange = atomicChanges.size() + atomicListOffset; 
         for(int e = 0; e < listenerEvents.size(); e++) {
@@ -136,10 +142,9 @@ public final class ListEventAssembler {
             if(mark == -1) continue;
             else if(mark < oldestRequiredChange) oldestRequiredChange = mark;
         }
+        
         // recycle every change that is no longer used
         for(int i = oldestChange; i < oldestRequiredChange; i++) {
-            List recycledChanges = (List)atomicChanges.get(0);
-            changePool.addAll(recycledChanges);
             atomicChanges.remove(0);
             reorderMaps.remove(0);
             atomicListOffset++;
@@ -155,21 +160,15 @@ public final class ListEventAssembler {
      * beginEvent() and followed by a call to commitEvent().
      */
     public void addChange(int type, int startIndex, int endIndex) {
-        // create a new change for the first change
-        if(atomicLatestBlock == null) {
-            atomicLatestBlock = createListEventBlock(startIndex, endIndex, type);
-            atomicChangeBlocks.add(atomicLatestBlock);
-            return;
+        // attempt to merge this into the most recent block
+        if(atomicLatestBlock != null) {
+            boolean appendSuccess = atomicLatestBlock.append(startIndex, endIndex, type);
+            if(appendSuccess) return;
         }
         
-        // append the change if possible
-        boolean appended = atomicLatestBlock.append(startIndex, endIndex, type);
-        // if appended is null the changes couldn't be merged
-        if(!appended) {
-            ListEventBlock block = createListEventBlock(startIndex, endIndex, type);
-            atomicChangeBlocks.add(block);
-            atomicLatestBlock = block;
-        }
+        // create a new block for the change
+        atomicLatestBlock = new ListEventBlock(startIndex, endIndex, type);
+        atomicChangeBlocks.add(atomicLatestBlock);
     }
     /**
      * Convenience method for appending a single change of the specified type.
@@ -231,21 +230,26 @@ public final class ListEventAssembler {
      * <br>2. For all changes in sourceEvent, apply those changes to this
      * <br>3. commitEvent()
      *
-     * <p>This method should be preferred to manually forwarding events because
-     * it may be optimized. Note that this implementation is currently not optimized,
-     * but it should be real soon!
+     * <p>Note that this method should be preferred to manually forwarding events
+     * because it is heavily optimized.
      */
     public void forwardEvent(ListEvent listChanges) {
-        beginEvent();
-        if(listChanges.isReordering()) {
-            int[] reorderMap = listChanges.getReorderMap();
-            reorder(reorderMap);
+        // if we're not nested, we can fire the event directly
+        if(eventLevel == 0) {
+            atomicChangeBlocks = listChanges.getBlocks();
+            reorderMap = listChanges.isReordering() ? listChanges.getReorderMap() : null;
+            listChanges.nextAtomicChange();
+            cleanUpHandledChanges();
+            fireEvent();
+            
+        // if we're nested, we have to copy this event's parts to our queue
         } else {
-            while(listChanges.next()) {
-                addChange(listChanges.getType(), listChanges.getIndex());
+            beginEvent();
+            while(listChanges.nextBlock()) {
+                addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
             }
+            commitEvent();
         }
-        commitEvent();
     }
     /**
      * Commits the current atomic change to this list change queue. This will
@@ -263,8 +267,9 @@ public final class ListEventAssembler {
         eventLevel--;
         allowNestedEvents = true;
         
-        // fire the event if we are no longer nested
+        // if this is the last stage, sort and fire
         if(eventLevel == 0) {
+            ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
             fireEvent();
         }
     }
@@ -274,9 +279,6 @@ public final class ListEventAssembler {
      * event exactly once, even if that event includes nested events.
      */
     private void fireEvent() {
-        // sort and simplify this block
-        ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
-        
         // bail on empty changes
         if(atomicChangeBlocks.size() == 0) {
             atomicChangeBlocks = null;
@@ -314,26 +316,6 @@ public final class ListEventAssembler {
         }
     }
 
-
-    /**
-     * For pooling list change objects. This gets a new list change
-     * object or recycles one if that exists.
-     */
-    private ListEventBlock createListEventBlock(int startIndex, int endIndex, int type) {
-        if(changePool.isEmpty()) return new ListEventBlock(startIndex, endIndex, type);
-        ListEventBlock listChange = (ListEventBlock)changePool.remove(changePool.size() - 1);
-        listChange.setData(startIndex, endIndex, type);
-        return listChange;
-    }
-    
-    /**
-     * Gets the total number of blocks in the specified atomic change.
-     */
-    int getBlockCount(int atomicCount) {
-        List atomicChange = (List)atomicChanges.get(atomicCount - atomicListOffset);
-        return atomicChange.size();
-    }
-
     /**
      * Gets the total number of atomic changes so far.
      */
@@ -342,13 +324,13 @@ public final class ListEventAssembler {
     }
     
     /**
-     * Gets the specified block from the current set of change blocks. Note
-     * that not blocks may be cleaned up after they are viewed by all
-     * monitoring sequences. Such blocks may not be available.
+     * Gets the list of blocks for the specified atomic change.
+     *
+     * @return a List containing the sequence of {@link ListEventBlock}s modelling
+     *      the specified change. It is an error to modify this list or its contents.
      */
-    ListEventBlock getBlock(int atomicCount, int block) {
-        List atomicChange = (List)atomicChanges.get(atomicCount - atomicListOffset);
-        return (ListEventBlock)atomicChange.get(block);
+    List getBlocks(int atomicCount) {
+        return (List)atomicChanges.get(atomicCount - atomicListOffset);
     }
     
     /**
