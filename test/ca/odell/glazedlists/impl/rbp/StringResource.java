@@ -25,7 +25,7 @@ import ca.odell.glazedlists.util.concurrent.*;
 public class StringResource implements Resource {
 
     /** the read/write lock provides mutual exclusion to access */
-    private ReadWriteLock readWriteLock = null;
+    private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
     
     /** the value of this resource */
     private String value = "";
