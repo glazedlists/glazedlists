@@ -14,6 +14,9 @@ import java.net.*;
 import java.io.*;
 // logging
 import java.util.logging.*;
+// parsing
+import ca.odell.glazedlists.util.impl.ByteBufferParser;
+import java.text.ParseException;
 
 /**
  * The CTPServerProtocol is a serverside implementation of Chunked Transfer
@@ -99,6 +102,7 @@ final class CTPServerProtocol extends CTPProtocol {
     void handleRead() throws IOException {
         // fill our buffer with incoming data
         int count = 0;
+        ByteBufferParser parser = new ByteBufferParser(inBuffer);
         while((count = socketChannel.read(inBuffer)) > 0) {
 
             // read a request
@@ -106,43 +110,42 @@ final class CTPServerProtocol extends CTPProtocol {
                 String uri = null;
                 Map headers = new TreeMap();
                 
-                // parse the request, oh so nasty
-                boolean hasEntireHeader = false;
-                inBuffer.flip();
-                for(int i = 0; i < inBuffer.limit() - 4; i++) {
-                    if(inBuffer.get(i) == (byte)'\r'
-                    && inBuffer.get(i+1) == (byte)'\n'
-                    && inBuffer.get(i+2) == (byte)'\r'
-                    && inBuffer.get(i+3) == (byte)'\n'
-                    || inBuffer.get(i+2) == (byte)'\n'
-                    && inBuffer.get(i+3) == (byte)'\n') {
-                        hasEntireHeader = true;
+                // parse the request
+                try {
+                    
+                    // if the entire header has not loaded, load more
+                    logger.finest("Current buffer " + inBuffer);
+                    inBuffer.flip();
+                    if(parser.indexOf("\\r?\\n\\r?\\n") == -1) {
+                        logger.finest("Insufficient data thus far " + parser);
+                        inBuffer.compact();
+                        continue;
                     }
-                }
-                inBuffer.position(inBuffer.limit());
-                if(!hasEntireHeader) continue;
-                byte[] inBytes = new byte[inBuffer.remaining()];
-                inBuffer.get(inBytes);
-                String request = new String(inBytes, CHARSET);
-                String[] lines = request.split("\\r?\\n");
-                if(lines.length < 2) throw new IllegalStateException();
-                if(lines[lines.length - 1].length() > 0) throw new IllegalStateException("Expected \"\", found \"" + lines[lines.length - 1].length() + "\"");
-                String[] statusLine = lines[0].split("\\s+", 3);
-                if(statusLine.length < 3) throw new IllegalStateException();
-                if(!statusLine[0].equals(HTTP_POST)) throw new IllegalStateException("Expected: " + HTTP_POST + ", found: " + statusLine[0]);
-                if(!statusLine[2].equals(HTTP_VERSION)) throw new IllegalStateException("Expected: " + HTTP_VERSION + ", found: " + statusLine[2]);
-                if(!statusLine[1].startsWith("/")) throw new IllegalStateException();
-                uri = statusLine[1];
-                for(int i = 1; i < lines.length; i++) {
-                    String[] keyValue = lines[i].split("\\s*\\:\\s*", 2);
-                    if(keyValue.length != 2) throw new IllegalStateException("Expected: key: value, found " + lines[i]);
-                    headers.put(keyValue[0], keyValue[1]);
+                    
+                    // parse the status line
+                    parser.consume("POST( )+");
+                    uri = parser.readUntil("( )+");
+                    parser.consume("HTTP\\/1\\.1 *");
+                    parser.consume("\\r?\\n");
+                    logger.finest("Reading request " + uri + " from " + this);
+                    
+                    // parse the headers
+                    while(true) {
+                        if(parser.indexOf("\\r?\\n") == 0) break;
+                        String key = parser.readUntil("\\:( )*");
+                        String value = parser.readUntil("\\r?\\n");
+                        headers.put(key, value);
+                        logger.finest("Read header " + key + ": " + value + " from " + this);
+                    }
+                    
+                } catch(ParseException e) {
+                    // handle this better
+                    e.printStackTrace();
                 }
                 
                 // handle the request
                 state = STATE_CONSTRUCTING_RESPONSE;
                 handler.receiveRequest(this, uri, headers);
-                
             } else {
                 throw new IllegalStateException();
             }
