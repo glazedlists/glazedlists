@@ -1,0 +1,50 @@
+<html>
+<body>
+Demo launcher application which allows running all other demo applications.
+<p>
+To include a new demo:
+<ul>
+
+<li>The demo class must have public access and provide a normal <tt>main(String[])</tt>
+method</li>
+
+<li>The main method <b>must not</b> call <tt>System.exit()</tt> or use
+<tt>JFrame.EXIT_ON_CLOSE</tt> for the default close operation if the system property
+<b><tt>in_launcher</tt></b> is set to a non-null value.<br>
+Example:<br>
+<pre>
+public static void main( String[] args ) {
+	// run test...
+
+	// when finished...
+	if ( System.getProperty( "in_launcher" ) == null ) System.exit( 0 );
+}
+</pre>
+or
+<pre>
+public static void main( String[] args ) {
+	JFrame my_test_frame = ...
+
+	if (System.getProperty("in_launcher") == null) {
+		my_test_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	else {
+		my_test_frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	}
+
+	// run test...
+}
+</pre>
+</li>
+
+<li>Add the following to <tt>demos.properties</tt>:
+<ol>
+<li>A property (for example: "aaa") to <tt>demos.properties</tt> with the display name
+of the class.</li>
+<li>(Optional) A property with the name from the previous step followed by ".desc" (for
+example: "aaa.desc") containing a description of the demo.</li>
+<li>A property with the name from step 1 followed by ".class" (for example: "aaa.class")
+containing the name of the class containing the main method for the demo.</li>
+</ul>
+</body>
+</html>
