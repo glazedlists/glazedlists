@@ -148,6 +148,7 @@ public final class Barcode extends AbstractList {
         if(root == null) {
             root = new BarcodeNode(this, null, length, index);
             treeSize = index + length;
+            whiteSpace -= index;
 
         // Add in the trailing whitespace
         } else if(index >= treeSize) {

@@ -103,6 +103,22 @@ public class BarcodeTest extends TestCase {
     }
 
     /**
+     * Tests that bug 121 is gone.  This bug occurred in the following case:
+     * Significant trailing whitespace.
+     * Root was null.
+     * Set a WHITE in the Barcode to BLACK
+     *
+     * This resulted in the Barcode increasing in size.
+     */
+    public void testBug121() {
+        barcode.addWhite(0, 100);
+        barcode.setBlack(50,1);
+        assertEquals(100, barcode.size());
+        assertEquals(1, barcode.blackSize());
+        assertEquals(99, barcode.whiteSize());
+    }
+
+    /**
      * Tests to verify that the sparse list is consistent after a long
      * series of list operations.
      */
