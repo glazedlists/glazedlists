@@ -60,14 +60,15 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
+            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            NetworkList sourceList = peer.publish(sourceListTS, path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
             waitFor(1000);
             assertTrue(sourceListener.isConnected());
-            sourceList.add(new Integer(8));
-            sourceList.add(new Integer(6));
-            sourceList.add(new Integer(7));
-            sourceList.add(new Integer(5));
+            sourceListTS.add(new Integer(8));
+            sourceListTS.add(new Integer(6));
+            sourceListTS.add(new Integer(7));
+            sourceListTS.add(new Integer(5));
             
             // prepare the target list
             NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
@@ -79,9 +80,9 @@ public class NetworkListTest extends TestCase {
             assertEquals(sourceList, targetList);
             
             // perform some changes and verify they keep in sync
-            sourceList.add(new Integer(3));
-            sourceList.add(new Integer(0));
-            sourceList.add(new Integer(9));
+            sourceListTS.add(new Integer(3));
+            sourceListTS.add(new Integer(0));
+            sourceListTS.add(new Integer(9));
             waitFor(1000);
             assertEquals(sourceList, targetList);
             
@@ -104,9 +105,10 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
-            sourceList.add(new Integer(8));
-            sourceList.add(new Integer(6));
+            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            NetworkList sourceList = peer.publish(sourceListTS, path, ByteCoderFactory.serializable());
+            sourceListTS.add(new Integer(8));
+            sourceListTS.add(new Integer(6));
             
             // prepare the target list
             NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
@@ -118,7 +120,7 @@ public class NetworkListTest extends TestCase {
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
             List snapshot = new ArrayList();
-            snapshot.addAll(sourceList);
+            snapshot.addAll(sourceListTS);
             
             // disconnect the client
             targetList.disconnect();
@@ -127,8 +129,8 @@ public class NetworkListTest extends TestCase {
             assertFalse(targetList.isConnected());
             
             // change the source list
-            sourceList.add(new Integer(7));
-            sourceList.add(new Integer(5));
+            sourceListTS.add(new Integer(7));
+            sourceListTS.add(new Integer(5));
             
             // they client should be out of date
             waitFor(1000);
@@ -158,10 +160,11 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
+            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            NetworkList sourceList = peer.publish(sourceListTS, path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
-            sourceList.add(new Integer(8));
-            sourceList.add(new Integer(6));
+            sourceListTS.add(new Integer(8));
+            sourceListTS.add(new Integer(6));
             
             // prepare the target list
             NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
@@ -175,7 +178,7 @@ public class NetworkListTest extends TestCase {
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
             List snapshot = new ArrayList();
-            snapshot.addAll(sourceList);
+            snapshot.addAll(sourceListTS);
             
             // disconnect the server
             //targetList.disconnect(); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
@@ -187,8 +190,8 @@ public class NetworkListTest extends TestCase {
             assertFalse(targetList.isConnected());
             
             // change the source list
-            sourceList.add(new Integer(7));
-            sourceList.add(new Integer(5));
+            sourceListTS.add(new Integer(7));
+            sourceListTS.add(new Integer(5));
             
             // they client should be out of date
             waitFor(1000);
@@ -221,9 +224,10 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
-            sourceList.add(new Integer(8));
-            sourceList.add(new Integer(6));
+            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            NetworkList sourceList = peer.publish(sourceListTS, path, ByteCoderFactory.serializable());
+            sourceListTS.add(new Integer(8));
+            sourceListTS.add(new Integer(6));
             int connectPort = serverPort;
             
             // prepare the listener's peers
@@ -251,9 +255,9 @@ public class NetworkListTest extends TestCase {
             }
 
             // perform some changes
-            sourceList.add(new Integer(3));
-            sourceList.add(new Integer(0));
-            sourceList.add(new Integer(9));
+            sourceListTS.add(new Integer(3));
+            sourceListTS.add(new Integer(0));
+            sourceListTS.add(new Integer(9));
 
             // verify they're still in sync
             waitFor(1000);
@@ -282,9 +286,10 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
-            sourceList.add(new Integer(8));
-            sourceList.add(new Integer(6));
+            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            NetworkList sourceList = peer.publish(sourceListTS, path, ByteCoderFactory.serializable());
+            sourceListTS.add(new Integer(8));
+            sourceListTS.add(new Integer(6));
             
             // prepare the target list
             NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
@@ -293,7 +298,7 @@ public class NetworkListTest extends TestCase {
             waitFor(1000);
             assertEquals(sourceList, targetList);
             List snapshot = new ArrayList();
-            snapshot.addAll(sourceList);
+            snapshot.addAll(sourceListTS);
             
             // disconnect the first list
             //targetList.disconnect(); waitFor(1000); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
@@ -302,9 +307,10 @@ public class NetworkListTest extends TestCase {
             assertFalse(targetList.isConnected());
             
             // prepare the second source list
-            NetworkList sourceList2 = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
-            sourceList2.add(new Integer(7));
-            sourceList2.add(new Integer(5));
+            EventList sourceList2TS = new ThreadSafeList(new BasicEventList());
+            NetworkList sourceList2 = peer.publish(sourceList2TS, path, ByteCoderFactory.serializable());
+            sourceList2TS.add(new Integer(7));
+            sourceList2TS.add(new Integer(5));
             
             // verify they're equal after a new connect
             targetList.connect();
