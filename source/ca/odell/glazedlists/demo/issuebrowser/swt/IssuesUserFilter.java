@@ -101,7 +101,7 @@ public class IssuesUserFilter extends AbstractFilterList {
             // The filter now contains a different set of users
             getReadWriteLock().writeLock().lock();
             try {
-                if(contrained && relaxed) handleFilterChanged();
+                if(constrained && relaxed) handleFilterChanged();
                 else if(relaxed) handleFilterRelaxed();
                 else if(constrained) handleFilterConstrained();
             } finally {
