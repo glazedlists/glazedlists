@@ -73,6 +73,9 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 
 	public static void main(String[] args) {
+		// Set this system property so that anything we launch knows not to System.exit().
+		System.setProperty("in_launcher", "true");
+
 		new Launcher();
 	}
 
@@ -206,7 +209,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 			in = Launcher.class.getResourceAsStream("demos.properties");
 
 			props.load(in);
-		} catch(IOException ex) {
+		} catch(Exception ex) {
 			handleError(ex, "loading data about the demos");
 			System.exit(-1);
 		} finally {
