@@ -45,7 +45,7 @@ public class IssuesUserFilter extends AbstractFilterList implements ListSelectio
 
         // create an EventList containing the JList's selection
         EventSelectionModel userSelectionModel = new EventSelectionModel(usersEventList);
-        userSelect.setSelectionModel(userSelectionModel.getListSelectionModel());
+        userSelect.setSelectionModel(userSelectionModel);
         usersSelectedList = userSelectionModel.getEventList();
         userSelect.addListSelectionListener(this);
 

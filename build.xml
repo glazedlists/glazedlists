@@ -98,7 +98,7 @@
         description="Compile the source.">
     <mkdir dir="classes"/>
     <!-- Compile the java code from source/ into classes/ -->
-    <javac destdir="classes" srcdir="source" debug="on" source="1.4">
+    <javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
       <exclude name="**/swt/**"/>
     </javac>
   </target>

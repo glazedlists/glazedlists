@@ -20,33 +20,20 @@ import javax.swing.event.*;
 import java.util.*;
 
 /**
- * An EventSelectionModel is a class that performs two simulaneous
- * services. It is a ListSelectionModel to provide selection tracking for a
- * JTable. It is also a EventList that contains the table's selection.
+ * An {@link EventSelectionModel} is a class that performs two simulaneous
+ * services. It is a {@link ListSelectionModel} to provide selection tracking for a
+ * {@link JTable}. It is also a {@link EventList} that contains the table's selection.
  *
- * <p>As elements are selected or deselected, the List aspect of the
- * EventSelectionModel changes. Changes to that list will change the
- * source list. To modify the selection, use the SelectionModel's methods.
+ * <p>As elements are selected or deselected, the {@link EventList} aspect of this
+ * {@link EventSelectionModel} changes. Changes to that {@link List} will change the
+ * source {@link EventList}. To modify only the selection, use the
+ * {@link ListSelectionModel}'s methods.
  *
- * <p>The SelectionModelEventList responds to two classes of changes from a
- * JTable. The JTable's structure can change and the JTable's selection can
- * change. In either case the SelectionModelEventList is responsible for
- * updating its view of the selection and sending SelectionEvents and
- * ListEvents to listeners.
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
  *
- * <p>The EventList aspect of this EventSelectionModel is <strong>not
- * thread-safe</strong> for read access. Like other EventLists, users must
- * obtain the read lock to read it. The SelectionModel aspect is thread-safe
- * for access.
- *
- * <p>Internally this maintains a flag list to keep track of which elements
- * are selected and not and where they are in the source list. It uses
- * a sparse list that corresponds directly to the source list. The sparse
- * list contains null for all unselected elements and Boolean.TRUE for
- * elements which are selected. This is used to map indexes between the
- * selection subset and the full source list.
- *
- * <p>Alongside <code>MULTIPLE_INTERVAL_SELECTION</code>, this selection model
+ * <p>Alongside <code>MULTIPLE_INTERVAL_SELECTION</code>, this {@link ListSelectionModel}
  * supports an additional selection mode.
  * <code>MULTIPLE_INTERVAL_SELECTION_DEFENSIVE</code> is a new selection mode.
  * It is idential to <code>MULTIPLE_INTERVAL_SELECTION</code> in every way but
@@ -54,20 +41,35 @@ import java.util.*;
  * <code>MULTIPLE_INTERVAL_SELECTION</code> mode, it becomes selected. But in
  * the <code>MULTIPLE_INTERVAL_SELECTION_DEFENSIVE</code> mode, it does not
  * become selected. To set this mode, use
- * <code>setSelectionMode(SelectionModelEventList.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE)</code>.
- * on the ListSelectionModel.
- *
- * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=15">Bug 15</a>
+ * {@link #setSelectionMode(int) setSelectionMode(EventSelectionModel.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE)}.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class EventSelectionModel {
-
+public final class EventSelectionModel implements ListSelectionModel {
+    // Internally this maintains a flag list to keep track of which elements
+    // are selected and not and where they are in the source list. It uses
+    // a sparse list that corresponds directly to the source list. The sparse
+    // list contains null for all unselected elements and Boolean.TRUE for
+    // elements which are selected. This is used to map indexes between the
+    // selection subset and the full source list.
+    //
+    // The SelectionModelEventList responds to two classes of changes from a
+    // JTable. The JTable's structure can change and the JTable's selection can
+    // change. In either case the SelectionModelEventList is responsible for
+    // updating its view of the selection and sending SelectionEvents and
+    // ListEvents to listeners.
+    //
+    // This model provides a service for the JTable. It listens to changes in
+    // the JTable's selection and keeps track of what is selected. It is also
+    // responsible for notifying ListSelectionListeners of any changes.
+    //
+    // <p>All read and write access to the EventSelectionModel are protected
+    // with the list's read/write lock. This guarantees that user classes such
+    // as JTable or JList can access the EventListSelectionModel even if the
+    // source list is being modified by a separate thread.
+    //
     /** the new selection mode behaves similar to MULTIPLE_INTERVAL_SELECTION */
     public static final int MULTIPLE_INTERVAL_SELECTION_DEFENSIVE = 103;
-
-    /** the list selection model handles selection tables */
-    private EventListSelectionModel selectionModel;
 
     /** the event list provides an event list view of the selection */
     private SelectionEventList eventList;
@@ -84,15 +86,31 @@ public final class EventSelectionModel {
     /** whether the user can modify the selection */
     private boolean enabled = true;
 
+    /** listeners to notify when the selection changes */
+    private List listeners = new ArrayList();
+
+    /** whether there are a series of changes on the way */
+    private boolean valueIsAdjusting = false;
+    private int fullChangeStart = -1;
+    private int fullChangeFinish = -1;
+
+    /** the lead and anchor selection index are the first and last in a range */
+    private int anchorSelectionIndex = -1;
+    private int leadSelectionIndex = -1;
+
+    /** the selection mode defines characteristics of the selection */
+    private int selectionMode = MULTIPLE_INTERVAL_SELECTION_DEFENSIVE;
+
     /**
      * Creates a new selection model that also presents a list of the selection.
      */
     public EventSelectionModel(EventList source) {
         this.source = source;
 
+        // build the initial state
         prepareFlagList();
 
-        this.selectionModel = new EventListSelectionModel();
+        // build a list for reading the selection
         this.eventList = new SelectionEventList(source);
     }
 
@@ -114,11 +132,13 @@ public final class EventSelectionModel {
     }
 
     /**
-     * Gets the selection model that provides selection management for a
-     * table.
+     * Gets the selection model that provides selection management for a table.
+     *
+     * @deprecated As of 2004/11/26, the {@link EventSelectionModel} implements
+     *      {@link ListSelectionModel} directly.
      */
     public ListSelectionModel getListSelectionModel() {
-        return selectionModel;
+        return this;
     }
 
     /**
@@ -233,8 +253,8 @@ public final class EventSelectionModel {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
                 // prepare for notifying ListSelectionListeners
-                int minSelectionIndexBefore = selectionModel.getMinSelectionIndex();
-                int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
+                int minSelectionIndexBefore = getMinSelectionIndex();
+                int maxSelectionIndexBefore = getMaxSelectionIndex();
 
                 // prepare a sequence of changes
                 updates.beginEvent();
@@ -290,8 +310,8 @@ public final class EventSelectionModel {
                             if(previouslySelected) {
 
                                 // select the inserted for single interval and multiple interval selection
-                                if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
-                                || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
+                                if(selectionMode == SINGLE_INTERVAL_SELECTION
+                                || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
                                     flagList.add(index, Boolean.TRUE);
                                     updates.addInsert(previousSelectionIndex);
 
@@ -321,13 +341,13 @@ public final class EventSelectionModel {
 
                 // fire the changes to ListSelectionListeners
                 if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
-                    int minSelectionIndexAfter = selectionModel.getMinSelectionIndex();
-                    int maxSelectionIndexAfter = selectionModel.getMaxSelectionIndex();
+                    int minSelectionIndexAfter = getMinSelectionIndex();
+                    int maxSelectionIndexAfter = getMaxSelectionIndex();
                     int changeStart = minSelectionIndexBefore;
                     int changeFinish = maxSelectionIndexBefore;
                     if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
                     if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
-                    selectionModel.fireSelectionChanged(changeStart, changeFinish);
+                    fireSelectionChanged(changeStart, changeFinish);
                 }
             } finally {
                 ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
@@ -349,526 +369,498 @@ public final class EventSelectionModel {
     }
 
     /**
-     * This model provides a service for the JTable. It listens to changes in
-     * the JTable's selection and keeps track of what is selected. It is also
-     * responsible for notifying ListSelectionListeners of any changes.
+     * Notify listeners that the selection has changed.
      *
-     * <p>All read and write access to the EventSelectionModel are protected
-     * with the list's read/write lock. This guarantees that user classes such
-     * as JTable or JList can access the EventListSelectionModel even if the
-     * source list is being modified by a separate thread.
+     * <p>This notifies all listeners with the same immutable
+     * ListSelectionEvent.
      */
-    class EventListSelectionModel implements ListSelectionModel {
-
-        /** listeners to notify when the selection changes */
-        private List listeners = new ArrayList();
-
-        /** whether there are a series of changes on the way */
-        private boolean valueIsAdjusting = false;
-        private int fullChangeStart = -1;
-        private int fullChangeFinish = -1;
-
-        /** the lead and anchor selection index are the first and last in a range */
-        private int anchorSelectionIndex = -1;
-        private int leadSelectionIndex = -1;
-
-        /** the selection mode defines characteristics of the selection */
-        private int selectionMode = MULTIPLE_INTERVAL_SELECTION_DEFENSIVE;
-
-        /**
-         * Notify listeners that the selection has changed.
-         *
-         * <p>This notifies all listeners with the same immutable
-         * ListSelectionEvent.
-         */
-        private void fireSelectionChanged(int changeStart, int changeFinish) {
-            // if this is a change in a series, save the bounds of this change
-            if(valueIsAdjusting) {
-                if(fullChangeStart == -1 || changeStart < fullChangeStart) fullChangeStart = changeStart;
-                if(fullChangeFinish == -1 || changeFinish > fullChangeFinish) fullChangeFinish = changeFinish;
-            }
-
-            // fire the change
-            ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
-            for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-                ListSelectionListener listener = (ListSelectionListener)i.next();
-                listener.valueChanged(event);
-            }
+    private void fireSelectionChanged(int changeStart, int changeFinish) {
+        // if this is a change in a series, save the bounds of this change
+        if(valueIsAdjusting) {
+            if(fullChangeStart == -1 || changeStart < fullChangeStart) fullChangeStart = changeStart;
+            if(fullChangeFinish == -1 || changeFinish > fullChangeFinish) fullChangeFinish = changeFinish;
         }
 
-        /**
-         * Walks through the union of the specified ranges. All values in the
-         * first range are given the specified selection value. All values in
-         * the second range but not in the first range are given the opposite
-         * selection value. In effect, the first range and the intersection of
-         * the two ranges are given the specified value. The parts that are
-         * in the second range but not in the first range (ie. everything else)
-         * is given the opposite selection value.
-         *
-         * @param select true to set values in the first range as selected and
-         *      the other values in the second range as not selected. false to
-         *      set values in the first range as not selected and the other
-         *      values in the second range as selected.
-         * @param changeIndex0 one end of the first range, inclusive.
-         * @param changeIndex1 the opposite end of the first range, inclusive.
-         *      This may be lower than changeIndex0.
-         * @param invertIndex0 one end of the second range, inclusive. To
-         *      specify an empty second range, specify -1 for this value.
-         * @param invertIndex1 the opposite end of the second range, inclusive.
-         *      This may be lower than invertIndex0. To specify an empty second
-         *      range, specify -1 for this value.
-         */
-        private void setSubRangeOfRange(boolean select, int changeIndex0, int changeIndex1, int invertIndex0, int invertIndex1) {
-            // verify that the first range is legitimate
-            if(changeIndex0 >= flagList.size() || changeIndex1 >= flagList.size()
-            || ((changeIndex0 == -1 || changeIndex1 == -1) && changeIndex0 != changeIndex1)) {
-                throw new IndexOutOfBoundsException("Invalid range for selection: " + changeIndex0 + "-" + changeIndex1 + ", list size is " + flagList.size());
-            }
-            // verify that the second range is legitimate
-            if(invertIndex0 >= flagList.size() || invertIndex1 >= flagList.size()
-            || ((invertIndex0 == -1 || invertIndex1 == -1) && invertIndex0 != invertIndex1)) {
-                throw new IndexOutOfBoundsException("Invalid range for invert selection: " + invertIndex0 + "-" + invertIndex1 + ", list size is " + flagList.size());
-            }
+        // fire the change
+        ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
+        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
+            ListSelectionListener listener = (ListSelectionListener)i.next();
+            listener.valueChanged(event);
+        }
+    }
 
-            // when the first range is empty
-            if(changeIndex0 == -1 && changeIndex1 == -1) {
-                // if the second range is empty, we're done
-                if(invertIndex0 == -1 && invertIndex1 == -1) return;
-                // otherwise set the first range to the second range and invert the goal
-                changeIndex0 = invertIndex0;
-                changeIndex1 = invertIndex1;
-                select = !select;
-            }
-            // when the second range is empty
-            if(invertIndex0 == -1 && invertIndex1 == -1) {
-                // make this a subset of the first index which behaves the same as empty
-                invertIndex0 = changeIndex0;
-                invertIndex1 = changeIndex1;
-            }
-
-            // now get the change interval and invert interval
-            int minChangeIndex = Math.min(changeIndex0, changeIndex1);
-            int maxChangeIndex = Math.max(changeIndex0, changeIndex1);
-            int minInvertIndex = Math.min(invertIndex0, invertIndex1);
-            int maxInvertIndex = Math.max(invertIndex0, invertIndex1);
-
-            // get the union of the two ranges
-            int minUnionIndex = Math.min(minChangeIndex, minInvertIndex);
-            int maxUnionIndex = Math.max(maxChangeIndex, maxInvertIndex);
-
-            // keep track of the minimum and maximum change range
-            int minChangedIndex = maxUnionIndex + 1;
-            int maxChangedIndex = minUnionIndex - 1;
-
-            // prepare a sequence of changes
-            updates.beginEvent();
-
-            // walk through the list making changes
-            for(int i = minUnionIndex; i <= maxUnionIndex; i++) {
-                boolean selectedBefore = (flagList.get(i) != null);
-                boolean inChangeRange = (i >= minChangeIndex && i <= maxChangeIndex);
-                boolean selectedAfter = (inChangeRange == select);
-                // when there's a change
-                if(selectedBefore != selectedAfter) {
-                    // update change range
-                    if(i < minChangedIndex) minChangedIndex = i;
-                    if(i > maxChangedIndex) maxChangedIndex = i;
-
-                    // if it is being deselected
-                    if(selectedBefore) {
-                        int selectionIndex = flagList.getCompressedIndex(i);
-                        flagList.set(i, null);
-                        updates.addDelete(selectionIndex);
-                    // if it is being selected
-                    } else {
-                        flagList.set(i, Boolean.TRUE);
-                        int selectionIndex = flagList.getCompressedIndex(i);
-                        updates.addInsert(selectionIndex);
-                    }
-                }
-            }
-
-            // notify event lists first
-            updates.commitEvent();
-
-            // notify list selection listeners second
-            if(minChangedIndex <= maxChangedIndex) fireSelectionChanged(minChangedIndex, maxChangedIndex);
+    /**
+     * Walks through the union of the specified ranges. All values in the
+     * first range are given the specified selection value. All values in
+     * the second range but not in the first range are given the opposite
+     * selection value. In effect, the first range and the intersection of
+     * the two ranges are given the specified value. The parts that are
+     * in the second range but not in the first range (ie. everything else)
+     * is given the opposite selection value.
+     *
+     * @param select true to set values in the first range as selected and
+     *      the other values in the second range as not selected. false to
+     *      set values in the first range as not selected and the other
+     *      values in the second range as selected.
+     * @param changeIndex0 one end of the first range, inclusive.
+     * @param changeIndex1 the opposite end of the first range, inclusive.
+     *      This may be lower than changeIndex0.
+     * @param invertIndex0 one end of the second range, inclusive. To
+     *      specify an empty second range, specify -1 for this value.
+     * @param invertIndex1 the opposite end of the second range, inclusive.
+     *      This may be lower than invertIndex0. To specify an empty second
+     *      range, specify -1 for this value.
+     */
+    private void setSubRangeOfRange(boolean select, int changeIndex0, int changeIndex1, int invertIndex0, int invertIndex1) {
+        // verify that the first range is legitimate
+        if(changeIndex0 >= flagList.size() || changeIndex1 >= flagList.size()
+        || ((changeIndex0 == -1 || changeIndex1 == -1) && changeIndex0 != changeIndex1)) {
+            throw new IndexOutOfBoundsException("Invalid range for selection: " + changeIndex0 + "-" + changeIndex1 + ", list size is " + flagList.size());
+        }
+        // verify that the second range is legitimate
+        if(invertIndex0 >= flagList.size() || invertIndex1 >= flagList.size()
+        || ((invertIndex0 == -1 || invertIndex1 == -1) && invertIndex0 != invertIndex1)) {
+            throw new IndexOutOfBoundsException("Invalid range for invert selection: " + invertIndex0 + "-" + invertIndex1 + ", list size is " + flagList.size());
         }
 
-        /**
-         * Change the selection to be between index0 and index1 inclusive.
-         *
-         * <p>First this calculates the smallest range where changes occur. This
-         * includes the union of the selection range before and the selection
-         * range specified. It then walks through the change and sets each
-         * index as selected or not based on whether the index is in the
-         * new range. Finally it fires events to both the listening lists and
-         * selection listeners about what changes happened.
-         *
-         * <p>If the selection does not change, this will not fire any events.
-         */
-        public void setSelectionInterval(int index0, int index1) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                if(!enabled) return;
+        // when the first range is empty
+        if(changeIndex0 == -1 && changeIndex1 == -1) {
+            // if the second range is empty, we're done
+            if(invertIndex0 == -1 && invertIndex1 == -1) return;
+            // otherwise set the first range to the second range and invert the goal
+            changeIndex0 = invertIndex0;
+            changeIndex1 = invertIndex1;
+            select = !select;
+        }
+        // when the second range is empty
+        if(invertIndex0 == -1 && invertIndex1 == -1) {
+            // make this a subset of the first index which behaves the same as empty
+            invertIndex0 = changeIndex0;
+            invertIndex1 = changeIndex1;
+        }
 
-                // handle a clear
-                if(index0 < 0 || index1 < 0) {
-                    clearSelection();
-                    return;
-                }
+        // now get the change interval and invert interval
+        int minChangeIndex = Math.min(changeIndex0, changeIndex1);
+        int maxChangeIndex = Math.max(changeIndex0, changeIndex1);
+        int minInvertIndex = Math.min(invertIndex0, invertIndex1);
+        int maxInvertIndex = Math.max(invertIndex0, invertIndex1);
 
-                // update anchor and lead
-                anchorSelectionIndex = index0;
-                leadSelectionIndex = index1;
+        // get the union of the two ranges
+        int minUnionIndex = Math.min(minChangeIndex, minInvertIndex);
+        int maxUnionIndex = Math.max(maxChangeIndex, maxInvertIndex);
 
-                // set the selection to the range and nothing else
-                if(selectionMode == SINGLE_SELECTION) {
-                    setSubRangeOfRange(true, index0, index0, getMinSelectionIndex(), getMaxSelectionIndex());
+        // keep track of the minimum and maximum change range
+        int minChangedIndex = maxUnionIndex + 1;
+        int maxChangedIndex = minUnionIndex - 1;
+
+        // prepare a sequence of changes
+        updates.beginEvent();
+
+        // walk through the list making changes
+        for(int i = minUnionIndex; i <= maxUnionIndex; i++) {
+            boolean selectedBefore = (flagList.get(i) != null);
+            boolean inChangeRange = (i >= minChangeIndex && i <= maxChangeIndex);
+            boolean selectedAfter = (inChangeRange == select);
+            // when there's a change
+            if(selectedBefore != selectedAfter) {
+                // update change range
+                if(i < minChangedIndex) minChangedIndex = i;
+                if(i > maxChangedIndex) maxChangedIndex = i;
+
+                // if it is being deselected
+                if(selectedBefore) {
+                    int selectionIndex = flagList.getCompressedIndex(i);
+                    flagList.set(i, null);
+                    updates.addDelete(selectionIndex);
+                // if it is being selected
                 } else {
-                    setSubRangeOfRange(true, index0, index1, getMinSelectionIndex(), getMaxSelectionIndex());
+                    flagList.set(i, Boolean.TRUE);
+                    int selectionIndex = flagList.getCompressedIndex(i);
+                    updates.addInsert(selectionIndex);
                 }
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
         }
 
-        /**
-         * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
-         */
-        public void addSelectionInterval(int index0, int index1) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                if(!enabled) return;
+        // notify event lists first
+        updates.commitEvent();
 
-                // handle a no-op
-                if(index0 < 0 || index1 < 0) {
-                    return;
-                }
+        // notify list selection listeners second
+        if(minChangedIndex <= maxChangedIndex) fireSelectionChanged(minChangedIndex, maxChangedIndex);
+    }
 
-                // update anchor and lead
-                anchorSelectionIndex = index0;
-                leadSelectionIndex = index1;
+    /**
+     * Change the selection to be between index0 and index1 inclusive.
+     *
+     * <p>First this calculates the smallest range where changes occur. This
+     * includes the union of the selection range before and the selection
+     * range specified. It then walks through the change and sets each
+     * index as selected or not based on whether the index is in the
+     * new range. Finally it fires events to both the listening lists and
+     * selection listeners about what changes happened.
+     *
+     * <p>If the selection does not change, this will not fire any events.
+     */
+    public void setSelectionInterval(int index0, int index1) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            if(!enabled) return;
 
-                // add this and deselect everything
-                if(selectionMode == SINGLE_SELECTION) {
-                    setSubRangeOfRange(true, index0, index0, getMinSelectionIndex(), getMaxSelectionIndex());
+            // handle a clear
+            if(index0 < 0 || index1 < 0) {
+                clearSelection();
+                return;
+            }
 
-                // add this interval and deselect every other interval
-                } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
+            // update anchor and lead
+            anchorSelectionIndex = index0;
+            leadSelectionIndex = index1;
 
-                    // test if the current and new selection overlap
-                    boolean overlap = false;
-                    int minSelectedIndex = getMinSelectionIndex();
-                    int maxSelectedIndex = getMaxSelectionIndex();
-                    if(minSelectedIndex - 1 <= index0 && index0 <= maxSelectedIndex + 1) overlap = true;
-                    if(minSelectedIndex - 1 <= index1 && index1 <= maxSelectedIndex + 1) overlap = true;
+            // set the selection to the range and nothing else
+            if(selectionMode == SINGLE_SELECTION) {
+                setSubRangeOfRange(true, index0, index0, getMinSelectionIndex(), getMaxSelectionIndex());
+            } else {
+                setSubRangeOfRange(true, index0, index1, getMinSelectionIndex(), getMaxSelectionIndex());
+            }
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+        }
+    }
 
-                    // if they overlap, do not clear anything
-                    if(overlap) {
-                        setSubRangeOfRange(true, index0, index1, -1, -1);
-                    // otherwise clear the previous selection
-                    } else {
-                        setSubRangeOfRange(true, index0, index1, minSelectedIndex, maxSelectedIndex);
-                    }
+    /**
+     * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
+     */
+    public void addSelectionInterval(int index0, int index1) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            if(!enabled) return;
 
-                // select the specified interval without deselecting anything
-                } else {
+            // handle a no-op
+            if(index0 < 0 || index1 < 0) {
+                return;
+            }
+
+            // update anchor and lead
+            anchorSelectionIndex = index0;
+            leadSelectionIndex = index1;
+
+            // add this and deselect everything
+            if(selectionMode == SINGLE_SELECTION) {
+                setSubRangeOfRange(true, index0, index0, getMinSelectionIndex(), getMaxSelectionIndex());
+
+            // add this interval and deselect every other interval
+            } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
+
+                // test if the current and new selection overlap
+                boolean overlap = false;
+                int minSelectedIndex = getMinSelectionIndex();
+                int maxSelectedIndex = getMaxSelectionIndex();
+                if(minSelectedIndex - 1 <= index0 && index0 <= maxSelectedIndex + 1) overlap = true;
+                if(minSelectedIndex - 1 <= index1 && index1 <= maxSelectedIndex + 1) overlap = true;
+
+                // if they overlap, do not clear anything
+                if(overlap) {
                     setSubRangeOfRange(true, index0, index1, -1, -1);
-                }
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
-            }
-        }
-        /**
-         * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
-         */
-        public void removeSelectionInterval(int index0, int index1) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                if(!enabled) return;
-
-                // handle a no-op
-                if(index0 < 0 || index1 < 0 || flagList.isEmpty()) {
-                    return;
-                }
-
-                // update anchor and lead
-                anchorSelectionIndex = index0;
-                leadSelectionIndex = index1;
-
-                // deselect everything
-                if(selectionMode == SINGLE_SELECTION) {
-                    setSubRangeOfRange(false, getMinSelectionIndex(), getMaxSelectionIndex(), -1, -1);
-                // deselect from this to the end
-                } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
-                    setSubRangeOfRange(false, index0, getMaxSelectionIndex(), -1, -1);
-                // deselect the specified interval without selecting anything
+                // otherwise clear the previous selection
                 } else {
-                    setSubRangeOfRange(false, index0, index1, -1, -1);
-                }
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
-            }
-        }
-
-        /**
-         * Returns the first selected index or -1 if the selection is empty.
-         */
-        public int getMinSelectionIndex() {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                if(flagList.getCompressedList().size() == 0) return -1;
-                return flagList.getIndex(0);
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
-            }
-        }
-        /**
-         * Returns the last selected index or -1 if the selection is empty.
-         */
-        public int getMaxSelectionIndex() {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                if(flagList.getCompressedList().size() == 0) return -1;
-                return flagList.getIndex(flagList.getCompressedList().size() - 1);
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
-            }
-        }
-        /**
-         * Returns true if the specified index is selected. If the specified
-         * index has not been seen before, this will return false. This is
-         * in the case where the table painting and selection have fallen
-         * out of sync. Usually in this case there is an update event waiting
-         * in the event queue that notifies this model of the change
-         * in table size.
-         */
-        public boolean isSelectedIndex(int index) {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                // bail if index is too high
-                if(index < 0 || index >= flagList.size()) {
-                    //throw new ArrayIndexOutOfBoundsException("Cannot get selection index " + index + ", list size " + flagList.size() + " pending " + source.size());
-                    return false;
+                    setSubRangeOfRange(true, index0, index1, minSelectedIndex, maxSelectedIndex);
                 }
 
-                // a value is selected if it is not null in the flag list
-                return (flagList.get(index) != null);
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
+            // select the specified interval without deselecting anything
+            } else {
+                setSubRangeOfRange(true, index0, index1, -1, -1);
             }
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
         }
+    }
+    /**
+     * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
+     */
+    public void removeSelectionInterval(int index0, int index1) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            if(!enabled) return;
 
-        /**
-         * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
-         */
-        public int getAnchorSelectionIndex() {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                return anchorSelectionIndex;
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
+            // handle a no-op
+            if(index0 < 0 || index1 < 0 || flagList.isEmpty()) {
+                return;
             }
-        }
-        /**
-         * Set the anchor selection index.
-         */
-        public void setAnchorSelectionIndex(int anchorSelectionIndex) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                if(!enabled) return;
 
-                // update anchor
-                this.anchorSelectionIndex = anchorSelectionIndex;
+            // update anchor and lead
+            anchorSelectionIndex = index0;
+            leadSelectionIndex = index1;
 
-                // handle a clear
-                if(anchorSelectionIndex == -1) {
-                    clearSelection();
-                    return;
-                }
-
-                // select the interval to be the anchor
-                if(selectionMode == SINGLE_SELECTION) {
-                    setSubRangeOfRange(true, anchorSelectionIndex, anchorSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-                // select the interval between anchor and lead
-                } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
-                    setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-                // select the interval between anchor and lead without deselecting anything
-                } else {
-                    setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, -1, -1);
-                }
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
-            }
-        }
-        /**
-         * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
-         */
-        public int getLeadSelectionIndex() {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                return leadSelectionIndex;
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
-            }
-        }
-        /**
-         * Set the lead selection index.
-         */
-        public void setLeadSelectionIndex(int leadSelectionIndex) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                if(!enabled) return;
-
-                // update lead
-                int originalLeadIndex = this.leadSelectionIndex;
-                this.leadSelectionIndex = leadSelectionIndex;
-
-                // handle a clear
-                if(leadSelectionIndex == -1) {
-                    clearSelection();
-                    return;
-                }
-
-                // select the interval to be the lead
-                if(selectionMode == SINGLE_SELECTION) {
-                    setSubRangeOfRange(true, leadSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-
-                // select the interval between anchor and lead
-                } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
-                    setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-
-                // select the interval between anchor and lead without deselecting anything
-                } else {
-                    setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, anchorSelectionIndex, originalLeadIndex);
-                }
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
-            }
-        }
-
-        /**
-         * Change the selection to the empty set.
-         */
-        public void clearSelection() {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                if(!enabled) return;
-
+            // deselect everything
+            if(selectionMode == SINGLE_SELECTION) {
                 setSubRangeOfRange(false, getMinSelectionIndex(), getMaxSelectionIndex(), -1, -1);
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            // deselect from this to the end
+            } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
+                setSubRangeOfRange(false, index0, getMaxSelectionIndex(), -1, -1);
+            // deselect the specified interval without selecting anything
+            } else {
+                setSubRangeOfRange(false, index0, index1, -1, -1);
             }
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
         }
-        /**
-         * Returns true if no indices are selected.
-         */
-        public boolean isSelectionEmpty() {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                return (flagList.getCompressedList().size() == 0);
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
+    }
+
+    /**
+     * Returns the first selected index or -1 if the selection is empty.
+     */
+    public int getMinSelectionIndex() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            if(flagList.getCompressedList().size() == 0) return -1;
+            return flagList.getIndex(0);
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
+        }
+    }
+    /**
+     * Returns the last selected index or -1 if the selection is empty.
+     */
+    public int getMaxSelectionIndex() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            if(flagList.getCompressedList().size() == 0) return -1;
+            return flagList.getIndex(flagList.getCompressedList().size() - 1);
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
+        }
+    }
+    /**
+     * Returns true if the specified index is selected. If the specified
+     * index has not been seen before, this will return false. This is
+     * in the case where the table painting and selection have fallen
+     * out of sync. Usually in this case there is an update event waiting
+     * in the event queue that notifies this model of the change
+     * in table size.
+     */
+    public boolean isSelectedIndex(int index) {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            // bail if index is too high
+            if(index < 0 || index >= flagList.size()) {
+                //throw new ArrayIndexOutOfBoundsException("Cannot get selection index " + index + ", list size " + flagList.size() + " pending " + source.size());
+                return false;
             }
-        }
 
-        /**
-         * Insert length indices beginning before/after index.
-         */
-        public void insertIndexInterval(int index, int length, boolean before) {
-            // these changes are handled by the ListEventListener
+            // a value is selected if it is not null in the flag list
+            return (flagList.get(index) != null);
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
         }
-        /**
-         * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
-         */
-        public void removeIndexInterval(int index0, int index1) {
-            // these changes are handled by the ListEventListener
+    }
+
+    /**
+     * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
+     */
+    public int getAnchorSelectionIndex() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            return anchorSelectionIndex;
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
         }
+    }
+    /**
+     * Set the anchor selection index.
+     */
+    public void setAnchorSelectionIndex(int anchorSelectionIndex) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            if(!enabled) return;
 
-        /**
-         * This property is true if upcoming changes to the value  of the model should be considered a single event.
-         */
-        public void setValueIsAdjusting(boolean valueIsAdjusting) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                this.valueIsAdjusting = valueIsAdjusting;
+            // update anchor
+            this.anchorSelectionIndex = anchorSelectionIndex;
 
-                // fire one extra change containing all changes in this set
-                if(!valueIsAdjusting) {
-                    if(fullChangeStart != -1 && fullChangeFinish != -1) {
-                        fireSelectionChanged(fullChangeStart, fullChangeFinish);
-                        fullChangeStart = -1;
-                        fullChangeFinish = -1;
-                    }
+            // handle a clear
+            if(anchorSelectionIndex == -1) {
+                clearSelection();
+                return;
+            }
+
+            // select the interval to be the anchor
+            if(selectionMode == SINGLE_SELECTION) {
+                setSubRangeOfRange(true, anchorSelectionIndex, anchorSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+            // select the interval between anchor and lead
+            } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
+                setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+            // select the interval between anchor and lead without deselecting anything
+            } else {
+                setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, -1, -1);
+            }
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+        }
+    }
+    /**
+     * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
+     */
+    public int getLeadSelectionIndex() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            return leadSelectionIndex;
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
+        }
+    }
+    /**
+     * Set the lead selection index.
+     */
+    public void setLeadSelectionIndex(int leadSelectionIndex) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            if(!enabled) return;
+
+            // update lead
+            int originalLeadIndex = this.leadSelectionIndex;
+            this.leadSelectionIndex = leadSelectionIndex;
+
+            // handle a clear
+            if(leadSelectionIndex == -1) {
+                clearSelection();
+                return;
+            }
+
+            // select the interval to be the lead
+            if(selectionMode == SINGLE_SELECTION) {
+                setSubRangeOfRange(true, leadSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+
+            // select the interval between anchor and lead
+            } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
+                setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+
+            // select the interval between anchor and lead without deselecting anything
+            } else {
+                setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, anchorSelectionIndex, originalLeadIndex);
+            }
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+        }
+    }
+
+    /**
+     * Change the selection to the empty set.
+     */
+    public void clearSelection() {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            if(!enabled) return;
+
+            setSubRangeOfRange(false, getMinSelectionIndex(), getMaxSelectionIndex(), -1, -1);
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+        }
+    }
+    /**
+     * Returns true if no indices are selected.
+     */
+    public boolean isSelectionEmpty() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            return (flagList.getCompressedList().size() == 0);
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    /**
+     * Insert length indices beginning before/after index.
+     */
+    public void insertIndexInterval(int index, int length, boolean before) {
+        // these changes are handled by the ListEventListener
+    }
+    /**
+     * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
+     */
+    public void removeIndexInterval(int index0, int index1) {
+        // these changes are handled by the ListEventListener
+    }
+
+    /**
+     * This property is true if upcoming changes to the value  of the model should be considered a single event.
+     */
+    public void setValueIsAdjusting(boolean valueIsAdjusting) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            this.valueIsAdjusting = valueIsAdjusting;
+
+            // fire one extra change containing all changes in this set
+            if(!valueIsAdjusting) {
+                if(fullChangeStart != -1 && fullChangeFinish != -1) {
+                    fireSelectionChanged(fullChangeStart, fullChangeFinish);
+                    fullChangeStart = -1;
+                    fullChangeFinish = -1;
                 }
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
         }
+    }
 
-        /**
-         * Returns true if the value is undergoing a series of changes.
-         */
-        public boolean getValueIsAdjusting() {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                return valueIsAdjusting;
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
+    /**
+     * Returns true if the value is undergoing a series of changes.
+     */
+    public boolean getValueIsAdjusting() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            return valueIsAdjusting;
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    /**
+     * Set the selection mode.
+     */
+    public void setSelectionMode(int selectionMode) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            this.selectionMode = selectionMode;
+
+            // ensure the selection is no more than a single element
+            if(selectionMode == SINGLE_SELECTION) {
+                setSubRangeOfRange(true, getMinSelectionIndex(), getMinSelectionIndex(), getMinSelectionIndex(), getMaxSelectionIndex());
+
+            // ensure the selection is no more than a single interval
+            } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
+                setSubRangeOfRange(true, getMinSelectionIndex(), getMaxSelectionIndex(), getMinSelectionIndex(), getMaxSelectionIndex());
             }
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
         }
+    }
 
-        /**
-         * Set the selection mode.
-         */
-        public void setSelectionMode(int selectionMode) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
-            try {
-                this.selectionMode = selectionMode;
-
-                // ensure the selection is no more than a single element
-                if(selectionMode == SINGLE_SELECTION) {
-                    setSubRangeOfRange(true, getMinSelectionIndex(), getMinSelectionIndex(), getMinSelectionIndex(), getMaxSelectionIndex());
-
-                // ensure the selection is no more than a single interval
-                } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
-                    setSubRangeOfRange(true, getMinSelectionIndex(), getMaxSelectionIndex(), getMinSelectionIndex(), getMaxSelectionIndex());
-                }
-            } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
-            }
+    /**
+     * Returns the current selection mode.
+     */
+    public int getSelectionMode() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            return selectionMode;
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
         }
+    }
 
-        /**
-         * Returns the current selection mode.
-         */
-        public int getSelectionMode() {
-            eventList.getReadWriteLock().readLock().lock();
-            try {
-                return selectionMode;
-            } finally {
-                eventList.getReadWriteLock().readLock().unlock();
-            }
-        }
-
-        /**
-         * Add a listener to the list that's notified each time a change to
-         * the selection occurs.
-         *
-         * Note that the change events fired by this class may include rows
-         * that have been removed from the table. For this reason it is
-         * advised not to <code>for()</code> through the changed range without
-         * also verifying that each row is still in the table.
-         */
-        public void addListSelectionListener(ListSelectionListener listener) {
-            listeners.add(listener);
-        }
-        /**
-         * Remove a listener from the list that's notified each time a change to the selection occurs.
-         */
-        public void removeListSelectionListener(ListSelectionListener listener) {
-            listeners.remove(listener);
-        }
+    /**
+     * Add a listener to the list that's notified each time a change to
+     * the selection occurs.
+     *
+     * Note that the change events fired by this class may include rows
+     * that have been removed from the table. For this reason it is
+     * advised not to <code>for()</code> through the changed range without
+     * also verifying that each row is still in the table.
+     */
+    public void addListSelectionListener(ListSelectionListener listener) {
+        listeners.add(listener);
+    }
+    /**
+     * Remove a listener from the list that's notified each time a change to the selection occurs.
+     */
+    public void removeListSelectionListener(ListSelectionListener listener) {
+        listeners.remove(listener);
     }
 }
