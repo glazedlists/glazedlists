@@ -54,36 +54,21 @@ public class BeanComparatorTest extends TestCase {
         assertEquals(sorted1, sorted2);
     }
 
-
     /**
      * Simple class that sorts in the same order as its position value.
      */
     public static class Position implements Comparable {
-        int position;
-    
+        private int position;
         public Position(int position) {
-            super();
             this.position = position;
         }
-    
-        public int getPosition() {
-            return position;
-        }
-    
-        public void setPosition(int order) {
-            this.position = order;
-        }
-    
-        /**
-         * @see java.lang.Comparable#compareTo(java.lang.Object)
-         */
-        public int compareTo(Object o) {
-            return position - ((Position)o).position;
-        }
-        
+        public int getPosition() { return position; }
+        public void setPosition(int position) { this.position = position; }
         public String toString() {
             return "P:" + position;
         }
+        public int compareTo(Object o) { 
+            return position - ((Position)o).position;
+        }
     }
 }
-

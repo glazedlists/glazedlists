@@ -514,11 +514,11 @@ public class SortedListTest extends TestCase {
     public void testAlwaysEqualComparator() {
         Comparator alwaysEqualComparator = new AlwaysEqualComparator();
         sortedList.dispose();
+        unsortedList.add(new Integer(4));
+        unsortedList.add(new Integer(3));
+        unsortedList.add(new Integer(1));
+
         sortedList = new SortedList(unsortedList, alwaysEqualComparator);
-        
-        unsortedList.add(new Integer(8));
-        unsortedList.add(new Integer(6));
-        unsortedList.add(new Integer(7));
         unsortedList.add(new Integer(5));
         unsortedList.add(new Integer(3));
         unsortedList.add(new Integer(0));
@@ -527,11 +527,57 @@ public class SortedListTest extends TestCase {
     }
     
     /**
+     * Test that the SortedList doesn't get grumpy if half the elements are null.
+     */
+    public void testHalfNullComparator() {
+        Comparator halfNullComparator = new HalfNullComparator();
+        sortedList.dispose();
+        Position p = new Position(4);
+        unsortedList.add(p);
+        unsortedList.add(new Position(3));
+        unsortedList.add(new Position(1));
+
+        sortedList = new SortedList(unsortedList, halfNullComparator);
+
+        p.setPosition(2);
+        sortedList.set(2, p);
+        assertEquals(unsortedList, sortedList);
+    }
+
+    /**
      * Compares two objects to be equal.
      */
     class AlwaysEqualComparator implements Comparator {
         public int compare(Object a, Object b) {
             return 0;
+        }
+    }
+
+    /**
+     * Compares two objects with the second one always null.
+     */
+    class HalfNullComparator implements Comparator {
+        Comparator target = GlazedLists.comparableComparator();
+        public int compare(Object a, Object b) {
+            return target.compare(b, null);
+        }
+    }
+
+    /**
+     * Simple class that sorts in the same order as its position value.
+     */
+    static class Position implements Comparable {
+        private int position;
+        public Position(int position) {
+            this.position = position;
+        }
+        public int getPosition() { return position; }
+        public void setPosition(int position) { this.position = position; }
+        public String toString() {
+            return "P:" + position;
+        }
+        public int compareTo(Object o) { 
+            return position - ((Position)o).position;
         }
     }
 
