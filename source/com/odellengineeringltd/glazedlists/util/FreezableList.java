@@ -51,10 +51,12 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      * mutation lists will override the get method to use a mapping.
      */
     public Object get(int index) {
-        if(frozen) {
-            return frozenData.get(index);
-        } else {
-            return source.get(index);
+        synchronized(getRootList()) {
+            if(frozen) {
+                return frozenData.get(index);
+            } else {
+                return source.get(index);
+            }
         }
     }
     
@@ -62,10 +64,12 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      * Returns the number of elements in this list.
      */
     public int size() {
-        if(frozen) {
-            return frozenData.size();
-        } else {
-            return source.size();
+        synchronized(getRootList()) {
+            if(frozen) {
+                return frozenData.size();
+            } else {
+                return source.size();
+            }
         }
     }
     
@@ -145,19 +149,21 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      * frozen.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        if(frozen) {
-            // when a list change event arrives and this list is frozen,
-            // it is possible that the event was queued before this list
-            // was frozen. for this reason we do not throw any exceptions
-            // but instead silently ignore the event
-            
-        } else {
-            // just pass on the changes
-            updates.beginAtomicChange();
-            while(listChanges.next()) {
-                updates.appendChange(listChanges.getIndex(), listChanges.getType());
+        synchronized(getRootList()) {
+            if(frozen) {
+                // when a list change event arrives and this list is frozen,
+                // it is possible that the event was queued before this list
+                // was frozen. for this reason we do not throw any exceptions
+                // but instead silently ignore the event
+                
+            } else {
+                // just pass on the changes
+                updates.beginAtomicChange();
+                while(listChanges.next()) {
+                    updates.appendChange(listChanges.getIndex(), listChanges.getType());
+                }
+                updates.commitAtomicChange();
             }
-            updates.commitAtomicChange();
         }
     }
 }

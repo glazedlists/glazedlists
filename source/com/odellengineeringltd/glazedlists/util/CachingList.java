@@ -59,14 +59,12 @@ public class CachingList extends WritableMutationList implements ListChangeListe
         // attempt to get the element from the cache
         value = cache.get(indexObject);
         if(value != null) {
-            System.out.print("C");
             cacheHits++;
             return value;
         }
 
         // get the element from the source list and cache it
         cacheMisses++;
-        System.out.print(".");
         value = source.get(index);
         cache.put(indexObject, value);
         return value;

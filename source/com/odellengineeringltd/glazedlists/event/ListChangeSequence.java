@@ -19,7 +19,7 @@ import java.util.ConcurrentModificationException;
  * that occur on a continuous set of rows are grouped into blocks
  * automatically for performance benefits.
  *
- * Atomic sets of changes may involve many lines of changes and many blocks
+ * <p>Atomic sets of changes may involve many lines of changes and many blocks
  * of changes. They are committed to the queue in one action. No other threads
  * should be creating a change on the same list change queue when an atomic
  * change is being created.
@@ -28,8 +28,6 @@ import java.util.ConcurrentModificationException;
  */
 public class ListChangeSequence {
     
-    /** the set of non-contiguous changes */
-    //private ArrayList changeBlocks = new ArrayList();
     /** the list of lists of change blocks */
     private ArrayList atomicChanges = new ArrayList();
     private int oldestChange = 0;
@@ -221,10 +219,27 @@ public class ListChangeSequence {
     /**
      * Removes the specified listener from receiving notification when new
      * changes are appended to this list change sequence.
+     *
+     * This uses the <code>==</code> identity comparison to find the listener
+     * instead of <code>equals()</code>. This is because multiple Lists may be
+     * listening and therefore <code>equals()</code> may be ambiguous.
      */
     public synchronized void removeListChangeListener(ListChangeListener listChangeListener) {
-        int index = listeners.indexOf(listChangeListener);
-        listeners.remove(index);
-        listenerEvents.remove(index);
+        // find the listener
+        int index = -1;
+        for(int i = 0; i < listeners.size(); i++) {
+            if(listeners.get(i) == listChangeListener) {
+                index = i;
+                break;
+            }
+        }
+
+        // remove the listener
+        if(index != -1) {
+            listenerEvents.remove(index);
+            listeners.remove(index);
+        } else {
+            throw new IllegalArgumentException("Cannot remove nonexistent listener " + listChangeListener);
+        }
     }
 }
