@@ -61,12 +61,40 @@ public class TaskContext {
     }
     
     /**
+     * Convenience method for setting the progress of this task and simultaneously
+     * updating the action caption.
+     */
+    public void setProgress(double progress, String actionCaption) {
+        // update the progress
+        if(progress < 0.0 || progress > 1.0) throw new RuntimeException("Progress must be between 0.0 and 1.0");
+        this.progress = progress;
+        this.busy = false;
+        // update the action caption
+        this.actionCaption = actionCaption;
+        // notify changes
+        taskManager.taskUpdated(this);
+    }
+    
+    /**
      * When a task is performing work with an indeterminite completion time
      * it should call setBusy() to notify the user that work is being
      * performed.
      */
     public void setBusy(boolean busy) {
         this.busy = busy;
+        taskManager.taskUpdated(this);
+    }
+    
+    /**
+     * Convenience method for setting this task's indeterminite completion time
+     * and simultaneously updating the action caption.
+     */
+    public void setBusy(boolean busy, String actionCaption) {
+        // update the task being busy
+        this.busy = busy;
+        // update the action caption
+        this.actionCaption = actionCaption;
+        // notify changes
         taskManager.taskUpdated(this);
     }
     
@@ -148,8 +176,6 @@ public class TaskContext {
     /**
      * When a task runner finishes a task, it tells the task manager so that
      * the manager can clean up the task and possibly re-use the TaskRunner.
-     * Implementors should strongly consider synchronizing this method as multiple
-     * task runners may complete their tasks simultaneously.
      */
     public synchronized void taskComplete() {
         progress = 1.0;
@@ -158,8 +184,6 @@ public class TaskContext {
     
     /**
      * When a task runner finishes a task that ended due to a cancellation.
-     * Implementors should strongly consider synchronizing this method as multiple
-     * task runners may complete their tasks simultaneously.
      */
     public synchronized void taskInterrupted(InterruptedException e) {
         finishedException = e;
@@ -170,8 +194,6 @@ public class TaskContext {
     
     /**
      * When a task runner finishes a task that ended due to a failure.
-     * Implementors should strongly consider synchronizing this method as multiple
-     * task runners may complete their tasks simultaneously.
      */
     public synchronized void taskFailed(Exception e) {
         finishedException = e;
