@@ -43,7 +43,7 @@ public abstract class SwingTestCase extends TestCase {
     public static final String SET_UP_METHOD = "guiSetUp";
     public static final String TEAR_DOWN_METHOD = "guiTearDown";
     public static final String JUNIT_BAD_PREFIX = "test";
-    public static final String JUNIT_OK_PREFIX = "test";
+    public static final String JUNIT_OK_METHOD = "testGui";
     
     /** useful empty arrays */
     private static final Class[] DECLARE_NO_PARAMETERS = new Class[0];
@@ -102,7 +102,7 @@ public abstract class SwingTestCase extends TestCase {
                 // run all test methods
                 Method[] allMethods = guiClass.getDeclaredMethods();
                 for(int m = 0; m < allMethods.length; m++) {
-                    if(!allMethods[m].getName().startsWith(JUNIT_OK_PREFIX) && allMethods[m].getName().startsWith(JUNIT_BAD_PREFIX)) throw new IllegalStateException("No testXXX() methods allowed in decendents of SwingTestCase, use guiTestXXX() instead.");
+                    if(!allMethods[m].getName().equals(JUNIT_OK_METHOD) && allMethods[m].getName().startsWith(JUNIT_BAD_PREFIX)) throw new IllegalStateException("No testXXX() methods allowed in decendents of SwingTestCase, use guiTestXXX() instead.");
                     if(!allMethods[m].getName().startsWith(TEST_METHOD_PREFIX)) continue;
                     
                     System.out.println("Running " + allMethods[m].getName());
