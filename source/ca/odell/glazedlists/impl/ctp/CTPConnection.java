@@ -7,6 +7,7 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
+import ca.odell.glazedlists.impl.nio.*;
 import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -34,7 +35,7 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class CTPConnection {
+public final class CTPConnection implements NIOHandler {
     // client:
     // AWAITING_CONNECT
     //   --[connect]-->
@@ -182,7 +183,7 @@ public final class CTPConnection {
     /**
      * Handles the incoming bytes.
      */
-    void handleRead() {
+    public void handleRead() {
         // read at least a byte of data
         try {
             int bytesIn = parser.readFromChannel(socketChannel);
@@ -216,7 +217,7 @@ public final class CTPConnection {
     /**
      * When we can write, flush the output stream.
      */
-    void handleWrite() {
+    public void handleWrite() {
         // do the write
         try {
             writer.writeToChannel(socketChannel, selectionKey);
@@ -228,7 +229,7 @@ public final class CTPConnection {
     /**
      * When connected, prepare the higher-level connection.
      */
-    void handleConnect() {
+    public void handleConnect() {
         // finish up the connect() process
         try {
             socketChannel.finishConnect();
@@ -324,13 +325,16 @@ public final class CTPConnection {
                 sendResponse(RESPONSE_OK, Collections.EMPTY_MAP);
                 return true;
             } else {
-                return close(new Exception("Could not find URI \"" + uri + "\""));
+                close(new Exception("Could not find URI \"" + uri + "\""));
+                return false;
             }
 
         } catch(ParseException e) {
-            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            return false;
         } catch(IOException e) {
-            return close(e);
+            close(e);
+            return false;
         }
     }
     
@@ -408,15 +412,19 @@ public final class CTPConnection {
                 handler.connectionReady(this);
                 return true;
             } else {
-                return close(null);
+                close(null);
+                return false;
             }
 
         } catch(ParseException e) {
-            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            return false;
         } catch(NumberFormatException e) {
-            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            return false;
         } catch(IOException e) {
-            return close(e);
+            close(e);
+            return false;
         }
     }
 
@@ -431,7 +439,7 @@ public final class CTPConnection {
      *      is safe to modify afterwards.
      */
     public void sendChunk(Bufferlo data) {
-        manager.invokeAndWait(new CTPChunkToSend(this, data));
+        manager.getNIODaemon().invokeAndWait(new CTPChunkToSend(this, data));
     }
 
     /**
@@ -475,7 +483,8 @@ public final class CTPConnection {
                     handler.receiveChunk(this, chunkData);
                     return true;
                 } else {
-                    return close();
+                    close();
+                    return false;
                 }
 
             } else {
@@ -491,9 +500,11 @@ public final class CTPConnection {
             }
             
         } catch(NumberFormatException e) {
-            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            return false;
         } catch(ParseException e) {
-            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
+            return false;
         }
     }
 
@@ -508,8 +519,9 @@ public final class CTPConnection {
      * Closes the connection to the client. As specified by the HTTP/1.1 RFC,
      * this sends a single empty chunk and closes the TCP/IP connection.
      */
-    public synchronized boolean close() {
-        return close(null);
+    public synchronized void close() {
+        //return close(null);
+        close(null);
     }
     
     /**
@@ -526,11 +538,11 @@ public final class CTPConnection {
      * @return This method returns false because the connection is always in an
      *      unreadable and unwritable state after a close.
      */
-    public boolean close(Exception reason) {
-        manager.invokeLater(new CTPConnectionToClose(this, reason));
-        return false;
+    public void close(Exception reason) {
+        manager.getNIODaemon().invokeLater(new CTPConnectionToClose(this, reason));
+        //return false;
     }
-    
+
     /**
      * Writes the specified set of headers, one per line in standard HTTP form.
      */

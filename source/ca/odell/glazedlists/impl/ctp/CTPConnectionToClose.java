@@ -7,6 +7,7 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
+import ca.odell.glazedlists.impl.nio.*;
 import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -16,9 +17,9 @@ import java.io.*;
 import java.util.logging.*;
 
 /**
- * A CTPRunnable that closes a connection.
+ * Closes a connection on the NIO thread.
  */
-class CTPConnectionToClose implements CTPRunnable {
+class CTPConnectionToClose implements Runnable {
     
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnectionToClose.class.toString());
@@ -38,13 +39,9 @@ class CTPConnectionToClose implements CTPRunnable {
     }
     
     /**
-     * Runs the specified task.
-     *
-     * @param selector the selector being shared by all connections.
-     * @return true unless the server shall shutdown due to a shutdown request or
-     *      an unrecoverable failure.
+     * Runs this task.
      */
-    public void run(Selector selector, CTPConnectionManager manager) {        
+    public void run() {        
         // if this is already closed, we're done
         if(connection.state == CTPConnection.STATE_CLOSED_PERMANENTLY) return;
         

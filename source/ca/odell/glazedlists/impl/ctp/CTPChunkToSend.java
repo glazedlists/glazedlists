@@ -7,6 +7,7 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
+import ca.odell.glazedlists.impl.nio.*;
 import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -17,9 +18,9 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
 import java.util.logging.*;
 
 /**
- * Sends a chunk of data on the CTPConnectionManager thread.
+ * Sends a chunk of data on the NIO thread.
  */
-class CTPChunkToSend implements CTPRunnable {
+class CTPChunkToSend implements Runnable {
      
     /** logging */
     private static Logger logger = Logger.getLogger(CTPChunkToSend.class.toString());
@@ -41,7 +42,7 @@ class CTPChunkToSend implements CTPRunnable {
     /**
      * Writes the data.
      */
-    public void run(Selector selector, CTPConnectionManager manager) {
+    public void run() {
         if(connection.state != CTPConnection.STATE_READY) throw new IllegalStateException();
         
         try {

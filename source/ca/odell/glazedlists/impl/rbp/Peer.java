@@ -65,26 +65,31 @@ public class Peer implements CTPHandlerFactory {
      * Stops the peer.
      */
     public void stop() {
-        // unsubscribe from everything
-        for(Iterator s = subscribed.values().iterator(); s.hasNext(); ) {
-            PeerResource resource = (PeerResource)s.next();
-            resource.status().disconnect();
+        connectionManager.getNIODaemon().invokeAndWait(new StopRunnable());
+    }
+    private class StopRunnable implements Runnable {
+        public void run() {
+            // unsubscribe from everything
+            for(Iterator s = subscribed.values().iterator(); s.hasNext(); ) {
+                PeerResource resource = (PeerResource)s.next();
+                resource.status().disconnect();
+            }
+            subscribed.clear();
+            
+            // unpublish everything
+            logger.warning("Closing with published entries");
+            
+            // close all connections
+            List connectionsToClose = new ArrayList();
+            connectionsToClose.addAll(connections);
+            for(Iterator c = connectionsToClose.iterator(); c.hasNext(); ) {
+                PeerConnection connection = (PeerConnection)c.next();
+                connection.close();
+            }
+            
+            // stop the connection manager
+            connectionManager.stop();
         }
-        subscribed.clear();
-        
-        // unpublish everything
-        logger.warning("Closing with published entries");
-        
-        // close all connections
-        List connectionsToClose = new ArrayList();
-        connectionsToClose.addAll(connections);
-        for(Iterator c = connectionsToClose.iterator(); c.hasNext(); ) {
-            PeerConnection connection = (PeerConnection)c.next();
-            connection.close();
-        }
-        
-        // stop the connection manager
-        connectionManager.stop();
     }
     
     /**
@@ -149,6 +154,6 @@ public class Peer implements CTPHandlerFactory {
       * Runs the specified task on the network thread.
       */
      void invokeLater(Runnable runnable) {
-         connectionManager.invokeLater(runnable);
+         connectionManager.getNIODaemon().invokeLater(runnable);
      }
 }
