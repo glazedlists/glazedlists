@@ -14,6 +14,8 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.io.UnsupportedEncodingException;
 import ca.odell.glazedlists.impl.io.Bufferlo;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.util.concurrent.*;
 
 /**
  * A simple resource for a String.
@@ -22,6 +24,9 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
  */
 public class StringResource implements Resource {
 
+    /** the read/write lock provides mutual exclusion to access */
+    private ReadWriteLock readWriteLock = null;
+    
     /** the value of this resource */
     private String value = "";
     
@@ -74,6 +79,16 @@ public class StringResource implements Resource {
      */
     public void removeResourceListener(ResourceListener listener) {
         listeners.add(listener);
+    }
+    
+    /**
+     * Gets the lock required to share this resource between multiple threads.
+     *
+     * @return a re-entrant {@link ReadWriteLock} that guarantees thread safe
+     *      access to this list.
+     */
+    public ReadWriteLock getReadWriteLock() {
+        return readWriteLock;
     }
     
     /**

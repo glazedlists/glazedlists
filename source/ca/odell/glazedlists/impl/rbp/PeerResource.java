@@ -92,22 +92,27 @@ class PeerResource {
      * Listens to changes in the resource, so they can be broadcast to subscribers.
      */
     private class PrivateResourceListener implements ResourceListener {
+        /**
+         * Handles a change in a resource contained by the specified delta. This method
+         * will be called while holding the Resource's write lock.
+         */
         public void resourceUpdated(Resource resource, Bufferlo delta) {
-            peer.invokeLater(new UpdatedRunnable(delta));
+            resourceUpdateId++;
+            peer.invokeLater(new UpdatedRunnable(delta, resourceUpdateId));
         }
         private class UpdatedRunnable implements Runnable {
             private Bufferlo delta = null;
-            public UpdatedRunnable(Bufferlo delta) {
+            private int updateId = -1;
+            public UpdatedRunnable(Bufferlo delta, int updateId) {
                 this.delta = delta;
+                this.updateId = updateId;
             }
             public void run() {
-                if(resourceUri.isLocal()) resourceUpdateId++;
-                
                 // if nobody's listening, we're done
                 if(subscribers.isEmpty()) return;
                 
                 // forward the event to listeners
-                PeerBlock block = PeerBlock.update(resourceUri, sessionId, resourceUpdateId, delta);
+                PeerBlock block = PeerBlock.update(resourceUri, sessionId, updateId, delta);
                 
                 // send the block to interested subscribers
                 for(int s = 0; s < subscribers.size(); s++) {
@@ -143,9 +148,6 @@ class PeerResource {
         }
         private class ConnectRunnable implements Runnable {
             public void run() {
-                // listen for updates
-                resource.addResourceListener(resourceListener);
-                
                 // if this is remote, subscribe to this resource
                 if(resourceUri.isRemote()) {
                     publisher = peer.getConnection(resourceUri.getHost(), resourceUri.getPort());
@@ -156,7 +158,9 @@ class PeerResource {
                     publisher.writeBlock(PeerResource.this, subscribe);
         
                 // if this is local, we're immediately connected
-                } else {
+                } else if(resourceUri.isLocal()) {
+                    resource.addResourceListener(resourceListener);
+                
                     resourceStatus.setConnected(true, null);
                     if(peer.published.get(resourceUri) != null) throw new IllegalStateException();
                     peer.published.put(resourceUri, PeerResource.this);
@@ -173,10 +177,7 @@ class PeerResource {
                 // we're immediately disconnected
                 resourceStatus.setConnected(false, null);
                 
-                // listen for updates
-                resource.removeResourceListener(resourceListener);
-                
-                // if this is remote
+                // if this is remote, unsubscribe
                 if(resourceUri.isRemote()) {
                     peer.subscribed.remove(resourceUri);
                     
@@ -188,8 +189,10 @@ class PeerResource {
                         publisher = null;
                     }
     
-                // if this is local
-                } else {
+                // if this is local, unpublish everyone
+                } else if(resourceUri.isLocal()) {
+                    resource.removeResourceListener(resourceListener);
+                    
                     if(peer.published.get(resourceUri) == null) throw new IllegalStateException();
                     peer.published.remove(resourceUri);
                     
@@ -247,27 +250,44 @@ class PeerResource {
         else if(block.isUnpublish()) remoteUnpublish(source, block);
         else throw new IllegalStateException();
     }
-    int r = new Random().nextInt(10);
-
     private void remoteUpdate(ResourceConnection publisher, PeerBlock block) {
-        // confirm the update is consistent
-        if(block.getUpdateId() != (resourceUpdateId+1)) throw new IllegalStateException("Expected update id " + (resourceUpdateId+1) + " but found " + block.getUpdateId());
+        // confirm the update is consistent with the session
         if(block.getSessionId() != sessionId) throw new IllegalStateException();
 
         // handle the update
-        resource.update(block.getPayload());
-        resourceUpdateId++;
+        resource.getReadWriteLock().writeLock().lock();
+        try {
+            // confirm this update is consistent with the update ID
+            if(block.getUpdateId() != (resourceUpdateId+1)) throw new IllegalStateException("Expected update id " + (resourceUpdateId+1) + " but found " + block.getUpdateId());
+            // apply locally
+            resource.update(block.getPayload());
+            // update state and propagate
+            resourceListener.resourceUpdated(resource, block.getPayload());
+        } finally {
+            resource.getReadWriteLock().writeLock().unlock();
+        }
     }
     private void remoteSubscribe(ResourceConnection subscriber, PeerBlock block) {
         // we're accepting connections
         if(resourceStatus.isConnected()) {
-            // first create the subscription
-            subscriber.setUpdateId(resourceUpdateId);
+            // save the update id and a snapshot
+            int updateId = -1;
+            Bufferlo snapshot = null;
+            resource.getReadWriteLock().writeLock().lock();
+            try {
+                updateId = resourceUpdateId;
+                snapshot = resource.toSnapshot();
+            } finally {
+                resource.getReadWriteLock().writeLock().unlock();
+            }
+            
+            // create the subscription
+            subscriber.setUpdateId(updateId);
             subscriber.getConnection().outgoingPublications.put(resourceUri, subscriber);
             subscribers.add(subscriber);
             
             // now send the snapshot to this subscriber
-            PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceUri, sessionId, resourceUpdateId, resource.toSnapshot());
+            PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceUri, sessionId, updateId, snapshot);
             subscriber.getConnection().writeBlock(this, subscribeConfirm);
 
         // we're not accepting connections for now
@@ -278,9 +298,20 @@ class PeerResource {
         }
     }
     private void remoteSubscribeConfirm(ResourceConnection publisher, PeerBlock block) {
-        // update state
-        resource.fromSnapshot(block.getPayload());
-        resourceUpdateId = block.getUpdateId();
+        // handle the confirm
+        resource.getReadWriteLock().writeLock().lock();
+        try {
+            // apply locally
+            System.out.print("CONFIRM: " + (block.getUpdateId()) + " ");
+            resource.fromSnapshot(block.getPayload());
+            // update state and propagate
+            resourceUpdateId = block.getUpdateId() - 1;
+            resourceListener.resourceUpdated(resource, block.getPayload());
+        } finally {
+            resource.getReadWriteLock().writeLock().unlock();
+        }
+        
+        // save a session cookie to verify this is the same source
         sessionId = block.getSessionId();
         
         // finally we're connected

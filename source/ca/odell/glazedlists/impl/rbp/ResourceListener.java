@@ -20,7 +20,8 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
 public interface ResourceListener {
 
     /**
-     * Handles a change in a resource contained by the specified delta.
+     * Handles a change in a resource contained by the specified delta. This method
+     * will be called while holding the Resource's write lock.
      */
     public void resourceUpdated(Resource resource, Bufferlo delta);
 }

@@ -345,6 +345,8 @@ public class NetworkListTest extends TestCase {
             
             // retry a handful of times
             for(int j = 0; j < 5; j++) {
+                System.out.println("START");
+                System.out.println("");
                 waitFor(1000);
                 sourceList.clear();
                 targetList.connect();

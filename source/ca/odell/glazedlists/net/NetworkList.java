@@ -13,6 +13,8 @@ import ca.odell.glazedlists.event.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.impl.rbp.*;
 import ca.odell.glazedlists.impl.io.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.util.concurrent.*;
 // NIO is used for BRP
 import java.util.*;
 import java.nio.*;
@@ -239,6 +241,11 @@ public final class NetworkList extends TransformedList {
                     return;
                 }
             }
+        }
+        
+        /** {@inheritDoc} */
+        public ReadWriteLock getReadWriteLock() {
+             return NetworkList.this.getReadWriteLock();
         }
     }
         

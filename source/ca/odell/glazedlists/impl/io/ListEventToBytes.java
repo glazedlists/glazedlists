@@ -68,15 +68,21 @@ public class ListEventToBytes {
         List parts = bytesToParts(listEvent, byteCoder);
         for(Iterator i = parts.iterator(); i.hasNext(); ) {
             ListEventPart part = (ListEventPart)i.next();
+            System.out.print("  APPLYING (");
             if(part.isDelete()) {
+                System.out.print("R" + part.getIndex());
                 target.remove(part.getIndex());
             } else if(part.isUpdate()) {
+                System.out.print("U" + part.getIndex());
                 target.set(part.getIndex(), part.getValue());
             } else if(part.isInsert()) {
+                System.out.print("I" + part.getIndex() + ", {" + part.getValue() + "}");
                 target.add(part.getIndex(), part.getValue());
             } else if(part.isClear()) {
+                System.out.print("C");
                 target.clear();
             }
+            System.out.println(")");
         }
     }
         

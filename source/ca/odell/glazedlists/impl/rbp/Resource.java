@@ -11,6 +11,8 @@ import java.util.*;
 import java.nio.*;
 import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.util.concurrent.*;
 
 /**
  * A resource is a dynamic Object that can publish its changes as a series of deltas.
@@ -47,4 +49,11 @@ public interface Resource {
      */
     public void removeResourceListener(ResourceListener listener);
     
+    /**
+     * Gets the lock required to share this resource between multiple threads.
+     *
+     * @return a re-entrant {@link ReadWriteLock} that guarantees thread safe
+     *      access to this list.
+     */
+    public ReadWriteLock getReadWriteLock();
 }
