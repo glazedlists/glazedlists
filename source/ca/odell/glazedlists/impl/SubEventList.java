@@ -122,7 +122,7 @@ public final class SubEventList extends TransformedList {
                         endIndex++;
                         updates.addInsert(changeIndex - startIndex);
                     } else if(changeType == ListEvent.UPDATE) {
-                        updates.addInsert(changeIndex - startIndex);
+                        updates.addUpdate(changeIndex - startIndex);
                     } else if(changeType == ListEvent.DELETE) {
                         endIndex--;
                         updates.addDelete(changeIndex - startIndex);
