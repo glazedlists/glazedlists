@@ -19,11 +19,11 @@ import javax.swing.event.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class ThresholdRangeModelFactory {
+public final class ThresholdRangeModelFactory {
 
     private ThresholdRangeModelFactory() {
         // don't make one of these
-        throw new IllegalStateException();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -102,25 +102,25 @@ public class ThresholdRangeModelFactory {
                 if(newMin > newMax) newMin = newMax;
                 if(newValue > newMax) newMax = newValue;
                 if(newValue < newMin) newMin = newValue;
-    
+
                 // See if non-threshold model changes are necessary
                 boolean changed =
                     (newExtent != getExtent()) ||
                     (newMin != getMinimum()) ||
                     (adjusting != getValueIsAdjusting());
-    
+
                 // Set the lower threshold if applicable
                 if(newValue != getValue()) {
                     target.setLowerThreshold(newValue);
                     changed = true;
                 }
-    
+
                 // Set the upper threshold if applicable
                 if(newMax != getMaximum()) {
                     target.setUpperThreshold(newMax);
                     changed = true;
                 }
-    
+
                 // Update all of the range properties if there was a change
                 if(changed) super.setRangeProperties(newValue, newExtent, newMin, newMax, adjusting);
 
@@ -187,25 +187,25 @@ public class ThresholdRangeModelFactory {
                 if(newMin > newMax) newMin = newMax;
                 if(newValue > newMax) newMax = newValue;
                 if(newValue < newMin) newMin = newValue;
-    
+
                 // See if non-threshold model changes are necessary
                 boolean changed =
                     (newExtent != getExtent()) ||
                     (newMax != getMaximum()) ||
                     (adjusting != getValueIsAdjusting());
-    
+
                 // Set the lower threshold if applicable
                 if(newMin != getMinimum()) {
                     target.setLowerThreshold(newMin);
                     changed = true;
                 }
-    
+
                 // Set the upper threshold if applicable
                 if(newValue != getValue()) {
                     target.setUpperThreshold(newValue);
                     changed = true;
                 }
-    
+
                 // Update all of the range properties if there was a change
                 if(changed) super.setRangeProperties(newValue, newExtent, newMin, newMax, adjusting);
             } finally {

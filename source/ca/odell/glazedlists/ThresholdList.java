@@ -8,6 +8,7 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.util.*;
 // to use standard collections
 import java.util.*;
 
@@ -21,7 +22,7 @@ import java.util.*;
  * be filtered in a simple and powerful way.
  *
  * <p>The {@link ThresholdList} lends itself to use with a slider widget for
- * manipulating the range's endpoints.
+ * manipulating one of the range's endpoints.
  *
  * <p>One use case for {@link ThresholdList} is in a media player application.
  * By creating a {@link ThresholdEvaluator} for a song's bitrate, the user could
@@ -62,8 +63,13 @@ public final class ThresholdList extends TransformedList {
     /** the evaluator to use to compare Objects against the threshold */
     private ThresholdEvaluator evaluator = null;
 
-    /** TODO: a flag to put this list in debug mode */
-    private boolean debug = false;
+	/**
+	 * Creates a {@link ThresholdList} that provides range-filtering based on the
+	 * specified {@link EventList} based on the specified integer JavaBean property.
+	 */
+	public ThresholdList(EventList source, String propertyName) {
+		this(source, BeanToolFactory.thresholdEvaluator(propertyName));
+	}
 
     /**
      * Creates a {@link ThresholdList} that provides range-filtering on the

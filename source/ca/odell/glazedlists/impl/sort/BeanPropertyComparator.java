@@ -9,7 +9,7 @@ package ca.odell.glazedlists.impl.sort;
 // for specifying a sorting algorithm
 import java.util.Comparator;
 // Bean reflection
-import ca.odell.glazedlists.impl.BeanProperty;
+import ca.odell.glazedlists.impl.beans.BeanProperty;
 
 /**
  * A {@link Comparator} that uses Reflection to compare two instances

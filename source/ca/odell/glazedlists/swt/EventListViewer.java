@@ -8,16 +8,16 @@ package ca.odell.glazedlists.swt;
 
 // for swt Lists
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.SelectionEvent;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
-// to preserve selection
-import java.util.ArrayList;
-
 
 /**
-* A helper that displays an EventList in an SWT List widget.
+ * A view helper that displays an {@link EventList} in a {@link List}.
  *
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
@@ -27,7 +27,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class EventListViewer implements ListEventListener {
+public class EventListViewer implements ListEventListener, Selectable {
 
     /** the SWT List */
     private List list = null;
@@ -37,6 +37,10 @@ public class EventListViewer implements ListEventListener {
 
     /** the formatter for list elements */
     private ListFormat listFormat = null;
+
+    /** For selection management */
+    private SelectionList selectionList = null;
+
     /**
      * Creates a new List that displays and responds to changes in source.
      * List elements will simply be displayed as the result of calling
@@ -54,6 +58,9 @@ public class EventListViewer implements ListEventListener {
         this.source = source;
         this.list = list;
         this.listFormat = listFormat;
+
+		// Enable the selection lists
+		selectionList = new SelectionList(source, this);
 
         populateList();
         source.addListEventListener(new UserInterfaceThreadProxy(this, list.getDisplay()));
@@ -84,6 +91,22 @@ public class EventListViewer implements ListEventListener {
     }
 
     /**
+     * Provides access to an {@link EventList} that contains items from the
+     * viewed Table that are not currently selected.
+     */
+	public EventList getDeselected() {
+		return selectionList.getDeselected();
+	}
+
+    /**
+     * Provides access to an {@link EventList} that contains items from the
+     * viewed Table that are currently selected.
+     */
+	public EventList getSelected() {
+		return selectionList.getSelected();
+	}
+
+    /**
      * Adds the value at the specified row.
      */
     private void addRow(int row, Object value) {
@@ -105,6 +128,90 @@ public class EventListViewer implements ListEventListener {
     }
 
     /**
+     * When the source list is changed, this forwards the change to the
+     * displayed List.
+     */
+    public void listChanged(ListEvent listChanges) {
+		int firstModified = source.size();
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // Apply the list changes
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+
+                if(changeType == ListEvent.INSERT) {
+                    addRow(changeIndex, source.get(changeIndex));
+                    firstModified = Math.min(changeIndex, firstModified);
+                } else if(changeType == ListEvent.UPDATE) {
+                    updateRow(changeIndex, source.get(changeIndex));
+                } else if(changeType == ListEvent.DELETE) {
+                    deleteRow(changeIndex);
+                    firstModified = Math.min(changeIndex, firstModified);
+                }
+            }
+
+            // Reapply selection to the List
+            for(int i = firstModified;i < list.getItemCount();i++) {
+				if(selectionList.isSelected(i)) {
+					list.select(i);
+				} else {
+					list.deselect(i);
+				}
+			}
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+	/** Methods for the Selectable Interface */
+
+    /** {@inheritDoc} */
+	public void addSelectionListener(SelectionListener listener) {
+		list.addSelectionListener(listener);
+	}
+
+	/** {@inheritDoc} */
+	public void removeSelectionListener(SelectionListener listener) {
+		list.removeSelectionListener(listener);
+	}
+
+	/** {@inheritDoc} */
+	public void addListener(int type, Listener listener) {
+		list.addListener(type, listener);
+	}
+
+	/** {@inheritDoc}*/
+	public void removeListener(int type, Listener listener) {
+		list.removeListener(type, listener);
+	}
+
+	/** {@inheritDoc} */
+	public int getSelectionCount() {
+		return list.getSelectionCount();
+	}
+
+	/** {@inheritDoc} */
+	public int getSelectionIndex() {
+		return list.getSelectionIndex();
+	}
+
+	/** {@inheritDoc} */
+	public int[] getSelectionIndices() {
+		return list.getSelectionIndices();
+	}
+
+	/** {@inheritDoc} */
+	public int getStyle() {
+		return list.getStyle();
+	}
+
+	/** {@inheritDoc} */
+	public boolean isSelected(int index) {
+		return list.isSelected(index);
+	}
+
+    /**
      * Provides simple list formatting where each element will be displayed
      * as the result of calling toString() on the source Object.
      */
@@ -115,59 +222,6 @@ public class EventListViewer implements ListEventListener {
          */
         public String getDisplayValue(Object element) {
             return element.toString();
-        }
-    }
-
-    /**
-     * When the source list is changed, this forwards the change to the
-     * displayed List.
-     *
-     * <p>This implementation saves the entire List's selection in an ArrayList before
-     * walking through the list of changes. It then walks through the List's changes.
-     * Finally it adjusts the selection on the List in response to the changes.
-     * Although simple, this implementation has much higher memory and runtime
-     * requirements than necessary. It is desirable to optimize this method by
-     * not storing a second copy of the selection list. Such an implementation would
-     * use only the selection data available in the List plus a list of entries
-     * which have been since overwritten.
-     */
-    public void listChanged(ListEvent listChanges) {
-        source.getReadWriteLock().readLock().lock();
-        try {
-
-            // save the former selection
-            ArrayList selection = new ArrayList();
-            for(int i = 0; i < list.getItemCount(); i++) {
-                selection.add(i, Boolean.valueOf(list.isSelected(i)));
-            }
-
-            // walk the list
-            while(listChanges.next()) {
-                int changeIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
-
-                if(changeType == ListEvent.INSERT) {
-                    selection.add(changeIndex, Boolean.FALSE);
-                    addRow(changeIndex, source.get(changeIndex));
-                } else if(changeType == ListEvent.UPDATE) {
-                    updateRow(changeIndex, source.get(changeIndex));
-                } else if(changeType == ListEvent.DELETE) {
-                    selection.remove(changeIndex);
-                    deleteRow(changeIndex);
-                }
-            }
-
-            // apply the saved selection
-            for(int i = 0; i < list.getItemCount(); i++) {
-                boolean selected = ((Boolean)selection.get(i)).booleanValue();
-                if(selected) {
-                    list.select(i);
-                } else {
-                    list.deselect(i);
-                }
-            }
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
         }
     }
 }

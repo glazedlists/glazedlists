@@ -36,7 +36,7 @@ import java.util.*;
  * <p>Alongside <code>MULTIPLE_INTERVAL_SELECTION</code>, this {@link ListSelectionModel}
  * supports an additional selection mode.
  * <code>MULTIPLE_INTERVAL_SELECTION_DEFENSIVE</code> is a new selection mode.
- * It is idential to <code>MULTIPLE_INTERVAL_SELECTION</code> in every way but
+ * It is identical to <code>MULTIPLE_INTERVAL_SELECTION</code> in every way but
  * one. When a row is inserted immediately before a selected row in the
  * <code>MULTIPLE_INTERVAL_SELECTION</code> mode, it becomes selected. But in
  * the <code>MULTIPLE_INTERVAL_SELECTION_DEFENSIVE</code> mode, it does not

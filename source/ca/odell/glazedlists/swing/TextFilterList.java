@@ -8,6 +8,7 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.util.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.impl.filter.*;
 // Swing toolkit stuff for displaying widgets
@@ -91,7 +92,7 @@ public class TextFilterList extends DefaultTextFilterList {
      *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
      */
     public TextFilterList(EventList source, String[] propertyNames) {
-        this(source, new BeanTextFilterator(propertyNames), new JTextField(""));
+        this(source, BeanToolFactory.textFilterator(propertyNames), new JTextField(""));
     }
 
     /**
@@ -110,7 +111,7 @@ public class TextFilterList extends DefaultTextFilterList {
      * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, String[] propertyNames, JTextField filterEdit) {
-        this(source, new BeanTextFilterator(propertyNames), filterEdit);
+        this(source, BeanToolFactory.textFilterator(propertyNames), filterEdit);
     }
 
     /**

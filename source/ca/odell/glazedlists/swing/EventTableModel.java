@@ -10,6 +10,7 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.util.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // tables for displaying lists
@@ -41,10 +42,10 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
 
     /** Reusable table event for broadcasting changes */
     private MutableTableModelEvent tableModelEvent;
-    
+
     /** whenever a list change covers greater than this many rows, redraw the whole thing */
     private int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
-    
+
     /**
      * Creates a new table that renders the specified list in the specified
      * format.
@@ -57,7 +58,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         // prepare listeners
         source.addListEventListener(new EventThreadProxy(this));
     }
-    
+
     /**
      * Creates a new table that renders the specified list with an automatically
      * generated {@link TableFormat}. It uses JavaBeans and reflection to create
@@ -78,9 +79,9 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      *      your table are writable.
      */
     public EventTableModel(EventList source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
-        this(source, new BeanTableFormat(propertyNames, columnLabels, writable));
+        this(source, BeanToolFactory.writableTableFormat(propertyNames, columnLabels, writable));
     }
-    
+
     /**
      * Gets the Table Format.
      */
@@ -102,7 +103,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         tableModelEvent.setStructureChanged();
         fireTableChanged(tableModelEvent);
     }
-    
+
     /**
      * For implementing the ListEventListener interface. This sends changes
      * to the table which can repaint the table cells. Because this class uses
@@ -119,14 +120,14 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         try {
             // when all events hae already been processed by clearing the event queue
             if(!listChanges.hasNext()) return;
-    
+
             // notify all changes simultaneously
             if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
                 listChanges.clearEventQueue();
                 // first scroll to row zero
                 //tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
                 fireTableDataChanged();
-    
+
             // for all changes, one block at a time
             } else {
                 while(listChanges.nextBlock()) {
@@ -150,7 +151,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public String getColumnName(int column) {
         return tableFormat.getColumnName(column);
     }
-    
+
     /**
      * The number of rows equals the number of entries in the source event list.
      */
@@ -162,7 +163,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
             source.getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * Get the column count as specified by the table format.
      */
@@ -187,7 +188,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
 
     /**
      * Retrieves the value at the specified location from the table.
-     * 
+     *
      * <p>Before every get, we need to validate the row because there may be an
      * update waiting in the event queue. For example, it is possible that
      * the source list has been updated by a database thread. Such a change
@@ -258,7 +259,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
             throw new UnsupportedOperationException("Unexpected set() on read-only table");
         }
     }
-    
+
     /**
      * Gets the minimum number of changes that will be combined into one uniform
      * change and cause selection and scrolling to be lost.

@@ -37,7 +37,6 @@ public class ThresholdListTest extends TestCase {
         source = new BasicEventList();
         evaluator = new IntegerEvaluator();
         thresholdList = new ThresholdList(source, evaluator);
-        //thresholdList.debug = false;
     }
 
     /**
@@ -909,6 +908,24 @@ public class ThresholdListTest extends TestCase {
     }
 
     /**
+     * Tests that the JavaBean constructor and supporting code
+     * works as expected.
+     */
+    public void testJavaBeanConstructor() {
+		thresholdList.dispose();
+		thresholdList = null;
+		thresholdList = new ThresholdList(source, "value");
+
+		for(int i = 0;i < 1000;i++) {
+			source.add(new SimpleJavaBeanObject(i));
+		}
+
+		thresholdList.setLowerThreshold(500);
+
+		assertEquals(500, thresholdList.size());
+	}
+
+    /**
      * A helper method to compare two lists for equality
      */
     private void validateListsEquals(EventList alpha, EventList beta) {
@@ -919,6 +936,22 @@ public class ThresholdListTest extends TestCase {
             assertEquals(alpha.get(i), beta.get(i));
         }
     }
+
+    /**
+     * A JavaBean to test out the Reflection constructor
+     */
+    public class SimpleJavaBeanObject {
+
+		private int value = 0;
+
+		public SimpleJavaBeanObject(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+	}
 
     private class IntegerEvaluator implements ThresholdEvaluator {
         /**

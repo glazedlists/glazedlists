@@ -8,6 +8,7 @@ package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.util.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.impl.filter.*;
 // for working with SWT Text widgets
@@ -93,7 +94,7 @@ public class TextFilterList extends DefaultTextFilterList {
      *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
      */
     public TextFilterList(EventList source, String[] propertyNames) {
-        this(source, null, new BeanTextFilterator(propertyNames));
+        this(source, null, BeanToolFactory.textFilterator(propertyNames));
     }
 
     /**
@@ -112,7 +113,7 @@ public class TextFilterList extends DefaultTextFilterList {
      * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, Text filterEdit, String[] propertyNames) {
-        this(source, filterEdit, new BeanTextFilterator(propertyNames));
+        this(source, filterEdit, BeanToolFactory.textFilterator(propertyNames));
     }
 
     /**

@@ -4,78 +4,36 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swing;
+package ca.odell.glazedlists.impl.beans;
 
-import java.util.*;
+//import java.util.*;
 import ca.odell.glazedlists.gui.WritableTableFormat;
-// Bean reflection
-import ca.odell.glazedlists.impl.BeanProperty;
 
 /**
- * TableFormat implementation that uses reflection to be used for any
+ * A WritableTableFormat implementation that uses Reflection to be used for any
  * JavaBean-like Object with getProperty() and setProperty() style API.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class BeanTableFormat implements WritableTableFormat {
+public final class BeanWritableTableFormat extends BeanTableFormat implements WritableTableFormat {
 
-    /** Java Beans property names */
-    private String[] propertyNames;
-    
-    /** methods for extracting field values */
-    private BeanProperty[] beanProperties = null;
-    
-    /** column labels are pretty-print column header labels */
-    private String[] columnLabels;
-    
     /** whether all columns can be edited */
     private boolean[] editable;
-    
+
     /**
-     * Create a BeanTableFormat that uses the specified column names
-     * and the specified field names.
+     * Create a BeanWritableTableFormat that uses the specified column names
+     * and the specified field names while offering editable columns.
      */
-    public BeanTableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        this.propertyNames = propertyNames;
-        this.columnLabels = columnLabels;
+    public BeanWritableTableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
+        super(propertyNames, columnLabels);
         this.editable = editable;
     }
-    
-    /**
-     * The number of columns to display.
-     */
-    public int getColumnCount() {
-        return columnLabels.length;
-    }
 
-    /**
-     * Gets the title of the specified column. 
-     */
-    public String getColumnName(int column) {
-        return columnLabels[column];
-    }
-    
-    /**
-     * Gets the value of the specified field for the specified object. This
-     * is the value that will be passed to the editor and renderer for the
-     * column. If you have defined a custom renderer, you may choose to return
-     * simply the baseObject.
-     */
-    public Object getColumnValue(Object baseObject, int column) {
-        if(baseObject == null) return null;
-
-        // load the property descriptors on first request
-        if(beanProperties == null) loadPropertyDescriptors(baseObject);
-
-        // get the property
-        return beanProperties[column].get(baseObject);
-    }
-    
     /**
      * Loads the property descriptors which are used to invoke property
      * access methods using the property names.
      */
-    private void loadPropertyDescriptors(Object beanObject) {
+    protected void loadPropertyDescriptors(Object beanObject) {
         Class beanClass = beanObject.getClass();
         beanProperties = new BeanProperty[propertyNames.length];
         for(int p = 0; p < propertyNames.length; p++) {
@@ -96,7 +54,7 @@ class BeanTableFormat implements WritableTableFormat {
     public boolean isEditable(Object baseObject, int column) {
         return editable[column];
     }
-    
+
     /**
      * Sets the specified field of the base object to the edited value. When
      * a column of a table is edited, this method is called so that the user
@@ -116,7 +74,7 @@ class BeanTableFormat implements WritableTableFormat {
 
         // set the property
         beanProperties[column].set(baseObject, editedValue);
-        
+
         // return the modified result
         return baseObject;
     }

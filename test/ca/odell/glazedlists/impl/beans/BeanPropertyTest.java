@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.impl;
+package ca.odell.glazedlists.impl.beans;
 
 // for being a JUnit test case
 import junit.framework.*;
@@ -40,13 +40,13 @@ public class BeanPropertyTest extends TestCase {
         assertEquals(Boolean.FALSE, transmission.get(myCar));
         Automobile yourCar = new Automobile(true);
         assertEquals(Boolean.TRUE, transmission.get(yourCar));
-        
+
         // superclass property set
         BeanProperty truckColor = new BeanProperty(Truck.class, "color", true, true);
         Truck myTruck = new Truck(3);
         myTruck.setColor(Color.yellow);
         assertEquals(Color.yellow, truckColor.get(myTruck));
-        
+
         // superclass property get
         truckColor.set(myTruck, Color.green);
         assertEquals(Color.green, myTruck.getColor());
@@ -64,7 +64,7 @@ public class BeanPropertyTest extends TestCase {
         assertEquals(Boolean.TRUE, drivable.get(myCar));
         myCar.setFullOfGas(false);
         assertEquals(Boolean.FALSE, drivable.get(myCar));
-        
+
         // interface property get
         BeanProperty towedVehicle = new BeanProperty(SupportsTrailerHitch.class, "towedVehicle", true, true);
         myTruck.setTowedVehicle(myCar);

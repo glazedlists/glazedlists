@@ -10,6 +10,7 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.util.*;
 // SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Table;
@@ -17,11 +18,13 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.SelectionEvent;
 // standard collections as support
 import java.util.*;
 
 /**
- * A helper that displays an EventList in an SWT table.
+ * A view helper that displays an EventList in an SWT table.
  *
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
@@ -31,7 +34,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventTableViewer implements ListEventListener {
+public class EventTableViewer implements ListEventListener, Selectable {
 
     /** the heavyweight table */
     private Table table;
@@ -48,8 +51,24 @@ public class EventTableViewer implements ListEventListener {
     /** Enables check support */
     private TableCheckFilterList checkFilter = null;
 
+    /** For selection management */
+    private SelectionList selectionList = null;
+
     /**
-     * Creates a new table that renders the specified list in the specified format.
+     * Creates a new viewer for the given {@link Table} that updates the table
+     * contents in response to changes on the specified {@link EventList}.  The
+     * {@link Table} is formatted with an automatically generated
+     * {@link TableFormat}. It uses JavaBeans and Reflection to create a
+     * {@link TableFormat} as specified.
+     */
+    public EventTableViewer(EventList source, Table table, String[] propertyNames, String[] columnLabels) {
+		this(source, table, BeanToolFactory.tableFormat(propertyNames, columnLabels));
+	}
+
+    /**
+     * Creates a new viewer for the given {@link Table} that updates the table
+     * contents in response to changes on the specified {@link EventList}.  The
+     * {@link Table} is formatted with the specified {@link TableFormat}.
      */
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
         // insert a checked source if supported by the table
@@ -62,6 +81,9 @@ public class EventTableViewer implements ListEventListener {
         this.table = table;
         this.source = source;
         this.tableFormat = tableFormat;
+
+		// Enable the selection lists
+		selectionList = new SelectionList(source, this);
 
         // determine if the provided table is Virtual
         tableIsVirtual = SWT.VIRTUAL == (table.getStyle() & SWT.VIRTUAL);
@@ -83,7 +105,7 @@ public class EventTableViewer implements ListEventListener {
     }
 
     /**
-     * Builds the tables columns and table headers
+     * Builds the columns and headers for the {@link Table}
      */
     private void initTable() {
         table.setHeaderVisible(true);
@@ -127,7 +149,7 @@ public class EventTableViewer implements ListEventListener {
     }
 
     /**
-     * Sets all of the column values on a TableItem.
+     * Sets all of the column values on a {@link TableItem}.
      */
     private void setItemText(TableItem item, Object value) {
         for(int i = 0; i < tableFormat.getColumnCount(); i++) {
@@ -138,14 +160,15 @@ public class EventTableViewer implements ListEventListener {
     }
 
     /**
-     * Gets the Table Format.
+     * Gets the {@link TableFormat}.
      */
     public TableFormat getTableFormat() {
         return tableFormat;
     }
 
     /**
-     * Gets the table being managed by this {@link EventTableViewer}.
+     * Gets the {@link Table} that is being managed by this
+     * {@link EventTableViewer}.
      */
     public Table getTable() {
         return table;
@@ -153,7 +176,8 @@ public class EventTableViewer implements ListEventListener {
 
 
     /**
-     * Sets this table to be rendered by a different table format.
+     * Sets this {@link Table} to be formatted by a different
+     * {@link TableFormat}.  This method is not yet implemented for SWT.
      */
     public void setTableFormat(TableFormat tableFormat) {
         throw new UnsupportedOperationException();
@@ -186,62 +210,109 @@ public class EventTableViewer implements ListEventListener {
         return source;
     }
 
+    /**
+     * Provides access to an {@link EventList} that contains items from the
+     * viewed {@link Table} that are not currently selected.
+     */
+	public EventList getDeselected() {
+		return selectionList.getDeselected();
+	}
+
+    /**
+     * Provides access to an {@link EventList} that contains items from the
+     * viewed {@link Table} that are currently selected.
+     */
+	public EventList getSelected() {
+		return selectionList.getSelected();
+	}
 
     /**
      * When the source list is changed, this forwards the change to the
-     * displayed table.
-     *
-     * <p>This implementation saves the entire table's selection in an ArrayList before
-     * walking through the list of changes. It then walks through the table's changes.
-     * Finally it adjusts the selection on the table in response to the changes.
-     * Although simple, this implementation has much higher memory and runtime
-     * requirements than necessary. It is desirable to optimize this method by
-     * not storing a second copy of the selection list. Such an implementation would
-     * use only the selection data available in the table plus a list of entries
-     * which have been since overwritten.
+     * displayed {@link Table}.
      */
     public void listChanged(ListEvent listChanges) {
         source.getReadWriteLock().readLock().lock();
+        int firstModified = source.size();
         try {
-
-            // save the former selection
-            List selection = new ArrayList();
-            for(int i = 0; i < table.getItemCount(); i++) {
-                selection.add(i, Boolean.valueOf(table.isSelected(i)));
-            }
-
-            // walk the list
+            // Apply changes to the list
             while(listChanges.next()) {
                 int changeIndex = listChanges.getIndex();
                 int changeType = listChanges.getType();
 
                 if(changeType == ListEvent.INSERT) {
-                    selection.add(changeIndex, Boolean.FALSE);
                     addRow(changeIndex, source.get(changeIndex));
+                    firstModified = Math.min(changeIndex, firstModified);
                 } else if(changeType == ListEvent.UPDATE) {
                     updateRow(changeIndex, source.get(changeIndex));
                 } else if(changeType == ListEvent.DELETE) {
-                    selection.remove(changeIndex);
                     table.remove(changeIndex);
+                    firstModified = Math.min(changeIndex, firstModified);
                 }
             }
 
-            // apply the saved selection
-            for(int i = 0; i < table.getItemCount(); i++) {
-                boolean selected = ((Boolean)selection.get(i)).booleanValue();
-                if(selected) {
-                    table.select(i);
-                } else {
-                    table.deselect(i);
-                }
-            }
+            // Reapply selection to the Table
+            for(int i = firstModified;i < table.getItemCount();i++) {
+				if(selectionList.isSelected(i)) {
+					table.select(i);
+				} else {
+					table.deselect(i);
+				}
+			}
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
     }
 
+	/** Methods for the Selectable Interface */
+
+    /** {@inheritDoc} */
+	public void addSelectionListener(SelectionListener listener) {
+		table.addSelectionListener(listener);
+	}
+
+	/** {@inheritDoc} */
+	public void removeSelectionListener(SelectionListener listener) {
+		table.removeSelectionListener(listener);
+	}
+
+	/** {@inheritDoc} */
+	public void addListener(int type, Listener listener) {
+		table.addListener(type, listener);
+	}
+
+	/** {@inheritDoc}*/
+	public void removeListener(int type, Listener listener) {
+		table.removeListener(type, listener);
+	}
+
+	/** {@inheritDoc} */
+	public int getSelectionCount() {
+		return table.getSelectionCount();
+	}
+
+	/** {@inheritDoc} */
+	public int getSelectionIndex() {
+		return table.getSelectionIndex();
+	}
+
+	/** {@inheritDoc} */
+	public int[] getSelectionIndices() {
+		return table.getSelectionIndices();
+	}
+
+	/** {@inheritDoc} */
+	public int getStyle() {
+		return table.getStyle();
+	}
+
+	/** {@inheritDoc} */
+	public boolean isSelected(int index) {
+		return table.isSelected(index);
+	}
+
     /**
-     * Respond to view changes on a Virtual Table
+     * Respond to view changes on a {@link Table} that is created with the
+     * {@link SWT#VIRTUAL} style flag.
      */
     protected final class VirtualTableListener implements Listener {
         public void handleEvent(Event e) {
