@@ -11,6 +11,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
+import ca.odell.glazedlists.util.impl.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // for automatically responding to changes in the filter field 
@@ -22,6 +23,8 @@ import java.awt.event.ActionEvent;
 // for recycling filter strings
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 
 /**
@@ -58,7 +61,10 @@ public final class TextFilterList extends AbstractFilterList {
 
     /** the filters list is currently just a list of Substrings to include */
     private String[] filters = new String[0];
-    
+
+    /** a map from each filter to a Strategy for locating that filter in arbitrary text */
+    private Map filterToTextContainmentStrategyMap = new HashMap();
+
     /** the field where the filter strings are edited */
     private JTextField filterEdit = null;
     
@@ -253,7 +259,39 @@ public final class TextFilterList extends AbstractFilterList {
      * and no filters apply.
      */
     private void updateFilterPattern() {
-        filters = filterEdit.getText().toUpperCase().split("[ \t]");
+        filters = filterEdit.getText().split("[ \t]");
+
+        // rebuild the filter -> TextSearchStrategy map
+        this.filterToTextContainmentStrategyMap.clear();
+        for (int i = 0; i < this.filters.length; i++) {
+            final String filter = this.filters[i];
+            final TextSearchStrategy strategy = this.selectTextSearchStrategy(filter);
+            strategy.setSubtext(filter);
+            this.filterToTextContainmentStrategyMap.put(filter, strategy);
+        }
+    }
+
+    /**
+     * This local factory method allows fine grained control over the choice of
+     * text search strategies for a given <code>filter</code>. Subclasses are
+     * welcome to override this method to return any custom TextSearchStrategy
+     * implementations which may exploit valid assumptions about the text being
+     * searched or the subtext being found.
+     *
+     * @param filter the filter for which to locate a TextSearchStrategy
+     * @return a TextSearchStrategy capable of location the given
+     *      <code>filter</code> within arbitrary text
+     */
+    protected TextSearchStrategy selectTextSearchStrategy(String filter) {
+        // uncomment me to test the old text search algorithm
+        return new OldCaseInsensitiveTextSearchStrategy();
+
+        // if the filter is only 1 character, use the optimized SingleCharacter strategy
+//        if (filter.length() == 1)
+//            return new SingleCharacterCaseInsensitiveTextSearchStrategy();
+
+        // default the using the Boyer-Moore algorithm
+//        return new BoyerMooreCaseInsensitiveTextSearchStrategy();
     }
 
     /** {@inheritDoc} */
@@ -266,37 +304,26 @@ public final class TextFilterList extends AbstractFilterList {
         } else {
             filterator.getFilterStrings(filterStrings, element);
         }
+
+        TextSearchStrategy textSearchStrategy;
+        Object filterString;
+
         // ensure each filter matches at least one field
         filters:
-        for(int f = 0; f < filters.length; f++) {
-            for(int c = 0; c < filterStrings.size(); c++) {
-                if(filterStrings.get(c) != null) {
-                    if(caseInsensitiveIndexOf(filterStrings.get(c).toString(), filters[f]) != -1) continue filters;
-                }
+        for (int f = 0; f < filters.length; f++) {
+            // get the text search strategy for the current filter
+            textSearchStrategy = (TextSearchStrategy) this.filterToTextContainmentStrategyMap.get(filters[f]);
+
+            // search through all fields for the current filter
+            for (int c = 0; c < filterStrings.size(); c++) {
+                filterString = filterStrings.get(c);
+                if (filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1)
+                    continue filters;
             }
             // no field matched this filter 
             return false;
         }
         // all filters have been matched
         return true;
-    }
-
-    /**
-     * Tests if one String contains the other. Originally this task was performed
-     * by Java's regular expressions library, but this is faster and less complex.
-     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=89">Bug 89</a>
-     * @param host the string to search within
-     * @param filter the string to search for, this must be upper case
-     */
-    private static int caseInsensitiveIndexOf(String host, String filter) {
-        int lastFirst = host.length() - filter.length();
-        sourceCharacter:
-        for(int c = 0; c <= lastFirst; c++) {
-            for(int f = 0; f < filter.length(); f++) {
-                if(Character.toUpperCase(host.charAt(c+f)) != filter.charAt(f)) continue sourceCharacter;
-            }
-            return c;
-        }
-        return -1;
     }
 }
