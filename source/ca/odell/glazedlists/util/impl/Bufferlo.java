@@ -23,7 +23,7 @@ import java.text.ParseException;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class Bufferlo {
+public class Bufferlo implements CharSequence {
     
     /** the buffers managed by this Bufferlo */
     private LinkedList buffers = new LinkedList();
@@ -115,6 +115,19 @@ public class Bufferlo {
     }
     
     /**
+     * Converts the specified String to bytes, one byte per character. The input
+     * String must contain US-ASCII one-byte characters or the result of this
+     * method is not specified.
+     */
+    public static final ByteBuffer stringToBytes(String in) {
+        try {
+            return ByteBuffer.wrap(in.getBytes("US-ASCII"));
+        } catch(UnsupportedEncodingException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
+    }
+    
+    /**
      * Writes the specified data to this bufferlo. This shortens the last ByteBuffer
      * in the added set so that it will not be written to. This allows a read-only
      * buffer to be added without it ever being modified.
@@ -180,13 +193,6 @@ public class Bufferlo {
         }
     }
     
-    /**
-     * Write this Bufferlo as a String for debugging.
-     */
-    public String toString() {
-        return buffers.toString();
-    }
-
     /**
      * Creates a new ByteBuffer identical to the parameter but without space trailing
      * after the limit. This allows a buffer to be added to the Bufferlo without
@@ -287,6 +293,112 @@ public class Bufferlo {
     private void doneWriting() {
         ByteBuffer writeInto = (ByteBuffer)buffers.getLast();
         writeInto.limit(writeInto.position());
+    }
+
+    
+    
+    /**
+     * Get the number of bytes available.
+     */
+    public int length() {
+        int bytesAvailable = 0;
+        for(Iterator b = buffers.iterator(); b.hasNext(); ) {
+            ByteBuffer buffer = (ByteBuffer)b.next();
+            bytesAvailable += buffer.position();
+        }
+        return bytesAvailable;
+    }
+    
+    /**
+     * Gets the character at the specified index.
+     */
+    public char charAt(int index) {
+        int bytesLeft = index;
+        for(Iterator b = buffers.iterator(); b.hasNext(); ) {
+            ByteBuffer buffer = (ByteBuffer)b.next();
+            if(bytesLeft < buffer.position()) {
+                return (char)buffer.get(bytesLeft);
+            } else {
+                bytesLeft -= buffer.position();
+            }
+        }
+        throw new IndexOutOfBoundsException();
+    }
+    
+    /**
+     * Returns a new character sequence that is a subsequence of this.
+     */
+    public CharSequence subSequence(int start, int end) {
+        Bufferlo clone = duplicate();
+        clone.skip(start);
+        clone.limit(end - start);
+        return clone;
+    }
+    
+    /**
+     * Gets this Bufferlo as a String.
+     */
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        for(int c = 0; c < length(); c++) {
+            result.append(charAt(c));
+        }
+        return result.toString();
+    }
+    
+
+    /**
+     * Finds the first index of the specified regular expression.
+     *
+     * @return the index of the specified regular expression, or -1 if that
+     *      regular expression does not currently exist in the ByteBuffer. This
+     *      index is volatile because further operations on this ByteBufferParser
+     *      may influence the location of the specified regular expression.
+     */
+    public int indexOf(String regex) throws IOException {
+        Matcher matcher = Pattern.compile(regex).matcher(this);
+        if(!matcher.find()) return -1;
+        return matcher.start();
+    }
+
+    /**
+     * Consumes the specified regular expression. This simply advances the buffer's
+     * position to the end of the regular expression.
+     *
+     * @throws ParseException if the specified expression is not in the input buffer
+     * @return the number of bytes consumed.
+     */
+    public int consume(String regex) throws IOException, ParseException {
+        Matcher matcher = Pattern.compile(regex).matcher(this);
+        if(!matcher.find()) throw new ParseException(regex + " is not in current buffer", 0);
+        if(matcher.start() != 0) throw new ParseException(regex + " is not a prefix of " + this, 0);
+        skip(matcher.end());
+        return matcher.end();
+    }
+
+    /**
+     * Reads the String up until the specified regular expression and returns it.
+     * This advances the buffer's position to the end of the regular expression.
+     *
+     * @throws ParseException if the specified expression is not in the input buffer
+     */
+    public String readUntil(String regex) throws IOException, ParseException {
+        return readUntil(regex, true);
+    }
+    
+    /**
+     * Reads the String up until the specified regular expression and returns it.
+     *
+     * @param consume true to advance the buffer's position to the end of the
+     *      regular expression, or false to not modify the buffer
+     * @throws ParseException if the specified expression is not in the input buffer
+     */
+    public String readUntil(String regex, boolean consume) throws IOException, ParseException {
+        Matcher matcher = Pattern.compile(regex).matcher(this);
+        if(!matcher.find()) throw new ParseException(regex + " is not in current buffer", 0);
+        String result = subSequence(0, matcher.start()).toString();
+        if(consume) skip(matcher.end());
+        return result;
     }
 
     /**
