@@ -14,6 +14,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.graphics.*;
@@ -47,9 +49,7 @@ public class EventTableViewer implements ListEventListener {
         this.source = source;
         this.tableFormat = tableFormat;
 
-        // prepare listeners
-        //source.addListEventListener(new EventThreadProxy(this));
-        
+        // prepare event list listeners
         source.getReadWriteLock().readLock().lock();
         try {
             populateTable();
