@@ -1117,6 +1117,10 @@ public class UniqueListTest extends TestCase {
         uniqueSource.add("E");
         uniqueSource.add("D");
         uniqueSource.add("C");
+
+        // count changes to the unique source
+        ListEventCounter counter = new ListEventCounter();
+        uniqueSource.addListEventListener(counter);
         
         // modify the unique list
         SortedSet data = new TreeSet(new ReverseComparator());
@@ -1129,6 +1133,10 @@ public class UniqueListTest extends TestCase {
         List consistencyTestList = new ArrayList();
         consistencyTestList.addAll(data);
         assertEquals(consistencyTestList, uniqueSource);
+        
+        // verify that the "D" and "E" were deleted and "A" and "B" were added
+        assertEquals(1, counter.getEventCount());
+        assertEquals(5, counter.getChangeCount(0));
     }
 
     /**

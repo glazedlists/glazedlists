@@ -75,6 +75,8 @@ public final class SortedList extends TransformedList {
     }
 
     
+    public boolean debug = false;
+    
     /**
      * For implementing the ListEventListener interface. When the underlying list
      * changes, this notification allows the object to repaint itself or update
@@ -86,31 +88,29 @@ public final class SortedList extends TransformedList {
      * index. In the second phase, the sorted list is updated with the changes.
      */
     public void listChanged(ListEvent listChanges) {
+        if(debug) System.out.println("");
+        if(debug) System.out.println("handling change event: " + listChanges);
+
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
         
         // first update the offset tree for all changes, and keep the changed nodes in a list
-        ArrayList unsortedNodes = new ArrayList();
-        ArrayList deletedIndices = new ArrayList();
+        LinkedList insertNodes = new LinkedList();
+        LinkedList updateNodes = new LinkedList();
+        LinkedList deleteIndices = new LinkedList();
 
-        // copy the list change sequence in order to iterate twice
-        ListEvent clonedChanges = new ListEvent(listChanges);
-        
-        // keep track of the difference between the sorted set size and its expected size
-        int sortedOffset = 0;
-        
         // perform the updates on the indexed tree
-        while(clonedChanges.next()) {
+        ListEvent firstPass = new ListEvent(listChanges);
+        while(firstPass.next()) {
             
             // get the current change info
-            int unsortedIndex = clonedChanges.getIndex();
-            int changeType = clonedChanges.getType();
+            int unsortedIndex = firstPass.getIndex();
+            int changeType = firstPass.getType();
 
             // on insert, insert the index node
             if(changeType == ListEvent.INSERT) {
                 IndexedTreeNode unsortedNode = unsorted.addByNode(unsortedIndex, this);
-                unsortedNodes.add(unsortedNode);
-                sortedOffset++;
+                insertNodes.addLast(unsortedNode);
 
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
@@ -119,59 +119,71 @@ public final class SortedList extends TransformedList {
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.addDelete(deleteSortedIndex);
 
-            // on update, delete the sorted node
             } else if(changeType == ListEvent.UPDATE) {
-                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                int deleteSortedIndex = deleteByUnsortedNode(unsortedNode) + sortedOffset;
-                unsortedNodes.add(unsortedNode);
-                deletedIndices.add(new Integer(deleteSortedIndex));
-                sortedOffset++;
+                // do not handle these till the next pass
             }
         }
-        
-        // verify the index tree matches the source
-        if(unsorted.size() != source.size()) throw new IllegalStateException();
-        if(sorted.size() + sortedOffset != source.size()) throw new IllegalStateException();
 
-        // for all changes now calculate the sorted index with the updated offset data
-        Iterator unsortedNodesIterator = unsortedNodes.iterator();
-        Iterator deletedIndicesIterator = deletedIndices.iterator();
-        while(listChanges.next()) {
+        // perform the updates on the indexed tree
+        ListEvent secondPass = listChanges;
+        while(secondPass.next()) {
             
             // get the current change info
-            int unsortedIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
+            int unsortedIndex = secondPass.getIndex();
+            int changeType = secondPass.getType();
 
-            // on insert, insert into the sorted list and fire an event
-            if(changeType == ListEvent.INSERT) {
-                IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
-                int sortedIndex = insertByUnsortedNode(unsortedNode);
-                updates.addInsert(sortedIndex);
-
-            // on delete, we've already fired the event
-            } else if(changeType == ListEvent.DELETE) {
-                // do nothing
-    
-            // on update, re-insert and fire an event
-            } else if(changeType == ListEvent.UPDATE) {
-                int deleteSortedIndex = ((Integer)deletedIndicesIterator.next()).intValue();
-                IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
-                int insertSortedIndex = insertByUnsortedNode(unsortedNode);
-                
-                if(deleteSortedIndex == insertSortedIndex) {
-                    updates.addUpdate(insertSortedIndex);
-                } else {
-                    updates.addDelete(deleteSortedIndex);
-                    updates.addInsert(insertSortedIndex);
-                }
+            // on insert, insert the index node
+            if(changeType == ListEvent.UPDATE) {
+                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
+                int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
+                updateNodes.addLast(unsortedNode);
+                deleteIndices.addLast(new Integer(deleteSortedIndex));
             }
         }
         
-        if(deletedIndicesIterator.hasNext()) throw new IllegalStateException();
-        if(unsortedNodesIterator.hasNext()) throw new IllegalStateException();
+        if(debug) System.out.println(deleteIndices);
+        
+        
+        // fire all the update events
+        while(!updateNodes.isEmpty()) {
+            IndexedTreeNode updateNode = (IndexedTreeNode)updateNodes.removeFirst();
+            int deletedIndex = ((Integer)deleteIndices.removeFirst()).intValue();
+            int insertedIndex = insertByUnsortedNode(updateNode);
+            // adjust the out of order insert with respect to the delete list
+            if(debug) System.out.println("HANDLE RM " + deletedIndex + ", ADD " + insertedIndex + "... " + deleteIndices); 
+            
+            for(ListIterator i = deleteIndices.listIterator(deleteIndices.size()); i.hasPrevious(); ) {
+                int currentDeletedIndex = ((Integer)i.previous()).intValue();
+                //if(currentDeletedIndex < insertedIndex ||
+                    //(currentDeletedIndex == insertedIndex && insertedIndex < deletedIndex)) {
+                if(currentDeletedIndex <= insertedIndex) {
+                    insertedIndex++;
+                } else {
+                    currentDeletedIndex++;
+                    i.set(new Integer(currentDeletedIndex));
+                }
+            }
+            // fire the events
+            if(deletedIndex == insertedIndex) {
+                if(debug == true) System.out.println("UPDATE! UPDATE " + insertedIndex);
+                updates.addUpdate(insertedIndex);
+            } else {
+                if(debug == true) System.out.println("UPDATE! RM " + deletedIndex + ", ADD " + insertedIndex);
+                updates.addDelete(deletedIndex);
+                updates.addInsert(insertedIndex);
+            }
+        }
+        
+        // fire all the insert events
+        while(!insertNodes.isEmpty()) {
+            IndexedTreeNode insertNode = (IndexedTreeNode)insertNodes.removeFirst();
+            int insertedIndex = insertByUnsortedNode(insertNode);
+            updates.addInsert(insertedIndex);
+        }
         
         // commit the changes and notify listeners
         updates.commitEvent();
+        if(debug) System.out.println("");
     }
     
     /**

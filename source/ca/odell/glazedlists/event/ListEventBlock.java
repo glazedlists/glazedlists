@@ -42,6 +42,7 @@ final class ListEventBlock {
         this.endIndex = endIndex;
         this.type = type;
         assert(startIndex >= 0 && endIndex >= startIndex);
+        assert(type == ListEvent.INSERT || type == ListEvent.UPDATE || type == ListEvent.DELETE);
     }
 
     /**
@@ -147,7 +148,10 @@ final class ListEventBlock {
                 ListEventBlock first = (ListEventBlock)changes.get(j);
                 ListEventBlock second = (ListEventBlock)changes.get(j+1);
                 
-                if(canBeCombined(first, second)) {
+                if(requiresSplit(first, second)) {
+                    ListEventBlock third = split(first, second);
+                    changes.add(j+2, third);
+                } else if(canBeCombined(first, second)) {
                     combine(first, second);
                     changes.remove(j+1);
                     if(j > 0) j--;
@@ -174,7 +178,8 @@ final class ListEventBlock {
      */
     private static boolean requiresSwap(ListEventBlock first, ListEventBlock second) {
         // verify no intersection
-        if(first.type != ListEvent.DELETE && first.type != second.type) {
+        if(first.type == ListEvent.INSERT && second.type != ListEvent.INSERT) {
+        //if(first.type != ListEvent.DELETE && first.type != second.type) {
             if(first.endIndex >= second.startIndex && first.startIndex <= second.endIndex) {
                 throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
             }
@@ -244,6 +249,79 @@ final class ListEventBlock {
             alpha.endIndex -= movedLength;
             assert(alpha.startIndex >= 0);
         }
+    }
+    
+    /**
+     * Tests if the second block must be split in two before the blocks can
+     * be sorted. This is only the case when the second block is an UPDATE
+     * event that spans a DELETE OR INSERT event of the first block.
+     */
+    private static boolean requiresSplit(ListEventBlock first, ListEventBlock second) {
+        // verify we have one update, and one non-update
+        if(first.type != ListEvent.UPDATE && second.type != ListEvent.UPDATE) return false;
+        if(first.type == second.type) return false;
+        
+        // find which block is update, which one is INSERT/DELETE
+        boolean updateIsFirst = (first.type == ListEvent.UPDATE);
+        ListEventBlock updateBlock = null;
+        ListEventBlock otherBlock = null;
+        if(updateIsFirst) {
+            updateBlock = first;
+            otherBlock = second;
+        } else {
+            updateBlock = second;
+            otherBlock = first;
+        }
+        
+        // verify we have a span for a split
+        if(updateBlock.startIndex >= otherBlock.startIndex) return false;
+        if(updateBlock.endIndex < otherBlock.startIndex) return false;
+        
+        return true;
+    }
+        
+    /**
+     * Breaks an udpate block into two smaller update blocks. One part is stored
+     * in the update block parameter and the other part is returned.
+     */
+    private static ListEventBlock split(ListEventBlock first, ListEventBlock second) {
+        /*System.out.println("SPLITTING: ");
+            System.out.println(first);
+            System.out.println(second);*/
+
+        // find which block is update, which one is INSERT/DELETE
+        boolean updateIsFirst = (first.type == ListEvent.UPDATE);
+        ListEventBlock updateBlock = null;
+        ListEventBlock otherBlock = null;
+        if(updateIsFirst) {
+            updateBlock = first;
+            otherBlock = second;
+        } else {
+            updateBlock = second;
+            otherBlock = first;
+        }
+
+        // find the split location & offset index
+        int splitLocation = otherBlock.startIndex;
+        int part2Offset = -1;
+        if(otherBlock.type == ListEvent.DELETE) {
+            part2Offset = 0;
+        //} else if(updateIsFirst) {
+        } else if(otherBlock.type == ListEvent.INSERT) {
+            part2Offset = otherBlock.getLength();
+        }
+
+        // apply the changes
+        ListEventBlock updateBlockPart2 = new ListEventBlock(splitLocation + part2Offset, updateBlock.endIndex + part2Offset, ListEvent.UPDATE);
+        updateBlock.endIndex = splitLocation - 1;
+        
+        /*System.out.println("SPLIT RESULTS: ");
+            System.out.println(first);
+            System.out.println(second);
+            System.out.println(updateBlockPart2);*/
+        
+        // return the new part
+        return updateBlockPart2;
     }
     
     /**

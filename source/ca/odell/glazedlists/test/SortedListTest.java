@@ -297,6 +297,7 @@ public class SortedListTest extends TestCase {
         assertEquals(false, fourthTest);
     }
     
+
     /**
      * Test if the SortedList fires update events rather than delete/insert
      * pairs.
@@ -308,10 +309,13 @@ public class SortedListTest extends TestCase {
         SortedSet data = new TreeSet(new ReverseComparator());
         data.add("A");
         data.add("B");
+        data.add("C");
+        data.add("D");
         uniqueSource.replaceAll(data);
         
         // listen to changes on the sorted list
         ListEventCounter counter = new ListEventCounter();
+        //sortedList.debug = true;
         sortedList.addListEventListener(counter);
 
         // replace the data with an identical copy
@@ -319,8 +323,55 @@ public class SortedListTest extends TestCase {
         
         // verify that only one event has occured
         assertEquals(1, counter.getEventCount());
-        assertEquals(2, counter.getChangeCount(0));
+        assertEquals(4, counter.getChangeCount(0));
     }
+
+
+    /**
+     * Test if the SortedList fires update events rather than delete/insert
+     * pairs.
+     */
+    public void testUpdateEventsFiredRigorous() {
+        // prepare a unique list with simple data
+        UniqueList uniqueSource = new UniqueList(unsortedList, new ReverseComparator());
+        sortedList = new SortedList(uniqueSource);
+        
+        // populate a unique source with some random elements
+        for(int i = 0; i < 500; i++) {
+            uniqueSource.add(new Integer(random.nextInt(200)));
+        }
+        
+        // populate a replacement set with some more random elements
+        SortedSet data = new TreeSet(new ReverseComparator());
+        for(int i = 0; i < 500; i++) {
+            data.add(new Integer(random.nextInt(200)));
+        }
+        
+        // calculate the number of changes expected
+        List intersection = new ArrayList();
+        intersection.addAll(uniqueSource);
+        intersection.retainAll(data);
+        int expectedUpdateCount = intersection.size();
+        int expectedDeleteCount = uniqueSource.size() - expectedUpdateCount;
+        int expectedInsertCount = data.size() - expectedUpdateCount;
+        int expectedChangeCount = expectedUpdateCount + expectedDeleteCount + expectedInsertCount;   
+        
+        // count the number of changes performed
+        ListEventCounter uniqueCounter = new ListEventCounter();
+        uniqueSource.addListEventListener(uniqueCounter);
+        ListEventCounter sortedCounter = new ListEventCounter();
+        sortedList.addListEventListener(sortedCounter);
+
+        // perform the change
+        uniqueSource.replaceAll(data);
+        
+        // verify our guess on the change count is correct
+        assertEquals(1, uniqueCounter.getEventCount());
+        assertEquals(1, sortedCounter.getEventCount());
+        assertEquals(expectedChangeCount, uniqueCounter.getChangeCount(0));
+        assertEquals(expectedChangeCount, sortedCounter.getChangeCount(0));
+    }
+
      
     /**
      * Explicit comparator for Kevin's sanity!
