@@ -224,10 +224,12 @@ public abstract class AbstractFilterList extends TransformedList {
         updates.beginEvent();
 
         // for all unfiltered items, see what the change is
-        for(BarcodeIterator i = flagList.iterator();i.hasNextBlack(); ) {
+        for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack(); ) {
             i.nextBlack();
             if(!filterMatches(source.get(i.getIndex()))) {
-                updates.addDelete(i.setWhite());
+                int blackIndex = i.getBlackIndex();
+                i.setWhite();
+                updates.addDelete(blackIndex);
             }
         }
 
