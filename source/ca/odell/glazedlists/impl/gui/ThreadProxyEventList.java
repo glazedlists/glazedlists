@@ -60,6 +60,8 @@ public abstract class ThreadProxyEventList extends TransformedList {
     
     /** whether the dispatch thread has been scheduled */
     private boolean scheduled = false;
+    
+    public volatile boolean debug = false;
         
     /**
      */
@@ -78,15 +80,21 @@ public abstract class ThreadProxyEventList extends TransformedList {
 
     /** {@inheritDoc} */
     public final void listChanged(ListEvent listChanges) {
-        // commit the event on the appropriate thread
+        // if we've haven't scheduled a commit, we need to begin a new event
         if(!scheduled) {
+            //if(debug) System.out.print("\nBEGIN[" + Thread.currentThread().getName() + "]");
             updates.beginEvent(true);
-            schedule(updateRunner);
-            scheduled = true;
         }
         
         // add the changes for this event to our queue
+        //if(debug) System.out.print(" EVENT[" + Thread.currentThread().getName() + "]");
         updates.forwardEvent(listChanges);
+        
+        // commit the event on the appropriate thread
+        if(!scheduled) {
+            scheduled = true;
+            schedule(updateRunner);
+        }
     }
     
     /**
@@ -128,6 +136,7 @@ public abstract class ThreadProxyEventList extends TransformedList {
         public void run() {
             getReadWriteLock().writeLock().lock();
             try {
+                //if(debug) System.out.print(" COMMIT[" + Thread.currentThread().getName() + "]");
                 updates.commitEvent();
                 scheduled = false;
             } finally {
