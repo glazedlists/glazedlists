@@ -102,6 +102,9 @@ public final class CompositeList extends AbstractEventList {
             }
             if(memberList == null) throw new IllegalArgumentException("Cannot remove list " + list + " which is not in this CompositeList");
             
+            // stop listening for events
+            memberList.getSourceList().removeListEventListener(memberList);
+            
             // get the offset for the elements of this member
             int offset = getListOffset(memberList);
 
@@ -164,7 +167,7 @@ public final class CompositeList extends AbstractEventList {
             if(current == memberList) return listOffset;
             else listOffset = listOffset + current.size();
         }
-        throw new RuntimeException();
+        throw new RuntimeException("Unable to find offset of member list " + memberList);
     }
 
     /**
