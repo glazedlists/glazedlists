@@ -25,18 +25,6 @@ public class Peer implements CTPHandlerFactory {
     /** logging */
     private static Logger logger = Logger.getLogger(Peer.class.toString());
 
-    /** constants used in the protocol */
-    static final String RESOURCE_NAME = "Resource-Name";
-    static final String DELTA = "Delta";
-    static final String SNAPSHOT = "Snapshot";
-    static final String SESSION_ID = "Session-Id";
-    static final String UPDATE_ID = "Update-Id";
-    static final String ACTION = "Action";
-    static final String ACTION_SUBSCRIBE = "Subscribe";
-    static final String ACTION_SUBSCRIBE_CONFIRM = "Subscribe-Confirm";
-    static final String ACTION_UPDATE = "Update";
-    static final String ACTION_UNSUBSCRIBE = "Unsubscribe";
-
     /** the resources being subscribed to */ 
     private Map subscribed = new TreeMap();
     

@@ -22,9 +22,6 @@ class PeerResource implements ResourceListener, ResourceStatus {
     /** the publisher of this resource */
     private PeerConnection publisher = null;
     
-    /** the source of peer blocks */
-    private PeerBlockFactory peerBlockFactory = null;
-    
     /** the resource being managed */
     private Resource resource = null;
     
@@ -33,6 +30,9 @@ class PeerResource implements ResourceListener, ResourceStatus {
     
     /** the name that this resource is being published as */
     private String resourceName;
+    
+    /** the session ID is a simple validation */
+    private int sessionId = -1;
     
     /** the ID of the current update */
     private int updateId = 0;
@@ -46,8 +46,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
         this.resourceName = resourceName;
         
         // build a factory for data blocks
-        peerBlockFactory = new PeerBlockFactory(resourceName);
-        peerBlockFactory.setSessionId(new Random(System.currentTimeMillis()).nextInt());
+        this.sessionId = new Random(System.currentTimeMillis()).nextInt();
         
         // listen for updates
         resource.addResourceListener(this);
@@ -61,12 +60,9 @@ class PeerResource implements ResourceListener, ResourceStatus {
         this.resource = resource;
         this.resourceName = resourceName;
         
-        // build a factory for data blocks
-        peerBlockFactory = new PeerBlockFactory(resourceName);
-        
         // subscribe to this resource
-        PeerBlock block = peerBlockFactory.subscribe();
         publisher.addIncomingSubscription(this);
+        PeerBlock block = PeerBlock.subscribe(resourceName);
         publisher.writeBlock(this, block);
         
         // listen for updates
@@ -89,7 +85,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
         if(!subscribers.isEmpty()) throw new IllegalStateException();
         
         // unsubscribe from this resource
-        PeerBlock block = peerBlockFactory.unsubscribe();
+        PeerBlock block = PeerBlock.unsubscribe(resourceName);
         publisher.writeBlock(this, block);
         publisher.removeIncomingSubscription(this);
     }
@@ -112,7 +108,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
         if(subscribers.isEmpty()) return;
         
         // forward the event to listeners
-        PeerBlock block = peerBlockFactory.update(updateId, delta);
+        PeerBlock block = PeerBlock.update(resourceName, sessionId, updateId, delta);
         
         // send the block to interested subscribers
         for(int s = 0; s < subscribers.size(); s++) {
@@ -130,7 +126,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
 
         // confirm the update is consistent
         if(block.getUpdateId() != updateId) throw new IllegalStateException("Expected update id " + updateId + " but found " + block.getUpdateId());
-        if(block.getSessionId() != peerBlockFactory.getSessionId()) throw new IllegalStateException();
+        if(block.getSessionId() != sessionId) throw new IllegalStateException();
 
         // handle the update
         resource.update(block.getPayload());
@@ -146,7 +142,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
         subscribers.add(subscriber);
         
         // now send the snapshot to this subscriber
-        PeerBlock subscribeConfirm = peerBlockFactory.subscribeConfirm(updateId, resource.toSnapshot());
+        PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceName, sessionId, updateId, resource.toSnapshot());
         subscriber.writeBlock(this, subscribeConfirm);
         // unlock peer resource //////////////////////////////
     }
@@ -156,7 +152,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
      */
     public void remoteSubscribeConfirm(PeerConnection publisher, PeerBlock block) {
         updateId = block.getUpdateId();
-        peerBlockFactory.setSessionId(block.getSessionId());
+        sessionId = block.getSessionId();
         resource.fromSnapshot(block.getPayload());
     }
     

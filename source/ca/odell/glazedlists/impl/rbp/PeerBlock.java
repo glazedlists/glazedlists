@@ -20,6 +20,18 @@ import java.text.ParseException;
  */
 class PeerBlock {
     
+    /** constants used in the protocol */
+    public static final String RESOURCE_NAME = "Resource-Name";
+    public static final String DELTA = "Delta";
+    public static final String SNAPSHOT = "Snapshot";
+    public static final String SESSION_ID = "Session-Id";
+    public static final String UPDATE_ID = "Update-Id";
+    public static final String ACTION = "Action";
+    public static final String ACTION_SUBSCRIBE = "Subscribe";
+    public static final String ACTION_SUBSCRIBE_CONFIRM = "Subscribe-Confirm";
+    public static final String ACTION_UPDATE = "Update";
+    public static final String ACTION_UNSUBSCRIBE = "Unsubscribe";
+
     /** the resource this block is concerned with */
     private String resourceName = null;
     
@@ -38,12 +50,40 @@ class PeerBlock {
     /**
      * Create a new PeerBlock.
      */
-    public PeerBlock(String resourceName, int sessionId, String action, int updateId, Bufferlo payload) {
+    private PeerBlock(String resourceName, int sessionId, String action, int updateId, Bufferlo payload) {
         this.resourceName = resourceName;
         this.sessionId = sessionId;
         this.action = action;
         this.updateId = updateId;
         this.payload = payload;
+    }
+    
+    /**
+     * Create a new subscribe block.
+     */
+    public static PeerBlock subscribeConfirm(String resourceName, int sessionId, int updateId, Bufferlo snapshot) {
+        return new PeerBlock(resourceName, sessionId, PeerBlock.ACTION_SUBSCRIBE_CONFIRM, updateId, snapshot);
+    }
+    
+    /**
+     * Create a new subscribe block.
+     */
+    public static PeerBlock update(String resourceName, int sessionId, int updateId, Bufferlo delta) {
+        return new PeerBlock(resourceName, sessionId, PeerBlock.ACTION_UPDATE, updateId, delta);
+    }
+    
+    /**
+     * Create a new subscribe block.
+     */
+    public static PeerBlock subscribe(String resourceName) {
+        return new PeerBlock(resourceName, -1, PeerBlock.ACTION_SUBSCRIBE, -1, null);
+    }
+
+    /**
+     * Create a new subscribe block.
+     */
+    public static PeerBlock unsubscribe(String resourceName) {
+        return new PeerBlock(resourceName, -1, PeerBlock.ACTION_UNSUBSCRIBE, -1, null);
     }
     
     /**
@@ -90,10 +130,10 @@ class PeerBlock {
         bytes.consume("\\r\\n");
         
         // parse the headers
-        String resourceName = (String)headers.get(Peer.RESOURCE_NAME);
-        String sessionIdString = (String)headers.get(Peer.SESSION_ID);
-        String action = (String)headers.get(Peer.ACTION);
-        String updateIdString = (String)headers.get(Peer.UPDATE_ID);
+        String resourceName = (String)headers.get(RESOURCE_NAME);
+        String sessionIdString = (String)headers.get(SESSION_ID);
+        String action = (String)headers.get(ACTION);
+        String updateIdString = (String)headers.get(UPDATE_ID);
         int sessionId = (sessionIdString != null) ? Integer.parseInt(sessionIdString) : -1;
         int updateId = (updateIdString != null) ? Integer.parseInt(updateIdString) : -1;
         
@@ -110,10 +150,10 @@ class PeerBlock {
         
         // populate the map of headers
         Map headers = new TreeMap();
-        if(resourceName != null) headers.put(Peer.RESOURCE_NAME, resourceName);
-        if(sessionId != -1) headers.put(Peer.SESSION_ID, new Integer(sessionId));
-        if(action != null) headers.put(Peer.ACTION, action);
-        if(updateId != -1) headers.put(Peer.UPDATE_ID, new Integer(updateId));
+        if(resourceName != null) headers.put(RESOURCE_NAME, resourceName);
+        if(sessionId != -1) headers.put(SESSION_ID, new Integer(sessionId));
+        if(action != null) headers.put(ACTION, action);
+        if(updateId != -1) headers.put(UPDATE_ID, new Integer(updateId));
         
         // write the header values
         for(Iterator i = headers.entrySet().iterator(); i.hasNext(); ) {
