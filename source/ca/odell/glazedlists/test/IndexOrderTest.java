@@ -23,6 +23,13 @@ import java.util.*;
  */
 public class IndexOrderTest extends TestCase {
 
+    public static void main(String[] args) {
+        new IndexOrderTest().testIncreasingOrder();
+        new IndexOrderTest().testIndexOutOfOrder();
+    }
+
+
+
     /** for randomly choosing list indicies */
     private Random random = new Random();
     

@@ -68,6 +68,13 @@ public class MultipleSourcesTest extends TestCase {
         MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists);
         
         source.clear();
+
+        source.add("Atari 2600");
+        source.add("Intellivision");
+        source.add("Game Gear");
+
+        filterOne.setMatch(true);
+        filterOne.setMatch(false);
     }
     
     /**
@@ -96,11 +103,16 @@ public class MultipleSourcesTest extends TestCase {
      * Simple TextFilterator for Strings.
      */
     class EasyFilterList extends AbstractFilterList {
+        public boolean match = true;
         public EasyFilterList(EventList source) {
             super(source);
         }
         public boolean filterMatches(Object element) {
-            return true;
+            return match;
+        }
+        public void setMatch(boolean match) {
+            this.match = match;
+            handleFilterChanged();
         }
     }
 }
