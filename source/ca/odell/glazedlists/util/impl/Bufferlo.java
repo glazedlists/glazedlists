@@ -59,35 +59,50 @@ public class Bufferlo implements CharSequence {
     /** 
      * Write the content of this Bufferlo to the specified channel.
      */
-    public int writeToChannel(WritableByteChannel target, SelectionKey selectionKey) throws IOException {
-        if(true) throw new RuntimeException("Convert this to gathering writes");
-        
+    public long writeToChannel(GatheringByteChannel target, SelectionKey selectionKey) throws IOException {
         // verify we can still write
         if(!selectionKey.isValid()) throw new IOException("Key cancelled");
+        
+        // nothing to write
+        if(length() == 0) return 0;
+        
+        // make all buffers readable
+        ByteBuffer[] toWrite = new ByteBuffer[buffers.size()];
+        for(int b = 0; b < buffers.size(); b++) {
+            ByteBuffer buffer = (ByteBuffer)buffers.get(b);
+            buffer.flip();
+            toWrite[b] = buffer;
+        }
+        
+        // write them all out
+        long totalWritten = target.write(toWrite);
+        
+        // restore the state on all buffers
+        for(ListIterator b = buffers.listIterator(); b.hasNext(); ) {
+            ByteBuffer buffer = (ByteBuffer)b.next();
 
-        // write everything we can
-        int totalWritten = 0;
-        while(length() > 0) {
-
-            // we need a place to read from
-            ByteBuffer readFrom = getReadFromBuffer();
-            
-            // write out
-            int bytesWritten = target.write(readFrom);
-            doneReading();
-            
-            // we have leftovers 
-            if(bytesWritten <= 0) {
-                selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
-                if(totalWritten == 0) return bytesWritten;
-                else return totalWritten;
+            if(buffer.hasRemaining()) {
+                b.remove();
+            } else if(buffer.position() > 0) {
+                int bytesLeftToRead = buffer.remaining();
+                buffer.limit(buffer.capacity());
+                ByteBuffer noneRead = buffer.slice();
+                noneRead.position(bytesLeftToRead);
+                noneRead.limit(bytesLeftToRead);
+                b.set(noneRead);
             } else {
-                totalWritten += bytesWritten;
+                buffer.position(buffer.limit());
             }
         }
         
-        // nothing more to write
-        selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
+        // adjust the key based on whether we have leftovers 
+        if(length() > 0) {
+            selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
+        } else {
+            selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
+        }
+
+        // return the count of bytes written
         return totalWritten;
     }
     

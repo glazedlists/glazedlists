@@ -63,13 +63,12 @@ class CTPConnectionToClose implements CTPRunnable {
         }
         
         // try to flush what we have left
-        int sentBytes = -1;
         try {
-            sentBytes = connection.writer.writeToChannel(connection.socketChannel, connection.selectionKey);
+            connection.writer.writeToChannel(connection.socketChannel, connection.selectionKey);
         } catch(IOException e) {
             // if this flush failed, there's nothing we can do
         }
-        if(sentBytes < 0) logger.warning("Close proceeding with unsent data");
+        if(connection.writer.length() > 0) logger.warning("Close proceeding with unsent data");
 
         // close the socket
         try {
