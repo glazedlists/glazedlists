@@ -84,7 +84,10 @@ public class IssuesUserFilter extends AbstractFilterList {
         /** {@inheritDoc} */
         public void listChanged(ListEvent listChanges) {
             // skip reorderings
-            if(listChanges.isReordering()) return;
+            if(listChanges.isReordering()) {
+                listChanges.getReorderMap();
+                return;
+            }
 
             // Loop through all the changes to see how the filters change
             boolean constrained = false;
