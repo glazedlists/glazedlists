@@ -352,7 +352,7 @@ public final class SortedList extends TransformedList {
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
         if(comparator != null) return sorted.lastIndexOf(object);
-        else return source.indexOf(object);
+        else return source.lastIndexOf(object);
     }
 
     /**

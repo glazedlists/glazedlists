@@ -42,6 +42,26 @@ public class SortedListTest extends TestCase {
         unsortedList = null;
         sortedList = null;
     }
+    
+    /**
+     * Test that the indexOf() and lastIndexOf() methods work if the SortedList
+     * is not actually sorted.
+     */
+    public void testIndexOfUnsorted() {
+        sortedList.setComparator(null);
+        sortedList.add("Riders");
+        sortedList.add("Stampeders");
+        sortedList.add("Bombers");
+        sortedList.add("Eskimos");
+        sortedList.add("Argos");
+        sortedList.add("Ti-Cats");
+        sortedList.add("Riders");
+        sortedList.add("Als");
+        
+        assertEquals(0, sortedList.indexOf("Riders"));
+        assertEquals(6, sortedList.lastIndexOf("Riders"));
+        assertEquals(8, sortedList.indexOfSimulated("Riders"));
+    }
 
     /**
      * Test to verify that the sorted list is working correctly when it is
