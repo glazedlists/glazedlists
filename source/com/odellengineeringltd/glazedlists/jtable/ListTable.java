@@ -94,6 +94,13 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * Gets an event list that contains the current selection in
      * this list table. That list changes dynamically as elements
      * are selected and deselected from the list.
+     *
+     * Because the list is dynamic, users should be careful of changes
+     * when accessing the SelectionList. It is safer to access the 
+     * SelectionList on the Swing event dispatch thread because no
+     * selection changes can occur while that thread is executing code. 
+     * It is still possible for changes to occur if the base list is
+     * being modified on another thread.
      */
     public EventList getSelectionList() {
         return selectionList;

@@ -24,10 +24,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
- * A table comparator selector allows the user to choose which
- * sorter will be used on an underlying EventList by clicking
- * on the table's header.
+ * A table comparator selector allows the user to choose which sorter will be used
+ * on an underlying EventList by clicking on the table's header.
  *
+ * The table comparator must be very careful about discerning between the view
+ * and the model when selecting columns. This is because users can rearrange
+ * the order of the columns, causing the two values to be different.
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=4">Issue #4</a>
+ * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class TableComparatorSelector extends MouseAdapter {
@@ -111,6 +115,8 @@ public class TableComparatorSelector extends MouseAdapter {
      * @todo the setHeaderValue method won't work permanently due to the fact
      *      that the TableFormat class overrides its value. Work out a way
      *      to set the value directly on the TableFormat?
+     * @param column the column-model column to choose a comparator for. This is
+     *      different from the view column which is the natural column in the table.
      */
     public void chooseComparator(int column, boolean ascending) {
         Comparator selected;
@@ -130,10 +136,11 @@ public class TableComparatorSelector extends MouseAdapter {
         sortedList.setComparator(selected);
         // and set the name of the table header to the current comparator
         for(int c = 0; c < table.getColumnCount(); c++) {
-            if(c == column) {
-                table.getColumnModel().getColumn(column).setHeaderValue(sortedHeader);
+            int modelColumn = table.convertColumnIndexToModel(c);
+            if(modelColumn == column) {
+                table.getColumnModel().getColumn(c).setHeaderValue(sortedHeader);
             } else {
-                String header = listTable.getTableFormat().getFieldName(c);
+                String header = listTable.getTableFormat().getFieldName(modelColumn);
                 table.getColumnModel().getColumn(c).setHeaderValue(header);
             }
         }
