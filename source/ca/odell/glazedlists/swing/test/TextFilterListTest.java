@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.test;
+package ca.odell.glazedlists.swing.test;
 
 // for being a JUnit test case
 import junit.framework.*;
