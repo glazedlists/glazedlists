@@ -99,7 +99,7 @@ public class SubListTest extends TestCase {
         eventList.set(24, "Twenty-Four");
         assertEquals("Fifteen", subListAfter.get(2));
         assertEquals("Eighteen", subListAfter.get(5));
-        subListBefore.set(17, "Twenty-Seven");
+        subListBefore.set(14, "Twenty-Seven");
         assertEquals("Twenty-Seven", eventList.get(27));
         assertEquals(subListAfter, subListBefore);
     }
