@@ -12,7 +12,6 @@ import java.nio.*;
 import java.io.*;
 // BRP sits atop Chunk Transfer Protocol
 import ca.odell.glazedlists.impl.ctp.*;
-import ca.odell.glazedlists.net.*;
 // logging
 import java.util.logging.*;
 
@@ -37,13 +36,12 @@ public class Peer implements CTPHandlerFactory {
     
     /** the connection management */
     private CTPConnectionManager connectionManager;
-    private int port;
     
     /**
      * Creates a new peer that binds to the specified port.
      */
-    public Peer(int port) {
-        this.port = port;
+    public Peer(int listenPort) {
+        this.connectionManager = new CTPConnectionManager(this, listenPort);
     }
     
     /**
@@ -59,14 +57,8 @@ public class Peer implements CTPHandlerFactory {
     /**
      * Starts the peer.
      */
-    public void start() {
-        connectionManager = new CTPConnectionManager(this, port);
-
-        try {
-            connectionManager.start();
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void start() throws IOException {
+        connectionManager.start();
     }
     
     /**
@@ -132,38 +124,21 @@ public class Peer implements CTPHandlerFactory {
     /**
      * Publish the specified resource.
      */
-    public void publish(Resource resource, String resourceName) {
+    public ResourceStatus publish(Resource resource, String resourceName) {
         PeerResource peerResource = new PeerResource(resource, resourceName);
         published.put(resourceName, peerResource);
+        return peerResource;
     }
     
-    /**
+    /*
      * Unsubscribes from the specified resource.
      */
-    public void unsubscribe(String resourceName) {
+    /*public void unsubscribe(String resourceName) {
         PeerResource peerResource = (PeerResource)subscribed.remove(resourceName);
         if(peerResource == null) throw new IllegalArgumentException("Not subscribed to " + resourceName);
         peerResource.unsubscribe();
-    }
+    }*/
 
-    /**
-     * Creates a block that contains the specified information.
-     *
-     * @return a List of ByteBuffers
-     */
-    static List encodeBlock(Map parameters) {
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
-     * Creates a Map of from the specified block or partial block.
-     *
-     * @param data a List of ByteBuffers
-     */
-     static Map decodeBlock(List data) {
-        throw new UnsupportedOperationException();
-     }
-     
      /**
       * Gets the specified published resource.
       */

@@ -11,7 +11,6 @@ import java.util.*;
 import java.nio.*;
 import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
-import ca.odell.glazedlists.net.*;
 
 /**
  * A resource that is being published on the network.

@@ -4,13 +4,14 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.impl.rbp;
+package ca.odell.glazedlists.net;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.event.*;
 // access to the volatile implementation pacakge
+import ca.odell.glazedlists.impl.rbp.*;
 import ca.odell.glazedlists.impl.io.*;
 // NIO is used for BRP
 import java.util.*;
@@ -23,7 +24,7 @@ import java.io.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class NetworkList extends TransformedList implements Resource {
+public class NetworkList extends TransformedList implements Resource, ResourceStatus {
 
     /** listeners to resource changes */
     private List resourceListeners = new ArrayList();
@@ -31,18 +32,77 @@ public class NetworkList extends TransformedList implements Resource {
     /** how bytes are encoded and decoded */
     private ByteCoder byteCoder;
     
+    /** who manages this resource's connection */
+    private ResourceStatus resourceStatus = null;
+    
+    /** whether this NetworkList is writable via its own API */
+    private boolean writable = false;
+    
     /**
      * Create a NetworkList that connects to the specified source.
      */
-    public NetworkList(EventList source, ByteCoder byteCoder) {
+    NetworkList(EventList source, ByteCoder byteCoder) {
         super(source);
         this.byteCoder = byteCoder;
         source.addListEventListener(this);
     }
     
+    /**
+     * Sets the ResourceStatus to delegate connection information requests to.
+     */
+    void setResourceStatus(ResourceStatus resourceStatus) {
+        this.resourceStatus = resourceStatus;
+    }
+    
+    /** 
+     * Set the NetworkList as writable.
+     */
+    void setWritable(boolean writable) {
+        this.writable = writable;
+    }
+
+    /**
+     * Returns true if this resource is actively being updated by the network.
+     */
+    public boolean isConnected() {
+         return resourceStatus.isConnected();
+    }
+    
+    /**
+     * Forces this resource to attempt to connect. The results from the attempt
+     * will not be visible immediately.
+     */
+    public void connect() {
+        resourceStatus.connect();
+    }
+    
+    /**
+     * Forces this resource to attempt to disconnect. This will prevent the resource
+     * from consuming network resources.
+     */
+    public void disconnect() {
+        resourceStatus.disconnect();
+    }
+    
+    /**
+     * Registers the specified listener to receive events about the status of this
+     * resource.
+     */
+    public void addResourceStatusListener(ResourceStatusListener listener) {
+        resourceStatus.addResourceStatusListener(listener);
+    }
+    
+    /**
+     * Deregisters the specified listener from receiving events about the status of
+     * this resource.
+     */
+    public void removeResourceStatusListener(ResourceStatusListener listener) {
+        resourceStatus.removeResourceStatusListener(listener);
+    }
+
     /** {@inheritDoc} */
     protected boolean isWritable() {
-        return true;
+        return writable;
     }
     
     /** {@inheritDoc} */
@@ -84,7 +144,7 @@ public class NetworkList extends TransformedList implements Resource {
     private void applyCodedEvent(Bufferlo data) {
         getReadWriteLock().writeLock().lock();
         try {
-            ListEventToBytes.toListEvent(data, this, byteCoder);
+            ListEventToBytes.toListEvent(data, source, byteCoder);
         } catch(IOException e) {
             throw new IllegalStateException(e.getMessage());
         } finally {
