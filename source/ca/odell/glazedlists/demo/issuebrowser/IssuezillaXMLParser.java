@@ -111,12 +111,12 @@ public class IssuezillaXMLParser {
      */
     public static void main(String[] args) throws IOException {
         if(args.length != 1) {
-            System.out.println("Usage: IssuezillaXMLParser <url>");
+            System.out.println("Usage: IssuezillaXMLParser <file>");
             return;
         }
 
         BasicEventList issuesList = new BasicEventList();
-        loadIssues(issuesList, args[ 0 ]);
+        loadIssues(issuesList, new FileInputStream(args[0]));
         System.out.println(issuesList);
     }
 
@@ -159,8 +159,15 @@ public class IssuezillaXMLParser {
      */
     public static void loadIssues(EventList target, InputStream source) throws IOException {
         try {
-            IssueHandler issueReader = new IssueHandler(target);
-            SAXParserFactory.newInstance().newSAXParser().parse(source, issueReader);
+            // configure a SAX parser
+            XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+            IssuezillaParserSidekick parserSidekick = new IssuezillaParserSidekick();
+            xmlReader.setEntityResolver(parserSidekick);
+            xmlReader.setErrorHandler(parserSidekick);
+            xmlReader.setContentHandler(new IssueHandler(target));
+            
+            // parse away
+            xmlReader.parse(new InputSource(source));
         } catch(SAXException e) {
             e.printStackTrace();
             throw new IOException("Parsing failed " + e.getMessage());
@@ -169,6 +176,42 @@ public class IssuezillaXMLParser {
             throw new IOException("Parsing failed " + e.getMessage());
         }
     }
+    
+    /**
+     * ParserSidekick performs various services for the SaxParser.
+     * It doesn't print exceptions caused by InterruptedException since this parser
+     * is frequently interrupted intentionally. It also skips DTD validation for
+     * a significant performance boost.
+     *
+     * @see <a href="http://forum.java.sun.com/thread.jspa?forumID=34&threadID=284209">Java Forums</a>
+     */
+    static class IssuezillaParserSidekick implements EntityResolver, ErrorHandler {
+        /**
+         * Don't fetch a DTD from a remote webserver.
+         */
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+            // skip the DTD
+            if(systemId.endsWith("issuezilla.dtd")) {
+                byte[] emptyDTDBytes = "<?xml version='1.0' encoding='UTF-8'?>".getBytes();
+                return new InputSource(new ByteArrayInputStream(emptyDTDBytes));
+            } else {
+                return null;
+            }
+        }
+        public void error(SAXParseException exception) {
+            System.out.println("Error: ");
+            exception.printStackTrace();
+        }
+        public void fatalError(SAXParseException exception) {
+            System.out.println("Fatal error: ");
+            exception.printStackTrace();
+        }
+        public void warning(SAXParseException exception) {
+            System.out.println("Warning: ");
+            exception.printStackTrace();
+        }
+    }
+        
 
     /**
      * The IssueHandler does the real parsing.
