@@ -11,7 +11,7 @@
 <p><strong>Change</strong> the list to add, update and remove items as the source list changes in real time. If your list contained rows from a dynamic database table, changes to the data would be reflected in your list.
 <p><strong>Display</strong> the list in a JTable or JComboBox. By using Glazed Lists' custom renderers, you can make your Java Swing application look great.
 
-<h3>How it works</h3>
+<h3>How It Works</h3>
 <p>Glazed Lists uses <strong>event-driven lists</strong>. When a change to a list is made, it notifies all <code>ListChangeListeners</code> of the change. This is the same mechanism Swing uses to send events about user activity.
 <p>Start with a <strong>source list</strong>. A <code>BasicEventList</code> can contain all of the unsorted, unfiltered objects. It can be used just like an ArrayList, with all the <code>add()</code>, <code>remove()</code> and <code>get()</code> methods from the <code>List</code> interface.
 <p>Then add a <strong>mutation list</strong>. It provides a mutated view of the source list. When the source list is changed, the mutation list receives a notification to update itself. For example, the <code>SortedList</code> provides a sorted view of a source list. When an object is added to the source list it is simultaneously added to the SortedList in sorted order. The <code>FilterList</code> is a mutation list which views a subset of the source list.
@@ -22,8 +22,12 @@
 <p>Execute the <a href="https://glazedlists.dev.java.net/files/documents/1073/1671/glazedlists.jar">Glazed Lists jar file</a> for a simple demo.
 <p><img src="/tutorial/part5/screenshot.gif" width="431" height="273" alt="Screenshot of Glazed Lists Demo">
 
-<h3>Glazed Lists Tutorial</h3>
-<p>A <a href="tutorial/index.html">quick guide</a> to get you up-and-running with Glazed Lists in your Java application.
+<h3>Getting Started</h3>
+<ul>
+  <li><a href="tutorial/index.html">Tutorial</a> - a quick guide to get you up-and-running with Glazed Lists in your Java application.
+  <li><a href="/servlets/ProjectMemberList">Membership</a> - join the project as an Observer to submit issues to our <a href="/issues/buglist.cgi?component=glazedlists">bug database</a>.
+  <li><a href="/servlets/ProjectMailingListList">Mailing Lists</a> - your questions will be answered promptly on the <a href="mailto:users@glazedlists.dev.java.net">users@glazedlists.dev.java.net</a> mailing list.
+</ul>
 
 <br><br><br>
 </body></html>
