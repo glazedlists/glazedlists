@@ -106,7 +106,10 @@ public class BeanPropertyTest extends TestCase {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=183">Issue 183</a>
      */
     public void testInterfaces() {
-        BeanProperty beanProperty = new BeanProperty(SubInterface.class, "code", true, true);
+        BeanProperty codeProperty = new BeanProperty(SubInterface.class, "code", true, true);
+        NamedCode namedCode = new NamedCode();
+        codeProperty.set(namedCode, "C++");
+        assertEquals("C++", codeProperty.get(namedCode));
     }
 }
 
@@ -114,12 +117,28 @@ public class BeanPropertyTest extends TestCase {
  * Test interfaces.
  */
 interface BaseInterface {
-    String getCode();
-    void setCode(String code);
+    public String getCode();
+    public void setCode(String code);
 }
 interface SubInterface extends BaseInterface {
     public String getName();
     public void setName(String name);
+}
+class NamedCode implements SubInterface {
+    private String name = "JManning";
+    private String code = "Java!";
+    public String getCode() {
+        return code;
+    }
+    public void setCode(String code) {
+        this.code = code;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 }
 
 /**

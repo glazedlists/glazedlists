@@ -102,7 +102,7 @@ public class BeanProperty {
         while(currentClass != null) {
 
             // loop through this class' methods
-            Method[] classMethods = currentClass.getDeclaredMethods();
+            Method[] classMethods = currentClass.getMethods();
             for(int m = 0; m < classMethods.length; m++) {
                 if(!classMethods[m].getName().equals(setProperty)) continue;
                 if(classMethods[m].getParameterTypes().length != 1) continue;
@@ -159,7 +159,7 @@ public class BeanProperty {
      */
     private Method getMethod(Class targetClass, String methodName, Class[] parameterTypes) {
         try {
-            return targetClass.getDeclaredMethod(methodName, parameterTypes);
+            return targetClass.getMethod(methodName, parameterTypes);
         } catch(NoSuchMethodException e) {
             return null;
         }
