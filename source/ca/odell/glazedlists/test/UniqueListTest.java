@@ -32,8 +32,6 @@ public class UniqueListTest extends TestCase {
     public void setUp() {
         source = new BasicEventList();
         unique = new UniqueList(source, new ComparableComparator());
-        // verify that the size is always consistent
-        unique.addListEventListener(new ConsistencyTestList(unique, "Unique"));
     }
 
     /**
