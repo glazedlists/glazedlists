@@ -12,8 +12,6 @@ import com.odellengineeringltd.glazedlists.event.*;
 import java.util.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
 
 
 /**
