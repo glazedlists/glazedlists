@@ -14,10 +14,10 @@ import java.util.Collections;
 import java.util.NoSuchElementException;
 
 /**
- * An tree node that can be accessed either in sorted order or by
- * index.
+ * A tree node that can be accessed either in sorted order or by
+ * index. 
  *
- * This tree-node uses AVL-Trees to ensure that access is always
+ * <p>This tree-node uses AVL-Trees to ensure that access is always
  * logarithmic in terms of the size of the tree. AVL Trees use
  * rotations (single and double) when the height of a pair of
  * subtrees do not match in order to guarantee a bound on the

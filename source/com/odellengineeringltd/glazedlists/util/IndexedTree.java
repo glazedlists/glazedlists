@@ -16,6 +16,15 @@ import java.util.Collections;
  * Models a tree which keeps its elements either in sorted order
  * or by index.
  *
+ * When an <code>IndexedTree</code> is being used in sorted order, it
+ * <strong>must</strong> be accessed using sorted order exclusively.
+ * This means that the <code>setValue()</code> method of
+ * <code>IndexedTreeNode</code> shall not be used, and neither should
+ * the method <code>addByNode(int,Object)</code> of <code>IndexedTree</code>.
+ * Similarly, when an IndexedTree is being used in random order,
+ * it does not support <code>addByNode(Object)</code> because that
+ * method specifies no index.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class IndexedTree {
