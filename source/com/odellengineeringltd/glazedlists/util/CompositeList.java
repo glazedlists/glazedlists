@@ -69,9 +69,11 @@ public class CompositeList extends AbstractList implements EventList {
             int offset = getListOffset(memberList);
 
             // pass on a change for the insert of all this list's elements
-            updates.beginAtomicChange();
-            updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.INSERT);
-            updates.commitAtomicChange();
+            if(memberList.size() > 0) {
+                updates.beginAtomicChange();
+                updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.INSERT);
+                updates.commitAtomicChange();
+            }
         }
     }
     
@@ -98,9 +100,11 @@ public class CompositeList extends AbstractList implements EventList {
             memberLists.remove(memberList);
         
             // pass on a change for the remove of all this list's elements
-            updates.beginAtomicChange();
-            updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.DELETE);
-            updates.commitAtomicChange();
+            if(memberList.size() > 0) {
+                updates.beginAtomicChange();
+                updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.DELETE);
+                updates.commitAtomicChange();
+            }
         }
     }
     
