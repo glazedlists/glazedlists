@@ -76,7 +76,7 @@ public class DefaultTextFilterList extends AbstractFilterList {
      * Adjusts the filters of this {@link DefaultTextFilterList} and then
      * applies the new filters to the list.
      *
-     * @param filters the {@link String}s representing all of the filter values
+     * @param newFilters the {@link String}s representing all of the filter values
      */
     public void setFilterText(final String[] newFilters) {
         // adjusting the filters and refiltering the source list happens "atomically"
