@@ -35,11 +35,6 @@ interface Selectable {
     public void removeSelectionListener(SelectionListener listener);
 
     /**
-     * Gets the Display for this Selectable widget
-     */
-    public Display getDisplay();
-
-    /**
      * Gets the number of items selected.
      */
     public int getSelectionCount();

@@ -11,13 +11,10 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // access to the volatile implementation classes
 import ca.odell.glazedlists.impl.adt.*;
-// to act as a SelectionListener to a Selectable SWT Viewer
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Event;
-// to determine which form of selection is in use
+// to work with SWT
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.*;
+import org.eclipse.swt.widgets.*;
 // to store event info for forwarding on the deselected EventList
 import java.util.ArrayList;
 
@@ -41,11 +38,8 @@ class SelectionList extends TransformedList {
     /** the selection state */
     private Barcode barcode = null;
 
-    /** the Strategy to handle changes in selection */
-    private SelectionChangeStrategy selectionChangeStrategy = null;
-
     /** the selection listener */
-    private AdvancedSelectionListener selectionListener = null;
+    private SelectionListener selectionListener = null;
 
     /** to allow selection inversion without changing the barcode*/
     private Object selected = Barcode.BLACK;
@@ -62,15 +56,12 @@ class SelectionList extends TransformedList {
         this.selectable = selectable;
         barcode = new Barcode();
         source.addListEventListener(this);
-        selectionListener = new AdvancedSelectionListener();
-        selectable.addSelectionListener(selectionListener);
         if((selectable.getStyle() & SWT.SINGLE) == SWT.SINGLE) {
-            selectionChangeStrategy = new SingleLineSelectionChangeStrategy();
+            selectionListener = new SingleLineSelectionChangeStrategy();
         } else if((selectable.getStyle() & SWT.MULTI) == SWT.MULTI) {
-            selectable.getDisplay().addListener(SWT.KeyDown, selectionListener);
-            selectable.getDisplay().addListener(SWT.KeyUp, selectionListener);
-            selectionChangeStrategy = new MultiLineSelectionChangeStrategy();
+            selectionListener = new MultiLineSelectionChangeStrategy();
         }
+        selectable.addSelectionListener(selectionListener);
     }
 
     /** {@inheritDoc} */
@@ -239,8 +230,8 @@ class SelectionList extends TransformedList {
         }
 
         // Invert selection in the Selectable widget
-        //selectable.deselectAll();
-        //selectable.select(newSelection);
+        selectable.deselectAll();
+        selectable.select(newSelection);
 
         // Update the selected list to reflect the selection inversion
         updates.beginEvent();
@@ -263,10 +254,6 @@ class SelectionList extends TransformedList {
     /** {@inheritDoc} */
     public void dispose() {
         selectable.removeSelectionListener(selectionListener);
-        if((selectable.getStyle() & SWT.MULTI) == SWT.MULTI) {
-            selectable.getDisplay().removeListener(SWT.KeyUp, selectionListener);
-            selectable.getDisplay().removeListener(SWT.KeyDown, selectionListener);
-        }
         super.dispose();
         disposed = true;
     }
@@ -325,79 +312,28 @@ class SelectionList extends TransformedList {
     }
 
     /**
-     * This {@link SelectionListener} fills in the stateMask of
-     * {@link SelectionEvent}s which is left empty on item selection within
-     * {@link Tables}. The stateMask is documented to hold the value of
-     * modifier keys.  However, this value is also documented to be not in use
-     * for some widgets, and oddly, {@link Table} is one of those widgets.
-     */
-    private class AdvancedSelectionListener implements Listener, SelectionListener {
-
-        /** the selection modifier key, either NONE, CTRL, or SHIFT */
-        private int currentKeyModifier = SWT.NONE;
-
-        /**
-         * Handles {@link SWT#KeyUp} and {@link SWT#KeyDown} events.  Either
-         * none or both of these {@link Listener}s must be registered.
-         */
-        public void handleEvent(Event event) {
-            // handle KeyDown events
-            if(event.type == SWT.KeyDown) {
-                if(event.keyCode == SWT.CTRL) currentKeyModifier = SWT.CTRL;
-                else if(event.keyCode == SWT.SHIFT) currentKeyModifier = SWT.SHIFT;
-
-            // handle KeyUp events
-            } else if(event.keyCode == SWT.CTRL || event.keyCode == SWT.SHIFT) {
-                currentKeyModifier = SWT.NONE;
-            }
-        }
-
-        /**
-         * Responds to a single click or arrow key based selection.
-         */
-        public void widgetSelected(SelectionEvent event) {
-            event.stateMask = currentKeyModifier;
-            selectionChangeStrategy.handleSelectionChanged(event);
-        }
-
-        /**
-         * Responds to a double-click selection.
-         */
-        public void widgetDefaultSelected(SelectionEvent event) {
-            event.stateMask = currentKeyModifier;
-            selectionChangeStrategy.handleSelectionChanged(event);
-        }
-    }
-
-    /**
-     * This Strategy is applied in response to a {@link SelectionEvent} to
-     * process changes in selection.
-     */
-    private interface SelectionChangeStrategy {
-
-        /**
-         * Process how selection has changed and forward events as necessary.
-         */
-        public void handleSelectionChanged(SelectionEvent event);
-    }
-
-    /**
      * This Strategy handles selection changes in Selectable widgets
      * that are created with the {@link SWT#SWT.SINGLE} selection flag.  This
      * is the simple base case where at most one item is ever selected.  The
      * value of this pair of {@link EventList}s isn't really demonstrated in
      * this mode.
      */
-    private class SingleLineSelectionChangeStrategy implements SelectionChangeStrategy {
+    private final class SingleLineSelectionChangeStrategy implements SelectionListener {
 
         /** The last selected line */
         private int lastSelected = -1;
 
         /**
-         * Only one line is ever selected (or deselected) in {@link SWT#SINGLE}
-         * selection mode.
+         * Responds to a double-click selection.
          */
-        public void handleSelectionChanged(SelectionEvent event) {
+        public void widgetDefaultSelected(SelectionEvent event) {
+            widgetSelected(event);
+        }
+
+        /**
+         * Responds to a single click or arrow key based selection.
+         */
+        public void widgetSelected(SelectionEvent event) {
             int selectedIndex = selectable.getSelectionIndex();
 
             // there is no actual change
@@ -441,171 +377,20 @@ class SelectionList extends TransformedList {
      * This Strategy handles selection changes in {@link Selectable} widgets
      * that are created with the {@link SWT#MULTI} selection flag.
      */
-    private class MultiLineSelectionChangeStrategy implements SelectionChangeStrategy {
+    private final class MultiLineSelectionChangeStrategy implements SelectionListener {
 
         /**
-         * Mutliple lines can be selected (or deselected) at any one time
-         * on a {@link Selectable} widget in {@link SWT#MULTI} selection mode.
+         * Responds to a double-click selection.
          */
-        public void handleSelectionChanged(SelectionEvent event) {
-
-            // The selection is not modified by any keys
-            if(event.stateMask == SWT.NONE && selectable.getSelectionCount() == 1) {
-                handleUnmodifiedSelection();
-
-            // The selection is modified with the CTRL key
-            } else if((event.stateMask & SWT.CTRL) == SWT.CTRL) {
-                handleCtrlModifiedSelection();
-
-            // The selection is modified with the SHIFT key
-            } else if((event.stateMask & SWT.SHIFT) == SWT.SHIFT) {
-                handleShiftModifiedSelection();
-
-            // A selection method was called directly on the widget
-            } else {
-                handleCustomSelection();
-            }
+        public void widgetDefaultSelected(SelectionEvent event) {
+            widgetSelected(event);
         }
 
         /**
-         * Handles the case where a selection occurs that is unmodified.
-         * This implies that the current selection has been replaced by
-         * the selection of exactly one item.
+         * Responds to a single click or arrow key based selection.
          */
-        private void handleUnmodifiedSelection() {
-            int selectedIndex = selectable.getSelectionIndex();
-            int blackIndex = barcode.getColourIndex(selectedIndex, selected);
-            boolean wasSelected = blackIndex != -1;
-
-            // Remove all but one from the current selection
-            if(wasSelected) {
-                int[] oldSelection = new int[barcode.colourSize(selected) - 1];
-                updates.beginEvent();
-                for(int i = 0;i < blackIndex;i++) {
-                    oldSelection[i] = barcode.getIndex(0, selected);
-                    barcode.set(oldSelection[i], deselected, 1);
-                    updates.addDelete(0);
-                }
-                for(int i = blackIndex + 1;i < oldSelection.length;i++) {
-                    oldSelection[i - 1] = barcode.getIndex(1, selected);
-                    barcode.set(oldSelection[i - 1], deselected, 1);
-                    updates.addDelete(1);
-                }
-                updates.commitEvent();
-                deselectedList.updates().beginEvent();
-                for(int i = 0;i < oldSelection.length;i++) {
-                    deselectedList.updates().addInsert(oldSelection[i]);
-                }
-                deselectedList.updates().commitEvent();
-
-            // Remove the current selection then add the new one
-            } else {
-                int[] oldSelection = new int[barcode.colourSize(selected)];
-                updates.beginEvent();
-                for(int i = 0;i < oldSelection.length;i++) {
-                    oldSelection[i] = barcode.getIndex(0, selected);
-                    barcode.set(oldSelection[i], deselected, 1);
-                    updates.addDelete(0);
-                }
-                barcode.set(selectedIndex, selected, 1);
-                updates.addInsert(0);
-                updates.commitEvent();
-                deselectedList.updates().beginEvent();
-                for(int i = 0;i < oldSelection.length;i++) {
-                    deselectedList.updates().addInsert(oldSelection[i]);
-                }
-                deselectedList.updates().addDelete(selectedIndex);
-                deselectedList.updates().commitEvent();
-            }
-        }
-
-        /**
-         * Handles the case where a selection occurs that is modified by the
-         * user pressing the CTRL key.  This implies that the current selection
-         * has either increased or decreased by exactly one item.
-         */
-        private void handleCtrlModifiedSelection() {
-            // Selection has increased in size
-            if(selectable.getSelectionCount() > barcode.colourSize(selected)) {
-                int selectedIndex = selectable.getSelectionIndex();
-                barcode.set(selectedIndex, selected, 1);
-                int blackIndex = barcode.getColourIndex(selectedIndex, selected);
-                updates.beginEvent();
-                updates.addInsert(blackIndex);
-                updates.commitEvent();
-                deselectedList.updates().beginEvent();
-                deselectedList.updates().addDelete(selectedIndex);
-                deselectedList.updates().commitEvent();
-
-            // Selection has decreased in size
-            } else if(selectable.getSelectionCount() < barcode.colourSize(selected)) {
-                int index = -1;
-                int blackIndex = -1;
-                int[] selectedValues = selectable.getSelectionIndices();
-
-                // search for what value is missing
-                for(int i = 0;i < selectedValues.length;i++) {
-                    int selectedIndex = barcode.getIndex(i, selected);
-                    if(selectedIndex != selectedValues[i]) {
-                        index = selectedIndex;
-                        blackIndex = i;
-                        break;
-                    }
-                }
-
-                // The different value is the last selected value
-                if(index == -1) {
-                    blackIndex = selectedValues.length;
-                    index = barcode.getIndex(blackIndex, selected);
-                }
-
-                // update the barcode and forward the events
-                barcode.set(index, deselected, 1);
-                updates.beginEvent();
-                updates.addDelete(blackIndex);
-                updates.commitEvent();
-                int whiteIndex = barcode.getColourIndex(index, deselected);
-                deselectedList.updates().beginEvent();
-                deselectedList.updates().addInsert(whiteIndex);
-                deselectedList.updates().commitEvent();
-            }
-        }
-
-        /**
-         * Handles the case where a selection occurs that is modified by the
-         * user pressing the SHIFT key.  This implies that the current selection
-         * is replaced by a selected range which may or may not include values
-         * that were previously selected.
-         *
-         * @todo Currently this method is relatively brute force and could be
-         * optimized later if it has a significant performance impact.
-         */
-        private void handleShiftModifiedSelection() {
-            int[] selectedValues = selectable.getSelectionIndices();
-            int[] oldSelection = new int[barcode.colourSize(selected)];
-            updates.beginEvent();
-            for(int i = 0;i < oldSelection.length;i++) {
-                oldSelection[i] = barcode.getIndex(i, selected);
-            }
-            barcode = new Barcode();
-            barcode.add(0, deselected, source.size());
-            updates.addDelete(0, oldSelection.length);
-            updates.addInsert(0, selectedValues.length);
-            updates.commitEvent();
-
-            barcode.set(selectedValues[0], selected, selectedValues.length);
-            deselectedList.updates().beginEvent();
-            int unchangedSelections = 0;
-            for(int i = 0;i < oldSelection.length;i++) {
-                int current = oldSelection[i];
-                if(current < selectedValues[0] || current > selectedValues[selectedValues.length - 1]) {
-                    deselectedList.updates().addInsert(oldSelection[i]);
-                } else {
-                    unchangedSelections++;
-                }
-            }
-            deselectedList.updates().addDelete(selectedValues[0], selectedValues.length - unchangedSelections);
-            deselectedList.updates().commitEvent();
+        public void widgetSelected(SelectionEvent event) {
+            handleCustomSelection();
         }
 
         /**

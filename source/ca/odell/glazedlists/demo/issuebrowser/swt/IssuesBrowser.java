@@ -93,7 +93,7 @@ public class IssuesBrowser {
         Text filterText = createFilterText(filterPanel);
         issuesTextFiltered.setFilterEdit(filterText);
         createPrioritySlider(filterPanel, priorityList);
-        createUsersList(filterPanel);
+        createUsersList(shell, filterPanel);
 
         // A panel containing the two tables to display Issue data
         SashForm issuePanel = new SashForm(demoForm, SWT.VERTICAL);
@@ -259,7 +259,7 @@ public class IssuesBrowser {
         highPriorityLabel.setLayoutData(highPriorityLabelLayout);
     }
 
-    private void createUsersList(Composite parent) {
+    private void createUsersList(Shell shell, Composite parent) {
         // A panel containing tthe users list
         Canvas usersListPanel = new Canvas(parent, SWT.NONE);
 
@@ -347,8 +347,7 @@ public class IssuesBrowser {
         descriptionsLabel.setLayoutData(descriptionsLabelLayout);
     }
 
-    private void createDescriptionsTable(Composite parent,
-        EventTableViewer issuesTableViewer) {
+    private void createDescriptionsTable(Composite parent, EventTableViewer issuesTableViewer) {
         Table descriptionsTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER);
         GridData descriptionsTableLayout = new GridData();
         descriptionsTableLayout.horizontalAlignment = GridData.FILL;

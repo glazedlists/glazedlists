@@ -277,11 +277,6 @@ public class EventTableViewer implements ListEventListener, Selectable {
     }
 
     /** {@inheritDoc} */
-    public Display getDisplay() {
-        return table.getDisplay();
-    }
-
-    /** {@inheritDoc} */
     public int getSelectionCount() {
         return table.getSelectionCount();
     }
