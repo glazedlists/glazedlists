@@ -101,17 +101,18 @@ public class ProgrammingLanguageTableCell implements TableFormat {
 
 <h3>Fixing the Sorter</h3>
 
-<p>Originally we set our <code>TableComparatorSelector</code> so that clicking on the
+<p>Originally we set our <code>TableComparatorChooser</code> so that clicking on the
 name column sorted by name, and clicking on the year column sorted by year. As we
 have collapsed all values into a single column, we need to update the
-<code>TableComparatorSelector</code> to use just the single column.
+<code>TableComparatorChooser</code> to use just the single column.
 
 <p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>    public void display() {
         ListTable listTable = new ListTable(customFilteredLanguages, new ProgrammingLanguageTableCell());
         
-        TableComparatorSelector sortSelect = new TableComparatorSelector(listTable, sortedLanguages);
-        sortSelect.addComparator(<font color="#FF3333">0</font>, <font color="#FF3333">"by name"</font>, sortByName);
-        sortSelect.addComparator(<font color="#FF3333">0</font>, <font color="#FF3333">"by year"</font>, sortByYear);
+        <font color="#FF3333">TableComparatorChooser tableSorter = new TableComparatorChooser(listTable, sortedLanguages, false);</font>
+        <font color="#FF3333">tableSorter.getComparatorsForColumn(0).clear();</font>
+        <font color="#FF3333">tableSorter.getComparatorsForColumn(<font color="#FF3333">0</font>).add(<font color="#FF3333">new ProgrammingLanguageNameComparator()</font>);</font>
+        <font color="#FF3333">tableSorter.getComparatorsForColumn(<font color="#FF3333">0</font>).add(<font color="#FF3333">new ProgrammingLanguageYearComparator()</font>);</font>
         
         JFrame frame = new JFrame("Programming Languages");
         frame.getContentPane().setLayout(new GridBagLayout());
