@@ -12,20 +12,27 @@ import ca.odell.glazedlists.impl.filter.*;
 // standard collections
 import java.util.*;
 
+/**
+ * Tests the generic FilterList class.
+ */
 public class FilterListTest extends TestCase {
 
-    
+    /**
+     * This test demonstrates a Issue 213.
+     */
     public void testRelax() {
+        // construct a (contrived) list of initial values
         int[] values = new int [] { 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 10, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 1 };
-        
         BasicEventList original = new BasicEventList();
         for(int i = 0; i < values.length; i++) {
             original.add(new Integer(values[i]));
         }
         
+        // prepare a filter to filter our list
         MinimumValueMatcherEditor editor = new MinimumValueMatcherEditor();
         FilterList myFilterList = new FilterList(original, editor);
         
+        // relax the list
         editor.setMinimum(11);
         editor.setMinimum(10);
     }
