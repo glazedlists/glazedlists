@@ -416,7 +416,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             if(index < size() - 1) {
                 removeStart = getSourceIndex(index);
                 removeEnd = getSourceIndex(index + 1);
-            // if this is before the end, remove everything up to the first different element
+            // if this is at the end, remove everything after
             } else {
                 removeStart = getSourceIndex(index);
                 removeEnd = source.size();
@@ -457,9 +457,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * Replaces the object at the specified index in the source list with
      * the specified value.
      *
-     * <p>This has been modified for UniqueList in order to remove all of
-     * the elements at the source index with a single instance of the specified
-     * element.
+     * <p>This removes all duplicates of the replaced value, then sets the
+     * replacement value on the source list.
      *
      * <p><strong>Warning:</strong> Because the set() method is implemented
      * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
@@ -476,10 +475,30 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // save the replaced value
             Object replaced = get(index);
             
-            // remove the existing value and add the new value
+            // wrap this update in a nested change set
             updates.beginEvent(true);
-            remove(index);
-            add(index, value);
+
+            // calculate the start (inclusive) and end (exclusive) of the duplicates to remove
+            int removeStart = -1;
+            int removeEnd = -1;
+            // if this is before the end, remove everything up to the first different element
+            if(index < size() - 1) {
+                removeStart = getSourceIndex(index) + 1;
+                removeEnd = getSourceIndex(index + 1);
+            // if this is at the end, remove everything after
+            } else {
+                removeStart = getSourceIndex(index) + 1;
+                removeEnd = source.size();
+            }
+            // remove the range from the source list if it is non-empty
+            if(removeStart < removeEnd) {
+                source.subList(removeStart, removeEnd).clear();
+            }
+
+            // replace the non-duplicate with the new value
+            source.set(getSourceIndex(index), value);
+            
+            // commit the nested change set
             updates.commitEvent();
             
             return replaced;
