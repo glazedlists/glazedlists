@@ -340,7 +340,7 @@ public final class CompositeList extends AbstractEventList {
         
         /** the forward and read locks delegated to */
         //private Lock forwardLock = new LoudLock("PROPLOCK", new ReentrantWriterPreferenceReadWriteLock().writeLock());
-        private Lock forwardLock = new ReentrantWriterPreferenceReadWriteLock().writeLock();
+        private Lock forwardLock = new J2SE12ReadWriteLock().writeLock();
         private Lock readLock;
 
         /**
