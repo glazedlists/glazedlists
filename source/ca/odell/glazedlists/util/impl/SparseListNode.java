@@ -138,6 +138,25 @@ public final class SparseListNode {
     }
     
     /**
+     * Gets the object with the specified index in the tree, given the specified
+     * compressed index.
+     */
+    public int getIndexByCompressedIndex(int compressedIndex) {
+        assert(compressedIndex >= treeLeftSize + treeRightSize + treeRootSize);
+
+        // recurse to the left
+        if(compressedIndex < treeLeftSize) {
+            return left.getIndexByCompressedIndex(compressedIndex);
+        // return this node's root
+        } else if(compressedIndex < treeLeftSize + treeRootSize) {
+            return totalLeftSize + virtualRootSize;
+        // recurse on the right side
+        } else {
+            return right.getIndexByCompressedIndex(compressedIndex - (treeLeftSize + treeRootSize)) + totalLeftSize + treeRootSize + virtualRootSize;
+        }
+    }
+    
+    /**
      * Gets the compressed index of the specified index into the tree. This
      * is the index of the node that the specified index will be stored in.
      *
@@ -254,7 +273,7 @@ public final class SparseListNode {
     }
     
     /**
-     * Gets the index of the current node, based on a recurrsive
+     * Gets the index of the current node, based on a recursive
      * path up the tree.
      */
     public int getCompressedIndex() {

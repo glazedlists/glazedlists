@@ -226,8 +226,9 @@ public final class SparseList extends AbstractList {
      */
     public int getIndex(int compressedIndex) {
         if(root == null) throw new IndexOutOfBoundsException("cannot get from a tree of size 0 at " + compressedIndex);
-        SparseListNode node = root.getNodeByCompressedIndex(compressedIndex);
-        return node.getIndex();
+        //SparseListNode node = root.getNodeByCompressedIndex(compressedIndex);
+        //return node.getIndex();
+        return root.getIndexByCompressedIndex(compressedIndex);
     }
     
     /**
