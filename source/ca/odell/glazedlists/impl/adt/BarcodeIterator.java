@@ -31,9 +31,6 @@ public class BarcodeIterator implements Iterator {
     /** the number of white elements before this node */
     private int whiteSoFar = 0;
 
-    /** the total size of the Barcode */
-    private int size = 0;
-
     /**
      * Creates a new Iterator for the given Barcode.
      */
@@ -47,7 +44,6 @@ public class BarcodeIterator implements Iterator {
             }
         }
         this.barcode = barcode;
-        this.size = barcode.size();
     }
 
     /**
@@ -55,7 +51,7 @@ public class BarcodeIterator implements Iterator {
      * iterate over.
      */
     public boolean hasNext() {
-        if(getIndex() >= barcode.treeSize() - 1 && getIndex() == size - 1) {
+        if(getIndex() == barcode.size() - 1) {
             return false;
         }
         return true;
@@ -76,10 +72,9 @@ public class BarcodeIterator implements Iterator {
      * move the {@link Iterator} to.
      */
     public boolean hasNextWhite() {
-        if(size != barcode.treeSize()) return hasNext();
+        if(barcode.size() != barcode.treeSize()) return hasNext();
         else if(currentNode == null) return false;
         else if(localIndex < currentNode.whiteSpace - 1) return true;
-        else if(blackSoFar + whiteSoFar + currentNode.whiteSpace + currentNode.rootSize < size) return true;
         else return false;
     }
 
@@ -101,7 +96,7 @@ public class BarcodeIterator implements Iterator {
         // handle the empty tree case
         if(currentNode == null) {
             // beyond the tree in the trailing whitespace
-            if(getIndex() < size) {
+            if(getIndex() < barcode.size()) {
                 return Barcode.WHITE;
 
             // at the end of the list
@@ -121,7 +116,7 @@ public class BarcodeIterator implements Iterator {
             // act on the trailing whitespace
             } else {
                 // beyond the tree in the trailing whitespace
-                if(getIndex() < size) {
+                if(getIndex() < barcode.size()) {
                     return Barcode.WHITE;
 
                 // at the end of the list
@@ -188,7 +183,7 @@ public class BarcodeIterator implements Iterator {
         // handle the empty tree case
         if(currentNode == null) {
             // beyond the tree in the trailing whitespace
-            if(getIndex() < size) {
+            if(getIndex() < barcode.size()) {
                 return Barcode.WHITE;
 
             // at the end of the list
@@ -198,8 +193,9 @@ public class BarcodeIterator implements Iterator {
 
         // at the edge of the current node
         } else if(localIndex >= currentNode.whiteSpace) {
-            // move to the trailing nulls
-            if(getIndex() + currentNode.rootSize == barcode.treeSize()) {
+            // move to the trailing whitespace
+            if(getIndex() < barcode.treeSize() && getIndex() + currentNode.rootSize >= barcode.treeSize()) {
+                localIndex = currentNode.whiteSpace;
                 localIndex += currentNode.rootSize;
             }
 
@@ -213,7 +209,7 @@ public class BarcodeIterator implements Iterator {
             // act on the trailing whitespace
             } else {
                 // beyond the tree in the trailing whitespace
-                if(getIndex() < size) {
+                if(getIndex() < barcode.size()) {
                     return Barcode.WHITE;
 
                 // at the end of the list
@@ -365,7 +361,7 @@ public class BarcodeIterator implements Iterator {
         if(localIndex == -1) {
             throw new NoSuchElementException("Cannot call setBlack() before next() is called.");
 
-        // Set in the trailing nulls without a tree
+        // Set in the trailing whitespace without a tree
         } else if(currentNode == null) {
             barcode.setBlack(getIndex(), 1);
             currentNode = barcode.getRootNode();
