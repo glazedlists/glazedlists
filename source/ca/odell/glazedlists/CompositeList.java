@@ -16,10 +16,11 @@ import ca.odell.glazedlists.util.concurrent.*;
 /**
  * A CompositeList is a list that is composed of one or more lists.
  *
- * <strong><font color="#FF0000">Warning!</font> The CompositeList is thread-unsafe
- * and may cause deadlock in multi-threaded applications. Its use is for single-threaded
- * environments only! This issue is a high priority issue in the Glazed Lists bug tracker
- * and will hopefully be resolved soon. (Jesse Wilson, June 14, 2004)</font>
+ * <p><strong><font color="#FF0000">Warning:</font></strong> the CompositeList's
+ * concurrency lock recursively acquires the lock for all source lists. This can
+ * lead to deadlocks in situations where multiple CompositeLists share the same
+ * source lists. To avoid risk of deadlock, no source list (or its parent lists)
+ * should be a member to more than one CompositeList. 
  *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=25">Bug 25</a>
  *
@@ -236,7 +237,7 @@ public final class CompositeList extends AbstractEventList {
     private void propagateChanges() {
         // propogate all the changes
         while(!globalChangeQueue.isEmpty()) {
-        updates.beginEvent();
+            updates.beginEvent();
             // get the list and its changes
             MemberList listWithChanges = (MemberList)globalChangeQueue.removeFirst();
             ListEvent listChanges = (ListEvent)listWithChanges.changeQueue.removeFirst();
@@ -259,7 +260,7 @@ public final class CompositeList extends AbstractEventList {
                 }
                 assert(listWithChanges.size >= 0);
             }
-        updates.commitEvent();
+            updates.commitEvent();
         }
     }
 
