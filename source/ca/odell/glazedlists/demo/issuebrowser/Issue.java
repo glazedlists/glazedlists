@@ -452,27 +452,6 @@ public class Issue implements TextFilterable, Comparable {
             description.getFilterStrings(baseList);
         }
     }
-
-    /**
-     * Return a list of issues. This list is generated in an interesting way.
-     * First, an XML file is paresed into a list of Issue objects. Those Issue
-     * Objects then write out the Java code necessary to create them. Finally
-     * that Java code is pasted here.
-     *
-     * <p>This removes the need to include an XML file and reduces parse time.
-     */
-    /*public static List loadIssues() {
-        try {
-            String baseUrl = "https://glazedlists.dev.java.net/issues/xml.cgi";
-            return IssuezillaXMLParser.loadIssues(baseUrl, 1, 150);
-        } catch(IOException e) {
-            e.printStackTrace();
-        } catch(SecurityException e) {
-            e.printStackTrace();
-        }
-
-        return Collections.EMPTY_LIST;
-    }*/
 }
 
 /**
