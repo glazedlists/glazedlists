@@ -29,9 +29,6 @@ import java.util.*;
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
  *
- * <p><font size="5"><strong><font color="#FF0000">Warning:</font></strong> This
- * class is a technology preview and is subject to API changes.</font>
- *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class PopularityList extends TransformedList {
