@@ -8,6 +8,7 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.matchers.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
@@ -47,9 +48,9 @@ import ca.odell.glazedlists.util.concurrent.*;
  */
 public abstract class AbstractFilterList extends TransformedList {
 
-    /** the flag list contains Barcode.BLACK for items that match the current filter and Barcode.WHITE for others */
-    private Barcode flagList = new Barcode();
-
+    /** implement Matcher's requirements in one quick inner class */
+    private PrivateMatcherEditor editor = null;
+    
     /**
      * Creates a {@link AbstractFilterList} that includes a subset of the specified
      * source {@link EventList}.
@@ -57,111 +58,10 @@ public abstract class AbstractFilterList extends TransformedList {
      * <p>Extending classes must call handleFilterChanged().
      */
     protected AbstractFilterList(EventList source) {
-        super(source);
-
-        // use an Internal Lock to avoid locking the source list during a sort
-        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
-
-        // build a list of what is filtered and what's not
-        flagList.addBlack(0, source.size());
+        super(new FilterList(source));
+        
         // listen for changes to the source list
-        source.addListEventListener(this);
-    }
-
-    /** {@inheritDoc} */
-    public final void listChanged(ListEvent listChanges) {
-        // all of these changes to this list happen "atomically"
-        updates.beginEvent();
-
-        // handle reordering events
-        if(listChanges.isReordering()) {
-            int[] sourceReorderMap = listChanges.getReorderMap();
-            int[] filterReorderMap = new int[flagList.blackSize()];
-
-            // adjust the flaglist & construct a reorder map to propagate
-            Barcode previousFlagList = flagList;
-            flagList = new Barcode();
-            for(int i = 0; i < sourceReorderMap.length; i++) {
-                Object flag = previousFlagList.get(sourceReorderMap[i]);
-                flagList.add(i, flag, 1);
-                if(flag != Barcode.WHITE) filterReorderMap[flagList.getBlackIndex(i)] = previousFlagList.getBlackIndex(sourceReorderMap[i]);
-            }
-
-            // fire the reorder
-            updates.reorder(filterReorderMap);
-
-        // handle non-reordering events
-        } else {
-
-            // for all changes, one index at a time
-            while(listChanges.next()) {
-
-                // get the current change info
-                int sourceIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
-
-                // handle delete events
-                if(changeType == ListEvent.DELETE) {
-                    // determine if this value was already filtered out or not
-                    int filteredIndex = flagList.getBlackIndex(sourceIndex);
-
-                    // if this value was not filtered out, it is now so add a change
-                    if(filteredIndex != -1) {
-                        updates.addDelete(filteredIndex);
-                    }
-
-                    // remove this entry from the flag list
-                    flagList.remove(sourceIndex, 1);
-
-                // handle insert events
-                } else if(changeType == ListEvent.INSERT) {
-
-                    // whether we should add this item
-                    boolean include = filterMatches(source.get(sourceIndex));
-
-                    // if this value should be included, add a change and add the item
-                    if(include) {
-                        flagList.addBlack(sourceIndex, 1);
-                        int filteredIndex = flagList.getBlackIndex(sourceIndex);
-                        updates.addInsert(filteredIndex);
-
-                    // if this value should not be included, just add the item
-                    } else {
-                        flagList.addWhite(sourceIndex, 1);
-                    }
-
-                // handle update events
-                } else if(changeType == ListEvent.UPDATE) {
-
-
-
-                    // determine if this value was already filtered out or not
-                    int filteredIndex = flagList.getBlackIndex(sourceIndex);
-                    boolean wasIncluded = filteredIndex != -1;
-                    // whether we should add this item
-                    boolean include = filterMatches(source.get(sourceIndex));
-
-                    // if this element is being removed as a result of the change
-                    if(wasIncluded && !include) {
-                        flagList.setWhite(sourceIndex, 1);
-                        updates.addDelete(filteredIndex);
-
-                    // if this element is being added as a result of the change
-                    } else if(!wasIncluded && include) {
-                        flagList.setBlack(sourceIndex, 1);
-                        updates.addInsert(flagList.getBlackIndex(sourceIndex));
-
-                    // this element is still here
-                    } else if(wasIncluded && include) {
-                        updates.addUpdate(filteredIndex);
-
-                    }
-                }
-            }
-        }
-
-        // commit the changes and notify listeners
-        updates.commitEvent();
+        this.source.addListEventListener(this);
     }
 
     /**
@@ -170,19 +70,13 @@ public abstract class AbstractFilterList extends TransformedList {
      * source list.
      */
     protected void handleFilterCleared() {
-        // all of these changes to this list happen "atomically"
-        updates.beginEvent();
-
-        // for all filtered items, add them
-        for(BarcodeIterator i = flagList.iterator();i.hasNextWhite(); ) {
-            i.nextWhite();
-            updates.addInsert(i.getIndex());
+        if(editor == null) {
+            editor = new PrivateMatcherEditor();
+            FilterList filterList = (FilterList)super.source;
+            filterList.setMatcherEditor(editor);
+        } else {
+            editor.fireCleared();
         }
-        flagList.clear();
-        flagList.addBlack(0, source.size());
-
-        // commit the changes and notify listeners
-        updates.commitEvent();
     }
 
     /**
@@ -195,19 +89,7 @@ public abstract class AbstractFilterList extends TransformedList {
      * of thread safe code.
      */
     protected final void handleFilterRelaxed() {
-        // all of these changes to this list happen "atomically"
-        updates.beginEvent();
-
-        // for all filtered items, see what the change is
-        for(BarcodeIterator i = flagList.iterator();i.hasNextWhite(); ) {
-            i.nextWhite();
-            if(filterMatches(source.get(i.getIndex()))) {
-                updates.addInsert(i.setBlack());
-            }
-        }
-
-        // commit the changes and notify listeners
-        updates.commitEvent();
+        editor.fireRelaxed();
     }
 
     /**
@@ -220,21 +102,7 @@ public abstract class AbstractFilterList extends TransformedList {
      * of thread safe code.
      */
     protected final void handleFilterConstrained() {
-        // all of these changes to this list happen "atomically"
-        updates.beginEvent();
-
-        // for all unfiltered items, see what the change is
-        for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack(); ) {
-            i.nextBlack();
-            if(!filterMatches(source.get(i.getIndex()))) {
-                int blackIndex = i.getBlackIndex();
-                i.setWhite();
-                updates.addDelete(blackIndex);
-            }
-        }
-
-        // commit the changes and notify listeners
-        updates.commitEvent();
+        editor.fireConstrained();
     }
 
     /**
@@ -246,84 +114,14 @@ public abstract class AbstractFilterList extends TransformedList {
      * of thread safe code.
      */
     protected final void handleFilterChanged() {
-        // all of these changes to this list happen "atomically"
-        updates.beginEvent();
-
-        // for all source items, see what the change is
-        for(BarcodeIterator i = flagList.iterator();i.hasNext(); ) {
-            i.next();
-
-            // determine if this value was already filtered out or not
-            int filteredIndex = i.getBlackIndex();
-            boolean wasIncluded = filteredIndex != -1;
-            // whether we should add this item
-            boolean include = filterMatches(source.get(i.getIndex()));
-
-            // this element is being removed as a result of the change
-            if(wasIncluded && !include) {
-                i.setWhite();
-                updates.addDelete(filteredIndex);
-
-            // this element is being added as a result of the change
-            } else if(!wasIncluded && include) {
-                updates.addInsert(i.setBlack());
-            }
+        if(editor == null) {
+            editor = new PrivateMatcherEditor();
+            FilterList filterList = (FilterList)super.source;
+            filterList.setMatcherEditor(editor);
+        } else {
+            editor.fireChanged();
         }
-
-        // commit the changes and notify listeners
-        updates.commitEvent();
     }
-
-    /*
-     * Returns <tt>true</tt> if <code>filter1</code> is the same logical filter
-     * as <code>filter2</code>, meaning <code>filter1</code> would discriminate
-     * the source list elements precisely the same way as <code>filter2</code>.
-     * The default implementation simply returns
-     * <code>filter1.equals(filter2)</code> if filter1 is non-null, however,
-     * subclasses may have further strategies for determining
-     *
-     * @param filter1 a filter value
-     * @param filter2 another filter value
-     * @return <tt>true</tt> if <code>filter1</code> is the same logical filter
-     *      as <code>filter2</code>; <tt>false</tt> otherwise
-     */
-    /*public boolean isFilterEqual(Object filter1, Object filter2) {
-        return filter1 == null ? filter2 == null : filter1.equals(filter2);
-    }*/
-
-    /*
-     * Tests if the <code>newFilter</code> represents a relaxed version of the
-     * <code>oldFilter</code>. If <code>newFilter</code> is a relaxed version
-     * of <code>oldFilter</code> then it is guaranteed to accept the same
-     * source list items as <code>oldFilter</code> and possibly more. By
-     * default, this method returns <tt>false</tt>, but subclasses may override
-     * it if filter relaxation can be detected.
-     *
-     * @param oldFilter the current value filtering the source list
-     * @param newFilter the next value to filter the source list
-     * @return <tt>true</tt> if <code>newFilter</code> is a relaxed version of
-     *      <code>oldFilter</code>; <tt>false</tt> otherwise
-     */
-    /*public boolean isFilterRelaxed(Object oldFilter, Object newFilter) {
-        return false;
-    }*/
-
-    /*
-     * Tests if the <code>newFilter</code> represents a constrained version of
-     * the <code>oldFilter</code>. If <code>newFilter</code> is a constrained
-     * version of <code>oldFilter</code> then it is guaranteed to reject the
-     * same source list items as <code>oldFilter</code> and possibly more. By
-     * default, this method returns <tt>false</tt>, but subclasses may override
-     * it if filter constrainment can be detected.
-     *
-     * @param oldFilter the current value filtering the source list
-     * @param newFilter the next value to filter the source list
-     * @return <tt>true</tt> if <code>newFilter</code> is a constrained version
-     *      of <code>oldFilter</code>; <tt>false</tt> otherwise
-     */
-    /*public boolean isFilterConstrained(Object oldFilter, Object newFilter) {
-        return false;
-    }*/
 
     /**
      * Tests if the specified item from the source {@link EventList} is matched by
@@ -336,17 +134,43 @@ public abstract class AbstractFilterList extends TransformedList {
     public abstract boolean filterMatches(Object element);
 
     /** {@inheritDoc} */
-    public final int size() {
-        return flagList.blackSize();
-    }
-
-    /** {@inheritDoc} */
-    protected final int getSourceIndex(int mutationIndex) {
-        return flagList.getIndex(mutationIndex, Barcode.BLACK);
+    public void listChanged(ListEvent listChanges) {
+        // just pass on the changes
+        updates.forwardEvent(listChanges);
     }
 
     /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
+    }
+    
+    /**
+     * The MatcherEditor within the {@link AbstractFilterList} is a simple way for
+     * it to fit into the new {@link Matcher}s micro framework.
+     */
+    private class PrivateMatcherEditor extends AbstractMatcherEditor implements Matcher {
+        /** 
+         * This MatcherEditor's Matcher is itself.
+         */
+        public PrivateMatcherEditor() {
+            this.currentMatcher = this;
+        }
+    
+        /** {@inheritDoc} */
+        public boolean matches(Object item) {
+            return filterMatches(item);
+        }
+        public void fireCleared() { super.fireMatchAll(); }
+        public void fireRelaxed() { super.fireRelaxed(this); }
+        public void fireConstrained() { super.fireConstrained(this); }
+        public void fireChanged() { super.fireChanged(this); }
+    }
+
+
+    /** {@inheritDoc} */
+    public void dispose() {
+        FilterList filteredSource = (FilterList)source;
+        super.dispose();
+        filteredSource.dispose();
     }
 }

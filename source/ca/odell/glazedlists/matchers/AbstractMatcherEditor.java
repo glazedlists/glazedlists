@@ -31,7 +31,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
     private final List listeners = new ArrayList(1);  // normally only one listener
 
 	/** the current Matcher in effect */
-	private volatile Matcher currentMatcher = Matchers.trueMatcher();
+	protected Matcher currentMatcher = Matchers.trueMatcher();
 
 	/** {@inheritDoc} */
 	public Matcher getMatcher() {

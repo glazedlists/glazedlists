@@ -75,6 +75,7 @@ public class DefaultTextFilterList extends AbstractFilterList {
     public DefaultTextFilterList(EventList source, TextFilterator filterator) {
         super(source);
         this.filterator = filterator;
+        handleFilterChanged();
     }
 
     /**

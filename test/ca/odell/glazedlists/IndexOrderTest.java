@@ -147,6 +147,7 @@ public class IndexOrderTest extends TestCase {
             super(source);
             this.index = index;
             this.threshhold = threshhold;
+            handleFilterChanged();
         }
         public void setFilter(int index, int threshhold) {
             this.index = index;

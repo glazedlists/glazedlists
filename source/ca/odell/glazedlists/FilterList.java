@@ -64,6 +64,7 @@ public final class FilterList extends TransformedList {
 
         // build a list of what is filtered and what's not
         flagList.addBlack(0, source.size());
+        
         // listen for changes to the source list
         source.addListEventListener(this);
     }
