@@ -7,6 +7,7 @@
 package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.Matcher;
+import ca.odell.glazedlists.MatcherSource;
 
 
 /**
@@ -16,19 +17,19 @@ import ca.odell.glazedlists.Matcher;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.Matcher
  */
-public interface MatcherListener {
+public interface MatcherSourceListener {
     /**
      * Indicates that the filter on the {@link ca.odell.glazedlists.Matcher} has been
      * cleared (i.e., all elements should now be visible).
      */
-    public void cleared(Matcher source);
+    public void cleared(MatcherSource source);
 
     /**
      * Indicates that the {@link Matcher} has changed in an inditerminate way.
      *
      * @param source The source of the event.
      */
-    public void changed(Matcher source);
+    public void changed(Matcher new_matcher, MatcherSource source);
 
     /**
      * Indicates that the {@link Matcher} has changed to be more restrictive. This should
@@ -36,7 +37,7 @@ public interface MatcherListener {
      *
      * @param source The source of the event.
      */
-    public void constrained(Matcher source);
+    public void constrained(Matcher new_matcher, MatcherSource source);
 
     /**
      * Indicates that the {@link Matcher} has changed to be less restrictive. This should
@@ -44,5 +45,5 @@ public interface MatcherListener {
      *
      * @param source The source of the event.
      */
-    public void relaxed(Matcher source);
+    public void relaxed(Matcher new_matcher, MatcherSource source);
 }

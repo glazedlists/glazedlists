@@ -7,15 +7,16 @@
 package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.Matcher;
-import ca.odell.glazedlists.event.MatcherListener;
+import ca.odell.glazedlists.MatcherSource;
+import ca.odell.glazedlists.event.MatcherSourceListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * Basic building block for {@link ca.odell.glazedlists.Matcher} implementations that
- * handles the details of dealing with listeners. All <tt>Matcher</tt> implementations are
+ * Basic building block for {@link ca.odell.glazedlists.MatcherSource} implementations that
+ * handles the details of dealing with listeners. All <tt>MatcherSource</tt> implementations are
  * encouraged to extends this class rather than directly implementing <tt>Matcher</tt>.
  * <p/>
  * Extending classes can fire events to listener using "fire" methods: <ul> <li>{@link
@@ -24,17 +25,48 @@ import java.util.List;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public abstract class AbstractMatcher implements Matcher {
+public abstract class AbstractMatcherSource implements MatcherSource {
     /**
      * Contains MatcherListeners.
      */
     private final List listener_list = new ArrayList(1);  // normally only one listener
 
 
-    /**
+	/**
+	 * The current matcher in effect.
+	 */
+	private volatile Matcher current_matcher;
+
+
+	protected AbstractMatcherSource(Matcher initial_matcher) {
+		if (initial_matcher == null)
+			throw new IllegalArgumentException("Initial Matcher cannot be null");
+
+		this.current_matcher = initial_matcher;
+	}
+
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Matcher getCurrentMatcher() {
+		return current_matcher;
+	}
+
+	/**
+	 * Used by extending classes to set the matcher that is currently in use.
+	 */
+	public void setCurrentMatcher(Matcher matcher) {
+		if (matcher == null) throw new IllegalArgumentException("Matcher cannot be null");
+
+		this.current_matcher = matcher;
+	}
+
+
+	/**
      * {@inheritDoc}
      */
-    public void addMatcherListener(MatcherListener listener) {
+    public final void addMatcherSourceListener(MatcherSourceListener listener) {
         synchronized(listener_list) {
             listener_list.add(listener);
         }
@@ -43,7 +75,7 @@ public abstract class AbstractMatcher implements Matcher {
     /**
      * {@inheritDoc}
      */
-    public void removeMatcherListener(MatcherListener listener) {
+    public final void removeMatcherSourceListener(MatcherSourceListener listener) {
         synchronized(listener_list) {
             listener_list.remove(listener);
         }
@@ -54,10 +86,10 @@ public abstract class AbstractMatcher implements Matcher {
      * Indicates that the filter has been cleared (i.e., all elements should now be
      * visible.
      */
-    protected void fireCleared() {
+    protected final void fireCleared() {
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
-                ((MatcherListener) listener_list.get(i)).cleared(this);
+                ((MatcherSourceListener) listener_list.get(i)).cleared(this);
             }
         }
     }
@@ -65,10 +97,10 @@ public abstract class AbstractMatcher implements Matcher {
     /**
      * Indicates that the filter has changed in an inditerminate way.
      */
-    protected void fireChanged() {
+    protected final void fireChanged(Matcher new_matcher) {
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
-                ((MatcherListener) listener_list.get(i)).changed(this);
+                ((MatcherSourceListener) listener_list.get(i)).changed(new_matcher,this);
             }
         }
     }
@@ -77,10 +109,10 @@ public abstract class AbstractMatcher implements Matcher {
      * Indicates that the filter has changed to be more restrictive. This should only be
      * called if all currently filtered items will remain filtered.
      */
-    protected void fireConstrained() {
+    protected final void fireConstrained(Matcher new_matcher) {
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
-                ((MatcherListener) listener_list.get(i)).constrained(this);
+                ((MatcherSourceListener) listener_list.get(i)).constrained(new_matcher, this);
             }
         }
     }
@@ -89,10 +121,10 @@ public abstract class AbstractMatcher implements Matcher {
      * Indicates that the filter has changed to be less restrictive. This should only be
      * called if all currently unfiltered items will remain unfiltered.
      */
-    protected void fireRelaxed() {
+    protected final void fireRelaxed(Matcher new_matcher) {
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
-                ((MatcherListener) listener_list.get(i)).relaxed(this);
+                ((MatcherSourceListener) listener_list.get(i)).relaxed(new_matcher, this);
             }
         }
     }
