@@ -212,4 +212,12 @@ public final class NetworkList extends TransformedList {
     public void removeStatusListener(NetworkListStatusListener listener) {
         statusListeners.remove(listener);
     }
+    
+    /** {@inheritDoc} */
+    public void dispose() {
+        resourceStatus.removeResourceStatusListener(privateInterfaces);
+        disconnect();
+        resourceStatus = null;
+        super.dispose();
+    }
 }
