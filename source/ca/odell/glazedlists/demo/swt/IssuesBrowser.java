@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swt;
+package ca.odell.glazedlists.demo.swt;
 
 // swt
 import org.eclipse.swt.SWT;
@@ -18,6 +18,7 @@ import ca.odell.glazedlists.demo.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
+import ca.odell.glazedlists.swt.*;
 
 /**
  * This is the SWT version of the demo application designed to look good on a

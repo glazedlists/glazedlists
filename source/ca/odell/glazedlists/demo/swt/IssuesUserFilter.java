@@ -4,10 +4,11 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swt;
+package ca.odell.glazedlists.demo.swt;
 
 // glazed lists
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.swt.*;
 // the public demo
 import ca.odell.glazedlists.demo.Issue;
 import ca.odell.glazedlists.demo.IssuesToUserList;
