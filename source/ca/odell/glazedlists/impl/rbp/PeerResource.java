@@ -247,6 +247,8 @@ class PeerResource {
         else if(block.isUnpublish()) remoteUnpublish(source, block);
         else throw new IllegalStateException();
     }
+    int r = new Random().nextInt(10);
+
     private void remoteUpdate(ResourceConnection publisher, PeerBlock block) {
         // confirm the update is consistent
         if(block.getUpdateId() != (resourceUpdateId+1)) throw new IllegalStateException("Expected update id " + (resourceUpdateId+1) + " but found " + block.getUpdateId());

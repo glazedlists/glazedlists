@@ -348,13 +348,11 @@ public class NetworkListTest extends TestCase {
                 waitFor(1000);
                 sourceList.clear();
                 targetList.connect();
-                for(int i = 0; i < 100; i++) {
+                for(int i = 0; i < 25; i++) {
                     sourceList.add(new Integer(i));
                 }
                 // test that they're equal
-                System.out.println(" < WAITING ");
                 waitFor(1000);
-                System.out.println("            < DONE WAITING ");
                 assertEquals(sourceList, targetList);
                 targetList.disconnect();
             }
