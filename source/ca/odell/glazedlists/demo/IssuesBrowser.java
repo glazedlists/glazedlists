@@ -98,16 +98,16 @@ public class IssuesBrowser extends Applet {
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
         TableComparatorChooser tableSorter = new TableComparatorChooser(issuesJTable, issuesSortedList, true);
-        JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable);
+        JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
         // users table
-        JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect());
+        JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
         // descriptions
         EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
         JTable descriptionsTable = new JTable(descriptionsTableModel);
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
-        JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable);
+        JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         panel.add(usersListScrollPane, new GridBagConstraints(0, 0, 1, 2, 0.3, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
         panel.add(new JLabel("Filter: "), new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0));
