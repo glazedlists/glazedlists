@@ -28,8 +28,8 @@ import ca.odell.glazedlists.io.*;
 public class SwingListPeer implements ActionListener {
     
     /** the shared data */
-    private NetworkList localData = new NetworkList(new BasicEventList(), new IntegerCoder());
-    private NetworkList remoteData = new NetworkList(new BasicEventList(), new IntegerCoder());
+    private NetworkList localData = new NetworkList(new BasicEventList(), new SerializableByteCoder());
+    private NetworkList remoteData = new NetworkList(new BasicEventList(), new SerializableByteCoder());
     
     /** fields for editing the local list */
     JTextField enterNumber = null;
@@ -98,11 +98,8 @@ public class SwingListPeer implements ActionListener {
     }
     
     public void actionPerformed(ActionEvent e) {
-        System.out.println("ACTION EVENT");
-        int value = Integer.parseInt(enterNumber.getText());
-        localData.add(new Integer(value));
+        localData.add(enterNumber.getText());
         enterNumber.setText("");
-        System.out.println("/ACTION EVENT");
     }
     
     /**

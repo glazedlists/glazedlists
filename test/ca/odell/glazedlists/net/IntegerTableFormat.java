@@ -22,7 +22,7 @@ public class IntegerTableFormat implements TableFormat {
     }
 
     public String getColumnName(int column) {
-        return "Integer";
+        return "Value";
     }
 
     public Object getColumnValue(Object baseObject, int column) {
