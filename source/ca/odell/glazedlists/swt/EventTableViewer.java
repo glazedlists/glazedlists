@@ -67,6 +67,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
      */
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
+        //((ca.odell.glazedlists.impl.gui.ThreadProxyEventList)swtSource).debug = true;
+        
         disposeSource = swtSource;
 
         // insert a checked source if supported by the table
