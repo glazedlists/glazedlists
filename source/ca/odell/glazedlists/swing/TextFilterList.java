@@ -28,15 +28,15 @@ import java.util.List;
 
 /**
  * A filter list that shows only elements that contain the filter text. It also owns
- * a text box. When the text box contains tokens (Strings separated by spaces),
+ * a {@link JTextField}. When the text field contains tokens (Strings separated by spaces),
  * these are used as filters on the contents. The list elements that contain
  * all of the tokens are retained, while all others are (temporarily) removed
  * from the list. The list dynamically changes as its tokens are edited.
  *
- * <p>The filter list either requires that a <code>TextFilterator</code> be specified
+ * <p>The filter list either requires that a {@link TextFilterator} be specified
  * in its constructor, or that every object in the source list implements
- * the <code>TextFilterable</code> interface. This can be compared to the sorted
- * collections (ie. TreeSet) and the Comparable/Comparator interfaces.
+ * the {@link TextFilterable} interface. This can be compared to the sorted
+ * collections and the {@link Comparable}/{@link Comparator} interfaces.
  *
  * <p>Refiltering the list can be triggered in two ways. They are when the user
  * explicitly refilters by triggering the refilterActionListener or when the
@@ -44,8 +44,8 @@ import java.util.List;
  * boost, turn off "live" mode that filters automatically as the text field is
  * edited. To do this, call <code>setLive(false)</code>.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part2/index.html">Glazed
- * Lists Tutorial Part 2 - Text Filtering</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/part3/index.html">Glazed
+ * Lists Tutorial Part 3 - Text Filtering</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -53,7 +53,7 @@ public class TextFilterList extends AbstractFilterList {
 
     /** the filters list is currently just a list of Substrings to include */
     private Matcher[] filters = new Matcher[0];
-    private JTextField filterEdit = new JTextField("");
+    private JTextField filterEdit = null;
     
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private TextFilterator filterator = null;
@@ -62,7 +62,7 @@ public class TextFilterList extends AbstractFilterList {
     private FilterEditListener filterEditListener = null;
     
     /** the action listener performs a refilter when fired */
-    private FilterActionListener filterActionListener = null;
+    private FilterActionListener filterActionListener = new FilterActionListener();
     
     /** a heavily recycled list of filter Strings, call clear() before use */
     private List filterStrings = new ArrayList();
@@ -72,25 +72,36 @@ public class TextFilterList extends AbstractFilterList {
      * specified source list.
      */
     public TextFilterList(EventList source) {
-        this(source, null);
+        this(source, null, new JTextField(""));
     }
 
     /**
-     * Creates a new filter list that uses a TextFilterator. A TextFilterator is something
-     * that I made up. It is basically a class that knows how to take an arbitrary
-     * object and get an array of strings for that object.
+     * Creates a new filter list that filters elements out of the
+     * specified source list.
+     *
+     * @param filterator a class that knows how to take a list element
+     *      and get a filter strings for it. If this is null, the list elements
+     *      must all implement {@link Filterable}.
      */
     public TextFilterList(EventList source, TextFilterator filterator) {
+        this(source, filterator, new JTextField(""));
+    }
+
+    /**
+     * Creates a new filter list that filters elements out of the
+     * specified source list.
+     *
+     * @param filterator a class that knows how to take a list element
+     *      and get a filter strings for it. If this is null, the list elements
+     *      must all implement {@link Filterable}.
+     * @param filterEdit a text field for typing in the filter text.
+     */
+    public TextFilterList(EventList source, TextFilterator filterator, JTextField filterEdit) {
         super(source);
         this.filterator = filterator;
 
         // listen to filter events
-        filterActionListener = new FilterActionListener();
-        filterEdit.addActionListener(filterActionListener);
-        setLive(true);
-
-        // set up the initial list
-        reFilter();
+        setFilterEdit(filterEdit);
     }
 
     /**
@@ -98,6 +109,28 @@ public class TextFilterList extends AbstractFilterList {
      */
     public JTextField getFilterEdit() {
         return filterEdit;
+    }
+    
+    /**
+     * Sets the filter edit component for editing filters.
+     */
+    public void setFilterEdit(JTextField filterEdit) {
+        boolean live = true;
+
+        // stop listening on filter events from the old filter edit
+        if(this.filterEdit != null) {
+            this.filterEdit.removeActionListener(filterActionListener);
+            live = (filterEditListener != null);
+            setLive(false);
+        }
+        
+        // start listening for filter events from the new filter edit
+        this.filterEdit = filterEdit;
+        filterEdit.addActionListener(filterActionListener);
+        setLive(live);
+        
+        // filter with the new filter edit
+        reFilter();
     }
     
     /**
