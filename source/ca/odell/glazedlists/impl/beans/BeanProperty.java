@@ -257,4 +257,12 @@ public class BeanProperty {
             throw new UndeclaredThrowableException(e.getCause());
         }
     }
+    
+    /** {@inheritDoc} */
+    public boolean equals(Object other) {
+        BeanProperty otherProperty = (BeanProperty)other;
+        if(!beanClass.equals(otherProperty.beanClass)) return false; 
+        if(!propertyName.equals(otherProperty.propertyName)) return false;
+        return true;
+    }
 }

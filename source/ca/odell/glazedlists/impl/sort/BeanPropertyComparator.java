@@ -58,6 +58,8 @@ public final class BeanPropertyComparator implements Comparator {
     public boolean equals(Object other) {
         if(!(other instanceof BeanPropertyComparator)) return false;
         BeanPropertyComparator otherBeanPropertyComparator = (BeanPropertyComparator)other;
-        return propertyComparator.equals(otherBeanPropertyComparator.propertyComparator);
+        if(!beanProperty.equals(otherBeanPropertyComparator.beanProperty)) return false;
+        if(!propertyComparator.equals(otherBeanPropertyComparator.propertyComparator)) return false;
+        return true;
     }
 }
