@@ -55,7 +55,11 @@ public class IssueTableFormat implements AdvancedTableFormat {
 	}
 
 	public Comparator getColumnComparator(int column) {
-		return GlazedLists.comparableComparator();
+        if(column == 5) {
+            return GlazedLists.caseInsensitiveComparator();
+        } else {
+            return GlazedLists.comparableComparator();
+        }
 	}
 
 	public Object getColumnValue(Object baseObject, int column) {
