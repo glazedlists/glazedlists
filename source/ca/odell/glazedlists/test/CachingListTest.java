@@ -176,4 +176,101 @@ public class CachingListTest extends TestCase {
             assertEquals(cacheMissBaseline + 1 + (15 - i), cache.getCacheMisses());
         }
     }
+
+    /**
+     * Validates that when a remove is called on an index
+     * that is cached, the value is successfully removed
+     * from the cache.
+     */
+    public void testRemovingCachedValueWithCachedFollower() {
+        // Load the source with some data
+        for(int i = 0;i < 10;i++) {
+            source.add(new Integer(i));
+        }
+
+        // Load some of the source data into the cache
+        for(int i = 0;i < 5;i++) {
+            cache.get(i);
+        }
+
+        // Remove data that is cached that has at least one
+        // element cached that follows it
+        cache.remove(2);
+
+        assertEquals(0, cache.getCacheHits());
+        assertEquals(5, cache.getCacheMisses());
+
+        Object result = cache.get(2);
+        assertEquals(3, ((Integer)result).intValue());
+
+        assertEquals(1, cache.getCacheHits());
+        assertEquals(5, cache.getCacheMisses());
+    }
+
+    /**
+     * Validates that when a remove is called on an index
+     * that is cached, the value is successfully removed
+     * from the cache.
+     */
+    public void testRemovingCachedValueAtCacheEdge() {
+        // Load the source with some data
+        for(int i = 0;i < 10;i++) {
+            source.add(new Integer(i));
+        }
+
+        // Load some of the source data into the cache
+        for(int i = 0;i < 5;i++) {
+            cache.get(i);
+        }
+
+        // Remove at the edge of the cached data
+        cache.remove(4);
+
+        assertEquals(0, cache.getCacheHits());
+        assertEquals(5, cache.getCacheMisses());
+
+        Object result = cache.get(4);
+        assertEquals(5, ((Integer)result).intValue());
+
+        assertEquals(0, cache.getCacheHits());
+        assertEquals(6, cache.getCacheMisses());
+    }
+
+    /**
+     * Validates that when a remove is called on an index
+     * that has been cached, that the internal cache size
+     * decreases.
+     */
+    public void testRemoveCorrectsCacheSize() {
+        // Load the source with data
+        for(int i = 0;i < 25;i++) {
+            source.add(new Integer(i));
+        }
+
+        // Lookup enough values to fill the cache
+        for(int i = 0;i < 15;i++) {
+            Object result = cache.get(i);
+            assertEquals(new Integer(i), (Integer)result);
+        }
+
+        // Remove 10 values leaving the first value
+        for(int i = 10; i > 0;i--) {
+            cache.remove(i);
+        }
+
+        // Refill cache
+        for(int i = 6; i < 15;i++) {
+            cache.get(i);
+        }
+
+        int cacheHitBaseline = cache.getCacheHits();
+        int cacheMissBaseline = cache.getCacheMisses();
+
+        // Lookup the first value which should still be the oldest
+        // in the cache if it resized correctly
+        Object result = cache.get(0);
+        assertEquals(0, ((Integer)result).intValue());
+        assertEquals(cacheHitBaseline + 1, cache.getCacheHits());
+        assertEquals(cacheMissBaseline, cache.getCacheMisses());
+    }
 }

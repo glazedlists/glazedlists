@@ -120,32 +120,30 @@ public class CachingList extends TransformedList implements ListEventListener {
             Object value = null;
 
             // attempt to get the element from the cache
-            IndexedTreeNode treeNode = indexTree.getNode(index);
-            Object nodeValue = treeNode.getValue();
+            IndexedTreeNode indexNode = indexTree.getNode(index);
+            Object nodeValue = indexNode.getValue();
             if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
                 if(recordHitsOrMisses) cacheHits ++;
-                Object agedTreeNodeObject = treeNode.getValue();
-                IndexedTreeNode agedTreeNode = (IndexedTreeNode)agedTreeNodeObject;
-                Object agedNodeObject = agedTreeNode.getValue();
-                AgedNode agedNode = (AgedNode)agedNodeObject;
+                IndexedTreeNode cacheNode = (IndexedTreeNode)indexNode.getValue();
+                AgedNode agedNode = (AgedNode)cacheNode.getValue();
                 value = agedNode.getValue();
-                agedTreeNode.removeFromTree();
-                treeNode.setValue(cache.addByNode(agedNode));
+                cacheNode.removeFromTree();
+                indexNode.setValue(cache.addByNode(agedNode));
             } else {
                 if(recordHitsOrMisses) cacheMisses++;
                 value = source.get(index);
                 if(currentSize < maxSize) {
                     currentSize++;
-                    IndexedTreeNode cachedValue = cache.addByNode(new AgedNode(treeNode, value));
-                    treeNode.setValue(cachedValue);
+                    IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
+                    indexNode.setValue(cacheNode);
                 } else {
-                    IndexedTreeNode oldValue = cache.getNode(0);
-                    oldValue.removeFromTree();
-                    AgedNode oldNode = (AgedNode)oldValue.getValue();
-                    IndexedTreeNode oldTreeNode = oldNode.getIndexNode();
-                    oldTreeNode.setValue(EMPTY_INDEX_NODE);
-                    IndexedTreeNode cachedValue = cache.addByNode(new AgedNode(treeNode, value));
-                    treeNode.setValue(cachedValue);
+                    IndexedTreeNode oldestInCache = cache.getNode(0);
+                    oldestInCache.removeFromTree();
+                    AgedNode oldAgedNode = (AgedNode)oldestInCache.getValue();
+                    IndexedTreeNode oldIndexNode = oldAgedNode.getIndexNode();
+                    oldIndexNode.setValue(EMPTY_INDEX_NODE);
+                    IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
+                    indexNode.setValue(cacheNode);
                 }
             }
             return value;
@@ -227,29 +225,29 @@ public class CachingList extends TransformedList implements ListEventListener {
             final int changeType = listChanges.getType();
 
             // Lookup the cache entry for this index if possible
-            Object value = null;
-            IndexedTreeNode treeNode = null;
+            Object nodeValue = null;
+            IndexedTreeNode indexNode = null;
             if(index < lastKnownSize) {
-                treeNode = indexTree.getNode(index);
-                value = treeNode.getValue();
+                indexNode = indexTree.getNode(index);
+                nodeValue = indexNode.getValue();
             }
-            IndexedTreeNode cachedObject = null;
-            if(EMPTY_INDEX_NODE != value && value != null) {
-                cachedObject = (IndexedTreeNode)value;
+            IndexedTreeNode cacheNode = null;
+            if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
+                cacheNode = (IndexedTreeNode)nodeValue;
             }
 
             // Perform specific actions for each type of change
             if(changeType == ListEvent.INSERT) {
                 indexTree.addByNode(index, EMPTY_INDEX_NODE);
             } else if(changeType == ListEvent.DELETE) {
-                if(cachedObject != null) {
-                    cachedObject.removeFromTree();
+                if(cacheNode != null) {
+                    cacheNode.removeFromTree();
                     currentSize--;
                 }
-                treeNode.removeFromTree();
+                indexNode.removeFromTree();
             } else if(changeType == ListEvent.UPDATE) {
-                if(cachedObject != null) {
-                    cachedObject.removeFromTree();
+                if(cacheNode != null) {
+                    cacheNode.removeFromTree();
                     currentSize--;
                 }
             }
