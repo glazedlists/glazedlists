@@ -25,7 +25,7 @@ import java.io.*;
  * and from bytes.
  *
  * <p>To instantiate a {@link NetworkList}, use the
- * {@link ListPeer#subscribe(String,String,int,ByteCoder) subscribe()}
+ * {@link ListPeer#subscribe(String,int,String,ByteCoder) subscribe()}
  * and {@link ListPeer#publish(EventList,String,ByteCoder) publish()} methods
  * of a started {@link ListPeer}.
  *
@@ -139,7 +139,9 @@ public final class NetworkList extends TransformedList {
     }
     
     /**
-     * Returns true if this resource is actively being updated by the network.
+     * Returns true if this resource is on the network. For published lists, this
+     * requires that the list is being served. For subscribed lists, this requires
+     * that a connection to the server has been established.
      */
     public boolean isConnected() {
          return resourceStatus.isConnected();
