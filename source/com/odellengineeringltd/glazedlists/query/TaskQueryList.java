@@ -65,9 +65,6 @@ public class TaskQueryList extends QueryList {
      */
     class QueryTask extends AbstractTask {
         
-        /** the context of this task */
-        private TaskContext taskContext;
-        
         /** the query to execute */
         private Query query;
         
