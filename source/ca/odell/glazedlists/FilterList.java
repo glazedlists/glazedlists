@@ -50,7 +50,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
 
 		readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
 			new J2SE12ReadWriteLock());
-
+//		readWriteLock = source.getReadWriteLock();
         setMatcherSource(matcher_source);
     }
 
@@ -93,7 +93,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
      * {@inheritDoc}
      */
     public final void cleared(MatcherSource source) {
-		readWriteLock.writeLock().lock();
+		((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
 
 		try {
 			// TODO: remove debugging
@@ -102,7 +102,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
 			handleFilterCleared();
 		}
 		finally {
-			readWriteLock.writeLock().unlock();
+			((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
 		}
     }
 
@@ -110,7 +110,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
      * {@inheritDoc}
      */
     public final void changed(Matcher matcher, MatcherSource source) {
-		readWriteLock.writeLock().lock();
+		((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
 
 		try {
 			System.out.println("Changed: " + matcher);
@@ -118,7 +118,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
 			handleFilterChanged();
 		}
 		finally {
-			readWriteLock.writeLock().unlock();
+			((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
 		}
     }
 
@@ -126,7 +126,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
      * {@inheritDoc}
      */
     public final void constrained(Matcher matcher, MatcherSource source) {
-		readWriteLock.writeLock().lock();
+		((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
 
 		try {
 			System.out.println("Constrained: " + matcher);
@@ -134,7 +134,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
 			handleFilterConstrained();
 		}
 		finally {
-			readWriteLock.writeLock().unlock();
+			((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
 		}
     }
 
@@ -142,7 +142,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
      * {@inheritDoc}
      */
     public final void relaxed(Matcher matcher, MatcherSource source) {
-		readWriteLock.writeLock().lock();
+		((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
 
 		try {
 			System.out.println("Relaxed: " + matcher);
@@ -150,7 +150,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
 			handleFilterRelaxed();
 		}
 		finally {
-			readWriteLock.writeLock().unlock();
+			((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
 		}
     }
 }

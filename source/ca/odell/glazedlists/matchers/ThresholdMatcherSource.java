@@ -115,7 +115,7 @@ public class ThresholdMatcherSource extends AbstractValueMatcherSource {
 
 		// Note: initial matcher will be updated by setComparator (before constructor
 		// is done)
-		super(TrueMatcher.getInstance(), logic_inverted, threshold);
+		super(TrueMatcher.getInstance(), logic_inverted, null);
 
         // Defaults
         if (operation == null) operation = GREATER_THAN;
@@ -123,8 +123,7 @@ public class ThresholdMatcherSource extends AbstractValueMatcherSource {
 
 		this.operation = operation;
 		this.comparator = comparator;
-
-		fireChange(CHANGE_UNKNOWN);
+		setValue(threshold);
     }
 
 
@@ -201,6 +200,11 @@ public class ThresholdMatcherSource extends AbstractValueMatcherSource {
      * Fire the change for the given op code.
      */
     private void fireChange(int op_code) {
+		if (isLogicInverted()) {
+			if (op_code == CHANGE_CONSTRAINED) op_code = CHANGE_RELAXED;
+			else if ( op_code == CHANGE_RELAXED) op_code = CHANGE_CONSTRAINED;
+		}
+
         if (op_code == CHANGE_NONE) {
             return;
 		} else if (op_code == CHANGE_CONSTRAINED) {

@@ -17,7 +17,7 @@ import ca.odell.glazedlists.Matcher;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class PercentageMatcherSource extends CompositeMatcherSource {
+public class PercentageMatcherSource extends AbstractMatcherSource {
 
 	protected PercentageMatcherSource(Matcher initial_matcher) {
 		super(initial_matcher);	// TODO: implement

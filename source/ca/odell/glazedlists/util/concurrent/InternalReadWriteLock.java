@@ -7,9 +7,7 @@
 package ca.odell.glazedlists.util.concurrent;
 
 // the Glazed Lists for testing the internal lock
-import ca.odell.glazedlists.*;
-// standard collections
-import java.util.*;
+import ca.odell.glazedlists.SortedList;
 
 /**
  * An internal read-write lock manages a pair of read-write locks. This allows
@@ -88,7 +86,9 @@ class LockPair implements Lock {
      */
     public void lock() {
         first.lock();
+		System.out.println("Locked: " + first + " (1) " + Thread.currentThread());
         second.lock();
+		System.out.println("Locked: " + second + " (2) " + Thread.currentThread());
     }
     
     /**
@@ -112,6 +112,8 @@ class LockPair implements Lock {
      */
     public void unlock() {
         second.unlock();
+		System.out.println("Unlock: " + second + " (2) " + Thread.currentThread());
         first.unlock();
+		System.out.println("Unlock: " + first + " (1) " + Thread.currentThread());
     }
 }

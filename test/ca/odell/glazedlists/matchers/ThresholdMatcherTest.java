@@ -86,11 +86,17 @@ public class ThresholdMatcherTest extends TestCase {
             assertEquals(new Integer(i), threshold_list.get(i));
         }
 
+		threshold_matchersource.setThreshold(new Integer(7));
+        assertEquals(threshold_list.toString(), 8, threshold_list.size()); // 0 1 2 3 4 5 6 7
+        for (int i = 0; i < 6; i++) {
+            assertEquals(new Integer(i), threshold_list.get(i));
+        }
+
 		// Not inverted
 		threshold_matchersource.setLogicInverted(false);
-        assertEquals(threshold_list.toString(), 5, threshold_list.size()); // 6 7 8 9 10
-        for (int i = 0; i < 5; i++) {
-            assertEquals(new Integer(6 + i), threshold_list.get(i));
+        assertEquals(threshold_list.toString(), 3, threshold_list.size()); // 8 9 10
+        for (int i = 0; i < 3; i++) {
+            assertEquals(new Integer(8 + i), threshold_list.get(i));
         }
 	}
 
