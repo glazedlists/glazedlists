@@ -36,7 +36,7 @@ public abstract class MutationList extends AbstractList implements EventList, Li
     protected EventList source;
     
     /** the change event and notification system */
-    protected ListEventFactory updates = new ListEventFactory(this);
+    protected ListEventAssembler updates = new ListEventAssembler(this);
     
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock;

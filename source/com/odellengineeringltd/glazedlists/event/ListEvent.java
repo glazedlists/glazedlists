@@ -51,13 +51,13 @@ public final class ListEvent extends EventObject {
     /** the list that has changed */
     private EventList sourceList;
     /** the master sequence that this is a view of */
-    private ListEventFactory masterSequence;
+    private ListEventAssembler masterSequence;
     
     /**
      * Create a new list change sequence that uses the source master list
      * for the source of changes.
      */
-    ListEvent(ListEventFactory masterSequence, EventList sourceList) {
+    ListEvent(ListEventAssembler masterSequence, EventList sourceList) {
         super(sourceList);
 
         // keep track of the origin sequence and list

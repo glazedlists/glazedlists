@@ -23,7 +23,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ListEventFactory {
+public final class ListEventAssembler {
     
     /** the list that this tracks changes for */
     private EventList sourceList;
@@ -45,10 +45,10 @@ public final class ListEventFactory {
     private ArrayList listenerEvents = new ArrayList();
 
     /**
-     * Creates a new ListEventFactory that tracks changes for the
+     * Creates a new ListEventAssembler that tracks changes for the
      * specified list.
      */
-    public ListEventFactory(EventList sourceList) {
+    public ListEventAssembler(EventList sourceList) {
         this.sourceList = sourceList;
     }
     

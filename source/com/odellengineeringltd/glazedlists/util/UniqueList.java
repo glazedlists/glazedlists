@@ -172,10 +172,6 @@ public final class UniqueList extends MutationList implements ListEventListener,
     /**
      * Called to handle all DELETE events
      *
-     * <p>The delete event is currently <strong>broken!</strong> It fails
-     * to forward update events due to lack of intersection support in
-     * ListEventFactory.
-     *
      * @param changeIndex The index which the UPDATE event affects
      */
     private void processDeleteEvent(int changeIndex) {
@@ -329,7 +325,7 @@ public final class UniqueList extends MutationList implements ListEventListener,
     }
 
     /**
-     * Appends a change to the ListEventFactory.
+     * Appends a change to the ListEventAssembler.
      *
      * <p>This is to handle the case where more verbosity could add value to
      * lists listening to changes on the unique list.

@@ -35,7 +35,7 @@ public class CompositeList extends AbstractList implements EventList {
     public List memberLists = new ArrayList();
     
     /** the change event and notification system */
-    protected ListEventFactory updates = new ListEventFactory(this);
+    protected ListEventAssembler updates = new ListEventAssembler(this);
 
     /**
      * Creates a new CompositeList.

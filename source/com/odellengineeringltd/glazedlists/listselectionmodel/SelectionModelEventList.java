@@ -73,7 +73,7 @@ public class SelectionModelEventList {
     private EventList source;
     
     /** list change updates */
-    private ListEventFactory updates = null;
+    private ListEventAssembler updates = null;
     
     /**
      * Creates a new Mutation list that uses the specified source list.

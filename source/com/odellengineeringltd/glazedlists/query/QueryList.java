@@ -38,7 +38,7 @@ public class QueryList extends AbstractList implements EventList {
     protected Query query = null;
 
     /** the change event and notification system */
-    protected ListEventFactory updates = new ListEventFactory(this);
+    protected ListEventAssembler updates = new ListEventAssembler(this);
 
     /** the read/write lock provides mutual exclusion to access */
     private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
