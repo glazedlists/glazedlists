@@ -8,6 +8,7 @@ package ca.odell.glazedlists.io;
 
 import java.util.List;
 import java.io.*;
+import ca.odell.glazedlists.util.ByteCoderFactory;
 
 /**
  * An utility interface for converting Objects to bytes for storage or network

@@ -21,7 +21,7 @@ import java.io.*;
 /**
  * An {@link EventList} that is either published to the network or subscribed from
  * the network. Since list elements must be transmitted over the network, each
- * {@link NetworkList} requires a {@link ByteCoder} to convert {@link Objects} to
+ * {@link NetworkList} requires a {@link ByteCoder} to convert {@link Object}s to
  * and from bytes.
  *
  * <p>To instantiate a {@link NetworkList}, use the
