@@ -100,4 +100,14 @@ public class NetworkListTest extends TestCase {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Runs the test of this application
+     */
+    public static void main(String[] args) {
+        NetworkListTest test = new NetworkListTest();
+        test.setUp();
+        test.testSimpleSubscription();
+        test.tearDown();
+    }
 }

@@ -106,7 +106,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
      */
     public void resourceUpdated(Resource resource, Bufferlo delta) {
         // update the internal state
-        updateId++;
+        if(publisher == null) updateId++;
         
         // if nobody's listening, we're done
         if(subscribers.isEmpty()) return;
@@ -125,8 +125,11 @@ class PeerResource implements ResourceListener, ResourceStatus {
      * Handles a change in a remote resource.
      */
     public void remoteUpdate(PeerConnection publisher, PeerBlock block) {
+        // update the internal state
+        if(publisher != null) updateId++;
+
         // confirm the update is consistent
-        if(block.getUpdateId() != (updateId + 1)) throw new IllegalStateException();
+        if(block.getUpdateId() != updateId) throw new IllegalStateException("Expected update id " + updateId + " but found " + block.getUpdateId());
         if(block.getSessionId() != peerBlockFactory.getSessionId()) throw new IllegalStateException();
 
         // handle the update

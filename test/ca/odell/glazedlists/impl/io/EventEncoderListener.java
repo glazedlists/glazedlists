@@ -4,12 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.io;
+package ca.odell.glazedlists.impl.io;
 
 import java.util.*;
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.impl.io.*;
 // NIO
 import java.nio.*;
 import java.nio.channels.*;
