@@ -29,7 +29,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventListIterator implements ListIterator, ListChangeListener {
+public class EventListIterator implements ListIterator, ListEventListener {
     
     /** the list being iterated */
     private EventList source;
@@ -68,10 +68,10 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * @param source the list to iterate
      * @param nextIndex the starting point within the list
      * @param automaticallyRemove true if this SubList should deregister itself
-     *      from the ListChangeListener list of the source list once it is
+     *      from the ListEventListener list of the source list once it is
      *      otherwise out of scope.
      *
-     * @see com.odellengineeringltd.glazedlists.event.ListChangeListenerWeakReferenceProxy
+     * @see com.odellengineeringltd.glazedlists.event.WeakReferenceProxy
      */
     public EventListIterator(EventList source, int nextIndex, boolean automaticallyRemove) {
         this.source = source;
@@ -79,9 +79,9 @@ public class EventListIterator implements ListIterator, ListChangeListener {
 
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            source.addListChangeListener(new ListChangeListenerWeakReferenceProxy(source, this));
+            source.addListEventListener(new WeakReferenceProxy(source, this));
         } else {
-            source.addListChangeListener(this);
+            source.addListEventListener(this);
         }
     }
 
@@ -222,18 +222,18 @@ public class EventListIterator implements ListIterator, ListChangeListener {
     /**
      * When the list is changed, the iterator adjusts its index.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
             
             // if it is an insert
-            if(changeType == ListChangeBlock.INSERT) {
+            if(changeType == ListEvent.INSERT) {
                 if(changeIndex <= nextIndex) nextIndex++;
                 
                 if(lastIndex != -1 && changeIndex <= lastIndex) lastIndex++;
             // if it is a delete
-            } else if(changeType == ListChangeBlock.DELETE) {
+            } else if(changeType == ListEvent.DELETE) {
                 if(changeIndex < nextIndex) nextIndex--;
                 
                 if(lastIndex != -1 && changeIndex < lastIndex) lastIndex--;

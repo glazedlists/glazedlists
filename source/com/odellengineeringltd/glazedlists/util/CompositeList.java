@@ -35,7 +35,7 @@ public class CompositeList extends AbstractList implements EventList {
     public List memberLists = new ArrayList();
     
     /** the change event and notification system */
-    protected ListChangeSequence updates = new ListChangeSequence();
+    protected ListEventFactory updates = new ListEventFactory(this);
 
     /**
      * Creates a new CompositeList.
@@ -59,7 +59,7 @@ public class CompositeList extends AbstractList implements EventList {
             // pass on a change for the insert of all this list's elements
             if(memberList.size() > 0) {
                 updates.beginAtomicChange();
-                updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.INSERT);
+                updates.appendChange(offset, offset + memberList.size() - 1, ListEvent.INSERT);
                 updates.commitAtomicChange();
             }
         } finally {
@@ -93,7 +93,7 @@ public class CompositeList extends AbstractList implements EventList {
             // pass on a change for the remove of all this list's elements
             if(memberList.size() > 0) {
                 updates.beginAtomicChange();
-                updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.DELETE);
+                updates.appendChange(offset, offset + memberList.size() - 1, ListEvent.DELETE);
                 updates.commitAtomicChange();
             }
         } finally {
@@ -153,15 +153,15 @@ public class CompositeList extends AbstractList implements EventList {
      * Registers the specified listener to receive notification of changes
      * to this list.
      */
-    public final void addListChangeListener(ListChangeListener listChangeListener) {
-        updates.addListChangeListener(listChangeListener);
+    public final void addListEventListener(ListEventListener listChangeListener) {
+        updates.addListEventListener(listChangeListener);
     }
 
     /**
      * Removes the specified listener from receiving change updates for this list.
      */
-    public void removeListChangeListener(ListChangeListener listChangeListener) {
-        updates.removeListChangeListener(listChangeListener);
+    public void removeListEventListener(ListEventListener listChangeListener) {
+        updates.removeListEventListener(listChangeListener);
     }
 
     /**
@@ -196,7 +196,7 @@ public class CompositeList extends AbstractList implements EventList {
      * The member list listener listens to a single list for changes and
      * forwards the changes from that list to all listeners for composed list.
      */
-    class MemberList implements ListChangeListener {
+    class MemberList implements ListEventListener {
         
         /** the source list for this member */
         private EventList sourceList;
@@ -212,7 +212,7 @@ public class CompositeList extends AbstractList implements EventList {
             this.sourceList = sourceList;
             this.size = sourceList.size();
             
-            sourceList.addListChangeListener(this);
+            sourceList.addListEventListener(this);
         }
         
         /**
@@ -236,7 +236,7 @@ public class CompositeList extends AbstractList implements EventList {
          * When the source list is changed, this changes the composite list
          * also.
          */
-        public void notifyListChanges(ListChangeEvent listChanges) {
+        public void listChanged(ListEvent listChanges) {
             getReadWriteLock().writeLock().lock();
             try {
                 // get the offset for the elements of this member
@@ -251,9 +251,9 @@ public class CompositeList extends AbstractList implements EventList {
                     updates.appendChange(offset + index, type);
                     
                     // update the size
-                    if(type == ListChangeBlock.DELETE) {
+                    if(type == ListEvent.DELETE) {
                         size--;
-                    } else if(type == ListChangeBlock.INSERT) {
+                    } else if(type == ListEvent.INSERT) {
                         size++;
                     }
                     assert(size >= 0);

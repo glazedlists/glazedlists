@@ -36,7 +36,7 @@ import com.odellengineeringltd.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class AbstractFilterList extends WritableMutationList implements ListChangeListener, EventList {
+public abstract class AbstractFilterList extends WritableMutationList implements ListEventListener, EventList {
 
     /** the flag list contains Boolean.TRUE for selected items and null or others */
     private SparseList flagList = new SparseList();
@@ -58,7 +58,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
             // build a list of what is filtered and what's not
             prepareFlagList();
             // listen for changes to the source list
-            source.addListChangeListener(this);
+            source.addListEventListener(this);
         } finally {
             getReadWriteLock().readLock().unlock();
         }
@@ -78,7 +78,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
     }
 
     /**
-     * For implementing the ListChangeListener interface. When the underlying list
+     * For implementing the ListEventListener interface. When the underlying list
      * changes, this notification allows the object to repaint itself or update
      * itself as necessary.
      *
@@ -86,7 +86,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
      * <li>When a list item is inserted, it may be visible or filtered.
      * <li>When a list item is deleted, it must be filtered if it is not visible.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         // all of these changes to this list happen "atomically"
         updates.beginAtomicChange();
         
@@ -98,21 +98,21 @@ public abstract class AbstractFilterList extends WritableMutationList implements
             int changeType = listChanges.getType();
 
             // handle delete events
-            if(changeType == ListChangeBlock.DELETE) {
+            if(changeType == ListEvent.DELETE) {
                 // test if this value was already not filtered out
                 boolean wasIncluded = flagList.get(sourceIndex) != null;
                 
                 // if this value was not filtered out, it is now so add a change
                 if(wasIncluded) {
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.appendChange(filteredIndex, ListChangeBlock.DELETE);
+                    updates.appendChange(filteredIndex, ListEvent.DELETE);
                 }
 
                 // remove this entry from the flag list
                 flagList.remove(sourceIndex);
                 
             // handle insert events
-            } else if(changeType == ListChangeBlock.INSERT) {
+            } else if(changeType == ListEvent.INSERT) {
                 
                 // whether we should add this item
                 boolean include = filterMatches(source.get(sourceIndex));
@@ -121,7 +121,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 if(include) {
                     flagList.add(sourceIndex, Boolean.TRUE);
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.appendChange(filteredIndex, ListChangeBlock.INSERT);
+                    updates.appendChange(filteredIndex, ListEvent.INSERT);
 
                 // if this value should not be included, just add the item
                 } else {
@@ -129,7 +129,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 }
 
             // handle update events
-            } else if(changeType == ListChangeBlock.UPDATE) {
+            } else if(changeType == ListEvent.UPDATE) {
                 // test if this value was already not filtered out
                 boolean wasIncluded = flagList.get(sourceIndex) != null;
                 // whether we should add this item
@@ -139,13 +139,13 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 if(wasIncluded && !include) {
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
                     flagList.set(sourceIndex, null);
-                    updates.appendChange(filteredIndex, ListChangeBlock.DELETE);
+                    updates.appendChange(filteredIndex, ListEvent.DELETE);
 
                 // if this element is being added as a result of the change
                 } else if(!wasIncluded && include) {
                     flagList.set(sourceIndex, Boolean.TRUE);
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.appendChange(filteredIndex, ListChangeBlock.INSERT);
+                    updates.appendChange(filteredIndex, ListEvent.INSERT);
                 }
             }
         }
@@ -182,13 +182,13 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 if(wasIncluded && !include) {
                     int filteredIndex = flagList.getCompressedIndex(i);
                     flagList.set(i, null);
-                    updates.appendChange(filteredIndex, ListChangeBlock.DELETE);
+                    updates.appendChange(filteredIndex, ListEvent.DELETE);
 
                 // if this element is being added as a result of the change
                 } else if(!wasIncluded && include) {
                     flagList.set(i, Boolean.TRUE);
                     int filteredIndex = flagList.getCompressedIndex(i);
-                    updates.appendChange(filteredIndex, ListChangeBlock.INSERT);
+                    updates.appendChange(filteredIndex, ListEvent.INSERT);
                 }
             }
 

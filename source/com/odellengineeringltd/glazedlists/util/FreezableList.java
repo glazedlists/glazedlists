@@ -30,7 +30,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class FreezableList extends WritableMutationList implements ListChangeListener, EventList {
+public class FreezableList extends WritableMutationList implements ListEventListener, EventList {
 
     /** the state of the freezable list */
     private boolean frozen = false;
@@ -43,7 +43,7 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      */
     public FreezableList(EventList source) {
         super(source);
-        source.addListChangeListener(this);
+        source.addListEventListener(this);
     }
     
     /**
@@ -107,7 +107,7 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
             if(frozen) throw new IllegalStateException("Cannot freeze a list that is already frozen");
             
             // we are no longer interested in update events
-            source.removeListChangeListener(this);
+            source.removeListEventListener(this);
             
             // copy the source array into the frozen list
             frozenData.addAll(source);
@@ -139,12 +139,12 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
             
             // fire events to listeners of the thaw
             updates.beginAtomicChange();
-            if(frozenDataSize > 0) updates.appendChange(0, frozenDataSize - 1, ListChangeBlock.DELETE);
-            if(source.size() > 0) updates.appendChange(0, source.size() - 1, ListChangeBlock.INSERT);
+            if(frozenDataSize > 0) updates.appendChange(0, frozenDataSize - 1, ListEvent.DELETE);
+            if(source.size() > 0) updates.appendChange(0, source.size() - 1, ListEvent.INSERT);
             updates.commitAtomicChange();
 
             // being listening to update events
-            source.addListChangeListener(this);
+            source.addListEventListener(this);
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -156,7 +156,7 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      * assumption that the change event was sent before this list became
      * frozen.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         if(frozen) {
             // when a list change event arrives and this list is frozen,
             // it is possible that the event was queued before this list

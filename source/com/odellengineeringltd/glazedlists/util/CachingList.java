@@ -25,7 +25,7 @@ import java.util.Random;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class CachingList extends WritableMutationList implements ListChangeListener, EventList {
+public class CachingList extends WritableMutationList implements ListEventListener, EventList {
 
     /** The value signifying that an index node is currently unset  */
     public static final Integer EMPTY_INDEX_NODE = new Integer(-1);
@@ -222,7 +222,7 @@ public class CachingList extends WritableMutationList implements ListChangeListe
      *
      * @param listChanges The list of changes to apply to this list
      */
-    public final void notifyListChanges(ListChangeEvent listChanges) {
+    public final void listChanged(ListEvent listChanges) {
         updates.beginAtomicChange();
         while(listChanges.next()) {
             // get the current change info
@@ -238,15 +238,15 @@ public class CachingList extends WritableMutationList implements ListChangeListe
             }
 
             // Perform specific actions for each type of change
-            if(changeType == ListChangeBlock.INSERT) {
+            if(changeType == ListEvent.INSERT) {
                 indexTree.addByNode(index, EMPTY_INDEX_NODE);
-            } else if(changeType == ListChangeBlock.DELETE) {
+            } else if(changeType == ListEvent.DELETE) {
                 if(cachedObject != null) {
                     cachedObject.removeFromTree();
                     currentSize--;
                 }
                 treeNode.removeFromTree();
-            } else if(changeType == ListChangeBlock.UPDATE) {
+            } else if(changeType == ListEvent.UPDATE) {
                 if(cachedObject != null) {
                     cachedObject.removeFromTree();
                     currentSize--;

@@ -30,7 +30,7 @@ import com.odellengineeringltd.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SortedList extends WritableMutationList implements ListChangeListener, EventList {
+public final class SortedList extends WritableMutationList implements ListEventListener, EventList {
 
     /** a map from the unsorted index to the sorted index */
     private IndexedTree unsorted = null;
@@ -68,7 +68,7 @@ public final class SortedList extends WritableMutationList implements ListChange
         try {
             // trees are instansiated when a comparator is set
             setComparator(comparator);
-            source.addListChangeListener(this);
+            source.addListEventListener(this);
         } finally {
             getReadWriteLock().readLock().unlock();
         }
@@ -76,7 +76,7 @@ public final class SortedList extends WritableMutationList implements ListChange
 
     
     /**
-     * For implementing the ListChangeListener interface. When the underlying list
+     * For implementing the ListEventListener interface. When the underlying list
      * changes, this notification allows the object to repaint itself or update
      * itself as necessary.
      *
@@ -85,7 +85,7 @@ public final class SortedList extends WritableMutationList implements ListChange
      * are performed, the comparisons are done with respect to the correct unsorted
      * index. In the second phase, the sorted list is updated with the changes.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         // all of these changes to this list happen "atomically"
         updates.beginAtomicChange();
         
@@ -94,7 +94,7 @@ public final class SortedList extends WritableMutationList implements ListChange
         ArrayList deletedIndices = new ArrayList();
 
         // copy the list change sequence in order to iterate twice
-        ListChangeEvent clonedChanges = new ListChangeEvent(listChanges);
+        ListEvent clonedChanges = new ListEvent(listChanges);
         
         // keep track of the difference between the sorted set size and its expected size
         int sortedOffset = 0;
@@ -107,20 +107,20 @@ public final class SortedList extends WritableMutationList implements ListChange
             int changeType = clonedChanges.getType();
 
             // on insert, insert the index node
-            if(changeType == ListChangeBlock.INSERT) {
+            if(changeType == ListEvent.INSERT) {
                 IndexedTreeNode unsortedNode = unsorted.addByNode(unsortedIndex, this);
                 unsortedNodes.add(unsortedNode);
                 sortedOffset++;
 
             // on delete, delete the index and sorted node
-            } else if(changeType == ListChangeBlock.DELETE) {
+            } else if(changeType == ListEvent.DELETE) {
                 IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
                 unsortedNode.removeFromTree();
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
-                updates.appendChange(deleteSortedIndex, ListChangeBlock.DELETE);
+                updates.appendChange(deleteSortedIndex, ListEvent.DELETE);
 
             // on update, delete the sorted node
-            } else if(changeType == ListChangeBlock.UPDATE) {
+            } else if(changeType == ListEvent.UPDATE) {
                 IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode) + sortedOffset;
                 unsortedNodes.add(unsortedNode);
@@ -143,26 +143,26 @@ public final class SortedList extends WritableMutationList implements ListChange
             int changeType = listChanges.getType();
 
             // on insert, insert into the sorted list and fire an event
-            if(changeType == ListChangeBlock.INSERT) {
+            if(changeType == ListEvent.INSERT) {
                 IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
                 int sortedIndex = insertByUnsortedNode(unsortedNode);
-                updates.appendChange(sortedIndex, ListChangeBlock.INSERT);
+                updates.appendChange(sortedIndex, ListEvent.INSERT);
 
             // on delete, we've already fired the event
-            } else if(changeType == ListChangeBlock.DELETE) {
+            } else if(changeType == ListEvent.DELETE) {
                 // do nothing
     
             // on update, re-insert and fire an event
-            } else if(changeType == ListChangeBlock.UPDATE) {
+            } else if(changeType == ListEvent.UPDATE) {
                 int deleteSortedIndex = ((Integer)deletedIndicesIterator.next()).intValue();
                 IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
                 int insertSortedIndex = insertByUnsortedNode(unsortedNode);
                 
                 if(deleteSortedIndex == insertSortedIndex) {
-                    updates.appendChange(insertSortedIndex, ListChangeBlock.UPDATE);
+                    updates.appendChange(insertSortedIndex, ListEvent.UPDATE);
                 } else {
-                    updates.appendChange(deleteSortedIndex, ListChangeBlock.DELETE);
-                    updates.appendChange(insertSortedIndex, ListChangeBlock.INSERT);
+                    updates.appendChange(deleteSortedIndex, ListEvent.DELETE);
+                    updates.appendChange(insertSortedIndex, ListEvent.INSERT);
                 }
             }
         }
@@ -251,8 +251,8 @@ public final class SortedList extends WritableMutationList implements ListChange
 
             // notification about the big change
             updates.beginAtomicChange();
-            updates.appendChange(0, size() - 1, ListChangeBlock.DELETE);
-            updates.appendChange(0, size() - 1, ListChangeBlock.INSERT);
+            updates.appendChange(0, size() - 1, ListEvent.DELETE);
+            updates.appendChange(0, size() - 1, ListEvent.INSERT);
             updates.commitAtomicChange();
             
             //System.out.println("  < Sorted  a list of size: " + source.size());

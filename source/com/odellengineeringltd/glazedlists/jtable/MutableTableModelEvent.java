@@ -59,9 +59,9 @@ public class MutableTableModelEvent extends TableModelEvent {
     public void setValues(int startIndex, int endIndex, int listChangeType) {
         this.firstRow = startIndex;
         this.lastRow = endIndex;
-        if(listChangeType == ListChangeBlock.INSERT) type = INSERT;
-        else if(listChangeType == ListChangeBlock.DELETE) type = DELETE;
-        else if(listChangeType == ListChangeBlock.UPDATE) type = UPDATE;
+        if(listChangeType == ListEvent.INSERT) type = INSERT;
+        else if(listChangeType == ListEvent.DELETE) type = DELETE;
+        else if(listChangeType == ListEvent.UPDATE) type = UPDATE;
         column = ALL_COLUMNS;
     }
 

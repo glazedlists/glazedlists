@@ -48,7 +48,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventJList extends AbstractListModel implements ListChangeListener, MouseListener {
+public class EventJList extends AbstractListModel implements ListEventListener, MouseListener {
 
     /** The Swing list */
     private JList jList;
@@ -82,7 +82,7 @@ public class EventJList extends AbstractListModel implements ListChangeListener,
         jList.setSelectionModel(listSelectionModel);
         
         // prepare listeners
-        source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
+        source.addListEventListener(new EventThreadProxy(this));
         jList.addMouseListener(this);
     }
     
@@ -111,22 +111,22 @@ public class EventJList extends AbstractListModel implements ListChangeListener,
     }
     
     /**
-     * For implementing the ListChangeListener interface. This sends changes
+     * For implementing the ListEventListener interface. This sends changes
      * to the list which can repaint the table rows. Because this class uses
-     * a ListChangeListenerEventThreadProxy, it is guaranteed that all natural
+     * a EventThreadProxy, it is guaranteed that all natural
      * calls to this method use the Swing thread.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         while(listChanges.nextBlock()) {
             // get the current change info
             int startIndex = listChanges.getBlockStartIndex();
             int endIndex = listChanges.getBlockEndIndex();
             int changeType = listChanges.getType();
-            if(changeType == ListChangeBlock.INSERT) {
+            if(changeType == ListEvent.INSERT) {
                 fireIntervalAdded(this, startIndex, endIndex);
-            } else if(changeType == ListChangeBlock.UPDATE) {
+            } else if(changeType == ListEvent.UPDATE) {
                 fireContentsChanged(this, startIndex, endIndex);
-            } else if(changeType == ListChangeBlock.DELETE) {
+            } else if(changeType == ListEvent.DELETE) {
                 fireIntervalRemoved(this, startIndex, endIndex);
             }
         }

@@ -30,7 +30,7 @@ import com.odellengineeringltd.glazedlists.util.EventListIterator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class WritableMutationList extends MutationList implements ListChangeListener, EventList {
+public abstract class WritableMutationList extends MutationList implements ListEventListener, EventList {
 
     /**
      * Creates a new WritableMutationList that uses the specified source list.

@@ -31,7 +31,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThreadSafeList extends WritableMutationList implements ListChangeListener, EventList {
+public final class ThreadSafeList extends WritableMutationList implements ListEventListener, EventList {
 
     /**
      * Creates a new ThreadSafeList that is a thread-safe view of the
@@ -39,14 +39,14 @@ public final class ThreadSafeList extends WritableMutationList implements ListCh
      */
     protected ThreadSafeList(EventList source) {
         super(source);
-        source.addListChangeListener(this);
+        source.addListEventListener(this);
     }
     
     /**
-     * For implementing the ListChangeListener interface. When the underlying list
+     * For implementing the ListEventListener interface. When the underlying list
      * changes, this sends notification to listening lists.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.beginAtomicChange();
         while(listChanges.next()) {

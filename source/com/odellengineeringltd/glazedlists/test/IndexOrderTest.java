@@ -52,10 +52,10 @@ public class IndexOrderTest extends TestCase {
         SortedList sortedOnce = new SortedList(filteredOnce, new IntegerArrayComparator(0));
         SortedList sortedTwice = new SortedList(sortedOnce, new IntegerArrayComparator(1));
         
-        //unsorted.addListChangeListener(new IncreasingChangeIndexListener());
-        //sortedOnce.addListChangeListener(new IncreasingChangeIndexListener());
-        //sortedTwice.addListChangeListener(new IncreasingChangeIndexListener());
-        //filteredOnce.addListChangeListener(new IncreasingChangeIndexListener());
+        //unsorted.addListEventListener(new IncreasingChangeIndexListener());
+        //sortedOnce.addListEventListener(new IncreasingChangeIndexListener());
+        //sortedTwice.addListEventListener(new IncreasingChangeIndexListener());
+        //filteredOnce.addListEventListener(new IncreasingChangeIndexListener());
         
         // add a block of new elements one hundred times
         for(int a = 0; a < 100; a++) {
@@ -89,9 +89,9 @@ public class IndexOrderTest extends TestCase {
         AbstractFilterList filteredOnce = new IntegerArrayFilterList(sortedOnce, 0, 50);
         SortedList sortedTwice = new SortedList(filteredOnce, new IntegerArrayComparator(0));
         
-        unsorted.addListChangeListener(new IncreasingChangeIndexListener());
-        sortedOnce.addListChangeListener(new IncreasingChangeIndexListener());
-        filteredOnce.addListChangeListener(new IncreasingChangeIndexListener());
+        unsorted.addListEventListener(new IncreasingChangeIndexListener());
+        sortedOnce.addListEventListener(new IncreasingChangeIndexListener());
+        filteredOnce.addListEventListener(new IncreasingChangeIndexListener());
         
         ArrayList controlList = new ArrayList();
         
@@ -179,8 +179,8 @@ public class IndexOrderTest extends TestCase {
      * A special list change listener that verifies that the change indicies
      * within each atomic change are in increasing order.
      */
-    class IncreasingChangeIndexListener implements ListChangeListener {
-        public void notifyListChanges(ListChangeEvent listChanges) {
+    class IncreasingChangeIndexListener implements ListEventListener {
+        public void listChanged(ListEvent listChanges) {
             StringBuffer changeDescription = new StringBuffer();
             int previousChangeIndex = -1;
             boolean increasingOrder = true;
@@ -190,17 +190,17 @@ public class IndexOrderTest extends TestCase {
                 int changeType = listChanges.getType();
                 
                 // maintain the change string
-                if(changeType == ListChangeBlock.UPDATE) {
+                if(changeType == ListEvent.UPDATE) {
                     changeDescription.append("U");
-                } else if(changeType == ListChangeBlock.INSERT) {
+                } else if(changeType == ListEvent.INSERT) {
                     changeDescription.append("I");
-                } else if(changeType == ListChangeBlock.DELETE) {
+                } else if(changeType == ListEvent.DELETE) {
                     changeDescription.append("D");
                 }
                 changeDescription.append(changeIndex);
                 
                 // see if this was a failure
-                if(changeType == ListChangeBlock.DELETE) {
+                if(changeType == ListEvent.DELETE) {
                     if(changeIndex < previousChangeIndex) {
                         increasingOrder = false;
                         changeDescription.append("*");

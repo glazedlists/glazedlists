@@ -30,13 +30,13 @@ import com.odellengineeringltd.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class MutationList extends AbstractList implements EventList, ListChangeListener {
+public abstract class MutationList extends AbstractList implements EventList, ListEventListener {
 
     /** the underlying event list */
     protected EventList source;
     
     /** the change event and notification system */
-    protected ListChangeSequence updates = new ListChangeSequence();
+    protected ListEventFactory updates = new ListEventFactory(this);
     
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock;
@@ -76,21 +76,21 @@ public abstract class MutationList extends AbstractList implements EventList, Li
      * Overriding classes will want to override this method to respond to
      * changes and to send those changes to listening classes.
      */
-    public abstract void notifyListChanges(ListChangeEvent listChanges);
+    public abstract void listChanged(ListEvent listChanges);
 
     /**
      * Registers the specified listener to receive notification of changes
      * to this list.
      */
-    public void addListChangeListener(ListChangeListener listChangeListener) {
-        updates.addListChangeListener(listChangeListener);
+    public void addListEventListener(ListEventListener listChangeListener) {
+        updates.addListEventListener(listChangeListener);
     }
 
     /**
      * Removes the specified listener from receiving change updates for this list.
      */
-    public void removeListChangeListener(ListChangeListener listChangeListener) {
-        updates.removeListChangeListener(listChangeListener);
+    public void removeListEventListener(ListEventListener listChangeListener) {
+        updates.removeListEventListener(listChangeListener);
     }
 
     /**

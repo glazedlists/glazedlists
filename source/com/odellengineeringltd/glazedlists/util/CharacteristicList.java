@@ -40,14 +40,14 @@ import com.odellengineeringltd.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class CharacteristicList extends MutationList implements ListChangeListener, EventList {
+public abstract class CharacteristicList extends MutationList implements ListEventListener, EventList {
 
     /**
      * Creates a new CharacteristicList.
      */
     protected CharacteristicList(EventList source) {
         super(source);
-        source.addListChangeListener(this);
+        source.addListEventListener(this);
     }
     
     /**
@@ -79,7 +79,7 @@ public abstract class CharacteristicList extends MutationList implements ListCha
     /**
      * When this list is changed, it passes on the changes to all listeners.
      */
-    public final void notifyListChanges(ListChangeEvent listChanges) {
+    public final void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.beginAtomicChange();
         while(listChanges.next()) {

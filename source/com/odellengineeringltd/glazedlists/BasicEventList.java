@@ -36,7 +36,7 @@ public class BasicEventList implements EventList, Serializable {
     private List data;
 
     /** the change event and notification system */
-    protected ListChangeSequence updates = new ListChangeSequence();
+    protected ListEventFactory updates = new ListEventFactory(this);
     
     /** the read/write lock provides mutual exclusion to access */
     private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
@@ -67,7 +67,7 @@ public class BasicEventList implements EventList, Serializable {
         try {
             // create the change event
             updates.beginAtomicChange();
-            updates.appendChange(index, ListChangeBlock.INSERT);
+            updates.appendChange(index, ListEvent.INSERT);
             // do the actual add
             data.add(index, element);
             // fire the event
@@ -85,7 +85,7 @@ public class BasicEventList implements EventList, Serializable {
         try {
             // create the change event
             updates.beginAtomicChange();
-            updates.appendChange(size(), ListChangeBlock.INSERT);
+            updates.appendChange(size(), ListEvent.INSERT);
             // do the actual add
             boolean result = data.add(element);
             // fire the event
@@ -117,7 +117,7 @@ public class BasicEventList implements EventList, Serializable {
         try {
             // create the change event
             updates.beginAtomicChange();
-            updates.appendChange(index, index + collection.size() - 1, ListChangeBlock.INSERT);
+            updates.appendChange(index, index + collection.size() - 1, ListEvent.INSERT);
             // do the actual add
             boolean result = data.addAll(index, collection);
             // fire the event
@@ -148,7 +148,7 @@ public class BasicEventList implements EventList, Serializable {
         try {
             // create the change event
             updates.beginAtomicChange();
-            updates.appendChange(index, index + objects.length - 1, ListChangeBlock.INSERT);
+            updates.appendChange(index, index + objects.length - 1, ListEvent.INSERT);
             // do the actual add
             boolean overallResult = true;
             boolean elementResult = true;
@@ -172,7 +172,7 @@ public class BasicEventList implements EventList, Serializable {
         try {
             // create the change event
             updates.beginAtomicChange();
-            updates.appendChange(index, ListChangeBlock.DELETE);
+            updates.appendChange(index, ListEvent.DELETE);
             // do the actual remove
             Object removed = data.remove(index);
             // fire the event
@@ -210,7 +210,7 @@ public class BasicEventList implements EventList, Serializable {
             if(size() == 0) return;
             // create the change event
             updates.beginAtomicChange();
-            updates.appendChange(0, size() - 1, ListChangeBlock.DELETE);
+            updates.appendChange(0, size() - 1, ListEvent.DELETE);
             // do the actual clear
             data.clear();
             // fire the event
@@ -229,7 +229,7 @@ public class BasicEventList implements EventList, Serializable {
         try {
             // create the change event
             updates.beginAtomicChange();
-            updates.appendChange(index, ListChangeBlock.UPDATE);
+            updates.appendChange(index, ListEvent.UPDATE);
             // do the actual set
             Object previous = data.set(index, element);
             // fire the event
@@ -380,7 +380,7 @@ public class BasicEventList implements EventList, Serializable {
             for(Iterator i = collection.iterator(); i.hasNext(); ) {
                 int index = -1;
                 while((index = data.indexOf(i.next())) != -1) {
-                    updates.appendChange(index, ListChangeBlock.DELETE);
+                    updates.appendChange(index, ListEvent.DELETE);
                     data.remove(index);
                     changed = true;
                 }
@@ -407,7 +407,7 @@ public class BasicEventList implements EventList, Serializable {
                 if(collection.contains(data.get(index))) {
                     index++;
                 } else {
-                    updates.appendChange(index, ListChangeBlock.DELETE);
+                    updates.appendChange(index, ListEvent.DELETE);
                     data.remove(index);
                     changed = true;
                 }
@@ -445,14 +445,14 @@ public class BasicEventList implements EventList, Serializable {
      * Registers the specified listener to receive notification of changes
      * to this list.
      */
-    public final void addListChangeListener(ListChangeListener listChangeListener) {
-        updates.addListChangeListener(listChangeListener);
+    public final void addListEventListener(ListEventListener listChangeListener) {
+        updates.addListEventListener(listChangeListener);
     }
     /**
      * Removes the specified listener from receiving change updates for this list.
      */
-    public void removeListChangeListener(ListChangeListener listChangeListener) {
-        updates.removeListChangeListener(listChangeListener);
+    public void removeListEventListener(ListEventListener listChangeListener) {
+        updates.removeListEventListener(listChangeListener);
     }
 
     /**

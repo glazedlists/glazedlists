@@ -34,7 +34,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
+public class ListComboBoxModel implements ListEventListener, ComboBoxModel {
 
     /** the complete list of messages before filters */
     protected EventList source;
@@ -55,13 +55,13 @@ public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
     public ListComboBoxModel(EventList source) {
         this.source = source;
         listDataEvent = new MutableListDataEvent(this);
-        source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
+        source.addListEventListener(new EventThreadProxy(this));
     }
     
     /**
-     * For implementing the ListChangeListener interface. This sends changes
+     * For implementing the ListEventListener interface. This sends changes
      * to the table which can repaint the table cells. Because this class uses
-     * a ListChangeListenerEventThreadProxy, it is guaranteed that all natural
+     * a EventThreadProxy, it is guaranteed that all natural
      * calls to this method use the Swing thread.
      *
      * <p>This always sends discrete changes for the complete size of the list.
@@ -69,7 +69,7 @@ public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
      * of changes are grouped together as a single change. This is how the
      * ListTable accepts large change events.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         // when all events hae already been processed by clearing the event queue
         if(!listChanges.hasNext()) return;
 
@@ -82,9 +82,9 @@ public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
 
             // create a table model event for this block
             listDataEvent.setRange(startIndex, endIndex);
-            if(changeType == ListChangeBlock.INSERT) listDataEvent.setType(ListDataEvent.INTERVAL_ADDED);
-            else if(changeType == ListChangeBlock.DELETE) listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED);
-            else if(changeType == ListChangeBlock.UPDATE) listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
+            if(changeType == ListEvent.INSERT) listDataEvent.setType(ListDataEvent.INTERVAL_ADDED);
+            else if(changeType == ListEvent.DELETE) listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED);
+            else if(changeType == ListEvent.UPDATE) listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
 
             // fire an event to notify all listeners
             fireListDataEvent(listDataEvent);

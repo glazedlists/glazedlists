@@ -53,7 +53,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
         
         prepareFlagList();
         
-        source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
+        source.addListEventListener(new EventThreadProxy(this));
         selectionModel.addListSelectionListener(this);
     }
     
@@ -109,7 +109,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
      * This changes the flag list. Changes to the source list may cause simultaneous
      * changes to the corresponding selection list.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         getReadWriteLock().writeLock().lock();
         try {
         
@@ -127,21 +127,21 @@ public class SelectionList extends MutationList implements ListSelectionListener
                 if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
                 
                 // when an element is deleted, blow it away
-                if(changeType == ListChangeBlock.DELETE) {
+                if(changeType == ListEvent.DELETE) {
                     flagList.remove(index);
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListChangeBlock.DELETE);
+                        updates.appendChange(previousSelectionIndex, ListEvent.DELETE);
                     }
                     
                 // when an element is inserted, it is selected if its index was selected
-                } else if(changeType == ListChangeBlock.INSERT) {
+                } else if(changeType == ListEvent.INSERT) {
                     
                     // when selected, add the flag and fire a selection event
                     if(previouslySelected) {
                         flagList.add(index, Boolean.TRUE);
-                        updates.appendChange(previousSelectionIndex, ListChangeBlock.INSERT);
+                        updates.appendChange(previousSelectionIndex, ListEvent.INSERT);
 
                     // when not selected, just add the space
                     } else {
@@ -149,11 +149,11 @@ public class SelectionList extends MutationList implements ListSelectionListener
                     }
                     
                 // when an element is changed, assume selection stays the same
-                } else if(changeType == ListChangeBlock.UPDATE) {
+                } else if(changeType == ListEvent.UPDATE) {
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListChangeBlock.UPDATE);
+                        updates.appendChange(previousSelectionIndex, ListEvent.UPDATE);
                     }
                 }
             }
@@ -191,7 +191,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
                     // it is no longer selected so remove it from the selection list
                     int previousSelectionIndex = flagList.getCompressedIndex(i);
                     flagList.set(i, null);
-                    updates.appendChange(previousSelectionIndex, ListChangeBlock.DELETE);
+                    updates.appendChange(previousSelectionIndex, ListEvent.DELETE);
                     
                 // if the value was not selected before this event
                 } else {
@@ -201,7 +201,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
                     // it is newly selected so add it to the selection list
                     flagList.set(i, Boolean.TRUE);
                     int currentSelectionIndex = flagList.getCompressedIndex(i);
-                    updates.appendChange(currentSelectionIndex, ListChangeBlock.INSERT);
+                    updates.appendChange(currentSelectionIndex, ListEvent.INSERT);
                 }
             }
             // fire the changes

@@ -38,7 +38,7 @@ public class QueryList extends AbstractList implements EventList {
     protected Query query = null;
 
     /** the change event and notification system */
-    protected ListChangeSequence updates = new ListChangeSequence();
+    protected ListEventFactory updates = new ListEventFactory(this);
 
     /** the read/write lock provides mutual exclusion to access */
     private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
@@ -78,12 +78,12 @@ public class QueryList extends AbstractList implements EventList {
                     if(updated.compareTo(listElement) > 0) continue;
                     else break;
                 }
-                updates.appendChange(insertLocation, ListChangeBlock.INSERT);
+                updates.appendChange(insertLocation, ListEvent.INSERT);
                 before.add(updated);
                 values.add(insertLocation, updated);
             // when it matches and it is in the list, update it!
             } else if(queryMatches && listIndex != -1) {
-                updates.appendChange(listIndex, ListChangeBlock.UPDATE);
+                updates.appendChange(listIndex, ListEvent.UPDATE);
                 Object old = values.get(listIndex);
                 values.set(listIndex, updated);
                 // update the before copy by removing and re-adding it
@@ -91,7 +91,7 @@ public class QueryList extends AbstractList implements EventList {
                 before.add(updated);
             // when it doesn't match and it is in the list, remove it!
             } else if(!queryMatches && listIndex != -1) {
-                updates.appendChange(listIndex, ListChangeBlock.DELETE);
+                updates.appendChange(listIndex, ListEvent.DELETE);
                 values.remove(listIndex);
                 before.remove(updated);
             }
@@ -128,7 +128,7 @@ public class QueryList extends AbstractList implements EventList {
             // when the before list holds items smaller than the after list item,
             // the before list items are out-of-date and must be deleted 
             while(currentBefore != null && currentAfter.compareTo(currentBefore) > 0) {
-                updates.appendChange(updatedValues.size(), ListChangeBlock.DELETE);
+                updates.appendChange(updatedValues.size(), ListEvent.DELETE);
                 if(beforeIterator.hasNext()) {
                     currentBefore = (Comparable)beforeIterator.next();
                 } else { 
@@ -147,14 +147,14 @@ public class QueryList extends AbstractList implements EventList {
             // when the before list holds no more items or an item that is larger than
             // the current after list item, insert the after list item
             } else {
-                updates.appendChange(updatedValues.size(), ListChangeBlock.INSERT);
+                updates.appendChange(updatedValues.size(), ListEvent.INSERT);
                 updatedValues.add(currentAfter);
             }
         }
         // when the before list holds items larger than the largest after list item,
         // the before list items are out-of-date and must be deleted 
         while(currentBefore != null) {
-            updates.appendChange(updatedValues.size(), ListChangeBlock.DELETE);
+            updates.appendChange(updatedValues.size(), ListEvent.DELETE);
             if(beforeIterator.hasNext()) {
                 currentBefore = (Comparable)beforeIterator.next();
             } else {
@@ -208,15 +208,15 @@ public class QueryList extends AbstractList implements EventList {
      * Registers the specified listener to receive notification of changes
      * to this list.
      */
-    public final void addListChangeListener(ListChangeListener listChangeListener) {
-        updates.addListChangeListener(listChangeListener);
+    public final void addListEventListener(ListEventListener listChangeListener) {
+        updates.addListEventListener(listChangeListener);
     }
 
     /**
      * Removes the specified listener from receiving change updates for this list.
      */
-    public void removeListChangeListener(ListChangeListener listChangeListener) {
-        updates.removeListChangeListener(listChangeListener);
+    public void removeListEventListener(ListEventListener listChangeListener) {
+        updates.removeListEventListener(listChangeListener);
     }
 
     /**

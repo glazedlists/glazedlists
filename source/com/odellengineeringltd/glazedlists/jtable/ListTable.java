@@ -37,7 +37,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListTable extends AbstractTableModel implements ListChangeListener, MouseListener {
+public class ListTable extends AbstractTableModel implements ListEventListener, MouseListener {
 
     /** The Swing table for selecting a message from a list */
     private JTable table;
@@ -84,7 +84,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         tableScrollPane = new JScrollPane(table);
         
         // prepare listeners
-        source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
+        source.addListEventListener(new EventThreadProxy(this));
         table.addMouseListener(this);
     }
     
@@ -144,9 +144,9 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     }
     
     /**
-     * For implementing the ListChangeListener interface. This sends changes
+     * For implementing the ListEventListener interface. This sends changes
      * to the table which can repaint the table cells. Because this class uses
-     * a ListChangeListenerEventThreadProxy, it is guaranteed that all natural
+     * a EventThreadProxy, it is guaranteed that all natural
      * calls to this method use the Swing thread.
      *
      * <p>This tests the size of the change to determine how to handle it. If the
@@ -154,7 +154,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * then the entire table is notified as changed. Otherwise only the descrete
      * areas that changed are notified.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         // when all events hae already been processed by clearing the event queue
         if(!listChanges.hasNext()) return;
 

@@ -21,7 +21,7 @@ import com.odellengineeringltd.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SubEventList extends WritableMutationList implements ListChangeListener, EventList {
+public final class SubEventList extends WritableMutationList implements ListEventListener, EventList {
 
     /** the start index of this list, inclusive */
     private int startIndex;
@@ -37,10 +37,10 @@ public final class SubEventList extends WritableMutationList implements ListChan
      * @param endIndex the end index of the source list, exclusive
      * @param source the source list to view
      * @param automaticallyRemove true if this SubEventList should deregister itself
-     *      from the ListChangeListener list of the source list once it is
+     *      from the ListEventListener list of the source list once it is
      *      otherwise out of scope.
      *
-     * @see com.odellengineeringltd.glazedlists.event.ListChangeListenerWeakReferenceProxy
+     * @see com.odellengineeringltd.glazedlists.event.WeakReferenceProxy
      */
     public SubEventList(EventList source, int startIndex, int endIndex, boolean automaticallyRemove) {
         super(source);
@@ -58,9 +58,9 @@ public final class SubEventList extends WritableMutationList implements ListChan
         
             // listen directly or via a proxy that will do garbage collection
             if(automaticallyRemove) {
-                source.addListChangeListener(new ListChangeListenerWeakReferenceProxy(source, this));
+                source.addListEventListener(new WeakReferenceProxy(source, this));
             } else {
-                source.addListChangeListener(this);
+                source.addListEventListener(this);
             }
 
         } finally {
@@ -109,7 +109,7 @@ public final class SubEventList extends WritableMutationList implements ListChan
      * When the list is changed, the SubEventList only forwards changes that occur
      * within the bounds of the SubEventList.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         updates.beginAtomicChange();
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
@@ -117,23 +117,23 @@ public final class SubEventList extends WritableMutationList implements ListChan
             
             // if it is a change before
             if(changeIndex < startIndex) {
-                if(changeType == ListChangeBlock.INSERT) {
+                if(changeType == ListEvent.INSERT) {
                     startIndex++;
                     endIndex++;
-                } else if(changeType == ListChangeBlock.DELETE) {
+                } else if(changeType == ListEvent.DELETE) {
                     startIndex--;
                     endIndex--;
                 }
             // if it is a change within
             } else if(changeIndex < endIndex) {
-                if(changeType == ListChangeBlock.INSERT) {
+                if(changeType == ListEvent.INSERT) {
                     endIndex++;
-                    updates.appendChange(changeIndex - startIndex, ListChangeBlock.INSERT);
-                } else if(changeType == ListChangeBlock.UPDATE) {
-                    updates.appendChange(changeIndex - startIndex, ListChangeBlock.INSERT);
-                } else if(changeType == ListChangeBlock.DELETE) {
+                    updates.appendChange(changeIndex - startIndex, ListEvent.INSERT);
+                } else if(changeType == ListEvent.UPDATE) {
+                    updates.appendChange(changeIndex - startIndex, ListEvent.INSERT);
+                } else if(changeType == ListEvent.DELETE) {
                     endIndex--;
-                    updates.appendChange(changeIndex - startIndex, ListChangeBlock.DELETE);
+                    updates.appendChange(changeIndex - startIndex, ListEvent.DELETE);
                 }
             // if it is a change after
             } else {

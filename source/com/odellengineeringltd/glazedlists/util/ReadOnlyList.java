@@ -33,7 +33,7 @@ import javax.swing.SwingUtilities;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ReadOnlyList extends WritableMutationList implements ListChangeListener, EventList {
+public final class ReadOnlyList extends WritableMutationList implements ListEventListener, EventList {
 
     /**
      * Creates a new ReadOnlyList that is a read only view of the
@@ -41,14 +41,14 @@ public final class ReadOnlyList extends WritableMutationList implements ListChan
      */
     protected ReadOnlyList(EventList source) {
         super(source);
-        source.addListChangeListener(this);
+        source.addListEventListener(this);
     }
     
     /**
-     * For implementing the ListChangeListener interface. When the underlying list
+     * For implementing the ListEventListener interface. When the underlying list
      * changes, this sends notification to listening lists.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.beginAtomicChange();
         while(listChanges.next()) {

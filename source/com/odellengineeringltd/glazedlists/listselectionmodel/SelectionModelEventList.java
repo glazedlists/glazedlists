@@ -28,7 +28,7 @@ import java.util.*;
  * JTable. The JTable's structure can change and the JTable's selection can
  * change. In either case the SelectionModelEventList is responsible for
  * updating its view of the selection and sending SelectionEvents and
- * ListChangeEvents to listeners.
+ * ListEvents to listeners.
  *
  * <p>This class is <strong>not thread-safe</strong>. Users of this class
  * should access it using the Event Dispatch thread only.
@@ -73,7 +73,7 @@ public class SelectionModelEventList {
     private EventList source;
     
     /** list change updates */
-    private ListChangeSequence updates = null;
+    private ListEventFactory updates = null;
     
     /**
      * Creates a new Mutation list that uses the specified source list.
@@ -116,7 +116,7 @@ public class SelectionModelEventList {
      * responsible for listening to changes in the JTable's size and modifying
      * the internal list model to match.
      */
-    class SelectionEventList extends WritableMutationList implements ListChangeListener, EventList {
+    class SelectionEventList extends WritableMutationList implements ListEventListener, EventList {
         
         /**
          * Creates a new SelectionEventList that listens to changes from the
@@ -124,7 +124,7 @@ public class SelectionModelEventList {
          */
         public SelectionEventList(EventList source) {
             super(source);
-            source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
+            source.addListEventListener(new EventThreadProxy(this));
             SelectionModelEventList.this.updates = super.updates;
         }
     
@@ -186,7 +186,7 @@ public class SelectionModelEventList {
          * This changes the flag list. Changes to the source list may cause simultaneous
          * changes to the corresponding selection list.
          */
-        public void notifyListChanges(ListChangeEvent listChanges) {
+        public void listChanged(ListEvent listChanges) {
             // prepare for notifying ListSelectionListeners
             int minSelectionIndexBefore = selectionModel.getMinSelectionIndex();
             int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
@@ -205,16 +205,16 @@ public class SelectionModelEventList {
                 if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
                 
                 // when an element is deleted, blow it away
-                if(changeType == ListChangeBlock.DELETE) {
+                if(changeType == ListEvent.DELETE) {
                     flagList.remove(index);
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListChangeBlock.DELETE);
+                        updates.appendChange(previousSelectionIndex, ListEvent.DELETE);
                     }
                     
                 // when an element is inserted, it is selected if its index was selected
-                } else if(changeType == ListChangeBlock.INSERT) {
+                } else if(changeType == ListEvent.INSERT) {
                     
                     // when selected, decide based on selection mode
                     if(previouslySelected) {
@@ -223,7 +223,7 @@ public class SelectionModelEventList {
                         if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
                         || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
                             flagList.add(index, Boolean.TRUE);
-                            updates.appendChange(previousSelectionIndex, ListChangeBlock.INSERT);
+                            updates.appendChange(previousSelectionIndex, ListEvent.INSERT);
 
                         // do not select the inserted for single selection and defensive selection
                         } else {
@@ -236,16 +236,16 @@ public class SelectionModelEventList {
                     }
                     
                 // when an element is changed, assume selection stays the same
-                } else if(changeType == ListChangeBlock.UPDATE) {
+                } else if(changeType == ListEvent.UPDATE) {
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListChangeBlock.UPDATE);
+                        updates.appendChange(previousSelectionIndex, ListEvent.UPDATE);
                     }
                 }
             }
     
-            // fire the changes to ListChangeListeners
+            // fire the changes to ListEventListeners
             updates.commitAtomicChange();
 
             // fire the changes to ListSelectionListeners
@@ -399,12 +399,12 @@ public class SelectionModelEventList {
                     if(selectedBefore) {
                         int selectionIndex = flagList.getCompressedIndex(i);
                         flagList.set(i, null);
-                        updates.appendChange(selectionIndex, ListChangeBlock.DELETE);
+                        updates.appendChange(selectionIndex, ListEvent.DELETE);
                     // if it is being selected
                     } else {
                         flagList.set(i, Boolean.TRUE);
                         int selectionIndex = flagList.getCompressedIndex(i);
-                        updates.appendChange(selectionIndex, ListChangeBlock.INSERT);
+                        updates.appendChange(selectionIndex, ListEvent.INSERT);
                     }
                 }
             }
@@ -598,13 +598,13 @@ public class SelectionModelEventList {
          * Insert length indices beginning before/after index.
          */
         public void insertIndexInterval(int index, int length, boolean before) {
-            // these changes are handled by the ListChangeListener
+            // these changes are handled by the ListEventListener
         }
         /**
          * Remove the indices in the interval index0,index1 (inclusive) from  the selection model. 
          */
         public void removeIndexInterval(int index0, int index1) {
-            // these changes are handled by the ListChangeListener
+            // these changes are handled by the ListEventListener
         }
 
         /**

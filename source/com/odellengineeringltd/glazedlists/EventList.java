@@ -33,8 +33,8 @@ import com.odellengineeringltd.glazedlists.util.concurrent.*;
  *
  * <p>EventLists can be writable but there is no requirement for doing so.
  * When a <i>root list</i> is changed, the change event is propagated to all
- * ListChangeListeners that are interested in the change. The set of
- * ListChangeListeners will include any <i>mutation lists</i> providing a
+ * ListEventListeners that are interested in the change. The set of
+ * ListEventListeners will include any <i>mutation lists</i> providing a
  * mutated view of the root list.
  *
  * <p>When a <i>mutation list</i> is modified via <code>set()</code>,
@@ -60,7 +60,7 @@ public interface EventList extends List {
     /**
      * Registers the specified listener to receive change updates for this list.
      */
-    public void addListChangeListener(ListChangeListener listChangeListener);
+    public void addListEventListener(ListEventListener listChangeListener);
 
     /**
      * Removes the specified listener from receiving change updates for this
@@ -70,7 +70,7 @@ public interface EventList extends List {
      *     If you need to implement this method, please review the implementation
      *     in MutationList for an example.
      */
-    public void removeListChangeListener(ListChangeListener listChangeListener);
+    public void removeListEventListener(ListEventListener listChangeListener);
 
     /**
      * Gets the source list that this list depends on. This may return the same

@@ -24,7 +24,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SelectionNotifier implements ListChangeListener {
+public class SelectionNotifier implements ListEventListener {
     
     /** whom to notify of selection changes */
     private ArrayList selectionListeners = new ArrayList();
@@ -38,14 +38,14 @@ public class SelectionNotifier implements ListChangeListener {
      */
     public SelectionNotifier(EventList source) {
         this.source = source;
-        source.addListChangeListener(this);
+        source.addListEventListener(this);
     }
     
     /**
      * When the SelectionList changes, send notification to selection listeners
      * of the new selection.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         if(!listChanges.hasNext()) return;
         
         // clearing the event queue marks this event as handled

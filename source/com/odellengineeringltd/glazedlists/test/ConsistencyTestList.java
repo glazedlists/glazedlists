@@ -16,7 +16,7 @@ import com.odellengineeringltd.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ConsistencyTestList implements ListChangeListener {
+public class ConsistencyTestList implements ListEventListener {
 
     /** the internally tracked size, to compare with for consistency */
     private int size;
@@ -38,13 +38,13 @@ public class ConsistencyTestList implements ListChangeListener {
         this.source = source;
         this.name = name;
         size = source.size();
-        source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
+        source.addListEventListener(new EventThreadProxy(this));
     }
     
     /**
-     * For implementing the ListChangeListener interface.     
+     * For implementing the ListEventListener interface.     
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public void listChanged(ListEvent listChanges) {
         // for all changes, one index at a time
         while(listChanges.next()) {
             
@@ -52,8 +52,8 @@ public class ConsistencyTestList implements ListChangeListener {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
             
-            if(changeType == ListChangeBlock.INSERT) size++;
-            else if(changeType == ListChangeBlock.DELETE) size--;
+            if(changeType == ListEvent.INSERT) size++;
+            else if(changeType == ListEvent.DELETE) size--;
             
         }
         if(size != source.size()) {
