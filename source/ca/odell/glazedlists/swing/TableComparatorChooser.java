@@ -18,6 +18,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 // for responding to user actions
 import java.awt.event.*;
+import java.awt.AWTEventMulticaster;
 import javax.swing.event.*;
 // for keeping lists of comparators
 import java.util.*;
@@ -109,6 +110,9 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
 
     /** whether to support sorting on single or multiple columns */
     private boolean multipleColumnSort;
+    
+    /** listeners to sort change events */
+    private ActionListener sortListener = null;
 
     /**
      * Creates a new TableComparatorChooser that responds to clicks
@@ -240,6 +244,21 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         } finally {
             ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().unlock();
         }
+    }
+    
+    /**
+     * Registers the specified {@link ActionListener} to receive notification whenever
+     * the {@link JTable} is sorted by this {@link TableComparatorChooser}.
+     */
+    public void addSortActionListener(final ActionListener sortActionListener) {
+        sortListener = AWTEventMulticaster.add(sortListener, sortActionListener);
+    }
+    /**
+     * Deregisters the specified {@link ActionListener} to no longer receive
+     * action events.
+     */
+    public void removeSortActionListener(final ActionListener sortActionListener) {
+        sortListener = AWTEventMulticaster.remove(sortListener, sortActionListener);
     }
 
     /**
@@ -379,7 +398,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      */
     private void rebuildComparator() {
         // build a new comparator
-        if(recentlyClickedColumns.size() > 0) {
+        if(!recentlyClickedColumns.isEmpty()) {
             List comparators = new ArrayList();
             for(Iterator i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
                 ColumnClickTracker columnClickTracker = (ColumnClickTracker)i.next();
@@ -387,7 +406,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
                 comparators.add(comparator);
             }
             ComparatorChain comparatorChain = new ComparatorChain(comparators);
-
+    
             // select the new comparator
             sortedList.getReadWriteLock().writeLock().lock();
             try {
@@ -401,6 +420,9 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         // force the table header to redraw itself
         table.getTableHeader().revalidate();
         table.getTableHeader().repaint();
+        
+        // notify interested listeners that the sorting has changed
+        sortListener.actionPerformed(new ActionEvent(this, 0, "sort"));
     }
 
     /**
