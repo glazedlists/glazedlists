@@ -205,14 +205,14 @@ public class DefaultTextFilterList extends AbstractFilterList {
      *
      * Note: the number of filter values in <code>filter1</code> or
      * <code>filter2</code> is meaningless. A filter of <code>"abc"</code> is
-     * logically equal to a filter of <code>"abc", "ab", "a"</code>.
+     * logically equal to a filter of <code>"abc", "abc"</code>.
      *
      * @param oldFilters a filter value
      * @param newFilters another filter value
      * @return <tt>true</tt> if <code>filter1</code> is the same logical filter
      *      as <code>filter2</code>; <tt>false</tt> otherwise
      */
-    public static boolean isFilterEqual(final String[] oldFilters, final String[] newFilters) {
+    protected static boolean isFilterEqual(final String[] oldFilters, final String[] newFilters) {
         // each new filter value must have a precise match with an old filter
         // value for the text filters to be considered equal
         newFiltersCoveredByOld:
@@ -223,7 +223,7 @@ public class DefaultTextFilterList extends AbstractFilterList {
             return false;
         }
 
-        // each new filter value must have a precise match with an old filter
+        // each old filter value must have a precise match with a new filter
         // value for the text filters to be considered equal
         oldFiltersCoveredByNew:
         for(int i = 0; i < oldFilters.length; i++) {
@@ -275,7 +275,7 @@ public class DefaultTextFilterList extends AbstractFilterList {
      * @return <tt>true</tt> if <code>newFilter</code> is a relaxed version of
      *      <code>oldFilter</code>; <tt>false</tt> otherwise
      */
-    public static boolean isFilterRelaxed(final String[] oldFilters, final String[] newFilters) {
+    protected static boolean isFilterRelaxed(final String[] oldFilters, final String[] newFilters) {
         // ensure each new filter value has a counterpart in the old filter value that
         // starts with it (and thus the new filter value is covered by the old filter value)
         newFiltersCoveredByOld:
@@ -310,7 +310,7 @@ public class DefaultTextFilterList extends AbstractFilterList {
      *      of <code>oldFilter</code>; <tt>false</tt> otherwise
      * @see #isFilterRelaxed
      */
-    public static boolean isFilterConstrained(String[] oldFilter, String[] newFilter) {
+    protected static boolean isFilterConstrained(String[] oldFilter, String[] newFilter) {
         return isFilterRelaxed(newFilter, oldFilter);
     }
 
