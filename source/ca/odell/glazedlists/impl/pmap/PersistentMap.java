@@ -116,14 +116,14 @@ public final class PersistentMap implements Map {
      * Returns true if this map contains a mapping for the  specified key.
      */
     public boolean containsKey(Object key) {
-        throw new UnsupportedOperationException();
+        return map.containsKey(key);
     }
     
     /**
      * Returns true if this map maps one or more keys to the  specified value.
      */
     public boolean containsValue(Object value) {
-        throw new UnsupportedOperationException();
+        return map.containsValue(value);
     }
     
     /**
@@ -183,21 +183,21 @@ public final class PersistentMap implements Map {
      * Returns a set view of the keys contained in this map.
      */
     public Set keySet() {
-        throw new UnsupportedOperationException();
+        return Collections.unmodifiableSet(map.keySet());
     }
         
     /**
      * Returns a collection view of the values contained in this map.
      */
     public Collection values() {
-        throw new UnsupportedOperationException();
+        return Collections.unmodifiableCollection(map.values());
     }
     
     /**
      * Returns true if this map contains no key-value mappings.
      */
     public boolean isEmpty() {
-        throw new UnsupportedOperationException();
+        return map.isEmpty();
     }
     
     /**
@@ -213,7 +213,7 @@ public final class PersistentMap implements Map {
      * Returns the number of key-value mappings in this map.
      */
     public int size() {
-        throw new UnsupportedOperationException();
+        return map.size();
     }
     
     /**
