@@ -10,7 +10,6 @@ package ca.odell.glazedlists.impl.pmap;
 import ca.odell.glazedlists.impl.nio.*;
 import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.io.*;
-import ca.odell.glazedlists.GlazedLists;
 import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -64,7 +63,7 @@ public final class PersistentMap implements Map {
      * interface to convert keys to bytes.
      */
     public PersistentMap(File file) throws IOException {
-        this(file, GlazedLists.serializableByteCoder());
+        this(file, GlazedListsIO.serializableByteCoder());
     }
     /**
      * Creates a new PersistentMap for the specified file that uses the specified

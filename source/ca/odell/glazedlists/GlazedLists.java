@@ -10,12 +10,10 @@ import java.util.*;
 // for access to volatile classes
 import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.impl.sort.*;
-import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.gui.*;
 import ca.odell.glazedlists.impl.swt.*;
 // implemented interfaces
-import ca.odell.glazedlists.io.ByteCoder;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
@@ -179,32 +177,6 @@ public final class GlazedLists {
      */
     public static ThresholdEvaluator thresholdEvaluator(String propertyName) {
         return new BeanThresholdEvaluator(propertyName);
-    }
-
-
-    // ByteCoders // // // // // // // // // // // // // // // // // // // // //
-
-    /** Provide Singleton access for all ByteCoders with no internal state */
-    private static ByteCoder serializableByteCoder = new SerializableByteCoder();
-    private static ByteCoder beanXMLByteCoder = new BeanXMLByteCoder();
-
-    /**
-     * Creates a {@link ByteCoder} that encodes {@link java.io.Serializable Serializable}
-     * Objects using an {@link java.io.ObjectOutputStream}.
-     */
-    public static ByteCoder serializableByteCoder() {
-        if(serializableByteCoder == null) serializableByteCoder = new SerializableByteCoder();
-        return serializableByteCoder;
-    }
-
-    /**
-     * Creates a {@link ByteCoder} that uses {@link java.beans.XMLEncoder XMLEncoder} and
-     * {@link java.beans.XMLDecoder XMLDecoder} classes from java.beans. Encoded
-     * Objects must be JavaBeans.
-     */
-    public static ByteCoder beanXMLByteCoder() {
-        if(beanXMLByteCoder == null) beanXMLByteCoder = new BeanXMLByteCoder();
-        return beanXMLByteCoder;
     }
 
 

@@ -50,7 +50,7 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
         this.peer = peer;
         
         // publish
-        data = peer.publish(new BasicEventList(), path, GlazedLists.serializableByteCoder());
+        data = peer.publish(new BasicEventList(), path, GlazedListsIO.serializableByteCoder());
         
         // build user interface
         constructStandalone();

@@ -47,7 +47,7 @@ public class SubscribeFrame implements ActionListener, NetworkListStatusListener
         this.peer = peer;
         
         // subscribe
-        data = peer.subscribe(host, port, path, GlazedLists.serializableByteCoder());
+        data = peer.subscribe(host, port, path, GlazedListsIO.serializableByteCoder());
         
         // build user interface
         constructStandalone();

@@ -50,7 +50,7 @@ public class FileListTest extends TestCase {
         int expectedLast = 0;
         int current = 0;
         for(int i = 0; i < 16; i++) {
-            FileList fibonacci = new FileList(fibonacciFile, GlazedLists.serializableByteCoder());
+            FileList fibonacci = new FileList(fibonacciFile, GlazedListsIO.serializableByteCoder());
             
             // base case
             if(fibonacci.size() < 2) {

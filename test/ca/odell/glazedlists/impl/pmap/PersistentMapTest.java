@@ -10,6 +10,7 @@ package ca.odell.glazedlists.impl.pmap;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.impl.io.*;
 // standard collections
 import java.util.*;
@@ -80,7 +81,7 @@ public class PersistentMapTest extends TestCase {
      */
     public static Chunk chunkify(Object value) throws IOException {
         Bufferlo data = new Bufferlo();
-        GlazedLists.serializableByteCoder().encode(value, data.getOutputStream());
+        GlazedListsIO.serializableByteCoder().encode(value, data.getOutputStream());
         System.err.println("CHUNKIFIED " + data.length() + " BYTES");
         return new Chunk(data);
     }
@@ -90,7 +91,7 @@ public class PersistentMapTest extends TestCase {
      */
     public static Object deChunkify(Chunk chunk) throws IOException {
         Bufferlo data = chunk.getValue();
-        return GlazedLists.serializableByteCoder().decode(data.getInputStream());
+        return GlazedListsIO.serializableByteCoder().decode(data.getInputStream());
     }
 
     /**
@@ -194,7 +195,7 @@ public class PersistentMapTest extends TestCase {
         // create a big long queue to keep the writer thread busy
         NullValueCallback callback = new NullValueCallback();
         Bufferlo data = new Bufferlo();
-        GlazedLists.serializableByteCoder().encode(new long[4000], data.getOutputStream()); // 4000 x 8 bytes ~ 32000 bytes
+        GlazedListsIO.serializableByteCoder().encode(new long[4000], data.getOutputStream()); // 4000 x 8 bytes ~ 32000 bytes
         for(int i = 0; i < 50; i++) {
             Chunk chunk = new Chunk(data);
             writer.put("big data", chunk);
