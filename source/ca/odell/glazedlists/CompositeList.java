@@ -17,9 +17,10 @@ import ca.odell.glazedlists.util.concurrent.*;
  * An {@link EventList} composed of multiple source {@link EventList}s.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is not
- * writable via its API. Calls to {@link #set(int,Object) set()},
- * {@link #add(Object) add()}, etc. will throw a {@link RuntimeException}. To
- * modify this {@link EventList}, modify its source {@link EventList}s directly.
+ * generally writable via its API. It supports only two writing methods,
+ * {@link #set(int,Object) set()} and {@link #remove(int) remove()}. Other calls
+ * such as {@link #add(Object) add()}, etc. will throw a {@link RuntimeException}.
+ * To modify this {@link EventList}, modify its source {@link EventList}s directly.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This
  * {@link EventList}'s {@link ReadWriteLock} recursively acquires the locks
@@ -119,6 +120,32 @@ public final class CompositeList extends AbstractEventList {
             MemberList current = (MemberList)memberLists.get(i);
             if(index < current.size()) {
                 return current.getSourceList().get(index);
+            } else {
+                index = index - current.size();
+            }
+        }
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    public Object set(int index, Object value) {
+        for(int i = 0; i < memberLists.size(); i++) {
+            MemberList current = (MemberList)memberLists.get(i);
+            if(index < current.size()) {
+                return current.getSourceList().set(index, value);
+            } else {
+                index = index - current.size();
+            }
+        }
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    public Object remove(int index) {
+        for(int i = 0; i < memberLists.size(); i++) {
+            MemberList current = (MemberList)memberLists.get(i);
+            if(index < current.size()) {
+                return current.getSourceList().remove(index);
             } else {
                 index = index - current.size();
             }
