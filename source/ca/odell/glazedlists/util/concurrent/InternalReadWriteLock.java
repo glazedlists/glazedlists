@@ -8,7 +8,6 @@ package ca.odell.glazedlists.util.concurrent;
 
 // the Glazed Lists for testing the internal lock
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.test.*;
 // standard collections
 import java.util.*;
 
@@ -61,14 +60,6 @@ public final class InternalReadWriteLock implements ReadWriteLock {
      */
     public Lock internalLock() {
         return internalLock;
-    }
-
-    /**
-     * Runs a test to see if concurrent access is allowed by performing multiple
-     * sorts using different threads and a common source list.
-     */
-    public static void main(String[] args) {
-        Sorter.start();
     }
 }
 
@@ -124,57 +115,3 @@ class LockPair implements Lock {
         first.unlock();
     }
 }
-
-/**
- * A test class, the sorter continuously re-sorts its own view of the list.
- */
-class Sorter implements Runnable {
-    
-    /** the ID of this sorter */
-    private int id;
-    
-    /** the source list */
-    private EventList listToSort;
-    
-    /** for generating random values to sort */
-    private static Random random = new Random();
-    
-    /**
-     * Creates a new sorter with the specified ID.
-     */
-    public Sorter(EventList listToSort, int id) {
-        this.listToSort = listToSort;
-        this.id = id;
-    }
-
-    /**
-     * When run, the sorter sorts a random sublist of the source list.
-     */
-    public void run() {
-        for(int i = 0; i < 10000; i++) {
-            EventList subList = (EventList)listToSort.subList(0, random.nextInt(listToSort.size()));
-            System.out.println("> Sorting a list of size: " + subList.size());
-            SortedList sorted = new SortedList(subList, new IntArrayComparator(random.nextInt(2)));
-            System.out.println("< Sorted  a list of size: " + subList.size());
-        }
-    }
-
-    /**
-     * Starts multiple threads continuously sorting their own views of the
-     * same list.
-     */
-    public static void start() {
-
-        // populate a list with 10,000 2-integer arrays
-        EventList concurrentAccessList = new BasicEventList();
-        for(int i = 0; i < 10000; i++) {
-            concurrentAccessList.add(new int[] { random.nextInt(10000), random.nextInt(10000) });
-        }
-        
-        // start two threads continuously sorting that array
-        for(int i = 0; i < 8; i++) {
-            new Thread(new Sorter(concurrentAccessList, i)).start();
-        }
-    }
-}
-
