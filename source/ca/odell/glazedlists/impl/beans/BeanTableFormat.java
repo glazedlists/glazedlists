@@ -36,6 +36,21 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
     
     /** column classes */
     protected Class[] classes;
+    
+    /** primitive class to object class conversion map */
+    protected static Map primitiveToObjectMap;
+    static {
+        primitiveToObjectMap = new HashMap();
+        primitiveToObjectMap.put(boolean.class, Boolean.class);
+        primitiveToObjectMap.put(char.class, Character.class);
+        primitiveToObjectMap.put(byte.class, Byte.class);
+        primitiveToObjectMap.put(short.class, Short.class);
+        primitiveToObjectMap.put(int.class, Integer.class);
+        primitiveToObjectMap.put(long.class, Long.class);
+        primitiveToObjectMap.put(float.class, Float.class);
+        primitiveToObjectMap.put(double.class, Double.class);
+    }
+    
 
     /**
      * Create a BeanTableFormat that uses the specified column names
@@ -62,7 +77,12 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
             loadPropertyDescriptors(beanClass);
             for(int c = 0; c < classes.length; c++) {
                 // class
-                classes[c] = beanProperties[c].getValueClass();
+                Class rawClass = beanProperties[c].getValueClass();
+                if(primitiveToObjectMap.containsKey(rawClass)) {
+                    classes[c] = (Class)primitiveToObjectMap.get(rawClass);
+                } else {
+                    classes[c] = rawClass;
+                }
                 // comparator
                 if(Comparable.class.isAssignableFrom(classes[c])) comparators[c] = GlazedLists.comparableComparator();
                 else comparators[c] = null;
@@ -176,3 +196,4 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
         return comparators[column];
     }
 }
+

@@ -35,9 +35,9 @@ public class BeanTableFormatTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        String[] propertyNames = new String[] { "name", "home", "primary", "secondary" };
-        String[] columnNames = new String[] { "Name", "Home", "Primary Color", "Secondary Color" };
-        boolean[] writable = new boolean[] { false, true, false, false };
+        String[] propertyNames = new String[] { "name", "home", "primary", "secondary", "yearWinner", "matchCount"};
+        String[] columnNames = new String[] { "Name", "Home", "Primary Color", "Secondary Color", "Has won this year", "Match count" };
+        boolean[] writable = new boolean[] { false, true, false, false, false, false };
         footballFormat = GlazedLists.tableFormat(propertyNames, columnNames, writable);
         classedFootballFormat = GlazedLists.tableFormat(FootballTeam.class, propertyNames, columnNames, writable);
     }
@@ -53,7 +53,7 @@ public class BeanTableFormatTest extends TestCase {
      * Tests that BeanTableFormat works as a TableFormat.
      */
     public void testTableFormat() {
-        assertEquals(4,                  footballFormat.getColumnCount());
+        assertEquals(6,                  footballFormat.getColumnCount());
         assertEquals("Name",             footballFormat.getColumnName(0));
         assertEquals("Home",             footballFormat.getColumnName(1));
         assertEquals("Primary Color",    footballFormat.getColumnName(2));
@@ -98,20 +98,28 @@ public class BeanTableFormatTest extends TestCase {
         assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(1));
         assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(2));
         assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(3));
+        assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(4));
+        assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(5));
         assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(0));
         assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(1));
         assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(2));
         assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(3));
+        assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(4));
+        assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(5));
 
         AdvancedTableFormat fullAdvancedFootballFormat = (AdvancedTableFormat)classedFootballFormat;
         assertEquals(String.class,       fullAdvancedFootballFormat.getColumnClass(0));
         assertEquals(String.class,       fullAdvancedFootballFormat.getColumnClass(1));
         assertEquals(Color.class,        fullAdvancedFootballFormat.getColumnClass(2));
         assertEquals(Color.class,        fullAdvancedFootballFormat.getColumnClass(3));
+        assertEquals(Boolean.class,      fullAdvancedFootballFormat.getColumnClass(4));
+        assertEquals(Integer.class,      fullAdvancedFootballFormat.getColumnClass(5));
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(0));
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(1));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(2));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(3));
+        assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(4));
+        assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(5));
     }
 }
 
@@ -123,6 +131,8 @@ class FootballTeam {
     private String home;
     private Color primary;
     private Color secondary;
+    private boolean yearWinner;
+    private int matchCount;
     public FootballTeam(String name, String home, Color primary, Color secondary) {
         this.name = name;
         this.home = home;
@@ -140,4 +150,11 @@ class FootballTeam {
 
     public Color getSecondary() { return secondary; }
     public void setSecondary(Color secondary) { this.secondary = secondary; };
+
+    public int getMatchCount() { return matchCount; }
+    public void setMatchCount(int matchCount) { this.matchCount = matchCount; }
+
+    public boolean isYearWinner() { return yearWinner; }
+    public void setYearWinner(boolean yearWinner) { this.yearWinner = yearWinner; }
 }
+
