@@ -6,6 +6,7 @@
  */
 package ca.odell.glazedlists.demo.issuebrowser;
 
+import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 // glazed lists
@@ -21,15 +22,12 @@ import ca.odell.glazedlists.swing.*;
  */
 public class IssuesUserFilter extends AbstractFilterList implements ListSelectionListener {
 
-	/**
-	 * a list of users
-	 */
-	EventList usersEventList;
-	EventList usersSelectedList;
-	/**
-	 * a widget for selecting users
-	 */
-	JList userSelect;
+	/** a list of users */
+	private EventList usersEventList;
+	private EventList usersSelectedList;
+
+	/** a widget for selecting users */
+	private JList userSelect;
 
 	/**
 	 * Create a filter list that filters the specified source list, which
@@ -39,7 +37,7 @@ public class IssuesUserFilter extends AbstractFilterList implements ListSelectio
 		super(source);
 
 		// create a unique users list from the source issues list
-		usersEventList = new UniqueList(new IssuesToUserList(source));
+		usersEventList = new UniqueList(new CollectionList(source, new IssueUserator()));
 
 		// create a JList that contains users
 		EventListModel usersListModel = new EventListModel(usersEventList);
@@ -73,17 +71,19 @@ public class IssuesUserFilter extends AbstractFilterList implements ListSelectio
 	 * on whether or not their user is selected.
 	 */
 	public boolean filterMatches(Object o) {
-		usersSelectedList.getReadWriteLock().readLock().lock();
-		try {
-			if (o == null) return false;
-			if (usersSelectedList.isEmpty()) return true;
+        if (o == null) return false;
+        if (usersSelectedList.isEmpty()) return true;
 
-			Issue issue = (Issue) o;
-			String user = issue.getAssignedTo();
-			return usersSelectedList.contains(user);
-
-		} finally {
-			usersSelectedList.getReadWriteLock().readLock().unlock();
-		}
+        Issue issue = (Issue)o;
+        
+        // see if the two lists have just one intersection
+        List users = issue.getAllUsers();
+        for(Iterator u = users.iterator(); u.hasNext(); ) {
+            String user = (String)u.next();
+            if(usersSelectedList.contains(user)) return true;
+        }
+        
+        // no intersection
+        return false;
 	}
 }

@@ -52,12 +52,33 @@ public class Issue implements TextFilterable, Comparable {
     private List activities = new ArrayList();
     private List duplicates = new ArrayList();
     private List dependsOn = new ArrayList();
+    
+    private List allUsers = null;
 
     /**
      * Creates a new empty issue.
      */
     public Issue() {
         // do nothing
+    }
+    
+    /**
+     * Gets all users related to this issue.
+     */
+    public List getAllUsers() {
+        // init the users list if necessary
+        if(allUsers == null) {
+            allUsers = new ArrayList();
+            if(assignedTo != null) allUsers.add(assignedTo);
+            if(reporter != null) allUsers.add(reporter);
+            if(qaContact != null) allUsers.add(qaContact);
+            for(Iterator d = descriptions.iterator(); d.hasNext(); ) {
+                Description description = (Description)d.next();
+                allUsers.add(description.getWho());
+            }
+        }
+        
+        return allUsers;
     }
 
     /**

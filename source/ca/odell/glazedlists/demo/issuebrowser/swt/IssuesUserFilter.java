@@ -6,13 +6,13 @@
  */
 package ca.odell.glazedlists.demo.issuebrowser.swt;
 
+import java.util.*;
 // glazed lists
-
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // the public demo
 import ca.odell.glazedlists.demo.issuebrowser.Issue;
-import ca.odell.glazedlists.demo.issuebrowser.IssuesToUserList;
+import ca.odell.glazedlists.demo.issuebrowser.IssueUserator;
 
 /**
  * An IssuesUserFilter is a filter list that filters based on the selected
@@ -37,7 +37,7 @@ public class IssuesUserFilter extends AbstractFilterList {
         super(source);
 
         // create a unique users list from the source issues list
-        usersEventList = new UniqueList(new IssuesToUserList(source));
+		usersEventList = new UniqueList(new CollectionList(source, new IssueUserator()));
     }
 
     /**
@@ -56,9 +56,17 @@ public class IssuesUserFilter extends AbstractFilterList {
         if (o == null) return false;
         if (usersSelectedList.isEmpty()) return true;
 
-        Issue issue = (Issue) o;
-        String user = issue.getAssignedTo();
-        return usersSelectedList.contains(user);
+        Issue issue = (Issue)o;
+        
+        // see if the two lists have just one intersection
+        List users = issue.getAllUsers();
+        for(Iterator u = users.iterator(); u.hasNext(); ) {
+            String user = (String)u.next();
+            if(usersSelectedList.contains(user)) return true;
+        }
+
+        // no intersection
+        return false;
     }
 
     /**
