@@ -24,7 +24,7 @@ import java.util.*;
 public class IndexOrderTest extends TestCase {
 
     /** for randomly choosing list indicies */
-    private Random random = new Random(3);
+    private Random random = new Random();
     
     /**
      * Prepare for the test.
