@@ -55,10 +55,10 @@ public class EventComboViewer implements ListEventListener {
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
      * {@link String} values displayed in the {@link Combo} compoment will be
-     * formatted using the provided {@link LabelFormat}.
+     * formatted using the provided {@link ILabelProvider}.
      *
-     * @see LabelFormat
-     * @see GlazedLists#beanLabelProvider(String)
+     * @see ILabelProvider
+     * @see GlazedListsSWT#beanLabelProvider(String)
      */
     public EventComboViewer(EventList source, Combo combo, ILabelProvider labelProvider) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, combo.getDisplay());

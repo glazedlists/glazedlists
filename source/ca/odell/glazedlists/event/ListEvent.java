@@ -96,9 +96,9 @@ public final class ListEvent extends EventObject {
     /**
      * Mark the current location in the sequence of list events so that it may be
      * returned to later. Note that this will cause the components of this
-     * {@link ListEvent} to persist in memory until {@link clearMark()} is called.
-     * Therefore be sure to call {@link clearMark()} whenever you call
-     * {@link mark()}.
+     * {@link ListEvent} to persist in memory until {@link #clearMark()} is called.
+     * Therefore be sure to call {@link #clearMark()} whenever you call
+     * {@link #mark()}.
      */
     public void mark() {
         atomicCountMark = atomicCount;

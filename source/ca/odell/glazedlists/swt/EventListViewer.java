@@ -45,7 +45,7 @@ public class EventListViewer implements ListEventListener, Selectable {
     /**
      * Creates a new List that displays and responds to changes in source.
      * List elements will simply be displayed as the result of calling
-     * toString() on the contents of the source list.
+     * {@link Object#toString()} on the contents of the source list.
      */
     public EventListViewer(EventList source, List list) {
         this(source, list, new LabelProvider());
@@ -53,7 +53,7 @@ public class EventListViewer implements ListEventListener, Selectable {
 
     /**
      * Creates a new List that displays and responds to changes in source.
-     * List elements are formatted using the provided {@link LabelFormat}.
+     * List elements are formatted using the provided {@link ILabelProvider}.
      */
     public EventListViewer(EventList source, List list, ILabelProvider labelProvider) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
