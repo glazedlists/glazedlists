@@ -17,7 +17,7 @@ import java.util.logging.*;
 /**
  * Handles incoming NIO connections.
  */
-public interface NIOServerHandler {
+public interface NIOServer {
     
     /**
      * Handle an accept-ready selection key.

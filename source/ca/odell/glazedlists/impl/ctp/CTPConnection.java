@@ -35,7 +35,7 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class CTPConnection implements NIOHandler {
+public final class CTPConnection implements NIOAttachment {
     // client:
     // AWAITING_CONNECT
     //   --[connect]-->

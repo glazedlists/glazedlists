@@ -24,7 +24,7 @@ import java.util.logging.*;
  * all read and write operations on all connections. A pool of other threads are
  * used to notify the handlers of the data and status of a connection.
  */
-public final class CTPConnectionManager implements NIOServerHandler {
+public final class CTPConnectionManager implements NIOServer {
     
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnectionManager.class.toString());

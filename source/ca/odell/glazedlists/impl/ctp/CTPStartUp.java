@@ -58,7 +58,7 @@ class CTPStartUp implements Runnable {
             // prepare for non-blocking, selectable IO
             serverChannel.configureBlocking(false);
             serverChannel.register(connectionManager.getNIODaemon().getSelector(), SelectionKey.OP_ACCEPT);
-            connectionManager.getNIODaemon().setServerHandler(connectionManager);
+            connectionManager.getNIODaemon().setServer(connectionManager);
     
             // bind success
             logger.info("Connection Manager ready, listening on " + listenAddress);

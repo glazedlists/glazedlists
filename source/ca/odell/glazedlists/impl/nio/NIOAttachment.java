@@ -18,7 +18,7 @@ import java.util.logging.*;
  * Handles all sorts of incoming NIO events. An object implementing this interface
  * must be set as the attachment for all SelectionKeys used by the NIODaemon. 
  */
-public interface NIOHandler {
+public interface NIOAttachment {
     
     /**
      * Handle a connect-ready key.

@@ -18,10 +18,10 @@ import java.util.logging.*;
 /**
  * A task that gracefully shuts down the NIO daemon.
  */
-class NIOShutdown implements Runnable {
+class Shutdown implements Runnable {
     
     /** logging */
-    private static Logger logger = Logger.getLogger(NIOShutdown.class.toString());
+    private static Logger logger = Logger.getLogger(Shutdown.class.toString());
 
     /** the I/O event queue daemon */
     private NIODaemon nioDaemon = null;
@@ -30,7 +30,7 @@ class NIOShutdown implements Runnable {
      * Create a new NIOShutdown that shuts down a server using the specified
      * NIODaemon.
      */
-    public NIOShutdown(NIODaemon nioDaemon) {
+    public Shutdown(NIODaemon nioDaemon) {
         this.nioDaemon = nioDaemon;
     }
     
@@ -50,8 +50,8 @@ class NIOShutdown implements Runnable {
 
             // close an invalid connection
             if(!key.isValid()) {
-                NIOHandler nioHandler = (NIOHandler)key.attachment();
-                nioHandler.close(new IOException("Connection closed"));
+                NIOAttachment attachment = (NIOAttachment)key.attachment();
+                attachment.close(new IOException("Connection closed"));
 
             // close the server socket
             } else if((key.interestOps() & SelectionKey.OP_ACCEPT) != 0) {
@@ -65,8 +65,8 @@ class NIOShutdown implements Runnable {
                 
             // close a connection socket
             } else {
-                NIOHandler nioHandler = (NIOHandler)key.attachment();
-                nioHandler.close(new ServerShutdownException());
+                NIOAttachment attachment = (NIOAttachment)key.attachment();
+                attachment.close(new ServerShutdownException());
             }
         }
     }

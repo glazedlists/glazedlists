@@ -16,12 +16,12 @@ import java.io.*;
 import java.util.logging.*;
 
 /**
- * The SelectorHandler walks through the list of ready keys and handles them.
+ * The SelectAndHandle selects ready keys and handles them.
  */
-class SelectorHandler implements Runnable {
+class SelectAndHandle implements Runnable {
      
     /** logging */
-    private static Logger logger = Logger.getLogger(SelectorHandler.class.toString());
+    private static Logger logger = Logger.getLogger(SelectAndHandle.class.toString());
 
     /** the I/O event queue daemon */
     private NIODaemon nioDaemon = null;
@@ -29,14 +29,22 @@ class SelectorHandler implements Runnable {
     /**
      * Create a new SelectorHandler for the specified NIO Daemon.
      */
-    public SelectorHandler(NIODaemon nioDaemon) {
+    public SelectAndHandle(NIODaemon nioDaemon) {
         this.nioDaemon = nioDaemon;
     }
     
     /**
-     * Handle each selection key.
+     * Select and handle.
      */
     public void run() {
+        select();
+        handle();
+    }
+    
+    /**
+     * Selects keys which are ready to be processed.
+     */
+    void select() {
         // This may block for a long time. Upon returning, the
         // selected set contains keys of the ready channels
         try {
@@ -44,15 +52,12 @@ class SelectorHandler implements Runnable {
         } catch(IOException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
-        
-        // handle what's ready
-        handleSelectedKeys();
     }
     
     /**
      * Handles all keys which are ready to be processed.
      */
-    void handleSelectedKeys() {
+    void handle() {
         // Iterate over the selected keys
         for(Iterator i = nioDaemon.getSelector().selectedKeys().iterator(); i.hasNext(); ) {
             SelectionKey key = (SelectionKey)i.next();
@@ -60,31 +65,31 @@ class SelectorHandler implements Runnable {
             
             // Is a new connection coming in?
             if(key.isValid() && key.isAcceptable()) {
-                nioDaemon.getServerHandler().handleAccept(key, nioDaemon.getSelector());
+                nioDaemon.getServer().handleAccept(key, nioDaemon.getSelector());
             }
             
             // an outgoing connection has been established
             if(key.isValid() && key.isConnectable()) {
-                NIOHandler nioHandler = (NIOHandler)key.attachment();
-                nioHandler.handleConnect();
+                NIOAttachment attachment = (NIOAttachment)key.attachment();
+                attachment.handleConnect();
             }
 
             // incoming data can be read
             if(key.isValid() && key.isReadable()) {
-                NIOHandler nioHandler = (NIOHandler)key.attachment();
-                nioHandler.handleRead();
+                NIOAttachment attachment = (NIOAttachment)key.attachment();
+                attachment.handleRead();
             }
             
             // outgoing data can be written
             if(key.isValid() && key.isWritable()) {
-                NIOHandler nioHandler = (NIOHandler)key.attachment();
-                nioHandler.handleWrite();
+                NIOAttachment attachment = (NIOAttachment)key.attachment();
+                attachment.handleWrite();
             }
 
             // clean up broken connections
             if(!key.isValid()) {
-                NIOHandler nioHandler = (NIOHandler)key.attachment();
-                nioHandler.close(new IOException("Connection closed"));
+                NIOAttachment attachment = (NIOAttachment)key.attachment();
+                attachment.close(new IOException("Connection closed"));
             }
         }
     }

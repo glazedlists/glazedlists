@@ -35,7 +35,7 @@ public final class NIODaemon implements Runnable {
     private boolean keepRunning = false;
     
     /** whom to handle incoming connections */
-    private NIOServerHandler serverHandler = null;
+    private NIOServer server = null;
     
     /**
      * Starts the NIODaemon.
@@ -61,7 +61,7 @@ public final class NIODaemon implements Runnable {
         List toExecute = new ArrayList();
             
         // always run the selector handler
-        SelectorHandler selectorHandler = new SelectorHandler(this);
+        SelectAndHandle selectAndHandle = new SelectAndHandle(this);
 
         // continuously select a socket and action on it
         while(keepRunning) {
@@ -69,7 +69,7 @@ public final class NIODaemon implements Runnable {
             // get the list of runnables to run
             synchronized(this) {
                 toExecute.addAll(pendingRunnables);
-                toExecute.add(selectorHandler);
+                toExecute.add(selectAndHandle);
                 pendingRunnables.clear();
             }
             
@@ -168,15 +168,15 @@ public final class NIODaemon implements Runnable {
      */
     public void stop() {
         // shutdown the server
-        invokeAndWait(new NIOShutdown(this));
+        invokeAndWait(new Shutdown(this));
         
         // stop the server
-        invokeAndWait(new NIOStop());
+        invokeAndWait(new Stop());
     }
     /**
      * Stops the server after it has been shut down.
      */
-    private class NIOStop implements Runnable {
+    private class Stop implements Runnable {
         public void run() {
             // warn if unsatisfied keys remain
             if(selector.keys().size() != 0) {
@@ -201,10 +201,10 @@ public final class NIODaemon implements Runnable {
      * Configure this NIODaemon to use the specified server handler for acceptable
      * selection keys.
      */
-    public void setServerHandler(NIOServerHandler serverHandler) {
-        this.serverHandler = serverHandler;
+    public void setServer(NIOServer server) {
+        this.server = server;
     }
-    public NIOServerHandler getServerHandler() {
-        return serverHandler;
+    public NIOServer getServer() {
+        return server;
     }
 }
