@@ -218,7 +218,7 @@ public class IssuesBrowser {
         // Create the slider widget to control priority filtering
         Slider prioritySlider = new Slider(priorityPanel, SWT.HORIZONTAL);
         prioritySlider.setValues(0, 0, 100, 10, 1, 25);
-        ThresholdViewerFactory.createLower(priorityList, prioritySlider);
+        GlazedListsSWT.lowerThresholdViewer(priorityList, prioritySlider);
         GridData prioritySliderLayout = new GridData();
         prioritySliderLayout.horizontalAlignment = GridData.FILL;
         prioritySliderLayout.verticalAlignment = GridData.BEGINNING;

@@ -50,7 +50,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * format.
      */
     public EventTableModel(EventList source, TableFormat tableFormat) {
-        swingSource = GlazedLists.swingThreadProxyList(source);
+        swingSource = GlazedListsSwing.swingThreadProxyList(source);
         this.tableFormat = tableFormat;
 
         // prepare listeners

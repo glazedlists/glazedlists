@@ -200,6 +200,25 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
     }
 
     /**
+     * Releases the resources consumed by this {@link TableComparatorChooser} so that it
+     * may eventually be garbage collected.
+     *
+     * <p>A {@link TableComparatorChooser} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link TableComparatorChooser}
+     * to be garbage collected before its source {@link EventList}. This is 
+     * necessary for situations where an {@link TableComparatorChooser} is short-lived but
+     * its source {@link EventList} is long-lived.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link TableComparatorChooser} after it has been disposed.
+     */
+    public void dispose() {
+        table.getTableHeader().removeMouseListener(listener);
+        table.getModel().removeTableModelListener(listener);
+    }
+    
+    /**
      * The SortArrowHeaderRenderer simply delegates most of the rendering
      * to the previous renderer, and adds an icon to indicate sorting
      * direction. This eliminates the hassle of setting the border and

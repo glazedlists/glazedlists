@@ -141,7 +141,7 @@ public class IssuesBrowser extends Applet {
 		JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
 		// priority slider
-		BoundedRangeModel priorityRangeModel = ThresholdRangeModelFactory.createLower(priorityList);
+		BoundedRangeModel priorityRangeModel = GlazedListsSwing.createLower(priorityList);
 		priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
 		JSlider prioritySlider = new JSlider(priorityRangeModel);
 		Hashtable prioritySliderLabels = new Hashtable();

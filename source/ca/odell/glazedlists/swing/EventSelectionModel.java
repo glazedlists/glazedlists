@@ -104,7 +104,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Creates a new selection model that also presents a list of the selection.
      */
     public EventSelectionModel(EventList source) {
-        swingSource = GlazedLists.swingThreadProxyList(source);
+        swingSource = GlazedListsSwing.swingThreadProxyList(source);
         
         // build the initial state
         flagList.addWhite(0, swingSource.size());

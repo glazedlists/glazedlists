@@ -59,7 +59,7 @@ public class EventListModel implements ListEventListener, ListModel {
      * Creates a new widget that renders the specified list.
      */
     public EventListModel(EventList source) {
-        swingSource = GlazedLists.swingThreadProxyList(source);
+        swingSource = GlazedListsSwing.swingThreadProxyList(source);
 
         // prepare listeners
         swingSource.addListEventListener(this);

@@ -59,7 +59,7 @@ public class EventComboViewer implements ListEventListener {
      * @see GlazedLists#beanLabelFormat(String)
      */
     public EventComboViewer(EventList source, Combo combo, LabelFormat labelFormat) {
-        swtSource = GlazedLists.swtThreadProxyList(source, combo.getDisplay());
+        swtSource = GlazedListsSWT.swtThreadProxyList(source, combo.getDisplay());
         this.combo = combo;
         this.labelFormat = labelFormat;
 

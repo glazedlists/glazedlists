@@ -13,7 +13,6 @@ import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.gui.*;
-import ca.odell.glazedlists.impl.swing.*;
 import ca.odell.glazedlists.impl.swt.*;
 // implemented interfaces
 import ca.odell.glazedlists.io.ByteCoder;
@@ -23,8 +22,6 @@ import ca.odell.glazedlists.gui.LabelFormat;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
-// for SWT thread proxy
-import org.eclipse.swt.widgets.Display;
 
 
 /**
@@ -135,6 +132,29 @@ public final class GlazedLists {
     }
 
 
+    // LabelFormats // // // // // // // // // // // // // // // // // // // // //
+
+    /** Provide Singleton access for all LabelFormats with no internal state */
+    private static LabelFormat toStringLabelFormat = null;
+
+    /**
+     * Creates a {@link LabelFormat} that returns labels for Objects by simply
+     * returning the result of their toString() method.
+     */
+    public static LabelFormat toStringLabelFormat() {
+        if(toStringLabelFormat == null) toStringLabelFormat = new ToStringLabelFormat();
+        return toStringLabelFormat;
+    }
+
+    /**
+     * Creates a {@link LabelFormat} that returns labels for Objects via
+     * Relection.  The label returned will be the String value of specified
+     * JavaBean property.
+     */
+    public static LabelFormat beanLabelFormat(String property) {
+        return new BeanLabelFormat(property);
+    }
+
     // TextFilterators // // // // // // // // // // // // // // // // // // //
 
     /**
@@ -182,28 +202,6 @@ public final class GlazedLists {
         return beanXMLByteCoder;
     }
 
-    // LabelFormats // // // // // // // // // // // // // // // // // // // // //
-
-    /** Provide Singleton access for all LabelFormats with no internal state */
-    private static LabelFormat toStringLabelFormat = null;
-
-    /**
-     * Creates a {@link LabelFormat} that returns labels for Objects by simply
-     * returning the result of their toString() method.
-     */
-    public static LabelFormat toStringLabelFormat() {
-        if(toStringLabelFormat == null) toStringLabelFormat = new ToStringLabelFormat();
-        return toStringLabelFormat;
-    }
-
-    /**
-     * Creates a {@link LabelFormat} that returns labels for Objects via
-     * Relection.  The label returned will be the String value of specified
-     * JavaBean property.
-     */
-    public static LabelFormat beanLabelFormat(String property) {
-        return new BeanLabelFormat(property);
-    }
 
     // EventLists // // // // // // // // // // // // // // // // // // // // //
 
@@ -258,21 +256,5 @@ public final class GlazedLists {
      */
     public static TransformedList threadSafeList(EventList source) {
         return new ThreadSafeList(source);
-    }
-    
-    /**
-     * Wraps the source in an {@link EventList} that fires all of its update events
-     * from the Swing event dispatch thread.
-     */
-    public static TransformedList swingThreadProxyList(EventList source) {
-        return new SwingThreadProxyEventList(source);
-    }
-
-    /**
-     * Wraps the source in an {@link EventList} that fires all of its update events
-     * from the SWT user interface thread.
-     */
-    public static TransformedList swtThreadProxyList(EventList source, Display display) {
-        return new SWTThreadProxyEventList(source, display);
     }
 }

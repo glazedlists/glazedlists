@@ -54,7 +54,7 @@ public class EventListViewer implements ListEventListener, Selectable {
      * List elements are formatted using the provided {@link LabelFormat}.
      */
     public EventListViewer(EventList source, List list, LabelFormat LabelFormat) {
-        swtSource = GlazedLists.swtThreadProxyList(source, list.getDisplay());
+        swtSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
         this.list = list;
         this.LabelFormat = LabelFormat;
 

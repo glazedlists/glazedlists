@@ -72,7 +72,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * {@link Table} is formatted with the specified {@link TableFormat}.
      */
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
-        swtSource = GlazedLists.swtThreadProxyList(source, table.getDisplay());
+        swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
         disposeSource = swtSource;
         
         // insert a checked source if supported by the table

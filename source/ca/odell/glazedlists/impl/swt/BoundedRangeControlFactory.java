@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swt;
+package ca.odell.glazedlists.impl.swt;
 
 // to proxy adding of SelectionListeners
 import org.eclipse.swt.events.SelectionListener;
@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-class BoundedRangeControlFactory {
+public class BoundedRangeControlFactory {
 
     /**
      * Don't let this Factory be created.
