@@ -88,7 +88,7 @@ public class ProgrammingLanguageBrowser {
         frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
         frame.getContentPane().add(listTable.getTableScrollPane(), new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
         // begin hack to view selection also
-        new java.util.Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+        /*new java.util.Timer().scheduleAtFixedRate(new java.util.TimerTask() {
                 int count = 1995;
                 public void run() {
                     count++;
@@ -96,7 +96,7 @@ public class ProgrammingLanguageBrowser {
                 }
             }, 5000, 1000);
         ListTable selectionTable = new ListTable(listTable.getSelectionList(), new ProgrammingLanguageTableCell());
-        frame.getContentPane().add(selectionTable.getTableScrollPane(), new GridBagConstraints(0, 4, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+        frame.getContentPane().add(selectionTable.getTableScrollPane(), new GridBagConstraints(0, 4, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));*/
         // end hack
         frame.setSize(640, 480);
         frame.show();
