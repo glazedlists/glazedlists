@@ -13,6 +13,8 @@ import com.odellengineeringltd.glazedlists.util.*;
 import java.util.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import com.odellengineeringltd.glazedlists.util.concurrent.*;
 
 
 /**
@@ -57,9 +59,19 @@ public final class SortedList extends WritableMutationList implements ListChange
      */
     public SortedList(EventList source, Comparator comparator) {
         super(source);
-        // trees are instansiated when a comparator is set
-        setComparator(comparator);
-        source.addListChangeListener(this);
+        
+        // use an Internal Lock to avoid locking the source list during a sort
+        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
+
+        // load the initial data
+        getReadWriteLock().readLock().lock();
+        try {
+            // trees are instansiated when a comparator is set
+            setComparator(comparator);
+            source.addListChangeListener(this);
+        } finally {
+            getReadWriteLock().readLock().unlock();
+        }
     }
 
     
@@ -213,7 +225,7 @@ public final class SortedList extends WritableMutationList implements ListChange
      *      leave the list in the same order as the source list.
      */
     public void setComparator(Comparator comparator) {
-        getReadWriteLock().writeLock().lock();
+        ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
 
             //System.out.println("  > Sorting a list of size: " + source.size());
@@ -246,7 +258,7 @@ public final class SortedList extends WritableMutationList implements ListChange
             //System.out.println("  < Sorted  a list of size: " + source.size());
 
         } finally {
-            getReadWriteLock().writeLock().unlock();
+            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
     }
 

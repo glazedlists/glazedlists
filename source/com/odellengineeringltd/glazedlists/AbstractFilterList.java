@@ -13,6 +13,8 @@ import com.odellengineeringltd.glazedlists.util.*;
 import java.util.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import com.odellengineeringltd.glazedlists.util.concurrent.*;
 
 
 /**
@@ -47,9 +49,19 @@ public abstract class AbstractFilterList extends WritableMutationList implements
     protected AbstractFilterList(EventList source) {
         super(source);
         
-        prepareFlagList();
+        // use an Internal Lock to avoid locking the source list during a sort
+        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
         
-        source.addListChangeListener(this);
+        // load the initial data
+        getReadWriteLock().readLock().lock();
+        try {
+            // build a list of what is filtered and what's not
+            prepareFlagList();
+            // listen for changes to the source list
+            source.addListChangeListener(this);
+        } finally {
+            getReadWriteLock().readLock().unlock();
+        }
     }
     
     
@@ -153,7 +165,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
      *    <li>It coudl stay off because it never matches
      */
     protected void handleFilterChanged() {
-        getReadWriteLock().writeLock().lock();
+        ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
             // all of these changes to this list happen "atomically"
             updates.beginAtomicChange();
@@ -183,7 +195,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
             // commit the changes and notify listeners
             updates.commitAtomicChange();
         } finally {
-            getReadWriteLock().writeLock().unlock();
+            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
     }
     

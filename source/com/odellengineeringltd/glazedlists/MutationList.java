@@ -39,7 +39,7 @@ public abstract class MutationList extends AbstractList implements EventList, Li
     protected ListChangeSequence updates = new ListChangeSequence();
     
     /** the read/write lock provides mutual exclusion to access */
-    private ReadWriteLock readWriteLock;
+    protected ReadWriteLock readWriteLock;
 
     /**
      * Creates a new Mutation list that uses the specified source list.
