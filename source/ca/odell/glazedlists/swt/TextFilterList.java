@@ -48,7 +48,7 @@ public class TextFilterList extends DefaultTextFilterList {
      * the TextFilterable interface.
      */
     public TextFilterList(EventList source) {
-        this(source, (Text)null, null);
+        this(source, (Text)null, (TextFilterator)null);
     }
 
     /**
@@ -57,7 +57,7 @@ public class TextFilterList extends DefaultTextFilterList {
      * the TextFilterable interface.
      */
     public TextFilterList(EventList source, Text filterEdit) {
-        this(source, filterEdit, null);
+        this(source, filterEdit, (TextFilterator)null);
     }
 
     /**
@@ -93,7 +93,7 @@ public class TextFilterList extends DefaultTextFilterList {
      *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
      * @param filterEdit a text field for typing in the filter text.
      */
-    public TextFilterList(EventList source, String[] propertyNames, Text filterEdit) {
+    public TextFilterList(EventList source, Text filterEdit, String[] propertyNames) {
         this(source, filterEdit, new BeanTextFilterator(propertyNames));
     }
 
@@ -185,10 +185,10 @@ public class TextFilterList extends DefaultTextFilterList {
      * SelectionListener can be used to update the filter in response.
      */
     private class FilterSelectionListener implements SelectionListener {
-        public void widgetDefaultSelected(SelectionEvent e) {
+        public void widgetSelected(SelectionEvent e) {
             reFilter();
         }
-        public void widgetSelected(SelectionEvent e) {
+        public void widgetDefaultSelected(SelectionEvent e) {
             reFilter();
         }
     }
