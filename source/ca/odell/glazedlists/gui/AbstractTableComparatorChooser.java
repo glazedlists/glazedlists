@@ -294,13 +294,13 @@ public abstract class AbstractTableComparatorChooser {
     public Comparator createComparatorForElement(Comparator comparatorForColumn, int column) {
         return new TableColumnComparator(tableFormat, column, comparatorForColumn);
     }
-
+    
     /**
      * A ColumnClickTracker monitors the clicks on a specified column
      * and provides access to the most appropriate comparator for that
      * column.
      */
-    protected final class ColumnClickTracker {
+    private final class ColumnClickTracker {
 
         /** the column for this comparator */
         private int column = 0;
@@ -314,8 +314,16 @@ public abstract class AbstractTableComparatorChooser {
          */
         public ColumnClickTracker(TableFormat tableFormat, int column) {
             this.column = column;
-            // add a default comparator
-            comparators.add(new TableColumnComparator(tableFormat, column));
+
+            // add the preferred comparator for AdvancedTableFormat
+            if(tableFormat instanceof AdvancedTableFormat) {
+                AdvancedTableFormat advancedTableFormat = (AdvancedTableFormat)tableFormat;
+                Comparator columnComparator = advancedTableFormat.getColumnComparator(column);
+                if(columnComparator != null) comparators.add(new TableColumnComparator(tableFormat, column, columnComparator));
+            // otherwise just add the default comparator
+            } else {
+                comparators.add(new TableColumnComparator(tableFormat, column));
+            }
         }
 
         /**

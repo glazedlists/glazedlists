@@ -14,8 +14,9 @@ import ca.odell.glazedlists.event.*;
  * Specifies how to edit the elements of table.
  *
  * <p>This class can be used as an alternative to the simple {@link TableFormat}
- * class to provide editable cells. The {@link EventTableModel} detects if a
- * class implements WritableTableFormat for modifying the table. If a table
+ * class to provide editable cells. The 
+ * {@link ca.odell.glazedlists.swing.EventTableModel EventTableModel} detects if a
+ * class implements {@link WritableTableFormat} for modifying the table. If a table
  * is not editable at all, it is sufficient to implement {@link TableFormat}
  * only.
  *
