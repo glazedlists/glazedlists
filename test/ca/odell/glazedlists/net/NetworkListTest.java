@@ -30,7 +30,7 @@ public class NetworkListTest extends TestCase {
     private ListPeer peer;
     
     /** the port to listen on */
-    private static int serverPort = 5000;
+    private static int serverPort = 5100;
     
     /**
      * Prepare for the test.

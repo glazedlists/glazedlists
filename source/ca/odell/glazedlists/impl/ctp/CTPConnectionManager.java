@@ -79,6 +79,7 @@ public final class CTPConnectionManager implements Runnable {
         // open a channel and bind
         ServerSocketChannel serverChannel = ServerSocketChannel.open();
         ServerSocket serverSocket = serverChannel.socket();
+        serverSocket.setReuseAddress(false); // fix for Apple JVM bug 3922515
         InetSocketAddress listenAddress = new InetSocketAddress(listenPort);
         serverSocket.bind(listenAddress);
         
