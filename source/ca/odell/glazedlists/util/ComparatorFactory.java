@@ -25,12 +25,19 @@ public final class ComparatorFactory {
     private static Comparator reversedComparable = null;
 
     /**
+     * A dummy constructor to prevent instantiation of this class
+     */
+    private ComparatorFactory() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Creates a {@link Comparator} that uses Reflection to compare two instances
      * of the specified {@link Class} by the given JavaBean property.  The JavaBean
      * property must implement {@link Comparable}.
      */
     public static Comparator beanProperty(Class className, String property) {
-        return new BeanPropertyComparator(className, property, comparable());
+        return beanProperty(className, property, comparable());
     }
 
     /**
@@ -60,8 +67,9 @@ public final class ComparatorFactory {
     }
 
     /**
-     * Creates a chain of {@link Comparator}s that apply the specified
-     * {@link Comparator}s in the sequence specified.
+     * Creates a chain of {@link Comparator}s that applies the provided
+     * {@link Comparator}s in the sequence specified until differences or
+     * absoulute equality.is determined.
      */
     public static Comparator chain(List comparators) {
         return new ComparatorChain(comparators);
