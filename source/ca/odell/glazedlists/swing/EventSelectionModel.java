@@ -355,6 +355,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                     int changeFinish = maxSelectionIndexBefore;
                     if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
                     if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
+                    valueIsAdjusting = false;
                     fireSelectionChanged(changeStart, changeFinish);
                 }
             } finally {
