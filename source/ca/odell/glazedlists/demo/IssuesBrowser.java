@@ -8,6 +8,7 @@ package ca.odell.glazedlists.demo;
 
 import java.util.*;
 import javax.swing.*;
+import javax.swing.event.*;
 import java.applet.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -24,7 +25,13 @@ import ca.odell.glazedlists.swing.*;
 public class IssuesBrowser extends Applet {
     
     /** an event list to host the issues */
-    IssuesList issuesEventList = new IssuesList();
+    private IssuesList issuesEventList = new IssuesList();
+    
+    /** the currently selected issues */
+    private EventSelectionModel issuesSelectionModel;
+    
+    /** an event list to host the descriptions */
+    private EventList descriptions = new BasicEventList();
     
     /**
      * Load the issues browser as an applet.
@@ -61,7 +68,7 @@ public class IssuesBrowser extends Applet {
         // create a frame with that panel
         JFrame frame = new JFrame("Issues");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(540, 380);
+        frame.setSize(640, 480);
         frame.getContentPane().setLayout(new GridBagLayout());
         frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         frame.show();
@@ -77,12 +84,13 @@ public class IssuesBrowser extends Applet {
         IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
         SortedList issuesSortedList = new SortedList(issuesUserFiltered);
         TextFilterList issuesTextFiltered = new TextFilterList(issuesSortedList);
-        //String[] fields = new String[] { "id", "issueType", "priority", "status", "resolution", "shortDescription" };
-        //String[] labels = new String[] { "ID", "Issue Type", "Priority", "State", "Result", "Summary" };
-        //EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, fields, labels, false);
+
+        // issues table
         EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
-        issuesJTable.setSelectionModel(new EventSelectionModel(issuesTextFiltered).getListSelectionModel());
+        issuesSelectionModel = new EventSelectionModel(issuesTextFiltered);
+        issuesSelectionModel.getListSelectionModel().addListSelectionListener(new IssuesSelectionListener());
+        issuesJTable.setSelectionModel(issuesSelectionModel.getListSelectionModel());
         issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(10);
@@ -91,13 +99,39 @@ public class IssuesBrowser extends Applet {
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
         TableComparatorChooser tableSorter = new TableComparatorChooser(issuesJTable, issuesSortedList, true);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable);
+        
+        // users table
         JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect());
-        panel.add(usersListScrollPane, new GridBagConstraints(0, 0, 2, 1, 1.0, 0.3, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 0, 5), 0, 0));
-        panel.add(issuesTableScrollPane, new GridBagConstraints(0, 1, 2, 1, 1.0, 0.7, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-        panel.add(new JLabel("Filter: "), new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
-        panel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
+        
+        // descriptions
+        EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
+        JTable descriptionsTable = new JTable(descriptionsTableModel);
+        descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
+        JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable);
+
+        panel.add(usersListScrollPane, new GridBagConstraints(0, 0, 1, 2, 0.3, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+        panel.add(new JLabel("Filter: "), new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0));
+        panel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(2, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0));
+        panel.add(issuesTableScrollPane, new GridBagConstraints(1, 1, 2, 1, 0.7, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
+        panel.add(descriptionsTableScrollPane, new GridBagConstraints(0, 2, 3, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
+
         return panel;
     }
+    
+    /**
+     * Listens for changes in the selection on the issues table.
+     */
+    class IssuesSelectionListener implements ListSelectionListener {
+        public void valueChanged(ListSelectionEvent e) {
+            descriptions.clear();
+            if(issuesSelectionModel.getEventList().size() > 0) {
+                Issue selectedIssue = (Issue)issuesSelectionModel.getEventList().get(0);
+                descriptions.addAll(selectedIssue.getDescriptions());
+            }
+        }
+    }
+    
+    
     
     /**
      * When started via a main method, this creates a standalone issues browser.
