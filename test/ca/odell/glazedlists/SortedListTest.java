@@ -543,6 +543,14 @@ public class SortedListTest extends TestCase {
         sortedList.set(2, p);
         assertEquals(unsortedList, sortedList);
     }
+    
+    public static void main(String[] args) {
+        
+        SortedListTest test = new SortedListTest();
+        test.setUp();
+        test.testHalfNullComparator();
+        test.tearDown();
+    }
 
     /**
      * Compares two objects to be equal.

@@ -197,8 +197,9 @@ public final class SortedList extends TransformedList {
         }
 
         // fire all the update events
-        while(indicesPendingDeletion.hasPair()) {
-            IndexNodePair indexNodePair = indicesPendingDeletion.removePair();
+        for(Iterator i = indicesPendingDeletion.iterator(); i.hasNext(); ) {
+            IndexNodePair indexNodePair = (IndexNodePair)i.next();
+            
             int insertedIndex = insertByUnsortedNode(indexNodePair.node);
             int deletedIndex = indexNodePair.index;
             // adjust the out of order insert with respect to the delete list
@@ -472,9 +473,11 @@ public final class SortedList extends TransformedList {
         public int adjustDeleteAndInsert(int deletedIndex, int insertedIndex) {
             for(Iterator i = indexNodePairs.iterator(); i.hasNext(); ) {
                 IndexNodePair indexNodePair = (IndexNodePair)i.next();
+                // adjust due to the delete
                 if(deletedIndex < indexNodePair.index) {
                     indexNodePair.index--;
                 }
+                // adjust due to the insert
                 if(insertedIndex <= indexNodePair.index) {
                     indexNodePair.index++;
                 } else {
@@ -485,19 +488,30 @@ public final class SortedList extends TransformedList {
         }
 
         /**
-         * Gets the next index/node pair to insert.
+         * The Iterator for IndicesPendingDeletion automatically removes elements
+         * as they are requested.
          */
-        public IndexNodePair removePair() {
-            IndexNodePair first = (IndexNodePair)indexNodePairs.first();
-            indexNodePairs.remove(first);
-            return first;
+        class IndicesPendingDeletionIterator implements Iterator {
+            private Iterator delegate = indexNodePairs.iterator();
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+            public Object next() {
+                Object result = delegate.next();
+                delegate.remove();
+                return result;
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
         }
-
+            
         /**
-         * Tests if there is a pair to remove.
+         * Gets the Iterator for this set of indices. When an element is accessed
+         * it is immediately removed which is the necessary behaviour.
          */
-        public boolean hasPair() {
-            return !(indexNodePairs.isEmpty());
+        public Iterator iterator() {
+            return new IndicesPendingDeletionIterator();
         }
 
         /**
