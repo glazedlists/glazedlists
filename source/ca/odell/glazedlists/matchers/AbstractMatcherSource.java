@@ -54,9 +54,9 @@ public abstract class AbstractMatcherSource implements MatcherSource {
 	}
 
 	/**
-	 * Used by extending classes to set the matchersource that is currently in use.
+	 * Used internally to set the matchersource that is currently in use.
 	 */
-	public void setCurrentMatcher(Matcher matcher) {
+	private void setCurrentMatcher(Matcher matcher) {
 		if (matcher == null) throw new IllegalArgumentException("Matcher cannot be null");
 
 		this.current_matcher = matcher;
@@ -87,6 +87,8 @@ public abstract class AbstractMatcherSource implements MatcherSource {
      * visible.
      */
     protected final void fireCleared() {
+		setCurrentMatcher(TrueMatcher.getInstance());
+
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
                 ((MatcherSourceListener) listener_list.get(i)).cleared(this);
@@ -98,6 +100,8 @@ public abstract class AbstractMatcherSource implements MatcherSource {
      * Indicates that the filter has changed in an inditerminate way.
      */
     protected final void fireChanged(Matcher new_matcher) {
+		setCurrentMatcher(new_matcher);
+
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
                 ((MatcherSourceListener) listener_list.get(i)).changed(new_matcher,this);
@@ -110,6 +114,8 @@ public abstract class AbstractMatcherSource implements MatcherSource {
      * called if all currently filtered items will remain filtered.
      */
     protected final void fireConstrained(Matcher new_matcher) {
+		setCurrentMatcher(new_matcher);
+
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
                 ((MatcherSourceListener) listener_list.get(i)).constrained(new_matcher, this);
@@ -122,6 +128,8 @@ public abstract class AbstractMatcherSource implements MatcherSource {
      * called if all currently unfiltered items will remain unfiltered.
      */
     protected final void fireRelaxed(Matcher new_matcher) {
+		setCurrentMatcher(new_matcher);
+
         synchronized(listener_list) {
             for (int i = 0; i < listener_list.size(); i++) {
                 ((MatcherSourceListener) listener_list.get(i)).relaxed(new_matcher, this);

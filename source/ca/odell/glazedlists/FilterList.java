@@ -7,9 +7,12 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.MatcherSourceListener;
+import ca.odell.glazedlists.util.concurrent.InternalReadWriteLock;
+import ca.odell.glazedlists.util.concurrent.J2SE12ReadWriteLock;
 
 
 /**
+ * // TODO: update comments
  * An {@link EventList} that shows a subset of the elements of a source {@link EventList}.
  * This subset is composed of all elements of the source {@link EventList} that match the
  * filter see on a user-defined {@link ca.odell.glazedlists.Matcher}. <tt>Matcher<tt>s can
@@ -32,7 +35,9 @@ import ca.odell.glazedlists.event.MatcherSourceListener;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
 public class FilterList extends AbstractFilterList implements MatcherSourceListener {
-    private volatile Matcher matcher;
+    private MatcherSource matcher_source;
+
+	private volatile Matcher active_matcher = null;
 
 
     /**
@@ -40,33 +45,38 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
      *
      * @param source The source list that provides the raw data.
      */
-    public FilterList(EventList source, Matcher matcher) {
+    public FilterList(EventList source, MatcherSource matcher_source) {
         super(source);
 
-        setMatcher(matcher);
+		readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
+			new J2SE12ReadWriteLock());
+
+        setMatcherSource(matcher_source);
     }
 
 
     /**
-     * Update the matcher used by the list.
+     * Update the {@link MatcherSource} used by the list.
      */
-    public synchronized void setMatcher(Matcher matcher) {
-//        Matcher old_matcher = this.matcher;
-//        if (old_matcher != null) old_matcher.removeMatcherListener(this);
-//
-//        this.matcher = matcher;
-//        if (matcher != null) {
-//            matcher.addMatcherListener(this);
-//            handleFilterChanged();
-//        } else
-//            handleFilterCleared();
+    public synchronized void setMatcherSource(MatcherSource matcher_source) {
+        MatcherSource old_matcher_source = this.matcher_source;
+        if (old_matcher_source != null) old_matcher_source.removeMatcherSourceListener(this);
+
+        this.matcher_source = matcher_source;
+        if (matcher_source != null) {
+            matcher_source.addMatcherSourceListener(this);
+			this.active_matcher = matcher_source.getCurrentMatcher();
+            handleFilterChanged();
+        } else {
+            handleFilterCleared();
+		}
     }
 
     /**
-     * @see #setMatcher
+     * @see #setMatcherSource(MatcherSource)
      */
-    public Matcher getMatcher() {
-        return matcher;
+    public MatcherSource getMatcherSource() {
+        return matcher_source;
     }
 
 
@@ -74,7 +84,7 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
      * {@inheritDoc}
      */
     public final boolean filterMatches(Object element) {
-        Matcher matcher = this.matcher;
+        Matcher matcher = this.active_matcher;
         return matcher == null ? true : matcher.matches(element);
     }
 
@@ -83,29 +93,64 @@ public class FilterList extends AbstractFilterList implements MatcherSourceListe
      * {@inheritDoc}
      */
     public final void cleared(MatcherSource source) {
-        handleFilterCleared();
+		readWriteLock.writeLock().lock();
+
+		try {
+			// TODO: remove debugging
+			System.out.println("Cleared");
+			this.active_matcher = null;
+			handleFilterCleared();
+		}
+		finally {
+			readWriteLock.writeLock().unlock();
+		}
     }
 
     /**
      * {@inheritDoc}
      */
     public final void changed(Matcher matcher, MatcherSource source) {
-        handleFilterChanged();
+		readWriteLock.writeLock().lock();
+
+		try {
+			System.out.println("Changed: " + matcher);
+			this.active_matcher = matcher;
+			handleFilterChanged();
+		}
+		finally {
+			readWriteLock.writeLock().unlock();
+		}
     }
 
     /**
      * {@inheritDoc}
      */
     public final void constrained(Matcher matcher, MatcherSource source) {
-        handleFilterConstrained();
+		readWriteLock.writeLock().lock();
+
+		try {
+			System.out.println("Constrained: " + matcher);
+			this.active_matcher = matcher;
+			handleFilterConstrained();
+		}
+		finally {
+			readWriteLock.writeLock().unlock();
+		}
     }
 
     /**
      * {@inheritDoc}
      */
     public final void relaxed(Matcher matcher, MatcherSource source) {
-        handleFilterRelaxed();
+		readWriteLock.writeLock().lock();
+
+		try {
+			System.out.println("Relaxed: " + matcher);
+			this.active_matcher = matcher;
+			handleFilterRelaxed();
+		}
+		finally {
+			readWriteLock.writeLock().unlock();
+		}
     }
-
-
 }
