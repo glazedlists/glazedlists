@@ -128,7 +128,7 @@ public final class GlazedLists {
      * {@link WritableTableFormat} and may be used for an editable table.
      */
     public static TableFormat tableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        return new BeanWritableTableFormat(propertyNames, columnLabels, editable);
+        return new BeanTableFormat(propertyNames, columnLabels, editable);
     }
 
 
