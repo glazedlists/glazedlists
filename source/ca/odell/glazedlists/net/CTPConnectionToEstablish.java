@@ -24,6 +24,9 @@ import java.util.logging.*;
  */
 class CTPConnectionToEstablish implements CTPRunnable {
      
+    /** logging */
+    private static Logger logger = Logger.getLogger(CTPConnectionToEstablish.class.toString());
+
     private String host;
     private int port;
     private CTPHandler handler;

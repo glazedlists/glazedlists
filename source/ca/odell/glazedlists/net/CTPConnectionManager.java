@@ -113,8 +113,8 @@ public final class CTPConnectionManager implements Runnable {
 
             // get the list of runnables to run
             synchronized(this) {
-                toExecute.add(selectorHandler);
                 toExecute.addAll(pendingRunnables);
+                toExecute.add(selectorHandler);
                 pendingRunnables.clear();
             }
             
@@ -220,7 +220,7 @@ public final class CTPConnectionManager implements Runnable {
          * @param data A non-empty array of bytes.
          */
         public void receiveChunk(CTPConnection source, ByteBuffer data) {
-            logger.info("Received data " + data);
+            System.out.println("Received data " + data);
         }
     
         /**
@@ -232,14 +232,14 @@ public final class CTPConnectionManager implements Runnable {
          *      a failure. This may be null.
          */
         public void connectionClosed(CTPConnection source, Exception reason) {
-            logger.info("connectionClosed( " + source + " , " + reason + " )");
+            System.out.println("connectionClosed( " + source + " , " + reason + " )");
         }
 
         /**
          * Handles the connection being ready for chunks to be sent.
          */
         public void connectionReady(CTPConnection source) {
-            logger.info("connectionReady( " + source + " )");
+            System.out.println("connectionReady( " + source + " )");
         }
     }
 }

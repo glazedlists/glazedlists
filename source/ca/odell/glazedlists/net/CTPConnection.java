@@ -158,21 +158,27 @@ public final class CTPConnection {
      * Handles the incoming bytes.
      */
     synchronized void handleRead() {
-        // read a request
-        if(state == STATE_SERVER_AWAITING_REQUEST) {
-            handleRequest();
-            
-        // read a response
-        } else if(state == STATE_CLIENT_AWAITING_RESPONSE) {
-            handleResponse();
-            
-        // read a chunk
-        } else if(state == STATE_READY) {
-            handleChunk();
-            
-        // we don't know what to read
-        } else {
-            throw new IllegalStateException("Cannot handle read from state " + state);
+        // whether the read was fully satisfied by the amount of data
+        boolean satisfied = true;
+        
+        // continually handle incoming data
+        while(satisfied) {
+            // read a request
+            if(state == STATE_SERVER_AWAITING_REQUEST) {
+                satisfied = handleRequest();
+                
+            // read a response
+            } else if(state == STATE_CLIENT_AWAITING_RESPONSE) {
+                satisfied = handleResponse();
+                
+            // read a chunk
+            } else if(state == STATE_READY) {
+                satisfied = handleChunk();
+                
+            // we don't know what to read
+            } else {
+                throw new IllegalStateException("Cannot handle read from state " + state);
+            }
         }
     }
     
@@ -258,13 +264,16 @@ public final class CTPConnection {
      *   <li>the request will be processed
      *   <li>the buffer will be advanced, and
      *   <li>the state will be updated
+     *
+     * @return whether the expected data was read fully. This returns false if there
+     *      was an insufficient amount of data to satisfy the request.
      */
-    private void handleRequest() {
+    private boolean handleRequest() {
         if(state != STATE_SERVER_AWAITING_REQUEST) throw new IllegalStateException();
         
         try {
             // if the entire header has not loaded, load more
-            if(parser.indexOf("\\r\\n\\r\\n") == -1) return;
+            if(parser.indexOf("\\r\\n\\r\\n") == -1) return false;
 
             // parse the status line
             parser.consume("POST( )+");
@@ -281,14 +290,15 @@ public final class CTPConnection {
             if(CTP_URI.equals(uri)) {
                 state = STATE_SERVER_CONSTRUCTING_RESPONSE;
                 sendResponse(RESPONSE_OK, Collections.EMPTY_MAP);
+                return true;
             } else {
-                close(new Exception("Could not find URI \"" + uri + "\""));
+                return close(new Exception("Could not find URI \"" + uri + "\""));
             }
 
         } catch(ParseException e) {
-            close(e);
+            return close(e);
         } catch(IOException e) {
-            close(e);
+            return close(e);
         }
     }
     
@@ -336,13 +346,16 @@ public final class CTPConnection {
      *   <li>the response will be processed
      *   <li>the buffer will be advanced, and
      *   <li>the state will be updated
+     *
+     * @return whether the expected data was read fully. This returns false if there
+     *      was an insufficient amount of data to satisfy the request.
      */
-    private void handleResponse() {
+    private boolean handleResponse() {
         if(state != STATE_CLIENT_AWAITING_RESPONSE) throw new IllegalStateException();
         
         try {
             // if the entire header has not loaded, load more
-            if(parser.indexOf("\\r\\n\\r\\n") == -1) return;
+            if(parser.indexOf("\\r\\n\\r\\n") == -1) return false;
             
             // parse the status line
             parser.consume("HTTP\\/1\\.1( )+");
@@ -359,16 +372,17 @@ public final class CTPConnection {
             if(code == RESPONSE_OK) {
                 state = STATE_READY;
                 handler.connectionReady(this);
+                return true;
             } else {
-                close(null);
+                return close(null);
             }
 
         } catch(ParseException e) {
-            close(e);
+            return close(e);
         } catch(NumberFormatException e) {
-            close(e);
+            return close(e);
         } catch(IOException e) {
-            close(e);
+            return close(e);
         }
     }
 
@@ -408,13 +422,16 @@ public final class CTPConnection {
      * <p>It is possible that the source stream is not chunked, as a consequence
      * of an interfering proxy server. In this case, we arbitrarily form our own
      * chunks which are as large as possible.
+     *
+     * @return whether the expected data was read fully. This returns false if there
+     *      was an insufficient amount of data to satisfy the request.
      */
-    private void handleChunk() {
+    private boolean handleChunk() {
         try {
             if(sourceChunked) {
                 // if the chunk size has not loaded, load more
                 int chunkEndIndex = parser.indexOf("\\r\\n");
-                if(chunkEndIndex == -1) return;
+                if(chunkEndIndex == -1) return false;
                 
                 // calculate the chunk size
                 String chunkSizeInHex = parser.readUntil("(\\;[^\\r\\n]*)?\\r\\n", false);
@@ -423,7 +440,7 @@ public final class CTPConnection {
                 // if the full chunk has not loaded, load more
                 int bytesRequired = chunkEndIndex + 2 + chunkSize + 2;
                 if(bytesRequired > parser.bytesAvailable()) {
-                    return;
+                    return false;
                 }
             
                 // load the chunk
@@ -434,8 +451,9 @@ public final class CTPConnection {
                 // handle the chunk
                 if(chunkSize != 0) {
                     handler.receiveChunk(this, chunkBuffer);
+                    return true;
                 } else {
-                    close();
+                    return close();
                 }
 
             } else {
@@ -445,15 +463,18 @@ public final class CTPConnection {
                 // handle the simulated chunk
                 if(bytesAvailable != 0) {
                     handler.receiveChunk(this, chunkBuffer);
+                    return true;
+                } else {
+                    return false;
                 }
             }
             
         } catch(NumberFormatException e) {
-            close(e);
+            return close(e);
         } catch(ParseException e) {
-            close(e);
+            return close(e);
         } catch(IOException e) {
-            close(e);
+            return close(e);
         }
     }
 
@@ -468,8 +489,8 @@ public final class CTPConnection {
      * Closes the connection to the client. As specified by the HTTP/1.1 RFC,
      * this sends a single empty chunk and closes the TCP/IP connection.
      */
-    public synchronized void close() {
-        close(null);
+    public synchronized boolean close() {
+        return close(null);
     }
     
     /**
@@ -482,10 +503,13 @@ public final class CTPConnection {
      * <li>If the state is READY, the goodbye is a single 0-byte chunk
      * <li>If the state is SERVER_AWAITING_REQUEST, the goodbye is a request error
      * <li>If the state is RECEIVED_CLOSE, no goodbye message is sent
+     *
+     * @return This method returns false because the connection is always in an
+     *      unreadable and unwritable state after a close.
      */
-    private void close(Exception reason) {
+    private boolean close(Exception reason) {
         // if this is already closed, we're done
-        if(state == STATE_CLOSED_PERMANENTLY) return;
+        if(state == STATE_CLOSED_PERMANENTLY) return false;
         
         // close is not a result of a connection error, so say goodbye
         if(reason == null || !(reason instanceof IOException)) {
@@ -525,6 +549,9 @@ public final class CTPConnection {
         } else {
             logger.log(Level.FINE, "Closed connection to " + this);
         }
+        
+        // all done
+        return false;
     }
     
     /**
