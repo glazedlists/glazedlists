@@ -159,7 +159,12 @@ public class CompositeList extends AbstractList implements EventList {
      * not depend on another list.
      */
     public EventList getRootList() {
-        return this;
+        //return this;
+        if(memberLists.size() == 1) {
+            return ((MemberList)memberLists.get(0)).getSourceList().getRootList();
+        } else {
+            return new BasicEventList();
+        }
     }
 
     

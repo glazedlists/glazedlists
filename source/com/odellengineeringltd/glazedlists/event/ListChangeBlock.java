@@ -122,7 +122,7 @@ public class ListChangeBlock {
         // bail if the types are different
         if(type != this.type) return null;
         // insert events: join if the ends touch
-        if(type == INSERT && (appendStartIndex > endIndex + 1 || appendEndIndex < startIndex)) return null;
+        if(type == INSERT && (appendStartIndex > endIndex + 1 || appendStartIndex < startIndex)) return null;
         // delete events: same if deleted from start index or one before start index
         else if(type == DELETE && (appendEndIndex < startIndex - 1 || appendStartIndex > startIndex)) return null;
         // update events: same if update is one from beginning or end
