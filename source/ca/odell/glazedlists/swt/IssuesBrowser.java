@@ -43,38 +43,107 @@ public class IssuesBrowser {
         SortedList issuesSortedList = new SortedList(issuesUserFiltered);
         TextFilterList issuesTextFiltered = new TextFilterList(issuesSortedList);
 
-        // Users List
-        createUsersList(shell);
+        // A SashFrom to layout the whole demo
+        SashForm demoForm = new SashForm(shell, SWT.VERTICAL);
 
-        // Filter Label
-        createFilterLabel(shell);
+        // Set the layout of the form
+        GridData demoFormLayout = new GridData();
+        demoFormLayout.horizontalAlignment = GridData.FILL;
+        demoFormLayout.verticalAlignment = GridData.FILL;
+        demoFormLayout.grabExcessHorizontalSpace = true;
+        demoFormLayout.grabExcessVerticalSpace = true;
+        demoForm.setLayoutData(demoFormLayout);
 
-        // Filter Text
-        Text filterText = createFilterText(shell);
+        // Set the layout for the contents fo the form
+        GridLayout demoFormContentLayout = new GridLayout(1, false);
+        demoFormContentLayout.marginHeight = 0;
+        demoFormContentLayout.marginWidth = 0;
+        demoForm.setLayout(demoFormContentLayout);
+
+        // Layout the top half of the demo
+        SashForm topSash = new SashForm(demoForm, SWT.HORIZONTAL);
+
+        // Set the layout of the sash form
+        GridData topSashLayout = new GridData();
+        topSashLayout.horizontalAlignment = GridData.FILL;
+        topSashLayout.verticalAlignment = GridData.FILL;
+        topSashLayout.grabExcessHorizontalSpace = true;
+        topSashLayout.grabExcessVerticalSpace = true;
+        topSash.setLayoutData(topSashLayout);
+
+        // Set the layout for the contents of the form
+        GridLayout topSashContentLayout = new GridLayout(2, false);
+        topSashContentLayout.marginHeight = 0;
+        topSashContentLayout.marginWidth = 0;
+        topSash.setLayout(topSashContentLayout);
+
+        createUsersList(topSash);
+        Canvas topForm = createTopForm(topSash);
+        topSash.setWeights(new int[] {25, 75});
+        createFilterLabel(topForm);
+        Text filterText = createFilterText(topForm);
         issuesTextFiltered.setFilterEdit(filterText);
-
-        // Issues Table
-        Table issuesTable = createIssuesTable(shell);
+        Table issuesTable = createIssuesTable(topForm);
         EventTableViewer issuesTableViewer = new EventTableViewer(issuesTextFiltered, issuesTable, new IssueTableFormat());
         issuesTable = formatIssuesTable(issuesTable);
         new TableComparatorChooser(issuesTableViewer, issuesSortedList, false);
 
-        // Descriptions Header
-        createDescriptionsHeader(shell);
+        // Layout the bottom half of the demo
+        Canvas bottomForm = createBottomForm(demoForm);
+        createDescriptionsHeader(bottomForm);
+        createDescriptionsTable(bottomForm, issuesTableViewer);
+        createStatusBar(bottomForm);
 
-        // Descriptions Table
-        createDescriptionsTable(shell, issuesTableViewer);
-
-        // Status Bar
-        createStatusBar(shell);
+        // Apply weight to the demo form
+        demoForm.setWeights(new int[] {50, 50});
 
         // Start the demo
         issuesEventList.start();
 
     }
 
-    private void createUsersList(Shell shell) {
-        usersList = new List(shell, SWT.MULTI | SWT.BORDER);
+    private Canvas createTopForm(Composite parent) {
+        Canvas topForm = new Canvas(parent, 0);
+
+        // Set the layout of the form
+        GridData topFormLayout = new GridData();
+        topFormLayout.horizontalAlignment = GridData.FILL;
+        topFormLayout.verticalAlignment = GridData.FILL;
+        topFormLayout.grabExcessHorizontalSpace = true;
+        topFormLayout.grabExcessVerticalSpace = true;
+        topForm.setLayoutData(topFormLayout);
+
+        // Set the layout for the contents of the form
+        GridLayout topFormContentLayout = new GridLayout(2, false);
+        topFormContentLayout.marginHeight = 0;
+        topFormContentLayout.marginWidth = 0;
+        topForm.setLayout(topFormContentLayout);
+
+        return topForm;
+    }
+
+    private Canvas createBottomForm(Composite parent) {
+        Canvas bottomForm = new Canvas(parent, 0);
+
+        // Set the layout of the form
+        GridData bottomFormLayout = new GridData();
+        bottomFormLayout.horizontalAlignment = GridData.FILL;
+        bottomFormLayout.verticalAlignment = GridData.FILL;
+        bottomFormLayout.grabExcessHorizontalSpace = true;
+        bottomFormLayout.grabExcessVerticalSpace = true;
+        bottomForm.setLayoutData(bottomFormLayout);
+
+        // Set the layout for the contents of the form
+        GridLayout bottomFormContentLayout = new GridLayout(1, false);
+        bottomFormContentLayout.marginHeight = 0;
+        bottomFormContentLayout.marginWidth = 0;
+        bottomForm.setLayout(bottomFormContentLayout);
+
+        return bottomForm;
+    }
+
+    private void createUsersList(Composite parent) {
+        usersList = new List(parent, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
         GridData usersListLayout = new GridData();
         usersListLayout.horizontalSpan = 1;
         usersListLayout.verticalSpan = 2;
@@ -88,31 +157,28 @@ public class IssuesBrowser {
         EventListViewer listViewer = new EventListViewer(issuesUserFiltered.getUsersList(), usersList);
     }
 
-    private void createFilterLabel(Shell shell) {
-        Label filterLabel = new Label(shell, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+    private void createFilterLabel(Composite parent) {
+        Label filterLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
         filterLabel.setText("Filter: ");
         GridData filterLabelLayout = new GridData();
-        filterLabelLayout.horizontalSpan = 1;
-        filterLabelLayout.verticalSpan = 1;
         filterLabelLayout.horizontalAlignment = GridData.BEGINNING;
         filterLabelLayout.verticalAlignment = GridData.CENTER;
         filterLabel.setLayoutData(filterLabelLayout);
     }
 
-    private Text createFilterText(Shell shell) {
-        Text filterText = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    private Text createFilterText(Composite parent) {
+        Text filterText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
         GridData filterTextLayout = new GridData();
-        filterTextLayout.horizontalSpan = 1;
-        filterTextLayout.verticalSpan = 1;
         filterTextLayout.horizontalAlignment = GridData.FILL;
         filterTextLayout.verticalAlignment = GridData.BEGINNING;
         filterTextLayout.grabExcessHorizontalSpace = true;
+        filterTextLayout.grabExcessVerticalSpace = false;
         filterText.setLayoutData(filterTextLayout);
         return filterText;
     }
 
-    private Table createIssuesTable(Shell shell) {
-        Table issuesTable = new Table(shell, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER | SWT.VIRTUAL);
+    private Table createIssuesTable(Composite parent) {
+        Table issuesTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER | SWT.VIRTUAL);
         GridData issuesTableLayout = new GridData();
         issuesTableLayout.horizontalSpan = 2;
         issuesTableLayout.verticalSpan = 1;
@@ -137,45 +203,39 @@ public class IssuesBrowser {
         return issuesTable;
     }
 
-    private void createDescriptionsHeader(Shell shell) {
-        Label descriptionsLabel = new Label(shell, SWT.HORIZONTAL | SWT.CENTER | SWT.SHADOW_NONE);
+    private void createDescriptionsHeader(Composite parent) {
+        Label descriptionsLabel = new Label(parent, SWT.HORIZONTAL | SWT.CENTER | SWT.SHADOW_NONE);
         descriptionsLabel.setText("Description");
         GridData descriptionsLabelLayout = new GridData();
-        descriptionsLabelLayout.horizontalSpan = 3;
-        descriptionsLabelLayout.verticalSpan = 1;
         descriptionsLabelLayout.horizontalAlignment = GridData.FILL;
-        descriptionsLabelLayout.verticalAlignment = GridData.CENTER;
+        descriptionsLabelLayout.verticalAlignment = GridData.BEGINNING;
         descriptionsLabelLayout.grabExcessHorizontalSpace = true;
+        descriptionsLabelLayout.grabExcessVerticalSpace = false;
         descriptionsLabel.setLayoutData(descriptionsLabelLayout);
     }
 
-    private void createDescriptionsTable(Shell shell, EventTableViewer issuesTableViewer) {
-        Table descriptionsTable = new Table(shell, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER);
+    private void createDescriptionsTable(Composite parent, EventTableViewer issuesTableViewer) {
+        Table descriptionsTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER);
         GridData descriptionsTableLayout = new GridData();
-        descriptionsTableLayout.horizontalSpan = 3;
-        descriptionsTableLayout.verticalSpan = 1;
         descriptionsTableLayout.horizontalAlignment = GridData.FILL;
         descriptionsTableLayout.verticalAlignment = GridData.FILL;
         descriptionsTableLayout.grabExcessHorizontalSpace = true;
         descriptionsTableLayout.grabExcessVerticalSpace = true;
-        descriptionsTableLayout.heightHint = 30;
         descriptionsTable.setLayoutData(descriptionsTableLayout);
         descriptionsTable.showColumn(new TableColumn(descriptionsTable, SWT.LEFT));
         descriptionsTable.getColumn(0).setWidth(618);
-        descriptionsTable.getVerticalBar().setEnabled(true);
         descriptionsTable.setHeaderVisible(false);
         issuesTableViewer.getTable().addSelectionListener(new IssueSelectionListener(issuesTableViewer, descriptionsTable));
 
     }
 
-    private void createStatusBar(Shell shell) {
-        Text statusText = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
+    private void createStatusBar(Composite parent) {
+        Text statusText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
         GridData statusTextLayout = new GridData();
-        statusTextLayout.horizontalSpan = 3;
-        statusTextLayout.verticalSpan = 1;
         statusTextLayout.horizontalAlignment = GridData.FILL;
         statusTextLayout.verticalAlignment = GridData.END;
         statusTextLayout.grabExcessHorizontalSpace = true;
+        statusTextLayout.grabExcessVerticalSpace = false;
         statusText.setLayoutData(statusTextLayout);
         statusText.setText("Java Application Window");
     }
@@ -252,18 +312,18 @@ public class IssuesBrowser {
         System.setProperty("java.library.path", ".");
 
         Display display = new Display();
-        Shell shell = new Shell(display);
-        shell.setText("Issues");
-        GridLayout gridLayout = new GridLayout(3, false);
+        Shell parent = new Shell(display);
+        parent.setText("Issues");
+        GridLayout gridLayout = new GridLayout(1, false);
         gridLayout.marginHeight = 0;
         gridLayout.marginWidth = 0;
-        shell.setLayout(gridLayout);
+        parent.setLayout(gridLayout);
 
-        new IssuesBrowser(shell);
-        shell.setSize(640, 480);
-        shell.open();
+        new IssuesBrowser(parent);
+        parent.setSize(640, 480);
+        parent.open();
 
-        while(!shell.isDisposed()) {
+        while(!parent.isDisposed()) {
             if(!display.readAndDispatch()) {
                 display.sleep();
             }
@@ -334,47 +394,5 @@ class IssueTableFormat implements CheckableTableFormat {
     public boolean getChecked(Object baseObject) {
         Issue issue = (Issue)baseObject;
         return issue.getPriority().equals("P3");
-    }
-}
-
-/**
- * The DescriptionsTableFormat specifies how an Issue description is displayed in a table.
- *
- * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
- */
-class DescriptionsTableFormat implements CheckableTableFormat {
-
-    public int getColumnCount() {
-        return 1;
-    }
-
-    public String getColumnName(int column) {
-        if(column == 0) {
-            return "Description";
-        }
-        return null;
-    }
-
-    public Object getColumnValue(Object baseObject, int column) {
-        if(baseObject == null) return null;
-        Issue issue = (Issue)baseObject;
-        if(column == 0) {
-            return issue.getId();
-        }
-        return null;
-    }
-
-    /**
-     * Sets the specified object as checked.
-     */
-    public void setChecked(Object baseObject, boolean checked) {
-        // Do nothing
-    }
-
-    /**
-     * Gets whether the specified object is checked.
-     */
-    public boolean getChecked(Object baseObject) {
-        return true;
     }
 }
