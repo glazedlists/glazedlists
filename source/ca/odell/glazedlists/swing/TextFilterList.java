@@ -48,7 +48,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TextFilterList extends AbstractFilterList {
+public final class TextFilterList extends AbstractFilterList {
 
     /** the filters list is currently just a list of Substrings to include */
     private String[] filters = new String[0];
@@ -293,7 +293,7 @@ public class TextFilterList extends AbstractFilterList {
      * @param host the string to search within
      * @param filter the string to search for, this must be upper case
      */
-    public static int caseInsensitiveIndexOf(String host, String filter) {
+    private static int caseInsensitiveIndexOf(String host, String filter) {
         int lastFirst = host.length() - filter.length();
         sourceCharacter:
         for(int c = 0; c <= lastFirst; c++) {
