@@ -166,6 +166,12 @@ public abstract class AbstractFilterList extends TransformedList implements List
                         flagList.set(sourceIndex, Boolean.TRUE);
                         int filteredIndex = flagList.getCompressedIndex(sourceIndex);
                         updates.addInsert(filteredIndex);
+
+                    // this element is still here
+                    } else if(wasIncluded && include) {
+                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                        updates.addUpdate(filteredIndex);
+
                     }
                 }
             }
