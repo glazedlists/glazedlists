@@ -53,7 +53,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Verifies that ThresholdList fires the right events.
      */
-    public void testEventFiring() {
+    public void testEventFiringLower() {
         // populate our sample list
         source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
             new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
@@ -61,6 +61,19 @@ public class ThresholdListTest extends TestCase {
         // make some dealbreaking changes
         thresholdList.setLowerThreshold(27);
         thresholdList.setLowerThreshold(18);
+    }
+    
+    /**
+     * Verifies that ThresholdList fires the right events.
+     */
+    public void testEventFiringUpper() {
+        // populate our sample list
+        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
+            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+            
+        // make some dealbreaking changes
+        thresholdList.setUpperThreshold(77);
+        thresholdList.setUpperThreshold(102);
     }
     
     /**
