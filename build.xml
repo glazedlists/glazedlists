@@ -64,6 +64,7 @@
     <jar destfile="glazedlists.jar" update="true">
       <fileset dir="classes">
         <exclude name="**/**Test.class"/>
+        <exclude name="**/**Test$*.class"/>
       </fileset>
       <manifest>
         <attribute name="Main-Class" value="com.odellengineeringltd.glazedlists.demo.ProgrammingLanguageBrowser"/>
@@ -98,7 +99,7 @@
        basedir="."
        excludes="classes/**, docs/api/**, glazedlists-source.zip"/>
   </target>
-  
+
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      TEST
