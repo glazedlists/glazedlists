@@ -94,33 +94,48 @@ public final class SubEventList extends TransformedList implements ListEventList
      */
     public void listChanged(ListEvent listChanges) {
         updates.beginEvent();
-        while(listChanges.next()) {
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-            
-            // if it is a change before
-            if(changeIndex < startIndex) {
-                if(changeType == ListEvent.INSERT) {
-                    startIndex++;
-                    endIndex++;
-                } else if(changeType == ListEvent.DELETE) {
-                    startIndex--;
-                    endIndex--;
+
+        // if this sublist is size one, just move the start and end index
+        if(listChanges.isReordering() && size() == 1) {
+            int[] reorderMap = listChanges.getReorderMap();
+            for(int r = 0; r < reorderMap.length; r++) {
+                if(reorderMap[r] == startIndex) {
+                    startIndex = r;
+                    endIndex = startIndex + 1;
+                    break;
                 }
-            // if it is a change within
-            } else if(changeIndex < endIndex) {
-                if(changeType == ListEvent.INSERT) {
-                    endIndex++;
-                    updates.addInsert(changeIndex - startIndex);
-                } else if(changeType == ListEvent.UPDATE) {
-                    updates.addInsert(changeIndex - startIndex);
-                } else if(changeType == ListEvent.DELETE) {
-                    endIndex--;
-                    updates.addDelete(changeIndex - startIndex);
+            }
+
+        // handle regular change events by shifting indices as necessary
+        } else {
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+                
+                // if it is a change before
+                if(changeIndex < startIndex || (changeType == ListEvent.INSERT && changeIndex == startIndex)) {
+                    if(changeType == ListEvent.INSERT) {
+                        startIndex++;
+                        endIndex++;
+                    } else if(changeType == ListEvent.DELETE) {
+                        startIndex--;
+                        endIndex--;
+                    }
+                // if it is a change within
+                } else if(changeIndex < endIndex) {
+                    if(changeType == ListEvent.INSERT) {
+                        endIndex++;
+                        updates.addInsert(changeIndex - startIndex);
+                    } else if(changeType == ListEvent.UPDATE) {
+                        updates.addInsert(changeIndex - startIndex);
+                    } else if(changeType == ListEvent.DELETE) {
+                        endIndex--;
+                        updates.addDelete(changeIndex - startIndex);
+                    }
+                // if it is a change after
+                } else {
+                    // do nothing
                 }
-            // if it is a change after
-            } else {
-                // do nothing
             }
         }
         assert(startIndex <= endIndex);
