@@ -61,27 +61,33 @@ public class BasicEventList implements EventList, Serializable {
      * Inserts the specified element at the specified position in this list.
      */
     public void add(int index, Object element) {
-        // create the change event
-        updates.beginAtomicChange();
-        updates.appendChange(index, ListChangeBlock.INSERT);
-        // do the actual add
-        data.add(index, element);
-        // fire the event
-        updates.commitAtomicChange();
+        // lock on this list
+        synchronized(getRootList()) {
+            // create the change event
+            updates.beginAtomicChange();
+            updates.appendChange(index, ListChangeBlock.INSERT);
+            // do the actual add
+            data.add(index, element);
+            // fire the event
+            updates.commitAtomicChange();
+        }
     }
             
     /**
      * Appends the specified element to the end of this list.
      */
     public boolean add(Object element) {
-        // create the change event
-        updates.beginAtomicChange();
-        updates.appendChange(size(), ListChangeBlock.INSERT);
-        // do the actual add
-        boolean result = data.add(element);
-        // fire the event
-        updates.commitAtomicChange();
-        return result;
+        // lock on this list
+        synchronized(getRootList()) {
+            // create the change event
+            updates.beginAtomicChange();
+            updates.appendChange(size(), ListChangeBlock.INSERT);
+            // do the actual add
+            boolean result = data.add(element);
+            // fire the event
+            updates.commitAtomicChange();
+            return result;
+        }
     }
     
     /**
@@ -100,14 +106,17 @@ public class BasicEventList implements EventList, Serializable {
     public boolean addAll(int index, Collection collection) {
         // don't do an add of an empty set
         if(collection.size() == 0) return true;
-        // create the change event
-        updates.beginAtomicChange();
-        updates.appendChange(index, index + collection.size() - 1, ListChangeBlock.INSERT);
-        // do the actual add
-        boolean result = data.addAll(index, collection);
-        // fire the event
-        updates.commitAtomicChange();
-        return result;
+        // lock on this list
+        synchronized(getRootList()) {
+            // create the change event
+            updates.beginAtomicChange();
+            updates.appendChange(index, index + collection.size() - 1, ListChangeBlock.INSERT);
+            // do the actual add
+            boolean result = data.addAll(index, collection);
+            // fire the event
+            updates.commitAtomicChange();
+            return result;
+        }
     }
 
     /**
@@ -125,33 +134,39 @@ public class BasicEventList implements EventList, Serializable {
     public boolean addAll(int index, Object[] objects) {
         // don't do an add of an empty set
         if(objects.length == 0) return true;
-        // create the change event
-        updates.beginAtomicChange();
-        updates.appendChange(index, index + objects.length - 1, ListChangeBlock.INSERT);
-        // do the actual add
-        boolean overallResult = true;
-        boolean elementResult = true;
-        for(int i = 0; i < objects.length; i++) {
-            elementResult = data.add(objects[i]);
-            overallResult = (overallResult && elementResult);
+        // lock on this list
+        synchronized(getRootList()) {
+            // create the change event
+            updates.beginAtomicChange();
+            updates.appendChange(index, index + objects.length - 1, ListChangeBlock.INSERT);
+            // do the actual add
+            boolean overallResult = true;
+            boolean elementResult = true;
+            for(int i = 0; i < objects.length; i++) {
+                elementResult = data.add(objects[i]);
+                overallResult = (overallResult && elementResult);
+            }
+            // fire the event
+            updates.commitAtomicChange();
+            return overallResult;
         }
-        // fire the event
-        updates.commitAtomicChange();
-        return overallResult;
     }
 
     /**
      * Removes the element at the specified position in this list.
      */
     public Object remove(int index) {
-        // create the change event
-        updates.beginAtomicChange();
-        updates.appendChange(index, ListChangeBlock.DELETE);
-        // do the actual remove
-        Object removed = data.remove(index);
-        // fire the event
-        updates.commitAtomicChange();
-        return removed;
+        // lock on this list
+        synchronized(getRootList()) {
+            // create the change event
+            updates.beginAtomicChange();
+            updates.appendChange(index, ListChangeBlock.DELETE);
+            // do the actual remove
+            Object removed = data.remove(index);
+            // fire the event
+            updates.commitAtomicChange();
+            return removed;
+        }
     }
     /**
      * Removes a single instance of the specified element from this 
@@ -172,13 +187,16 @@ public class BasicEventList implements EventList, Serializable {
     public void clear() {
         // don't do a clear on an empty set
         if(size() == 0) return;
-        // create the change event
-        updates.beginAtomicChange();
-        updates.appendChange(0, size() - 1, ListChangeBlock.DELETE);
-        // do the actual clear
-        data.clear();
-        // fire the event
-        updates.commitAtomicChange();
+        // lock on this list
+        synchronized(getRootList()) {
+            // create the change event
+            updates.beginAtomicChange();
+            updates.appendChange(0, size() - 1, ListChangeBlock.DELETE);
+            // do the actual clear
+            data.clear();
+            // fire the event
+            updates.commitAtomicChange();
+        }
     }
 
     /**
@@ -186,14 +204,17 @@ public class BasicEventList implements EventList, Serializable {
      * specified element.
      */
     public Object set(int index, Object element) {
-        // create the change event
-        updates.beginAtomicChange();
-        updates.appendChange(index, ListChangeBlock.UPDATE);
-        // do the actual set
-        Object previous = data.set(index, element);
-        // fire the event
-        updates.commitAtomicChange();
-        return previous;
+        // lock on this list
+        synchronized(getRootList()) {
+            // create the change event
+            updates.beginAtomicChange();
+            updates.appendChange(index, ListChangeBlock.UPDATE);
+            // do the actual set
+            Object previous = data.set(index, element);
+            // fire the event
+            updates.commitAtomicChange();
+            return previous;
+        }
     }
           
 

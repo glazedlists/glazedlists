@@ -140,26 +140,6 @@ public class ListChangeBlock {
         assert(startIndex >= 0 && endIndex >= startIndex);
         return this;
     }
-    /*public ListChangeBlock append(int index, int type) {
-        // bail if the types are different
-        if(type != this.type) return null;
-        // insert events: same if inserted at beginning, end or middle; only end increases
-        if(type == INSERT) {
-            if(index < startIndex || index > endIndex + 1) return null; //new ListChange(index, type);
-            endIndex++;
-        // delete events: same if deleted from start index or one before start index
-        } else if(type == DELETE) {
-            if(index < startIndex - 1 || index > startIndex) return null; //new ListChange(index, type);
-            if(index == startIndex - 1) startIndex--;
-            else if(index == startIndex) endIndex++;
-        // update events: same if update is one from beginning or end
-        } else if(type == UPDATE) {
-            if(index < startIndex - 1 || index > endIndex + 1) return null; //new ListChange(index, type);
-            if(index == startIndex - 1) startIndex--;
-            else if(index == endIndex + 1) endIndex++;
-        }
-        return this;
-    }*/
     
     /**
      * Gets this ListChangeBlock represented as a String

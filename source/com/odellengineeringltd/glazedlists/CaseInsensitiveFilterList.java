@@ -54,7 +54,7 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
         // construct the filter editor
         filterEdit.getDocument().addDocumentListener(this);
         // set up the initial list
-        handleFilterChanged();
+        reFilter();
     }
     /**
      * Creates a new filter list that uses a Filterator. A Filterator is something
@@ -67,7 +67,7 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
         // construct the filter editor
         filterEdit.getDocument().addDocumentListener(this);
         // set up the initial list
-        handleFilterChanged();
+        reFilter();
     }
 
     /**
@@ -82,22 +82,26 @@ public class CaseInsensitiveFilterList extends AbstractFilterList implements Doc
      * Implement the document listener interface to create a text filter.
      */
     public void changedUpdate(DocumentEvent e) {
-        // build the regex pattern from the filter strings
-        updateFilterPattern();
-        // refilter the whole list
-        handleFilterChanged();
+        reFilter();
     }
     public void insertUpdate(DocumentEvent e) {
-        // build the regex pattern from the filter strings
-        updateFilterPattern();
-        // refilter the whole list
-        handleFilterChanged();
+        reFilter();
     }
     public void removeUpdate(DocumentEvent e) {
-        // build the regex pattern from the filter strings
-        updateFilterPattern();
-        // refilter the whole list
-        handleFilterChanged();
+        reFilter();
+    }
+    
+    /**
+     * When the filter changes, first update the regex pattern used
+     * to do filtering, then apply the filter on all elements.
+     */
+    private void reFilter() {
+        synchronized(getRootList()) {
+            // build the regex pattern from the filter strings
+            updateFilterPattern();
+            // refilter the whole list
+            handleFilterChanged();
+        }
     }
 
     /**

@@ -120,8 +120,11 @@ public class ListChangeEvent {
     public synchronized boolean hasNext() {
         // we are at the end of the current block
         if(listChange == null || rowIndex == listChange.getEndIndex()) {
+            // if there are no more atomic changes
+            if(atomicCount == masterSequence.getAtomicCount()) {
+                return false;
             // there are no more blocks in this atomic change
-            if(blockCount == masterSequence.getBlockCount(atomicCount)) {
+            } else if(blockCount == masterSequence.getBlockCount(atomicCount)) {
                 return false;
             // there are more blocks in this atomic change
             } else {
