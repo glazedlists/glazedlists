@@ -14,9 +14,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.jnlp.ServiceManager;
-import javax.jnlp.BasicService;
-import javax.jnlp.UnavailableServiceException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -251,17 +248,41 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	 * @param box The box to add buttons to.
 	 */
 	private void addWebStartLinks(JPanel box, GridBagConstraints gbc) {
-		String[] services = ServiceManager.getServiceNames();
-		if (services == null) return;			// not running in WebStart
-
-		System.out.println("Service names: " + java.util.Arrays.asList(services));
-
-		BasicService basic_service;
+		// Note: We're going to do a bunch of relection here to avoid requiring the JNLP
+		// JAR to build the launcher.
+		Object basic_service;
+		Method show_document_method;
 		try {
-			basic_service =
-				(BasicService) ServiceManager.lookup(BasicService.class.getName());
-			if (!basic_service.isWebBrowserSupported()) return;
-		} catch(UnavailableServiceException ex) {
+			// See if we're running in webstart
+			Class service_manager_class = Class.forName( "javax.jnlp.ServiceManager" );
+			Method service_names_method =
+				service_manager_class.getMethod( "getServiceNames", new Class[]{} );
+			String[] service_names = ( String[] ) service_names_method.invoke(
+				service_manager_class, new Object[] {});
+
+			// If null or empty, not running in WebStart
+			if ( service_names == null || service_names.length == 0 ) return;
+
+
+			// Lookup the BasicService (needed to launch URLs)
+			Class basic_service_class = Class.forName( "javax.jnlp.BasicService" );
+
+			Method lookup_method =
+				service_manager_class.getMethod("lookup",new Class[] {String.class});
+
+			basic_service = lookup_method.invoke(service_manager_class,
+				new Object[] {basic_service_class.getName()});
+
+			// See if web browsers are supported
+			Method web_browser_supported_method =
+				basic_service_class.getMethod("isWebBrowserSupported", new Class[]{});
+			Boolean bool = (Boolean) web_browser_supported_method.invoke(basic_service,
+				new Object[] {});
+			if ( bool == null || !bool.booleanValue()) return;
+
+			show_document_method = basic_service_class.getMethod("showDocument",
+				new Class[]{URL.class} );
+		} catch(Exception ex) {
 			return;
 		}
 
@@ -269,14 +290,16 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		gbc.gridy++;
 		try {
 			box.add(createLinkBarLabel("Main Website",
-				new URL("http://publicobject.com/glazedlists/"), basic_service), gbc);
+				new URL("http://publicobject.com/glazedlists/"), basic_service,
+				show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
 		}
 
 		try {
 			box.add(createLinkBarLabel("Java.net",
-				new URL("http://glazedlists.dev.java.net/"), basic_service), gbc);
+				new URL("http://glazedlists.dev.java.net/"), basic_service,
+				show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
 		}
@@ -295,7 +318,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		try {
 			box.add(createLinkBarLabel("Tutorial",
 				new URL("http://publicobject.com/glazedlists/tutorial-0.9.4/index.html"),
-				basic_service), gbc);
+				basic_service, show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
 		}
@@ -303,15 +326,15 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		try {
 			box.add(createLinkBarLabel("Javadoc API",
 				new URL("http://publicobject.com/glazedlists/glazedlists-0.9.4/api/"),
-				basic_service), gbc);
+				basic_service, show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
 		}
 
 		try {
 			box.add(createLinkBarLabel("FAQ",
-				new URL("http://publicobject.com/glazedlists/faq.html"), basic_service),
-				gbc);
+				new URL("http://publicobject.com/glazedlists/faq.html"), basic_service,
+				show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
 		}
@@ -454,7 +477,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	 * Create a label that looks like a link bar button on the Glazed Lists website.
 	 */
 	private JLabel createLinkBarLabel(String text, final URL url,
-		final BasicService basic_service) {
+		final Object basic_service, final Method show_document_method ) {
 
 		final JLabel label = new JLabel(text);
 		label.setOpaque(true);
@@ -475,7 +498,10 @@ public class Launcher implements ActionListener, ListSelectionListener {
 			}
 
 			public void mouseClicked(MouseEvent e) {
-				basic_service.showDocument(url);
+				try {
+					show_document_method.invoke( basic_service, new Object[] { url } );
+				}
+				catch( Exception ex ) {}
 			}
 		});
 
