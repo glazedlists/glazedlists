@@ -49,8 +49,11 @@ public class CompositeList extends AbstractList implements EventList {
         synchronized(getRootList()) {
             for(int i = 0; i < memberLists.size(); i++) {
                 MemberList current = (MemberList)memberLists.get(i);
-                if(index < current.size()) return current.getSourceList().get(index);
-                else index = index - current.size();
+                if(index < current.size()) {
+                    return current.getSourceList().get(index);
+                } else {
+                    index = index - current.size();
+                }
             }
         }
         return null;

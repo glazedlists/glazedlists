@@ -129,7 +129,7 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
             
             // fire events to listeners of the thaw
             updates.beginAtomicChange();
-            if(frozenData.size() > 0) updates.appendChange(0, frozenDataSize - 1, ListChangeBlock.DELETE);
+            if(frozenDataSize > 0) updates.appendChange(0, frozenDataSize - 1, ListChangeBlock.DELETE);
             if(source.size() > 0) updates.appendChange(0, source.size() - 1, ListChangeBlock.INSERT);
             updates.commitAtomicChange();
 
