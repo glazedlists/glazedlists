@@ -66,6 +66,9 @@ class PeerResource {
         
         // listen for updates
         resource.addResourceListener(resourceListener);
+        
+        // a server is initially connected
+        resourceStatus.setConnected(true, null);
     }
     
     /**
@@ -169,11 +172,15 @@ class PeerResource {
             // we can't unsubscribe until we have no subscribers
             if(!subscribers.isEmpty()) throw new IllegalStateException();
             
+            // mark this as done
+            PeerConnection oldPublisher = publisher;
+            publisher = null;
+            resourceStatus.setConnected(false, null);
+            
             // unsubscribe from this resource
-            PeerBlock block = PeerBlock.unsubscribe(resourceName);
-            publisher.writeBlock(PeerResource.this, block);
-            publisher.incomingSubscriptions.remove(resourceName);
-            if(publisher.isIdle()) publisher.close();
+            oldPublisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
+            oldPublisher.incomingSubscriptions.remove(resourceName);
+            if(oldPublisher.isIdle()) oldPublisher.close();
         }
         
         /** {@inheritDoc} */

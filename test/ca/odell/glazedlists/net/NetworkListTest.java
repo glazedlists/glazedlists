@@ -61,6 +61,8 @@ public class NetworkListTest extends TestCase {
             // prepare the source list
             String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
             NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
+            assertTrue(sourceListener.isConnected());
             sourceList.add(new Integer(8));
             sourceList.add(new Integer(6));
             sourceList.add(new Integer(7));
@@ -68,9 +70,11 @@ public class NetworkListTest extends TestCase {
             
             // prepare the target list
             NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            SimpleNetworkListStatusListener targetListener = new SimpleNetworkListStatusListener(targetList);
             
             // verify they're equal after a subscribe
             waitFor(1000);
+            assertTrue(targetListener.isConnected());
             assertEquals(sourceList, targetList);
             
             // perform some changes and verify they keep in sync
@@ -83,6 +87,8 @@ public class NetworkListTest extends TestCase {
             // clean up after myself
             targetList.disconnect();
             waitFor(1000);
+            assertFalse(targetListener.isConnected());
+            assertTrue(sourceListener.isConnected());
             
         } catch(Exception e) {
             e.printStackTrace();
@@ -103,9 +109,11 @@ public class NetworkListTest extends TestCase {
             
             // prepare the target list
             NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            SimpleNetworkListStatusListener targetListener = new SimpleNetworkListStatusListener(targetList);
             
             // verify they're equal after a subscribe
             waitFor(1000);
+            assertTrue(targetListener.isConnected());
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
             List snapshot = new ArrayList();
@@ -114,6 +122,7 @@ public class NetworkListTest extends TestCase {
             // disconnect the client
             targetList.disconnect();
             waitFor(1000);
+            assertFalse(targetListener.isConnected());
             assertFalse(targetList.isConnected());
             
             // change the source list
@@ -126,6 +135,7 @@ public class NetworkListTest extends TestCase {
             // bring the target list back to life
             targetList.connect();
             waitFor(1000);
+            assertTrue(targetListener.isConnected());
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
             

@@ -27,5 +27,5 @@ public interface NetworkListStatusListener extends EventListener {
      * Called each time a resource's disconnected status changes. This method may
      * be called for each attempt it makes to reconnect to the network.
      */
-    public void disconnected(NetworkList list, Exception cause);
+    public void disconnected(NetworkList list, Exception reason);
 }
