@@ -9,15 +9,15 @@ To include a new demo:
 method</li>
 
 <li>The main method <b>must not</b> call <tt>System.exit()</tt> or use
-<tt>JFrame.EXIT_ON_CLOSE</tt> for the default close operation if the system property
-<b><tt>in_launcher</tt></b> is set to a non-null value.<br>
+<tt>JFrame.EXIT_ON_CLOSE</tt> for the default close operation if
+<tt>Launcher.runningInLauncher()</tt> returns true.<br>
 Example:<br>
 <pre>
 public static void main( String[] args ) {
 	// run test...
 
 	// when finished...
-	if ( System.getProperty( "in_launcher" ) == null ) System.exit( 0 );
+	if ( !Launcher.runningInLauncher() ) System.exit( 0 );
 }
 </pre>
 or
@@ -25,7 +25,7 @@ or
 public static void main( String[] args ) {
 	JFrame my_test_frame = ...
 
-	if (System.getProperty("in_launcher") == null) {
+	if (!Launcher.runningInLauncher()) {
 		my_test_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	else {
