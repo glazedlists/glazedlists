@@ -54,7 +54,6 @@ public class PopularityListTest extends TestCase {
         
         assertEquals("Melissa", popularityList.get(0));
         assertEquals("Mike", popularityList.get(1));
-        validateRanked(popularityList, source);
         
         source.add("Jonathan");
         source.add("Jonathan");
@@ -63,7 +62,6 @@ public class PopularityListTest extends TestCase {
 
         assertEquals("Jonathan", popularityList.get(0));
         assertEquals("Melissa", popularityList.get(1));
-        validateRanked(popularityList, source);
 
         source.add("Mike");
         source.add("Mike");
@@ -72,7 +70,6 @@ public class PopularityListTest extends TestCase {
         assertEquals("Mike", popularityList.get(0));
         assertEquals("Jonathan", popularityList.get(1));
         assertEquals("Melissa", popularityList.get(2));
-        validateRanked(popularityList, source);
         
         source.clear();
     }
@@ -84,97 +81,96 @@ public class PopularityListTest extends TestCase {
         Random dice = new Random(0);
         
         EventList source = new BasicEventList();
+        SortedList sortedSource = new SortedList(source);
         PopularityList popularityList = new PopularityList(source);
-        new PopularityListValidator(popularityList, source);
+        new PopularityListValidator(popularityList, sortedSource);
         
-        for(int j = 0; j < 10; j++) {
-            // add 1000
-            for(int i = 0; i < 100; i++) {
-                source.add(new Integer(dice.nextInt(10)));
-            }
+        // add 1000
+        for(int i = 0; i < 1000; i++) {
+            source.add(new Integer(dice.nextInt(50)));
+        }
 
-            // remove 900
-            for(int i = 0; i < 90; i++) {
-                int remIndex = dice.nextInt(source.size());
-                source.remove(remIndex);
-            }
-            
-            // set 800
-            for(int i = 0; i < 80; i++) {
-                int updateIndex = dice.nextInt(source.size());
-                Integer updateValue = new Integer(dice.nextInt(10));
-                source.set(updateIndex, updateValue);
-            }
+        // remove 900
+        for(int i = 0; i < 900; i++) {
+            int remIndex = dice.nextInt(source.size());
+            source.remove(remIndex);
         }
-    }
-    
-    /**
-     * Returns the number of repetitions of the specified value in the specified
-     * source.
-     */
-    private int count(Object value, List source) {
-        int count = 0;
-        for(Iterator i = source.iterator(); i.hasNext(); ) {
-            if(value.equals(i.next())) count++;
-        }
-        return count;
-    }
-    
-    /**
-     * Verifies that the specified list is in order of popular elements. This verifies
-     * that the rank of the elements in popularity is decreasing.
-     */
-    private void validateRanked(List popularity, List source) {
-        // verify the collections contain the same set of elements
-        Set uniqueSource = new TreeSet();
-        uniqueSource.addAll(source);
-        assertTrue(popularity.containsAll(uniqueSource));
-        assertTrue(uniqueSource.containsAll(popularity));
-        assertEquals(uniqueSource.size(), popularity.size());
         
-        // validate proper rank order
-        int lastRank = Integer.MAX_VALUE;
-        for(Iterator p = popularity.iterator(); p.hasNext(); ) {
-            Object element = p.next();
-            int currentRank = count(element, source);
-            assertTrue("lastRank=" + lastRank + " < currentRank=" + currentRank + "\nelement=" + element +", \npop=" + popularity + "\nall=" + source, lastRank >= currentRank);
-            lastRank = currentRank;
+        // set 800
+        for(int i = 0; i < 800; i++) {
+            int updateIndex = dice.nextInt(source.size());
+            Integer updateValue = new Integer(dice.nextInt(50));
+            source.set(updateIndex, updateValue);
         }
     }
     
+    /**
+     * Validates that the state of the PopularityList is correct. Because this class
+     * is a Listener, it can detect the exact change that causes the PopularityList
+     * to come out of sync.
+     */
     class PopularityListValidator implements ListEventListener {
+
         private List elementCounts = new ArrayList();
-        private List popularityList;
-        private List source;
-        public PopularityListValidator(PopularityList popularityList, List source) {
+        private PopularityList popularityList;
+        private SortedList sortedSource;
+
+        /**
+         * Creates a PopularityListValidator that validates that the specified
+         * popularity list ranks the elements in the speceified sortedlist in 
+         * order of popularity. A SortedList is used because it has much better
+         * performance for {@link List#indexOf(Object)} and {@link List#lastIndexOf(Object)}
+         * operations.
+         */
+        public PopularityListValidator(PopularityList popularityList, SortedList sortedSource) {
             this.popularityList = popularityList;
-            this.source = source;
+            this.sortedSource = sortedSource;
             for(int i = 0; i < popularityList.size(); i++) {
-                elementCounts.add(new Integer(count(popularityList.get(i), source)));
+                elementCounts.add(new Integer(count(popularityList.get(i))));
             }
             
             popularityList.addListEventListener(this);
         }
+        
+        /**
+         * Handle the source PopularityList changing by validating that list.
+         */
         public void listChanged(ListEvent listEvent) {
+            List changedIndices = new ArrayList();
+            
             // apply the changes
             while(listEvent.next()) {
                 int changeIndex = listEvent.getIndex();
                 int changeType = listEvent.getType();
+                changedIndices.add(new Integer(changeIndex));
                 
                 if(changeType == ListEvent.DELETE) {
                     elementCounts.remove(changeIndex);
                 } else if(changeType == ListEvent.INSERT) {
-                    elementCounts.add(changeIndex, new Integer(count(popularityList.get(changeIndex), source)));
+                    elementCounts.add(changeIndex, new Integer(count(popularityList.get(changeIndex))));
                 } else if(changeType == ListEvent.UPDATE) {
-                    elementCounts.set(changeIndex, new Integer(count(popularityList.get(changeIndex), source)));
+                    elementCounts.set(changeIndex, new Integer(count(popularityList.get(changeIndex))));
                 }
             }
             
             // validate the changes
             assertEquals(popularityList.size(), elementCounts.size());
-            for(int i = 0; i < popularityList.size(); i++) {
-                assertEquals("Test index " + i + ", value: " + popularityList.get(i), elementCounts.get(i), new Integer(count(popularityList.get(i), source)));
+            for(Iterator c = changedIndices.iterator(); c.hasNext(); ) {
+                int changeIndex = ((Integer)c.next()).intValue();
+                for(int i = Math.max(changeIndex - 1, 0); i < Math.min(changeIndex+2, popularityList.size()); i++) {
+                    assertEquals("Test index " + i + ", value: " + popularityList.get(i), elementCounts.get(i), new Integer(count(popularityList.get(i))));
+                }
             }
+        }
+
+        /**
+         * Get the number of copies of the specified value exist in the source list.
+         */
+        public int count(Object value) {
+            int first = sortedSource.indexOf(value);
+            if(first == -1) return 0;
+            int last = sortedSource.lastIndexOf(value);
+            return (last - first + 1);
         }
     }
 }

@@ -41,14 +41,29 @@ public final class PopularityList extends TransformedList {
     private UniqueList uniqueList;
     
     /**
-     * @param comparator The {@link Comparator} used to determine equality.
+     * Creates a new {@link PopularityList} that provides frequency-ranking for the
+     * specified {@link EventList}.
+     * 
+     * @param uniqueComparator The {@link Comparator} used to determine equality.
      */
     public PopularityList(EventList source, Comparator uniqueComparator) {
         this(source, new UniqueList(source, uniqueComparator));
     }
+
+    /**
+     * Creates a new {@link PopularityList} that provides frequency-ranking for the
+     * specified {@link EventList}.
+     * 
+     * @param uniqueComparator The {@link Comparator} used to determine equality.
+     */
     public PopularityList(EventList source) {
         this(source, new UniqueList(source));
     }
+    
+    /**
+     * Private constructor is used as a Java-language hack to allow us to save
+     * a reference to the specified {@link UniqueList}.
+     */
     private PopularityList(EventList source, UniqueList uniqueList) {
         super(new SortedList(uniqueList, new PopularityComparator(uniqueList)));
         this.uniqueList = uniqueList;

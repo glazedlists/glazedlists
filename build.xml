@@ -54,7 +54,7 @@
         <exclude name="**/demo/**"/>
         <exclude name="**/migrationkit/**"/>
         <exclude name="**/swt/**"/>
-        <exclude name="**/net/**"/>
+        <!--<exclude name="**/net/**"/>-->
       </packageset>
       <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
       <bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>

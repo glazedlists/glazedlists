@@ -180,53 +180,44 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
             // inserts can result in UPDATE or INSERT events
             if(changeType == ListEvent.INSERT) {
-                int hasNeighbour = handleOldNeighbour(changeIndex);
+                boolean hasNeighbour = handleOldNeighbour(changeIndex);
                 // finally fire the event
-                if(hasNeighbour != 0) {
+                if(hasNeighbour) {
                     enqueueEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
                 } else {
                     enqueueEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
                 }
             // updates can result in INSERT, UPDATE or DELETE events
             } else if(changeType == ListEvent.UPDATE) {
+
                 // get the previous state
                 Object updated = duplicatesList.get(changeIndex);
-                boolean hadDuplicateOnRight = (updated == TEMP_UNIQUE);
-                boolean hadDuplicateOnLeft = (updated == DUPLICATE);
-                boolean hadNoDuplicate = (updated == DUPLICATE);
+                boolean wasDuplicate = (updated == DUPLICATE); // this was a duplicate of an earlier element
+                boolean hadDuplicate = (updated == TEMP_UNIQUE); // this has a duplicate of a later element
+                boolean wasUnique = (updated == UNIQUE); // this had no duplicate on either side
+
                 // get the current state
-                int hasNeighbour = handleOldNeighbour(changeIndex);
-                boolean duplicateOnRight = (hasNeighbour == 1);
-                boolean duplicateOnLeft = (hasNeighbour == -1);
-                boolean noDuplicate = (hasNeighbour == 0);
+                boolean isUnique = !handleOldNeighbour(changeIndex);
+
                 // fire events
                 int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
-                int rightNeighbourIndex = compressedIndex + 1;
-                // left changed -> was dup of left, now no longer
-                // left changed -> was original, now dup of left
-                // right changed -> had dup on right, now 2 distinct
-                // right changed -> was original, now dup on right
-                
-                // neighbour on left has changed
-                if(hadDuplicateOnLeft) enqueueEvent(ListEvent.UPDATE, compressedIndex-1, false);
-                
-                if(hasNeighbour != 0) {
-                    if(updated == UNIQUE) {
-                        enqueueEvent(ListEvent.DELETE, compressedIndex, true);
-                        rightNeighbourIndex--;
-                    } else {
-                        enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
-                    }
-                } else {
-                    if(updated == UNIQUE) {
-                        // should this be false? -Jesse, 2004-11-20
+                if(isUnique) {
+                    if(wasUnique) {
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, true);
                     } else {
+                        if(wasDuplicate) enqueueEvent(ListEvent.UPDATE, compressedIndex-1, false);
                         enqueueEvent(ListEvent.INSERT, compressedIndex, true);
+                        if(hadDuplicate) enqueueEvent(ListEvent.UPDATE, compressedIndex+1, false);
+                    }
+                } else {
+                    if(wasUnique) {
+                        enqueueEvent(ListEvent.DELETE, compressedIndex, true);
+                        enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
+                    } else {
+                        enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
+                        if(compressedIndex+1 < duplicatesList.getCompressedList().size()) enqueueEvent(ListEvent.UPDATE, compressedIndex+1, false);
                     }
                 }
-                // extra events for good measure
-                if(rightNeighbourIndex < duplicatesList.getCompressedList().size()) enqueueEvent(ListEvent.UPDATE, rightNeighbourIndex, false);
                 
             // deletes can result in UPDATE or DELETE events
             } else if(changeType == ListEvent.DELETE) {
@@ -261,18 +252,12 @@ public final class UniqueList extends TransformedList implements ListEventListen
      *      updated in response. returns false if the specified index has no such
      *      neighbour. In this case the value at the specified index will be
      *      marked as unique (but not temporarily so).
-     * @return -1 if a neighbour was found on the left and the duplicates list
-     *      has been updated in response. Returns 1 if a neighbour was found on the
-     *      right. Returns 0 if the specified index has no such
-     *      neighbour. In this case the value at the specified index will be
-     *      marked as unique (but not temporarily so).
      */
-    private int handleOldNeighbour(int changeIndex) {
+    private boolean handleOldNeighbour(int changeIndex) {
         // test if equal by value to predecessor which is always old
         if(valuesEqual(changeIndex-1, changeIndex)) {
             duplicatesList.set(changeIndex, DUPLICATE);
-            //return true;
-            return -1;
+            return true;
         }
 
         // search for an old follower that is equal
@@ -288,14 +273,12 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 } else {
                     duplicatesList.set(changeIndex, UNIQUE);
                     duplicatesList.set(followerIndex, null);
-                    //return true;
-                    return 1;
+                    return true;
                 }
             // we have no equal follower that is old, this is a new value
             } else {
                 duplicatesList.set(changeIndex, UNIQUE);
-                //return false;
-                return 0;
+                return false;
             }
         }
     }
