@@ -17,9 +17,12 @@ import java.lang.reflect.*;
 public class BeanProperty {
 
     /** the target class */
-    private Class memberClass = null;
+    private Class beanClass = null;
     /** the property name */
     private String propertyName = null;
+    
+    /** the value class */
+    private Class valueClass = null;
 
     /** the chain of methods for the getter */
     private List getterChain = null;
@@ -35,14 +38,14 @@ public class BeanProperty {
      * Creates a new {@link BeanProperty} that gets the specified property from the
      * specified class.
      */
-    public BeanProperty(Class memberClass, String propertyName, boolean readable, boolean writable) {
-        this.memberClass = memberClass;
+    public BeanProperty(Class beanClass, String propertyName, boolean readable, boolean writable) {
+        this.beanClass = beanClass;
         this.propertyName = propertyName;
 
         // look up the common chain
         String[] propertyParts = propertyName.split("\\.");
         List commonChain = new ArrayList();
-        Class currentClass = memberClass;
+        Class currentClass = beanClass;
         for(int p = 0; p < propertyParts.length - 1; p++) {
             Method partGetter = findGetterMethod(currentClass, propertyParts[p]);
             commonChain.add(partGetter);
@@ -53,14 +56,18 @@ public class BeanProperty {
         if(readable) {
             getterChain = new ArrayList();
             getterChain.addAll(commonChain);
-            getterChain.add(findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]));
+            Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
+            getterChain.add(lastGetter);
+            valueClass = lastGetter.getReturnType();
         }
 
         // look up the final setter
         if(writable) {
             setterChain = new ArrayList();
             setterChain.addAll(commonChain);
-            setterChain.add(findSetterMethod(currentClass, propertyParts[propertyParts.length - 1]));
+            Method lastSetter = findSetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
+            setterChain.add(lastSetter);
+            if(valueClass == null) valueClass = lastSetter.getParameterTypes()[0];
         }
     }
 
@@ -168,8 +175,8 @@ public class BeanProperty {
     /**
      * Gets the base class that this getter accesses.
      */
-    public Class getPropertyClass() {
-         return memberClass;
+    public Class getBeanClass() {
+         return beanClass;
     }
 
     /**
@@ -177,6 +184,14 @@ public class BeanProperty {
      */
     public String getPropertyName() {
          return propertyName;
+    }
+
+    /**
+     * Gets the class of the property's value. This is the return type and not
+     * necessarily the runtime type of the class.
+     */
+    public Class getValueClass() {
+        return valueClass;
     }
 
     /**
@@ -197,7 +212,7 @@ public class BeanProperty {
      * Gets the value of this property for the specified Object.
      */
     public Object get(Object member) {
-        if(!isReadable()) throw new IllegalStateException("Property " + propertyName + " of " + memberClass + " not readable");
+        if(!isReadable()) throw new IllegalStateException("Property " + propertyName + " of " + beanClass + " not readable");
 
         try {
             // do all the getters in sequence
@@ -221,7 +236,7 @@ public class BeanProperty {
      * Gets the value of this property for the specified Object.
      */
     public Object set(Object member, Object newValue) {
-        if(!isWritable()) throw new IllegalStateException("Property " + propertyName + " of " + memberClass + " not writable");
+        if(!isWritable()) throw new IllegalStateException("Property " + propertyName + " of " + beanClass + " not writable");
 
         try {
             // everything except the last setter chain element is a getter

@@ -47,6 +47,7 @@ public class BeanPropertyTest extends TestCase {
         Truck myTruck = new Truck(3);
         myTruck.setColor(Color.yellow);
         assertEquals(Color.yellow, truckColor.get(myTruck));
+        assertEquals(Color.class, truckColor.getValueClass());
 
         // superclass property get
         truckColor.set(myTruck, Color.green);
@@ -56,6 +57,7 @@ public class BeanPropertyTest extends TestCase {
         BeanProperty gasUp = new BeanProperty(Automobile.class, "fullOfGas", false, true);
         gasUp.set(myCar, Boolean.TRUE);
         assertEquals(true, myCar.getDrivable());
+        assertEquals(boolean.class, gasUp.getValueClass());
         gasUp.set(myCar, Boolean.FALSE);
         assertEquals(false, myCar.getDrivable());
 
@@ -63,6 +65,7 @@ public class BeanPropertyTest extends TestCase {
         BeanProperty drivable = new BeanProperty(Automobile.class, "drivable", true, false);
         myCar.setFullOfGas(true);
         assertEquals(Boolean.TRUE, drivable.get(myCar));
+        assertEquals(boolean.class, drivable.getValueClass());
         myCar.setFullOfGas(false);
         assertEquals(Boolean.FALSE, drivable.get(myCar));
 
@@ -70,6 +73,7 @@ public class BeanPropertyTest extends TestCase {
         BeanProperty towedVehicle = new BeanProperty(SupportsTrailerHitch.class, "towedVehicle", true, true);
         myTruck.setTowedVehicle(myCar);
         assertEquals(myCar, towedVehicle.get(myTruck));
+        assertEquals(Automobile.class, towedVehicle.getValueClass());
 
         // interface property set
         towedVehicle.set(myTruck, yourCar);
@@ -87,6 +91,7 @@ public class BeanPropertyTest extends TestCase {
         towTruck.setTowedVehicle(rainbowCar);
         rainbowCar.setColor(Color.red);
         assertEquals(Color.red, towAndPaint.get(towTruck));
+        assertEquals(Color.class, towAndPaint.getValueClass());
 
         // navigated set
         towAndPaint.set(towTruck, Color.gray);
@@ -98,6 +103,7 @@ public class BeanPropertyTest extends TestCase {
         assertEquals(new Integer(0), red.get(towTruck));
         rainbowCar.setColor(Color.red);
         assertEquals(new Integer(255), red.get(towTruck));
+        assertEquals(int.class, red.getValueClass());
     }
     
     /**
