@@ -175,163 +175,165 @@ public class IteratorTest extends TestCase {
      * is the one returned that way everything else is up to Sun to test.
      */
     public void testEmptyListIterator() {
-		BasicEventList testList = new BasicEventList();
-		assertEquals(Collections.EMPTY_LIST.iterator().getClass(), testList.iterator().getClass());
-	}
+        BasicEventList testList = new BasicEventList();
+        assertEquals(Collections.EMPTY_LIST.iterator().getClass(), testList.iterator().getClass());
+    }
 
-	/**
-	 * Tests that changing the underlying list externally to the ListIterator
-	 * doesn't break the expectation of the remove operation.
-	 */
-	public void testRemoveAfterInsertAtCursor() {
-		BasicEventList testList = new BasicEventList();
-		String helo = "Hello, world.";
-		String bye = "Goodbye, cruel world.";
-		String end = "the end";
-		testList.add(bye);
-		testList.add(end);
-		ListIterator iterator = testList.listIterator();
+    /**
+     * Tests that changing the underlying list externally to the ListIterator
+     * doesn't break the expectation of the remove operation.
+     */
+    public void testRemoveAfterInsertAtCursor() {
+        BasicEventList testList = new BasicEventList();
+        String helo = "Hello, world.";
+        String bye = "Goodbye, cruel world.";
+        String end = "the end";
+        testList.add(bye);
+        testList.add(end);
+        ListIterator iterator = testList.listIterator();
 
-		// move iterator to bye
-		iterator.next();
-		testList.add(0, helo);
-		iterator.remove();
-		assertEquals(false, testList.contains(bye));
-	}
+        // move iterator to bye
+        iterator.next();
+        testList.add(0, helo);
+        iterator.remove();
+        assertEquals(false, testList.contains(bye));
+    }
 
-	/**
-	 * Tests that changing the underlying list externally to the ListIterator
-	 * doesn't break the expectation of the remove operation.
-	 */
-	public void testRemoveAfterInsertAtNext() {
-		BasicEventList testList = new BasicEventList();
-		String helo = "Hello, world.";
-		String bye = "Goodbye, cruel world.";
-		String end = "the end";
-		testList.add(bye);
-		testList.add(end);
-		ListIterator iterator = testList.listIterator();
+    /**
+     * Tests that changing the underlying list externally to the ListIterator
+     * doesn't break the expectation of the remove operation.
+     */
+    public void testRemoveAfterInsertAtNext() {
+        BasicEventList testList = new BasicEventList();
+        String helo = "Hello, world.";
+        String bye = "Goodbye, cruel world.";
+        String end = "the end";
+        testList.add(bye);
+        testList.add(end);
+        ListIterator iterator = testList.listIterator();
 
-		// move iterator to bye
-		iterator.next();
-		testList.add(1, helo);
-		iterator.remove();
-		assertEquals(false, testList.contains(bye));
-	}
+        // move iterator to bye
+        iterator.next();
+        testList.add(1, helo);
+        iterator.remove();
+        assertEquals(false, testList.contains(bye));
+    }
 
-	/**
-	 * Tests that changing the underlying list externally to the ListIterator
-	 * doesn't break the expectation of the remove operation.
-	 */
-	public void testRemoveAfterInsertAtCursorReverse() {
-		BasicEventList testList = new BasicEventList();
-		String helo = "Hello, world.";
-		String bye = "Goodbye, cruel world.";
-		String end = "the end";
-		testList.add(end);
-		testList.add(bye);
-		ListIterator iterator = testList.listIterator(testList.size());
+    /**
+     * Tests that changing the underlying list externally to the ListIterator
+     * doesn't break the expectation of the remove operation.
+     */
+    public void testRemoveAfterInsertAtCursorReverse() {
+        BasicEventList testList = new BasicEventList();
+        String helo = "Hello, world.";
+        String bye = "Goodbye, cruel world.";
+        String end = "the end";
+        testList.add(end);
+        testList.add(bye);
+        ListIterator iterator = testList.listIterator(testList.size());
 
-		// move iterator to bye
-		iterator.previous();
-		testList.add(1, helo);
-		iterator.remove();
-		assertEquals(false, testList.contains(bye));
-	}
+        // move iterator to bye
+        iterator.previous();
+        testList.add(1, helo);
+        iterator.remove();
+        assertEquals(false, testList.contains(bye));
+    }
 
-	/**
-	 * Tests that changing the underlying list externally to the ListIterator
-	 * doesn't break the expectation of the remove operation.
-	 */
-	public void testRemoveAfterInsertAtPrevious() {
-		BasicEventList testList = new BasicEventList();
-		String helo = "Hello, world.";
-		String bye = "Goodbye, cruel world.";
-		String end = "the end";
-		testList.add(end);
-		testList.add(bye);
-		ListIterator iterator = testList.listIterator(testList.size());
+    /**
+     * Tests that changing the underlying list externally to the ListIterator
+     * doesn't break the expectation of the remove operation.
+     */
+    public void testRemoveAfterInsertAtPrevious() {
+        BasicEventList testList = new BasicEventList();
+        String helo = "Hello, world.";
+        String bye = "Goodbye, cruel world.";
+        String end = "the end";
+        testList.add(end);
+        testList.add(bye);
+        ListIterator iterator = testList.listIterator(testList.size());
 
-		// move iterator to bye
-		iterator.previous();
-		testList.add(0, helo);
-		iterator.remove();
-		assertEquals(false, testList.contains(bye));
-	}
+        // move iterator to bye
+        iterator.previous();
+        testList.add(0, helo);
+        iterator.remove();
+        assertEquals(false, testList.contains(bye));
+    }
 
-	/**
-	 * Tests that adding at a particular element does the right thing.
-	 */
-	public void testAdding() {
-		// Create a control list to test against
-		ArrayList controlList = new ArrayList();
-		controlList.add("zero");
-		controlList.add("one");
-		controlList.add("two");
-		controlList.add("three");
-		controlList.add("four");
+    /**
+     * Tests that adding at a particular element does the right thing.
+     */
+    public void testAdding() {
+        // Create a control list to test against
+        ArrayList controlList = new ArrayList();
+        controlList.add("zero");
+        controlList.add("one");
+        controlList.add("two");
+        controlList.add("three");
+        controlList.add("four");
 
-		// Create a list to be iterated on forwards
-		BasicEventList forwardsList = new BasicEventList();
-		forwardsList.add("one");
-		forwardsList.add("three");
+        // Create a list to be iterated on forwards
+        BasicEventList forwardsList = new BasicEventList();
+        forwardsList.add("one");
+        forwardsList.add("three");
 
-		// Iterate through the list forwards adding in places of interest
-		ListIterator iterator = forwardsList.listIterator(0);
-		iterator.add("zero");
-		assertEquals("one", (String)iterator.next());
-		iterator.add("two");
-		assertEquals("three", (String)iterator.next());
-		iterator.add("four");
-		assertEquals(controlList, forwardsList);
+        // Iterate through the list forwards adding in places of interest
+        ListIterator iterator = forwardsList.listIterator(0);
+        iterator.add("zero");
+        assertEquals("one", (String)iterator.next());
+        iterator.add("two");
+        assertEquals("three", (String)iterator.next());
+        iterator.add("four");
+        assertEquals(controlList, forwardsList);
 
-		// Create a list to be iterated of backwards
-		BasicEventList backwardsList = new BasicEventList();
-		backwardsList.add("one");
-		backwardsList.add("three");
+        // Create a list to be iterated of backwards
+        BasicEventList backwardsList = new BasicEventList();
+        backwardsList.add("one");
+        backwardsList.add("three");
 
-		// Iterate through the list backwards adding in places of interest
-		ListIterator backwardsIterator = backwardsList.listIterator(backwardsList.size());
-		backwardsIterator.add("four");
-		assertEquals("four", (String)backwardsIterator.previous());
-		assertEquals("three", (String)backwardsIterator.previous());
-		backwardsIterator.add("two");
-		assertEquals("one", (String)backwardsIterator.previous());
-		backwardsIterator.add("zero");
-		assertEquals(false, backwardsIterator.hasPrevious());
-		assertEquals(controlList, backwardsList);
-	}
+        // Iterate through the list backwards adding in places of interest
+        ListIterator backwardsIterator = backwardsList.listIterator(backwardsList.size());
+        backwardsIterator.add("four");
+        assertEquals("four", (String)backwardsIterator.previous());
+        assertEquals("three", (String)backwardsIterator.previous());
+        backwardsIterator.add("two");
+        assertEquals("two", (String)backwardsIterator.previous());
+        assertEquals("one", (String)backwardsIterator.previous());
+        backwardsIterator.add("zero");
+        assertEquals("zero", (String)backwardsIterator.previous());
+        assertEquals(false, backwardsIterator.hasPrevious());
+        assertEquals(controlList, backwardsList);
+    }
 
-	/**
-	 * Tests empty list adds
- 	 */
- 	public void testEmptyListAdding() {
-		List testList = new BasicEventList();
-		ListIterator iterator = testList.listIterator();
-		iterator.add("just one element");
-		assertEquals(false, iterator.hasNext());
-		assertEquals(true, iterator.hasPrevious());
-	}
+    /**
+     * Tests empty list adds
+     */
+    public void testEmptyListAdding() {
+        List testList = new BasicEventList();
+        ListIterator iterator = testList.listIterator();
+        iterator.add("just one element");
+        assertEquals(false, iterator.hasNext());
+        assertEquals(true, iterator.hasPrevious());
+    }
 
-	/**
-	 * Tests that the EventListIterator responds correctly to adding on an
-	 * empty list from an external call to remove().
-	 */
-	public void testExternalAddingOnEmptyList() {
-		BasicEventList testList = new BasicEventList();
-		ListIterator iterator = testList.listIterator();
-		assertEquals(false, iterator.hasPrevious());
-		assertEquals(false, iterator.hasNext());
+    /**
+     * Tests that the EventListIterator responds correctly to adding on an
+     * empty list from an external call to remove().
+     */
+    public void testExternalAddingOnEmptyList() {
+        BasicEventList testList = new BasicEventList();
+        ListIterator iterator = testList.listIterator();
+        assertEquals(false, iterator.hasPrevious());
+        assertEquals(false, iterator.hasNext());
 
-		// add one element to validate the iterator responds accordingly
-		String helo = "hello, world";
-		testList.add(helo);
-		assertEquals(false, iterator.hasPrevious());
-		assertEquals(true, iterator.hasNext());
-		assertEquals(helo, iterator.next());
-		assertEquals(true, iterator.hasPrevious());
-		assertEquals(false, iterator.hasNext());
-	}
+        // add one element to validate the iterator responds accordingly
+        String helo = "hello, world";
+        testList.add(helo);
+        assertEquals(true, iterator.hasPrevious());
+        assertEquals(false, iterator.hasNext());
+        assertEquals(helo, iterator.previous());
+        assertEquals(false, iterator.hasPrevious());
+        assertEquals(true, iterator.hasNext());
+    }
 
     /**
      * This manually executed test runs forever creating iterators and

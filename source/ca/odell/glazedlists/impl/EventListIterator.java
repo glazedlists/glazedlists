@@ -100,7 +100,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
     public Object next() {
         // next shouldn't have been called.
         if(nextIndex == source.size()) {
- 	       throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
+           throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
 
         // when next has not been removed
         } else {
@@ -132,7 +132,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
     public Object previous() {
         // previous shouldn't have been called
         if(nextIndex == 0) {
-	        throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
+            throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
 
         // when previous has not been removed
         } else {
