@@ -150,7 +150,10 @@ public class ThresholdMatcher extends AbstractMatcher {
             else
                 fireConstrained();
         } else if (old_threshold == null) {
-            fireConstrained();
+            if (match_on_no_threshold)
+                fireConstrained();
+            else
+                fireRelaxed();
         } else {
             // The operation can be smart about how the threshold changed
             int change = operation.changeType(old_threshold, threshold, comparator);
