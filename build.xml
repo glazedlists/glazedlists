@@ -130,11 +130,14 @@
      Package the entire Glazed Lists source tree in a .zip file.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-  <target name="dist" depends="init"
+  <target name="dist" depends="init,clean"
     description="Create a .zip file of the source for backup or distribution.">
-    <zip destfile="glazedlists-source.zip"
-       basedir="."
-       excludes="classes/**, docs/api/**, glazedlists-source.zip"/>
+    <zip destfile="glazedlists-source.zip" basedir=".">
+     <exclude name="classes/**"/>
+     <exclude name="docs/**"/>
+     <exclude name="glazedlists-source.zip"/>
+     <exclude name="www/**"/>
+    </zip>
   </target>
 
 
