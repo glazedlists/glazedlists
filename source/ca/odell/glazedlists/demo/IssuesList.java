@@ -25,8 +25,8 @@ public class IssuesList extends TransformedList {
     private URL issuesUrl;
     
     /** refresh every five minutes */
-    //private static long ISSUES_REFRESH_INTERVAL = 1000 * 60 * 5; 
-    private static long ISSUES_REFRESH_INTERVAL = 1000 * 5; 
+    private static long ISSUES_REFRESH_INTERVAL = 1000 * 60 * 5; 
+    //private static long ISSUES_REFRESH_INTERVAL = 1000 * 5; 
     
     /**
      * Create a new IssuesList that shows issues from the specified URL.

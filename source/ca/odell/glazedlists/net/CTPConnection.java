@@ -31,7 +31,7 @@ import java.util.logging.*;
  * <li>it can only read and write a single URI, "/glazedlists"
  * <li>as a client, it sends only the headers, "Host", "Transfer-Encoding"
  * <li>as a server, it sends only the header, "Transfer-Encoding"
- * <li>it does not interpret received headers
+ * <li>it interprets only the header, "Transfer-Encoding".
  *
  * client:
  * AWAITING_CONNECT
@@ -72,7 +72,7 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class CTPConnection {
+final class CTPConnection {
 
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnection.class.toString());
@@ -115,6 +115,9 @@ class CTPConnection {
     
     /** the only URI allowed by CTPConnection */
     private static final String CTP_URI = "/glazedlists";
+    
+    /** if our source is not chunked, we have to break up chunks arbitrarily */
+    private boolean sourceChunked = false;
     
     /**
      * Creates a new CTPConnection.
@@ -271,6 +274,7 @@ class CTPConnection {
             
             // parse the headers
             Map headers = readHeaders();
+            handleHeaders(headers);
             parser.consume("\\r\\n");
             
             // handle the request
@@ -287,8 +291,6 @@ class CTPConnection {
             close(e);
         }
     }
-
-
     
     /**
      * Sends the response header to the client.
@@ -349,6 +351,7 @@ class CTPConnection {
             
             // parse the headers
             Map headers = readHeaders();
+            handleHeaders(headers);
             parser.consume("\\r\\n");
             
             // handle the response
@@ -399,33 +402,48 @@ class CTPConnection {
      * contain a chunk:
      *   <li>the chunk will be processed
      *   <li>if the chunk is empty, the connection will be closed
+     *
+     * <p>It is possible that the source stream is not chunked, as a consequence
+     * of an interfering proxy server. In this case, we arbitrarily form our own
+     * chunks which are as large as possible.
      */
     private void handleChunk() {
         try {
-            // if the chunk size has not loaded, load more
-            int chunkEndIndex = parser.indexOf("\\r\\n");
-            if(chunkEndIndex == -1) return;
+            if(sourceChunked) {
+                // if the chunk size has not loaded, load more
+                int chunkEndIndex = parser.indexOf("\\r\\n");
+                if(chunkEndIndex == -1) return;
+                
+                // calculate the chunk size
+                String chunkSizeInHex = parser.readUntil("(\\;[^\\r\\n]*)?\\r\\n", false);
+                int chunkSize = Integer.parseInt(chunkSizeInHex, 16);
+                
+                // if the full chunk has not loaded, load more
+                int bytesRequired = chunkEndIndex + 2 + chunkSize + 2;
+                if(bytesRequired > parser.bytesAvailable()) {
+                    return;
+                }
             
-            // calculate the chunk size
-            String chunkSizeInHex = parser.readUntil("(\\;[^\\r\\n]*)?\\r\\n", false);
-            int chunkSize = Integer.parseInt(chunkSizeInHex, 16);
-            
-            // if the full chunk has not loaded, load more
-            int bytesRequired = chunkEndIndex + 2 + chunkSize + 2;
-            if(bytesRequired > parser.bytesAvailable()) {
-                return;
-            }
-        
-            // load the chunk
-            parser.consume("[^\\r\\n]*\\r\\n");
-            ByteBuffer chunkBuffer = parser.readBytes(chunkSize);
-            parser.consume("\\r\\n");
-            
-            // handle the chunk
-            if(chunkSize != 0) {
-                handler.receiveChunk(this, chunkBuffer);
+                // load the chunk
+                parser.consume("[^\\r\\n]*\\r\\n");
+                ByteBuffer chunkBuffer = parser.readBytes(chunkSize);
+                parser.consume("\\r\\n");
+                
+                // handle the chunk
+                if(chunkSize != 0) {
+                    handler.receiveChunk(this, chunkBuffer);
+                } else {
+                    close();
+                }
+
             } else {
-                close();
+                int bytesAvailable = parser.bytesAvailable();
+                ByteBuffer chunkBuffer = parser.readBytes(bytesAvailable);
+            
+                // handle the simulated chunk
+                if(bytesAvailable != 0) {
+                    handler.receiveChunk(this, chunkBuffer);
+                }
             }
             
         } catch(NumberFormatException e) {
@@ -532,5 +550,20 @@ class CTPConnection {
             headers.put(key, value);
         }
         return headers;
+    }
+
+    /**
+     * Handles the Map of headers. This adjusts the state of the CTPConnection
+     * in response to the headers.
+     *
+     * <p>Currently, this recognizes the following headers:
+     * <li>Transfer-Encoding, if "chunked", then this expects chunked HTTP transfer.
+     */
+    private void handleHeaders(Map headers) {
+        if("chunked".equals(headers.get("Transfer-Encoding"))) {
+            sourceChunked = true;
+        } else {
+            sourceChunked = false;
+        }
     }
 }

@@ -61,7 +61,7 @@ public class Issue implements TextFilterable, Comparable {
     private List descriptions = new ArrayList();
     private List attachments = new ArrayList();
     private List activities = new ArrayList();
-    
+
     private static SortedSet ISSUE_SIMPLE_FIELDS = new TreeSet();
     static {
         ISSUE_SIMPLE_FIELDS.add("issue_id");
@@ -116,6 +116,45 @@ public class Issue implements TextFilterable, Comparable {
         ACTIVITY_SIMPLE_FIELDS.add("field_desc");
         ACTIVITY_SIMPLE_FIELDS.add("oldvalue");
         ACTIVITY_SIMPLE_FIELDS.add("newvalue");
+    }
+    
+    /**
+     * Creates a new empty issue.
+     */
+    public Issue() {
+        // do nothing
+    }
+    
+    /**
+     * Creates a new issue that uses the specified issue as a template.
+     */
+    public Issue(Issue template) {
+        id = template.id;
+        status = template.status;
+        priority = template.priority;
+        resolution = template.resolution;
+        component = template.component;
+        version = template.version;
+        repPlatform = template.repPlatform;
+        assignedTo = template.assignedTo;
+        deltaTimestamp = template.deltaTimestamp;
+        subcomponent = template.subcomponent;
+        reporter = template.reporter;
+        targetMilestone = template.targetMilestone;
+        issueType = template.issueType;
+        creationTimestamp = template.creationTimestamp;
+        qaContact = template.qaContact;
+        statusWhiteboard = template.statusWhiteboard;
+        votes = template.votes;
+        operatingSystem = template.operatingSystem;
+        shortDescription = template.shortDescription;
+        keywords.addAll(template.keywords);
+        blocks.addAll(template.blocks);
+        dependsOn.addAll(template.dependsOn);
+        cc.addAll(template.cc);
+        descriptions.addAll(template.descriptions);
+        attachments.addAll(template.attachments);
+        activities.addAll(template.activities);
     }
     
     /**
@@ -320,7 +359,19 @@ public class Issue implements TextFilterable, Comparable {
         try {
             IssueHandler issueReader = new IssueHandler();
             SAXParserFactory.newInstance().newSAXParser().parse(source, issueReader);
-            return issueReader.getIssues();
+            //return issueReader.getIssues();
+            List singleResults = issueReader.getIssues();
+            List results = new ArrayList();
+            Random random = new Random();
+            for(Iterator i = singleResults.iterator(); i.hasNext(); ) {
+                Issue issue = (Issue)i.next();
+                for(int j = 0; j < 100; j++) {
+                    Issue copy = new Issue(issue);
+                    copy.id = new Integer(random.nextInt(10000));
+                    results.add(copy);
+                }
+            }
+            return results;
         } catch(SAXException e) {
             e.printStackTrace();
             throw new IOException("Parsing failed " + e.getMessage());

@@ -180,8 +180,13 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
             WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
-            // test if this cell is editable
-            return writableTableFormat.isColumnEditable(column);
+            source.getReadWriteLock().readLock().lock();
+            try {
+                Object toEdit = source.get(row);
+                return writableTableFormat.isEditable(toEdit, column);
+            } finally {
+                source.getReadWriteLock().readLock().unlock();
+            }
         // this is not a writable table
         } else {
             return false;
