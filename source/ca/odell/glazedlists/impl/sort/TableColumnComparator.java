@@ -8,7 +8,7 @@ package ca.odell.glazedlists.impl.sort;
 
 // to work with Comparators
 import java.util.Comparator;
-import ca.odell.glazedlists.util.ComparatorFactory;
+import ca.odell.glazedlists.GlazedLists;
 // to work with TableFormats
 import ca.odell.glazedlists.gui.TableFormat;
 
@@ -31,7 +31,7 @@ public class TableColumnComparator implements Comparator {
      * column using the specified table format.
      */
     public TableColumnComparator(TableFormat tableFormat, int column) {
-        this(tableFormat, column, ComparatorFactory.comparable());
+        this(tableFormat, column, GlazedLists.comparableComparator());
     }
 
     /**
@@ -55,7 +55,7 @@ public class TableColumnComparator implements Comparator {
         // throw a 'nicer' exception if the class does not implement Comparable
         } catch(ClassCastException e) {
             IllegalStateException illegalStateException = null;
-            if(comparator == ComparatorFactory.comparable()) {
+            if(comparator == GlazedLists.comparableComparator()) {
                 illegalStateException = new IllegalStateException("TableComparatorChooser can not sort objects \"" + alphaField + "\", \"" + betaField + "\" that do not implement Comparable.");
             } else {
                 illegalStateException = new IllegalStateException("TableComparatorChooser can not sort objects \"" + alphaField + "\", \"" + betaField + "\" using the provided Comparator.");

@@ -10,7 +10,6 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.*;
 // SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Table;
@@ -63,7 +62,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * {@link TableFormat} as specified.
      */
     public EventTableViewer(EventList source, Table table, String[] propertyNames, String[] columnLabels) {
-        this(source, table, BeanToolFactory.tableFormat(propertyNames, columnLabels));
+        this(source, table, GlazedLists.tableFormat(propertyNames, columnLabels));
     }
 
     /**

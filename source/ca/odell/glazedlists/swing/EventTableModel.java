@@ -80,7 +80,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      *      your table are writable.
      */
     public EventTableModel(EventList source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
-        this(source, BeanToolFactory.writableTableFormat(propertyNames, columnLabels, writable));
+        this(source, GlazedLists.writableTableFormat(propertyNames, columnLabels, writable));
     }
 
     /**

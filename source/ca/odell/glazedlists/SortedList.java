@@ -8,7 +8,6 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
 import ca.odell.glazedlists.impl.sort.*;
@@ -53,7 +52,7 @@ public final class SortedList extends TransformedList {
      * or a {@link ClassCastException} will be thrown.
      */
     public SortedList(EventList source) {
-        this(source, ComparatorFactory.comparable());
+        this(source, GlazedLists.comparableComparator());
     }
 
     /**

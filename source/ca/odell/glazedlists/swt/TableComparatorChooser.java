@@ -9,7 +9,6 @@ package ca.odell.glazedlists.swt;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 // the Glazed Lists util and volatile packages for default comparators
-import ca.odell.glazedlists.util.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.sort.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5

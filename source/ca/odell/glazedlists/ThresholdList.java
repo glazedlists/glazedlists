@@ -8,7 +8,6 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.*;
 // to use standard collections
 import java.util.*;
 
@@ -68,7 +67,7 @@ public final class ThresholdList extends TransformedList {
      * specified {@link EventList} based on the specified integer JavaBean property.
      */
     public ThresholdList(EventList source, String propertyName) {
-        this(source, BeanToolFactory.thresholdEvaluator(propertyName));
+        this(source, GlazedLists.thresholdEvaluator(propertyName));
     }
 
     /**

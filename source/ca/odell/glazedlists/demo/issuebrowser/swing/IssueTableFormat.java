@@ -11,7 +11,7 @@ import java.util.Comparator;
 import ca.odell.glazedlists.demo.issuebrowser.Issue;
 import ca.odell.glazedlists.demo.issuebrowser.Priority;
 import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.util.*;
+import ca.odell.glazedlists.GlazedLists;
 
 
 /**
@@ -55,7 +55,7 @@ public class IssueTableFormat implements AdvancedTableFormat {
 	}
 
 	public Comparator getColumnComparator(int column) {
-		return ComparatorFactory.comparable();
+		return GlazedLists.comparableComparator();
 	}
 
 	public Object getColumnValue(Object baseObject, int column) {

@@ -9,7 +9,7 @@ package ca.odell.glazedlists.impl.adt;
 // for comparators and iterators
 import java.util.*;
 // for access to the ComparableComparator
-import ca.odell.glazedlists.util.*;
+import ca.odell.glazedlists.GlazedLists;
 
 /**
  * Models a tree which keeps its elements either in sorted order
@@ -228,7 +228,7 @@ public final class IndexedTree {
         long start = System.currentTimeMillis();
 
         for(int r = 0; r < repetitions; r++) {
-            IndexedTree tree = new IndexedTree(ComparatorFactory.comparable());
+            IndexedTree tree = new IndexedTree(GlazedLists.comparableComparator());
             for(int i = 0; i < operations; i++) {
                 int operation = (int)(random.nextDouble() * 3.0);
 

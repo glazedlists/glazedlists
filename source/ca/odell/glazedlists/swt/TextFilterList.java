@@ -94,7 +94,7 @@ public class TextFilterList extends DefaultTextFilterList {
      *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
      */
     public TextFilterList(EventList source, String[] propertyNames) {
-        this(source, null, BeanToolFactory.textFilterator(propertyNames));
+        this(source, null, GlazedLists.textFilterator(propertyNames));
     }
 
     /**
@@ -113,7 +113,7 @@ public class TextFilterList extends DefaultTextFilterList {
      * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, Text filterEdit, String[] propertyNames) {
-        this(source, filterEdit, BeanToolFactory.textFilterator(propertyNames));
+        this(source, filterEdit, GlazedLists.textFilterator(propertyNames));
     }
 
     /**

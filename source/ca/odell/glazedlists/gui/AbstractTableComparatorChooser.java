@@ -11,7 +11,6 @@ import ca.odell.glazedlists.*;
 // To track clicks
 import java.util.*;
 // For Comparators
-import ca.odell.glazedlists.util.ComparatorFactory;
 import ca.odell.glazedlists.impl.sort.*;
 
 /**
@@ -208,7 +207,7 @@ public abstract class AbstractTableComparatorChooser {
                 Comparator comparator = columnClickTracker.getComparator();
                 comparators.add(comparator);
             }
-            ComparatorChain comparatorChain = (ComparatorChain)ComparatorFactory.chain(comparators);
+            ComparatorChain comparatorChain = (ComparatorChain)GlazedLists.chainComparators(comparators);
 
             // select the new comparator
             sortedList.getReadWriteLock().writeLock().lock();
@@ -397,7 +396,7 @@ public abstract class AbstractTableComparatorChooser {
          */
         public Comparator getComparator() {
             Comparator comparator = (Comparator)comparators.get(getComparatorIndex());
-            if(isReverse()) comparator = ComparatorFactory.reverse(comparator);
+            if(isReverse()) comparator = GlazedLists.reverseComparator(comparator);
             return comparator;
         }
 

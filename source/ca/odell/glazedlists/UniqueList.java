@@ -8,8 +8,6 @@ package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
-// for event list utilities, iterators and comparators
-import ca.odell.glazedlists.util.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
 import ca.odell.glazedlists.impl.sort.*;
@@ -101,7 +99,7 @@ public final class UniqueList extends TransformedList {
      * must impelement {@link Comparable}.
      */
     public UniqueList(EventList source) {
-        this(source, ComparatorFactory.comparable());
+        this(source, GlazedLists.comparableComparator());
     }
 
     /** {@inheritDoc} */
