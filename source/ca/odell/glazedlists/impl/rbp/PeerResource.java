@@ -77,14 +77,14 @@ class PeerResource {
     /**
      * Handle the state of the specified connection changing.
      */
-    public void connectionClosed(PeerConnection connection, Exception reason) {
-        if(publisher == connection) {
+    public void connectionClosed(ResourceConnection connection, Exception reason) {
+        if(publisher == connection.getConnection()) {
             publisher = null;
             resourceStatus.setConnected(false, reason);
-            connection.incomingSubscriptions.remove(resourceUri);
+            connection.getConnection().incomingSubscriptions.remove(resourceUri);
         } else {
             subscribers.remove(connection);
-            connection.outgoingPublications.remove(resourceUri);
+            connection.getConnection().outgoingPublications.remove(resourceUri);
         }
     }
     
@@ -112,8 +112,8 @@ class PeerResource {
                 
                 // send the block to interested subscribers
                 for(int s = 0; s < subscribers.size(); s++) {
-                    PeerConnection subscriber = (PeerConnection)subscribers.get(s);
-                    subscriber.writeBlock(PeerResource.this, block);
+                    ResourceConnection subscriber = (ResourceConnection)subscribers.get(s);
+                    subscriber.getConnection().writeBlock(PeerResource.this, block);
                 }
             }
         }
@@ -152,9 +152,9 @@ class PeerResource {
                     publisher = peer.getConnection(resourceUri.getHost(), resourceUri.getPort());
                 
                     peer.subscribed.put(resourceUri, PeerResource.this);
-                    publisher.incomingSubscriptions.put(resourceUri, PeerResource.this);
-                    PeerBlock block = PeerBlock.subscribe(resourceUri);
-                    publisher.writeBlock(PeerResource.this, block);
+                    publisher.incomingSubscriptions.put(resourceUri, new ResourceConnection(publisher, PeerResource.this));
+                    PeerBlock subscribe = PeerBlock.subscribe(resourceUri);
+                    publisher.writeBlock(PeerResource.this, subscribe);
         
                 // if this is local, we're immediately connected
                 } else {
@@ -196,10 +196,10 @@ class PeerResource {
                     
                     // unpublish the subscribers
                     for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
-                        PeerConnection subscriber = (PeerConnection)s.next();
-                        subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceUri));
-                        subscriber.outgoingPublications.remove(resourceUri);
-                        if(subscriber.isIdle()) subscriber.close();
+                        ResourceConnection subscriber = (ResourceConnection)s.next();
+                        subscriber.getConnection().writeBlock(PeerResource.this, PeerBlock.unpublish(resourceUri));
+                        subscriber.getConnection().outgoingPublications.remove(resourceUri);
+                        if(subscriber.getConnection().isIdle()) subscriber.getConnection().close();
                         s.remove();
                     }
                 }
@@ -240,7 +240,7 @@ class PeerResource {
     /**
      * Handles a block of incoming data.
      */
-    void incomingBlock(PeerConnection source, PeerBlock block) {
+    void incomingBlock(ResourceConnection source, PeerBlock block) {
         if(block.isSubscribe()) remoteSubscribe(source, block);
         else if(block.isSubscribeConfirm()) remoteSubscribeConfirm(source, block);
         else if(block.isUpdate()) remoteUpdate(source, block);
@@ -248,9 +248,9 @@ class PeerResource {
         else if(block.isUnpublish()) remoteUnpublish(source, block);
         else throw new IllegalStateException();
     }
-    private void remoteUpdate(PeerConnection publisher, PeerBlock block) {
+    private void remoteUpdate(ResourceConnection publisher, PeerBlock block) {
         // update the internal state
-        if(publisher != null) updateId++;
+        updateId++;
 
         // confirm the update is consistent
         if(block.getUpdateId() != updateId) throw new IllegalStateException("Expected update id " + updateId + " but found " + block.getUpdateId());
@@ -259,42 +259,40 @@ class PeerResource {
         // handle the update
         resource.update(block.getPayload());
     }
-    private void remoteSubscribe(PeerConnection subscriber, PeerBlock block) {
+    private void remoteSubscribe(ResourceConnection subscriber, PeerBlock block) {
         // we're accepting connections
         if(resourceStatus.isConnected()) {
             // first create the subscription
-            subscriber.outgoingPublications.put(resourceUri, this);
+            subscriber.setUpdateId(updateId);
+            subscriber.getConnection().outgoingPublications.put(resourceUri, subscriber);
             subscribers.add(subscriber);
             
             // now send the snapshot to this subscriber
             PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceUri, sessionId, updateId, resource.toSnapshot());
-            subscriber.writeBlock(this, subscribeConfirm);
+            subscriber.getConnection().writeBlock(this, subscribeConfirm);
 
         // we're not accepting connections for now
         } else {
             PeerBlock unpublish = PeerBlock.unpublish(resourceUri);
-            subscriber.writeBlock(this, unpublish);
-            if(subscriber.isIdle()) subscriber.close();
+            subscriber.getConnection().writeBlock(this, unpublish);
+            if(subscriber.getConnection().isIdle()) subscriber.getConnection().close();
         }
     }
-    private void remoteSubscribeConfirm(PeerConnection publisher, PeerBlock block) {
-        // update publisher
-        publisher.incomingSubscriptions.put(resourceUri, this);
-        
+    private void remoteSubscribeConfirm(ResourceConnection publisher, PeerBlock block) {
         // update state
+        resource.fromSnapshot(block.getPayload());
         updateId = block.getUpdateId();
         sessionId = block.getSessionId();
-        resource.fromSnapshot(block.getPayload());
         
         // finally we're connected
         resourceStatus.setConnected(true, null);
     }
-    private void remoteUnsubscribe(PeerConnection subscriber, PeerBlock block) {
+    private void remoteUnsubscribe(ResourceConnection subscriber, PeerBlock block) {
         // remove the subscription
         subscribers.remove(subscriber);
-        subscriber.outgoingPublications.remove(resourceUri);
+        subscriber.getConnection().outgoingPublications.remove(resourceUri);
     }
-    private void remoteUnpublish(PeerConnection subscriber, PeerBlock block) {
+    private void remoteUnpublish(ResourceConnection subscriber, PeerBlock block) {
         // immediately disconnected
         resourceStatus.setConnected(false, new Exception("Resource became unavailable"));
         
@@ -306,7 +304,6 @@ class PeerResource {
         }
     }
     
-
     /**
      * Gets this resource as a String for debugging.
      */
@@ -316,8 +313,8 @@ class PeerResource {
         System.out.print(publisher);
         System.out.print(" to: ");
         for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
-            PeerConnection subscriber = (PeerConnection)s.next();
-            System.out.print(subscriber.toString());
+            ResourceConnection subscriber = (ResourceConnection)s.next();
+            System.out.print(subscriber.getConnection().toString());
             if(s.hasNext()) System.out.print(", ");
         }
         System.out.println("");

@@ -91,8 +91,8 @@ class PeerConnection implements CTPHandler {
         resourcesToNotify.addAll(incomingSubscriptions.values());
         resourcesToNotify.addAll(outgoingPublications.values());
         for(Iterator r = resourcesToNotify.iterator(); r.hasNext(); ) {
-            PeerResource resource = (PeerResource)r.next();
-            resource.connectionClosed(this, reason);
+            ResourceConnection resource = (ResourceConnection)r.next();
+            resource.getResource().connectionClosed(resource, reason);
         }
     }
 
@@ -116,13 +116,13 @@ class PeerConnection implements CTPHandler {
                 ResourceUri resourceUri = block.getResourceUri();
                 
                 // get the resource for this connection
-                PeerResource resource = null;
+                ResourceConnection resource = null;
                 if(block.isSubscribe()) {
-                    resource = peer.getPublishedResource(resourceUri);
+                    resource = new ResourceConnection(this, peer.getPublishedResource(resourceUri));
                 } else if(block.isUnsubscribe()) {
-                    resource = (PeerResource)outgoingPublications.get(resourceUri);
+                    resource = (ResourceConnection)outgoingPublications.get(resourceUri);
                 } else if(block.isSubscribeConfirm() || block.isUpdate() || block.isUnpublish()) {
-                    resource = (PeerResource)incomingSubscriptions.get(resourceUri);
+                    resource = (ResourceConnection)incomingSubscriptions.get(resourceUri);
                 } else {
                     throw new UnsupportedOperationException();
                 }
@@ -135,10 +135,14 @@ class PeerConnection implements CTPHandler {
                 }
                 
                 // handle the block
-                resource.incomingBlock(this, block);
+                resource.getResource().incomingBlock(resource, block);
             }
         // if the data is corrupted, close the connection
         } catch(ParseException e) {
+            source.close(e);
+        // if any other error happened, close the connection
+        } catch(RuntimeException e) {
+            logger.log(Level.WARNING, "Unexpected error handling block", e.getMessage());
             source.close(e);
         }
     }
