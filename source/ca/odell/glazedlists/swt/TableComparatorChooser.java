@@ -66,9 +66,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
 
         // listen for events on the specified table
         for(int c = 0; c < table.getColumnCount(); c++) {
-            table.getColumn(c).addListener(SWT.Selection, new ColumnListener(c));
             table.getColumn(c).addSelectionListener(new ColumnListener(c));
-            table.getColumn(c).addControlListener(new ColumnListener(c));
         }
     }
 
@@ -106,26 +104,16 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
         throw new IllegalArgumentException("Cannot remove nonexistant listener " + sortListener);
     }
 
-    class ColumnListener implements SelectionListener, Listener, ControlListener {
+    class ColumnListener implements SelectionListener {
         private int column;
         public ColumnListener(int column) {
             this.column = column;
         }
-        public void handleEvent(Event e) {
-            System.out.println("column clicked, " + e);
-        }
         public void widgetSelected(SelectionEvent e) {
-            System.out.println("column clicked, " + e);
             columnClicked(column, 1);
         }
         public void widgetDefaultSelected(SelectionEvent e) {
-            System.out.println("default selected, " + e);
-        }
-        public void controlMoved(ControlEvent e) {
-            System.out.println("control moved, " + e);
-        }
-        public void controlResized(ControlEvent e) {
-            System.out.println("control resized, " + e);
+            // Do Nothing
         }
     }
 

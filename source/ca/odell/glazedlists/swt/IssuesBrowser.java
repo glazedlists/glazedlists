@@ -250,7 +250,6 @@ public class IssuesBrowser {
      */
     public static void main(String[] args) {
         System.setProperty("java.library.path", ".");
-        System.out.println("Library Path: " +  System.getProperty("java.library.path"));
 
         Display display = new Display();
         Shell shell = new Shell(display);
@@ -262,7 +261,6 @@ public class IssuesBrowser {
 
         new IssuesBrowser(shell);
         shell.setSize(640, 480);
-        //shell.pack();
         shell.open();
 
         while(!shell.isDisposed()) {
@@ -271,6 +269,7 @@ public class IssuesBrowser {
             }
         }
         display.dispose();
+        System.exit(0);
     }
 
 }
