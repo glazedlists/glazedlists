@@ -121,27 +121,32 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * areas that changed are notified.
      */
     public void listChanged(ListEvent listChanges) {
-        // when all events hae already been processed by clearing the event queue
-        if(!listChanges.hasNext()) return;
-
-        // notify all changes simultaneously
-        if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
-            listChanges.clearEventQueue();
-            // first scroll to row zero
-            //tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
-            fireTableDataChanged();
-
-        // for all changes, one block at a time
-        } else {
-            while(listChanges.nextBlock()) {
-                // get the current change info
-                int startIndex = listChanges.getBlockStartIndex();
-                int endIndex = listChanges.getBlockEndIndex();
-                int changeType = listChanges.getType();
-                // create a table model event for this block
-                tableModelEvent.setValues(startIndex, endIndex, changeType);
-                fireTableChanged(tableModelEvent);
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // when all events hae already been processed by clearing the event queue
+            if(!listChanges.hasNext()) return;
+    
+            // notify all changes simultaneously
+            if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
+                listChanges.clearEventQueue();
+                // first scroll to row zero
+                //tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
+                fireTableDataChanged();
+    
+            // for all changes, one block at a time
+            } else {
+                while(listChanges.nextBlock()) {
+                    // get the current change info
+                    int startIndex = listChanges.getBlockStartIndex();
+                    int endIndex = listChanges.getBlockEndIndex();
+                    int changeType = listChanges.getType();
+                    // create a table model event for this block
+                    tableModelEvent.setValues(startIndex, endIndex, changeType);
+                    fireTableChanged(tableModelEvent);
+                }
             }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 

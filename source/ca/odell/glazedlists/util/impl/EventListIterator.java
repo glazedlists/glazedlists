@@ -100,16 +100,11 @@ public class EventListIterator implements ListIterator, ListEventListener {
      * call to {@link #next()}.
      */
     public boolean hasNext() {
-        source.getReadWriteLock().readLock().lock();
-        try {
-            if(nextIndex < source.size()) {
-                next = source.get(nextIndex);
-                return true;
-            } else {
-                return false;
-            }
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
+        if(nextIndex < source.size()) {
+            next = source.get(nextIndex);
+            return true;
+        } else {
+            return false;
         }
     }
     
@@ -153,16 +148,11 @@ public class EventListIterator implements ListIterator, ListEventListener {
      * call to {@link #previous()}.
      */
     public boolean hasPrevious() {
-        source.getReadWriteLock().readLock().lock();
-        try {
-            if(nextIndex > 0) {
-                previous = source.get(nextIndex - 1);
-                return true;
-            } else {
-                return false;
-            }
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
+        if(nextIndex > 0) {
+            previous = source.get(nextIndex - 1);
+            return true;
+        } else {
+            return false;
         }
     }
     

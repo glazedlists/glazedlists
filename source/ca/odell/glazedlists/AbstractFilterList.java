@@ -58,16 +58,10 @@ public abstract class AbstractFilterList extends TransformedList implements List
         // use an Internal Lock to avoid locking the source list during a sort
         readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
 
-        // load the initial data
-        getReadWriteLock().readLock().lock();
-        try {
-            // build a list of what is filtered and what's not
-            prepareFlagList();
-            // listen for changes to the source list
-            source.addListEventListener(this);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
+        // build a list of what is filtered and what's not
+        prepareFlagList();
+        // listen for changes to the source list
+        source.addListEventListener(this);
     }
 
 
@@ -180,40 +174,39 @@ public abstract class AbstractFilterList extends TransformedList implements List
     /**
      * Handles changes to the behavior of the filter. This may change the contents
      * of this {@link EventList} as elements are filtered and unfiltered.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     protected final void handleFilterChanged() {
-        ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
-        try {
-            // all of these changes to this list happen "atomically"
-            updates.beginEvent();
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
 
-            // for all source items, see what the change is
-            for(int i = 0; i < source.size(); i++) {
+        // for all source items, see what the change is
+        for(int i = 0; i < source.size(); i++) {
 
-                // test if this value was already not filtered out
-                boolean wasIncluded = flagList.get(i) != null;
-                // whether we should add this item
-                boolean include = filterMatches(source.get(i));
+            // test if this value was already not filtered out
+            boolean wasIncluded = flagList.get(i) != null;
+            // whether we should add this item
+            boolean include = filterMatches(source.get(i));
 
-                // if this element is being removed as a result of the change
-                if(wasIncluded && !include) {
-                    int filteredIndex = flagList.getCompressedIndex(i);
-                    flagList.set(i, null);
-                    updates.addDelete(filteredIndex);
+            // if this element is being removed as a result of the change
+            if(wasIncluded && !include) {
+                int filteredIndex = flagList.getCompressedIndex(i);
+                flagList.set(i, null);
+                updates.addDelete(filteredIndex);
 
-                // if this element is being added as a result of the change
-                } else if(!wasIncluded && include) {
-                    flagList.set(i, Boolean.TRUE);
-                    int filteredIndex = flagList.getCompressedIndex(i);
-                    updates.addInsert(filteredIndex);
-                }
+            // if this element is being added as a result of the change
+            } else if(!wasIncluded && include) {
+                flagList.set(i, Boolean.TRUE);
+                int filteredIndex = flagList.getCompressedIndex(i);
+                updates.addInsert(filteredIndex);
             }
-
-            // commit the changes and notify listeners
-            updates.commitEvent();
-        } finally {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
     }
 
     /**

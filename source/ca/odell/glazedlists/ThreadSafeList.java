@@ -33,6 +33,10 @@ import ca.odell.glazedlists.util.concurrent.*;
  *   System.out.println(myList.get(3));
  * }</pre>
  *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> The objects returned
+ * by {@link #iterator() iterator()}, {@link #subList(int,int) subList()}, etc. are
+ * not thread safe.
+ *
  * @see ca.odell.glazedlists.util.concurrent
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
@@ -46,6 +50,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
     public ThreadSafeList(EventList source) {
         super(source);
         source.addListEventListener(this);
+        System.out.println("threadsafe list is broken for write methods");
     }
 
     /** {@inheritDoc} */
@@ -174,6 +179,106 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
+    /** {@inheritDoc} */
+    public boolean add(Object value) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.add(value);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+        
+    /** {@inheritDoc} */
+    public boolean remove(Object toRemove) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.remove(toRemove);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public boolean addAll(Collection values) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.addAll(values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public boolean addAll(int index, Collection values) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.addAll(index, values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public boolean removeAll(Collection values) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.removeAll(values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public boolean retainAll(Collection values) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.retainAll(values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+        
+    /** {@inheritDoc} */
+    public void clear() {
+        getReadWriteLock().writeLock().lock();
+        try {
+            source.clear();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public Object set(int index, Object value) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.set(index, value);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public void add(int index, Object value) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            source.add(index, value);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public Object remove(int index) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.remove(index);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+    
     /** {@inheritDoc} */
     public String toString() {
         getReadWriteLock().readLock().lock();

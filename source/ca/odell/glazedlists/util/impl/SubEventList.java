@@ -44,34 +44,29 @@ public final class SubEventList extends TransformedList implements ListEventList
     public SubEventList(EventList source, int startIndex, int endIndex, boolean automaticallyRemove) {
         super(source);
         
-        getReadWriteLock().readLock().lock();
-        try {
-            // do consistency checking
-            if(startIndex < 0 || endIndex < startIndex || endIndex > source.size()) {
-                throw new IllegalArgumentException("The range " + startIndex + "-" + endIndex + " is not valid over a list of size " + source.size());
-            }
-            
-            // save the sublist bounds
-            this.startIndex = startIndex;
-            this.endIndex = endIndex;
+        // do consistency checking
+        if(startIndex < 0 || endIndex < startIndex || endIndex > source.size()) {
+            throw new IllegalArgumentException("The range " + startIndex + "-" + endIndex + " is not valid over a list of size " + source.size());
+        }
         
-            // listen directly or via a proxy that will do garbage collection
-            if(automaticallyRemove) {
-                source.addListEventListener(new WeakReferenceProxy(source, this));
-            } else {
-                source.addListEventListener(this);
-            }
-
-        } finally {
-            getReadWriteLock().readLock().unlock();
+        // save the sublist bounds
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
+    
+        // listen directly or via a proxy that will do garbage collection
+        if(automaticallyRemove) {
+            source.addListEventListener(new WeakReferenceProxy(source, this));
+        } else {
+            source.addListEventListener(this);
         }
     }
     
     /**
      * Returns the number of elements in this list. 
      *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public int size() {
         return endIndex - startIndex;

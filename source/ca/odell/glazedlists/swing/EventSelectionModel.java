@@ -143,11 +143,11 @@ public final class EventSelectionModel {
      * Gets whether the EventSelectionModel is editable or not.
      */
     public boolean getEnabled() {
-        eventList.getReadWriteLock().readLock().lock();
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
         try {
             return enabled;
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -230,102 +230,107 @@ public final class EventSelectionModel {
          * changes to the corresponding selection list.
          */
         public void listChanged(ListEvent listChanges) {
-            // prepare for notifying ListSelectionListeners
-            int minSelectionIndexBefore = selectionModel.getMinSelectionIndex();
-            int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+            try {
+                // prepare for notifying ListSelectionListeners
+                int minSelectionIndexBefore = selectionModel.getMinSelectionIndex();
+                int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
+                
+                // prepare a sequence of changes
+                updates.beginEvent();
             
-            // prepare a sequence of changes
-            updates.beginEvent();
-        
-            // handle reordering events
-            if(listChanges.isReordering()) {
-                int[] sourceReorderMap = listChanges.getReorderMap();
-                int[] selectReorderMap = new int[flagList.getCompressedList().size()];
-                
-                // adjust the flaglist & construct a reorder map to propagate
-                SparseList previousFlagList = flagList;
-                flagList = new SparseList();
-                for(int c = 0; c < sourceReorderMap.length; c++) {
-                    Object flag = previousFlagList.get(sourceReorderMap[c]);
-                    boolean wasSelected = (flag != null);
-                    flagList.add(c, flag);
-                    if(wasSelected) {
-                        int previousIndex = previousFlagList.getCompressedIndex(sourceReorderMap[c]);
-                        int currentIndex = flagList.getCompressedIndex(c); 
-                        selectReorderMap[currentIndex] = previousIndex;
-                    }
-                }
-                
-                // fire the reorder
-                updates.reorder(selectReorderMap);
-
-            // handle non-reordering events
-            } else {
-
-                // for all changes simply update the flag list
-                while(listChanges.next()) {
-                    int index = listChanges.getIndex();
-                    int changeType = listChanges.getType();
+                // handle reordering events
+                if(listChanges.isReordering()) {
+                    int[] sourceReorderMap = listChanges.getReorderMap();
+                    int[] selectReorderMap = new int[flagList.getCompressedList().size()];
                     
-                    // learn about what it was
-                    boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
-                    int previousSelectionIndex = -1;
-                    if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
-                    
-                    // when an element is deleted, blow it away
-                    if(changeType == ListEvent.DELETE) {
-                        flagList.remove(index);
-        
-                        // fire a change to the selection list if a selected object is changed
-                        if(previouslySelected) {
-                            updates.addDelete(previousSelectionIndex);
+                    // adjust the flaglist & construct a reorder map to propagate
+                    SparseList previousFlagList = flagList;
+                    flagList = new SparseList();
+                    for(int c = 0; c < sourceReorderMap.length; c++) {
+                        Object flag = previousFlagList.get(sourceReorderMap[c]);
+                        boolean wasSelected = (flag != null);
+                        flagList.add(c, flag);
+                        if(wasSelected) {
+                            int previousIndex = previousFlagList.getCompressedIndex(sourceReorderMap[c]);
+                            int currentIndex = flagList.getCompressedIndex(c); 
+                            selectReorderMap[currentIndex] = previousIndex;
                         }
-                        
-                    // when an element is inserted, it is selected if its index was selected
-                    } else if(changeType == ListEvent.INSERT) {
-                        
-                        // when selected, decide based on selection mode
-                        if(previouslySelected) {
+                    }
+                    
+                    // fire the reorder
+                    updates.reorder(selectReorderMap);
     
-                            // select the inserted for single interval and multiple interval selection
-                            if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
-                            || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
-                                flagList.add(index, Boolean.TRUE);
-                                updates.addInsert(previousSelectionIndex);
+                // handle non-reordering events
+                } else {
     
-                            // do not select the inserted for single selection and defensive selection
+                    // for all changes simply update the flag list
+                    while(listChanges.next()) {
+                        int index = listChanges.getIndex();
+                        int changeType = listChanges.getType();
+                        
+                        // learn about what it was
+                        boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
+                        int previousSelectionIndex = -1;
+                        if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
+                        
+                        // when an element is deleted, blow it away
+                        if(changeType == ListEvent.DELETE) {
+                            flagList.remove(index);
+            
+                            // fire a change to the selection list if a selected object is changed
+                            if(previouslySelected) {
+                                updates.addDelete(previousSelectionIndex);
+                            }
+                            
+                        // when an element is inserted, it is selected if its index was selected
+                        } else if(changeType == ListEvent.INSERT) {
+                            
+                            // when selected, decide based on selection mode
+                            if(previouslySelected) {
+        
+                                // select the inserted for single interval and multiple interval selection
+                                if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
+                                || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
+                                    flagList.add(index, Boolean.TRUE);
+                                    updates.addInsert(previousSelectionIndex);
+        
+                                // do not select the inserted for single selection and defensive selection
+                                } else {
+                                    flagList.add(index, null);
+                                }
+        
+                            // when not selected, just add the space
                             } else {
                                 flagList.add(index, null);
                             }
-    
-                        // when not selected, just add the space
-                        } else {
-                            flagList.add(index, null);
-                        }
-                        
-                    // when an element is changed, assume selection stays the same
-                    } else if(changeType == ListEvent.UPDATE) {
-        
-                        // fire a change to the selection list if a selected object is changed
-                        if(previouslySelected) {
-                            updates.addUpdate(previousSelectionIndex);
+                            
+                        // when an element is changed, assume selection stays the same
+                        } else if(changeType == ListEvent.UPDATE) {
+            
+                            // fire a change to the selection list if a selected object is changed
+                            if(previouslySelected) {
+                                updates.addUpdate(previousSelectionIndex);
+                            }
                         }
                     }
                 }
-            }
+        
+                // fire the changes to ListEventListeners
+                updates.commitEvent();
     
-            // fire the changes to ListEventListeners
-            updates.commitEvent();
-
-            // fire the changes to ListSelectionListeners
-            if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
-                int minSelectionIndexAfter = selectionModel.getMinSelectionIndex();
-                int maxSelectionIndexAfter = selectionModel.getMaxSelectionIndex();
-                int changeStart = minSelectionIndexBefore;
-                int changeFinish = maxSelectionIndexBefore;
-                if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
-                if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
-                selectionModel.fireSelectionChanged(changeStart, changeFinish);
+                // fire the changes to ListSelectionListeners
+                if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
+                    int minSelectionIndexAfter = selectionModel.getMinSelectionIndex();
+                    int maxSelectionIndexAfter = selectionModel.getMaxSelectionIndex();
+                    int changeStart = minSelectionIndexBefore;
+                    int changeFinish = maxSelectionIndexBefore;
+                    if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
+                    if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
+                    selectionModel.fireSelectionChanged(changeStart, changeFinish);
+                }
+            } finally {
+                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
         }
     }
@@ -801,6 +806,7 @@ public final class EventSelectionModel {
                 ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
         }
+
         /**
          * Returns true if the value is undergoing a series of changes.
          */
@@ -833,6 +839,7 @@ public final class EventSelectionModel {
                 ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
         }
+
         /**
          * Returns the current selection mode.
          */

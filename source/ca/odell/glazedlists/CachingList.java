@@ -64,18 +64,14 @@ public class CachingList extends TransformedList implements ListEventListener {
     public CachingList(EventList source, int maxSize) {
         super(source);
         this.maxSize = maxSize;
-        getReadWriteLock().writeLock().lock();
-        try {
-            cache = new IndexedTree(new AgedNodeComparator());
-            indexTree = new IndexedTree();
-            for(int i = 0; i < source.size();i++) {
-                indexTree.addByNode(i, EMPTY_INDEX_NODE);
-            }
-            source.addListEventListener(this);
-            lastKnownSize = source.size();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+
+        cache = new IndexedTree(new AgedNodeComparator());
+        indexTree = new IndexedTree();
+        for(int i = 0; i < source.size();i++) {
+            indexTree.addByNode(i, EMPTY_INDEX_NODE);
         }
+        source.addListEventListener(this);
+        lastKnownSize = source.size();
     }
 
     /** {@inheritDoc} */
@@ -85,14 +81,9 @@ public class CachingList extends TransformedList implements ListEventListener {
 
     /** {@inheritDoc} */
     public final Object get(int index) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(index >= size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
-            preFetch(index);
-            return fetch(index, true);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(index >= size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
+        preFetch(index);
+        return fetch(index, true);
     }
 
     /**

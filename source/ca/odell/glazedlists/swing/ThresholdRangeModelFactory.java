@@ -68,14 +68,24 @@ public class ThresholdRangeModelFactory {
          * Returns the model's maximum.
          */
         public int getMaximum() {
-            return target.getUpperThreshold();
+            target.getReadWriteLock().readLock().lock();
+            try {
+                return target.getUpperThreshold();
+            } finally {
+                target.getReadWriteLock().readLock().unlock();
+            }
         }
 
         /**
          * Returns the model's current value.
          */
         public int getValue() {
-            return target.getLowerThreshold();
+            target.getReadWriteLock().readLock().lock();
+            try {
+                return target.getLowerThreshold();
+            } finally {
+                target.getReadWriteLock().readLock().unlock();
+            }
         }
 
         /**
@@ -86,31 +96,37 @@ public class ThresholdRangeModelFactory {
          * credit is due.
          */
         public void setRangeProperties(int newValue, int newExtent, int newMin, int newMax, boolean adjusting) {
-            // Correct invalid values
-            if(newMin > newMax) newMin = newMax;
-            if(newValue > newMax) newMax = newValue;
-            if(newValue < newMin) newMin = newValue;
+            target.getReadWriteLock().writeLock().lock();
+            try {
+                // Correct invalid values
+                if(newMin > newMax) newMin = newMax;
+                if(newValue > newMax) newMax = newValue;
+                if(newValue < newMin) newMin = newValue;
+    
+                // See if non-threshold model changes are necessary
+                boolean changed =
+                    (newExtent != getExtent()) ||
+                    (newMin != getMinimum()) ||
+                    (adjusting != getValueIsAdjusting());
+    
+                // Set the lower threshold if applicable
+                if(newValue != getValue()) {
+                    target.setLowerThreshold(newValue);
+                    changed = true;
+                }
+    
+                // Set the upper threshold if applicable
+                if(newMax != getMaximum()) {
+                    target.setUpperThreshold(newMax);
+                    changed = true;
+                }
+    
+                // Update all of the range properties if there was a change
+                if(changed) super.setRangeProperties(newValue, newExtent, newMin, newMax, adjusting);
 
-            // See if non-threshold model changes are necessary
-            boolean changed =
-                (newExtent != getExtent()) ||
-                (newMin != getMinimum()) ||
-                (adjusting != getValueIsAdjusting());
-
-            // Set the lower threshold if applicable
-            if(newValue != getValue()) {
-                target.setLowerThreshold(newValue);
-                changed = true;
+            } finally {
+                target.getReadWriteLock().writeLock().unlock();
             }
-
-            // Set the upper threshold if applicable
-            if(newMax != getMaximum()) {
-                target.setUpperThreshold(newMax);
-                changed = true;
-            }
-
-            // Update all of the range properties if there was a change
-            if(changed) super.setRangeProperties(newValue, newExtent, newMin, newMax, adjusting);
         }
     }
 
@@ -137,14 +153,24 @@ public class ThresholdRangeModelFactory {
          * Returns the model's minimum.
          */
         public int getMinimum() {
-            return target.getLowerThreshold();
+            target.getReadWriteLock().readLock().lock();
+            try {
+                return target.getLowerThreshold();
+            } finally {
+                target.getReadWriteLock().readLock().unlock();
+            }
         }
 
         /**
          * Returns the model's current value.
          */
         public int getValue() {
-            return target.getUpperThreshold();
+            target.getReadWriteLock().readLock().lock();
+            try {
+                return target.getUpperThreshold();
+            } finally {
+                target.getReadWriteLock().readLock().unlock();
+            }
         }
 
         /**
@@ -155,31 +181,36 @@ public class ThresholdRangeModelFactory {
          * credit is due.
          */
         public void setRangeProperties(int newValue, int newExtent, int newMin, int newMax, boolean adjusting) {
-            // Correct invalid values
-            if(newMin > newMax) newMin = newMax;
-            if(newValue > newMax) newMax = newValue;
-            if(newValue < newMin) newMin = newValue;
-
-            // See if non-threshold model changes are necessary
-            boolean changed =
-                (newExtent != getExtent()) ||
-                (newMax != getMaximum()) ||
-                (adjusting != getValueIsAdjusting());
-
-            // Set the lower threshold if applicable
-            if(newMin != getMinimum()) {
-                target.setLowerThreshold(newMin);
-                changed = true;
+            target.getReadWriteLock().writeLock().lock();
+            try {
+                // Correct invalid values
+                if(newMin > newMax) newMin = newMax;
+                if(newValue > newMax) newMax = newValue;
+                if(newValue < newMin) newMin = newValue;
+    
+                // See if non-threshold model changes are necessary
+                boolean changed =
+                    (newExtent != getExtent()) ||
+                    (newMax != getMaximum()) ||
+                    (adjusting != getValueIsAdjusting());
+    
+                // Set the lower threshold if applicable
+                if(newMin != getMinimum()) {
+                    target.setLowerThreshold(newMin);
+                    changed = true;
+                }
+    
+                // Set the upper threshold if applicable
+                if(newValue != getValue()) {
+                    target.setUpperThreshold(newValue);
+                    changed = true;
+                }
+    
+                // Update all of the range properties if there was a change
+                if(changed) super.setRangeProperties(newValue, newExtent, newMin, newMax, adjusting);
+            } finally {
+                target.getReadWriteLock().writeLock().unlock();
             }
-
-            // Set the upper threshold if applicable
-            if(newValue != getValue()) {
-                target.setUpperThreshold(newValue);
-                changed = true;
-            }
-
-            // Update all of the range properties if there was a change
-            if(changed) super.setRangeProperties(newValue, newExtent, newMin, newMax, adjusting);
         }
     }
 

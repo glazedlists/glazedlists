@@ -11,6 +11,8 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // the Glazed Lists util package includes default comparators
 import ca.odell.glazedlists.util.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.util.concurrent.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import javax.swing.table.*;
@@ -227,8 +229,16 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
             rebuildColumns();
         }
-        if(sortedList.getComparator() != sortedListComparator) {
-            redetectComparator();
+        
+        // if the comparator has changed
+        ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().lock();
+        try {
+            Comparator currentComparator = sortedList.getComparator();
+            if(currentComparator != sortedListComparator) {
+                redetectComparator(currentComparator);
+            }
+        } finally {
+            ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -239,8 +249,8 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.
      */
-    private void redetectComparator() {
-        sortedListComparator = sortedList.getComparator();
+    private void redetectComparator(Comparator currentComparator) {
+        sortedListComparator = currentComparator;
 
         // Clear the current click counts
         for(int c = 0; c < columnClickTrackers.length; c++) {
@@ -379,8 +389,13 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
             ComparatorChain comparatorChain = new ComparatorChain(comparators);
 
             // select the new comparator
-            sortedListComparator = comparatorChain;
-            sortedList.setComparator(comparatorChain);
+            sortedList.getReadWriteLock().writeLock().lock();
+            try {
+                sortedListComparator = comparatorChain;
+                sortedList.setComparator(comparatorChain);
+            } finally {
+                sortedList.getReadWriteLock().writeLock().unlock();
+            }
         }
 
         // force the table header to redraw itself

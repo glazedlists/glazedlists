@@ -58,35 +58,25 @@ public final class BasicEventList extends AbstractEventList {
 
     /** {@inheritDoc} */
     public void add(int index, Object element) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            // create the change event
-            updates.beginEvent();
-            updates.addInsert(index);
-            // do the actual add
-            data.add(index, element);
-            // fire the event
-            updates.commitEvent();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // create the change event
+        updates.beginEvent();
+        updates.addInsert(index);
+        // do the actual add
+        data.add(index, element);
+        // fire the event
+        updates.commitEvent();
     }
 
     /** {@inheritDoc} */
     public boolean add(Object element) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            // create the change event
-            updates.beginEvent();
-            updates.addInsert(size());
-            // do the actual add
-            boolean result = data.add(element);
-            // fire the event
-            updates.commitEvent();
-            return result;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // create the change event
+        updates.beginEvent();
+        updates.addInsert(size());
+        // do the actual add
+        boolean result = data.add(element);
+        // fire the event
+        updates.commitEvent();
+        return result;
     }
 
     /** {@inheritDoc} */
@@ -99,19 +89,14 @@ public final class BasicEventList extends AbstractEventList {
         // don't do an add of an empty set
         if(collection.size() == 0) return false;
 
-        getReadWriteLock().writeLock().lock();
-        try {
-            // create the change event
-            updates.beginEvent();
-            updates.addInsert(index, index + collection.size() - 1);
-            // do the actual add
-            boolean result = data.addAll(index, collection);
-            // fire the event
-            updates.commitEvent();
-            return result;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // create the change event
+        updates.beginEvent();
+        updates.addInsert(index, index + collection.size() - 1);
+        // do the actual add
+        boolean result = data.addAll(index, collection);
+        // fire the event
+        updates.commitEvent();
+        return result;
     }
 
     /**
@@ -161,89 +146,64 @@ public final class BasicEventList extends AbstractEventList {
         // don't do an add of an empty set
         if(objects.length == 0) return false;
 
-        getReadWriteLock().writeLock().lock();
-        try {
-            // create the change event
-            updates.beginEvent();
-            updates.addInsert(index, index + objects.length - 1);
-            // do the actual add
-            boolean overallResult = true;
-            boolean elementResult = true;
-            for(int i = 0; i < objects.length; i++) {
-                elementResult = data.add(objects[i]);
-                overallResult = (overallResult && elementResult);
-            }
-            // fire the event
-            updates.commitEvent();
-            return overallResult;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        // create the change event
+        updates.beginEvent();
+        updates.addInsert(index, index + objects.length - 1);
+        // do the actual add
+        boolean overallResult = true;
+        boolean elementResult = true;
+        for(int i = 0; i < objects.length; i++) {
+            elementResult = data.add(objects[i]);
+            overallResult = (overallResult && elementResult);
         }
+        // fire the event
+        updates.commitEvent();
+        return overallResult;
     }
 
     /** {@inheritDoc} */
     public Object remove(int index) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            // create the change event
-            updates.beginEvent();
-            updates.addDelete(index);
-            // do the actual remove
-            Object removed = data.remove(index);
-            // fire the event
-            updates.commitEvent();
-            return removed;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // create the change event
+        updates.beginEvent();
+        updates.addDelete(index);
+        // do the actual remove
+        Object removed = data.remove(index);
+        // fire the event
+        updates.commitEvent();
+        return removed;
     }
 
     /** {@inheritDoc} */
     public boolean remove(Object element) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            int index = data.indexOf(element);
-            if(index == -1) return false;
-            remove(index);
-            return true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        int index = data.indexOf(element);
+        if(index == -1) return false;
+        remove(index);
+        return true;
     }
 
     /** {@inheritDoc} */
     public void clear() {
-        getReadWriteLock().writeLock().lock();
-        try {
-            // don't do a clear on an empty set
-            if(size() == 0) return;
-            // create the change event
-            updates.beginEvent();
-            updates.addDelete(0, size() - 1);
-            // do the actual clear
-            data.clear();
-            // fire the event
-            updates.commitEvent();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // don't do a clear on an empty set
+        if(size() == 0) return;
+        // create the change event
+        updates.beginEvent();
+        updates.addDelete(0, size() - 1);
+        // do the actual clear
+        data.clear();
+        // fire the event
+        updates.commitEvent();
     }
 
     /** {@inheritDoc} */
     public Object set(int index, Object element) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            // create the change event
-            updates.beginEvent();
-            updates.addUpdate(index);
-            // do the actual set
-            Object previous = data.set(index, element);
-            // fire the event
-            updates.commitEvent();
-            return previous;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // create the change event
+        updates.beginEvent();
+        updates.addUpdate(index);
+        // do the actual set
+        Object previous = data.set(index, element);
+        // fire the event
+        updates.commitEvent();
+        return previous;
     }
 
     /** {@inheritDoc} */
@@ -258,45 +218,35 @@ public final class BasicEventList extends AbstractEventList {
 
     /** {@inheritDoc} */
     public boolean removeAll(Collection collection) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            boolean changed = false;
-            updates.beginEvent();
-            for(Iterator i = collection.iterator(); i.hasNext(); ) {
-                int index = -1;
-                if((index = data.indexOf(i.next())) != -1) {
-                    updates.addDelete(index);
-                    data.remove(index);
-                    changed = true;
-                }
+        boolean changed = false;
+        updates.beginEvent();
+        for(Iterator i = collection.iterator(); i.hasNext(); ) {
+            int index = -1;
+            if((index = data.indexOf(i.next())) != -1) {
+                updates.addDelete(index);
+                data.remove(index);
+                changed = true;
             }
-            updates.commitEvent();
-            return changed;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
         }
+        updates.commitEvent();
+        return changed;
     }
 
     /** {@inheritDoc} */
     public boolean retainAll(Collection collection) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            boolean changed = false;
-            updates.beginEvent();
-            int index = 0;
-            while(index < data.size()) {
-                if(collection.contains(data.get(index))) {
-                    index++;
-                } else {
-                    updates.addDelete(index);
-                    data.remove(index);
-                    changed = true;
-                }
+        boolean changed = false;
+        updates.beginEvent();
+        int index = 0;
+        while(index < data.size()) {
+            if(collection.contains(data.get(index))) {
+                index++;
+            } else {
+                updates.addDelete(index);
+                data.remove(index);
+                changed = true;
             }
-            updates.commitEvent();
-            return changed;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
         }
+        updates.commitEvent();
+        return changed;
     }
 }

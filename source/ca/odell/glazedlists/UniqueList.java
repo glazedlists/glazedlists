@@ -337,19 +337,14 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * source list and examining adjacent entries for equality.
      */
     private void populateDuplicatesList() {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!duplicatesList.isEmpty()) throw new IllegalStateException();
+        if(!duplicatesList.isEmpty()) throw new IllegalStateException();
 
-            for(int i = 0; i < source.size(); i++) {
-                if(!valuesEqual(i, i-1)) {
-                    duplicatesList.add(i, UNIQUE);
-                } else {
-                    duplicatesList.add(i, DUPLICATE);
-                }
+        for(int i = 0; i < source.size(); i++) {
+            if(!valuesEqual(i, i-1)) {
+                duplicatesList.add(i, UNIQUE);
+            } else {
+                duplicatesList.add(i, DUPLICATE);
             }
-        } finally {
-            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -370,75 +365,60 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
     /** {@inheritDoc} */
     public Object remove(int index) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
-            // keep the removed object to return
-            Object removed = get(index);
+        // keep the removed object to return
+        Object removed = get(index);
 
-            // calculate the start (inclusive) and end (exclusive) of the range to remove
-            int removeStart = getSourceIndex(index);
-            int removeEnd = removeStart + getCount(index);
+        // calculate the start (inclusive) and end (exclusive) of the range to remove
+        int removeStart = getSourceIndex(index);
+        int removeEnd = removeStart + getCount(index);
 
-            // remove the range from the source list
-            source.subList(removeStart, removeEnd).clear();
+        // remove the range from the source list
+        source.subList(removeStart, removeEnd).clear();
 
-            // return the first of the removed objects
-            return removed;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // return the first of the removed objects
+        return removed;
     }
 
     /** {@inheritDoc} */
     public boolean remove(Object toRemove) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            int index = indexOf(toRemove);
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        int index = indexOf(toRemove);
 
-            if(index == -1) return false;
+        if(index == -1) return false;
 
-            remove(index);
-            return true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        remove(index);
+        return true;
     }
 
     /** {@inheritDoc} */
     public Object set(int index, Object value) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
 
-            // save the replaced value
-            Object replaced = get(index);
+        // save the replaced value
+        Object replaced = get(index);
 
-            // wrap this update in a nested change set
-            updates.beginEvent(true);
+        // wrap this update in a nested change set
+        updates.beginEvent(true);
 
-            // calculate the start (inclusive) and end (exclusive) of the duplicates to remove
-            int removeStart = getSourceIndex(index) + 1;
-            int removeEnd = removeStart + getCount(index) - 1;
-            // remove the range from the source list if it is non-empty
-            if(removeStart < removeEnd) {
-                source.subList(removeStart, removeEnd).clear();
-            }
-
-            // replace the non-duplicate with the new value
-            source.set(getSourceIndex(index), value);
-
-            // commit the nested change set
-            updates.commitEvent();
-
-            return replaced;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        // calculate the start (inclusive) and end (exclusive) of the duplicates to remove
+        int removeStart = getSourceIndex(index) + 1;
+        int removeEnd = removeStart + getCount(index) - 1;
+        // remove the range from the source list if it is non-empty
+        if(removeStart < removeEnd) {
+            source.subList(removeStart, removeEnd).clear();
         }
+
+        // replace the non-duplicate with the new value
+        source.set(getSourceIndex(index), value);
+
+        // commit the nested change set
+        updates.commitEvent();
+
+        return replaced;
     }
 
     /**
@@ -446,6 +426,10 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * specified {@link SortedSet}. If this {@link UniqueList} uses a {@link Comparator}
      * to determine equality of elements, the specified {@link SortedList} must use
      * an equal {@link Comparator}.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public void replaceAll(SortedSet revision) {
 
@@ -459,56 +443,50 @@ public final class UniqueList extends TransformedList implements ListEventListen
             throw new IllegalArgumentException("SortedSet comparator " + revision.comparator() + " != " + comparator);
         }
 
-        getReadWriteLock().writeLock().lock();
-        try {
+        // nest changes and let the other methods compose the event
+        updates.beginEvent(true);
 
-            // nest changes and let the other methods compose the event
-            updates.beginEvent(true);
+        // set up the current objects to examine
+        int originalIndex = 0;
+        Object originalElement = getOrNull(this, originalIndex);
 
-            // set up the current objects to examine
-            int originalIndex = 0;
-            Object originalElement = getOrNull(this, originalIndex);
+        // for all elements in the revised set
+        for(Iterator revisionIterator = revision.iterator(); revisionIterator.hasNext(); ) {
+            Object revisionElement = revisionIterator.next();
 
-            // for all elements in the revised set
-            for(Iterator revisionIterator = revision.iterator(); revisionIterator.hasNext(); ) {
-                Object revisionElement = revisionIterator.next();
-
-                // when the before list holds items smaller than the after list item,
-                // the before list items are out-of-date and must be deleted
-                while(originalElement != null && comparator.compare(originalElement, revisionElement) < 0) {
-                    remove(originalIndex);
-                    // replace the original element
-                    originalElement = getOrNull(this, originalIndex);
-                }
-
-                // when the before list holds an item identical to the after list item,
-                // the item has not changed
-                if(originalElement != null && comparator.compare(originalElement, revisionElement) == 0) {
-                    set(originalIndex, revisionElement);
-                    // replace the original element
-                    originalIndex++;
-                    originalElement = getOrNull(this, originalIndex);
-
-                // when the before list holds no more items or an item that is larger than
-                // the current after list item, insert the after list item
-                } else {
-                    add(originalIndex, revisionElement);
-                    // adjust the index of the original element
-                    originalIndex++;
-                }
-            }
-
-            // when the before list holds items larger than the largest after list item,
+            // when the before list holds items smaller than the after list item,
             // the before list items are out-of-date and must be deleted
-            while(originalIndex < size()) {
+            while(originalElement != null && comparator.compare(originalElement, revisionElement) < 0) {
                 remove(originalIndex);
+                // replace the original element
+                originalElement = getOrNull(this, originalIndex);
             }
 
-            // fire the composed event
-            updates.commitEvent();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+            // when the before list holds an item identical to the after list item,
+            // the item has not changed
+            if(originalElement != null && comparator.compare(originalElement, revisionElement) == 0) {
+                set(originalIndex, revisionElement);
+                // replace the original element
+                originalIndex++;
+                originalElement = getOrNull(this, originalIndex);
+
+            // when the before list holds no more items or an item that is larger than
+            // the current after list item, insert the after list item
+            } else {
+                add(originalIndex, revisionElement);
+                // adjust the index of the original element
+                originalIndex++;
+            }
         }
+
+        // when the before list holds items larger than the largest after list item,
+        // the before list items are out-of-date and must be deleted
+        while(originalIndex < size()) {
+            remove(originalIndex);
+        }
+
+        // fire the composed event
+        updates.commitEvent();
     }
 
     /**

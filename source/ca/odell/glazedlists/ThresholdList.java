@@ -211,65 +211,64 @@ public final class ThresholdList extends TransformedList implements ListEventLis
      * <p>This list can be used programmatically rather than hooking it up to
      * a UI component. <strong>Calling this method directly while this list
      * is connected to a particular widget could result in errors.</strong>
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public void setLowerThreshold(int threshold) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            // the index at the new threshold
-            int newListIndex = 0;
+        // the index at the new threshold
+        int newListIndex = 0;
 
-            // Threshold change is irrelevant
-            if(sourceSize == 0) {
-                lowerThreshold = threshold;
-                lowerThresholdIndex = -1;
-                return;
-
-            // Threshold is unchanged
-            } else if(threshold == lowerThreshold) {
-                return;
-
-            // Threshold is changed
-            } else {
-                newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold));
-                // return -1 if the value is before the list
-                if(newListIndex == 0) newListIndex = source.indexOf(new Integer(threshold));
-            }
-
-            // update the threshold
+        // Threshold change is irrelevant
+        if(sourceSize == 0) {
             lowerThreshold = threshold;
+            lowerThresholdIndex = -1;
+            return;
 
-            // the index at the threshold has not changed
-            if(newListIndex == lowerThresholdIndex) {
-                return;
-            }
+        // Threshold is unchanged
+        } else if(threshold == lowerThreshold) {
+            return;
 
-            // the index at the threshold has changed but no event should be thrown
-            if((newListIndex == -1 && lowerThresholdIndex == 0) ||
-                (newListIndex == 0 && lowerThresholdIndex == -1) ||
-                (newListIndex == size() && lowerThresholdIndex == size() - 1) ||
-                (newListIndex == size() - 1 && lowerThresholdIndex == size())) {
-                lowerThresholdIndex = newListIndex;
-                return;
-            }
-
-            // Changes are necessary so prepare an event
-            updates.beginEvent();
-
-            // The threshold is lower
-            if(newListIndex < lowerThresholdIndex) {
-                updates.addInsert(0, Math.max(lowerThresholdIndex, 0) - newListIndex - 1);
-
-            // The threshold is higher
-            } else if(newListIndex > lowerThresholdIndex) {
-                updates.addDelete(0, newListIndex - Math.max(lowerThresholdIndex, 0) - 1);
-            }
-
-            // Update the lowerThresholdIndex and fire the event
-            lowerThresholdIndex = newListIndex;
-            updates.commitEvent();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        // Threshold is changed
+        } else {
+            newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold));
+            // return -1 if the value is before the list
+            if(newListIndex == 0) newListIndex = source.indexOf(new Integer(threshold));
         }
+
+        // update the threshold
+        lowerThreshold = threshold;
+
+        // the index at the threshold has not changed
+        if(newListIndex == lowerThresholdIndex) {
+            return;
+        }
+
+        // the index at the threshold has changed but no event should be thrown
+        if((newListIndex == -1 && lowerThresholdIndex == 0) ||
+            (newListIndex == 0 && lowerThresholdIndex == -1) ||
+            (newListIndex == size() && lowerThresholdIndex == size() - 1) ||
+            (newListIndex == size() - 1 && lowerThresholdIndex == size())) {
+            lowerThresholdIndex = newListIndex;
+            return;
+        }
+
+        // Changes are necessary so prepare an event
+        updates.beginEvent();
+
+        // The threshold is lower
+        if(newListIndex < lowerThresholdIndex) {
+            updates.addInsert(0, Math.max(lowerThresholdIndex, 0) - newListIndex - 1);
+
+        // The threshold is higher
+        } else if(newListIndex > lowerThresholdIndex) {
+            updates.addDelete(0, newListIndex - Math.max(lowerThresholdIndex, 0) - 1);
+        }
+
+        // Update the lowerThresholdIndex and fire the event
+        lowerThresholdIndex = newListIndex;
+        updates.commitEvent();
     }
 
     /**
@@ -281,64 +280,63 @@ public final class ThresholdList extends TransformedList implements ListEventLis
 
     /**
      * Sets the upper threshold for this list.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public void setUpperThreshold(int threshold) {
-        getReadWriteLock().writeLock().lock();
-        try {
 
-            // the index at the new threshold
-            int newListIndex = 0;
+        // the index at the new threshold
+        int newListIndex = 0;
 
-            // Threshold change is irrelevant
-            if(sourceSize == 0) {
-                upperThreshold = threshold;
-                upperThresholdIndex = -1;
-                return;
-
-            // Threshold is unchanged
-            } else if(threshold == upperThreshold) {
-                return;
-
-            // Threshold is changed
-            } else {
-                newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold+1)) - 1;
-            }
-
-            // update the threshold
+        // Threshold change is irrelevant
+        if(sourceSize == 0) {
             upperThreshold = threshold;
+            upperThresholdIndex = -1;
+            return;
 
-            // the index at the threshold has not changed
-            if(newListIndex == upperThresholdIndex) {
-                return;
-            }
+        // Threshold is unchanged
+        } else if(threshold == upperThreshold) {
+            return;
 
-            // the index at the threshold has changed but no event should be thrown
-            if((newListIndex == -1 && upperThresholdIndex == 0) ||
-                (newListIndex == 0 && upperThresholdIndex == -1) ||
-                (newListIndex == size() && upperThresholdIndex == size() - 1) ||
-                (newListIndex == size() - 1 && upperThresholdIndex == size())) {
-                upperThresholdIndex = newListIndex;
-                return;
-            }
-
-            // Changes are necessary so prepare an event
-            updates.beginEvent();
-
-            // The threshold is lower
-            if(newListIndex < upperThresholdIndex) {
-                updates.addDelete(newListIndex + 1, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
-
-            // The threshold is higher
-            } else if(newListIndex > upperThresholdIndex) {
-                updates.addInsert(upperThresholdIndex - Math.max(lowerThresholdIndex, 0) + 1, newListIndex);
-            }
-
-            // Update the upperThresholdIndex and fire the event
-            upperThresholdIndex = newListIndex;
-            updates.commitEvent();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        // Threshold is changed
+        } else {
+            newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold+1)) - 1;
         }
+
+        // update the threshold
+        upperThreshold = threshold;
+
+        // the index at the threshold has not changed
+        if(newListIndex == upperThresholdIndex) {
+            return;
+        }
+
+        // the index at the threshold has changed but no event should be thrown
+        if((newListIndex == -1 && upperThresholdIndex == 0) ||
+            (newListIndex == 0 && upperThresholdIndex == -1) ||
+            (newListIndex == size() && upperThresholdIndex == size() - 1) ||
+            (newListIndex == size() - 1 && upperThresholdIndex == size())) {
+            upperThresholdIndex = newListIndex;
+            return;
+        }
+
+        // Changes are necessary so prepare an event
+        updates.beginEvent();
+
+        // The threshold is lower
+        if(newListIndex < upperThresholdIndex) {
+            updates.addDelete(newListIndex + 1, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
+
+        // The threshold is higher
+        } else if(newListIndex > upperThresholdIndex) {
+            updates.addInsert(upperThresholdIndex - Math.max(lowerThresholdIndex, 0) + 1, newListIndex);
+        }
+
+        // Update the upperThresholdIndex and fire the event
+        upperThresholdIndex = newListIndex;
+        updates.commitEvent();
     }
 
     /**

@@ -52,69 +52,64 @@ public final class CompositeList extends AbstractEventList {
     
     /**
      * Adds the specified {@link EventList} as a source to this {@link CompositeList}.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public void addMemberList(EventList list) {
-        // lock all member lists and the new list
-        list.getReadWriteLock().readLock().lock();
-        getReadWriteLock().writeLock().lock();
-        try {
-            // insert the actual list
-            MemberList memberList = new MemberList(list);
-            memberLists.add(memberList);
-            
-            // get the offset for the elements of this member
-            int offset = getListOffset(memberList);
+        // insert the actual list
+        MemberList memberList = new MemberList(list);
+        memberLists.add(memberList);
+        
+        // lock the new list
+        ((CompositeReadWriteLock)getReadWriteLock()).lockNewMember(memberList);
+        
+        // get the offset for the elements of this member
+        int offset = getListOffset(memberList);
 
-            // pass on a change for the insert of all this list's elements
-            if(memberList.size() > 0) {
-                updates.beginEvent();
-                updates.addInsert(offset, offset + memberList.size() - 1);
-                updates.commitEvent();
-            }
-        } finally {
-            // release all member lists which now include the new list
-            getReadWriteLock().writeLock().unlock();
+        // pass on a change for the insert of all this list's elements
+        if(memberList.size() > 0) {
+            updates.beginEvent();
+            updates.addInsert(offset, offset + memberList.size() - 1);
+            updates.commitEvent();
         }
     }
     
     /**
      * Removes the specified {@link EventList} as a source {@link EventList}
      * to this {@link CompositeList}.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public void removeMemberList(EventList list) {
-        // lock all member lists
-        getReadWriteLock().writeLock().lock();
-        try {
-            // find the member list
-            MemberList memberList = null;
-            for(int i = 0; i < memberLists.size(); i++) {
-                MemberList current = (MemberList)memberLists.get(i);
-                if(current.getSourceList() == list) {
-                    memberList = current;
-                    break;
-                }
+        // find the member list
+        MemberList memberList = null;
+        for(int i = 0; i < memberLists.size(); i++) {
+            MemberList current = (MemberList)memberLists.get(i);
+            if(current.getSourceList() == list) {
+                memberList = current;
+                break;
             }
-            if(memberList == null) throw new IllegalArgumentException("Cannot remove list " + list + " which is not in this CompositeList");
-            
-            // stop listening for events
-            memberList.getSourceList().removeListEventListener(memberList);
-            
-            // get the offset for the elements of this member
-            int offset = getListOffset(memberList);
+        }
+        if(memberList == null) throw new IllegalArgumentException("Cannot remove list " + list + " which is not in this CompositeList");
+        
+        // stop listening for events
+        memberList.getSourceList().removeListEventListener(memberList);
+        
+        // get the offset for the elements of this member
+        int offset = getListOffset(memberList);
 
-            // remove the member list
-            memberLists.remove(memberList);
+        // remove the member list
+        memberLists.remove(memberList);
 
-            // pass on a change for the remove of all this list's elements
-            if(memberList.size() > 0) {
-                updates.beginEvent();
-                updates.addDelete(offset, offset + memberList.size() - 1);
-                updates.commitEvent();
-            }
-        } finally {
-            // release all member lists and the removed list
-            list.getReadWriteLock().readLock().unlock();
-            getReadWriteLock().writeLock().unlock();
+        // pass on a change for the remove of all this list's elements
+        if(memberList.size() > 0) {
+            updates.beginEvent();
+            updates.addDelete(offset, offset + memberList.size() - 1);
+            updates.commitEvent();
         }
     }
     
@@ -150,6 +145,42 @@ public final class CompositeList extends AbstractEventList {
             else listOffset = listOffset + current.size();
         }
         throw new IllegalStateException("Unable to find offset of member list " + memberList);
+    }
+
+    /**
+     * Propagates all changes from the global change queue.
+     *
+     * <p>Callers to this method must have already obtained this list's
+     * lock. 
+     */
+    private void propagateChanges() {
+        // propogate all the changes
+        while(!globalChangeQueue.isEmpty()) {
+            updates.beginEvent();
+            // get the list and its changes
+            MemberList listWithChanges = (MemberList)globalChangeQueue.removeFirst();
+            ListEvent listChanges = (ListEvent)listWithChanges.changeQueue.removeFirst();
+
+            // get the offset for the elements of this member
+            int offset = getListOffset(listWithChanges);
+
+            // pass on the changes
+            while(listChanges.next()) {
+                // propagate the change
+                int index = listChanges.getIndex();
+                int type = listChanges.getType();
+                updates.addChange(type, offset + index);
+                
+                // update the size
+                if(type == ListEvent.DELETE) {
+                    listWithChanges.size--;
+                } else if(type == ListEvent.INSERT) {
+                    listWithChanges.size++;
+                }
+                assert(listWithChanges.size >= 0);
+            }
+            updates.commitEvent();
+        }
     }
 
     /**
@@ -220,55 +251,27 @@ public final class CompositeList extends AbstractEventList {
     }
 
     /**
-     * Propagates all changes from the global change queue.
-     *
-     * <p>Callers to this method must have already obtained this list's
-     * lock. 
-     */
-    private void propagateChanges() {
-        // propogate all the changes
-        while(!globalChangeQueue.isEmpty()) {
-            updates.beginEvent();
-            // get the list and its changes
-            MemberList listWithChanges = (MemberList)globalChangeQueue.removeFirst();
-            ListEvent listChanges = (ListEvent)listWithChanges.changeQueue.removeFirst();
-
-            // get the offset for the elements of this member
-            int offset = getListOffset(listWithChanges);
-
-            // pass on the changes
-            while(listChanges.next()) {
-                // propagate the change
-                int index = listChanges.getIndex();
-                int type = listChanges.getType();
-                updates.addChange(type, offset + index);
-                
-                // update the size
-                if(type == ListEvent.DELETE) {
-                    listWithChanges.size--;
-                } else if(type == ListEvent.INSERT) {
-                    listWithChanges.size++;
-                }
-                assert(listWithChanges.size >= 0);
-            }
-            updates.commitEvent();
-        }
-    }
-
-    /**
      * The CompositeReadWriteLock uses a single CompositeLock for both
      * reading and writing.
      */
     private class CompositeReadWriteLock implements ReadWriteLock {
         
         /** the reading and writing lock */
-        Lock lock = new CompositeLock();
+        CompositeLock lock = new CompositeLock();
         
         /**
          * Return the lock used for reading.
          */
         public Lock readLock() {
             return lock;
+        }
+        
+        /**
+         * Locks the specified {@link MemberList} in addition to the already locked
+         * member lists.
+         */
+        public void lockNewMember(MemberList newMember) {
+            lock.lockNewMember(newMember);
         }
 
         /**
@@ -292,6 +295,12 @@ public final class CompositeList extends AbstractEventList {
         /** use a delegate lock to guarantee mutual exclusion */
         private Lock raceLock = new J2SE12ReadWriteLock().writeLock();
     
+        /** list of MemberLists whose locks are currently acquired */
+        private List lockedMemberLists = new ArrayList();
+
+        /** the locking thread may need to know if it has made a lock */
+        private boolean locked = false;
+        
         /**
          * Obtaining this lock includes obtaining a read lock on all
          * member lists. This is a complex process and may require
@@ -311,15 +320,30 @@ public final class CompositeList extends AbstractEventList {
         public void lock() {
             // 1 Obtain a lock to guarantee mutex
             raceLock.lock();
+            locked = true;
             // 2 Obtain all read locks
             for(Iterator i = memberLists.iterator(); i.hasNext(); ) {
                 MemberList memberList = (MemberList)i.next();
                 memberList.getSourceList().getReadWriteLock().readLock().lock();
+                lockedMemberLists.add(memberList);
             }
             // 3 Forward events
             propagateChanges();
         }
-
+        
+        /**
+         * Locks the specified {@link MemberList} which has become a {@link MemberList}
+         * since this lock was originally acquired. This requires that this lock
+         * has been acquired.
+         */
+        public void lockNewMember(MemberList newMember) {
+            // only lock if it will eventually be released
+            if(locked) {
+                newMember.getSourceList().getReadWriteLock().readLock().lock();
+                lockedMemberLists.add(newMember);
+            }
+        }
+        
         /**
          * Trying for this lock follows the same process as obtaining
          * the lock naturally. If the raceLock cannot be acquired, this
@@ -328,12 +352,14 @@ public final class CompositeList extends AbstractEventList {
          */
         public boolean tryLock() {
             // 1 Obtain a lock to guarantee mutex
+            locked = false;
             boolean success = raceLock.tryLock();
             if(!success) return false;
             // 2 Obtain all read locks
             for(Iterator i = memberLists.iterator(); i.hasNext(); ) {
                 MemberList memberList = (MemberList)i.next();
                 memberList.getSourceList().getReadWriteLock().readLock().lock();
+                lockedMemberLists.add(memberList);
             }
             // 3 Forward events
             propagateChanges();
@@ -346,13 +372,18 @@ public final class CompositeList extends AbstractEventList {
          * list's locks in sequence.
          */
         public void unlock() {
-            // 1 Release the race lock guaranteeing mutex
+            // 1 List the locks to release
+            List locksToRelease = new ArrayList();
+            locksToRelease.addAll(lockedMemberLists);
+            lockedMemberLists.clear();
+            // 2 Release the race lock guaranteeing mutex
             raceLock.unlock();
-            // 2 Release all read locks
-            for(Iterator i = memberLists.iterator(); i.hasNext(); ) {
+            // 3 Release all read locks
+            for(Iterator i = locksToRelease.iterator(); i.hasNext(); ) {
                 MemberList memberList = (MemberList)i.next();
                 memberList.getSourceList().getReadWriteLock().readLock().unlock();
             }
+            lockedMemberLists.clear();
         }
     }
 }

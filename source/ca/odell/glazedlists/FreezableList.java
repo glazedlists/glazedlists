@@ -68,11 +68,6 @@ public final class FreezableList extends TransformedList implements ListEventLis
     }
     
     /** {@inheritDoc} */
-    /*protected int getSourceIndex(int mutationIndex) {
-        return mutationIndex;
-    }*/
-    
-    /** {@inheritDoc} */
     protected boolean isWritable() {
         return !frozen;
     }
@@ -93,51 +88,49 @@ public final class FreezableList extends TransformedList implements ListEventLis
      * Locks this {@link FreezableList} on the current state of the source
      * {@link EventList}. While frozen, changes to the source {@link EventList}
      * will not be reflected by this list.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public void freeze() {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(frozen) throw new IllegalStateException("Cannot freeze a list that is already frozen");
-            
-            // we are no longer interested in update events
-            ((EventList)source).removeListEventListener(this);
-            
-            // copy the source array into the frozen list
-            frozenData.addAll(source);
-            
-            // mark this list as frozen
-            frozen = true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(frozen) throw new IllegalStateException("Cannot freeze a list that is already frozen");
+        
+        // we are no longer interested in update events
+        ((EventList)source).removeListEventListener(this);
+        
+        // copy the source array into the frozen list
+        frozenData.addAll(source);
+        
+        // mark this list as frozen
+        frozen = true;
     }
     
     /**
      * Unlocks this {@link FreezableList} to show the same contents of the source
      * {@link EventList}. When thawed, changes to the source {@link EventList}
      * will be reflected by this list.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
      */
     public void thaw() {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!frozen) throw new IllegalStateException("Cannot thaw a list that is not frozen");
-            
-            // mark this list as thawed
-            frozen = false;
-            int frozenDataSize = frozenData.size();
-            frozenData.clear();
-            
-            // fire events to listeners of the thaw
-            updates.beginEvent();
-            if(frozenDataSize > 0) updates.addDelete(0, frozenDataSize - 1);
-            if(source.size() > 0) updates.addInsert(0, source.size() - 1);
-            updates.commitEvent();
+        if(!frozen) throw new IllegalStateException("Cannot thaw a list that is not frozen");
+        
+        // mark this list as thawed
+        frozen = false;
+        int frozenDataSize = frozenData.size();
+        frozenData.clear();
+        
+        // fire events to listeners of the thaw
+        updates.beginEvent();
+        if(frozenDataSize > 0) updates.addDelete(0, frozenDataSize - 1);
+        if(source.size() > 0) updates.addInsert(0, source.size() - 1);
+        updates.commitEvent();
 
-            // being listening to update events
-            ((EventList)source).addListEventListener(this);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // being listening to update events
+        ((EventList)source).addListEventListener(this);
     }
     
     /** {@inheritDoc} */

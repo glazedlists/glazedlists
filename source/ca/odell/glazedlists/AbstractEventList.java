@@ -203,13 +203,8 @@ public abstract class AbstractEventList implements EventList, Serializable {
      *            prevents it from being added to this list.
      */
     public boolean add(Object value) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            add(size(), value);
-            return true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        add(size(), value);
+        return true;
     }
 
     /**
@@ -229,15 +224,10 @@ public abstract class AbstractEventList implements EventList, Serializable {
      *		  not supported by this list.
      */
     public boolean remove(Object toRemove) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            int index = indexOf(toRemove);
-            if(index == -1) return false;
-            remove(index);
-            return true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        int index = indexOf(toRemove);
+        if(index == -1) return false;
+        remove(index);
+        return true;
     }
     
     /**
@@ -291,12 +281,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * @see #add(Object)
      */
     public boolean addAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            return addAll(size(), values);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        return addAll(size(), values);
     }
 
     /**
@@ -333,18 +318,13 @@ public abstract class AbstractEventList implements EventList, Serializable {
         // don't do an add of an empty set
         if(values.size() == 0) return false;
 
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
-            int count = 0;
-            for(Iterator i = values.iterator(); i.hasNext(); ) {
-                add(index + count, i.next());
-                count++;
-            }
-            return true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
+        int count = 0;
+        for(Iterator i = values.iterator(); i.hasNext(); ) {
+            add(index + count, i.next());
+            count++;
         }
+        return true;
     }
 
     /**
@@ -369,17 +349,12 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * @see #contains(Object)
      */
     public boolean removeAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            boolean overallChanged = false;
-            for(Iterator i = values.iterator(); i.hasNext(); ) {
-                boolean removeChanged = remove(i.next());
-                if(removeChanged) overallChanged = true;
-            }
-            return overallChanged;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        boolean overallChanged = false;
+        for(Iterator i = values.iterator(); i.hasNext(); ) {
+            boolean removeChanged = remove(i.next());
+            if(removeChanged) overallChanged = true;
         }
+        return overallChanged;
     }
 
 
@@ -407,19 +382,14 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * @see #contains(Object)
      */
     public boolean retainAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            boolean changed = false;
-            for(ListIterator i = listIterator(); i.hasNext(); ) {
-                if(!values.contains(i.next())) {
-                    i.remove();
-                    changed = true;
-                }
+        boolean changed = false;
+        for(ListIterator i = listIterator(); i.hasNext(); ) {
+            if(!values.contains(i.next())) {
+                i.remove();
+                changed = true;
             }
-            return changed;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
         }
+        return changed;
     }
 
     /**
@@ -431,14 +401,9 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * 		  not supported by this list.
      */
     public void clear() {
-        getReadWriteLock().writeLock().lock();
-        try {
-            for(ListIterator i = listIterator(); i.hasNext(); ) {
-                i.next();
-                i.remove();
-            }
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        for(ListIterator i = listIterator(); i.hasNext(); ) {
+            i.next();
+            i.remove();
         }
     }
 

@@ -79,70 +79,45 @@ public abstract class TransformedList extends AbstractEventList implements ListE
 
     /** {@inheritDoc} */
     public boolean add(Object value) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            return source.add(value);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        return source.add(value);
     }
 
     /** {@inheritDoc} */
     public void add(int index, Object value) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
-            int sourceIndex = 0;
-            if(index < size()) sourceIndex = getSourceIndex(index);
-            else sourceIndex = source.size();
-            source.add(sourceIndex, value);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
+        int sourceIndex = 0;
+        if(index < size()) sourceIndex = getSourceIndex(index);
+        else sourceIndex = source.size();
+        source.add(sourceIndex, value);
     }
 
     /** {@inheritDoc} */
     public boolean addAll(int index, Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
-            int sourceIndex = 0;
-            if(index < size()) sourceIndex = getSourceIndex(index);
-            else sourceIndex = source.size();
-            return source.addAll(sourceIndex, values);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
+        int sourceIndex = 0;
+        if(index < size()) sourceIndex = getSourceIndex(index);
+        else sourceIndex = source.size();
+        return source.addAll(sourceIndex, values);
     }
 
     /** {@inheritDoc} */
     public boolean addAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            return source.addAll(values);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        return source.addAll(values);
     }
 
     /** {@inheritDoc} */
     public void clear() {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            // nest changes and let the other methods compose the event
-            updates.beginEvent(true);
-            while(!isEmpty()) {
-                remove(0);
-            }
-            updates.commitEvent();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        // nest changes and let the other methods compose the event
+        updates.beginEvent(true);
+        while(!isEmpty()) {
+            remove(0);
         }
+        updates.commitEvent();
     }
 
     /** {@inheritDoc} */
@@ -153,82 +128,57 @@ public abstract class TransformedList extends AbstractEventList implements ListE
 
     /** {@inheritDoc} */
     public Object remove(int index) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
-            return source.remove(getSourceIndex(index));
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+        return source.remove(getSourceIndex(index));
     }
 
     /** {@inheritDoc} */
     public boolean remove(Object toRemove) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            int index = indexOf(toRemove);
-            if(index == -1) return false;
-            source.remove(getSourceIndex(index));
-            return true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        int index = indexOf(toRemove);
+        if(index == -1) return false;
+        source.remove(getSourceIndex(index));
+        return true;
     }
 
     /** {@inheritDoc} */
     public boolean removeAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            // nest changes and let the other methods compose the event
-            updates.beginEvent(true);
-            boolean overallChanged = false;
-            for(Iterator i = values.iterator(); i.hasNext(); ) {
-                boolean removeChanged = remove(i.next());
-                if(removeChanged) overallChanged = true;
-            }
-            updates.commitEvent();
-            return overallChanged;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        // nest changes and let the other methods compose the event
+        updates.beginEvent(true);
+        boolean overallChanged = false;
+        for(Iterator i = values.iterator(); i.hasNext(); ) {
+            boolean removeChanged = remove(i.next());
+            if(removeChanged) overallChanged = true;
         }
+        updates.commitEvent();
+        return overallChanged;
     }
 
     /** {@inheritDoc} */
     public boolean retainAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            // nest changes and let the other methods compose the event
-            updates.beginEvent(true);
-            boolean changed = false;
-            for(int i = 0; i < size(); ) {
-                if(!values.contains(get(i))) {
-                    remove(i);
-                    changed = true;
-                } else {
-                    i++;
-                }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        // nest changes and let the other methods compose the event
+        updates.beginEvent(true);
+        boolean changed = false;
+        for(int i = 0; i < size(); ) {
+            if(!values.contains(get(i))) {
+                remove(i);
+                changed = true;
+            } else {
+                i++;
             }
-            updates.commitEvent();
-            return changed;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
         }
+        updates.commitEvent();
+        return changed;
     }
 
     /** {@inheritDoc} */
     public Object set(int index, Object value) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
-            return source.set(getSourceIndex(index), value);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
+        return source.set(getSourceIndex(index), value);
     }
 
     /** {@inheritDoc} */

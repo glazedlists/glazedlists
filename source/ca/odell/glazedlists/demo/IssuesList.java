@@ -57,7 +57,12 @@ public class IssuesList extends TransformedList {
             SortedSet issuesSorted = new TreeSet();
             issuesSorted.addAll(issues);
             UniqueList uniqueSource = (UniqueList)source;
-            uniqueSource.replaceAll(issuesSorted);
+            uniqueSource.getReadWriteLock().writeLock().lock();
+            try {
+                uniqueSource.replaceAll(issuesSorted);
+            } finally {
+                uniqueSource.getReadWriteLock().writeLock().unlock();
+            }
         }
     }
 
