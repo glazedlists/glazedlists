@@ -132,7 +132,7 @@
 
   <target name="swt" depends="init,compile"
         description="Compile the SWT classes.">
-    <!-- Verify that JUnit is available on the classpath -->
+    <!-- Verify that SWT is available on the classpath -->
     <available classname="org.eclipse.swt.SWT" property="swt.present"/>
     <fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>
     <!-- Compile the java code from source/ into classes/ -->
@@ -168,7 +168,7 @@
         description="Compile unit tests and run them using JUnit.">
     <mkdir dir="classes"/>
     <!-- Verify that JUnit is available on the classpath -->
-    <available file="${ant.home}/lib/junit.jar" property="junit.present"/>
+    <available classname="junit.framework.TestCase" property="junit.present"/>
     <fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
     <!-- Compile the test classes from source/ into classes/ -->
     <javac destdir="classes" srcdir="test" debug="on" source="1.4">
