@@ -316,6 +316,40 @@ public final class UniqueList extends TransformedList implements ListEventListen
         if(index == -1) return 0;
         return getCount(index);
     }
+    
+    /**
+     * Gets a list of the repetitions of the value at the specified index.
+     *
+     * <p><strong>Warning:</strong> the returned list provides a view of the returned
+     * data that is only valid until the next list change occurs. Therefore users of
+     * this method should call it and do all of their access to it while continuously
+     * holding this list's read lock. Holding the read lock will guarantee that
+     * the result will not change while it is being read.
+     */
+    public List getAll(int index) {
+        // if this is before the end, its everything up to the first different element
+        if(index < size() - 1) {
+            return source.subList(duplicatesList.getIndex(index), duplicatesList.getIndex(index + 1));
+        // if this is at the end, its everything after
+        } else {
+            return source.subList(duplicatesList.getIndex(index), source.size());
+        }
+    }
+    
+    /**
+     * Gets a list of the repetitions of the specified value.
+     *
+     * <p><strong>Warning:</strong> the returned list provides a view of the returned
+     * data that is only valid until the next list change occurs. Therefore users of
+     * this method should call it and do all of their access to it while continuously
+     * holding this list's read lock. Holding the read lock will guarantee that
+     * the result will not change while it is being read.
+     */
+    public List getAll(Object value) {
+        int index = indexOf(value);
+        if(index == -1) return Collections.EMPTY_LIST;
+        return getAll(index);
+    }
 
     /**
      * Populates the duplicates list by walking through the elements of the

@@ -1184,6 +1184,25 @@ public class UniqueListTest extends TestCase {
         assertEquals(2, unique.getCount("C"));
         assertEquals(0, unique.getCount("D"));
     }
+    
+    /**
+     * Tests that getAll() works.
+     */
+    public void testGetAll() {
+        source.add("A");
+        source.add("A");
+        source.add("A");
+        source.add("B");
+        source.add("C");
+        source.add("C");
+        assertEquals(source.subList(0, 3), unique.getAll(0));
+        assertEquals(source.subList(3, 4), unique.getAll(1));
+        assertEquals(source.subList(4, 6), unique.getAll(2));
+        assertEquals(source.subList(0, 3), unique.getAll("A"));
+        assertEquals(source.subList(3, 4), unique.getAll("B"));
+        assertEquals(source.subList(4, 6), unique.getAll("C"));
+        assertEquals(Collections.EMPTY_LIST, unique.getAll("D"));
+    }
 
     /**
 	 * Explicit comparator for Kevin's sanity!
