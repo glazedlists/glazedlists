@@ -42,6 +42,24 @@ public class ListEventCoder {
     }
     
     /**
+     * Convert the List to a ListEvent. This is for snapshots or compressions.
+     */
+    public static Bufferlo listToBytes(EventList list, ByteCoder byteCoder) throws IOException {
+        List parts = new ArrayList();
+        
+        // start with a clear
+        parts.add(new ListEventPart(-1, ListEventCoder.CLEAR, null));
+        
+        // add all values as adds
+        for(int i = 0; i < list.size(); i++) {
+            parts.add(new ListEventPart(i, ListEvent.INSERT, list.get(i)));
+        }
+        
+        // get the whole list
+        return partsToBytes(parts, byteCoder);
+    }
+    
+    /**
      * Apply the specified list event to the specified target list. The write lock
      * for this list must already be acquired if the list is shared between threads.
      */

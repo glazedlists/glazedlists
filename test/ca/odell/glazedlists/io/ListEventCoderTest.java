@@ -31,6 +31,9 @@ import java.text.ParseException;
  */
 public class ListEventCoderTest extends TestCase {
     
+    /** encodes java.lang.Integer */
+    private ByteCoder intCoder = new IntCoder();
+
     /**
      * Prepare for the test.
      */
@@ -47,8 +50,6 @@ public class ListEventCoderTest extends TestCase {
      * Tests that a list event can be encoded and decoded.
      */
     public void testEncodeDecode() throws IOException {
-        ByteCoder intCoder = new IntCoder();
-        
         // prepare the encoding list
         EventList toEncode = new BasicEventList();
         EventEncoderListener encoder = new EventEncoderListener(intCoder);
@@ -71,6 +72,28 @@ public class ListEventCoderTest extends TestCase {
         assertEquals(toEncode, toDecode);
     }
 
+    /**
+     * Tests that a snapshot can be decoded.
+     */
+    public void testSnapshotDecode() throws IOException {
+        // prepare the encoding list
+        EventList toEncode = new BasicEventList();
+        EventEncoderListener encoder = new EventEncoderListener(intCoder);
+        toEncode.addListEventListener(encoder);
+        
+        // prepare the decoding list
+        EventList toDecode = new BasicEventList();
+        toDecode.add(new Integer(1));
+        toDecode.add(new Integer(2));
+        toDecode.add(new Integer(4));
+        
+        // change, encode, decode
+        List entireList = Arrays.asList(new Object[] { new Integer(8), new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
+        toEncode.addAll(entireList);
+        Bufferlo entireListEncoding = (Bufferlo)encoder.getEncodings().remove(0);
+        ListEventCoder.bytesToListEvent(entireListEncoding, toDecode, intCoder);
+        assertEquals(toEncode, toDecode);
+    }
     
     /**
      * Encodes List events as they arrive.
