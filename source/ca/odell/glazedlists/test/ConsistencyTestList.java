@@ -44,8 +44,6 @@ public class ConsistencyTestList implements ListEventListener {
      * For implementing the ListEventListener interface.
      */
     public void listChanged(ListEvent listChanges) {
-        System.out.println("" + name + ": " + listChanges);
-        
         // keep track of the highest change index so far
         int highestChangeIndex = 0;
         
