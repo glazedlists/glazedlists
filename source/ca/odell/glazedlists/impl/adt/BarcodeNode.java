@@ -371,6 +371,26 @@ final class BarcodeNode {
     }
 
     /**
+     * This method exists for CollectionList which needs a way to call
+     * getBlackIndex(index, true) with a white-centric index.
+     */
+    public int getBlackBeforeWhite(int whiteIndex) {
+        int localIndex = whiteIndex - (treeLeftSize - blackLeftSize);
+
+        // Recurse to the Left
+        if(localIndex < 0) return left.getBlackBeforeWhite(whiteIndex);
+
+        // Recurse to the Right
+        else if(localIndex >= whiteSpace) {
+            return right.getBlackBeforeWhite(localIndex - whiteSpace) + blackLeftSize + rootSize;
+
+        // Get the black index before this node
+        } else {
+            return blackLeftSize - 1;
+        }
+    }
+
+    /**
      * Sets the values from index to index + length.
      */
     void set(int index, Object value, int length) {

@@ -422,7 +422,22 @@ public final class Barcode extends AbstractList {
     }
 
     /**
-     *
+     * This method exists for CollectionList which needs a way to call
+     * getBlackIndex(index, true) with a white-centric index.
      */
+    public int getBlackBeforeWhite(int whiteIndex) {
+        // there is no tree
+        if(root == null) {
+            return -1;
+
+        // starting from beyond the tree
+        } else if(whiteIndex >= root.whiteSize()) {
+            return root.blackSize() - 1;
+
+        // the index is from within the tree
+        } else {
+            return root.getBlackBeforeWhite(whiteIndex);
+        }
+    }
 
 }

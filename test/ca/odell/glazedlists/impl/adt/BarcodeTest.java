@@ -147,6 +147,32 @@ public class BarcodeTest extends TestCase {
     }
 
     /**
+     * Tests that getBlackBeforeWhite() is working correctly.
+     */
+    public void testGetBlackBeforeWhite() {
+        barcode.addWhite(0, 1000);
+        int filler = 1000;
+
+        // randomly add blocks of black values
+        while(filler > 0) {
+            int whereToAdd = random.nextInt(barcode.size());
+            int amountToAdd = random.nextInt(filler + 1);
+
+            barcode.addBlack(whereToAdd, amountToAdd);
+            filler -= amountToAdd;
+        }
+
+        // since accesses don't alter state just look things up in order
+        for(int i = 0;i < barcode.whiteSize();i++) {
+            int actualWhiteIndex = barcode.getIndex(i, Barcode.WHITE);
+            int blackBeforeIndex = barcode.getBlackBeforeWhite(i);
+            int actualBlackIndex = barcode.getBlackIndex(actualWhiteIndex, true);
+
+            assertEquals(actualBlackIndex, blackBeforeIndex);
+        }
+    }
+
+    /**
      * Tests to verify that the sparse list is consistent after a long
      * series of list operations.
      */
