@@ -291,6 +291,9 @@ public final class SortedList extends TransformedList {
             // create a list which knows the offsets of the indexes
             unsorted = new IndexedTree();
             
+            // if the lists are empty, we're done
+            if(source.size() == 0) return;
+
             // add all elements in the source list, in order
             for(int i = 0; i < source.size(); i++) {
                 IndexedTreeNode unsortedNode = unsorted.addByNode(i, this);
