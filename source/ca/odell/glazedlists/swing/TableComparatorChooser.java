@@ -21,6 +21,9 @@ import javax.swing.event.*;
 import java.util.*;
 // for looking up icon files in jars
 import java.net.URL;
+// for inspecting the current Metal theme
+import javax.swing.plaf.metal.*;
+import java.lang.reflect.*;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking
@@ -83,7 +86,8 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     private static final Map lookAndFeelResourcePathMap = new HashMap();
     static {
         lookAndFeelResourcePathMap.put("Mac OS X Aqua", "aqua");
-        lookAndFeelResourcePathMap.put("Metal", "metal");
+        lookAndFeelResourcePathMap.put("Metal/Steel", "metal");
+        lookAndFeelResourcePathMap.put("Metal/Ocean", "ocean");
         lookAndFeelResourcePathMap.put("Windows", "windows");
     }
 
@@ -482,6 +486,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     private static void loadIcons() {
         // look up the icon resource path based on the current look and feel
         String lookAndFeelName = UIManager.getLookAndFeel().getName();
+        if(lookAndFeelName.equals("Metal")) lookAndFeelName = getMetalTheme();
         String resourcePath = (String)lookAndFeelResourcePathMap.get(lookAndFeelName);
         if(resourcePath == null) resourcePath = defaultResourcePath;
 
@@ -493,6 +498,27 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
             URL iconLocation = jarLoader.getResource(resourceRoot + "/" + resourcePath + "/" + iconFileNames[i]);
             if(iconLocation != null) icons[i] = new ImageIcon(iconLocation);
             else icons[i] = null;
+        }
+    }
+    /**
+     * Workaround method to get the metal theme, either "Steel" or "Ocean". This is because the
+     * Metal look and feel's getName() property does not distinguish between versions correctly.
+     * A bug has been submitted to the Sun Java bug database and will be reviewed. If fixed, we
+     * can get rid of this ugly hack method.
+     */
+    private static String getMetalTheme() {
+        try {
+            MetalLookAndFeel metalLNF = (MetalLookAndFeel)UIManager.getLookAndFeel();
+            Method getCurrentTheme = metalLNF.getClass().getMethod("getCurrentTheme", new Class[0]);
+            MetalTheme currentTheme = (MetalTheme)getCurrentTheme.invoke(metalLNF, new Object[0]);
+            return "Metal/" + currentTheme.getName();
+        } catch(NoSuchMethodException e) {
+            // must be Java 1.4 because getCurrentTheme() method does not exist
+            // therefore the theme of interest is "Steel"
+            return "Metal/Steel";
+        } catch(Exception e) {
+            e.printStackTrace();
+            return "Metal/Steel";
         }
     }
 
