@@ -15,7 +15,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-class IntArrayComparator implements Comparator {
+public class IntArrayComparator implements Comparator {
     public int index;
     public IntArrayComparator(int index) {
         this.index = index;

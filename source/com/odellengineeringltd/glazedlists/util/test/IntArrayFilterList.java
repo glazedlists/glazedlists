@@ -17,7 +17,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-class IntArrayFilterList extends AbstractFilterList {
+public class IntArrayFilterList extends AbstractFilterList {
     public int index = 0;
     public int threshhold = 0;
     public IntArrayFilterList(EventList source) {
