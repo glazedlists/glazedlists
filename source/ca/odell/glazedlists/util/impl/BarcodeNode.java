@@ -1109,7 +1109,6 @@ final class BarcodeNode {
         validateBlackSize();
         validateCompression();
         validateRootSize();
-        validateHostSizeMatchesRoot();
     }
 
     private int validateBlackSize() {
@@ -1190,9 +1189,5 @@ final class BarcodeNode {
         if(right != null) right.validateRootSize();
 
         if(rootSize == 0) throw new IllegalStateException("Root Size Validation Failure\n" + "A node was found with a root size of zero.");
-    }
-
-    private void validateHostSizeMatchesRoot() {
-        if(host.treeSize != size()) throw new IllegalStateException("Host Size Validation Failure\n" + "Expected: " + size() + "\nActual: " + host.treeSize);
     }
 }
