@@ -139,9 +139,10 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
     }
     
     /**
-     * When the list is changed the cache is cleared. This could be replaced
-     * by a more efficient implementation which iterated through the cache
-     * and updated elements whose indexes changed.
+     * When the list is changed the change propogates only if the list is
+     * not currently frozen. Otherwise the change is ignored under the
+     * assumption that the change event was sent before this list became
+     * frozen.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
         if(frozen) {
