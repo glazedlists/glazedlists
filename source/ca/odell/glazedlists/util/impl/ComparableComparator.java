@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.util;
+package ca.odell.glazedlists.util.impl;
 
 // for specifying a sorting algorithm
 import java.util.Comparator;
@@ -20,7 +20,7 @@ import java.util.Comparator;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class ComparableComparator implements Comparator {
-    
+
     /**
      * Compares object alpha to object beta by casting object one
      * to Comparable, and calling its compareTo method.
@@ -31,7 +31,7 @@ public final class ComparableComparator implements Comparator {
             Comparable alphaComparable = (Comparable)alpha;
             return alphaComparable.compareTo(beta);
         }
-        
+
         // compare nulls
         if(alpha == null) {
             if(beta == null) return 0;

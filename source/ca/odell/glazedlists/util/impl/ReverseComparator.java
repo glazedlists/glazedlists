@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.util;
+package ca.odell.glazedlists.util.impl;
 
 // for specifying a sorting algorithm
 import java.util.Comparator;
@@ -26,13 +26,6 @@ public final class ReverseComparator implements Comparator {
      */
     public ReverseComparator(Comparator source) {
         this.source = source;
-    }
-
-    /**
-     * Create a new reverse comparator that reverses Comparable elements.
-     */
-    public ReverseComparator() {
-        this(ComparatorFactory.comparable());
     }
 
     /**

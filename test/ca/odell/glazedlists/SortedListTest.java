@@ -516,7 +516,7 @@ public class SortedListTest extends TestCase {
      * normally.
      */
     class ReverseStringComparator implements Comparator {
-        public ComparableComparator delegate = (ComparableComparator)ComparatorFactory.comparable();
+        public Comparator delegate = ComparatorFactory.comparable();
 
         public int compare(Object a, Object b) {
             String aString = (String)a;

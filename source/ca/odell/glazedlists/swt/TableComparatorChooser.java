@@ -9,8 +9,9 @@ package ca.odell.glazedlists.swt;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-// the Glazed Lists util package includes default comparators
+// the Glazed Lists util and volatile packages for default comparators
 import ca.odell.glazedlists.util.*;
+import ca.odell.glazedlists.util.impl.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 // for keeping lists of comparators
@@ -70,7 +71,7 @@ public final class TableComparatorChooser {
 
     /** whether to support sorting on single or multiple columns */
     private boolean multipleColumnSort;
-    
+
     /** listeners to sort change events */
     private List sortListeners = new ArrayList();
 
@@ -199,7 +200,7 @@ public final class TableComparatorChooser {
         && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
             rebuildColumns();
         }
-        
+
         // if the comparator has changed
         ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().lock();
         try {
@@ -211,7 +212,7 @@ public final class TableComparatorChooser {
             ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().unlock();
         }
     }*/
-    
+
     /**
      * Registers the specified {@link Listener} to receive notification whenever
      * the {@link Table} is sorted by this {@link TableComparatorChooser}.
@@ -322,7 +323,7 @@ public final class TableComparatorChooser {
         recentlyClickedColumns.add(currentTracker);
         rebuildComparator();
     }
-    
+
     class ColumnListener implements SelectionListener, Listener, ControlListener {
         private int column;
         public ColumnListener(int column) {
@@ -399,8 +400,8 @@ public final class TableComparatorChooser {
                 Comparator comparator = columnClickTracker.getComparator();
                 comparators.add(comparator);
             }
-            ComparatorChain comparatorChain = new ComparatorChain(comparators);
-    
+            ComparatorChain comparatorChain = (ComparatorChain)ComparatorFactory.chain(comparators);
+
             // select the new comparator
             sortedList.getReadWriteLock().writeLock().lock();
             try {
@@ -414,7 +415,7 @@ public final class TableComparatorChooser {
         // force the table header to redraw itself
         //table.getTableHeader().revalidate();
         //table.getTableHeader().repaint();
-        
+
         // notify interested listeners that the sorting has changed
         Event sortEvent = new Event();
         sortEvent.widget = table;
@@ -526,7 +527,7 @@ public final class TableComparatorChooser {
          */
         public Comparator getComparator() {
             Comparator comparator = (Comparator)comparators.get(getComparatorIndex());
-            if(isReverse()) comparator = new ReverseComparator(comparator);
+            if(isReverse()) comparator = ComparatorFactory.reverse(comparator);
             return comparator;
         }
 
@@ -570,7 +571,7 @@ class TableColumnComparator implements Comparator {
     private int column;
 
     /** comparison is delegated to a ComparableComparator */
-    private static ComparableComparator comparableComparator = new ComparableComparator();
+    private static Comparator comparableComparator = ComparatorFactory.comparable();
 
     /**
      * Creates a new TableColumnComparator that sorts objects by the specified

@@ -9,8 +9,9 @@ package ca.odell.glazedlists.swing;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-// the Glazed Lists util package includes default comparators
+// the Glazed Lists util and impl packages include default comparators
 import ca.odell.glazedlists.util.*;
+import ca.odell.glazedlists.util.impl.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 // Swing toolkit stuff for displaying widgets
