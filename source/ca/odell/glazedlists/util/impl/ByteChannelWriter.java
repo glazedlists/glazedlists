@@ -47,6 +47,18 @@ public class ByteChannelWriter {
     }
     
     /**
+     * Writes the specified ByteBuffer.
+     *
+     * <p>This method could easily be optimized by using the ByteBuffer API.
+     */
+    public void write(ByteBuffer source) throws IOException {
+        while(source.remaining() > 0) {
+            if(buffer.remaining() == 0) flush();
+            buffer.put(source.get());
+        }
+    }
+    
+    /**
      * Flushes the contents of the buffer to the socket channel.
      */
     public void flush() throws IOException {

@@ -50,25 +50,19 @@ final class CTPConnectionManager {
      * managing outgoing connections.
      */
     public void start() throws IOException {
-
-        // Allocate an unbound server socket channel
+        // open a channel and bind
         ServerSocketChannel serverChannel = ServerSocketChannel.open();
-        // Get the associated ServerSocket to bind it with
         ServerSocket serverSocket = serverChannel.socket();
-        // Create a new Selector for use below
-        selector = Selector.open();
-        
-        // Set the port the server channel will listen to
         InetSocketAddress listenAddress = new InetSocketAddress(listenPort);
         logger.fine("Binding to " + listenAddress);
         serverSocket.bind(listenAddress);
-        
-        // Set nonblocking mode for the listening Socket
+    
+        // prepare for non-blocking, selectable IO
+        selector = Selector.open();
         serverChannel.configureBlocking(false);
-        
-        // Register the Server SocketChannel with the Selector
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
         
+        // continuously select a socket and action on it
         while(true) {
             // This may block for a long time. Upon returning, the
             // selected set contains keys of the ready channels
@@ -89,6 +83,7 @@ final class CTPConnectionManager {
                 // Is there data to be read on this channel?
                 if(key.isReadable()) {
                     CTPProtocol protocol = (CTPProtocol)key.attachment();
+                    logger.finest("Key is readable " + protocol);
                     protocol.handleRead();
                 }
                 
@@ -103,16 +98,24 @@ final class CTPConnectionManager {
      *
      * <p>This creates a CTPServerProtocol to handle the connection.
      */
-    private void handleAccept(SelectionKey key) throws IOException {
-        // peel the connection from the SocketChannel
-        ServerSocketChannel server = (ServerSocketChannel)key.channel();
-        SocketChannel channel = server.accept();
-        if(channel == null) return;
-        
-        // configure the channel for no-blocking and selection
-        channel.configureBlocking(false);
-        SelectionKey channelKey = channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-        
+    private void handleAccept(SelectionKey key) {
+        // construct the channels and selectors
+        SocketChannel channel = null;
+        SelectionKey channelKey = null;
+        try {
+            // peel the connection from the SocketChannel
+            ServerSocketChannel server = (ServerSocketChannel)key.channel();
+            channel = server.accept();
+
+            // configure the channel for no-blocking and selection
+            if(channel == null) return;
+            channel.configureBlocking(false);
+            channelKey = channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        } catch(IOException e) {
+            // the accept failed, there's nothing to clean up
+            return;
+        }
+
         // construct handlers for this connection
         CTPHandler handler = handlerFactory.constructHandler();
         CTPServerProtocol serverProtocol = new CTPServerProtocol(channelKey, handler);
@@ -189,7 +192,9 @@ final class CTPConnectionManager {
          * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
          */
         public void receiveRequest(CTPProtocol source, String uri, Map headers) {
-            throw new IllegalStateException("write code here");
+            logger.info("Received request for " + uri + " from " + source + " headers: " + headers);
+            CTPServerProtocol server = (CTPServerProtocol)source;
+            server.sendResponse(OK, Collections.EMPTY_MAP);
         }
         
         /**
@@ -199,8 +204,8 @@ final class CTPConnectionManager {
          *
          * @param data A non-empty array of bytes.
          */
-        public void receiveChunk(CTPProtocol source, byte[] data) {
-            throw new IllegalStateException("write code here");
+        public void receiveChunk(CTPProtocol source, ByteBuffer data) {
+            logger.info("Received data " + data);
         }
     
         /**

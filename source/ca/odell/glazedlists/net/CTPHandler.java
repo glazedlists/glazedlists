@@ -6,9 +6,8 @@
  */
 package ca.odell.glazedlists.net;
 
-// for maps of headers
 import java.util.*;
-
+import java.nio.*;
 
 /**
  * A callback interface for classes that implement a CTP Client or Server.
@@ -46,9 +45,11 @@ interface CTPHandler {
      * to be cleanly concatenated with the previous and following chunks without
      * problem by the reader.
      *
-     * @param data A non-empty array of bytes.
+     * @param data A non-empty ByteBuffer containing the bytes for this chunk. The
+     *      relevant bytes start at data.position() and end at data.limit(). This
+     *      buffer is only valid for the duration of this method call.
      */
-    public void receiveChunk(CTPProtocol source, byte[] data);
+    public void receiveChunk(CTPProtocol source, ByteBuffer data);
 
     /**
      * Handles the connection being closed by the remote client. This will also

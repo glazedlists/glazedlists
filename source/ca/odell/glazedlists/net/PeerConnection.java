@@ -7,6 +7,12 @@
 package ca.odell.glazedlists.net;
 
 import java.util.*;
+// NIO
+import java.util.*;
+import java.nio.*;
+import java.nio.channels.*;
+import java.net.*;
+import java.io.*;
 
 /**
  * Manages a connection to a peer. The peer connection is multiplexed and can be
@@ -89,33 +95,15 @@ class PeerConnection implements CTPHandler {
     /**
      * Handles reception of the specified chunk of data.
      */
-    public void receiveChunk(CTPProtocol source, byte[] data) {
-        System.out.println("Received chunk from " + source + " of size " + data.length);
-        
-        // scan through the chunk of data
-        int index = 0;
-
-        // find the chunk type
-        StringBuffer chunkTypeBuffer = new StringBuffer();
-        while(index < data.length) {
-            if(data[index] == (byte)'\n') {
-                index++;
-                break;
-            } else {
-                chunkTypeBuffer.append((char)data[index]);
-                index++;
-            }
-        }
-        String chunkType = chunkTypeBuffer.toString();
-        
-        System.out.println("Chunk type is: \"" + chunkType + "\"");
+    public void receiveChunk(CTPProtocol source, ByteBuffer data) {
+        System.out.println("Received chunk from " + source + " of size " + data.remaining());
         
         // handle the chunk based on its type
-        if(chunkType.equals("USP-SUBSCRIBE")) {
+        /*if(chunkType.equals("USP-SUBSCRIBE")) {
             System.out.println("Recognized subscribe chunk type");
         } else {
             System.out.println("Unrecognized chunk type: \"" + chunkType + "\"");
-        }
+        }*/
     }
 
     /**
@@ -124,9 +112,6 @@ class PeerConnection implements CTPHandler {
     public void connectionClosed(CTPProtocol source, Exception reason) {
         System.out.println("Connection to " + source + " closed, reason: " + reason.getMessage());
     }
-    
-    
-    
     
     /**
      * Creates a chunk for subscribing to the specified list.

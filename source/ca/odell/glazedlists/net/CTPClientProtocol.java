@@ -6,7 +6,7 @@
  */
 package ca.odell.glazedlists.net;
 
-// NIO is used for CTP
+// NIO
 import java.util.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -20,9 +20,6 @@ import java.io.*;
  */
 final class CTPClientProtocol extends CTPProtocol {
 
-    /** a buffer to read into and out of */
-    private ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
-
     /**
      * Creates a new CTPServerProtocol.
      *
@@ -31,44 +28,12 @@ final class CTPClientProtocol extends CTPProtocol {
      */
     CTPClientProtocol(String host, SelectionKey selectionKey, CTPHandler handler) {
         super(selectionKey, handler);
-    }
-
-    /**
-     * Sends the response header to the client.
-     *
-     * @param code an HTTP response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1
-     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2. This can
-     *      be null to indicate no headers.
-     */
-    public void sendRequest(String uri, Map headers) throws CTPException {
-    }
-
-    /**
-     * Handles the incoming bytes.
-     */
-    void handleRead() throws IOException {
-        SocketChannel socketChannel = (SocketChannel)selectionKey.channel();
-        buffer.clear();
+        this.host = host;
         
-        // read until we have exhausted the channel
-        int count = 0;
-        while((count = socketChannel.read(buffer)) > 0) {
-            // make buffer readable
-            buffer.flip();
-            
-            // send the data, it might not go all at once
-            while(buffer.hasRemaining()) {
-                socketChannel.write(buffer);
-            }
-            
-            // empty buffer
-            buffer.clear();
-        }
+        // wait for the request
+        state = STATE_CONSTRUCTING_REQUEST;
         
-        // handle EOF, close channel. This invalidates the key
-        if(count < 0) {
-            socketChannel.close();
-        }
+        // we are currently interested in reading
+        selectionKey.interestOps(SelectionKey.OP_READ);
     }
 }
-
