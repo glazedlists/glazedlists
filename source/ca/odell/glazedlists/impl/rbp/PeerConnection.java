@@ -14,6 +14,8 @@ import java.text.ParseException;
 import ca.odell.glazedlists.impl.io.Bufferlo;
 // BRP sits atop Chunk Transfer Protocol
 import ca.odell.glazedlists.impl.ctp.*;
+// logging
+import java.util.logging.*;
 
 
 /**
@@ -26,36 +28,33 @@ import ca.odell.glazedlists.impl.ctp.*;
  */
 class PeerConnection implements CTPHandler {
     
+    /** logging */
+    private static Logger logger = Logger.getLogger(PeerConnection.class.toString());
+
     /** the peer that owns all connections */
     private Peer peer;
     
     /** the lower level connection to this peer */
     private CTPConnection connection = null;
-    
+
     /** the state of this connection */
     private static final int AWAITING_CONNECT = 0;
     private static final int READY = 1;
     private static final int CLOSED = 2;
     private int state = AWAITING_CONNECT;
-    
-    /** whether this connection is ready yet */
-    private boolean ready = false;
-    
-    /** whether this connection has been closed */
-    private boolean closed = false;
-    
+
     /** the incoming bytes pending a full block */
     private Bufferlo currentBlock = new Bufferlo();
-    
+
     /** the outgoing bytes pending a connection */
     private Bufferlo pendingConnect = new Bufferlo();
 
     /** locally subscribed resources by resource name */
-    private Map incomingSubscriptions = new TreeMap();
-    
+    Map incomingSubscriptions = new TreeMap();
+
     /** locally published resources by resource name */
-    private Map outgoingPublications = new TreeMap();
-    
+    Map outgoingPublications = new TreeMap();
+
     /**
      * Creates a new PeerConnection for the specified peer.
      */
@@ -86,21 +85,15 @@ class PeerConnection implements CTPHandler {
         this.connection = null;
         this.state = CLOSED;
         peer.removeConnection(this);
-
-        // clean up the incoming subscriptions
-        for(Iterator r = incomingSubscriptions.values().iterator(); r.hasNext(); ) {
-            PeerResource resource = (PeerResource)r.next();
-            resource.publisherConnectionClosed(this);
-        }
-        incomingSubscriptions.clear();
         
-        // clean up the outgoing publications
-        for(Iterator r = outgoingPublications.values().iterator(); r.hasNext(); ) {
+        // notify resources of the close
+        List resourcesToNotify = new ArrayList();
+        resourcesToNotify.addAll(incomingSubscriptions.values());
+        resourcesToNotify.addAll(outgoingPublications.values());
+        for(Iterator r = resourcesToNotify.iterator(); r.hasNext(); ) {
             PeerResource resource = (PeerResource)r.next();
-            resource.subscriberConnectionClosed(this);
-            r.remove();
+            resource.connectionClosed(this, reason);
         }
-        outgoingPublications.clear();
     }
 
     /**
@@ -120,11 +113,29 @@ class PeerConnection implements CTPHandler {
         try {
             PeerBlock block = null;
             while((block = PeerBlock.fromBytes(currentBlock)) != null) {
-                if(block.isSubscribe()) remoteSubscribe(block);
-                else if(block.isSubscribeConfirm()) remoteSubscribeConfirm(block);
-                else if(block.isUpdate()) remoteUpdate(block);
-                else if(block.isUnsubscribe()) remoteUnsubscribe(block);
-                else throw new IllegalStateException();
+                String resourceName = block.getResourceName();
+                
+                // get the resource for this connection
+                PeerResource resource = null;
+                if(block.isSubscribe()) {
+                    resource = peer.getPublishedResource(resourceName);
+                } else if(block.isUnsubscribe()) {
+                    resource = (PeerResource)outgoingPublications.get(resourceName);
+                } else if(block.isSubscribeConfirm() || block.isUpdate()) {
+                    resource = (PeerResource)incomingSubscriptions.get(resourceName);
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+                
+                // handle an unknown resource name
+                if(resource == null) {
+                    logger.warning("Unknown resource: \"" + resourceName + "\"");
+                    close();
+                    return;
+                }
+                
+                // handle the block
+                resource.incomingBlock(this, block);
             }
         // if the data is corrupted, close the connection
         } catch(ParseException e) {
@@ -133,89 +144,26 @@ class PeerConnection implements CTPHandler {
     }
     
     /**
-     * Handles an request to subscribe to something we're publishing.
+     * Test whether this connection is being used by incoming subscriptions or
+     * outgoing publications.
      */
-    private void remoteSubscribe(PeerBlock block) {
-        // make sure we're not already publishing this
-        String resourceName = block.getResourceName();
-        if(outgoingPublications.get(resourceName) != null) throw new IllegalStateException("Connection is already subscribed to " + resourceName);
-        
-        // lookup the resource in the published list
-        PeerResource localResource = peer.getPublishedResource(resourceName);
-        if(localResource == null) throw new IllegalStateException();
-        
-        // do the subscribe
-        localResource.remoteSubscribe(this, block);
-        outgoingPublications.put(resourceName, localResource);
-    }
-
-    /**
-     * Handles an incoming subscription confirmation for something we've requested.
-     */
-    private void remoteSubscribeConfirm(PeerBlock block) {
-        // make sure we're not already subscribed
-        String resourceName = block.getResourceName();
-        PeerResource incomingSubscription = (PeerResource)incomingSubscriptions.get(resourceName);
-        if(incomingSubscription == null) throw new IllegalStateException("Connection not subscribed to " + resourceName);
-        
-        // handle the confirmation
-        incomingSubscription.remoteSubscribeConfirm(this, block);
-        incomingSubscriptions.put(resourceName, incomingSubscription);
-    }
-
-    /**
-     * Handles an incoming update to something we're subscribing to.
-     */
-    private void remoteUpdate(PeerBlock block) {
-        // make sure we're subscribed
-        String resourceName = block.getResourceName();
-        PeerResource incomingSubscription = (PeerResource)incomingSubscriptions.get(resourceName);
-        if(incomingSubscription == null) throw new IllegalStateException("Connection not subscribed to " + resourceName);
-
-        // handle the update
-        incomingSubscription.remoteUpdate(this, block);
-    }
-
-    /**
-     * Handles an incoming request unsubscribe from something we're publishing.
-     */
-    private void remoteUnsubscribe(PeerBlock block) {
-        // make sure we're subscribed
-        String resourceName = block.getResourceName();
-        PeerResource localResource = (PeerResource)outgoingPublications.get(resourceName);
-        if(localResource == null) throw new IllegalStateException("Connection not subscribed to " + resourceName);
-        
-        // handle the unsubscribe
-        localResource.remoteUnsubscribe(this, block);
-        outgoingPublications.remove(resourceName);
+    boolean isIdle() {
+        return (incomingSubscriptions.isEmpty() && outgoingPublications.isEmpty());
     }
     
     /**
-     * Addes a subscription to the specified resource.
+     * Tests whether this connection is closed.
      */
-    public void addIncomingSubscription(PeerResource resource) {
-        incomingSubscriptions.put(resource.getResourceName(), resource);
+    boolean isClosed() {
+        return (state == CLOSED);
     }
-    
-    /**
-     * Remove the subscription to the specified resource.
-     */
-    public void removeIncomingSubscription(PeerResource resource) {
-        Object removed = incomingSubscriptions.remove(resource.getResourceName());
-        if(removed != resource) throw new IllegalStateException();
-        if(incomingSubscriptions.isEmpty() && outgoingPublications.isEmpty()) {
-            close();
-        }
-    }
-    
+
     /**
      * Close this peer connection.
      */
     public void close() {
-        if(state != READY) throw new IllegalStateException();
-        if(!incomingSubscriptions.isEmpty()) throw new IllegalStateException();
-        if(!outgoingPublications.isEmpty()) throw new IllegalStateException();
-        if(connection == null) throw new IllegalStateException();
+        if(state != READY) throw new UnsupportedOperationException();
+        if(connection == null) throw new UnsupportedOperationException();
         connection.close();
         peer.removeConnection(this);
     }

@@ -11,6 +11,8 @@ import java.util.*;
 import java.nio.*;
 import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
+// logging
+import java.util.logging.*;
 
 /**
  * A resource that is being published on the network.
@@ -18,6 +20,9 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 class PeerResource implements ResourceListener, ResourceStatus {
+
+    /** logging */
+    private static Logger logger = Logger.getLogger(PeerResource.class.toString());
     
     /** the publisher of this resource */
     private PeerConnection publisher = null;
@@ -36,6 +41,9 @@ class PeerResource implements ResourceListener, ResourceStatus {
     
     /** the ID of the current update */
     private int updateId = 0;
+    
+    /** listeners interested in status changes */
+    private List statusListeners = new ArrayList();
     
     /**
      * Create a new PeerResource to manage the specified resource.
@@ -61,7 +69,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
         this.resourceName = resourceName;
         
         // subscribe to this resource
-        publisher.addIncomingSubscription(this);
+        publisher.incomingSubscriptions.put(resourceName, this);
         PeerBlock block = PeerBlock.subscribe(resourceName);
         publisher.writeBlock(this, block);
         
@@ -69,26 +77,41 @@ class PeerResource implements ResourceListener, ResourceStatus {
         resource.addResourceListener(this);
     }
     
-    /**
-     * Whether this resource is connected.
-     */
+    /** {@inheritDoc} */
     public boolean isConnected() {
         return publisher != null;
     }
+    /** {@inheritDoc} */
     public void connect() {
         throw new UnsupportedOperationException();
     }
+    /** {@inheritDoc} */
     public void disconnect() {
-        throw new UnsupportedOperationException();
+        if(publisher != null) {
+            unsubscribe();
+        } else {
+            throw new IllegalStateException();
+        }
     }
+    /** {@inheritDoc} */
     public void addResourceStatusListener(ResourceStatusListener listener) {
-        throw new UnsupportedOperationException();
+        statusListeners.add(listener);
     }
+    /** {@inheritDoc} */
     public void removeResourceStatusListener(ResourceStatusListener listener) {
-        throw new UnsupportedOperationException();
+        statusListeners.remove(listener);
     }
     
-    
+    /**
+     * Handles a block of incoming data.
+     */
+    public void incomingBlock(PeerConnection source, PeerBlock block) {
+        if(block.isSubscribe()) remoteSubscribe(source, block);
+        else if(block.isSubscribeConfirm()) remoteSubscribeConfirm(source, block);
+        else if(block.isUpdate()) remoteUpdate(source, block);
+        else if(block.isUnsubscribe()) remoteUnsubscribe(source, block);
+        else throw new IllegalStateException();
+    }
     
     /**
      * Unsubscribes to this resource.
@@ -101,7 +124,8 @@ class PeerResource implements ResourceListener, ResourceStatus {
         // unsubscribe from this resource
         PeerBlock block = PeerBlock.unsubscribe(resourceName);
         publisher.writeBlock(this, block);
-        publisher.removeIncomingSubscription(this);
+        publisher.incomingSubscriptions.remove(resourceName);
+        if(publisher.isIdle()) publisher.close();
     }
     
     /**
@@ -134,7 +158,7 @@ class PeerResource implements ResourceListener, ResourceStatus {
     /**
      * Handles a change in a remote resource.
      */
-    public void remoteUpdate(PeerConnection publisher, PeerBlock block) {
+    private void remoteUpdate(PeerConnection publisher, PeerBlock block) {
         // update the internal state
         if(publisher != null) updateId++;
 
@@ -149,10 +173,11 @@ class PeerResource implements ResourceListener, ResourceStatus {
     /**
      * Subscribe the specified remote peer to this resource.
      */
-    public void remoteSubscribe(PeerConnection subscriber, PeerBlock block) {
+    private void remoteSubscribe(PeerConnection subscriber, PeerBlock block) {
         // lock peer resource //////////////////////////////
         
         // first create the subscription
+        subscriber.outgoingPublications.put(resourceName, this);
         subscribers.add(subscriber);
         
         // now send the snapshot to this subscriber
@@ -164,7 +189,9 @@ class PeerResource implements ResourceListener, ResourceStatus {
     /**
      * Confirms the subscription by the specified remote peer.
      */
-    public void remoteSubscribeConfirm(PeerConnection publisher, PeerBlock block) {
+    private void remoteSubscribeConfirm(PeerConnection publisher, PeerBlock block) {
+        publisher.incomingSubscriptions.put(resourceName, this);
+        
         updateId = block.getUpdateId();
         sessionId = block.getSessionId();
         resource.fromSnapshot(block.getPayload());
@@ -173,25 +200,22 @@ class PeerResource implements ResourceListener, ResourceStatus {
     /**
      * Unsubscribe the specified remote peer from this resource.
      */
-    public void remoteUnsubscribe(PeerConnection subscriber, PeerBlock block) {
+    private void remoteUnsubscribe(PeerConnection subscriber, PeerBlock block) {
         subscribers.remove(subscriber);
+        subscriber.outgoingPublications.remove(resourceName);
     }
     
     /**
-     * Notifies this resource that the connection to its publisher has been
-     * closed.
+     * Handle the state of the specified connection changing.
      */
-    public void publisherConnectionClosed(PeerConnection connection) {
-        if(publisher != connection) throw new IllegalStateException();
-        publisher = null;
-    }
-    
-    /**
-     * Notifies this resource that the connection to a subscriber has been closed.
-     */
-    public void subscriberConnectionClosed(PeerConnection connection) {
-        boolean removed = subscribers.remove(connection);
-        if(!removed) throw new IllegalStateException();
+    public void connectionClosed(PeerConnection connection, Exception reason) {
+        if(publisher == connection) {
+            publisher = null;
+            connection.incomingSubscriptions.remove(resourceName);
+        } else {
+            subscribers.remove(connection);
+            connection.outgoingPublications.remove(resourceName);
+        }
     }
 
     /**
