@@ -112,13 +112,13 @@ public class IndexedTreeTest extends TestCase {
             int letter = random.nextInt(3);
 
             if(letter == 0 && ACount > 0) {
-                indexedTree.getNode("A").removeFromTree();
+                indexedTree.getNode("A").removeFromTree(indexedTree);
                 ACount--;
             } else if(letter == 1 && CCount > 0) {
-                indexedTree.getNode("C").removeFromTree();
+                indexedTree.getNode("C").removeFromTree(indexedTree);
                 CCount--;
             } else if(letter == 2 && ECount > 0) {
-                indexedTree.getNode("E").removeFromTree();
+                indexedTree.getNode("E").removeFromTree(indexedTree);
                 ECount--;
             }
         }

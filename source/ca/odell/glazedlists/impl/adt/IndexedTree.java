@@ -70,7 +70,7 @@ public final class IndexedTree {
      */
     public IndexedTreeNode getNode(Object value) {
         if(root == null) return null;
-        return root.getNodeByValue(value);
+        return root.getNodeByValue(comparator, value);
     }
 
     /**
@@ -104,7 +104,7 @@ public final class IndexedTree {
      */
     public IndexedTreeNode removeByIndex(int index) {
         IndexedTreeNode treeNode = root.getNodeWithIndex(index);
-        treeNode.removeFromTree();
+        treeNode.removeFromTree(this);
         return treeNode;
     }
 
@@ -116,8 +116,8 @@ public final class IndexedTree {
      *      index of the node.
      */
     public IndexedTreeNode addByNode(Object value) {
-        if(root == null) root = new IndexedTreeNode(this, null);
-        return root.insert(value);
+        if(root == null) root = new IndexedTreeNode(null);
+        return root.insert(this, value);
     }
     /**
      * Inserts the specified object into the tree with the specified index.
@@ -129,8 +129,8 @@ public final class IndexedTree {
     public IndexedTreeNode addByNode(int index, Object value) {
         if(index > size()) throw new IndexOutOfBoundsException("cannot insert into tree of size " + size() + " at " + index);
         else if(value == null) throw new NullPointerException("cannot insert a value that is null");
-        else if(root == null && index == 0) root = new IndexedTreeNode(this, null);
-        return root.insert(index, value);
+        else if(root == null && index == 0) root = new IndexedTreeNode(null);
+        return root.insert(this, index, value);
     }
 
     /**
@@ -138,7 +138,7 @@ public final class IndexedTree {
      */
     public boolean contains(Object object) {
         if(root == null) return false;
-        return root.contains(object);
+        return root.contains(comparator, object);
     }
 
     /**
@@ -160,7 +160,7 @@ public final class IndexedTree {
      */
     public int indexOf(Object object) {
         if(root == null) return -1;
-        return root.indexOf(object, false);
+        return root.indexOf(comparator, object, false);
     }
 
     /**
@@ -169,7 +169,7 @@ public final class IndexedTree {
      */
     public int lastIndexOf(Object object) {
         if(root == null) return -1;
-        return root.lastIndexOf(object);
+        return root.lastIndexOf(comparator, object);
     }
 
     /**
@@ -179,7 +179,7 @@ public final class IndexedTree {
      */
     public int indexOfSimulated(Object object) {
         if(root == null) return 0;
-        return root.indexOf(object, true);
+        return root.indexOf(comparator, object, true);
     }
 
     /**
@@ -189,7 +189,7 @@ public final class IndexedTree {
     void validate() {
         for(Iterator i = iterator(); i.hasNext();) {
             IndexedTreeNode node = (IndexedTreeNode)i.next();
-            node.validate();
+            node.validate(this);
         }
     }
 

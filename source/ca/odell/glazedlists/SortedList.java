@@ -152,7 +152,7 @@ public final class SortedList extends TransformedList {
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
                 IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                unsortedNode.removeFromTree();
+                unsortedNode.removeFromTree(unsorted);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.addDelete(deleteSortedIndex);
 
@@ -200,7 +200,7 @@ public final class SortedList extends TransformedList {
         for(Iterator i = indicesPendingDeletion.iterator(); i.hasNext(); ) {
             IndexNodePair indexNodePair = (IndexNodePair)i.next();
             i.remove();
-            
+
             int insertedIndex = insertByUnsortedNode(indexNodePair.node);
             int deletedIndex = indexNodePair.index;
             // adjust the out of order insert with respect to the delete list
@@ -252,7 +252,7 @@ public final class SortedList extends TransformedList {
         // look up the sorted index before removing the nodes
         int sortedIndex = sortedNode.getIndex();
         // delete the sorted node from its tree
-        sortedNode.removeFromTree();
+        sortedNode.removeFromTree(sorted);
         // return the sorted index
         return sortedIndex;
     }

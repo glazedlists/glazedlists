@@ -119,7 +119,7 @@ public class CachingList extends TransformedList {
             if(recordHitsOrMisses) cacheHits ++;;
             AgedNode agedNode = (AgedNode)cacheNode.getValue();
             value = agedNode.getValue();
-            cacheNode.removeFromTree();
+            cacheNode.removeFromTree(cache);
             SparseListNode indexNode = agedNode.getIndexNode();
             indexNode.setValue(cache.addByNode(agedNode));
 
@@ -129,7 +129,7 @@ public class CachingList extends TransformedList {
             // Make room in the cache if it is full
             if(currentSize >= maxSize) {
                 IndexedTreeNode oldestInCache = cache.getNode(0);
-                oldestInCache.removeFromTree();
+                oldestInCache.removeFromTree(cache);
                 AgedNode oldAgedNode = (AgedNode)oldestInCache.getValue();
                 SparseListNode oldIndexNode = oldAgedNode.getIndexNode();
                 indexTree.set(oldIndexNode.getIndex(), null);
@@ -221,7 +221,7 @@ public class CachingList extends TransformedList {
             // A DELETE causes an entry to be removed and/or the index values to be offset.
             } else if(changeType == ListEvent.DELETE) {
                 if(cacheNode != null) {
-                    cacheNode.removeFromTree();
+                    cacheNode.removeFromTree(cache);
                     currentSize--;
                 }
                 indexTree.remove(index);
@@ -229,7 +229,7 @@ public class CachingList extends TransformedList {
             // An UPDATE causes an existing entry to be removed
             } else if(changeType == ListEvent.UPDATE) {
                 if(cacheNode != null) {
-                    cacheNode.removeFromTree();
+                    cacheNode.removeFromTree(cache);
                     currentSize--;
                 }
             }

@@ -27,9 +27,6 @@ public final class IndexedTreeNode {
     /** the parent node, used to delete from leaf up */
     private IndexedTreeNode parent;
 
-    /** the indexed tree that this node is a member of */
-    private IndexedTree host;
-
     /** the left and right child nodes */
     private IndexedTreeNode left = null;
     private IndexedTreeNode right = null;
@@ -47,8 +44,7 @@ public final class IndexedTreeNode {
     /**
      * Creates a new IndexedTreeNode with the specified parent node.
      */
-    IndexedTreeNode(IndexedTree host, IndexedTreeNode parent) {
-        this.host = host;
+    IndexedTreeNode(IndexedTreeNode parent) {
         this.parent = parent;
     }
 
@@ -89,20 +85,20 @@ public final class IndexedTreeNode {
     /**
      * Gets the object with the specified value in the tree.
      */
-    IndexedTreeNode getNodeByValue(Object searchValue) {
-        int sortSide = host.getComparator().compare(searchValue, value);
+    IndexedTreeNode getNodeByValue(Comparator comparator, Object searchValue) {
+        int sortSide = comparator.compare(searchValue, value);
 
         // if it sorts on the left side, search there
         if(sortSide < 0) {
             if(left == null) return null;
-            return left.getNodeByValue(searchValue);
+            return left.getNodeByValue(comparator, searchValue);
         // if it equals this node, return this
         } else if(sortSide == 0) {
             return this;
         // if it sorts on the right side, search there
         } else {
             if(right == null) return null;
-            return right.getNodeByValue(searchValue);
+            return right.getNodeByValue(comparator, searchValue);
         }
     }
 
@@ -181,31 +177,26 @@ public final class IndexedTreeNode {
      *      use the getIndex() method on the node to discover what the sorted
      *      index of the value is.
      */
-    IndexedTreeNode insert(Object inserted) {
+    IndexedTreeNode insert(IndexedTree host, Object inserted) {
         // if this is a newborn leaf, the value can be null as long as there are no children
         if(value == null) {
             // can't insert into non-leaf node with null value
             assert(leftSize == 0 && rightSize == 0);
             value = inserted;
-            recalculateHeight();
+            ensureAVL(host);
             return this;
-        }
+
         // if it sorts on the left side, insert there
-        if(host.getComparator().compare(inserted, value) < 0) {
-            if(left == null) left = new IndexedTreeNode(host, this);
+        } else if(host.getComparator().compare(inserted, value) < 0) {
+            if(left == null) left = new IndexedTreeNode(this);
             leftSize++;
-            IndexedTreeNode result = left.insert(inserted);
-            // perform any necessary AVL-Rotations to keep the tree balanced
-            doRotationsForThisLevel();
-            return result;
+            return left.insert(host, inserted);
+
         // if it doesn't sort on the left side, insert on the right
         } else {
-            if(right == null) right = new IndexedTreeNode(host, this);
+            if(right == null) right = new IndexedTreeNode(this);
             rightSize++;
-            IndexedTreeNode result = right.insert(inserted);
-            // perform any necessary AVL-Rotations to keep the tree balanced
-            doRotationsForThisLevel();
-            return result;
+            return right.insert(host, inserted);
         }
     }
     /**
@@ -218,30 +209,26 @@ public final class IndexedTreeNode {
      *      index will shift. The getIndex() method can be used to get the
      *      current index of the node at any time.
      */
-    IndexedTreeNode insert(int index, Object inserted) {
+    IndexedTreeNode insert(IndexedTree host, int index, Object inserted) {
         // if this node has no value, insert as a leaf
         if(index == 0 && value == null) {
             // can't insert into non-leaf node with null value
             assert(leftSize == 0 && rightSize == 0);
             value = inserted;
-            recalculateHeight();
+            ensureAVL(host);
             return this;
+
         // if the index is on the left side, insert there
         } else if(index <= leftSize) {
-            if(left == null) left = new IndexedTreeNode(host, this);
+            if(left == null) left = new IndexedTreeNode(this);
             leftSize++;
-            IndexedTreeNode result = left.insert(index, inserted);
-            // perform any necessary AVL-Rotations to keep the tree balanced
-            doRotationsForThisLevel();
-            return result;
+            return left.insert(host, index, inserted);
+
         // if the index is not on the left side, insert on the right
         } else {
-            if(right == null) right = new IndexedTreeNode(host, this);
+            if(right == null) right = new IndexedTreeNode(this);
             rightSize++;
-            IndexedTreeNode result = right.insert(index - leftSize - 1, inserted);
-            // perform any necessary AVL-Rotations to keep the tree balanced
-            doRotationsForThisLevel();
-            return result;
+            return right.insert(host, index - leftSize - 1, inserted);
         }
     }
 
@@ -250,7 +237,7 @@ public final class IndexedTreeNode {
      * Unlinks this node from the sorted tree. This may cause the tree to
      * rotate nodes using AVL rotations.
      */
-    public void removeFromTree() {
+    public void removeFromTree(IndexedTree host) {
         // if this node has no value, we have a problem!
         assert(value != null);
         // if this is a leaf, we can delete it outright
@@ -259,7 +246,7 @@ public final class IndexedTreeNode {
             if(parent != null) {
                 parent.notifyChildNodeRemoved(this);
                 parent.replaceChildNode(this, null);
-                parent.recalculateHeight();
+                parent.ensureAVL(host);
             } else {
                 host.setRootNode(null);
             }
@@ -273,8 +260,7 @@ public final class IndexedTreeNode {
             if(parent != null) {
                 parent.notifyChildNodeRemoved(this);
                 parent.replaceChildNode(this, left);
-                parent.recalculateHeight();
-                parent.doRotationsUpTheTree();
+                parent.ensureAVL(host);
             } else {
                 host.setRootNode(left);
             }
@@ -286,8 +272,7 @@ public final class IndexedTreeNode {
             if(parent != null) {
                 parent.notifyChildNodeRemoved(this);
                 parent.replaceChildNode(this, right);
-                parent.recalculateHeight();
-                parent.doRotationsUpTheTree();
+                parent.ensureAVL(host);
             } else {
                 host.setRootNode(right);
             }
@@ -301,7 +286,7 @@ public final class IndexedTreeNode {
             } else {
                 middle = right.getSmallestChildNode();
             }
-            middle.removeFromTree();
+            middle.removeFromTree(host);
             // cannot have new middle with leaves
             assert(middle.leftSize == 0 && middle.rightSize == 0);
             // update the left child
@@ -318,7 +303,7 @@ public final class IndexedTreeNode {
             middle.parent = parent;
             if(parent != null) {
                 parent.replaceChildNode(this, middle);
-                parent.doRotationsUpTheTree();
+                parent.ensureAVL(host);
             } else {
                 host.setRootNode(middle);
             }
@@ -356,10 +341,10 @@ public final class IndexedTreeNode {
      * order and that their sizes are consistent. This throws a
      * IllegalStateException if any infraction is found.
      */
-    void validate() {
+    void validate(IndexedTree host) {
         // first validate the children
-        if(left != null) left.validate();
-        if(right != null) right.validate();
+        if(left != null) left.validate(host);
+        if(right != null) right.validate(host);
 
         // validate sort order
         if(host.getComparator() != null) {
@@ -381,64 +366,63 @@ public final class IndexedTreeNode {
     }
 
     /**
-     * When the height of a subtree changes, propogate that change up the
-     * tree.
+     * Ensures that the tree satisfies the AVL property.  It is sufficient to
+     * recurse up the tree only as long as height recalculations are needed.
+     * As such, this method is intended to be called only on a node whose height
+     * may be out of sync due to an insertion or deletion.
+     */
+    private void ensureAVL(IndexedTree host) {
+        int oldHeight = height;
+        recalculateHeight();
+        avlRotate(host);
+
+        // If adjustments were made, recurse up the tree
+        if(height != oldHeight && parent != null) parent.ensureAVL(host);
+    }
+
+    /**
+     * Recalculates the cached height at this level.
      */
     private void recalculateHeight() {
-        // save the old height to test for a difference
-        int oldHeight = height;
-
-        // calculate the new height
-        if(left == null && right == null) height = 1;
-        else if(right == null) height = 1 + left.height();
-        else if(left == null) height = 1 + right.height();
-        else height = 1 + Math.max(left.height(), right.height());
-
-        // propagate changes upstream if the height changed
-        if(height != oldHeight && parent != null) parent.recalculateHeight();
+        int leftHeight = left == null ? 0 : left.height;
+        int rightHeight = right == null ? 0 : right.height;
+        height = 1 + Math.max(leftHeight, rightHeight);
     }
 
     /**
-     * Checks the heights of the left and right child nodes, and does rotations
-     * if necessary. This only does rotations at the current node. It is necessary
-     * to use another method to send more recursive rotations up or down the
-     * tree.
+     * Determines if AVL rotations are required and performs them if they are.
      */
-    private void doRotationsForThisLevel() {
+    private void avlRotate(IndexedTree host) {
         // look up the left and right heights
-        int leftHeight = (left != null ? left.height() : 0);
-        int rightHeight = (right != null ? right.height() : 0);
+        int leftHeight = (left != null ? left.height : 0);
+        int rightHeight = (right != null ? right.height : 0);
+
         // rotations will be on the left
         if(leftHeight - rightHeight >= 2) {
-            // do the first rotation in a double-rotation if necessary
-            int leftLeftHeight = (left.left != null ? left.left.height() : 0);
-            int leftRightHeight = (left.right != null ? left.right.height() : 0);
-            if(leftRightHeight > leftLeftHeight) {
-                left.rotateRight();
-            }
-            // rotate on this node
-            rotateLeft();
+            // determine if a double rotation is necessary
+            int leftLeftHeight = (left.left != null ? left.left.height : 0);
+            int leftRightHeight = (left.right != null ? left.right.height : 0);
+
+            // Perform first half of double rotation if necessary
+            if(leftRightHeight > leftLeftHeight) left.rotateRight(host);
+
+            // Do the rotation for this node
+            rotateLeft(host);
+
         // rotations will be on the right
         } else if(rightHeight - leftHeight >= 2) {
-            // do the first rotation in a double-rotation if necessary
-            int rightLeftHeight = (right.left != null ? right.left.height() : 0);
-            int rightRightHeight = (right.right != null ? right.right.height() : 0);
-            if(rightLeftHeight > rightRightHeight) {
-                right.rotateLeft();
-            }
-            // rotate on this node
-            rotateRight();
+            // determine if a double rotation is necessary
+            int rightLeftHeight = (right.left != null ? right.left.height : 0);
+            int rightRightHeight = (right.right != null ? right.right.height : 0);
+
+            // Perform first half of double rotation if necessary
+            if(rightLeftHeight > rightRightHeight) right.rotateLeft(host);
+
+            // Do the rotation for this node
+            rotateRight(host);
         }
     }
-    /**
-     * Performs clean-up rotations from this node all the way up the tree. When
-     * this completes, every node from this up to the root should be balanced.
-     */
-    private void doRotationsUpTheTree() {
-        doRotationsForThisLevel();
-        // at the leaf level, just have the parent do rotations
-        if(parent != null) parent.doRotationsUpTheTree();
-    }
+
     /**
      * AVL-Rotates this subtree with its left child.
      *
@@ -447,28 +431,36 @@ public final class IndexedTreeNode {
      * replacement, the new value on this, and the new value on the
      * other node.
      */
-    private void rotateLeft() {
-        if(left == null) throw new IllegalArgumentException("Cannot rotate with a null child");
+    private void rotateLeft(IndexedTree host) {
+        // The replacement node is on the left
         IndexedTreeNode replacement = left;
+
         // take the right child of the replacement as my left child
         left = replacement.right;
         leftSize = replacement.rightSize;
         if(replacement.right != null) replacement.right.parent = this;
-        // set the replacement's parent to my parent and mine to the replacement
-        if(parent != null) {
-            parent.replaceChildNode(this, replacement);
-        } else {
-            host.setRootNode(replacement);
-        }
-        replacement.parent = parent;
-        parent = replacement;
+
         // set the right child of the replacement to this
         replacement.right = this;
         replacement.rightSize = size();
-        // recalculate heights
+
+        // set the replacement's parent to my parent and mine to the replacement
+        if(parent != null) parent.replaceChildNode(this, replacement);
+
+        // set a new tree root
+        else host.setRootNode(replacement);
+
+        // fix parent links on this and the replacement
+        replacement.parent = parent;
+        parent = replacement;
+
+        // recalculate height at this node
         recalculateHeight();
-        if(replacement.parent != null) replacement.parent.recalculateHeight();
+
+        // require height to be recalculated on the replacement node
+        replacement.height = 0;
     }
+
     /**
      * AVL-Rotates this subtree with its right child.
      *
@@ -477,27 +469,34 @@ public final class IndexedTreeNode {
      * replacement, the new value on this, and the new value on the
      * other node.
      */
-    private void rotateRight() {
-        if(right == null) throw new IllegalArgumentException("Cannot rotate with a null child");
+    private void rotateRight(IndexedTree host) {
+        // The replacement node is on the right
         IndexedTreeNode replacement = right;
+
         // take the right child of the replacement as my left child
         right = replacement.left;
         rightSize = replacement.leftSize;
         if(replacement.left != null) replacement.left.parent = this;
-        // set the replacement's parent to my parent and mine to the replacement
-        if(parent != null) {
-            parent.replaceChildNode(this, replacement);
-        } else {
-            host.setRootNode(replacement);
-        }
-        replacement.parent = parent;
-        parent = replacement;
+
         // set the right child of the replacement to this
         replacement.left = this;
         replacement.leftSize = size();
-        // recalculate heights
+
+        // set the replacement's parent to my parent and mine to the replacement
+        if(parent != null) parent.replaceChildNode(this, replacement);
+
+        // set a new tree root
+        else host.setRootNode(replacement);
+
+        //fix parent links on this and the replacement
+        replacement.parent = parent;
+        parent = replacement;
+
+        // recalculate height at this node
         recalculateHeight();
-        if(replacement.parent != null) replacement.parent.recalculateHeight();
+
+        // require height to be recalculated on the replacement node
+        replacement.height = 0;
     }
 
     /**
@@ -507,13 +506,13 @@ public final class IndexedTreeNode {
      * called on a node directly it will have non-deterministic
      * results.
      */
-    boolean contains(Object object) {
-        int sortSide = host.getComparator().compare(object, value);
+    boolean contains(Comparator comparator, Object object) {
+        int sortSide = comparator.compare(object, value);
 
         // if it sorts on the left side, search there
         if(sortSide < 0) {
             if(left == null) return false;
-            return left.contains(object);
+            return left.contains(comparator, object);
 
         // if it equals this node, return this
         } else if(sortSide == 0) {
@@ -522,7 +521,7 @@ public final class IndexedTreeNode {
         // if it sorts on the right side, search there
         } else {
             if(right == null) return false;
-            return right.contains(object);
+            return right.contains(comparator, object);
         }
     }
 
@@ -534,8 +533,8 @@ public final class IndexedTreeNode {
      * called on a node directly it will have non-deterministic
      * results.
      */
-    int indexOf(Object object, boolean simulate) {
-        int sortSide = host.getComparator().compare(object, value);
+    int indexOf(Comparator comparator, Object object, boolean simulate) {
+        int sortSide = comparator.compare(object, value);
 
         // if it sorts on the left side, search there
         if(sortSide < 0) {
@@ -543,12 +542,12 @@ public final class IndexedTreeNode {
                 if(simulate) return getIndex();
                 else return -1;
             } else {
-                return left.indexOf(object, simulate);
+                return left.indexOf(comparator, object, simulate);
             }
 
         // if it equals this node, search to the left for equal values
         } else if(sortSide == 0) {
-            return findLastNode(this, object, true);
+            return findLastNode(comparator, this, object, true);
 
         // if it sorts on the right side, search there
         } else {
@@ -556,7 +555,7 @@ public final class IndexedTreeNode {
                 if(simulate) return getIndex() + 1;
                 else return -1;
             } else {
-                return right.indexOf(object, simulate);
+                return right.indexOf(comparator, object, simulate);
             }
         }
     }
@@ -569,29 +568,29 @@ public final class IndexedTreeNode {
      * called on a node directly it will have non-deterministic
      * results.
      */
-    int lastIndexOf(Object object) {
-        int sortSide = host.getComparator().compare(object, value);
+    int lastIndexOf(Comparator comparator, Object object) {
+        int sortSide = comparator.compare(object, value);
 
         // if it sorts on the left side, search there
         if(sortSide < 0) {
             if(left == null) return -1;
-            return left.lastIndexOf(object);
+            return left.lastIndexOf(comparator, object);
 
         // if it equals this node, search to the right for equal values
         } else if(sortSide == 0) {
-            return findLastNode(this, object, false);
+            return findLastNode(comparator, this, object, false);
 
         // if it sorts on the right side, search there
         } else {
             if(right == null) return -1;
-            return right.lastIndexOf(object);
+            return right.lastIndexOf(comparator, object);
         }
     }
 
     /**
      * Helper method to the indexOf and lastIndexOf methods
      */
-    private int findLastNode(IndexedTreeNode parentNode, Object object, boolean goLeft) {
+    private int findLastNode(Comparator comparator, IndexedTreeNode parentNode, Object object, boolean goLeft) {
         IndexedTreeNode child = null;
         if(goLeft) child = parentNode.left;
         else child = parentNode.right;
@@ -601,8 +600,8 @@ public final class IndexedTreeNode {
             return parentNode.getIndex();
 
         // Child is different than the parent node
-        } else if(host.getComparator().compare(object, child.value) != 0) {
-            int result = secondaryLastNodeSearch(child, object, !goLeft);
+        } else if(comparator.compare(object, child.value) != 0) {
+            int result = secondaryLastNodeSearch(comparator, child, object, !goLeft);
             if(result != -1) {
                 return result;
             }
@@ -610,14 +609,14 @@ public final class IndexedTreeNode {
 
         // Child is the same so recurse on the child
         } else {
-            return findLastNode(child, object, goLeft);
+            return findLastNode(comparator, child, object, goLeft);
         }
     }
 
     /**
      * Helper method to the indexOf and lastIndexOf methods
      */
-    private int secondaryLastNodeSearch(IndexedTreeNode parentNode, Object object, boolean goLeft) {
+    private int secondaryLastNodeSearch(Comparator comparator, IndexedTreeNode parentNode, Object object, boolean goLeft) {
         IndexedTreeNode child = null;
         if(goLeft) child = parentNode.left;
         else child = parentNode.right;
@@ -627,12 +626,12 @@ public final class IndexedTreeNode {
             return -1;
 
         // Child is the same as the searched for node
-        } else if(host.getComparator().compare(object, child.value) == 0) {
-            return findLastNode(child, object, !goLeft);
+        } else if(comparator.compare(object, child.value) == 0) {
+            return findLastNode(comparator, child, object, !goLeft);
 
         // Child is different so recurse on the child
         } else {
-            return secondaryLastNodeSearch(child, object, goLeft);
+            return secondaryLastNodeSearch(comparator, child, object, goLeft);
         }
     }
 
