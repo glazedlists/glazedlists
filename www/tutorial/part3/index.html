@@ -7,7 +7,7 @@
 <h3>Glazed Lists Tutorial</h3>
 <h1>Part 3 - Custom Filtering</h1>
 
-Although text filters are fantastic, they don't solve all of our problems. Glazed Lists
+<p>Although text filters are fantastic, they don't solve all of our problems. Glazed Lists
 makes it easy to create custom filters that work with your data. The right filter
 will make your application easier to use and prevent user errors.
 
@@ -17,32 +17,33 @@ object-oriented or use a virtual machine. First, we'll need to ensure that the f
 data exists in our source object. We'll add a few methods to <code>ProgrammingLanguage</code>
 for this.
 
-<pre><code>    public boolean isObjectOriented() {
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>    public boolean isObjectOriented() {
         return objectOriented;
     }
     
     public boolean isVirtualMachine() {
         return virtualMachine;
-    }</code></pre>
+    }</code></pre></td></tr></table>
     
 <h3>Extending AbstractFilterList</h3>
-To create our custom filter we simply extend AbstractFilterList. There is one method
+<p>To create our custom filter we simply extend AbstractFilterList. There is one method
 which we need to create, <code>boolean filterMatches(Object element)</code>, to test
 if a given object in the set matches the current filter. Another noteworthy method
 of <code>AbstractFilterList</code> is <code>handleFilterChanged()</code>, which
 should be called whenever the filtering critera changes. In our case, this will be
 whenever a user changes the value of a checkbox.
-<pre><code>import com.odellengineeringltd.glazedlists.*;
+
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import com.odellengineeringltd.glazedlists.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-class ProgrammingLanguageFilter <span class="highlighted">extends AbstractFilterList</span> implements ItemListener {
+class ProgrammingLanguageFilter <font color="#FF3333">extends AbstractFilterList</font> implements ItemListener {
 
     JCheckBox objectOrientedCheck;
     JCheckBox virtualMachineCheck;
     
     public ProgrammingLanguageFilter(EventList source) {
-        <span class="highlighted">super(source);</span>
+        <font color="#FF3333">super(source);</font>
 
         objectOrientedCheck = new JCheckBox("Object Oriented");
         objectOrientedCheck.addItemListener(this);
@@ -50,10 +51,10 @@ class ProgrammingLanguageFilter <span class="highlighted">extends AbstractFilter
         virtualMachineCheck = new JCheckBox("Virtual Machine");
         virtualMachineCheck.addItemListener(this);
 
-        <span class="highlighted">handleFilterChanged();</span>
+        <font color="#FF3333">handleFilterChanged();</font>
     }
     
-    <span class="highlighted">public boolean filterMatches(Object element)</span> {
+    <font color="#FF3333">public boolean filterMatches(Object element)</font> {
         ProgrammingLanguage language = (ProgrammingLanguage)element;
         
         if(objectOrientedCheck.isSelected() && !language.isObjectOriented()) return false;
@@ -63,7 +64,7 @@ class ProgrammingLanguageFilter <span class="highlighted">extends AbstractFilter
     }
     
     public void itemStateChanged(ItemEvent e) {
-        <span class="highlighted">handleFilterChanged();</span>
+        <font color="#FF3333">handleFilterChanged();</font>
     }
 
     public JCheckBox getObjectOrientedCheckBox() {
@@ -73,7 +74,7 @@ class ProgrammingLanguageFilter <span class="highlighted">extends AbstractFilter
     public JCheckBox getVirtualMachineCheckBox() {
         return virtualMachineCheck;
     }
-}</pre>
+}</code></pre></td></tr></table>
 
 <p>There are a few important notes when extending <code>AbstractFilterList</code>:
 <li><code class="highlighted">super(EventList)</code> is the only way to instantiate the
@@ -83,7 +84,7 @@ AbstractFilterList. The parameter is the source list to be filtered.
 
 <p>Finally we must add the filter to our list chain and add the checkboxes to our Frame.
 
-<pre><code>import com.odellengineeringltd.glazedlists.*;
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.jtable.*;
 import javax.swing.*;
 import java.awt.*;
@@ -92,7 +93,7 @@ public class ProgrammingLanguageBrowser {
 
     BasicEventList languages;
     CaseInsensitiveFilterList filteredLanguages;
-    <span class="highlighted">ProgrammingLanguageFilter customFilteredLanguages;</span>
+    <font color="#FF3333">ProgrammingLanguageFilter customFilteredLanguages;</font>
 
     public ProgrammingLanguageBrowser() {
         languages = new BasicEventList();
@@ -102,7 +103,7 @@ public class ProgrammingLanguageBrowser {
         languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer", false, false));
         
         filteredLanguages = new CaseInsensitiveFilterList(languages);
-        <span class="highlighted">customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);</span>
+        <font color="#FF3333">customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);</font>
     }
     
     public void display() {
@@ -111,14 +112,18 @@ public class ProgrammingLanguageBrowser {
         frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(...));
         ...
     }
-</code></pre>
+</code></pre></td></tr></table>
 
-<img src="screenshot.gif" width="431" height="235" alt="Programming Languages Screen Shot">
+<p><img src="screenshot.gif" width="431" height="235" alt="Programming Languages Screen Shot">
 
 <p>As the user checks and unchecks the checkboxes, programming languages are displayed
 or hidden. Custom filters can be very powerful and could be used to limit items by
 date, magnitude, owner or even a regular expression.
 
+<br><br><p><table cellpadding="0" cellspacing="0" width="100%" border="0"><tr>
+<th align="left" width="30%"><a href="../part2/index.html">&lt;&lt; Part 2 - Text Filtering</a></th> 
+<th align="center" width="40%"><a href="../index.html">Tutorial Home</a></th>
+<th align="right" width="30%"><a href="../part4/index.html">Part 4 - Sorting &gt;&gt;</a></th>
 
 </body>
 </html>

@@ -7,13 +7,13 @@
 <h3>Glazed Lists Tutorial</h3>
 <h1>Part 2 - Text Filtering</h1>
 
-Once we have a list model in place, it is straightforward to add filtering to
+<p>Once we have a list model in place, it is straightforward to add filtering to
 our application. You can choose to use either the out-of-the-box filter that comes
 with Glazed Lists, <code>CaseInsensitiveFilterList</code>, or you can easily
 create a custom filter by extending <code>AbstractFilterList</code>.
 
 <h3>Text Filtering with CaseInsensitiveFilterList</h3>
-This filter works like a real-time search engine. It allows users to type words that
+<p>This filter works like a real-time search engine. It allows users to type words that
 must occur in the result. It is inspired by the filter found in
 <a href="http://www.apple.com" target="_top">Apple iTunes</a> that has shown
 up recently in many other user interfaces. 
@@ -26,27 +26,27 @@ implement a new interface on an existing class, you can use alternatively create
 a class that implements the <code>Filterator</code> interface. These two classes
 are parallel in purpose to <code>Comparable</code> and <code>Comparator</code>.
 
-<pre><code>import com.odellengineeringltd.glazedlists.*;
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import com.odellengineeringltd.glazedlists.*;
 
-class ProgrammingLanguage <span class="highlighted">implements Filterable</span> {
+class ProgrammingLanguage <font color="#FF3333">implements Filterable</font> {
     private String name;
     private String year;
     private String description;
     
     ...
 
-    <span class="highlighted">public String[] getFilterStrings()</span> {
+    <font color="#FF3333">public String[] getFilterStrings()</font> {
         return new String[] { name, year, description };
     }
 
-...</code></pre>
+...</code></pre></td></tr></table>
 
 <p>Once we have implemented the <code>Filterable</code> or <code>Filterator</code>
 interface, it is time to layer a Filtered view over our source list. We construct a
 <code>CaseInsensitiveFilterList</code> with our source list as the parameter, and
 use that filter list as our new parameter to the List table.
 
-<pre><code>import com.odellengineeringltd.glazedlists.*;
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.jtable.*;
 import javax.swing.*;
 import java.awt.*;
@@ -54,7 +54,7 @@ import java.awt.*;
 public class ProgrammingLanguageBrowser {
 
     BasicEventList languages;
-    <span class="highlighted">CaseInsensitiveFilterList filteredLanguages;</span>
+    <font color="#FF3333">CaseInsensitiveFilterList filteredLanguages;</font>
 
     public ProgrammingLanguageBrowser() {
         languages = new BasicEventList();
@@ -63,9 +63,9 @@ public class ProgrammingLanguageBrowser {
         ...
         languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer"));
         
-        <span class="highlighted">filteredLanguages = new CaseInsensitiveFilterList(languages);</span>
+        <font color="#FF3333">filteredLanguages = new CaseInsensitiveFilterList(languages);</font>
     }
-...</code></pre>
+...</code></pre></td></tr></table>
 
 <p>Finally, we need to add the appropriate filter widget to our JFrame so that the
 user can interactively manipulate the filter. We get a <code>JTextField</code> via
@@ -73,24 +73,30 @@ the <code>getFilterEdit()</code> method of the <code>CaseInsensitiveFilterList</
 Add this to our panel and we have real-time filtering of our list of programming
 languages.
 
-<pre><code>    public void display() {
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>    public void display() {
         ListTable listTable = new ListTable(filteredLanguages, new ProgrammingLanguageTableCell());
         JFrame frame = new JFrame("Programming Languages");
         frame.getContentPane().setLayout(new GridBagLayout());
         frame.getContentPane().add(new JLabel("Filter"), new GridBagConstraints(...));
-        frame.getContentPane().add(<span class="highlighted">filteredLanguages.getFilterEdit()</span>, new GridBagConstraints(...));
+        frame.getContentPane().add(<font color="#FF3333">filteredLanguages.getFilterEdit()</font>, new GridBagConstraints(...));
         frame.getContentPane().add(listTable.getTableScrollPane(), new GridBagConstraints(...));
         frame.setSize(640, 480);
         frame.show();
     }
-</code></pre>
+</code></pre></td></tr></table>
 
-<img src="screenshot.gif" width="430" height="195" alt="Programming Languages Screen Shot">
+<p><img src="screenshot.gif" width="430" height="195" alt="Programming Languages Screen Shot">
+
 <p>As the user types into the filter field, the list of programming languages shrinks,
 displaying only those matching the specified text. And although this works great for
 finding all of the <i>Green Day</i> MP3s on my iTunes playlist, it is text based
 and won't work for finding say, all tracks greater than 160 kbps. For this, we'll need
 to check out Part 3 for custom filters.
+
+<br><br><p><table cellpadding="0" cellspacing="0" width="100%" border="0"><tr>
+<th align="left" width="30%"><a href="../part1/index.html">&lt;&lt; Part 1 - Basics</a></th> 
+<th align="center" width="40%"><a href="../index.html">Tutorial Home</a></th>
+<th align="right" width="30%"><a href="../part3/index.html">Part 3 - Custom Filtering &gt;&gt;</a></th>
 
 </body>
 </html>

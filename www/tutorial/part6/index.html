@@ -7,7 +7,7 @@
 <h3>Glazed Lists Tutorial</h3>
 <h1>Part 6 - Query Lists</h1>
 
-One of the most important features of Glazed Lists is that it works with dynamically
+<p>One of the most important features of Glazed Lists is that it works with dynamically
 changing data. If our data was not dynamic, problems like sorting would be trivial.
 
 <p>For many applications, the dynamic component of the data will come from using
@@ -33,17 +33,17 @@ means that the selection is preserved even if the selected object is updated.
 languages from a JDBC database. The first step is to add <code>Comparable</code> to
 our <code>ProgrammingLanguage</code> class.
 
-<pre><code>import com.odellengineeringltd.glazedlists.*;
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import com.odellengineeringltd.glazedlists.*;
 
-class ProgrammingLanguage implements Filterable, <span class="highlighted">Comparable</span> {
+class ProgrammingLanguage implements Filterable, <font color="#FF3333">Comparable</font> {
     
     ...
     
-    <span class="highlighted">public int compareTo(Object other)</span> {
+    <font color="#FF3333">public int compareTo(Object other)</font> {
         ProgrammingLanguage otherLanguage = (ProgrammingLanguage)other;
         return getName().compareToIgnoreCase(otherLanguage.getName());
     }
-}</code></pre>
+}</code></pre></td></tr></table>
 
 <h3>Creating the Query</h3>
 
@@ -52,7 +52,7 @@ class ProgrammingLanguage implements Filterable, <span class="highlighted">Compa
 but it is not limited in how you find your objects. You could use EJB, SOAP, 
 local files or whatever your heart desires to lookup objects.
 
-<pre><code>import java.sql.*;
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import java.sql.*;
 import java.util.*;
 import com.odellengineeringltd.glazedlists.query.*;
 
@@ -70,11 +70,11 @@ class ProgrammingLanguageQuery implements Query {
         jdbcPassword = jdbcParameters[3];
     }
     
-    <span class="highlighted">public String getName()</span> {
+    <font color="#FF3333">public String getName()</font> {
         return "Programming Languages";
     }
 
-    <span class="highlighted">public SortedSet doQuery() throws InterruptedException</span> {
+    <font color="#FF3333">public SortedSet doQuery() throws InterruptedException</font> {
 
         SortedSet results = new TreeSet();
 
@@ -107,10 +107,10 @@ class ProgrammingLanguageQuery implements Query {
         
     }
     
-    <span class="highlighted">public boolean matchesObject(Comparable object)</span> {
+    <font color="#FF3333">public boolean matchesObject(Comparable object)</font> {
         return (object instanceof ProgrammingLanguage);
     }
-}</code></pre>
+}</code></pre></td></tr></table>
 
 <h3>Creating the DynamicQueryList</h3>
 
@@ -119,7 +119,7 @@ class ProgrammingLanguageQuery implements Query {
 <code>DynamicQueryList</code> with a refresh interval in <strong>milliseconds</strong>.
 We then set the list to use our new query.
 
-<pre><code>import com.odellengineeringltd.glazedlists.*;
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.jtable.*;
 import com.odellengineeringltd.glazedlists.query.*;
 import javax.swing.*;
@@ -127,7 +127,7 @@ import java.awt.*;
 
 public class ProgrammingLanguageBrowser {
 
-    <span class="highlighted">DynamicQueryList dynamicLanguages;</span>
+    <font color="#FF3333">DynamicQueryList dynamicLanguages;</font>
     SortedList sortedLanguages;
     CaseInsensitiveFilterList filteredLanguages;
     ProgrammingLanguageFilter customFilteredLanguages;
@@ -136,17 +136,17 @@ public class ProgrammingLanguageBrowser {
     ProgrammingLanguageYearComparator sortByYear = new ProgrammingLanguageYearComparator();
 
     public ProgrammingLanguageBrowser(String[] jdbcParameters) {
-        <span class="highlighted">dynamicLanguages = new DynamicQueryList(1000*30);</span>
-        <span class="highlighted">dynamicLanguages.setQuery(</span>new ProgrammingLanguageQuery()<span class="highlighted">)</span>;
+        <font color="#FF3333">dynamicLanguages = new DynamicQueryList(1000*30);</font>
+        <font color="#FF3333">dynamicLanguages.setQuery(</font>new ProgrammingLanguageQuery()<font color="#FF3333">)</font>;
         
         sortedLanguages = new SortedList(dynamicLanguages, sortByName);
         filteredLanguages = new CaseInsensitiveFilterList(sortedLanguages);
         customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);
     }
     
-    ...</code></pre>
+    ...</code></pre></td></tr></table>
 
-Now all that's left is to set up a sample database. I used my PostgreSQL database. The
+<p>Now all that's left is to set up a sample database. I used my PostgreSQL database. The
 exciting thing here is that I can add rows to the database, and they propogate to
 the table. If the table is sorted or filtered, new rows show up where they are
 supposed to.
@@ -163,6 +163,11 @@ the running query will be interrupted. If you have a query that could run a long
 should periodically test <code>Thread.interrupted()</code> and throw an
 <code>InterruptedException</code> if you have been interrupted. That will allow a
 replacement query to continue.
+
+<br><br><p><table cellpadding="0" cellspacing="0" width="100%" border="0"><tr>
+<th align="left" width="30%"><a href="../part5/index.html">&lt;&lt; Part 5 - Custom Renderers</a></th> 
+<th align="center" width="40%"><a href="../index.html">Tutorial Home</a></th>
+<th align="right" width="30%"><a href="../part7/index.html">Part 7 - JComboBox &gt;&gt;</a></th>
 
 </body>
 </html>

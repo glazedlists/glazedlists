@@ -7,13 +7,13 @@
 <h3>Glazed Lists Tutorial</h3>
 <h1>Part 7 - JComboBox</h1>
 
-Because Glazed Lists is widget-independent, it is straightforward to set up a list
+<p>Because Glazed Lists is widget-independent, it is straightforward to set up a list
 or selection widget to display them. We have already created formatted tables for
 our list, now we will display it in a JComboBox. 
 
 <h3>Rendering a JComboBox</h3>
 
-For JComboBox display we can either use the default behaviour
+<p>For JComboBox display we can either use the default behaviour
 which displays an object's <code>toString()</code> value, or we can create a
 custom renderer, similar to what we did for the table. Glazed Lists comes with
 a sample renderer, <code>IconComboBoxRenderer</code> which allows you to use
@@ -21,25 +21,25 @@ an icon for each element. We're going to use the default renderer so we need
 to fix the <code>toString()</code> value of our <code>ProgrammingLanguage</code>
 object.
 
-<pre><code>import com.odellengineeringltd.glazedlists.*;
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import com.odellengineeringltd.glazedlists.*;
 
 class ProgrammingLanguage implements Filterable, Comparable {
     
     ...
     
-    <span class="highlighted">public String toString()</span> {
+    <font color="#FF3333">public String toString()</font> {
         return name;
     }
-}</code></pre>
+}</code></pre></td></tr></table>
 
 <h3>The JComboBox List</h3>
 
-We now need to replace the JTable in our program with a JComboBox. We will keep
+<p>We now need to replace the JTable in our program with a JComboBox. We will keep
 the filters, although you may need to decide whether that makes sense for your
 application.
 
-<pre><code>    public void display() {
-        <span class="highlighted">ListComboBoxModel listCombo = new ListComboBoxModel(customFilteredLanguages);</span>
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>    public void display() {
+        <font color="#FF3333">ListComboBoxModel listCombo = new ListComboBoxModel(customFilteredLanguages);</font>
         
         JFrame frame = new JFrame("Programming Languages");
         frame.getContentPane().setLayout(new GridBagLayout());
@@ -47,10 +47,10 @@ application.
         frame.getContentPane().add(filteredLanguages.getFilterEdit(), new GridBagConstraints(...));
         frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(...));
         frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(...));
-        frame.getContentPane().add(<span class="highlighted">new JComboBox(listCombo)</span>, new GridBagConstraints(...));
+        frame.getContentPane().add(<font color="#FF3333">new JComboBox(listCombo)</font>, new GridBagConstraints(...));
         frame.setSize(640, 480);
         frame.show();
-    }</code</pre>
+    }</code</pre></td></tr></table>
 
 <p><img src="screenshot.gif" width="431" height="272" alt="Programming Languages Screen Shot">
 
@@ -60,6 +60,11 @@ a view of a <code>EventList</code>. For example, it is possible to get Glazed Li
 working with <a href="http://www.eclipse.org">Eclipse/AWT</a> widgets. And if you
 develop bindings for Glazed Lists to another widget, please submit it so that
 other developers can use it!
+
+<br><br><p><table cellpadding="0" cellspacing="0" width="100%" border="0"><tr>
+<th align="left" width="30%"><a href="../part6/index.html">&lt;&lt; Part 6 - Query Lists</a></th> 
+<th align="center" width="40%"><a href="../index.html">Tutorial Home</a></th>
+<th align="right" width="30%"><br></th>
 
 </body>
 </html>
