@@ -65,7 +65,7 @@ public class CollectionList extends TransformedList implements ListEventListener
 
             // update the list of child lists
             IndexedTreeNode node = childElements.addByNode(i, this);
-            node.setValue(childElementForList(children, node));
+            node.setValue(createChildElementForList(children, node));
             
             // update the barcode
             barcode.addBlack(barcode.size(), 1);
@@ -76,17 +76,7 @@ public class CollectionList extends TransformedList implements ListEventListener
         source.addListEventListener(this);
     }
     
-    /**
-     * Create a {@link ChildElement} for the specified List.
-     */
-    private ChildElement childElementForList(List children, IndexedTreeNode node) {
-        if(children instanceof EventList) return new EventChildElement((EventList)children, node);
-        else return new SimpleChildElement(children, node);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public int size() {
         // Size of the child nodes only
         return barcode.whiteSize();
@@ -94,14 +84,8 @@ public class CollectionList extends TransformedList implements ListEventListener
 
     /** {@inheritDoc} */
     public Object get(int index) {
-        if(index < 0) throw new IndexOutOfBoundsException("Invalid index: " + index);
-        if(index >= size()) throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
-
-        // get the parent
-        int parentIndex = barcode.getBlackBeforeWhite(index);
-        ChildElement childElement = (ChildElement)childElements.getNode(parentIndex).getValue();
-
         // get the child
+        ChildElement childElement = getChildElement(index);
         int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.get(childIndexInParent);
     }
@@ -109,32 +93,19 @@ public class CollectionList extends TransformedList implements ListEventListener
 
     /** {@inheritDoc} */
     public Object set(int index, Object value) {
-        if(index < 0) throw new IndexOutOfBoundsException("Invalid index: " + index);
-        if(index >= size()) throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
-        
-        // get the parent
-        int parentIndex = barcode.getBlackBeforeWhite(index);
-        ChildElement childElement = (ChildElement)childElements.getNode(parentIndex).getValue();
-
         // set on the child
+        ChildElement childElement = getChildElement(index);
         int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.set(childIndexInParent, value);
     }
 
     /** {@inheritDoc} */
     public Object remove(int index) {
-        if(index < 0) throw new IndexOutOfBoundsException("Invalid index: " + index);
-        if(index >= size()) throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
-        
-        // get the parent
-        int parentIndex = barcode.getBlackBeforeWhite(index);
-        ChildElement childElement = (ChildElement)childElements.getNode(parentIndex).getValue();
-
         // remove from the child
+        ChildElement childElement = getChildElement(index);
         int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.remove(childIndexInParent);
     }
-
     
     /**
      * Return the index of the first child in the CollectionList for the given parent
@@ -227,7 +198,7 @@ public class CollectionList extends TransformedList implements ListEventListener
 
         // update the list of child lists
         IndexedTreeNode node = childElements.addByNode(parentIndex, this);
-        node.setValue(childElementForList(children, node));
+        node.setValue(createChildElementForList(children, node));
         
         // update the barcode
         barcode.addBlack(absoluteIndex, 1);
@@ -264,6 +235,26 @@ public class CollectionList extends TransformedList implements ListEventListener
         }
     }
     
+    /**
+     * Get the child element for the specified child index.
+     */
+    private ChildElement getChildElement(int childIndex) {
+        if(childIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + childIndex);
+        if(childIndex >= size()) throw new IndexOutOfBoundsException("Index: " + childIndex + ", Size: " + size());
+        
+        // get the child element
+        int parentIndex = barcode.getBlackBeforeWhite(childIndex);
+        return (ChildElement)childElements.getNode(parentIndex).getValue();
+    }
+    
+    /**
+     * Create a {@link ChildElement} for the specified List.
+     */
+    private ChildElement createChildElementForList(List children, IndexedTreeNode node) {
+        if(children instanceof EventList) return new EventChildElement((EventList)children, node);
+        else return new SimpleChildElement(children, node);
+    }
+
     /**
      * Get the absolute index for the specified parent index. This may be virtual
      * if the parent index is one greater than the last element. This is useful
@@ -355,10 +346,12 @@ public class CollectionList extends TransformedList implements ListEventListener
             return children.get(index);
         }
         public Object remove(int index) {
-            throw new UnsupportedOperationException();
+            // events will be fired from this call
+            return children.remove(index);
         }
         public Object set(int index, Object element) {
-            throw new UnsupportedOperationException();
+            // events will be fired from this call
+            return children.set(index, element);
         }
         public void listChanged(ListEvent listChanges) {
             int parentIndex = node.getIndex();
