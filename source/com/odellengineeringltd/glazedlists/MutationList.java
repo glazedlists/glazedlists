@@ -94,14 +94,6 @@ public abstract class MutationList extends AbstractList implements EventList, Li
     }
 
     /**
-     * For implementing the EventList interface. This returns the root of the
-     * source list, or <code>this</code> if this list has no source.
-     */
-    public EventList getRootList() {
-        return source.getRootList();
-    }
-    
-    /**
      * Gets the lock object in order to access this list in a thread-safe manner.
      * This will return a <strong>re-entrant</strong> implementation of
      * ReadWriteLock which can be used to guarantee mutual exclusion on access.

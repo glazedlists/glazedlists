@@ -73,17 +73,6 @@ public interface EventList extends List {
     public void removeListEventListener(ListEventListener listChangeListener);
 
     /**
-     * Gets the source list that this list depends on. This may return the same
-     * object, or another object. This is useful for synchronization of chained
-     * lists, so that dependent lists can be synchronized on the root list to
-     * prevent deadlocks.
-     *
-     * @deprecated As of 2004-05-21, this method has been replaced with
-     *      <code>getReadWriteLock()</code>.
-     */
-    public EventList getRootList();
-    
-    /**
      * Gets the lock object in order to access this list in a thread-safe manner.
      * This will return a <strong>re-entrant</strong> implementation of
      * ReadWriteLock which can be used to guarantee mutual exclusion on access.

@@ -165,19 +165,6 @@ public class CompositeList extends AbstractList implements EventList {
     }
 
     /**
-     * For implementing the EventList interface. This returns this list, which does
-     * not depend on another list.
-     */
-    public EventList getRootList() {
-        //return this;
-        if(memberLists.size() == 1) {
-            return ((MemberList)memberLists.get(0)).getSourceList().getRootList();
-        } else {
-            return new BasicEventList();
-        }
-    }
-
-    /**
      * Gets the lock object in order to access this list in a thread-safe manner.
      * This will return a <strong>re-entrant</strong> implementation of
      * ReadWriteLock which can be used to guarantee mutual exclusion on access.

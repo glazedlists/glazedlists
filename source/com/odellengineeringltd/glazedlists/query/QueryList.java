@@ -220,14 +220,6 @@ public class QueryList extends AbstractList implements EventList {
     }
 
     /**
-     * For implementing the EventList interface. As a QueryList is a root
-     * list, this always returns <code>this</code>.
-     */
-    public EventList getRootList() {
-        return this;
-    }
-    
-    /**
      * Gets the lock object in order to access this list in a thread-safe manner.
      * This will return a <strong>re-entrant</strong> implementation of
      * ReadWriteLock which can be used to guarantee mutual exclusion on access.
