@@ -37,7 +37,6 @@ public final class IndexedTreeNode {
     /** the size of the left and right subtrees */
     private int leftSize = 0;
     private int rightSize = 0;
-    private int rootSize = 0;
 
     /** the height of this subtree */
     private int height = 0;
@@ -74,16 +73,16 @@ public final class IndexedTreeNode {
      */
     IndexedTreeNode getNodeWithIndex(int index) {
         // ensure the index value is valid
-        if(index >= leftSize + rightSize + rootSize) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
+        if(index >= leftSize + rightSize + 1) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         // recurse to the left
         if(index < leftSize) {
             return left.getNodeWithIndex(index);
         // return this node's root
-        } else if(index < leftSize + rootSize) {
+        } else if(index < leftSize + 1) {
             return this;
         // recurse on the right side
         } else {
-            return right.getNodeWithIndex(index - (leftSize + rootSize));
+            return right.getNodeWithIndex(index - (leftSize + 1));
         }
     }
 
@@ -111,7 +110,7 @@ public final class IndexedTreeNode {
      * Retrieves the size of this subtree.
      */
     int size() {
-        return leftSize + rootSize + rightSize;
+        return leftSize + 1 + rightSize;
     }
 
     /**
@@ -165,8 +164,8 @@ public final class IndexedTreeNode {
         }
         // if the child is on the right, return the index recursively
         if(child == right) {
-            if(parent != null) return parent.getIndex(this) + leftSize + rootSize;
-            return leftSize + rootSize;
+            if(parent != null) return parent.getIndex(this) + leftSize + 1;
+            return leftSize + 1;
         }
         // if no child is found, we have a problem
         throw new IndexOutOfBoundsException(this + " cannot get the index of a subtree that does not exist on this node!");
@@ -185,8 +184,8 @@ public final class IndexedTreeNode {
     IndexedTreeNode insert(Object inserted) {
         // if this is a newborn leaf, the value can be null as long as there are no children
         if(value == null) {
-            if(leftSize > 0 || rightSize > 0) throw new IllegalStateException("insert into non-leaf node with null value");
-            rootSize++;
+            // can't insert into non-leaf node with null value
+            assert(leftSize == 0 && rightSize == 0);
             value = inserted;
             recalculateHeight();
             return this;
@@ -220,12 +219,10 @@ public final class IndexedTreeNode {
      *      current index of the node at any time.
      */
     IndexedTreeNode insert(int index, Object inserted) {
-        if(index > leftSize + rootSize + rightSize) throw new IndexOutOfBoundsException("cannot insert into tree of size " + (leftSize + rootSize + rightSize) + " at " + index);
-        if(inserted == null) throw new NullPointerException("cannot insert a value that is null");
         // if this node has no value, insert as a leaf
         if(index == 0 && value == null) {
-            if(leftSize > 0 || rightSize > 0) throw new IllegalStateException("insert into non-leaf node with null value");
-            rootSize++;
+            // can't insert into non-leaf node with null value
+            assert(leftSize == 0 && rightSize == 0);
             value = inserted;
             recalculateHeight();
             return this;
@@ -241,7 +238,7 @@ public final class IndexedTreeNode {
         } else {
             if(right == null) right = new IndexedTreeNode(host, this);
             rightSize++;
-            IndexedTreeNode result = right.insert(index - leftSize - rootSize, inserted);
+            IndexedTreeNode result = right.insert(index - leftSize - 1, inserted);
             // perform any necessary AVL-Rotations to keep the tree balanced
             doRotationsForThisLevel();
             return result;
@@ -255,7 +252,7 @@ public final class IndexedTreeNode {
      */
     public void removeFromTree() {
         // if this node has no value, we have a problem!
-        if(value == null) throw new IllegalStateException("cannot delete a node with no value");
+        assert(value != null);
         // if this is a leaf, we can delete it outright
         if(leftSize == 0 && rightSize == 0) {
             // update the parent
@@ -305,7 +302,8 @@ public final class IndexedTreeNode {
                 middle = right.getSmallestChildNode();
             }
             middle.removeFromTree();
-            if(middle.leftSize > 0 || middle.rightSize > 0) throw new IllegalStateException("cannot have a new middle with leaves");
+            // cannot have new middle with leaves
+            assert(middle.leftSize == 0 && middle.rightSize == 0);
             // update the left child
             middle.left = left;
             middle.leftSize = leftSize;
@@ -365,10 +363,10 @@ public final class IndexedTreeNode {
 
         // validate sort order
         if(host.getComparator() != null) {
-            if(leftSize > 0 && rootSize > 0 && host.getComparator().compare(left.value, value) > 0) {
+            if(leftSize > 0 && host.getComparator().compare(left.value, value) > 0) {
                 throw new IllegalStateException("" + this + "left larger than middle");
             }
-            if(rightSize > 0 && rootSize > 0) if(host.getComparator().compare(value, right.value) > 0) {
+            if(rightSize > 0) if(host.getComparator().compare(value, right.value) > 0) {
                 throw new IllegalStateException("" + this + " middle larger than right");
             }
         }
@@ -555,7 +553,7 @@ public final class IndexedTreeNode {
         // if it sorts on the right side, search there
         } else {
             if(right == null) {
-                if(simulate) return getIndex() + rootSize;
+                if(simulate) return getIndex() + 1;
                 else return -1;
             } else {
                 return right.indexOf(object, simulate);

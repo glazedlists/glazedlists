@@ -127,7 +127,9 @@ public final class IndexedTree {
      *      index of the node.
      */
     public IndexedTreeNode addByNode(int index, Object value) {
-        if(root == null) root = new IndexedTreeNode(this, null);
+        if(index > size()) throw new IndexOutOfBoundsException("cannot insert into tree of size " + size() + " at " + index);
+        else if(value == null) throw new NullPointerException("cannot insert a value that is null");
+        else if(root == null && index == 0) root = new IndexedTreeNode(this, null);
         return root.insert(index, value);
     }
 
