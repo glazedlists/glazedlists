@@ -12,17 +12,14 @@ import com.odellengineeringltd.glazedlists.jtable.*;
 import com.odellengineeringltd.glazedlists.jlist.*;
 import com.odellengineeringltd.glazedlists.util.*;
 import com.odellengineeringltd.glazedlists.test.*;
+import java.applet.*;
 import javax.swing.*;
 import java.awt.*;
-
-// test
-import java.lang.reflect.*;
-// endtest
 
 /**
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ProgrammingLanguageBrowser {
+public class ProgrammingLanguageBrowser extends Applet {
 
     EventList languages;
     SortedList sortedLanguages;
@@ -31,8 +28,17 @@ public class ProgrammingLanguageBrowser {
 
     ProgrammingLanguageNameComparator sortByName = new ProgrammingLanguageNameComparator();
     ProgrammingLanguageYearComparator sortByYear = new ProgrammingLanguageYearComparator();
-
+    
     public ProgrammingLanguageBrowser() {
+        this(true);
+    }
+
+    public ProgrammingLanguageBrowser(boolean applet) {
+        if(applet) constructApplet(this);
+        else constructStandalone(this);
+    }
+    
+    private void constructModel() {
         languages = new BasicEventList();
         languages.add(new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems", true, true));
         languages.add(new ProgrammingLanguage("C", "1973", "The UNIX language originally developed for the PDP-11", false, false));
@@ -53,7 +59,7 @@ public class ProgrammingLanguageBrowser {
         customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);
     }
     
-    public void display() {
+    private void constructView(Container container) {
         // start with a list of tabs for each display type
         JTabbedPane listWidgetTabs = new JTabbedPane(JTabbedPane.BOTTOM);
 
@@ -74,40 +80,39 @@ public class ProgrammingLanguageBrowser {
         JComboBox eventJComboBox = new JComboBox(comboModel);
         listWidgetTabs.addTab("JComboBox", new JScrollPane(eventJComboBox));
 
+        // add everything to a JPanel
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.add(new JLabel("Filter"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
+        panel.add(filteredLanguages.getFilterEdit(), new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
+        panel.add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
+        panel.add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
+        panel.add(listWidgetTabs, new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+        
+        // add that to the container
+        container.setLayout(new GridBagLayout());
+        container.add(panel, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    }
+    
+    public static void constructApplet(ProgrammingLanguageBrowser browser) {
+        browser.constructModel();
+        browser.constructView(browser);
+    }
+    
+    public static void constructStandalone(ProgrammingLanguageBrowser browser) {
         // assemble the window
         JFrame frame = new JFrame("Programming Languages");
         ExitOnCloseHandler.addToFrame(frame);
-        frame.getContentPane().setLayout(new GridBagLayout());
-        frame.getContentPane().add(new JLabel("Filter"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
-        frame.getContentPane().add(filteredLanguages.getFilterEdit(), new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
-        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
-        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
-        frame.getContentPane().add(listWidgetTabs, new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
         
+        browser.constructModel();
+        browser.constructView(frame.getContentPane());
+
         // display the window
         frame.setSize(640, 480);
         frame.show();
     }
-    
-    class BackwardsStringComparator implements java.util.Comparator {
-        private ComparableComparator cc = new ComparableComparator();
-        public int compare(Object alpha, Object beta) {
-            ProgrammingLanguage alphaString = (ProgrammingLanguage)alpha;
-            ProgrammingLanguage betaString = (ProgrammingLanguage)beta;
-            return cc.compare(reverse(alphaString.getName()), reverse(betaString.getName()));
-        }
-        public String reverse(String a) {
-            char[] ch = a.toCharArray();
-            char[] ar = new char[ch.length];
-            for(int i = 0; i < ch.length; i++) {
-                ar[ch.length - i - 1] = ch[i];
-            }
-            return new String(ar);
-        }
-    }
-    
+        
     public static void main(String[] args) {
-        ProgrammingLanguageBrowser browser = new ProgrammingLanguageBrowser();
-        browser.display();
+        new ProgrammingLanguageBrowser(false);
     }
 }
