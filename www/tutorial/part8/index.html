@@ -10,7 +10,7 @@
 <p>Once your is application up and running you might want to make it faster. Here are
 some simple techniques to squeeze more performance out of Glazed Lists.
 
-<h3>Faster Filtering</h3>
+<a name="filtering"></a><h3>Faster Filtering</h3>
 <p>For filtering you have implemented <code>Filterable</code> in your
 list objects or <code>Filterator</code> as a utility class. Each of these
 must implement a <code>getFilterStrings()</code> method that returns
@@ -42,6 +42,37 @@ allocation and garbage collection to speed up your filtering.
 <code>getFilterStrings()</code> return values at a time. This means it is safe to reuse
 a single <code>String[]</code> for each <code>Filterator</code> as long as it is being
 used by only one <code>CaseInsensitiveFilterList</code>.
+
+<a name="trash"></a><h3>Trash Events After Reading Them</h3>
+<p> If you have written a class that implements <code>ListChangeListener</code>, you
+should be aware of a potential memory leak that occurs when failing to mark
+<code>ListChangeEvent</code>s as read.
+
+<p>When a list is changed Glazed Lists provides fine-grained access to exactly
+where the change was. For example, if a filter removes a subset of the elements
+in a list the <code>ListChangeEvent</code> will contain each of the indicies for the removed
+elements. Fine-grained changes allows Glazed Lists to perform minimal updates for
+the best performance.
+
+<p>The tradeoff of using fine-grained changes is that there is memory overhead
+for each change object. This change objects are shared among a set of <code>ListChangeEvent</code>s,
+and managed by a helper class, <code>ListChangeSequence</code>.
+
+<p>When a <code>ListChangeListener</code> processes a <code>ListChangeEvent</code>,
+it must notify the <code>ListChangeEvent</code> that it has completed viewing the
+current change so that they can be garbage-collected. There are two ways to notify
+the <code>ListChangeEvent</code> that the changes have been processed:
+
+<li>The <code>ListChangeEvent</code> can be notified <strong>implicitly</strong>, by
+iterating through the changes in the event in a series of calls to <code>next()</code>.
+<li>The <code>ListChangeEvent</code> can be notified <strong>explicitly</strong>, by
+calling the method <code>clearEventQueue()</code>.
+
+<p>Only after all listeners for a particular change have read it will the change be
+garbage collected. If a <code>ListChangeListener</code> never iterates or clears its
+change events, change ojbects will be allocated but never garbage collected so the
+application will have a memory leak.
+
 
 <br><br><p><table cellpadding="0" cellspacing="0" width="100%" border="0"><tr>
 <th align="left" width="30%"><a href="../part7/index.html">&lt;&lt; Part 7 - JComboBox</a></th> 

@@ -29,6 +29,9 @@ import java.io.Serializable;
  * filtering or sorting on to an existing list, or to simply receive events
  * when a list changes.
  *
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part1/index.html#basiceventlist">Glazed
+ * Lists Tutorial Part 1 - Basics</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class BasicEventList implements EventList, Serializable {

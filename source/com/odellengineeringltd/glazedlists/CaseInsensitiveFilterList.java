@@ -34,6 +34,9 @@ import java.util.regex.PatternSyntaxException;
  * the <code>filterable</code> interface. This can be compared to the sorted
  * collections (ie. TreeSet) and the Comparable/Comparator interfaces.
  *
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part2/index.html">Glazed
+ * Lists Tutorial Part 2 - Text Filtering</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class CaseInsensitiveFilterList extends AbstractFilterList implements DocumentListener {

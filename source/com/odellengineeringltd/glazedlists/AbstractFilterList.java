@@ -31,6 +31,9 @@ import javax.swing.SwingUtilities;
  * has changed, the user should call the <code>handleFilterChanged()</code>
  * method.
  *
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part3/index.html">Glazed
+ * Lists Tutorial Part 3 - Custom Filtering</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class AbstractFilterList extends MutationList implements ListChangeListener, EventList {

@@ -15,6 +15,9 @@ import javax.swing.JTable;
 /**
  * Specifies how a set of records are rendered in a table.
  *
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part1/index.html#tableformat">Glazed
+ * Lists Tutorial Part 1 - Basics</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public interface TableFormat {

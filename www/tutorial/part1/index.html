@@ -13,7 +13,7 @@ begin to exploit Glazed Lists' more advanced features.
 <p>We are going to create a simple Programming Language browser, so that we
 can review our favourite programming langauges.
 
-<h3>Step 1: The Source List</h3>
+<a name="basiceventlist"></a><h3>Step 1: The Source List</h3>
 <p>Create a <code>BasicEventList</code> and add elements to it, just like you would 
 an <code>ArrayList</code> or <code>LinkedList</code>. <code>BasicEventList</code> 
 implements the <code>List</code> interface, so you should have no problem learning 
@@ -37,7 +37,7 @@ public class ProgrammingLanguageBrowser {
 ...</code></pre></td></tr></table>
 
 
-<h3>Step 2: The Display Table</h3>
+<a name="tableformat"></a><h3>Step 2: The Display Table</h3>
 <p>Although Glazed Lists will take care of managing table, it is still necessary to do 
 some table set up. Glazed Lists needs to know column names and how to get a value 
 for a particular column. For this, it is necessary to implement the TableFormat 
@@ -75,7 +75,7 @@ column cell, given an object that models an entire row. In this case, the
 <code>ProgrammingLanguage</code> object models the entire row, and for column 1, we
 want the <code>getYear()</code> attribute of that <code>ProgrammingLanguage</code>.
 
-<h3>Step 3: A ListTable In a Frame</h3>
+<a name="listtable"></a><h3>Step 3: A ListTable In a Frame</h3>
 <p>Now that we have the data and display ready, it is time to display our table in a
 <code>JFrame</code>. The <code>ListTable</code> provides a <code>JTable</code> for displaying
 any <code>EventList</code>. It uses optimized table events to give you the best

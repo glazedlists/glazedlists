@@ -37,6 +37,9 @@ import java.util.SortedSet;
  * noted, all methods are only safe to be called from the event dispatch thread.
  * To do this programmatically, use <code>SwingUtilities.invokeAndWait()</code>.
  *
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part1/index.html#listtable">Glazed
+ * Lists Tutorial Part 1 - Basics</a>
+ *
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

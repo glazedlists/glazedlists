@@ -31,6 +31,9 @@ import java.util.Comparator;
  * The sorting algorithm may be dynamic. In effect, user may specify the
  * criteria that is used to choose a sorting order.
  *
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part4/index.html">Glazed
+ * Lists Tutorial Part 4 - Sorting</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class SortedList extends MutationList implements ListChangeListener, EventList {

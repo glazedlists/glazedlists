@@ -41,6 +41,9 @@ import javax.swing.UIManager;
  * <br>StyleConstants.setFontSize(alert, 16);
  * <br>StyleConstants.setForeground(alert, new Color(255, 00, 00));
  * 
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part5/index.html">Glazed
+ * Lists Tutorial Part 5 - Custom Renderers</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class StyledDocumentRenderer implements TableCellRenderer {

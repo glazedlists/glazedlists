@@ -18,6 +18,9 @@ import java.util.TimerTask;
  * query list requires its own thread, which is either sleeping
  * or updating the list with the freshest query update.
  *
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part6/index.html">Glazed
+ * Lists Tutorial Part 6 - Query Lists</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class DynamicQueryList extends QueryList implements Runnable {
