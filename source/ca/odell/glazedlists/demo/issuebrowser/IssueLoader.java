@@ -45,15 +45,15 @@ public class IssueLoader implements Runnable {
     public void run() {
         // loop forever, loading projects
         Project currentProject = null;
-        while (true) {
+        while(true) {
             try {
                 // get a project to load
                 synchronized(this) {
-                    if (project == null) wait();
+                    if(project == null) wait();
                     Thread.interrupted();
 
                     // we should still be asleep
-                    if (project == null) continue;
+                    if(project == null) continue;
 
                     // we have a project to load
                     currentProject = project;
@@ -72,17 +72,17 @@ public class IssueLoader implements Runnable {
 
             // handling interruptions is really gross
             } catch(IOException e) {
-                if (e.getCause() instanceof InterruptedException) {
+                if(e.getCause() instanceof InterruptedException) {
                     // do nothing, we were just interrupted as expected
-                } else if (e.getMessage().equals("Parsing failed java.lang.InterruptedException")) {
+                } else if(e.getMessage().equals("Parsing failed java.lang.InterruptedException")) {
                     // do nothing, we were just interrupted as expected
                 } else {
                     e.printStackTrace();
                 }
             } catch(RuntimeException e) {
-                if (e.getCause() instanceof InterruptedException) {
+                if(e.getCause() instanceof InterruptedException) {
                     // do nothing, we were just interrupted as expected
-                } else if (e.getCause() instanceof IOException && e.getCause().getMessage().equals("Parsing failed Lock interrupted")) {
+                } else if(e.getCause() instanceof IOException && e.getCause().getMessage().equals("Parsing failed Lock interrupted")) {
                     // do nothing, we were just interrupted as expected
                 } else {
                     throw e;

@@ -112,18 +112,26 @@ public class IssuesUserFilter extends AbstractFilterList {
                     stateMask = stateMask | FILTER_CONSTRAINED;
                 }
             }
+            
+            // if this didn't actually change anything
+            if(stateMask == 0) return;
 
             // The filter now contains a different set of users
-            if((stateMask & FILTER_CHANGED) != 0) {
-                handleFilterChanged();
-
-            // The filter now contains fewer users
-            } else if((stateMask & FILTER_RELAXED) != 0) {
-                handleFilterRelaxed();
-
-            // The filter now contains more users
-            } else if((stateMask & FILTER_CONSTRAINED) != 0) {
-                handleFilterConstrained();
+            getReadWriteLock().writeLock().lock();
+            try {
+                if((stateMask & FILTER_CHANGED) != 0) {
+                    handleFilterChanged();
+    
+                // The filter now contains fewer users
+                } else if((stateMask & FILTER_RELAXED) != 0) {
+                    handleFilterRelaxed();
+    
+                // The filter now contains more users
+                } else if((stateMask & FILTER_CONSTRAINED) != 0) {
+                    handleFilterConstrained();
+                }
+            } finally {
+                getReadWriteLock().writeLock().unlock();
             }
         }
     }
