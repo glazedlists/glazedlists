@@ -4,10 +4,8 @@
 
 <h1>Glazed Lists 0.9 Release Notes</h1>
 
-<p><font color="red">Glazed Lists 0.8 is the first formal release of Glazed Lists. It is
-the final release of Glazed Lists to use the <code>com.odellengineeringltd.glazedlists</code>
-package. This release will be available until April 15, 2005. No maintenance updates to this
-release are planned.</font>
+<p>Glazed Lists 0.9 is a major release of Glazed Lists. This release is smaller, easier to use
+and more flexible than previous releases. It has a new concurrency model and a stable API.
 
 <h3>Overview</h3>
 <p>Glazed Lists is an application of the <a href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</a>
@@ -18,21 +16,24 @@ powerful manipulation of the source data.
 <li><code>SortedList</code> presents a sorted view of a source list
 <li><code>AbstractFilterList</code> presents a filtered list containing a subset of a source list
 <li><code>UniqueList</code> presents a unique view of a source list
-<li><code>CharacteristicList</code> presents a custom mutation of a source list
+<li><code>TransformedList</code> presents a starting point for building custom transformations of a source list
 <p>Glazed Lists also provides Swing widgets that automatically update when the data changes. Included widgets are:
-<li><code>ListTable</code> displays a source list in a JTable with sophisticated sorting support
-<li><code>EventJList</code> displays a source list in a JList
-<li><code>ListComboBox</code> displays a source list in a JComboBox.
+<li><code>EventTableModel</code> models a source list for a JTable with sophisticated sorting support
+<li><code>EventListModel</code> models a source list for a JList
+<li><code>EventComboBoxModel</code> models a source list for a JComboBox.
+<li><code>EventSelectionModel</code> models a JTable or JList's selection as a event list.
 
-<font color="red"><h3>Download</h3>
-<li><a href="https://glazedlists.dev.java.net/files/documents/1073/3877/glazedlists-0.8.jar">glazedlists-0.8.jar</a> - a compiled jar file ready for your application's classpath.
-<li><a href="https://glazedlists.dev.java.net/files/documents/1073/3878/glazedlists-0.8-source.zip">glazedlists-0.8-source.zip</a> - the 0.8 revision of the source tree. You'll find <a href="http://ant.apache.org/">Ant</a> targets for compiling, jaring, <a href="http://www.junit.org/index.htm">JUnit</a> and generating Javadoc.
-</font>
+<h3>Download</h3>
+<li><a href="http://publicobject.com/glazedlists/glazedlists-0.9/glazedlists-0.9.jar">glazedlists-0.9.jar</a> - a compiled jar file ready for your application's classpath.
+<li><a href="http://publicobject.com/glazedlists/glazedlists-0.9/glazedlists-0.9-source.zip">glazedlists-0.9-source.zip</a> - the 0.9 revision of the source tree. You'll find <a href="http://ant.apache.org/">Ant</a> targets for compiling, jaring, <a href="http://www.junit.org/index.htm">JUnit</a> and generating Javadoc.
 
-<font color="red"><h3>Documentation</h3>
-<li>Tutorial - included in the <code>www/tutorial</code> folder of the source release.
-<li><a href="http://opensource.odellengineeringltd.com/glazedlists/glazedlists-0.8/api/">Javadoc API</a> - generated documentation is a useful reference.
-</font>
+<h3>Documentation</h3>
+<li>Tutorial - an <strong>out-of-date</strong> tutorial is included in the <code>www/tutorial</code> folder of the source release. A
+tutorial with up-to-date classnames and usage should be available on <a href="https://glazedlists.dev.java.net">https://glazedlists.dev.java.net</a>
+before July 1, 2004.
+<li><a href="http://publicobject.com/glazedlists/glazedlists-0.9/api/">Javadoc API</a> - generated documentation is a useful reference.
+<li><a href="http://publicobject.com/glazedlists/glazedlists-0.9/api-w-migration/">Migration API</a> - documentation with package <code>migrationkit</code>
+for migrating from Glazed Lists 0.8.
 
 <h3>Known Issues</h3>
 <table border="1" cellspacing="0" cellpadding="4">
@@ -48,6 +49,12 @@ powerful manipulation of the source data.
 <p>In order to make Glazed Lists as developer-friendly as possible, we decided to break compatibility
 between versions 0.8 and 0.9. This change brings a more robust concurrency model, a naming scheme more
 consistent with J2SE, and fewer public classes.
+<p>A special <a href="http://publicobject.com/glazedlists/glazedlists-0.9/api-w-migration/">Javadoc API</a>
+with the migration support package, <code>ca.odell.glazedlists.migrationkit</code> is available. The migration
+kit is a set of classes that will not be available in future releases of Glazed Lists. This package is designed
+to ease developers' transition to Glazed Lists 0.9. The classes in the migration kit have been removed from
+Glazed Lists because they have been replaced or they are beyond the scope of Glazed Lists.
+
 <p><table border="1" cellspacing="0" cellpadding="4">
 <tr><th>Version 0.8</th><th>Version 0.9</th></tr>
 <tr><td valign="top"><code>synchronized(getRootList()) {<br>&nbsp;&nbsp;&nbsp;&nbsp;// thread-safe code here<br>}</code></td>
