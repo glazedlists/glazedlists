@@ -148,6 +148,68 @@ public class NetworkListTest extends TestCase {
             fail(e.getMessage());
         }
     }
+
+    /**
+     * Verifies that many listeners can subscribe to a resource.
+     */
+    public void testManyListeners() {
+        try {
+            // prepare the source list
+            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            sourceList.add(new Integer(8));
+            sourceList.add(new Integer(6));
+            int connectPort = serverPort;
+            
+            // prepare the listener's peers
+            List peers = new ArrayList();
+            for(int p = 0; p < 4; p++) {
+                serverPort++;
+                ListPeer listenerPeer = new ListPeer(serverPort);
+                listenerPeer.start();
+                peers.add(listenerPeer);
+            }
+            
+            // prepare the listeners
+            List listeners = new ArrayList();
+            for(Iterator p = peers.iterator(); p.hasNext(); ) {
+                ListPeer listenerPeer = (ListPeer)p.next();
+                NetworkList listener = listenerPeer.subscribe(resourceName, "localhost", connectPort, ByteCoderFactory.serializable());
+                listeners.add(listener);
+            }
+            
+            // verify they're equal after a subscribe
+            waitFor(1000);
+            for(Iterator i = listeners.iterator(); i.hasNext(); ) {
+                NetworkList listener = (NetworkList)i.next();
+                assertEquals(sourceList, listener);
+            }
+
+            // perform some changes
+            sourceList.add(new Integer(3));
+            sourceList.add(new Integer(0));
+            sourceList.add(new Integer(9));
+
+            // verify they're still in sync
+            waitFor(1000);
+            for(Iterator i = listeners.iterator(); i.hasNext(); ) {
+                NetworkList listener = (NetworkList)i.next();
+                assertEquals(sourceList, listener);
+            }
+            
+            // clean up the listener's connections
+            for(Iterator p = peers.iterator(); p.hasNext(); ) {
+                ListPeer listenerPeer = (ListPeer)p.next();
+                listenerPeer.stop();
+            }
+            
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+    
+
     /**
      * Waits for the specified duration of time. This hack method should be replaced
      * with something else that uses notification.

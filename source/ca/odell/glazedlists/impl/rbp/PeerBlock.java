@@ -208,7 +208,7 @@ class PeerBlock {
 
         // write the payload
         if(payload != null) {
-            writer.append(payload);
+            writer.append(payload.duplicate());
         }
         
         // wrap the size
