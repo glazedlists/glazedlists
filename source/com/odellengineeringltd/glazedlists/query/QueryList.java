@@ -100,6 +100,8 @@ public class QueryList extends MutationList implements EventList {
      * @return the number of changes (inserts, deletes) as a consequence of this update.
      */
     protected void setQueryResults(SortedSet after) {
+        // skip these results if the set is null
+        if(after == null) return;
         // keep a running list of what's been added and what's been deleted
         updates.beginAtomicChange();
         // use a temporary values list
