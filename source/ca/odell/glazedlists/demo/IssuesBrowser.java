@@ -36,7 +36,9 @@ public class IssuesBrowser extends Applet {
     private EventList descriptions = new BasicEventList();
     
     /** monitor loading the issues */
-    private JProgressBar issuesLoading = null;
+    private JLabel throbber = null;
+    private ImageIcon throbberActive = null;
+    private ImageIcon throbberStatic = null;
     private JTextField issuesLoadingText = null;
     
     /**
@@ -135,6 +137,11 @@ public class IssuesBrowser extends Applet {
         prioritySlider.setPaintTicks(true);
         prioritySlider.setMajorTickSpacing(25);*/
         
+        // throbber icons
+        ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
+        throbberStatic = new ImageIcon(jarLoader.getResource("resources/demo/throbber-static.gif"));
+        throbberActive = new ImageIcon(jarLoader.getResource("resources/demo/throbber-active.gif"));
+        throbber = new JLabel(throbberStatic);
         
         // create the filters panel
         JPanel filtersPanel = new JPanel();
@@ -147,25 +154,13 @@ public class IssuesBrowser extends Applet {
         filtersPanel.add(new JLabel("Issue Owner"),          new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  10, 5,   10), 0, 0));
         filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets(0,  10, 10,  10), 0, 0));
         
-        // create the progress bar panel
-        issuesLoading = new JProgressBar();
-        issuesLoadingText = new JTextField();
-        issuesLoadingText.setEnabled(false);
-        issuesLoadingText.setForeground(UIManager.getColor("Panel.foreground"));
-        issuesLoadingText.setBackground(UIManager.getColor("Panel.background"));
-        issuesLoadingText.setDisabledTextColor(UIManager.getColor("Panel.foreground"));
-        JPanel progressPanel = new JPanel();
-        progressPanel.setLayout(new GridBagLayout());
-        progressPanel.add(issuesLoadingText,               new GridBagConstraints(0, 0, 1, 1, 0.90, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0,  0,  0,  5), 0, 0));
-        progressPanel.add(issuesLoading,                   new GridBagConstraints(1, 0, 2, 1, 0.10, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0,  0,  0,  0), 0, 0));
-        
         // a panel with a table
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
-        panel.add(filtersPanel,                new GridBagConstraints(0, 0, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
-        panel.add(issuesTableScrollPane,       new GridBagConstraints(1, 0, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
-        panel.add(descriptionsTableScrollPane, new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
-        panel.add(progressPanel,               new GridBagConstraints(0, 2, 2, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 2,  2,  2,  2), 0, 0));
+        panel.add(throbber,                    new GridBagConstraints(0, 0, 2, 1, 1.00, 0.0, GridBagConstraints.EAST,   GridBagConstraints.NONE,       new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(filtersPanel,                new GridBagConstraints(0, 1, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(issuesTableScrollPane,       new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(descriptionsTableScrollPane, new GridBagConstraints(1, 2, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
 
         return panel;
     }
@@ -202,7 +197,7 @@ public class IssuesBrowser extends Applet {
     class IssueLoader implements Runnable {
         public void run() {
             // start the progress bar
-            SwingUtilities.invokeLater(new IndeterminateToggler(true, "Downloading issues..."));
+            SwingUtilities.invokeLater(new IndeterminateToggler(throbberActive, "Downloading issues..."));
                 
             // load the issues
             List urlIssues = null;
@@ -225,18 +220,17 @@ public class IssuesBrowser extends Applet {
             }
             
             // stop the progress bar
-            SwingUtilities.invokeLater(new IndeterminateToggler(false, ""));
+            SwingUtilities.invokeLater(new IndeterminateToggler(throbberStatic, ""));
         }
         private class IndeterminateToggler implements Runnable {
-            private boolean indeterminite;
+            private ImageIcon throbberIcon;
             private String message;
-            public IndeterminateToggler(boolean indeterminite, String message) {
-                this.indeterminite = indeterminite;
+            public IndeterminateToggler(ImageIcon throbberIcon, String message) {
+                this.throbberIcon = throbberIcon;
                 this.message = message;
             }
             public void run() {
-                issuesLoading.setIndeterminate(indeterminite);
-                issuesLoadingText.setText(message);
+                throbber.setIcon(throbberIcon);
             }
         }
     }    
