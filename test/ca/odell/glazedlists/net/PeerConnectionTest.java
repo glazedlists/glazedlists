@@ -65,20 +65,15 @@ public class PeerConnectionTest extends TestCase {
             peer.subscribe(clone, resourceName, "localhost", serverPort);
             
             waitFor(1000);
-            System.out.println(stringResource.getValue());
-            System.out.println(clone.getValue());
+            assertEquals(stringResource.getValue(), clone.getValue());
             
             stringResource.setValue("World O Hell");
-            System.out.println(stringResource.getValue());
-            System.out.println(clone.getValue());
-            
             waitFor(1000);
-            
-            System.out.println(stringResource.getValue());
-            System.out.println(clone.getValue());
-            
             assertEquals(stringResource.getValue(), clone.getValue());
 
+            peer.unsubscribe(resourceName);
+            waitFor(1000);
+            
         } catch(Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
