@@ -9,13 +9,7 @@ package com.odellengineeringltd.glazedlists;
 // the Glazed Lists' change objects
 import com.odellengineeringltd.glazedlists.event.*;
 // Java collections are used for underlying data storage
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.TreeSet;
-import java.util.SortedSet;
-import java.util.Collection;
+import java.util.*;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
 // for iterating over a mutation list the lazy way

@@ -34,22 +34,20 @@
   </target>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-     JAVADOC & JAVA2HTML
-     Java2HTML is a free tool for putting Java code in a code-coloured, pretty
-     printed form. See http://www.java2html.com/
+     JAVADOC
+     Construct a browsable API.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     
   <target name="docs" depends="init"
     description="Scan the source code to generate the API">
     <mkdir dir="docs"/>
     <!-- document all the source with @todo tags -->
-    <javadoc packagenames="com.*" 
+    <javadoc packagenames="com.odellengineeringltd.glazedlists.*" 
       sourcepath="source" destdir="docs/api"
-      author="true" use="true" windowtitle="Glazed Lists">
+      author="true" use="true" windowtitle="Glazed Lists" source="1.4">
       <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
-      <bottom><![CDATA[<i>Copyright &#169; 2003 O'Dell Engineering.</i>]]></bottom>
-      <tag name="todo" description="To do:"/>
-      <tag name="comment" description="Implementation Notes:"/> 
+      <bottom><![CDATA[<i>Copyright &#169; 2003-2004 O'Dell Engineering.</i>]]></bottom>
+      <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
     </javadoc>
   </target>
 

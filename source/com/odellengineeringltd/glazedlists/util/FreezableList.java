@@ -18,17 +18,19 @@ import java.util.ArrayList;
  * modified while it is being accessed. The list can later resume receiving
  * updates and to complete the methaphor this is called being <i>thawed</i>.
  *
- * When a FreezableList is frozen, it copies the elements of the source list
+ * <p>When a FreezableList is frozen, it copies the elements of the source list
  * into an internal array. It notifies its source list that it is no longer
  * interested in receiving updates. At this point the list is temporarily 
  * immutable.
  *
- * When the FreezableList is thawed it discards its copied array and resumes
+ * <p>When the FreezableList is thawed it discards its copied array and resumes
  * receiving updates from the source list.
+ *
+ * <p>The FreezableList is only writable when it is not frozen.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class FreezableList extends MutationList {
+public class FreezableList extends WritableMutationList implements ListChangeListener, EventList {
 
     /** the state of the freezable list */
     private boolean frozen = false;
@@ -65,6 +67,22 @@ public class FreezableList extends MutationList {
         } else {
             return source.size();
         }
+    }
+    
+    /**
+     * Gets the index into the source list for the object with the specified
+     * index in this list.
+     */
+    protected int getSourceIndex(int mutationIndex) {
+        return mutationIndex;
+    }
+    
+    /**
+     * Tests if this mutation shall accept calls to <code>add()</code>,
+     * <code>remove()</code>, <code>set()</code> etc.
+     */
+    protected boolean isWritable() {
+        return !frozen;
     }
     
     /**
@@ -133,7 +151,12 @@ public class FreezableList extends MutationList {
             // but instead silently ignore the event
             
         } else {
-            super.notifyListChanges(listChanges);
+            // just pass on the changes
+            updates.beginAtomicChange();
+            while(listChanges.next()) {
+                updates.appendChange(listChanges.getIndex(), listChanges.getType());
+            }
+            updates.commitAtomicChange();
         }
     }
 }

@@ -25,7 +25,7 @@ import java.util.regex.PatternSyntaxException;
 
 
 /**
- * A filter list is a pseudo-list that owns another list. It also owns
+ * A filter list that shows only elements that contain the filter text. It also owns
  * a text box. When the text box contains tokens (Strings separated by spaces),
  * these are used as filters on the contents. The list elements that contain
  * all of the tokens are retained, while all others are (temporarily) removed

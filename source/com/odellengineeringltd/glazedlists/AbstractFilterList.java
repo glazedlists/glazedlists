@@ -9,12 +9,7 @@ package com.odellengineeringltd.glazedlists;
 // the Glazed Lists' change objects
 import com.odellengineeringltd.glazedlists.event.*;
 // Java collections are used for underlying data storage
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.TreeSet;
-import java.util.SortedSet;
+import java.util.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // For calling methods on the event dispacher thread
@@ -22,11 +17,11 @@ import javax.swing.SwingUtilities;
 
 
 /**
- * A filter list is a pseudo-list that owns another list. It only displays
- * a subset of the source list. That subset may be the complete set, an empty
- * set, or a select group of elements from a list. 
+ * A filter list is a mutation-list that views a subset of the source list.
+ * That subset may be the complete set, an empty set, or a select group of
+ * elements from a list. 
  *
- * The filter may be static or dynamic. In effect, the subset may change
+ * <p>The filter may be static or dynamic. In effect, the subset may change
  * in size by modifying the source set, or the filter itself. When the filter
  * has changed, the user should call the <code>handleFilterChanged()</code>
  * method.
@@ -36,7 +31,7 @@ import javax.swing.SwingUtilities;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class AbstractFilterList extends MutationList implements ListChangeListener, EventList {
+public abstract class AbstractFilterList extends WritableMutationList implements ListChangeListener, EventList {
 
     /** the arraylist that maps to the elements that are displayed */
     private int[] map = null;
@@ -51,7 +46,7 @@ public abstract class AbstractFilterList extends MutationList implements ListCha
      * specified source list. After an extending class is done instantiation,
      * it should <strong>always</strong> call handleFilterChanged().
      */
-    public AbstractFilterList(EventList source) {
+    protected AbstractFilterList(EventList source) {
         super(source);
         source.addListChangeListener(this);
     }
@@ -65,7 +60,7 @@ public abstract class AbstractFilterList extends MutationList implements ListCha
      * When a list item is inserted, it may be visible or filtered.
      * When a list item is deleted, it must be filtered if it is not visible.
      */
-    public void notifyListChanges(ListChangeEvent listChanges) {
+    public final void notifyListChanges(ListChangeEvent listChanges) {
         synchronized(getRootList()) {
             
             // all of these changes to this list happen "atomically"
@@ -143,7 +138,7 @@ public abstract class AbstractFilterList extends MutationList implements ListCha
      *    <li>It could stay on because it always matches
      *    <li>It coudl stay off because it never matches
      */
-    protected void handleFilterChanged() {
+    protected final void handleFilterChanged() {
         synchronized(getRootList()) {
             // all of these changes to this list happen "atomically"
             updates.beginAtomicChange();
@@ -219,6 +214,11 @@ public abstract class AbstractFilterList extends MutationList implements ListCha
             mapSize = current;
         }
     }
+    
+    /**
+     * Gets the filtered index of the element with the specified index in
+     * the source list.
+     */
     private int getFilterIndex(int sourceIndex) {
         if(map == null) rebuildMap();
         if(filterSet.get(sourceIndex).equals(Boolean.FALSE)) return -1;
@@ -240,6 +240,7 @@ public abstract class AbstractFilterList extends MutationList implements ListCha
         }
         return filterListAsString.toString();
     }
+
     /**
      * Gets the map as a String for debugging.
      */
@@ -262,7 +263,7 @@ public abstract class AbstractFilterList extends MutationList implements ListCha
     /**
      * Gets the specified element from the list.
      */
-    public Object get(int index) {
+    public final Object get(int index) {
         synchronized(getRootList()) {
             if(map == null) rebuildMap();
             try {
@@ -276,14 +277,31 @@ public abstract class AbstractFilterList extends MutationList implements ListCha
             }
         }
     }
-
+    
     /**
      * Gets the total number of elements in the list.
      */
-    public int size() {
+    public final int size() {
         synchronized(getRootList()) {
             if(map == null) rebuildMap();
             return mapSize;
         }
+    }
+
+    /**
+     * Gets the index into the source list for the object with the specified
+     * index in this list.
+     */
+    protected final int getSourceIndex(int mutationIndex) {
+        if(map == null) rebuildMap();
+        return map[mutationIndex];
+    }
+    
+    /**
+     * Tests if this mutation shall accept calls to <code>add()</code>,
+     * <code>remove()</code>, <code>set()</code> etc.
+     */
+    protected final boolean isWritable() {
+        return true;
     }
 }

@@ -34,6 +34,9 @@ public class TaskQueryList extends QueryList {
     
     /**
      * Create a new TaskQueryList with no query.
+     *
+     * @param repeatPeriod the number if milliseconds before the query is
+     *      re-executed to refresh the table.
      */
     public TaskQueryList(TaskManager taskManager, long repeatPeriod) {
         this.taskManager = taskManager;
@@ -46,9 +49,6 @@ public class TaskQueryList extends QueryList {
      * the specified query has loaded. As a woraround, consider
      * setting the query to an empty query to clear the list and then
      * to the desired query.
-     *
-     * @param period the number if milliseconds before the query is
-     *      re-executed to refresh the table.
      */
     public synchronized void setQuery(Query query) {
         // interrupt the previous query!

@@ -17,13 +17,13 @@ import com.odellengineeringltd.glazedlists.event.*;
  * or calculation. It is used when there are too many objects to keep in
  * memory simultaneously and object access happens in clusters.
  *
- * This list simply remembers the last <i>n</i> elements which were requested
+ * <p>This list simply remembers the last <i>n</i> elements which were requested
  * or set. Accesses to such elements does not perform a recursive operation
  * on the source list, instead the element is fetched from the cache.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CachingList extends MutationList {
+public class CachingList extends WritableMutationList implements ListChangeListener, EventList {
 
     /** the cache is implemented using a bounded map with indexes as keys */
     private BoundedMap cache;
@@ -43,8 +43,14 @@ public class CachingList extends MutationList {
     }
     
     /**
-     * Returns the element at the specified position in this list. Most
-     * mutation lists will override the get method to use a mapping.
+     * Returns the number of elements in this list. 
+     */
+    public int size() {
+        return source.size();
+    }
+    
+    /**
+     * Returns the element at the specified position in this list.
      */
     public Object get(int index) {
         Integer indexObject = new Integer(index);
@@ -61,11 +67,29 @@ public class CachingList extends MutationList {
         // get the element from the source list and cache it
         cacheMisses++;
         System.out.print(".");
-        value = super.get(index);
+        value = source.get(index);
         cache.put(indexObject, value);
         return value;
     }
     
+    
+    /**
+     * Gets the index into the source list for the object with the specified
+     * index in this list.
+     */
+    protected int getSourceIndex(int mutationIndex) {
+        return mutationIndex;
+    }
+    
+    /**
+     * Tests if this mutation shall accept calls to <code>add()</code>,
+     * <code>remove()</code>, <code>set()</code> etc.
+     */
+    protected boolean isWritable() {
+        return true;
+    }
+
+
     /**
      * Gets the total number of times that this list has fetched its result
      * from the cache rather than from the source list.
@@ -73,6 +97,7 @@ public class CachingList extends MutationList {
     public int getCacheHits() {
         return cacheHits;
     }
+
     /**
      * Gets the total number of times that this list has fetched its result
      * from the source list rather than the cache.
@@ -80,6 +105,7 @@ public class CachingList extends MutationList {
     public int getCacheMisses() {
         return cacheMisses;
     }
+
     /**
      * Gets the ratio of cache hits to cache misses. This is a number between
      * 0 and 1, where 0 means the cache is unused and 1 means the cache was
@@ -97,6 +123,12 @@ public class CachingList extends MutationList {
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
         cache.clear();
-        super.notifyListChanges(listChanges);
+
+        // just pass on the changes
+        updates.beginAtomicChange();
+        while(listChanges.next()) {
+            updates.appendChange(listChanges.getIndex(), listChanges.getType());
+        }
+        updates.commitAtomicChange();
     }
 }

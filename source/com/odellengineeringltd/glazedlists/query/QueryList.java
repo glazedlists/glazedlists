@@ -10,18 +10,13 @@ package com.odellengineeringltd.glazedlists.query;
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
 // Java collections are used for underlying data storage
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.TreeSet;
-import java.util.SortedSet;
+import java.util.*;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
 
 
 /**
- * A query list is a list who controls its contents by a query. The query list
+ * A QueryList is a list who controls its contents by a query. The QueryList
  * may re-run the query on a specified interval to ensure that the list is always
  * up-to-date. When a user edits an object, the user should notify the lists with
  * the updated object so that the list can add, update (repaint) or remove the
@@ -29,34 +24,37 @@ import javax.swing.SwingUtilities;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class QueryList extends MutationList implements EventList {
+public class QueryList extends AbstractList implements EventList {
 
     /** the arraylist that holds this querylist's data */
     private ArrayList values = new ArrayList();
+
     /** the treeset mirrors the values, but it is sorted */
     private SortedSet before = new TreeSet();
     
     /** the query containing this list's elements */
     protected Query query = null;
 
+    /** the change event and notification system */
+    protected ListChangeSequence updates = new ListChangeSequence();
+
     /**
-     * Creates a new query list. It is a mutation list with itself as its source.
-     * This list cannot be manipulated directly. The only way to change the values
-     * is to change the results from the query, either by changing the query or
-     * by changing its results.
+     * Creates a new QueryList. This list cannot be manipulated directly. The only
+     * way to change the values is to change the results from the query, either by
+     * changing the query or by changing its results.
      */
     public QueryList() {
     }
-
     
     /**
      * Whenever a user or external force updates an object that may be in this list
      * the list should be notified.
-     * If the updated object is already in the list and it still belongs in the list
-     * after the update, it will be repainted.
-     * If the updated object is already in the list and it no longer belongs in the
+     *
+     * <li>If the updated object is already in the list and it still belongs in the list
+     * after the update, it will be updated.
+     * <li>If the updated object is already in the list and it no longer belongs in the
      * list after the update, it will be removed.
-     * If the updated object is not alreayd in the list and it belongs in the list,
+     * <li>If the updated object is not alreayd in the list and it belongs in the list,
      * it will be added.
      */
     public synchronized void notifyObjectUpdated(Comparable updated) {
@@ -160,9 +158,6 @@ public class QueryList extends MutationList implements EventList {
             // fire all the changes to change listeners
             updates.commitAtomicChange();
         }
-        
-        // return the number of updates that occurred
-        //return updates.size();
     }
     
     /**
@@ -171,6 +166,7 @@ public class QueryList extends MutationList implements EventList {
     public synchronized Object get(int index) {
         return values.get(index);
     }
+
     /**
      * Gets the total number of elements in the list.
      */
@@ -178,6 +174,29 @@ public class QueryList extends MutationList implements EventList {
         return values.size();
     }
     
+    /**
+     * Registers the specified listener to receive notification of changes
+     * to this list.
+     */
+    public final void addListChangeListener(ListChangeListener listChangeListener) {
+        updates.addListChangeListener(listChangeListener);
+    }
+
+    /**
+     * Removes the specified listener from receiving change updates for this list.
+     */
+    public void removeListChangeListener(ListChangeListener listChangeListener) {
+        updates.removeListChangeListener(listChangeListener);
+    }
+
+    /**
+     * For implementing the EventList interface. As a QueryList is a root
+     * list, this always returns <code>this</code>.
+     */
+    public EventList getRootList() {
+        return this;
+    }
+
     /**
      * Gets the current query from the query list.
      */

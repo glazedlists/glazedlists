@@ -58,74 +58,36 @@ public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
         source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
     }
     
-    /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    public int changeSizeRepaintAllThreshhold = 25;
-    
     /**
      * For implementing the ListChangeListener interface. This sends changes
      * to the table which can repaint the table cells. Because this class uses
      * a ListChangeListenerEventThreadProxy, it is guaranteed that all natural
      * calls to this method use the Swing thread.
      *
-     * This tests the size of the change to determine how to handle it. If the
-     * size of the change is greater than the changeSizeRepaintAllThreshhold,
-     * then the entire table is notified as changed. Otherwise only the descrete
-     * areas that changed are notified.
-     *
-     * @todo implement redrawing the list instead of forwarding events where
-     *      that would be more efficient.
+     * <p>This always sends discrete changes for the complete size of the list.
+     * It may be more efficient to implement a threshhold where a large list
+     * of changes are grouped together as a single change. This is how the
+     * ListTable accepts large change events.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
         // when all events hae already been processed by clearing the event queue
-        if(!listChanges.hasNext()) {
-            return;
+        if(!listChanges.hasNext()) return;
 
-        // notify all changes simultaneously
-        /*} else if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
-            listChanges.clearEventQueue();
-            // first scroll to row zero
-            //tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
-            fireListDataEvent(listDataEvent);
+        // for all changes, one block at a time
+        while(listChanges.nextBlock()) {
+            // get the current change info
+            int startIndex = listChanges.getBlockStartIndex();
+            int endIndex = listChanges.getBlockEndIndex();
+            int changeType = listChanges.getType();
 
+            // create a table model event for this block
             listDataEvent.setRange(startIndex, endIndex);
             if(changeType == ListChangeBlock.INSERT) listDataEvent.setType(ListDataEvent.INTERVAL_ADDED);
             else if(changeType == ListChangeBlock.DELETE) listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED);
             else if(changeType == ListChangeBlock.UPDATE) listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
 
-            fireTableDataChanged();
-            // clear the selection
-            selectedIndex = -1;*/
-
-        // for all changes, one block at a time
-        } else {
-            while(listChanges.nextBlock()) {
-                // get the current change info
-                int startIndex = listChanges.getBlockStartIndex();
-                int endIndex = listChanges.getBlockEndIndex();
-                int changeType = listChanges.getType();
-
-                // create a table model event for this block
-                listDataEvent.setRange(startIndex, endIndex);
-                if(changeType == ListChangeBlock.INSERT) listDataEvent.setType(ListDataEvent.INTERVAL_ADDED);
-                else if(changeType == ListChangeBlock.DELETE) listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED);
-                else if(changeType == ListChangeBlock.UPDATE) listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
-
-                // fire an event to notify all listeners
-                fireListDataEvent(listDataEvent);
-
-                // update the selection
-                /*if(startIndex <= selectedIndex) {
-                    if(changeType == ListChangeBlock.INSERT) {
-                        selectedIndex += (endIndex - startIndex + 1);
-                    } else if(changeType == ListChangeBlock.DELETE) {
-                        if(endIndex >= selectedIndex) {
-                            selectedIndex = -1;
-                        } else {
-                            selectedIndex -= (endIndex - startIndex + 1);
-                        }
-                    }
-                }*/
-            }
+            // fire an event to notify all listeners
+            fireListDataEvent(listDataEvent);
         }
     }
 

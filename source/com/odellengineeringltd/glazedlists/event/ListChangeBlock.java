@@ -73,8 +73,8 @@ public class ListChangeBlock {
     }
     
     /**
-     * Setting a change to being valid means it is active, wheras invalid
-     * means that it can be re-used (ie. object pooling).
+     * Setting a change to being valid means it is in use. Invalid
+     * means that it can be recycled via object pooling.
      */
     public void setInvalid() {
         this.valid = false;

@@ -62,8 +62,6 @@ public class ListChangeSequence {
      * arraylist is used as a flag. If it is null, there is no change taking
      * place. Otherwise there is a conflicting change and a
      * ConcurrentModificationException is thrown.
-     *
-     * @todo clean up blocks before beginning an atomic change
      */
     public synchronized void beginAtomicChange() {
         if(atomicChangeBlocks != null) {

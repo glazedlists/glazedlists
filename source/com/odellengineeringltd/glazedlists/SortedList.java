@@ -36,7 +36,7 @@ import java.util.Comparator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SortedList extends MutationList implements ListChangeListener, EventList {
+public final class SortedList extends WritableMutationList implements ListChangeListener, EventList {
 
     /** a map from the unsorted index to the sorted index */
     private IndexedTree unsorted = null;
@@ -238,6 +238,25 @@ public class SortedList extends MutationList implements ListChangeListener, Even
         }
     }
     
+    /**
+     * Gets the index into the source list for the object with the specified
+     * index in this list.
+     */
+    protected int getSourceIndex(int mutationIndex) {
+        IndexedTreeNode sortedNode = sorted.getNode(mutationIndex);
+        IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
+        int unsortedIndex = unsortedNode.getIndex();
+        return unsortedIndex;
+    }
+    
+    /**
+     * Tests if this mutation shall accept calls to <code>add()</code>,
+     * <code>remove()</code>, <code>set()</code> etc.
+     */
+    protected boolean isWritable() {
+        return true;
+    }
+
     /**
      * A comparator that takes an indexed node, and compares the value
      * of an object in a list that has the index of that node.

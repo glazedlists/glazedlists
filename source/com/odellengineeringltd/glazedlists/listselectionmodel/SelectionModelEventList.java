@@ -116,7 +116,7 @@ public class SelectionModelEventList {
      * responsible for listening to changes in the JTable's size and modifying
      * the internal list model to match.
      */
-    class SelectionEventList extends MutationList {
+    class SelectionEventList extends WritableMutationList implements ListChangeListener, EventList {
         
         /**
          * Creates a new SelectionEventList that listens to changes from the
@@ -162,7 +162,24 @@ public class SelectionModelEventList {
         public int size() {
             return flagList.getCompressedList().size();
         }
-
+    
+        /**
+         * Gets the index into the source list for the object with the specified
+         * index in this list.
+         */
+        protected int getSourceIndex(int mutationIndex) {
+            int sourceIndex = flagList.getIndex(mutationIndex);
+            return sourceIndex;
+        }
+        
+        /**
+         * Tests if this mutation shall accept calls to <code>add()</code>,
+         * <code>remove()</code>, <code>set()</code> etc.
+         */
+        protected boolean isWritable() {
+            return true;
+        }
+    
         /**
          * Notifies this SelectionList about changes to its underlying list store.
          *
