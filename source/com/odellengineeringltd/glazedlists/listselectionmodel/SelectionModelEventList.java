@@ -280,7 +280,7 @@ public class SelectionModelEventList {
         private int leadSelectionIndex = -1;
         
         /** the selection mode defines characteristics of the selection */
-        private int selectionMode = MULTIPLE_INTERVAL_SELECTION;
+        private int selectionMode = MULTIPLE_INTERVAL_SELECTION_DEFENSIVE;
 
         /**
          * Notify listeners that the selection has changed.

@@ -11,18 +11,19 @@
 <p><strong>Change</strong> the list to add, update and remove items as the source list changes in real time. If your list contained rows from a dynamic database table, changes to the data would be reflected in your list.
 <p><strong>Display</strong> the list in a JTable or JComboBox. By using Glazed Lists' custom renderers, you can make your Java Swing application look great.
 
-<h1>How it works</h1>
+<h3>How it works</h3>
 <p>Glazed Lists uses <strong>event-driven lists</strong>. When a change to a list is made, it notifies all <code>ListChangeListeners</code> of the change. This is the same mechanism Swing uses to send events about user activity.
 <p>Start with a <strong>source list</strong>. A <code>BasicEventList</code> can contain all of the unsorted, unfiltered objects. It can be used just like an ArrayList, with all the <code>add()</code>, <code>remove()</code> and <code>get()</code> methods from the <code>List</code> interface.
 <p>Then add a <strong>mutation list</strong>. It provides a mutated view of the source list. When the source list is changed, the mutation list receives a notification to update itself. For example, the <code>SortedList</code> provides a sorted view of a source list. When an object is added to the source list it is simultaneously added to the SortedList in sorted order. The <code>FilterList</code> is a mutation list which views a subset of the source list.
 <p>Finally it is possible to create <strong>widgets</strong> to display the contents of an event list. A <code>ListTable</code> is a <code>JTable</code> that displays the contents of a list. When its source list is modified the <code>ListTable</code> is notified and updates the display table. There is also a <code>JComboBox</code> widget. It is straightforward to create custom Glazed List widgets for Swing, SWT or even Servlets.
 <p><img src="sourcesortfilterdisplay.gif" width="600" height="463" alt="source / sort / filter / display">
 
-<h1><a href="https://glazedlists.dev.java.net/files/documents/1073/1671/glazedlists.jar">Demo</a></h1>
-<p>Execute the Glazed Lists jar file for a simple demo.
+<h3>Demo</h3>
+<p>Execute the <a href="https://glazedlists.dev.java.net/files/documents/1073/1671/glazedlists.jar">Glazed Lists jar file</a> for a simple demo.
 <p><img src="/tutorial/part5/screenshot.gif" width="431" height="273" alt="Screenshot of Glazed Lists Demo">
-<h1><a href="tutorial/index.html">Glazed Lists Tutorial</a></h1>
-<p>A quick guide to get you up-and-running with Glazed Lists in your Java application.
+
+<h3>Glazed Lists Tutorial</h3>
+<p>A <a href="tutorial/index.html">quick guide</a> to get you up-and-running with Glazed Lists in your Java application.
 
 <br><br><br>
 </body></html>
