@@ -32,7 +32,6 @@ public class StringResource implements Resource {
      * Get a binary snapshot of this resource in its current state.
      */
     public Bufferlo toSnapshot() {
-        System.out.println("TO SNAPSHOT: " + value);
         Bufferlo result = new Bufferlo();
         result.write(value);
         return result;
@@ -51,7 +50,6 @@ public class StringResource implements Resource {
      */
     public void fromSnapshot(Bufferlo snapshot) {
         value = snapshot.toString();
-        System.out.println("FROM SNAPSHOT: " + value);
         notifyListeners();
     }
     
@@ -61,7 +59,6 @@ public class StringResource implements Resource {
      */
     public void update(Bufferlo delta) {
         fromSnapshot(delta);
-        System.out.println("UPDATE: " + value);
     }
     
     /**
@@ -69,7 +66,6 @@ public class StringResource implements Resource {
      * resource is modified.
      */
      public void addResourceListener(ResourceListener listener) {
-         System.out.println("ADDING LISTENER " + listener);
          listeners.add(listener);
      }
     
@@ -77,7 +73,6 @@ public class StringResource implements Resource {
      * Degregister the {@link ResourceListener} from receiving update events.
      */
     public void removeResourceListener(ResourceListener listener) {
-         System.out.println("REMOVING LISTENER " + listener);
         listeners.add(listener);
     }
     

@@ -57,32 +57,32 @@ public class PeerConnectionTest extends TestCase {
             StringResource clone = new StringResource();
             peer.subscribe(clone, resourceName, "localhost", serverPort);
             
-            try {
-                Object lock = new Object();
-                synchronized(lock) {
-                    lock.wait(1000);
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
+            waitFor(1000);
             
             stringResource.setValue("World O Hell");
             
-            try {
-                Object lock = new Object();
-                synchronized(lock) {
-                    lock.wait(1000);
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
+            waitFor(1000);
             
-            System.out.println("ORIG  VALUE: " + stringResource.getValue());
-            System.out.println("CLONE VALUE: " + clone.getValue());
+            assertEquals(stringResource.getValue(), clone.getValue());
 
         } catch(Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
+        }
+    }
+    
+    /**
+     * Waits for the specified duration of time. This hack method should be replaced
+     * with something else that uses notification.
+     */
+    private void waitFor(long time) {
+        try {
+            Object lock = new Object();
+            synchronized(lock) {
+                lock.wait(time);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
     
