@@ -88,7 +88,8 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         lookAndFeelResourcePathMap.put("Mac OS X Aqua", "aqua");
         lookAndFeelResourcePathMap.put("Metal/Steel", "metal");
         lookAndFeelResourcePathMap.put("Metal/Ocean", "ocean");
-        lookAndFeelResourcePathMap.put("Windows", "windows");
+        lookAndFeelResourcePathMap.put("Classic Windows", "windows");
+        lookAndFeelResourcePathMap.put("Windows XP", "windowsxp");
     }
 
     /** the icons to use for indicating sort order */
@@ -523,9 +524,9 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      * Loads the set of icons used to be consistent with the current UIManager.
      */
     private static void loadIcons() {
-        // look up the icon resource path based on the current look and feel
         String lookAndFeelName = UIManager.getLookAndFeel().getName();
         if(lookAndFeelName.equals("Metal")) lookAndFeelName = getMetalTheme();
+        else if(lookAndFeelName.equals("Windows")) lookAndFeelName = getWindowsTheme();
         String resourcePath = (String)lookAndFeelResourcePathMap.get(lookAndFeelName);
         if(resourcePath == null) resourcePath = defaultResourcePath;
 
@@ -559,6 +560,35 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
             e.printStackTrace();
             return "Metal/Steel";
         }
+    }
+
+    /**
+     * Workaround method to get the Windows theme, either "Windows Classic" or
+     * "Windows XP". This test for Windows XP is also an ugly hack because Swing's
+     * pluggable look-and-feel provides no alternative means for determining if
+     * the current theme is XP. For compatibility, the algorithm to determine if
+     * the style is XP is derived from similar code in the XPStyle class.
+     */
+    private static String getWindowsTheme() {
+        String classic = "Classic Windows";
+        String xp = "Windows XP";
+
+        // theme active property must be "Boolean.TRUE";
+        String themeActiveKey = "win.xpstyle.themeActive";
+        Boolean themeActive = (Boolean)java.awt.Toolkit.getDefaultToolkit().getDesktopProperty(themeActiveKey);
+        if(themeActive == null) return classic;
+        if(!themeActive.booleanValue()) return classic;
+
+        // no "swing.noxp" system property
+        String noXPProperty = "swing.noxp";
+        if(System.getProperty(noXPProperty) != null) return classic;
+
+        // l&f class must not be "WindowsClassicLookAndFeel"
+        String classicLnF = "com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel";
+        if(UIManager.getLookAndFeel().getClass().getName().equals(classicLnF)) return "Classic Windows";
+
+        // must be XP
+        return xp;
     }
 
     /**
