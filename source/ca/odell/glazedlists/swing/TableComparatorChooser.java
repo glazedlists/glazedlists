@@ -457,7 +457,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
             if(clickCount == 0) return COLUMN_UNSORTED;
 
             if(column == primaryColumn) {
-                if(isReverse()) {
+                if(!isReverse()) {
                     if(getComparatorIndex() == 0) return COLUMN_PRIMARY_SORTED;
                     else return COLUMN_PRIMARY_SORTED_ALTERNATE;
                 } else {
@@ -465,7 +465,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
                     else return COLUMN_PRIMARY_SORTED_ALTERNATE_REVERSE;
                 }
             } else {
-                if(isReverse()) {
+                if(!isReverse()) {
                     if(getComparatorIndex() == 0) return COLUMN_SECONDARY_SORTED;
                     else return COLUMN_SECONDARY_SORTED_ALTERNATE;
                 } else {
