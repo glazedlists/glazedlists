@@ -256,7 +256,7 @@ public final class CTPConnection {
             responseHeaders.put("Host", host);
             writeHeaders(responseHeaders);
             writer.write("\r\n");
-            writer.requestFlush();
+            writer.flush();
             
             // we're waiting for the response
             state = STATE_CLIENT_AWAITING_RESPONSE;
@@ -337,7 +337,7 @@ public final class CTPConnection {
             responseHeaders.put("Transfer-Encoding", "chunked");
             writeHeaders(responseHeaders);
             writer.write("\r\n");
-            writer.requestFlush();
+            writer.flush();
             
             // we're ready
             logger.info("Accepted connection from " + this);
@@ -380,7 +380,7 @@ public final class CTPConnection {
             
             // handle the response
             if(code == RESPONSE_OK) {
-                logger.info("Established connected to " + this);
+                logger.info("Established connection to " + this);
                 state = STATE_READY;
                 handler.connectionReady(this);
                 return true;

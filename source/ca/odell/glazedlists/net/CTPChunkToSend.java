@@ -49,7 +49,7 @@ class CTPChunkToSend implements CTPRunnable {
             connection.writer.write("\r\n");
             connection.writer.write(data);
             connection.writer.write("\r\n");
-            connection.writer.requestFlush();
+            connection.writer.flush();
             
         } catch(IOException e) {
             connection.close(e);

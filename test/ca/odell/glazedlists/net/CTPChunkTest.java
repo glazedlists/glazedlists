@@ -31,11 +31,6 @@ public class CTPChunkTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        System.err.println("");
-        System.err.println("");
-        handlerFactory = new StaticCTPHandlerFactory();
-        connectionManager = new CTPConnectionManager(handlerFactory);
-        connectionManager.start();
     }
 
     /**
@@ -49,6 +44,11 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testServerSendChunk() {
+        System.err.println("ServerSendChunk()");
+        handlerFactory = new StaticCTPHandlerFactory();
+        connectionManager = new CTPConnectionManager(handlerFactory);
+        connectionManager.start();
+
         try {
             StaticCTPHandler client = new StaticCTPHandler();
             client.addExpected("HELLO WORLD");
@@ -59,11 +59,10 @@ public class CTPChunkTest extends TestCase {
             handlerFactory.addHandler(server);
             connectionManager.connect("localhost", client);
             
-            client.waitForCompletion((long)1000);
-            server.waitForCompletion((long)1000);
-            
-            assertTrue("Server did not complete", server.isDone());
-            assertTrue("Client did not complete", client.isDone());
+            client.assertComplete((long)1000);
+            client.close();
+            server.assertComplete((long)1000);
+            server.close();
         } finally {
             connectionManager.stop();
         }
@@ -75,6 +74,11 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testClientSendChunk() {
+        System.err.println("ClientSendChunk()");
+        handlerFactory = new StaticCTPHandlerFactory();
+        connectionManager = new CTPConnectionManager(handlerFactory);
+        connectionManager.start();
+
         try {
             StaticCTPHandler client = new StaticCTPHandler();
             client.addEnqueued("WORLD O HELL");
@@ -85,11 +89,10 @@ public class CTPChunkTest extends TestCase {
             handlerFactory.addHandler(server);
             connectionManager.connect("localhost", client);
             
-            client.waitForCompletion((long)1000);
-            server.waitForCompletion((long)1000);
-            
-            assertTrue("Server did not complete", server.isDone());
-            assertTrue("Client did not complete", client.isDone());
+            client.assertComplete((long)1000);
+            server.assertComplete((long)1000);
+            client.close();
+            server.close();
         } finally {
             connectionManager.stop();
         }
@@ -97,13 +100,17 @@ public class CTPChunkTest extends TestCase {
 
 
     /**
-     * Verifies that chunks can be sent from the client to the server. This simply
-     * sends data to itself.
+     * Verifies that large chunks can be sent.
      */
     public void testSendLargeString() {
+        System.err.println("sendLargeString()");
+        handlerFactory = new StaticCTPHandlerFactory();
+        connectionManager = new CTPConnectionManager(handlerFactory);
+        connectionManager.start();
+
         try {
-            String clientSendData = randomString(2000);
-            String serverSendData = randomString(3000);
+            String clientSendData = randomString(100000);
+            String serverSendData = randomString(200000);
             
             StaticCTPHandler client = new StaticCTPHandler();
             client.addEnqueued(clientSendData);
@@ -116,11 +123,46 @@ public class CTPChunkTest extends TestCase {
             handlerFactory.addHandler(server);
             connectionManager.connect("localhost", client);
             
-            client.waitForCompletion((long)1000);
-            server.waitForCompletion((long)1000);
+            client.assertComplete((long)1000);
+            client.close();
+            server.assertComplete((long)1000);
+            server.close();
+        } finally {
+            connectionManager.stop();
+        }
+    }
+    
+    /**
+     * Verifies that chunks can be sent from the client to the server. This simply
+     * sends data to itself.
+     */
+    public void testManyStrings() {
+        System.err.println("manyStrings()");
+        handlerFactory = new StaticCTPHandlerFactory();
+        connectionManager = new CTPConnectionManager(handlerFactory);
+        connectionManager.start();
+
+        try {
+            StaticCTPHandler client = new StaticCTPHandler();
+            StaticCTPHandler server = new StaticCTPHandler();
+
+            for(int i = 0; i < 100; i++) {
+                String clientSendData = randomString(2000);
+                client.addEnqueued(clientSendData);
+                server.addExpected(clientSendData);
+                
+                String serverSendData = randomString(3000);
+                client.addExpected(serverSendData);
+                server.addEnqueued(serverSendData);
+            }
             
-            assertTrue("Server did not complete", server.isDone());
-            assertTrue("Client did not complete", client.isDone());
+            handlerFactory.addHandler(server);
+            connectionManager.connect("localhost", client);
+            
+            client.assertComplete((long)1000);
+            client.close();
+            server.assertComplete((long)1000);
+            server.close();
         } finally {
             connectionManager.stop();
         }
@@ -148,8 +190,12 @@ public class CTPChunkTest extends TestCase {
     public static void main(String[] args) {
         
         CTPChunkTest test = new CTPChunkTest();
-        test.setUp();
-        test.testClientSendChunk();
-        test.tearDown();
+        while(true) {
+            test.testClientSendChunk();
+            System.out.println("");
+            System.out.println("");
+            System.out.println("");
+            System.out.println("");
+        }
     }
 }

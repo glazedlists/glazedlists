@@ -37,8 +37,13 @@ class CTPShutdown implements CTPRunnable {
         for(Iterator k = selector.keys().iterator(); k.hasNext(); ) {
             SelectionKey key = (SelectionKey)k.next();
 
+            // close an invalid connection
+            if(!key.isValid()) {
+                CTPConnection connection = (CTPConnection)key.attachment();
+                connection.close(new IOException("Connection closed"));
+
             // close the server socket
-            if((key.interestOps() & SelectionKey.OP_ACCEPT) != 0) {
+            } else if((key.interestOps() & SelectionKey.OP_ACCEPT) != 0) {
                 try {
                     ServerSocketChannel server = (ServerSocketChannel)key.channel();
                     server.close();

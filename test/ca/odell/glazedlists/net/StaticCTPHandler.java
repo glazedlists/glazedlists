@@ -28,6 +28,8 @@ class StaticCTPHandler implements CTPHandler {
     /** whether this connection has disconnected */
     private boolean closed = false;
     
+    /** the connection being handled */
+    private CTPConnection connection = null;
     
     /**
      * Add expected incoming data.
@@ -49,7 +51,8 @@ class StaticCTPHandler implements CTPHandler {
     public synchronized void connectionReady(CTPConnection source) {
         if(ready) throw new IllegalStateException("Connection already ready");
         ready = true;
-        handlePendingTasks(source);
+        this.connection = source;
+        handlePendingTasks();
     }
     
     /**
@@ -63,7 +66,7 @@ class StaticCTPHandler implements CTPHandler {
         int remain = expected.consume(data);
         if(remain == 0) {
             tasks.remove(0);
-            handlePendingTasks(source);
+            handlePendingTasks();
         }
     }
     
@@ -73,40 +76,46 @@ class StaticCTPHandler implements CTPHandler {
     public synchronized void connectionClosed(CTPConnection source, Exception reason) {
         if(closed) throw new IllegalStateException("Connection already closed");
         closed = true;
-        notifyAll();
+        connection = null;
+        if(!tasks.isEmpty()) throw new IllegalStateException("Closed prematurely! " + tasks.size() + " Pending tasks " + tasks + ", reason " + reason);
     }
     
     /**
      * Handle pending tasks that can be performed immediately.
      */
-    private void handlePendingTasks(CTPConnection connection) {
+    private void handlePendingTasks() {
         while(tasks.size() > 0 && tasks.get(0) instanceof Enqueued) {
             Enqueued enqueued = (Enqueued)tasks.remove(0);
             connection.sendChunk(enqueued.getData());
         }
         if(tasks.isEmpty()) {
-            connection.close();
+            notifyAll();
         }
     }
     
     /**
-     * Whether all tasks have completed.
+     * Close this connection.
      */
-    public synchronized boolean isDone() {
-        return (tasks.isEmpty() && closed);
-    }
-    
-    /**
-     * Waits for this connection to be completed.
-     */
-    public synchronized void waitForCompletion(long timeout) {
+    public synchronized void close() {
         if(closed) return;
-        try {
-            wait(timeout);
-        } catch(InterruptedException e) {
-            throw new RuntimeException(e);
+        if(!ready) throw new IllegalStateException("Connection not established");
+        connection.close();
+    }
+    
+    /**
+     * Ensures that this handler has completed its tasks. If it has not, a RuntimeException
+     * shall be thrown.
+     */
+    public synchronized void assertComplete(long timeout) {
+        if(!tasks.isEmpty()) {
+            try {
+                wait(timeout);
+            } catch(InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
-        if(!closed) throw new IllegalStateException("Complete timed out without close");
+        
+        if(!tasks.isEmpty()) throw new IllegalStateException(tasks.size() + " uncompleted tasks " + tasks);
     }
 }
 

@@ -107,7 +107,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
     }
     
     /**
-     * Relative put method  (optional operation).
+     * Relative put method.
      *
      * Writes the given byte into this buffer at the current 
      * position, and then increments the position.
@@ -132,6 +132,16 @@ public class ResizableByteBuffer extends AbstractBuffer {
         byteBuffers.clear();
         byteBuffers.add(newBuffer);
         assert(consistentState());
+    }
+    
+    /**
+     * Gets the underlying ByteBuffer.
+     */
+    public ByteBuffer getBuffer() {
+        weld();
+        ByteBuffer result = getBufferAt(position);
+        result.limit(limit);
+        return result;
     }
     
     /**

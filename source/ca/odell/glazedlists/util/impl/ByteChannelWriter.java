@@ -29,8 +29,11 @@ public class ByteChannelWriter {
     private SocketChannel channel;
     
     /** the ResizableByteBuffer to write to */
-    private int initialBufferSize = 256;
-    private ResizableByteBuffer buffer = new ResizableByteBuffer(initialBufferSize);
+    private static final int INITIAL_BUFFER_SIZE = 256;
+    private ResizableByteBuffer buffer = new ResizableByteBuffer(INITIAL_BUFFER_SIZE);
+    
+    /** the ByteBuffers that are pending writes */
+    private List pendingBuffers = new ArrayList();
     
     /**
      * Create a writer for the specified channel.
@@ -49,49 +52,16 @@ public class ByteChannelWriter {
     public void write(String text) throws IOException {
         byte[] textAsBytes = text.getBytes("US-ASCII");
         ByteBuffer textAsByteBuffer = ByteBuffer.wrap(textAsBytes);
-        write(textAsByteBuffer);
+        pendingBuffers.add(textAsByteBuffer.duplicate());
     }
     
     /**
-     * Writes the specified ByteBuffer.
-     *
-     * <p>This write is performed in two stages. First all data is written directly
-     * to the channel until the channel is full. Then remaining data is copied to
-     * a local buffer to be written later.
+     * Writes the specified ByteBuffer. The specified buffer is not written
+     * immediately so it is an error to modify that buffer. Once {@link #flush()}
+     * has been called, the buffer may be modified. 
      */
     public void write(ByteBuffer source) throws IOException {
-        // write local bytes first to maintain sequence
-        flush();
-
-        // write all we can directly to the channel
-        if(!buffer.hasRemaining()) {
-            while(source.hasRemaining()) {
-                int written = channel.write(source);
-                if(written == 0) break;
-            }
-        }
-        
-        // if we've written all we need to, we're done
-        if(!source.hasRemaining()) return;
-        
-        // resize the local buffer as necessary
-        if(buffer.remaining() < source.remaining()) {
-            buffer.grow(buffer.capacity() + source.remaining());
-        }
-        
-        // write the rest to local buffers
-        buffer.put(source);
-        requestFlush();
-    }
-    
-    /**
-     * Marks this writer to flush when the channel can be written.
-     */
-    public void requestFlush() {
-        // mark this needing a flush
-        if(buffer.position() > 0) {
-            selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
-        }
+        pendingBuffers.add(source.duplicate());
     }
     
     /**
@@ -103,33 +73,42 @@ public class ByteChannelWriter {
      * @return true if all remaining data has been flushed.
      */
     public boolean flush() throws IOException {
+        // verify we can still write
+        if(!selectionKey.isValid()) throw new IOException("Key cancelled");
+        
+        // prepare the data to write
+        long totalBytes = 0;
+        ByteBuffer[] buffers = new ByteBuffer[1 + pendingBuffers.size()];
         buffer.flip();
-        while(true) {
-            // verify we can still write
-            if(!selectionKey.isValid()) throw new IOException("Key cancelled");
-            
-            // if we have nothing more to write
-            if(!buffer.hasRemaining()) {
-                selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
-                buffer.clear();
-                return true;
-            }
-
-            // write some bytes
-            int written = buffer.push(channel);
-
-            // the channel is full so we cannot write anything more
-            if(written == 0) {
-                buffer.compact();
-                return false;
+        buffers[0] = buffer.getBuffer();
+        totalBytes += buffers[0].remaining();
+        for(int b = 0; b < pendingBuffers.size(); b++) {
+            buffers[b + 1] = (ByteBuffer)pendingBuffers.get(b);
+            totalBytes += buffers[b + 1].remaining();
+        }
+        
+        // write what we can
+        long written = channel.write(buffers);
+        long leftOver = totalBytes - written;
+        
+        // copy the unwritten buffers into the first buffer
+        buffer.position(Math.min((int)written, buffer.limit()));
+        buffer.compact();
+        if(leftOver > 0) {
+            buffer.grow(buffer.capacity() + (int)leftOver);
+            for(int b = 0; b < pendingBuffers.size(); b++) {
+                buffer.put((ByteBuffer)pendingBuffers.get(b));
             }
         }
-    }
-    
-    /**
-     * Grow the local buffer to the specified minimum size.
-     */
-    public void growLocalBuffer(int minsize) throws IOException {
-        throw new IOException("Failed to grow local write buffer to " + minsize + " bytes");
+        pendingBuffers.clear();
+        
+        // if we have nothing more to write
+        if(leftOver == 0) {
+            selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
+            return true;
+        } else {
+            selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
+            return false;
+        }
     }
 }

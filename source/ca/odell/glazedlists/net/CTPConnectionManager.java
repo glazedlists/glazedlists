@@ -180,7 +180,7 @@ public final class CTPConnectionManager implements Runnable {
             CTPBlockingRunnable blockingRunnable = new CTPBlockingRunnable(runnable);
             synchronized(blockingRunnable) {
                 // start the event
-                synchronized(pendingRunnables) {
+                synchronized(this) {
                     pendingRunnables.add(blockingRunnable);
                 }
                 wakeUp();
