@@ -19,6 +19,8 @@ import java.util.logging.*;
 
 /**
  * Sends a chunk of data on the NIO thread.
+ *
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 class SendChunk implements Runnable {
      

@@ -11,6 +11,8 @@ import java.nio.*;
 
 /**
  * The CTPHandlerFactory provides a factory to handle incoming connections.
+ *
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public interface CTPHandlerFactory {
     

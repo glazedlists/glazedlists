@@ -186,4 +186,22 @@
     <fail message="Tests failed. Check test output." if="test.failed"/>
   </target>
 
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     PMD
+     Programming Mistake Detector, available free at http://pmd.sourceforge.net/
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+   
+  <target name="pmd">
+    <mkdir dir="docs"/>
+    <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask"/>
+    <pmd rulesetfiles="rulesets/strictexception.xml,rulesets/basic.xml,rulesets/design.xml,rulesets/imports.xml,rulesets/unusedcode.xml">
+      <formatter type="html" toFile="docs/pmd.html"/>
+        <fileset dir="source/">
+          <include name="**/*.java"/>
+      </fileset>
+    </pmd>
+  </target>
+
+  
 </project>

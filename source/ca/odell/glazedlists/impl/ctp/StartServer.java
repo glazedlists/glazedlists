@@ -18,6 +18,8 @@ import java.util.logging.*;
 
 /**
  * A task that starts the CTP Connection manager.
+ *
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 class StartServer implements Runnable {
     

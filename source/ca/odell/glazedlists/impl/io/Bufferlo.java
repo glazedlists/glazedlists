@@ -57,12 +57,37 @@ public class Bufferlo implements CharSequence {
     }
     
     /** 
+     * Populate this Bufferlo with the data from the specified channel, up to
+     * 
+     * @param bytesRequested the maximum number of bytes to read.
+     */
+    public int readFromChannel(ReadableByteChannel source, int bytesRequested) throws IOException {
+        int totalRead = 0;
+        while(totalRead < bytesRequested) {
+            // we need a new place to write into
+            ByteBuffer writeInto = getWriteIntoBuffer();
+            int bytesRemaining = bytesRequested - totalRead;
+            int maxBytesToRead = Math.min(bytesRemaining, writeInto.remaining());
+            writeInto.limit(writeInto.position() + maxBytesToRead);
+            
+            // read in
+            int bytesRead = source.read(writeInto);
+            doneWriting();
+
+            // figure out what to do next
+            if(bytesRead < 0 && totalRead == 0) return bytesRead;
+            else if(bytesRead <= 0) return totalRead;
+            else totalRead += bytesRead;
+        }
+        
+        // we've read all we want
+        return totalRead;
+    }
+    
+    /**
      * Write the content of this Bufferlo to the specified channel.
      */
-    public long writeToChannel(GatheringByteChannel target, SelectionKey selectionKey) throws IOException {
-        // verify we can still write
-        if(!selectionKey.isValid()) throw new IOException("Key cancelled");
-        
+    public long writeToChannel(GatheringByteChannel target) throws IOException {
         // nothing to write
         if(length() == 0) return 0;
         
@@ -94,6 +119,21 @@ public class Bufferlo implements CharSequence {
                 buffer.position(buffer.limit());
             }
         }
+        
+        // return the count of bytes written
+        return totalWritten;
+    }
+    
+    /** 
+     * Write the content of this Bufferlo to the specified channel, updating the
+     * specified {@link SelectionKey} as necessary.
+     */
+    public long writeToChannel(GatheringByteChannel target, SelectionKey selectionKey) throws IOException {
+        // verify we can still write
+        if(!selectionKey.isValid()) throw new IOException("Key cancelled");
+        
+        // do the write
+        long totalWritten = writeToChannel(target);
         
         // adjust the key based on whether we have leftovers 
         if(length() > 0) {

@@ -23,6 +23,8 @@ import java.util.logging.*;
  * <p>Each instance of this class owns a single thread which is used to perform
  * all read and write operations on all connections. A pool of other threads are
  * used to notify the handlers of the data and status of a connection.
+ *
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class CTPConnectionManager implements NIOServer {
     
