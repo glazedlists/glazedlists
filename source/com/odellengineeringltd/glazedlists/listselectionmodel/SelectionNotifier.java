@@ -30,13 +30,13 @@ public class SelectionNotifier implements ListChangeListener {
     private ArrayList selectionListeners = new ArrayList();
 
     /** the list that knows what is selected */
-    private SelectionList source;
+    private EventList source;
     
     /**
      * Create a new SelectionNotifier that notifies listeners of changes to
      * the specified SelectionList.
      */
-    public SelectionNotifier(SelectionList source) {
+    public SelectionNotifier(EventList source) {
         this.source = source;
         source.addListChangeListener(this);
     }

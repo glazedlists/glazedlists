@@ -19,6 +19,7 @@ import java.awt.event.*;
 import java.awt.Point;
 // tables for displaying lists
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 // this class uses tables for displaying message lists
@@ -53,8 +54,11 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     /** the complete list of messages before filters */
     protected EventList source;
 
-    /** whom to notify of selection changes */
-    private SelectionList selectionList;
+    /** selection managent is all by a SelectionModelEventList */
+    private SelectionModelEventList selectionModelEventList;
+    private EventList selectionList;
+    private ListSelectionModel listSelectionModel;
+    
     private SelectionNotifier selectionNotifier;
     
     /** Specifies how to render table headers and sort */
@@ -74,24 +78,24 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         this.source = source;
         tableModelEvent = new MutableTableModelEvent(this);
         this.tableFormat = tableFormat;
-        constructWidgets();
-        
-        selectionList = new SelectionList(source, table.getSelectionModel());
+
+        // create the selection model
+        selectionModelEventList = new SelectionModelEventList(source);
+        selectionList = selectionModelEventList.getEventList();
+        listSelectionModel = selectionModelEventList.getListSelectionModel();
         selectionNotifier = new SelectionNotifier(selectionList);
-        source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
-    }
-    
-    
-    /**
-     * Construct all widgets. Add action listeners to the widgets and
-     * get them generally ready for display.
-     */
-    private void constructWidgets() {
+
+        // construct widgets
         table = new JTable(this);
+        table.setSelectionModel(listSelectionModel);
         tableFormat.configureTable(table);
         tableScrollPane = new JScrollPane(table);
+        
+        // prepare listeners
+        source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
         table.addMouseListener(this);
     }
+    
     
     /**
      * Gets an event list that contains the current selection in
@@ -106,7 +110,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * being modified on another thread.
      */
     public EventList getSelectionList() {
-        return selectionList;
+        return selectionModelEventList.getEventList();
     }
     
     /**

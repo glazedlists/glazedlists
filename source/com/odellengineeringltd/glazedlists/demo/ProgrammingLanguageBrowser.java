@@ -9,6 +9,7 @@ package com.odellengineeringltd.glazedlists.demo;
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.jtable.*;
 import com.odellengineeringltd.glazedlists.util.*;
+import com.odellengineeringltd.glazedlists.test.*;
 import javax.swing.*;
 import java.awt.*;
 
@@ -61,6 +62,14 @@ public class ProgrammingLanguageBrowser {
         frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
         frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
         frame.getContentPane().add(listTable.getTableScrollPane(), new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+        
+        // add a combo box to dynamically change selection type
+        // useful for verifying behaviour of fix for bug 15
+        /*
+        JComboBox selectionType = new SelectionModeComboBox(listTable).getComboBox();
+        frame.getContentPane().add(selectionType, new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
+        */
+
         frame.setSize(640, 480);
         frame.show();
     }

@@ -30,6 +30,10 @@ import javax.swing.event.*;
  * elements which are selected. This is used to map indexes between the
  * selection subset and the full source list.
  *
+ * @deprecated As of February 15, 2004, this class has been replaced by
+ *      {@link SelectionModelEventList}. This class should be removed from the
+ *      Glazed Lists source tree before August 15, 2004.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class SelectionList extends MutationList implements ListSelectionListener {
