@@ -57,7 +57,7 @@ public class TableComparatorChooser {
 
     /** listen for table and mouse events */
     private Listener listener = new Listener();
-    
+
     /** the table being sorted */
     private JTable table;
     private EventTableModel eventTableModel;
@@ -113,7 +113,7 @@ public class TableComparatorChooser {
 
     /** whether to support sorting on single or multiple columns */
     private boolean multipleColumnSort;
-    
+
     /** listeners to sort change events */
     private ActionListener sortListener = null;
 
@@ -151,7 +151,7 @@ public class TableComparatorChooser {
         table.getTableHeader().addMouseListener(listener);
         table.getModel().addTableModelListener(listener);
     }
-    
+
     /**
      * When the column model is changed, this resets the column clicks and
      * comparator list for each column.
@@ -367,8 +367,8 @@ public class TableComparatorChooser {
                 Comparator comparator = columnClickTracker.getComparator();
                 comparators.add(comparator);
             }
-            ComparatorChain comparatorChain = new ComparatorChain(comparators);
-    
+            ComparatorChain comparatorChain = (ComparatorChain)ComparatorFactory.chain(comparators);
+
             // select the new comparator
             sortedList.getReadWriteLock().writeLock().lock();
             try {
@@ -382,7 +382,7 @@ public class TableComparatorChooser {
         // force the table header to redraw itself
         table.getTableHeader().revalidate();
         table.getTableHeader().repaint();
-        
+
         // notify interested listeners that the sorting has changed
         if(sortListener != null) sortListener.actionPerformed(new ActionEvent(this, 0, "sort"));
     }
@@ -405,7 +405,7 @@ public class TableComparatorChooser {
     public Comparator createComparatorForElement(Comparator comparatorForColumn, int column) {
         return new TableColumnComparator(eventTableModel.getTableFormat(), column, comparatorForColumn);
     }
-    
+
     /**
      * Determines if the specified mouse event shall be handled by this
      * {@link TableComparatorChooser}. The default implementation handles only clicks
@@ -415,7 +415,7 @@ public class TableComparatorChooser {
     protected boolean isSortingMouseEvent(MouseEvent e) {
         return (e.getButton() == MouseEvent.BUTTON1);
     }
-    
+
     /**
      * Nested Listener class handles table events and mouse events.
      */
@@ -431,7 +431,7 @@ public class TableComparatorChooser {
          */
         public void mouseClicked(MouseEvent e) {
             if(!isSortingMouseEvent(e)) return;
-            
+
             TableColumnModel columnModel = table.getColumnModel();
             int viewColumn = columnModel.getColumnIndexAtX(e.getX());
             int column = table.convertColumnIndexToModel(viewColumn);
@@ -440,7 +440,7 @@ public class TableComparatorChooser {
                 columnClicked(column, clicks);
             }
         }
-        
+
         /**
          * When the number of columns changes in the table, we need to
          * clear the comparators and columns.
@@ -450,7 +450,7 @@ public class TableComparatorChooser {
             && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
                 rebuildColumns();
             }
-            
+
             // if the comparator has changed
             ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().lock();
             try {
@@ -558,7 +558,7 @@ public class TableComparatorChooser {
          */
         public Comparator getComparator() {
             Comparator comparator = (Comparator)comparators.get(getComparatorIndex());
-            if(isReverse()) comparator = new ReverseComparator(comparator);
+            if(isReverse()) comparator = ComparatorFactory.reverse(comparator);
             return comparator;
         }
 
@@ -725,7 +725,7 @@ class TableColumnComparator implements Comparator {
      * column using the specified table format.
      */
     public TableColumnComparator(TableFormat tableFormat, int column) {
-        this(tableFormat, column, new ComparableComparator());
+        this(tableFormat, column, ComparatorFactory.comparable());
     }
 
     /**

@@ -315,9 +315,9 @@ public class SortedListTest extends TestCase {
      */
     public void testUpdateEventsFired() {
         // prepare a unique list with simple data
-        UniqueList uniqueSource = new UniqueList(unsortedList, new ReverseComparator());
+        UniqueList uniqueSource = new UniqueList(unsortedList, ComparatorFactory.reverse());
         sortedList = new SortedList(uniqueSource);
-        SortedSet data = new TreeSet(new ReverseComparator());
+        SortedSet data = new TreeSet(ComparatorFactory.reverse());
         data.add("A");
         data.add("B");
         data.add("C");
@@ -433,7 +433,7 @@ public class SortedListTest extends TestCase {
         source.add("AA");
 
         // create a sorted view of that list
-        SortedList sorted = new SortedList(source, new ReverseComparator());
+        SortedList sorted = new SortedList(source, ComparatorFactory.reverse());
 
         // create a consistency test
         List consistencyTestList = new ArrayList();
@@ -447,7 +447,7 @@ public class SortedListTest extends TestCase {
         source.setComparator(null);
         assertEquals(consistencyTestList, sorted);
     }
-    
+
     /**
      * Verify that the sorted list works with no compatator.
      */
@@ -456,7 +456,7 @@ public class SortedListTest extends TestCase {
         consistencyTestList.add("A");
         consistencyTestList.add("C");
         consistencyTestList.add("B");
-        
+
         SortedList sorted = new SortedList(new BasicEventList(), null);
         sorted.addAll(consistencyTestList);
         assertEquals(consistencyTestList, sorted);
@@ -487,7 +487,7 @@ public class SortedListTest extends TestCase {
         unsortedList.add(4, "eerie"); // a b c d e f g h
         assertEquals(unsortedList, sortedList);
     }
-    
+
     /**
      * Compares Strings by their length.
      */
@@ -516,7 +516,7 @@ public class SortedListTest extends TestCase {
      * normally.
      */
     class ReverseStringComparator implements Comparator {
-        public ComparableComparator delegate = new ComparableComparator();
+        public ComparableComparator delegate = (ComparableComparator)ComparatorFactory.comparable();
 
         public int compare(Object a, Object b) {
             String aString = (String)a;

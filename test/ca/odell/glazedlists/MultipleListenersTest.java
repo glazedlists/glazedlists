@@ -44,25 +44,25 @@ public class MultipleListenersTest extends TestCase {
     public void testMultipleListeners() {
         BasicEventList root = new BasicEventList();
         List control = new ArrayList();
-        
+
         // add 1000 elements to start
         for(int i = 0; i < 1000; i++) {
             Integer value = new Integer(random.nextInt(100));
             root.add(value);
             control.add(value);
         }
-        
+
         // create sorted and filtered derivatives
-        Comparator comparator = new ComparableComparator();
+        Comparator comparator = ComparatorFactory.comparable();
         SortedList sorted = new SortedList(root, comparator);
         IntegerSizeFilterList filtered = new IntegerSizeFilterList(root, 50);
-        
+
         // create 2nd level derivatives
         SortedList sortedSorted = new SortedList(sorted, comparator);
         IntegerSizeFilterList sortedFiltered = new IntegerSizeFilterList(sorted, 75);
         SortedList filteredSorted = new SortedList(filtered, comparator);
         IntegerSizeFilterList filteredFiltered = new IntegerSizeFilterList(filtered, 75);
-        
+
         // repeatedly make updates and verify the derivates keep up
         for(int i = 0; i < 30; i++) {
             // add 100 elements
@@ -71,16 +71,16 @@ public class MultipleListenersTest extends TestCase {
                 root.add(value);
                 control.add(value);
             }
-            
+
             // verify the base list is correct
             assertEquals(root, control);
-            
+
             // verify that the sorted list is correct
             List sortedControl = new ArrayList();
             sortedControl.addAll(control);
             Collections.sort(sortedControl, sorted.getComparator());
             assertEquals(sortedControl, sorted);
-            
+
             // verify that the filtered list is correct
             List filteredControl = new ArrayList();
             for(int j = 0; j < control.size(); j++) {
@@ -89,15 +89,15 @@ public class MultipleListenersTest extends TestCase {
                 }
             }
             assertEquals(filteredControl, filtered);
-            
+
             // adjust the sorter
             if(comparator instanceof ReverseComparator) {
-                comparator = new ComparableComparator();
+                comparator = ComparatorFactory.comparable();
             } else {
-                comparator = new ReverseComparator(comparator);
+                comparator = ComparatorFactory.reverse(comparator);
             }
             sorted.setComparator(comparator);
-            
+
             // adjust the filter
             filtered.setThreshhold(random.nextInt(100));
         }
@@ -122,7 +122,7 @@ public class MultipleListenersTest extends TestCase {
             return (integer.intValue() >= threshhold);
         }
     }
-    
+
     /**
      * The main method simply provides access to this class outside of JUnit.
      */

@@ -20,10 +20,10 @@ import java.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class IndexedTreeTest extends TestCase {
-    
+
     /** for randomly choosing list indicies */
     private Random random = new Random();
-    
+
     /**
      * Prepare for the test.
      */
@@ -43,13 +43,13 @@ public class IndexedTreeTest extends TestCase {
     public void testListOperations() {
         IndexedTree indexedTree = new IndexedTree();
         List controlList = new ArrayList();
-        
+
         // apply various operations to both the list and the tree
         for(int i = 0; i < 30; i++) {
             int operation = random.nextInt(4);
             int index = controlList.isEmpty() ? 0 : random.nextInt(controlList.size());
             Object value = new Integer(random.nextInt(10));
-            
+
             if(operation <= 1 || controlList.isEmpty()) {
                 indexedTree.addByNode(index, value);
                 controlList.add(index, value);
@@ -58,14 +58,14 @@ public class IndexedTreeTest extends TestCase {
                 controlList.remove(index);
             }
         }
-        
+
         // create a list from the elements of the IndexedTree
         List indexedTreeList = new ArrayList();
         for(Iterator i = indexedTree.iterator(); i.hasNext(); ) {
             IndexedTreeNode node = (IndexedTreeNode)i.next();
             indexedTreeList.add(node.getValue());
         }
-        
+
         // verify the lists are equal
         assertEquals(controlList, indexedTreeList);
     }
@@ -76,14 +76,14 @@ public class IndexedTreeTest extends TestCase {
      * entries that have the same value.
      */
     public void testEqualValues() {
-        IndexedTree indexedTree = new IndexedTree(new ComparableComparator());
-        
+        IndexedTree indexedTree = new IndexedTree(ComparatorFactory.comparable());
+
         int ACount = 0;
         int BCount = 0;
         int CCount = 0;
         int DCount = 0;
         int ECount = 0;
-        
+
         // populate the list with 100 B's and 100 D's
         while(BCount < 100 || DCount < 100) {
             indexedTree.addByNode("B");
@@ -91,11 +91,11 @@ public class IndexedTreeTest extends TestCase {
             indexedTree.addByNode("D");
             DCount++;
         }
-        
+
         // add 100 A's, 100 C's and 100 E's in random order
         while(ACount < 100 || CCount < 100 || ECount < 100) {
             int letter = random.nextInt(3);
-            
+
             if(letter == 0 && ACount < 100) {
                 indexedTree.addByNode("A");
                 ACount++;
@@ -107,11 +107,11 @@ public class IndexedTreeTest extends TestCase {
                 ECount++;
             }
         }
-        
+
         // remove the A's, C's and E's in random order
         while(ACount > 0 || CCount > 0 || ECount > 0) {
             int letter = random.nextInt(3);
-            
+
             if(letter == 0 && ACount > 0) {
                 indexedTree.getNode("A").removeFromTree();
                 ACount--;
@@ -123,7 +123,7 @@ public class IndexedTreeTest extends TestCase {
                 ECount--;
             }
         }
-        
+
         // verify the list contains only the original 100 Bs and 100 Ds
         List indexedTreeList = new ArrayList();
         for(Iterator i = indexedTree.iterator(); i.hasNext(); ) {

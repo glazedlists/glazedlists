@@ -49,13 +49,13 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
     /** the index of an update event that has not yet been added to the change */
     private int pendingUpdateIndex = -1;
-    
+
     /** the index of the add event that was most recently added to the change */
     private int lastInsertIndex = -1;
-    
+
     /** whether changes in an objects count should be fired as events */
     private boolean includeCountChangeEvents = false;
-    
+
     /** for tracking which neighbours of an element are equal */
     private static final int NEIGHBOUR_LEFT = -1;
     private static final int NEIGHBOUR_NONE = 0;
@@ -100,7 +100,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * must impelement {@link Comparable}.
      */
     public UniqueList(EventList source) {
-        this(source, new ComparableComparator());
+        this(source, ComparatorFactory.comparable());
     }
 
     /** {@inheritDoc} */
@@ -201,13 +201,13 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 if(updated == DUPLICATE) oldNeighbourSide = NEIGHBOUR_LEFT;
                 else if(updated == TEMP_UNIQUE) oldNeighbourSide = NEIGHBOUR_RIGHT;
                 else if(updated == UNIQUE) oldNeighbourSide = NEIGHBOUR_NONE;
-                
+
                 // get the current state, the side where a duplicate value is found
                 int newNeighbourSide = handleOldNeighbour(changeIndex);
 
                 // fire events
                 int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
-                
+
                 // we're unique now
                 if(newNeighbourSide == NEIGHBOUR_NONE) {
                     if(oldNeighbourSide == NEIGHBOUR_NONE) {
@@ -219,7 +219,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                         enqueueEvent(ListEvent.INSERT, compressedIndex, true);
                         enqueueEvent(ListEvent.UPDATE, compressedIndex+1, false);
                     }
-                    
+
                 // we are a duplicate of a previous element
                 } else if(newNeighbourSide == NEIGHBOUR_LEFT) {
                     if(oldNeighbourSide == NEIGHBOUR_NONE) {
@@ -231,7 +231,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
                         if(compressedIndex+1 < duplicatesList.getCompressedList().size()) enqueueEvent(ListEvent.UPDATE, compressedIndex+1, false);
                     }
-                    
+
                 // we have a duplicate that follows
                 } else if(newNeighbourSide == NEIGHBOUR_RIGHT) {
                     if(oldNeighbourSide == NEIGHBOUR_NONE) {
@@ -244,7 +244,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
                     }
                 }
-                
+
             // deletes can result in UPDATE or DELETE events
             } else if(changeType == ListEvent.DELETE) {
                 Object deleted = removedValues.removeFirst();
@@ -307,7 +307,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             }
         }
     }
-    
+
     /**
      * Appends a change to the ListEventAssembler. If the change is an UPDATE,
      * the index is queued and not added to the change event immediately. This
@@ -327,16 +327,16 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 updates.addChange(ListEvent.UPDATE, pendingUpdateIndex);
             }
             pendingUpdateIndex = -1;
-            
+
             // queue update events
             if(type == ListEvent.UPDATE && index != lastInsertIndex) {
                 pendingUpdateIndex = index;
-                
+
             // fire insert events immediately and save the inserted index
             } else if(type == ListEvent.INSERT) {
                 lastInsertIndex = index;
                 updates.addChange(type, index);
-                
+
             // fire remove events immediately
             } else if(type == ListEvent.DELETE) {
                 updates.addChange(type, index);

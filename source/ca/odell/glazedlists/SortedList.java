@@ -28,7 +28,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
- * 
+ *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
@@ -36,7 +36,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class SortedList extends TransformedList {
-    
+
     /** a map from the unsorted index to the sorted index */
     private IndexedTree unsorted = null;
     /** a map from the sorted index to the unsorted index */
@@ -52,7 +52,7 @@ public final class SortedList extends TransformedList {
      * or a {@link ClassCastException} will be thrown.
      */
     public SortedList(EventList source) {
-        this(source, new ComparableComparator());
+        this(source, ComparatorFactory.comparable());
     }
 
     /**
@@ -98,7 +98,7 @@ public final class SortedList extends TransformedList {
         // the unsorted tree, delete from the sorted tree and finally insert into the
         // sorted tree. The last two insert steps are split to simplify finding updates
         // where the index does not change.
-        
+
         // handle reordering events
         if(listChanges.isReordering()) {
             // the reorder map tells us what moved where
@@ -352,7 +352,7 @@ public final class SortedList extends TransformedList {
     public int lastIndexOf(Object object) {
         return sorted.lastIndexOf(object);
     }
-    
+
     /**
      * Returns the index in this list of the first occurrence of the specified
      * element, or the index where that element would be in the list if it were
@@ -386,7 +386,7 @@ public final class SortedList extends TransformedList {
     /**
      * A comparator that takes an indexed node, and compares the value
      * of an object in a list that has the index of that node.
-     * 
+     *
      * <p>If one of the objects passed to {@link #compare()} is not an
      * {@link IndexedTreeNode}, it will compare the object directly to the object
      * in the source {@link EventList} referenced by the {@link IndexedTreeNode}.

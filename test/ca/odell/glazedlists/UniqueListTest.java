@@ -30,7 +30,7 @@ public class UniqueListTest extends TestCase {
      */
     public void setUp() {
         source = new BasicEventList();
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
     }
 
     /**
@@ -97,7 +97,7 @@ public class UniqueListTest extends TestCase {
     public void testSimpleNonEmptySource() {
         unique = null;
         source.add("A");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         assertEquals(1, unique.size());
         assertEquals("A", (String)unique.get(0));
     }
@@ -107,7 +107,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         assertEquals(3, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("B", (String)unique.get(1));
@@ -119,7 +119,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("A");
         source.add("B");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         assertEquals(3, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("B", (String)unique.get(1));
@@ -131,7 +131,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         assertEquals(1, unique.size());
         assertEquals("A", (String)unique.get(0));
     }
@@ -144,7 +144,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         assertEquals(2, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("C", (String)unique.get(1));
@@ -155,7 +155,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         source.add("D");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -169,7 +169,7 @@ public class UniqueListTest extends TestCase {
         source.add("B");
         source.add("C");
         source.add("D");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         source.add("A");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -183,7 +183,7 @@ public class UniqueListTest extends TestCase {
         source.add("D");
         source.add("A");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         source.add("B");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -197,7 +197,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         source.add("C");
         source.add("C");
         source.add("C");
@@ -214,7 +214,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         source.add("D");
         source.add("D");
         source.add("D");
@@ -273,7 +273,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         LinkedList duplicates = new LinkedList();
         duplicates.add("A");
         duplicates.add("B");
@@ -294,7 +294,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         source.addAll(duplicates);
@@ -312,7 +312,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         duplicates.add("B");
@@ -335,7 +335,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, new ComparableComparator());
+        unique = new UniqueList(source, ComparatorFactory.comparable());
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         duplicates.add("B");
@@ -530,7 +530,7 @@ public class UniqueListTest extends TestCase {
 
         filterList.setFilter(1, 1);
         filterList.setFilter(2, 1);
-        
+
         assertEquals(3, unique.size());
         assertEquals(1, ((int[])unique.get(0))[0]);
         assertEquals(3, ((int[])unique.get(1))[0]);
@@ -552,7 +552,7 @@ public class UniqueListTest extends TestCase {
 
         filterList.setFilter(1, 1);
         filterList.setFilter(2, 1);
-        
+
         assertEquals(3, unique.size());
         assertEquals(1, ((int[])unique.get(0))[0]);
         assertEquals(3, ((int[])unique.get(1))[0]);
@@ -575,7 +575,7 @@ public class UniqueListTest extends TestCase {
 
         filterList.setFilter(1, 1);
         filterList.setFilter(2, 1);
-        
+
         assertEquals(3, unique.size());
         assertEquals(3, ((int[])unique.get(0))[0]);
         assertEquals(4, ((int[])unique.get(1))[0]);
@@ -604,14 +604,14 @@ public class UniqueListTest extends TestCase {
 
         filterList.setFilter(1, 1);
         filterList.setFilter(2, 1);
-        
+
         assertEquals(3, unique.size());
         assertEquals(3, ((int[])unique.get(0))[0]);
         assertEquals(4, ((int[])unique.get(1))[0]);
         assertEquals(5, ((int[])unique.get(2))[0]);
     }
-    
-    
+
+
     /**
      * Tests the change from A, A, B, B, C, C, D, D, E, E to B, B, E, E
      */
@@ -633,7 +633,7 @@ public class UniqueListTest extends TestCase {
 
         filterList.setFilter(1, 1);
         filterList.setFilter(2, 1);
-        
+
         assertEquals(2, unique.size());
         assertEquals(2, ((int[])unique.get(0))[0]);
         assertEquals(4, ((int[])unique.get(1))[0]);
@@ -657,13 +657,13 @@ public class UniqueListTest extends TestCase {
         filterList.setFilter(1, 1);
         filterList.setFilter(2, 1);
         filterList.setFilter(3, 1);
-        
+
         assertEquals(3, unique.size());
         assertEquals(1, ((int[])unique.get(0))[0]);
         assertEquals(2, ((int[])unique.get(1))[0]);
         assertEquals(3, ((int[])unique.get(2))[0]);
     }
-    
+
     /** the dice for the random tests */
     private Random random = new Random();
 
@@ -675,27 +675,27 @@ public class UniqueListTest extends TestCase {
         IntArrayFilterList filterList = new IntArrayFilterList(source);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
         SortedList sorted = new SortedList(filterList, new IntArrayComparator(0));
-        
+
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {
             int value = random.nextInt(1000);
             int[] array = new int[] { value, random.nextInt(2), random.nextInt(2), random.nextInt(2) };
             source.add(array);
         }
-        
+
         // try ten different filters
         for(int i = 0; i < 10; i++) {
             // apply the filter
             int filterColumn = random.nextInt(3);
             filterList.setFilter(filterColumn + 1, 1);
-            
+
             // construct the control list
             SortedSet controlSet = new TreeSet(new IntArrayComparator(0));
             controlSet.addAll(filterList);
             ArrayList controlList = new ArrayList();
             controlList.addAll(controlSet);
             Collections.sort(controlList, new IntArrayComparator(0));
-            
+
             // verify that the control and unique list are the same
             assertEquals(unique.size(), controlList.size());
             for(int j = 0; j < unique.size(); j++) {
@@ -703,7 +703,7 @@ public class UniqueListTest extends TestCase {
             }
         }
     }
-    
+
     /**
      * Tests a UniqueList version of a SortedList is safe when that SortedList
      * is re-sorted.
@@ -713,27 +713,27 @@ public class UniqueListTest extends TestCase {
         source = new BasicEventList();
         SortedList sortedList = new SortedList(source);
         unique = new UniqueList(sortedList);
-        
+
         // populate the source
         for(int i = 0; i < 1000; i++) {
             source.add(new Integer(random.nextInt(100)));
         }
-        
+
         // build a control list
         SortedSet uniqueSource = new TreeSet();
         uniqueSource.addAll(source);
         ArrayList controlList = new ArrayList();
         controlList.addAll(uniqueSource);
-        
+
         // verify the unique list is correct initially
         assertEquals(unique, controlList);
-        
+
         // verify the unique list is correct when the sorted list is unsorted
         sortedList.setComparator(null);
         assertEquals(unique, controlList);
-        
+
         // verify the unique list is correct when the sorted list is sorted
-        sortedList.setComparator(new ReverseComparator(new ComparableComparator()));
+        sortedList.setComparator(ComparatorFactory.reverse());
         assertEquals(unique, controlList);
     }
 
@@ -1106,13 +1106,13 @@ public class UniqueListTest extends TestCase {
         boolean fourthTest = unique.contains(ten);
         assertEquals(false, fourthTest);
     }
-    
+
     /**
      * Tests that the unique list works correctly when using a renegate comparator.
      */
     public void testReverseComparator() {
         // prepare a unique list with data in reverse order
-        UniqueList uniqueSource = new UniqueList(new BasicEventList(), new ReverseComparator());
+        UniqueList uniqueSource = new UniqueList(new BasicEventList(), ComparatorFactory.reverse());
         uniqueSource.add("E");
         uniqueSource.add("D");
         uniqueSource.add("C");
@@ -1120,24 +1120,24 @@ public class UniqueListTest extends TestCase {
         // count changes to the unique source
         ListEventCounter counter = new ListEventCounter();
         uniqueSource.addListEventListener(counter);
-        
+
         // modify the unique list
-        SortedSet data = new TreeSet(new ReverseComparator());
+        SortedSet data = new TreeSet(ComparatorFactory.reverse());
         data.add("A");
         data.add("B");
         data.add("C");
         uniqueSource.replaceAll(data);
-        
+
         // verify the modifications are consistent
         List consistencyTestList = new ArrayList();
         consistencyTestList.addAll(data);
         assertEquals(consistencyTestList, uniqueSource);
-        
+
         // verify that the "D" and "E" were deleted and "A" and "B" were added
         assertEquals(1, counter.getEventCount());
         assertEquals(5, counter.getChangeCount(0));
     }
-    
+
     /**
      * Test that replacing the entire contents of the source list works on the
      * unique list.
@@ -1151,7 +1151,7 @@ public class UniqueListTest extends TestCase {
 
         UniqueList uniqueListOne = new UniqueList(uniqueListZero, compareAtOne);
         uniqueListOne.addListEventListener(new ConsistencyTestList(uniqueListOne, "uniqueone"));
-        
+
         SortedSet data = new TreeSet(compareAtZero);
         data.add(new int[] { 0, 0 });
         data.add(new int[] { 1, 0 });
@@ -1183,7 +1183,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(2, unique.getCount("C"));
         assertEquals(0, unique.getCount("D"));
     }
-    
+
     /**
      * Tests that getAll() works.
      */
@@ -1379,9 +1379,9 @@ public class UniqueListTest extends TestCase {
     }
 
     /**
-	 * Explicit comparator for Kevin's sanity!
-	 */
-	class IntegerComparator implements Comparator {
+     * Explicit comparator for Kevin's sanity!
+     */
+    class IntegerComparator implements Comparator {
         public int compare(Object a, Object b) {
             int number1 = ((Integer)a).intValue();
             int number2 = ((Integer)b).intValue();

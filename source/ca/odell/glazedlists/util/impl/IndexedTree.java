@@ -228,7 +228,7 @@ public final class IndexedTree {
         long start = System.currentTimeMillis();
 
         for(int r = 0; r < repetitions; r++) {
-            IndexedTree tree = new IndexedTree(new ComparableComparator());
+            IndexedTree tree = new IndexedTree(ComparatorFactory.comparable());
             for(int i = 0; i < operations; i++) {
                 int operation = (int)(random.nextDouble() * 3.0);
 

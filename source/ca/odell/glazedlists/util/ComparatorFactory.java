@@ -22,6 +22,7 @@ public final class ComparatorFactory {
     /** Provide Singleton access for all Comparators with no internal state */
     private static Comparator booleanComparator = null;
     private static Comparator comparableComparator = null;
+    private static Comparator reversedComparable = null;
 
     /**
      * Creates a {@link Comparator} that uses Reflection to compare two instances
@@ -59,7 +60,7 @@ public final class ComparatorFactory {
     }
 
     /**
-     * Creates a chain of {@link Comparator}s that use the specified
+     * Creates a chain of {@link Comparator}s that apply the specified
      * {@link Comparator}s in the sequence specified.
      */
     public static Comparator chain(List comparators) {
@@ -78,7 +79,8 @@ public final class ComparatorFactory {
      * Creates a reverse {@link Comparator} that works for {@link Comparable} objects.
      */
     public static Comparator reverse() {
-        return new ReverseComparator(comparable());
+        if(reversedComparable == null) reversedComparable = reverse(comparable());
+        return reversedComparable;
     }
 
     /**

@@ -20,10 +20,10 @@ import java.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class SubListTest extends TestCase {
-    
+
     /** for randomly choosing list indicies */
     private Random random = new Random();
-    
+
     /**
      * Prepare for the test.
      */
@@ -47,7 +47,7 @@ public class SubListTest extends TestCase {
             eventList.add(new Integer(i));
             controlList.add(new Integer(i));
         }
-        
+
         // ensure all sublists are equal
         for(int i = 0; i < eventList.size(); i++) {
             for(int j = i + 1; j < eventList.size(); j++) {
@@ -69,30 +69,30 @@ public class SubListTest extends TestCase {
         for(int i = 0; i < 50; i++) {
             eventList.add(new Integer(i + 100));
         }
-        
+
         // get the sublist
         List subListBefore = eventList.subList(25, 75);
-        
+
         // change the source list to be 0,1,2,3,...49,50,51,..99,100,101...149
         for(int i = 0; i < 50; i++) {
             eventList.add(50+i, new Integer(50+i));
         }
-        
+
         // ensure the sublist took the change
         List subListAfter = eventList.subList(25, 125);
         assertEquals(subListBefore, subListAfter);
-        
+
         // change the lists again, deleting all odd numbered entries
         for(Iterator i = eventList.iterator(); i.hasNext(); ) {
             Integer current = (Integer)i.next();
             if(current.intValue() % 2 == 1) i.remove();
         }
-        
+
         // ensure the sublists took the change
         subListAfter = eventList.subList(13, 63);
         assertEquals(subListBefore, subListAfter);
     }
-    
+
     /**
      * Test that SubList works with a single index, even if the list is sorted.
      */
@@ -100,7 +100,7 @@ public class SubListTest extends TestCase {
         EventList eventList = new BasicEventList();
         SortedList sortedList = new SortedList(eventList);
         sortedList.setComparator(null);
-        
+
         eventList.add("Lions");
         eventList.add("Eskimos");
         eventList.add("Stampeders");
@@ -116,19 +116,19 @@ public class SubListTest extends TestCase {
         List expectedRiders = new ArrayList();
         expectedRiders.add("Roughriders");
         assertEquals(expectedRiders, riders);
-        
-        sortedList.setComparator(new ComparableComparator());
+
+        sortedList.setComparator(ComparatorFactory.comparable());
         assertEquals(expectedRiders, riders);
-        
-        sortedList.setComparator(new ReverseComparator(new ComparableComparator()));
+
+        sortedList.setComparator(ComparatorFactory.reverse());
         assertEquals(expectedRiders, riders);
-        
+
         eventList.remove("Stampeders");
         eventList.remove("Blue Bombers");
         eventList.remove("Renegades");
         assertEquals(expectedRiders, riders);
-        
-        sortedList.setComparator(new ComparableComparator());
+
+        sortedList.setComparator(ComparatorFactory.comparable());
         assertEquals(expectedRiders, riders);
 
         eventList.remove("Eskimos");
@@ -143,7 +143,7 @@ public class SubListTest extends TestCase {
         eventList.remove("Lions");
         assertEquals(Collections.EMPTY_LIST, eventList);
     }
-    
+
     /**
      * Test that SubList works while the underlying list changes.
      */
@@ -152,33 +152,33 @@ public class SubListTest extends TestCase {
         eventList.add("Viper");
         eventList.add("Mustang");
         eventList.add("Camaro");
-        
+
         List mustang = eventList.subList(1, 2);
         List expectedMustang = new ArrayList();
         expectedMustang.add("Mustang");
         assertEquals(expectedMustang, mustang);
-        
+
         eventList.add(0, "Boxter");
         eventList.add(2, "G35");
         eventList.add(4, "Supra");
         eventList.add(6, "Firebird");
         assertEquals(expectedMustang, mustang);
-        
+
         eventList.subList(0, 3).clear();
         assertEquals(expectedMustang, mustang);
-        
+
         eventList.subList(1, 4).clear();
         assertEquals(expectedMustang, mustang);
-        
+
         eventList.add("Focus");
         eventList.add(0, "500");
         eventList.add(1, "GT");
         eventList.add("F150");
         assertEquals(expectedMustang, mustang);
-        
+
         eventList.clear();
         assertEquals(Collections.EMPTY_LIST, mustang);
-        
+
         eventList.add("Ka");
         eventList.add("Escape Hybrid");
         assertEquals(Collections.EMPTY_LIST, mustang);
