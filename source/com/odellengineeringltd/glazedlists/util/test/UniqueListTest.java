@@ -678,14 +678,14 @@ public class UniqueListTest extends TestCase {
         SortedList sorted = new SortedList(filterList, new IntArrayComparator(0));
         
         // populate a list with 1000 random arrays between 0 and 1000
-        for(int i = 0; i < 20; i++) {
-            int value = random.nextInt(10);
+        for(int i = 0; i < 1000; i++) {
+            int value = random.nextInt(1000);
             int[] array = new int[] { value, random.nextInt(2), random.nextInt(2), random.nextInt(2) };
             source.add(array);
         }
         
         // try ten different filters
-        for(int i = 0; i < 100; i++) {
+        for(int i = 0; i < 10; i++) {
             // apply the filter
             int filterColumn = random.nextInt(3);
             filterList.setFilter(filterColumn + 1, 1);
@@ -698,28 +698,6 @@ public class UniqueListTest extends TestCase {
             Collections.sort(controlList, new IntArrayComparator(0));
             
             // verify that the control and unique list are the same
-            System.out.println("u: " + unique.size() + ", c: " + controlList.size());
-            if(unique.size() != controlList.size()) System.out.print("UNIQUE: ");
-            for(int j = 0; unique.size() != controlList.size() && j < unique.size(); j++) {
-                System.out.print(((int[])unique.get(j))[0] + ", ");
-            }
-            if(unique.size() != controlList.size()) System.out.println("");
-            if(unique.size() != controlList.size()) System.out.print("CONTROL: ");
-            for(int j = 0; unique.size() != controlList.size() && j < controlList.size(); j++) {
-                System.out.print(((int[])controlList.get(j))[0] + ", ");
-            }
-            if(unique.size() != controlList.size()) System.out.println("");
-            if(unique.size() != controlList.size()) System.out.print("FILTER: ");
-            for(int j = 0; unique.size() != controlList.size() && j < filterList.size(); j++) {
-                System.out.print(((int[])filterList.get(j))[0] + ", ");
-            }
-            if(unique.size() != controlList.size()) System.out.println("");
-            if(unique.size() != controlList.size()) System.out.print("SORTED: ");
-            for(int j = 0; unique.size() != controlList.size() && j < sorted.size(); j++) {
-                System.out.print(((int[])sorted.get(j))[0] + ", ");
-            }
-            if(unique.size() != controlList.size()) System.out.println("");
-            
             assertEquals(unique.size(), controlList.size());
             for(int j = 0; j < unique.size(); j++) {
                 assertEquals(((int[])unique.get(j))[0], ((int[])controlList.get(j))[0]);
