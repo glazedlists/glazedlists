@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.impl.rbp;
+package ca.odell.glazedlists.net;
 
 import java.util.*;
 // the core Glazed Lists packages
@@ -14,9 +14,10 @@ import ca.odell.glazedlists.impl.io.*;
 // for being a JUnit test case
 import junit.framework.*;
 // NIO is used for CTP
+import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
-import java.io.UnsupportedEncodingException;
+import ca.odell.glazedlists.util.ByteCoderFactory;
 
 /**
  * Verifies that NetworkList works.
@@ -26,7 +27,7 @@ import java.io.UnsupportedEncodingException;
 public class NetworkListTest extends TestCase {
 
     /** the peer manages publishing and subscribing */
-    private Peer peer;
+    private ListPeer peer;
     
     /** the port to listen on */
     private int serverPort = 5000;
@@ -35,10 +36,14 @@ public class NetworkListTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        // increment the server port as to not bind to a previously used one
-        serverPort++;
-        peer = new Peer(serverPort);
-        peer.start();
+        try {
+            // increment the server port as to not bind to a previously used one
+            serverPort++;
+            peer = new ListPeer(serverPort);
+            peer.start();
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
     }
 
     /**
@@ -54,17 +59,15 @@ public class NetworkListTest extends TestCase {
     public void testSimpleSubscription() {
         try {
             // prepare the source list
-            NetworkList sourceList = new NetworkList(new BasicEventList(), new IntegerCoder());
             String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
-            peer.publish(sourceList, resourceName);
+            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
             sourceList.add(new Integer(8));
             sourceList.add(new Integer(6));
             sourceList.add(new Integer(7));
             sourceList.add(new Integer(5));
             
             // prepare the target list
-            NetworkList targetList = new NetworkList(new BasicEventList(), new IntegerCoder());
-            peer.subscribe(targetList, resourceName, "localhost", serverPort);
+            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
             
             // verify they're equal after a subscribe
             waitFor(1000);
@@ -78,7 +81,7 @@ public class NetworkListTest extends TestCase {
             assertEquals(sourceList, targetList);
             
             // clean up after myself
-            peer.unsubscribe(resourceName);
+            targetList.disconnect();
             waitFor(1000);
             
         } catch(Exception e) {

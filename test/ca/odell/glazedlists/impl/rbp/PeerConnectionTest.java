@@ -10,9 +10,9 @@ import java.util.*;
 // for being a JUnit test case
 import junit.framework.*;
 // NIO is used for CTP
+import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
-import java.io.UnsupportedEncodingException;
 
 /**
  * A CTPChunk test verifies that the CTPConnection provides proper chunks.
@@ -31,10 +31,14 @@ public class PeerConnectionTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        // increment the server port as to not bind to a previously used one
-        serverPort++;
-        peer = new Peer(serverPort);
-        peer.start();
+        try {
+            // increment the server port as to not bind to a previously used one
+            serverPort++;
+            peer = new Peer(serverPort);
+            peer.start();
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
     }
 
     /**
@@ -59,7 +63,7 @@ public class PeerConnectionTest extends TestCase {
             StringResource stringResource = new StringResource();
             String resourceName = "glazedlists://localhost:" + serverPort + "/stringResource";
             stringResource.setValue("Hello World");
-            peer.publish(stringResource, resourceName);
+            ResourceStatus status = peer.publish(stringResource, resourceName);
             
             StringResource clone = new StringResource();
             peer.subscribe(clone, resourceName, "localhost", serverPort);
@@ -71,7 +75,7 @@ public class PeerConnectionTest extends TestCase {
             waitFor(1000);
             assertEquals(stringResource.getValue(), clone.getValue());
 
-            peer.unsubscribe(resourceName);
+            status.disconnect();
             waitFor(1000);
             
         } catch(Exception e) {
@@ -93,40 +97,5 @@ public class PeerConnectionTest extends TestCase {
         } catch(Exception e) {
             e.printStackTrace();
         }
-    }
-    
-    public static void main(String[] args) {
-        System.out.println("------------------------------------------------");
-        System.out.println("START");
-        int serverPort = 5000;
-        Peer peer = new Peer(serverPort);
-        peer.start();
-        peer.print();
-
-        System.out.println("------------------------------------------------");
-        System.out.println("PUBLISH");
-        StringResource stringResource = new StringResource();
-        String resourceName = "glazedlists://localhost:" + serverPort + "/stringResource";
-        stringResource.setValue("Hello World");
-        peer.publish(stringResource, resourceName);
-        peer.print();
-
-        System.out.println("------------------------------------------------");
-        System.out.println("SUBSCRIBE");
-        StringResource clone = new StringResource();
-        peer.subscribe(clone, resourceName, "localhost", serverPort);
-        waitFor(1000);
-        peer.print();
-
-        System.out.println("------------------------------------------------");
-        System.out.println("UNSUBSCRIBE");
-        peer.unsubscribe(resourceName);
-        waitFor(1000);
-        peer.print();
-
-        System.out.println("------------------------------------------------");
-        System.out.println("TEARED DOWN CONNECTION");
-        peer.stop();
-        peer.print();
     }
 }

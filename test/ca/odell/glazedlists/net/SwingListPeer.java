@@ -4,9 +4,10 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.impl.rbp;
+package ca.odell.glazedlists.net;
 
 import java.util.*;
+import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.applet.*;
@@ -19,6 +20,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
 import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.impl.io.*;
+import ca.odell.glazedlists.util.ByteCoderFactory;
 
 /**
  * A peer that publishes and subscribes to lists.
@@ -28,8 +30,8 @@ import ca.odell.glazedlists.impl.io.*;
 public class SwingListPeer implements ActionListener {
     
     /** the shared data */
-    private NetworkList localData = new NetworkList(new BasicEventList(), new SerializableByteCoder());
-    private NetworkList remoteData = new NetworkList(new BasicEventList(), new SerializableByteCoder());
+    private NetworkList localData = null;
+    private NetworkList remoteData = null;
     
     /** fields for editing the local list */
     JTextField enterNumber = null;
@@ -37,7 +39,7 @@ public class SwingListPeer implements ActionListener {
     /**
      * Creates a new SwingListPeer client.
      */
-    public SwingListPeer(String localHost, int localPort, String targetHost, int targetPort) {
+    public SwingListPeer(String localHost, int localPort, String targetHost, int targetPort) throws IOException {
         prepareService(localHost, localPort, targetHost, targetPort);
         constructStandalone();
     }
@@ -58,15 +60,15 @@ public class SwingListPeer implements ActionListener {
     /**
      * Sets up all service stuff.
      */
-    private void prepareService(String localHost, int localPort, String targetHost, int targetPort) {
+    private void prepareService(String localHost, int localPort, String targetHost, int targetPort) throws IOException {
         String localResourceName = "glazedlists://" + localHost + ":" + localPort + "/integers";
-        Peer peer = new Peer(localPort);
+        ListPeer peer = new ListPeer(localPort);
         peer.start();
-        peer.publish(localData, localResourceName);
+        localData = peer.publish(new BasicEventList(), localResourceName, ByteCoderFactory.serializable());
         
         if(targetHost != null) {
             String remoteResourceName = "glazedlists://" + targetHost + ":" + targetPort + "/integers";
-            peer.subscribe(remoteData, remoteResourceName, targetHost, targetPort);
+            remoteData = peer.subscribe(remoteResourceName, targetHost, targetPort, ByteCoderFactory.serializable());
         }
     }
     
@@ -105,7 +107,7 @@ public class SwingListPeer implements ActionListener {
     /**
      * When started via a main method, this creates a standalone issues browser.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if(args.length != 2 && args.length != 4) {
             System.out.println("Usage: SwingListPeer <localhost> <localport> [<targethost> <targetport>]");
             return;
