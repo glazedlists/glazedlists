@@ -600,4 +600,17 @@ public final class UniqueList extends TransformedList implements ListEventListen
     public int lastIndexOf(Object object) {
         return indexOf(object);
     }
+    
+    /**
+     * Release the resources consumed by this TransformedList so that it may be garbage
+     * collected. It is an error to call any method on a TransformedList after it
+     * has been disposed.
+     *
+     * <p>This implementation of UniqueList extends dispose() in order to first
+     * dispose the SortedList on which this implementation depends.
+     */
+    public void dispose() {
+        ((TransformedList)source).dispose();
+        super.dispose();
+    }
 }

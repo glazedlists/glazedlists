@@ -45,7 +45,7 @@ abstract class AbstractEventList implements EventList, Serializable {
     protected ListEventAssembler updates = new ListEventAssembler(this);
     
     /** the read/write lock provides mutual exclusion to access */
-    protected ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
+    protected ReadWriteLock readWriteLock = null;
 
     /**
      * Gets the lock object in order to access this list in a thread-safe manner.

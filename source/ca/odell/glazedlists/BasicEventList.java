@@ -42,7 +42,7 @@ public final class BasicEventList extends AbstractEventList {
      * implementation.
      */
     public BasicEventList() {
-        data = new ArrayList();
+        this(new ArrayList());
     }
     
     /**
@@ -53,6 +53,7 @@ public final class BasicEventList extends AbstractEventList {
      */
     public BasicEventList(List list) {
         data = list;
+        readWriteLock = new J2SE12ReadWriteLock();
     }
 
     /**

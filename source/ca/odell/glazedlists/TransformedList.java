@@ -387,4 +387,23 @@ public abstract class TransformedList extends AbstractEventList implements ListE
     public int size() {
         return source.size();
     }
+    
+    /**
+     * Release the resources consumed by this TransformedList so that it may be garbage
+     * collected. It is an error to call any method on a TransformedList after it
+     * has been disposed.
+     *
+     * <p>A TransformedList will be garbage collected without a call to dispose(), but
+     * not before its source list may be garbage collected. By calling dispose(), you
+     * allow the TransformedList to be garbage collected before its source list.
+     * This is useful for situations where a TransformedList is short-lived with a
+     * source EventList that is long-lived.
+     *
+     * <p>This method simply removes this list as a listener to its source. 
+     */
+    public void dispose() {
+        source.removeListEventListener(this);
+        source = null;
+        readWriteLock = null;
+    }
 }
