@@ -22,6 +22,7 @@ public class Issue implements TextFilterable, Comparable {
 
     // mandatory issue fields
     private Integer id = null;
+    private Integer statusCode = null;
     private String status = null;
     private Priority priority = null;
     private String resolution = null;
@@ -62,6 +63,7 @@ public class Issue implements TextFilterable, Comparable {
      */
     public Issue(Issue template) {
         id = template.id;
+        statusCode = template.statusCode;
         status = template.status;
         priority = template.priority;
         resolution = template.resolution;
@@ -97,6 +99,15 @@ public class Issue implements TextFilterable, Comparable {
     }
     public void setId(Integer id) {
         this.id = id;
+    }
+    /**
+     * Status code of this issue (load status).
+     */
+    public Integer getStatusCode() {
+        return statusCode;
+    }
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
     }
     /**
      * Current status of this issue.

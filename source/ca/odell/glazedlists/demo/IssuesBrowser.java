@@ -147,16 +147,16 @@ public class IssuesBrowser extends Applet {
         
         // projects
         EventList projects = new BasicEventList();
-        projects.add(new JavaNetProject("glazedlists",      "Glazed Lists", 1, 150));
-        projects.add(new JavaNetProject("lg3d-core",        "Project Looking Glass Core", 1, 237));
-        projects.add(new JavaNetProject("java-net",         "Java.net Watercooler", 1, 114));
-        projects.add(new JavaNetProject("javacc",           "Java Compiler Compiler", 1, 75));
-        projects.add(new JavaNetProject("sqlexplorer",      "SQLExplorer Eclipse Database Plugin", 1, 29));
-        projects.add(new JavaNetProject("ofbiz",            "Open For Business", 1, 177));
-        projects.add(new JavaNetProject("jogl",             "JOGL Java OpenGL Bindings", 1, 131));
-        projects.add(new JavaNetProject("sip-communicator", "SIP Communicator", 1, 22));
-        projects.add(new JavaNetProject("jdic",             "JavaDesktop Integration Components", 1, 169));
-        projects.add(new JavaNetProject("jdnc",             "JavaDesktop Network Components", 1, 157));
+        projects.add(new JavaNetProject("glazedlists",      "Glazed Lists"));
+        projects.add(new JavaNetProject("lg3d-core",        "Project Looking Glass Core"));
+        projects.add(new JavaNetProject("java-net",         "Java.net Watercooler"));
+        projects.add(new JavaNetProject("javacc",           "Java Compiler Compiler"));
+        projects.add(new JavaNetProject("sqlexplorer",      "SQLExplorer Eclipse Database Plugin"));
+        projects.add(new JavaNetProject("ofbiz",            "Open For Business"));
+        projects.add(new JavaNetProject("jogl",             "JOGL Java OpenGL Bindings"));
+        projects.add(new JavaNetProject("sip-communicator", "SIP Communicator"));
+        projects.add(new JavaNetProject("jdic",             "JavaDesktop Integration Components"));
+        projects.add(new JavaNetProject("jdnc",             "JavaDesktop Network Components"));
 
         // project select combobox
         EventComboBoxModel projectsComboModel = new EventComboBoxModel(projects);
@@ -164,7 +164,7 @@ public class IssuesBrowser extends Applet {
         projectsCombo.setEditable(false);
         projectsCombo.setBackground(GLAZED_LISTS_ORANGE);
         projectsCombo.addItemListener(new ProjectChangeListener());
-        projectsComboModel.setSelectedItem(new JavaNetProject(null,               "Select a Java.net project...", 0, 0));
+        projectsComboModel.setSelectedItem(new JavaNetProject(null,               "Select a Java.net project..."));
         
         // throbber icons
         JPanel iconBar = new JPanel();
@@ -243,14 +243,10 @@ public class IssuesBrowser extends Applet {
         
         private String projectName;
         private String projectTitle;
-        private int first;
-        private int last;
         
-        public JavaNetProject(String projectName, String projectTitle, int first, int last) {
+        public JavaNetProject(String projectName, String projectTitle) {
             this.projectName = projectName;
             this.projectTitle = projectTitle;
-            this.first = first;
-            this.last = last;
         }
         
         public boolean isValid() {
@@ -259,14 +255,6 @@ public class IssuesBrowser extends Applet {
         
         public String getXMLUri() {
             return "https://" + projectName + ".dev.java.net/issues/xml.cgi";
-        }
-        
-        public int getFirst() {
-            return first;
-        }
-        
-        public int getLast() {
-            return last;
         }
         
         public String toString() {
@@ -318,7 +306,7 @@ public class IssuesBrowser extends Applet {
                     // load the issues
                     EventList threadSafeIssuesEventList = new ThreadSafeList(issuesEventList);
                     threadSafeIssuesEventList.clear();
-                    IssuezillaXMLParser.loadIssues(threadSafeIssuesEventList, currentProject.getXMLUri(), currentProject.getFirst(), currentProject.getLast());
+                    IssuezillaXMLParser.loadIssues(threadSafeIssuesEventList, currentProject.getXMLUri());
 
                     // stop the progress bar
                     SwingUtilities.invokeLater(new IndeterminateToggler(throbberStatic, ""));

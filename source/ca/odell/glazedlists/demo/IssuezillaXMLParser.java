@@ -88,12 +88,58 @@ public class IssuezillaXMLParser {
     }
 
     /**
+     * When executed, this opens a file specified on the command line, parses
+     * it for Issuezilla XML and writes the issues to the command line.
+     */
+    public static void main(String[] args) throws IOException {
+        if(args.length != 1) {
+            System.out.println("Usage: IssuezillaXMLParser <url>");
+            return;
+        }
+
+        BasicEventList issuesList = new BasicEventList();
+        loadIssues(issuesList, args[0]);
+        System.out.println(issuesList);
+    }
+    
+    /**
+     * Loads issues from the specified URL.
+     */
+    public static void loadIssues(EventList target, String baseUrl) throws IOException {
+        int issuesPerRequest = 100;
+        
+        // continuously load issues until there's no more
+        while(true) {
+            // figure out how many to load
+            int currentTotal = target.size();
+            int nextTotal = currentTotal + issuesPerRequest;
+        
+            // assemble the issue ID argument
+            StringBuffer idArg = new StringBuffer();
+            for(int i = currentTotal + 1; i <= nextTotal; i++) {
+                idArg.append(i);
+                if(i < nextTotal) idArg.append(":");
+            }
+            
+            // prepare a stream
+            URL issuesUrl = new URL(baseUrl + "?id=" + idArg);
+            InputStream issuesInStream = issuesUrl.openStream();
+        
+            // parse
+            loadIssues(target, issuesInStream);
+            
+            // if we couldn't load everything, we've consumed everything
+            if(target.size() < nextTotal) return;
+        }
+    }
+
+    /**
      * Parses the Issuezilla XML document on the specified input stream into a List
      * of issues. While the parsing is taking place this writes some simple Java
      * commands to reproduce a lightweight version of this list. This is useful
      * to load the issues as code rather than XML.
      */
-    public static void parseIssuezillaXML(EventList target, InputStream source) throws IOException {
+    public static void loadIssues(EventList target, InputStream source) throws IOException {
         try {
             IssueHandler issueReader = new IssueHandler(target);
             SAXParserFactory.newInstance().newSAXParser().parse(source, issueReader);
@@ -106,40 +152,6 @@ public class IssuezillaXMLParser {
         }
     }
     
-    /**
-     * When executed, this opens a file specified on the command line, parses
-     * it for Issuezilla XML and writes the issues to the command line.
-     */
-    public static void main(String[] args) {
-        try {
-            InputStream streamIn = new FileInputStream(args[0]);
-            parseIssuezillaXML(new BasicEventList(), streamIn);
-            
-        } catch(IOException e) {
-            e.printStackTrace();
-            return;
-        }
-    }
-    
-    /**
-     * Loads issues from the specified URL.
-     */
-    public static void loadIssues(EventList target, String baseUrl, int first, int last) throws IOException {
-        // assemble the issue ID argument
-        StringBuffer idArg = new StringBuffer();
-        for(int i = first; i <= last; i++) {
-            idArg.append(i);
-            if(i < last) idArg.append(":");
-        }
-        
-        // prepare a stream
-        URL issuesUrl = new URL(baseUrl + "?id=" + idArg);
-        InputStream issuesInStream = issuesUrl.openStream();
-        
-        // parse
-        parseIssuezillaXML(target, issuesInStream);
-    }
-
     /**
      * The IssueHandler does the real parsing.
      */
@@ -175,6 +187,11 @@ public class IssuezillaXMLParser {
             } else if(currentIssue == null) {
                 if(qName.equals("issue")) {
                     currentIssue = new Issue();
+                    
+                    // save the status code
+                    String statusCode = attributes.getValue("status_code");
+                    currentIssue.setStatusCode(statusCode != null ? Integer.valueOf(statusCode) : new Integer(404));
+
                     // write the necessary Java code
                     /*System.out.println("currentIssue = new Issue();");*/
                 } else {
@@ -206,8 +223,15 @@ public class IssuezillaXMLParser {
                 simpleElementHandler.endElement(uri, localName, qName);
             // if this is the end of an issue
             } else if(qName.equals("issue")) {
+                // break out if this request is cancelled
                 if(Thread.interrupted()) throw new RuntimeException(new InterruptedException());
-                issues.add(currentIssue);
+                
+                // add the issue to the list if it was found okay
+                if(currentIssue.getStatusCode() != null && currentIssue.getStatusCode().intValue() == 200) {
+                    issues.add(currentIssue);
+                }
+                
+                // prepare for the next issue
                 currentIssue = null;
                 // write the necessary Java code
                 /*System.out.println("issues.add(currentIssue);");
