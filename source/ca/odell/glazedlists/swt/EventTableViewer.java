@@ -11,7 +11,9 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.graphics.*;
@@ -115,23 +117,47 @@ public class EventTableViewer implements ListEventListener {
     /**
      * When the source list is changed, this forwards the change to the
      * displayed table.
+     *
+     * <p>This implementation saves the entire table's selection in an ArrayList before
+     * walking through the list of changes. It then walks through the table's changes.
+     * Finally it adjusts the selection on the table in response to the changes.
+     * Although simple, this implementation has much higher memory and runtime
+     * requirements than necessary. It is desirable to optimize this method by
+     * not storing a second copy of the selection list. Such an implementation would
+     * use only the selection data available in the table plus a list of entries
+     * which have been since overwritten.
      */
     public void listChanged(ListEvent listChanges) {
-        while(listChanges.nextBlock()) {
-            int startIndex = listChanges.getBlockStartIndex();
-            int endIndex = listChanges.getBlockEndIndex();
+
+        // save the former selection
+        List selection = new ArrayList();
+        for(int i = 0; i < table.getItemCount(); i++) {
+            selection.add(i, new Boolean(table.isSelected(i)));
+        }
+        
+        // walk the list
+        while(listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
             
             if(changeType == ListEvent.INSERT) {
-                for(int r = startIndex; r <= endIndex; r++) {
-                    addRow(r, source.get(r));
-                }
+                selection.add(changeIndex, Boolean.FALSE);
+                addRow(changeIndex, source.get(changeIndex));
             } else if(changeType == ListEvent.UPDATE) {
-                for(int r = startIndex; r <= endIndex; r++) {
-                    updateRow(r, source.get(r));
-                }
+                updateRow(changeIndex, source.get(changeIndex));
             } else if(changeType == ListEvent.DELETE) {
-                table.remove(startIndex, endIndex);
+                selection.remove(changeIndex);
+                table.remove(changeIndex);
+            }
+        }
+        
+        // apply the saved selection
+        for(int i = 0; i < table.getItemCount(); i++) {
+            boolean selected = ((Boolean)selection.get(i)).booleanValue();
+            if(selected) {
+                table.select(i);
+            } else {
+                table.deselect(i);
             }
         }
     }
