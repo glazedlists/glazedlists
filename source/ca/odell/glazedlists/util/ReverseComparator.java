@@ -15,7 +15,7 @@ import java.util.Comparator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ReverseComparator implements Comparator {
+public final class ReverseComparator implements Comparator {
 
     /** the normal comparator to flip */
     private Comparator source;
@@ -26,6 +26,13 @@ public class ReverseComparator implements Comparator {
      */
     public ReverseComparator(Comparator source) {
         this.source = source;
+    }
+
+    /**
+     * Create a new reverse comparator that reverses Comparable elements.
+     */
+    public ReverseComparator() {
+        this(new ComparableComparator());
     }
 
     /**
@@ -40,5 +47,15 @@ public class ReverseComparator implements Comparator {
      */
     public Comparator getSourceComparator() {
         return source;
+    }
+    
+    /**
+     * This is equal to another comparator if and only if they both
+     * are reverse comparators for equal source comparators.
+     */
+    public boolean equals(Object other) {
+        if(!(other instanceof ReverseComparator)) return false;
+        ReverseComparator reverseOther = (ReverseComparator)other;
+        return source.equals(reverseOther.source);
     }
 }

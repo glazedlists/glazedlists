@@ -77,7 +77,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
     public UniqueList(EventList source, Comparator comparator) {
         super(new SortedList(source, comparator));
         SortedList sortedSource = (SortedList)super.source;
-        this.comparator = sortedSource.getComparator();
+        this.comparator = comparator;
 
         populateDuplicatesList();
         sortedSource.addListEventListener(this);
@@ -628,10 +628,18 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * objects that exist in both the current and the new revision.
      */
     public void replaceAll(SortedSet revision) {
+        // skip these results if the set is null
+        if(revision == null) return;
+
+        // verify we are using consistent comparators
+        if(revision.comparator() == null
+            ? !(comparator instanceof ComparableComparator)
+            : !(revision.comparator().equals(comparator))) {
+            throw new IllegalArgumentException("SortedSet comparator " + revision.comparator() + " != " + comparator); 
+        }
+        
         getReadWriteLock().writeLock().lock();
         try {
-            // skip these results if the set is null
-            if(revision == null) return;
 
             // nest changes and let the other methods compose the event
             updates.beginEvent(true);
@@ -674,7 +682,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             while(originalIndex < size()) {
                 remove(originalIndex);
             }
-
+            
             // fire the composed event
             updates.commitEvent();
         } finally {

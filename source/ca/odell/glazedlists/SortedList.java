@@ -40,9 +40,6 @@ public final class SortedList extends TransformedList {
     /** the comparator that this list uses for sorting */
     private Comparator comparator = null;
 
-    /** the unwrapped comparator that doesn't use IndexedTreeNodes */
-    private Comparator underlyingComparator = null;
-
     /**
      * Creates a new filter list that provides a sorted view on the source data.
      * By not specifying a <code>Comparator</code> to sort by, the list elements
@@ -232,7 +229,6 @@ public final class SortedList extends TransformedList {
         try {
             // save this comparator
             this.comparator = comparator;
-            this.underlyingComparator = comparator;
             // keep the old trees to construct the reordering
             IndexedTree previousSorted = sorted;
             IndexedTree previousUnsorted = unsorted;
@@ -343,7 +339,7 @@ public final class SortedList extends TransformedList {
 
         while(start <= end) {
             int current = (start + end) / 2;
-            int comparisonResult = underlyingComparator.compare(object, get(current));
+            int comparisonResult = comparator.compare(object, get(current));
             // The object is larger than current so focus on right half of list
             if(comparisonResult > 0) {
                 start = current + 1;
@@ -368,7 +364,7 @@ public final class SortedList extends TransformedList {
 
         while(start <= end) {
             current = (start + end) / 2;
-            int comparisonResult = underlyingComparator.compare(object, get(current));
+            int comparisonResult = comparator.compare(object, get(current));
             // The object is larger than current so focus on right half of list
             if(comparisonResult > 0) {
                 start = current + 1;
@@ -378,7 +374,7 @@ public final class SortedList extends TransformedList {
             // The object equals the object at current, so return
             } else {
                 // if it's the first or the one to the left isn't the same, return
-                if(current == 0 || 0 != underlyingComparator.compare(get(current-1), get(current))) {
+                if(current == 0 || 0 != comparator.compare(get(current-1), get(current))) {
                     return current;
                 }
                 else {
@@ -399,7 +395,7 @@ public final class SortedList extends TransformedList {
 
         while(start <= end) {
             current = (start + end) / 2;
-            int comparisonResult = underlyingComparator.compare(object, get(current));
+            int comparisonResult = comparator.compare(object, get(current));
             // The object is larger than current so focus on right half of list
             if(comparisonResult > 0) {
                 start = current + 1;
@@ -409,7 +405,7 @@ public final class SortedList extends TransformedList {
             // The object equals the object at current, so return
             } else {
                 // if it's the last or the one to the left isn't the same, return
-                if(current == size() - 1 || 0 != underlyingComparator.compare(get(current), get(current+1))) {
+                if(current == size() - 1 || 0 != comparator.compare(get(current), get(current+1))) {
                     return current;
                 }
                 else {

@@ -10,6 +10,7 @@ package ca.odell.glazedlists.test;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.util.*;
 // standard collections
 import java.util.*;
 
@@ -295,10 +296,35 @@ public class SortedListTest extends TestCase {
         boolean fourthTest = sorted.contains(ten);
         assertEquals(false, fourthTest);
     }
-
+    
     /**
-	 * Explicit comparator for Kevin's sanity!
-	 */
+     * Test if the SortedList fires update events rather than delete/insert
+     * pairs.
+     */
+    public void testUpdateEventsFired() {
+        // prepare a unique list with simple data
+        UniqueList uniqueSource = new UniqueList(unsortedList, new ReverseComparator());
+        sortedList = new SortedList(uniqueSource);
+        SortedSet data = new TreeSet(new ReverseComparator());
+        data.add("A");
+        data.add("B");
+        uniqueSource.replaceAll(data);
+        
+        // listen to changes on the sorted list
+        ListEventCounter counter = new ListEventCounter();
+        sortedList.addListEventListener(counter);
+
+        // replace the data with an identical copy
+        uniqueSource.replaceAll(data);
+        
+        // verify that only one event has occured
+        assertEquals(1, counter.getEventCount());
+        assertEquals(2, counter.getChangeCount(0));
+    }
+     
+    /**
+     * Explicit comparator for Kevin's sanity!
+     */
     class IntegerComparator implements Comparator {
 
         public int compare(Object a, Object b) {

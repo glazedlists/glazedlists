@@ -19,7 +19,7 @@ import java.util.Comparator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ComparableComparator implements Comparator {
+public final class ComparableComparator implements Comparator {
     
     /**
      * Compares object alpha to object beta by casting object one
@@ -39,5 +39,12 @@ public class ComparableComparator implements Comparator {
         } else {
             return 1;
         }
+    }
+
+    /**
+     * This is equal to another comparator if it is a ComparableComparable.
+     */
+    public boolean equals(Object other) {
+        return (other instanceof ComparableComparator);
     }
 }

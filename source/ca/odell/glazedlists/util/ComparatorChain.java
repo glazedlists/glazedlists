@@ -15,7 +15,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ComparatorChain implements Comparator {
+public final class ComparatorChain implements Comparator {
 
     /** the comparators to execute in sequence */
     private List comparators;
@@ -50,5 +50,14 @@ public class ComparatorChain implements Comparator {
      */
     public List getComparators() {
         return comparators;
+    }
+
+    /**
+     * A list of comparators are equal only if the lists are equal.
+     */
+    public boolean equals(Object other) {
+        if(!(other instanceof ComparatorChain)) return false;
+        ComparatorChain chainOther = (ComparatorChain)other;
+        return comparators.equals(chainOther.comparators);
     }
 }
