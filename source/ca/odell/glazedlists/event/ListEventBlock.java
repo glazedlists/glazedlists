@@ -136,8 +136,13 @@ final class ListEventBlock {
      * efficient sort because it is necessary to adjust offsets when swapping
      * and therefore it is preferred to only swap adjacent elements. Bubble
      * sort is a sort that only swaps adjacent elements.
+     *
+     * @param allowContradictingEvents whether a pair of contradicting events shall
+     *      be allowed. This would typically be an insert that is wiped away with a
+     *      delete, an update that is wiped away with a delete, or an insert that
+     *      is later updated.
      */
-    static void sortListEventBlocks(List changes) {
+    static void sortListEventBlocks(List changes, boolean allowContradictingEvents) {
         // bubblesort the changes
         while(true) {
             // count the number of swaps made on this repetition
@@ -174,12 +179,12 @@ final class ListEventBlock {
      * When there is a sequence of list changes, sometimes these changes are not
      * created in increasing order. Users usually need to receive changes in
      * increasing order, so it becomes necessary to reorder list change blocks.
-     * This returns true if two adjacent blocks are out of order.
+     *
+     * @return true if two adjacent blocks are out of order.
      */
     private static boolean requiresSwap(ListEventBlock first, ListEventBlock second) {
         // verify no intersection
         if(first.type == ListEvent.INSERT && second.type != ListEvent.INSERT) {
-        //if(first.type != ListEvent.DELETE && first.type != second.type) {
             if(first.endIndex >= second.startIndex && first.startIndex <= second.endIndex) {
                 throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
             }
@@ -285,10 +290,6 @@ final class ListEventBlock {
      * in the update block parameter and the other part is returned.
      */
     private static ListEventBlock split(ListEventBlock first, ListEventBlock second) {
-        /*System.out.println("SPLITTING: ");
-            System.out.println(first);
-            System.out.println(second);*/
-
         // find which block is update, which one is INSERT/DELETE
         boolean updateIsFirst = (first.type == ListEvent.UPDATE);
         ListEventBlock updateBlock = null;
@@ -314,11 +315,6 @@ final class ListEventBlock {
         // apply the changes
         ListEventBlock updateBlockPart2 = new ListEventBlock(splitLocation + part2Offset, updateBlock.endIndex + part2Offset, ListEvent.UPDATE);
         updateBlock.endIndex = splitLocation - 1;
-        
-        /*System.out.println("SPLIT RESULTS: ");
-            System.out.println(first);
-            System.out.println(second);
-            System.out.println(updateBlockPart2);*/
         
         // return the new part
         return updateBlockPart2;

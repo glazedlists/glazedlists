@@ -49,6 +49,15 @@ public final class ListEventAssembler {
     
     /** the pipeline manages the distribution of events */
     private ListEventPublisher publisher = null;
+    
+    /** the event level is the number of nested events */
+    private int eventLevel = 0;
+    
+    /** whether to allow nested events */
+    private boolean allowNestedEvents = true;
+    
+    /** whether to allow contradicting events */
+    private boolean allowContradictingEvents = false;
 
     /**
      * Creates a new ListEventAssembler that tracks changes for the
@@ -58,12 +67,6 @@ public final class ListEventAssembler {
         this.sourceList = sourceList;
         this.publisher = publisher;
     }
-    
-    /** the event level is the number of nested events */
-    private int eventLevel = 0;
-    
-    /** whether to allow nested events */
-    private boolean allowNestedEvents = true;
     
     /**
      * Starts a new atomic change to this list change queue. 
@@ -98,6 +101,7 @@ public final class ListEventAssembler {
             throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress");
         }
         this.allowNestedEvents = allowNestedEvents;
+        if(allowNestedEvents) allowContradictingEvents = true;
         
         // prepare for a new event if we haven't already
         if(eventLevel == 0) {
@@ -273,11 +277,12 @@ public final class ListEventAssembler {
             atomicChangeBlocks = null;
             atomicLatestBlock = null;
             reorderMap = null;
+            allowContradictingEvents = false;
             return;
         }
 
         // sort and simplify this block
-        ListEventBlock.sortListEventBlocks(atomicChangeBlocks);
+        ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
         // add this to the complete set
         atomicChanges.add(atomicChangeBlocks);
         // add the reorder map to the complete set only if it is the only change
@@ -301,6 +306,7 @@ public final class ListEventAssembler {
             atomicChangeBlocks = null;
             atomicLatestBlock = null;
             reorderMap = null;
+            allowContradictingEvents = false;
         }
     }
 
