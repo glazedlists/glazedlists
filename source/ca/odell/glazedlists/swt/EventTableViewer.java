@@ -43,23 +43,28 @@ public class EventTableViewer implements ListEventListener {
 
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
+    
+    /** Enables check support */
+    private TableCheckFilterList checkFilter = null;
 
     /**
      * Creates a new table that renders the specified list in the specified format.
      */
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
+        // insert a checked source if supported by the table
+        if((table.getStyle() & SWT.CHECK) > 0) {
+            this.checkFilter = new TableCheckFilterList(source, table, tableFormat);
+            source = checkFilter;
+        }
+        
+        // save table, source list and table format
         this.table = table;
         this.source = source;
         this.tableFormat = tableFormat;
 
-        // prepare event list listeners
-        source.getReadWriteLock().readLock().lock();
-        try {
-            populateTable();
-            source.addListEventListener(this);
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
+        // prepare the table's initial rows
+        populateTable();
+        source.addListEventListener(this);
     }
     
     /**
@@ -86,7 +91,9 @@ public class EventTableViewer implements ListEventListener {
     private void addRow(int row, Object value) {
         TableItem item = new TableItem(table, 0, row);
         for(int c = 0; c < tableFormat.getColumnCount(); c++) {
-            item.setText(c, (String)tableFormat.getColumnValue(value, c));
+            Object cellValue = tableFormat.getColumnValue(value, c);
+            if(cellValue != null) item.setText(c, cellValue.toString());
+            else item.setText(c, "");
         }
     }
     
@@ -96,7 +103,9 @@ public class EventTableViewer implements ListEventListener {
     private void updateRow(int row, Object value) {
         TableItem item = table.getItem(row);
         for(int c = 0; c < tableFormat.getColumnCount(); c++) {
-            item.setText(c, (String)tableFormat.getColumnValue(value, c));
+            Object cellValue = tableFormat.getColumnValue(value, c);
+            if(cellValue != null) item.setText(c, cellValue.toString());
+            else item.setText(c, "");
         }
     }
     
@@ -118,6 +127,20 @@ public class EventTableViewer implements ListEventListener {
     }
     
     /**
+     * Set whether this shall show only checked elements.
+     */
+    public void setCheckedOnly(boolean checkedOnly) {
+        checkFilter.setCheckedOnly(checkedOnly);
+    }
+    /**
+     * Get whether this is showing only checked elements.
+     */
+    public boolean getCheckedOnly() {
+        return checkFilter.getCheckedOnly();
+    }
+    
+    
+    /**
      * When the source list is changed, this forwards the change to the
      * displayed table.
      *
@@ -131,37 +154,42 @@ public class EventTableViewer implements ListEventListener {
      * which have been since overwritten.
      */
     public void listChanged(ListEvent listChanges) {
+        source.getReadWriteLock().readLock().lock();
+        try {
 
-        // save the former selection
-        List selection = new ArrayList();
-        for(int i = 0; i < table.getItemCount(); i++) {
-            selection.add(i, Boolean.valueOf(table.isSelected(i)));
-        }
-        
-        // walk the list
-        while(listChanges.next()) {
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
+            // save the former selection
+            List selection = new ArrayList();
+            for(int i = 0; i < table.getItemCount(); i++) {
+                selection.add(i, Boolean.valueOf(table.isSelected(i)));
+            }
             
-            if(changeType == ListEvent.INSERT) {
-                selection.add(changeIndex, Boolean.FALSE);
-                addRow(changeIndex, source.get(changeIndex));
-            } else if(changeType == ListEvent.UPDATE) {
-                updateRow(changeIndex, source.get(changeIndex));
-            } else if(changeType == ListEvent.DELETE) {
-                selection.remove(changeIndex);
-                table.remove(changeIndex);
+            // walk the list
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+                
+                if(changeType == ListEvent.INSERT) {
+                    selection.add(changeIndex, Boolean.FALSE);
+                    addRow(changeIndex, source.get(changeIndex));
+                } else if(changeType == ListEvent.UPDATE) {
+                    updateRow(changeIndex, source.get(changeIndex));
+                } else if(changeType == ListEvent.DELETE) {
+                    selection.remove(changeIndex);
+                    table.remove(changeIndex);
+                }
             }
-        }
-        
-        // apply the saved selection
-        for(int i = 0; i < table.getItemCount(); i++) {
-            boolean selected = ((Boolean)selection.get(i)).booleanValue();
-            if(selected) {
-                table.select(i);
-            } else {
-                table.deselect(i);
+            
+            // apply the saved selection
+            for(int i = 0; i < table.getItemCount(); i++) {
+                boolean selected = ((Boolean)selection.get(i)).booleanValue();
+                if(selected) {
+                    table.select(i);
+                } else {
+                    table.deselect(i);
+                }
             }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 }

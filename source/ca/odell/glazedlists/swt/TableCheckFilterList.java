@@ -23,7 +23,7 @@ import org.eclipse.swt.graphics.*;
 import java.util.*;
 
 /**
- * A FilterList for elements that are displayed using EventTableViewer.
+ * A FilterList for elements that are checked in the EventTableViewer.
  *
  * <p>The TableCheckFilterList <strong>must</strong> be used as the source list to
  * the EventTableViewer. This is because the TableCheckFilterList uses methods on
@@ -34,7 +34,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TableCheckFilterList extends AbstractFilterList implements SelectionListener {
+final class TableCheckFilterList extends AbstractFilterList implements SelectionListener {
     
     /** whether this displays all or only checked elements */
     private boolean checkedOnly = false;
@@ -42,8 +42,8 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
     /** the table that checkboxes are displayed in */
     private Table table;
     
-    /** whether the source list's elements implement Checkable */
-    private boolean elementsAreCheckable;
+    /** for checking table items */
+    private CheckableTableFormat checkableTableFormat;
 
     /**
      * Creates a new filter that filters elements depending on whether they are
@@ -53,75 +53,97 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
      *      implement Checkable. If false, the list objects will be transparently 
      *      wrapped to provide state management.
      */
-    public TableCheckFilterList(EventList source, Table table, boolean elementsAreCheckable) {
-        super(elementsAreCheckable ? source : new CheckableWrapperList(source));
+    public TableCheckFilterList(EventList source, Table table, TableFormat tableFormat) {
+        super(tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source));
         this.table = table;
-        this.elementsAreCheckable = elementsAreCheckable;
+        if(tableFormat instanceof CheckableTableFormat) {
+            this.checkableTableFormat = (CheckableTableFormat)tableFormat;
+        } else {
+            this.checkableTableFormat = null;
+        }
         
-        getReadWriteLock().writeLock().lock();
-        try {
-            // initially, everything is unchecked
-            for(Iterator i = this.source.iterator(); i.hasNext(); ) {
-                ((Checkable)i.next()).setChecked(false);
-            }
-            
-            // listen for changes in checkedness
-            table.addSelectionListener(this);
-            
-            // prepare the filter
-            handleFilterChanged();
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        // initially, everything is unchecked
+        for(int i = 0; i < size(); i++) {
+            setChecked(i, false);
+        }
+        
+        // listen for changes in checkedness
+        table.addSelectionListener(this);
+        
+        // prepare the filter
+        handleFilterChanged();
+    }
+    
+
+    /**
+     * Set the specified list element in the source list as checked.
+     */
+    private void setChecked(Object element, boolean checked) {
+        if(checkableTableFormat != null) {
+            checkableTableFormat.setChecked(element, checked);
+        } else {
+            ((CheckWrapped)element).setChecked(checked);
         }
     }
+    /**
+     * Set the specified index in the filtered list as checked.
+     */
+    private void setChecked(int index, boolean checked) {
+        setChecked(source.get(getSourceIndex(index)), checked);
+    }
+    /**
+     * Get whether the specified element in the source list is checked.
+     */
+    private boolean getChecked(Object element) {
+        if(checkableTableFormat != null) {
+            return checkableTableFormat.getChecked(element);
+        } else {
+            return ((CheckWrapped)element).getChecked();
+        }
+    }
+    /**
+     * Get whether the specified index in the filtered list is checked.
+     */
+    private boolean getChecked(int index) {
+        return getChecked(source.get(getSourceIndex(index)));
+    }
+
     
     /**
      * Returns true if the specified Object is checked.
      */
     public boolean filterMatches(Object element) {
         if(checkedOnly) {
-            Checkable checkable = (Checkable)element;
-            return checkable.isChecked();
+            return getChecked(element);
         } else {
             return true;
         }
     }
     
+
     /**
      * Gets a static snapshot of the checked Objects in this list.
      */
     public List getAllChecked() {
-        getReadWriteLock().readLock().lock();
-        try {
-            List result = new ArrayList();
-            for(int i = 0; i < size(); i++) {
-                Checkable checkable = (Checkable)source.get(getSourceIndex(i));
-                if(checkable.isChecked()) {
-                    result.add(get(i));
-                }
+        List result = new ArrayList();
+        for(int i = 0; i < size(); i++) {
+            if(getChecked(i)) {
+                result.add(get(i));
             }
-            return result;
-            
-        } finally {
-            getReadWriteLock().readLock().unlock();
         }
+        return result;
     }
     
+
     /**
      * Set whether this filter list displays all elements, or only checked elements.
      */
     public void setCheckedOnly(boolean checkedOnly) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            if(checkedOnly != this.checkedOnly) {
-                this.checkedOnly = checkedOnly;
-                handleFilterChanged();
-            }
-        } finally {
-            getReadWriteLock().writeLock().unlock();
+        if(checkedOnly != this.checkedOnly) {
+            this.checkedOnly = checkedOnly;
+            handleFilterChanged();
         }
     }
-    
     /**
      * Get whether this filter list displays all elements, or only checked elements.
      */
@@ -129,35 +151,45 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
         return checkedOnly;
     }
     
+
     /**
-     * Returns the element at the specified position in this list.
+     * Returns the element at the specified position in this list. This unwraps
+     * a {@link CheckWrapped} object from the source if necessary.
      */
     public Object get(int index) {
-        if(elementsAreCheckable) {
+        if(checkableTableFormat != null) {
             return super.get(index);
         } else {
             CheckWrapped checkWrapped = (CheckWrapped)super.get(index);
             return checkWrapped.getWrapped();
         }
     }
-    
-    /**
-     * Sent when default selection occurs in the control.
-     */
-    public void widgetDefaultSelected(SelectionEvent e) {
-        if(e.detail == SWT.CHECK) {
-            updateItemChecked((TableItem)e.item);
-        }
-    }
 
+    
     /**
      * Sent when selection occurs in the control.    
      */
     public void widgetSelected(SelectionEvent e) {
         if(e.detail == SWT.CHECK) {
-            updateItemChecked((TableItem)e.item);
+            getReadWriteLock().writeLock().lock();
+            try {
+                updateItemChecked((TableItem)e.item);
+            } finally {
+                getReadWriteLock().writeLock().unlock();
+            }
         }
     }
+    public void widgetDefaultSelected(SelectionEvent e) {
+        if(e.detail == SWT.CHECK) {
+            getReadWriteLock().writeLock().lock();
+            try {
+                updateItemChecked((TableItem)e.item);
+            } finally {
+                getReadWriteLock().writeLock().unlock();
+            }
+        }
+    }
+
     
     /**
      * When the check status of a table item is changed, this changes the
@@ -171,20 +203,15 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
      */
     private void updateItemChecked(TableItem updated) {
         if(updated == null) return;
-        getReadWriteLock().writeLock().lock();
-        try {
-            // set the checked property on the proper element
-            int filteredIndex = table.indexOf(updated);
-            int sourceIndex = getSourceIndex(filteredIndex);
-            boolean checked = updated.getChecked();
-            Checkable checkable = (Checkable)source.get(sourceIndex);
-            checkable.setChecked(checked);
 
-            // force an update event
-            source.set(sourceIndex, checkable);
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
+        // set the checked property on the proper element
+        int index = table.indexOf(updated);
+        boolean checked = updated.getChecked();
+        setChecked(index, checked);
+    
+        // force an update event
+        int sourceIndex = getSourceIndex(index);
+        source.set(sourceIndex, source.get(sourceIndex));
     }
     
     /**
@@ -196,12 +223,12 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
      * and the EventTableViewer.
      */
     public void addListEventListener(ListEventListener listChangeListener) {
-        if(!(listChangeListener instanceof EventTableViewer)) {
-            throw new IllegalArgumentException("TableCheckFilterList only accepts EventTableViewer as a listener");
+        if(listChangeListener instanceof EventTableViewer) {
+            super.addListEventListener(listChangeListener);
+            super.addListEventListener(new TableChecker());
+        } else {
+            super.addListEventListener(listChangeListener);
         }
-        
-        super.addListEventListener(listChangeListener);
-        super.addListEventListener(new TableChecker());
     }
 
     /**
@@ -213,9 +240,7 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
                 int changeIndex = listChanges.getIndex();
                 int changeType = listChanges.getType();
                 if(changeType == ListEvent.INSERT || changeType == ListEvent.UPDATE) {
-                    int sourceIndex = getSourceIndex(changeIndex);
-                    Checkable checkable = (Checkable)source.get(sourceIndex);
-                    boolean checked = checkable.isChecked();
+                    boolean checked = getChecked(changeIndex);
                     table.getItem(changeIndex).setChecked(checked);
                 }
             }
@@ -299,7 +324,7 @@ class CheckableWrapperList extends TransformedList {
 /**
  * A simple wrapper that adds a checked property to an Object.
  */
-class CheckWrapped implements Checkable {
+class CheckWrapped {
     private boolean checked = false;
     private Object wrapped = null;
     public CheckWrapped(Object wrapped) {
@@ -311,7 +336,7 @@ class CheckWrapped implements Checkable {
     public void setWrapped(Object wrapped) {
         this.wrapped = wrapped;
     }
-    public boolean isChecked() {
+    public boolean getChecked() {
         return checked;
     }
     public void setChecked(boolean checked) {
