@@ -21,7 +21,7 @@ import java.io.IOException;
  *
  * @author Petr Kuzel
  */
-public class FileListTest extends TestCase {
+public class OfflineListTest extends TestCase {
 
     public void testAll() {
         List gold = new ArrayList();
