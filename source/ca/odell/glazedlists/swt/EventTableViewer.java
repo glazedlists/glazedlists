@@ -64,8 +64,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * {@link TableFormat} as specified.
      */
     public EventTableViewer(EventList source, Table table, String[] propertyNames, String[] columnLabels) {
-		this(source, table, BeanToolFactory.tableFormat(propertyNames, columnLabels));
-	}
+        this(source, table, BeanToolFactory.tableFormat(propertyNames, columnLabels));
+    }
 
     /**
      * Creates a new viewer for the given {@link Table} that updates the table
@@ -84,8 +84,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
         this.source = source;
         this.tableFormat = tableFormat;
 
-		// Enable the selection lists
-		selectionList = new SelectionList(source, this);
+        // Enable the selection lists
+        selectionList = new SelectionList(source, this);
 
         // determine if the provided table is Virtual
         tableIsVirtual = SWT.VIRTUAL == (table.getStyle() & SWT.VIRTUAL);
@@ -213,17 +213,17 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * Provides access to an {@link EventList} that contains items from the
      * viewed {@link Table} that are not currently selected.
      */
-	public EventList getDeselected() {
-		return selectionList.getDeselected();
-	}
+    public EventList getDeselected() {
+        return selectionList.getDeselected();
+    }
 
     /**
      * Provides access to an {@link EventList} that contains items from the
      * viewed {@link Table} that are currently selected.
      */
-	public EventList getSelected() {
-		return selectionList.getSelected();
-	}
+    public EventList getSelected() {
+        return selectionList.getSelected();
+    }
 
     /**
      * When the source list is changed, this forwards the change to the
@@ -251,63 +251,63 @@ public class EventTableViewer implements ListEventListener, Selectable {
 
             // Reapply selection to the Table
             for(int i = firstModified;i < table.getItemCount();i++) {
-				if(selectionList.isSelected(i)) {
-					table.select(i);
-				} else {
-					table.deselect(i);
-				}
-			}
+                if(selectionList.isSelected(i)) {
+                    table.select(i);
+                } else {
+                    table.deselect(i);
+                }
+            }
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
     }
 
-	/** Methods for the Selectable Interface */
+    /** Methods for the Selectable Interface */
 
     /** {@inheritDoc} */
-	public void addSelectionListener(SelectionListener listener) {
-		table.addSelectionListener(listener);
-	}
+    public void addSelectionListener(SelectionListener listener) {
+        table.addSelectionListener(listener);
+    }
 
-	/** {@inheritDoc} */
-	public void removeSelectionListener(SelectionListener listener) {
-		table.removeSelectionListener(listener);
-	}
+    /** {@inheritDoc} */
+    public void removeSelectionListener(SelectionListener listener) {
+        table.removeSelectionListener(listener);
+    }
 
-	/** {@inheritDoc} */
-	public void addListener(int type, Listener listener) {
-		table.addListener(type, listener);
-	}
+    /** {@inheritDoc} */
+    public void addListener(int type, Listener listener) {
+        table.addListener(type, listener);
+    }
 
-	/** {@inheritDoc}*/
-	public void removeListener(int type, Listener listener) {
-		table.removeListener(type, listener);
-	}
+    /** {@inheritDoc}*/
+    public void removeListener(int type, Listener listener) {
+        table.removeListener(type, listener);
+    }
 
-	/** {@inheritDoc} */
-	public int getSelectionCount() {
-		return table.getSelectionCount();
-	}
+    /** {@inheritDoc} */
+    public int getSelectionCount() {
+        return table.getSelectionCount();
+    }
 
-	/** {@inheritDoc} */
-	public int getSelectionIndex() {
-		return table.getSelectionIndex();
-	}
+    /** {@inheritDoc} */
+    public int getSelectionIndex() {
+        return table.getSelectionIndex();
+    }
 
-	/** {@inheritDoc} */
-	public int[] getSelectionIndices() {
-		return table.getSelectionIndices();
-	}
+    /** {@inheritDoc} */
+    public int[] getSelectionIndices() {
+        return table.getSelectionIndices();
+    }
 
-	/** {@inheritDoc} */
-	public int getStyle() {
-		return table.getStyle();
-	}
+    /** {@inheritDoc} */
+    public int getStyle() {
+        return table.getStyle();
+    }
 
-	/** {@inheritDoc} */
-	public boolean isSelected(int index) {
-		return table.isSelected(index);
-	}
+    /** {@inheritDoc} */
+    public boolean isSelected(int index) {
+        return table.isSelected(index);
+    }
 
     /**
      * Respond to view changes on a {@link Table} that is created with the
@@ -321,7 +321,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
             setItemText(item, value);
         }
     }
-    
+
     /**
      * Releases the resources consumed by this {@link EventTableViewer} so that it
      * may eventually be garbage collected.
@@ -329,10 +329,10 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * <p>An {@link EventTableViewer} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link EventTableViewer}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link EventTableViewer} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventTableViewer} after it has been disposed.
      */
@@ -340,6 +340,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
         if(checkFilter != null) {
             checkFilter.dispose();
         }
+        if(!selectionList.isDisposed()) selectionList.dispose();
         source.removeListEventListener(uiThreadProxy);
     }
 }

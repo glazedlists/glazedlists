@@ -61,11 +61,11 @@ public class EventListViewer implements ListEventListener, Selectable {
         this.list = list;
         this.listFormat = listFormat;
 
-		// Enable the selection lists
-		selectionList = new SelectionList(source, this);
+        // Enable the selection lists
+        selectionList = new SelectionList(source, this);
 
         populateList();
-        
+
         // listen for changes
         uiThreadProxy = new UserInterfaceThreadProxy(this, list.getDisplay());
         source.addListEventListener(uiThreadProxy);
@@ -99,17 +99,17 @@ public class EventListViewer implements ListEventListener, Selectable {
      * Provides access to an {@link EventList} that contains items from the
      * viewed Table that are not currently selected.
      */
-	public EventList getDeselected() {
-		return selectionList.getDeselected();
-	}
+    public EventList getDeselected() {
+        return selectionList.getDeselected();
+    }
 
     /**
      * Provides access to an {@link EventList} that contains items from the
      * viewed Table that are currently selected.
      */
-	public EventList getSelected() {
-		return selectionList.getSelected();
-	}
+    public EventList getSelected() {
+        return selectionList.getSelected();
+    }
 
     /**
      * Adds the value at the specified row.
@@ -137,7 +137,7 @@ public class EventListViewer implements ListEventListener, Selectable {
      * displayed List.
      */
     public void listChanged(ListEvent listChanges) {
-		int firstModified = source.size();
+        int firstModified = source.size();
         source.getReadWriteLock().readLock().lock();
         try {
             // Apply the list changes
@@ -158,63 +158,63 @@ public class EventListViewer implements ListEventListener, Selectable {
 
             // Reapply selection to the List
             for(int i = firstModified;i < list.getItemCount();i++) {
-				if(selectionList.isSelected(i)) {
-					list.select(i);
-				} else {
-					list.deselect(i);
-				}
-			}
+                if(selectionList.isSelected(i)) {
+                    list.select(i);
+                } else {
+                    list.deselect(i);
+                }
+            }
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
     }
 
-	/** Methods for the Selectable Interface */
+    /** Methods for the Selectable Interface */
 
     /** {@inheritDoc} */
-	public void addSelectionListener(SelectionListener listener) {
-		list.addSelectionListener(listener);
-	}
+    public void addSelectionListener(SelectionListener listener) {
+        list.addSelectionListener(listener);
+    }
 
-	/** {@inheritDoc} */
-	public void removeSelectionListener(SelectionListener listener) {
-		list.removeSelectionListener(listener);
-	}
+    /** {@inheritDoc} */
+    public void removeSelectionListener(SelectionListener listener) {
+        list.removeSelectionListener(listener);
+    }
 
-	/** {@inheritDoc} */
-	public void addListener(int type, Listener listener) {
-		list.addListener(type, listener);
-	}
+    /** {@inheritDoc} */
+    public void addListener(int type, Listener listener) {
+        list.addListener(type, listener);
+    }
 
-	/** {@inheritDoc}*/
-	public void removeListener(int type, Listener listener) {
-		list.removeListener(type, listener);
-	}
+    /** {@inheritDoc}*/
+    public void removeListener(int type, Listener listener) {
+        list.removeListener(type, listener);
+    }
 
-	/** {@inheritDoc} */
-	public int getSelectionCount() {
-		return list.getSelectionCount();
-	}
+    /** {@inheritDoc} */
+    public int getSelectionCount() {
+        return list.getSelectionCount();
+    }
 
-	/** {@inheritDoc} */
-	public int getSelectionIndex() {
-		return list.getSelectionIndex();
-	}
+    /** {@inheritDoc} */
+    public int getSelectionIndex() {
+        return list.getSelectionIndex();
+    }
 
-	/** {@inheritDoc} */
-	public int[] getSelectionIndices() {
-		return list.getSelectionIndices();
-	}
+    /** {@inheritDoc} */
+    public int[] getSelectionIndices() {
+        return list.getSelectionIndices();
+    }
 
-	/** {@inheritDoc} */
-	public int getStyle() {
-		return list.getStyle();
-	}
+    /** {@inheritDoc} */
+    public int getStyle() {
+        return list.getStyle();
+    }
 
-	/** {@inheritDoc} */
-	public boolean isSelected(int index) {
-		return list.isSelected(index);
-	}
+    /** {@inheritDoc} */
+    public boolean isSelected(int index) {
+        return list.isSelected(index);
+    }
 
     /**
      * Provides simple list formatting where each element will be displayed
@@ -229,7 +229,7 @@ public class EventListViewer implements ListEventListener, Selectable {
             return element.toString();
         }
     }
-    
+
     /**
      * Releases the resources consumed by this {@link EventListViewer} so that it
      * may eventually be garbage collected.
@@ -237,14 +237,15 @@ public class EventListViewer implements ListEventListener, Selectable {
      * <p>An {@link EventListViewer} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link EventListViewer}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link EventListViewer} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventListViewer} after it has been disposed.
      */
     public void dispose() {
+        if(!selectionList.isDisposed()) selectionList.dispose();
         source.removeListEventListener(uiThreadProxy);
     }
 }
