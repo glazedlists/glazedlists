@@ -133,8 +133,9 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      * to call any method on a {@link TableComparatorChooser} after it has been disposed.
      */
     public void dispose() {
-        throw new UnsupportedOperationException();
-        //table.getTableHeader().removeMouseListener(listener);
-        //table.getModel().removeTableModelListener(listener);
+        // stop listening for events on the specified table
+        for(int c = 0; c < table.getColumnCount(); c++) {
+            table.getColumn(c).removeSelectionListener(columnListener);
+        }
     }
 }
