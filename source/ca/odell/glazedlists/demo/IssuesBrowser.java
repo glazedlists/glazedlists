@@ -7,8 +7,6 @@
 package ca.odell.glazedlists.demo;
 
 import java.util.*;
-import java.io.*;
-import java.net.*;
 import javax.swing.*;
 import java.applet.*;
 import java.awt.GridBagLayout;
@@ -28,9 +26,6 @@ public class IssuesBrowser extends Applet {
     /** an event list to host the issues */
     IssuesList issuesEventList = new IssuesList();
     
-    /** the file in the .jar with the issues */
-    private static final String ISSUES_FILE = "resources/demo/issues.xml";
-    
     /**
      * Load the issues browser as an applet.
      */
@@ -44,24 +39,13 @@ public class IssuesBrowser extends Applet {
     public IssuesBrowser(boolean applet) {
         if(applet) {
             constructApplet();
-            
         } else {
             constructStandalone();
-            
         }
 
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL issuesFile = classLoader.getResource(ISSUES_FILE);
-        startIssuesList(issuesFile);
+        issuesEventList.start();
     }
      
-    /**
-     * Load the issues from the specified URL.
-     */
-    public void startIssuesList(URL issuesUrl) {
-        issuesEventList.start(issuesUrl);
-    }
-    
     /**
      * Constructs the browser as an Applet.
      */

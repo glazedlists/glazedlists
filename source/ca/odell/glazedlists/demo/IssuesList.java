@@ -7,8 +7,6 @@
 package ca.odell.glazedlists.demo;
 
 import java.util.*;
-import java.io.*;
-import java.net.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
@@ -20,9 +18,6 @@ import ca.odell.glazedlists.swing.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class IssuesList extends TransformedList {
-    
-    /** the source of the issues */
-    private URL issuesUrl;
     
     /** refresh every five minutes */
     private static long ISSUES_REFRESH_INTERVAL = 1000 * 60 * 5; 
@@ -41,8 +36,7 @@ public class IssuesList extends TransformedList {
     /**
      * Starts the issues list update daemon.
      */
-    public void start(URL issuesUrl) {
-        this.issuesUrl = issuesUrl;
+    public void start() {
         new Timer().scheduleAtFixedRate(new IssuesRefreshTask(), 0, ISSUES_REFRESH_INTERVAL); 
     }
     
@@ -56,19 +50,14 @@ public class IssuesList extends TransformedList {
          * the issues list.
          */
         public void run() {
-            try {
-                // load the issues
-                InputStream issuesIn = issuesUrl.openStream();
-                Collection issues = Issue.parseIssuezillaXML(issuesIn);
+            // load the issues
+            Collection issues = Issue.loadIssues();
 
-                // replace the current issues list with the new issues list
-                SortedSet issuesSorted = new TreeSet();
-                issuesSorted.addAll(issues);
-                UniqueList uniqueSource = (UniqueList)source;
-                uniqueSource.replaceAll(issuesSorted);
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
+            // replace the current issues list with the new issues list
+            SortedSet issuesSorted = new TreeSet();
+            issuesSorted.addAll(issues);
+            UniqueList uniqueSource = (UniqueList)source;
+            uniqueSource.replaceAll(issuesSorted);
         }
     }
 
