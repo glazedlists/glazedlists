@@ -60,9 +60,8 @@ public class TextFilterList extends DefaultTextFilterList {
      * object and get an array of strings for that object.
      */
     public TextFilterList(EventList source, Text filterEdit, TextFilterator filterator) {
-        super(source);
+        super(source, filterator);
         this.filterEdit = filterEdit;
-        this.filterator = filterator;
 
         // listen to filter events
         filterModifyListener = new FilterModifyListener();
