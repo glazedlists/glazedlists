@@ -14,22 +14,14 @@ import com.odellengineeringltd.glazedlists.listselectionmodel.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import java.awt.GridBagLayout;
-// for responding to user actions
-import java.awt.event.*;
 import java.awt.Point;
+// for responding to user actions
+import javax.swing.event.*;
+import java.awt.event.*;
 // tables for displaying lists
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-// this class uses tables for displaying message lists
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.SortedSet;
+import javax.swing.table.*;
+// standard collections as support
+import java.util.*;
 
 /**
  * A table that displays the contents of an event-driven list.
@@ -68,7 +60,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     private MutableTableModelEvent tableModelEvent;
     
     /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    public int changeSizeRepaintAllThreshhold = 25;
+    public int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
     
     /**
      * Creates a new table that renders the specified list in the specified
@@ -102,7 +94,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * this list table. That list changes dynamically as elements
      * are selected and deselected from the list.
      *
-     * Because the list is dynamic, users should be careful of changes
+     * <p>Because the list is dynamic, users should be careful of changes
      * when accessing the SelectionList. It is safer to access the 
      * SelectionList on the Swing event dispatch thread because no
      * selection changes can occur while that thread is executing code. 
@@ -146,7 +138,6 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      */
     public void setTableFormat(TableFormat tableFormat) {
         this.tableFormat = tableFormat;
-        //tableModelEvent.setValues(TableModelEvent.ALL_COLUMNS, TableModelEvent.ALL_COLUMNS, TableModelEvent.HEADER_ROW);
         tableModelEvent.setStructureChanged();
         fireTableChanged(tableModelEvent);
         tableFormat.configureTable(table);
@@ -158,7 +149,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * a ListChangeListenerEventThreadProxy, it is guaranteed that all natural
      * calls to this method use the Swing thread.
      *
-     * This tests the size of the change to determine how to handle it. If the
+     * <p>This tests the size of the change to determine how to handle it. If the
      * size of the change is greater than the changeSizeRepaintAllThreshhold,
      * then the entire table is notified as changed. Otherwise only the descrete
      * areas that changed are notified.
@@ -269,7 +260,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * Registers the specified SelectionListener to receive updates
      * when the selection changes.
      *
-     * This will tell the specified SelectionListener about the current
+     * <p>This will tell the specified SelectionListener about the current
      * status of the table.
      */
     public void addSelectionListener(SelectionListener selectionListener) {
@@ -301,7 +292,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     /**
      * Retrieves the value at the specified location from the table.
      * 
-     * Before every get, we need to validate the row because there may be an
+     * <p>Before every get, we need to validate the row because there may be an
      * update waiting in the event queue. For example, it is possible that
      * the source list has been updated by a database thread. Such a change
      * may have been sent as notification, but after this request in the
@@ -328,7 +319,42 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         return false;
     }
 
+    /**
+     * The list table is not editable. For an editable list table, use the
+     * WritableListTable instead.
+     */
     public void setValueAt(Object value, int row, int column) {
         throw new UnsupportedOperationException("The basic list table is not editable, use a WritableListTable instead");
+    }
+    
+    /**
+     * Gets the minimum number of changes that will be combined into one uniform
+     * change and cause selection and scrolling to be lost.
+     */
+    public int getRepaintAllThreshhold() {
+        return changeSizeRepaintAllThreshhold;
+    }
+    
+    /**
+     * Sets the threshhold of the number of change blocks that will be handled
+     * individually before the ListTable collapses such changes into one and simply
+     * repaints the entire table. This is a work around to the JTable's poor
+     * performance when handling large sets of small changes. <strong>This
+     * work-around is only necessary when the JTable has variable row height</strong>.
+     * When the JTable has a fixed row height, there is no performance problem and
+     * this work around is unnecessary.
+     *
+     * <p>Two problems occur when using this work around. It will cause the table's
+     * selection to be destroyed and it will cause the table's scrolling to be lost.
+     *
+     * <p>By default, this work around is disabled and users must enable it by calling
+     * <code>setRepaintAllThreshhold()</code> to enable it. In practice, tests have shown
+     * that 100 is a decent value for the repaintAllThreshhold of tables that have variable
+     * height rows.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=30">Bug 30</a>
+     */
+    public void setRepaintAllThreshhold(int repaintAllThreshhold) {
+        this.changeSizeRepaintAllThreshhold = repaintAllThreshhold;
     }
 }
