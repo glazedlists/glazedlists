@@ -27,16 +27,25 @@ public class CTPChunkTest extends TestCase {
     /** handler factory manages connection handlers */
     StaticCTPHandlerFactory handlerFactory;
     
+    /** the port to listen on */
+    private int serverPort = 5000;
+    
     /**
      * Prepare for the test.
      */
     public void setUp() {
+        // increment the server port as to not bind to a previously used one
+        serverPort++;
+        handlerFactory = new StaticCTPHandlerFactory();
+        connectionManager = new CTPConnectionManager(handlerFactory, serverPort);
+        connectionManager.start();
     }
 
     /**
      * Clean up after the test.
      */
     public void tearDown() {
+        connectionManager.stop();
     }
 
     /**
@@ -44,11 +53,6 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testServerSendChunk() {
-        System.err.println("ServerSendChunk()");
-        handlerFactory = new StaticCTPHandlerFactory();
-        connectionManager = new CTPConnectionManager(handlerFactory);
-        connectionManager.start();
-
         try {
             StaticCTPHandler client = new StaticCTPHandler();
             client.addExpected("HELLO WORLD");
@@ -57,14 +61,14 @@ public class CTPChunkTest extends TestCase {
             server.addEnqueued("HELLO WORLD");
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", client);
+            connectionManager.connect("localhost", serverPort, client);
             
             client.assertComplete((long)1000);
             client.close();
             server.assertComplete((long)1000);
             server.close();
-        } finally {
-            connectionManager.stop();
+        } catch(Exception e) {
+            fail(e.getMessage());
         }
     }
 
@@ -74,11 +78,6 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testClientSendChunk() {
-        System.err.println("ClientSendChunk()");
-        handlerFactory = new StaticCTPHandlerFactory();
-        connectionManager = new CTPConnectionManager(handlerFactory);
-        connectionManager.start();
-
         try {
             StaticCTPHandler client = new StaticCTPHandler();
             client.addEnqueued("WORLD O HELL");
@@ -87,14 +86,14 @@ public class CTPChunkTest extends TestCase {
             server.addExpected("WORLD O HELL");
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", client);
+            connectionManager.connect("localhost", serverPort, client);
             
             client.assertComplete((long)1000);
             server.assertComplete((long)1000);
             client.close();
             server.close();
-        } finally {
-            connectionManager.stop();
+        } catch(Exception e) {
+            fail(e.getMessage());
         }
     }
 
@@ -103,11 +102,6 @@ public class CTPChunkTest extends TestCase {
      * Verifies that large chunks can be sent.
      */
     public void testSendLargeString() {
-        System.err.println("sendLargeString()");
-        handlerFactory = new StaticCTPHandlerFactory();
-        connectionManager = new CTPConnectionManager(handlerFactory);
-        connectionManager.start();
-
         try {
             String clientSendData = randomString(100000);
             String serverSendData = randomString(200000);
@@ -121,14 +115,14 @@ public class CTPChunkTest extends TestCase {
             server.addEnqueued(serverSendData);
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", client);
+            connectionManager.connect("localhost", serverPort, client);
             
             client.assertComplete((long)1000);
             client.close();
             server.assertComplete((long)1000);
             server.close();
-        } finally {
-            connectionManager.stop();
+        } catch(Exception e) {
+            fail(e.getMessage());
         }
     }
     
@@ -137,11 +131,6 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testManyStrings() {
-        System.err.println("manyStrings()");
-        handlerFactory = new StaticCTPHandlerFactory();
-        connectionManager = new CTPConnectionManager(handlerFactory);
-        connectionManager.start();
-
         try {
             StaticCTPHandler client = new StaticCTPHandler();
             StaticCTPHandler server = new StaticCTPHandler();
@@ -157,14 +146,14 @@ public class CTPChunkTest extends TestCase {
             }
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", client);
+            connectionManager.connect("localhost", serverPort, client);
             
             client.assertComplete((long)1000);
             client.close();
             server.assertComplete((long)1000);
             server.close();
-        } finally {
-            connectionManager.stop();
+        } catch(Exception e) {
+            fail(e.getMessage());
         }
     }
     
@@ -188,10 +177,11 @@ public class CTPChunkTest extends TestCase {
     }
     
     public static void main(String[] args) {
-        
         CTPChunkTest test = new CTPChunkTest();
         while(true) {
+            test.setUp();
             test.testClientSendChunk();
+            test.tearDown();
             System.out.println("");
             System.out.println("");
             System.out.println("");
