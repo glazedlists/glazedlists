@@ -40,17 +40,17 @@ public class EventTableViewer implements ListEventListener, Selectable {
     /** whether the underlying table is Virtual */
     private boolean tableIsVirtual = false;
 
-    /** the complete list of messages before filters */
-    protected EventList source;
-
-    /** the proxy moves events to the User Interface thread */
-    private UserInterfaceThreadProxy uiThreadProxy = null;
+    /** the first source event list to dispose */
+    private TransformedList disposeSource = null;
+    
+    /** the proxy moves events to the SWT user interface thread */
+    private TransformedList swtSource = null;
+    
+    /** Enables check support */
+    private TableCheckFilterList checkFilter = null;
 
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
-
-    /** Enables check support */
-    private TableCheckFilterList checkFilter = null;
 
     /** For selection management */
     private SelectionList selectionList = null;
@@ -72,23 +72,26 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * {@link Table} is formatted with the specified {@link TableFormat}.
      */
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
+        swtSource = GlazedLists.swtThreadProxyList(source, table.getDisplay());
+        disposeSource = swtSource;
+        
         // insert a checked source if supported by the table
         if((table.getStyle() & SWT.CHECK) > 0) {
-            this.checkFilter = new TableCheckFilterList(source, table, tableFormat);
-            source = checkFilter;
+            checkFilter = new TableCheckFilterList(swtSource, table, tableFormat);
+            swtSource = checkFilter;
         }
 
         // save table, source list and table format
         this.table = table;
-        this.source = source;
         this.tableFormat = tableFormat;
 
         // Enable the selection lists
-        selectionList = new SelectionList(source, this);
+        selectionList = new SelectionList(swtSource, this);
 
         // determine if the provided table is Virtual
         tableIsVirtual = SWT.VIRTUAL == (table.getStyle() & SWT.VIRTUAL);
 
+        // setup initial values
         initTable();
         if(!tableIsVirtual) {
             populateTable();
@@ -98,8 +101,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
         }
 
         // listen for events, using the user interface thread
-        uiThreadProxy = new UserInterfaceThreadProxy(this, table.getDisplay());
-        source.addListEventListener(uiThreadProxy);
+        swtSource.addListEventListener(this);
     }
 
     /**
@@ -118,8 +120,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * Populates the table with the initial data from the list.
      */
     private void populateTable() {
-        for(int r = 0; r < source.size(); r++) {
-            addRow(r, source.get(r));
+        for(int r = 0; r < swtSource.size(); r++) {
+            addRow(r, swtSource.get(r));
         }
     }
 
@@ -205,7 +207,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * Get the source of this {@link EventTableViewer}.
      */
     public EventList getSourceList() {
-        return source;
+        return swtSource;
     }
 
     /**
@@ -229,8 +231,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * displayed {@link Table}.
      */
     public void listChanged(ListEvent listChanges) {
-        source.getReadWriteLock().readLock().lock();
-        int firstModified = source.size();
+        swtSource.getReadWriteLock().readLock().lock();
+        int firstModified = swtSource.size();
         try {
             // Apply changes to the list
             while(listChanges.next()) {
@@ -238,10 +240,10 @@ public class EventTableViewer implements ListEventListener, Selectable {
                 int changeType = listChanges.getType();
 
                 if(changeType == ListEvent.INSERT) {
-                    addRow(changeIndex, source.get(changeIndex));
+                    addRow(changeIndex, swtSource.get(changeIndex));
                     firstModified = Math.min(changeIndex, firstModified);
                 } else if(changeType == ListEvent.UPDATE) {
-                    updateRow(changeIndex, source.get(changeIndex));
+                    updateRow(changeIndex, swtSource.get(changeIndex));
                 } else if(changeType == ListEvent.DELETE) {
                     table.remove(changeIndex);
                     firstModified = Math.min(changeIndex, firstModified);
@@ -257,7 +259,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
                 }
             }
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            swtSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -316,7 +318,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
         public void handleEvent(Event e) {
             TableItem item = (TableItem)e.item;
             int tableIndex = table.indexOf(item);
-            Object value = source.get(tableIndex);
+            Object value = swtSource.get(tableIndex);
             setItemText(item, value);
         }
     }
@@ -336,10 +338,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * to call any method on a {@link EventTableViewer} after it has been disposed.
      */
     public void dispose() {
-        if(checkFilter != null) {
-            checkFilter.dispose();
-        }
+        disposeSource.dispose();
         if(!selectionList.isDisposed()) selectionList.dispose();
-        source.removeListEventListener(uiThreadProxy);
     }
 }

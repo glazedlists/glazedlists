@@ -14,6 +14,7 @@ import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.gui.*;
 import ca.odell.glazedlists.impl.swing.*;
+import ca.odell.glazedlists.impl.swt.*;
 // implemented interfaces
 import ca.odell.glazedlists.io.ByteCoder;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -22,6 +23,9 @@ import ca.odell.glazedlists.gui.LabelFormat;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
+// for SWT thread proxy
+import org.eclipse.swt.widgets.Display;
+
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -262,5 +266,13 @@ public final class GlazedLists {
      */
     public static TransformedList swingThreadProxyList(EventList source) {
         return new SwingThreadProxyEventList(source);
+    }
+
+    /**
+     * Wraps the source in an {@link EventList} that fires all of its update events
+     * from the SWT user interface thread.
+     */
+    public static TransformedList swtThreadProxyList(EventList source, Display display) {
+        return new SWTThreadProxyEventList(source, display);
     }
 }

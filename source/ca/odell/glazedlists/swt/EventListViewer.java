@@ -31,11 +31,8 @@ public class EventListViewer implements ListEventListener, Selectable {
     /** the SWT List */
     private List list = null;
 
-    /** the EventList to respond to */
-    private EventList source = null;
-
-    /** the proxy moves events to the User Interface thread */
-    private UserInterfaceThreadProxy uiThreadProxy = null;
+    /** the proxy moves events to the SWT user interface thread */
+    private TransformedList swtSource = null;
 
     /** the formatter for list elements */
     private LabelFormat LabelFormat = null;
@@ -57,18 +54,18 @@ public class EventListViewer implements ListEventListener, Selectable {
      * List elements are formatted using the provided {@link LabelFormat}.
      */
     public EventListViewer(EventList source, List list, LabelFormat LabelFormat) {
-        this.source = source;
+        swtSource = GlazedLists.swtThreadProxyList(source, list.getDisplay());
         this.list = list;
         this.LabelFormat = LabelFormat;
 
         // Enable the selection lists
-        selectionList = new SelectionList(source, this);
+        selectionList = new SelectionList(swtSource, this);
 
+        // setup initial values
         populateList();
 
         // listen for changes
-        uiThreadProxy = new UserInterfaceThreadProxy(this, list.getDisplay());
-        source.addListEventListener(uiThreadProxy);
+        swtSource.addListEventListener(this);
     }
 
     /**
@@ -76,8 +73,8 @@ public class EventListViewer implements ListEventListener, Selectable {
      */
     private void populateList() {
         // set the initial data
-        for(int i = 0; i < source.size(); i++) {
-            addRow(i, source.get(i));
+        for(int i = 0; i < swtSource.size(); i++) {
+            addRow(i, swtSource.get(i));
         }
     }
 
@@ -137,8 +134,8 @@ public class EventListViewer implements ListEventListener, Selectable {
      * displayed List.
      */
     public void listChanged(ListEvent listChanges) {
-        int firstModified = source.size();
-        source.getReadWriteLock().readLock().lock();
+        int firstModified = swtSource.size();
+        swtSource.getReadWriteLock().readLock().lock();
         try {
             // Apply the list changes
             while(listChanges.next()) {
@@ -146,10 +143,10 @@ public class EventListViewer implements ListEventListener, Selectable {
                 int changeType = listChanges.getType();
 
                 if(changeType == ListEvent.INSERT) {
-                    addRow(changeIndex, source.get(changeIndex));
+                    addRow(changeIndex, swtSource.get(changeIndex));
                     firstModified = Math.min(changeIndex, firstModified);
                 } else if(changeType == ListEvent.UPDATE) {
-                    updateRow(changeIndex, source.get(changeIndex));
+                    updateRow(changeIndex, swtSource.get(changeIndex));
                 } else if(changeType == ListEvent.DELETE) {
                     deleteRow(changeIndex);
                     firstModified = Math.min(changeIndex, firstModified);
@@ -165,7 +162,7 @@ public class EventListViewer implements ListEventListener, Selectable {
                 }
             }
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            swtSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -231,7 +228,7 @@ public class EventListViewer implements ListEventListener, Selectable {
      * to call any method on a {@link EventListViewer} after it has been disposed.
      */
     public void dispose() {
+        swtSource.dispose();
         if(!selectionList.isDisposed()) selectionList.dispose();
-        source.removeListEventListener(uiThreadProxy);
     }
 }
