@@ -147,7 +147,7 @@ public class IteratorTest extends TestCase {
      */
     public static void main(String[] args) {
         List list = new BasicEventList();
-        long memoryUsage = Runtime.getRuntime().maxMemory();
+        long memoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);
         int repetitions = 0;
         Random random = new Random();
         
@@ -169,10 +169,12 @@ public class IteratorTest extends TestCase {
             List subList = list.subList(0, list.size()/2);
             
             // test and output memory usage
-            long newMemoryUsage = Runtime.getRuntime().maxMemory();
+            long newMemoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);
             if(newMemoryUsage > memoryUsage) {
                 memoryUsage = newMemoryUsage;
-                System.out.println(repetitions + ": " + memoryUsage);
+                System.out.println(repetitions + ": " + memoryUsage + "k, HIGHER");
+            } else if(repetitions % 10000 == 0) {
+                System.out.println(repetitions + ": " + newMemoryUsage + "k");
             }
             
             repetitions++;
