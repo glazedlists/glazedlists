@@ -74,7 +74,7 @@ public class ListTable implements MouseListener {
         // construct widgets
         table = new JTable(eventTableModel);
         table.setSelectionModel(listSelectionModel);
-        tableFormat.configureTable(table);
+        //tableFormat.configureTable(table);
         tableScrollPane = new JScrollPane(table);
         
         // prepare listeners
@@ -132,7 +132,7 @@ public class ListTable implements MouseListener {
      */
     public void setTableFormat(TableFormat tableFormat) {
         eventTableModel.setTableFormat(tableFormat);
-        tableFormat.configureTable(table);
+        //tableFormat.configureTable(table);
     }
     
     /**

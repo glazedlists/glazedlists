@@ -25,12 +25,12 @@ public interface TableFormat {
     /**
      * The number of columns to display.
      */
-    public int getFieldCount();
+    public int getColumnCount();
 
     /**
      * Gets the title of the specified column. 
      */
-    public String getFieldName(int column);
+    public String getColumnName(int column);
     
     /**
      * Gets the value of the specified field for the specified object. This
@@ -38,13 +38,5 @@ public interface TableFormat {
      * column. If you have defined a custom renderer, you may choose to return
      * simply the baseObject.
      */
-    public Object getFieldValue(Object baseObject, int column);
-
-    /**
-     * Allow the record model to customize the table to its liking
-     * This method is called after the table is created so that the
-     * record can ensure the table behaves appropriately. This may
-     * include setting the editors and renderers for the table.
-     */
-    public void configureTable(JTable table);
+    public Object getColumnValue(Object baseObject, int column);
 }

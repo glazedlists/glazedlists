@@ -186,19 +186,6 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
     }
 
     /**
-     * Returns a view of the portion of this list between the specified
-     * fromIndex, inclusive, and toIndex, exclusive.
-     */
-    public List subList(int fromIndex, int toIndex) {
-        getReadWriteLock().readLock().lock();
-        try {
-            return source.subList(fromIndex, toIndex);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
      * Returns an array containing all of the elements in this list in proper
      * sequence.
      */
@@ -220,42 +207,6 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         getReadWriteLock().readLock().lock();
         try {
             return source.toArray(array);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Returns an iterator over the elements in this list in proper sequence.
-     */
-    public Iterator iterator() {
-        getReadWriteLock().readLock().lock();
-        try {
-            return new EventListIterator(this);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence).
-     */
-    public ListIterator listIterator() {
-        getReadWriteLock().readLock().lock();
-        try {
-            return new EventListIterator(this);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence), starting at the specified position in this list.
-     */
-    public ListIterator listIterator(int index) {
-        getReadWriteLock().readLock().lock();
-        try {
-            return new EventListIterator(this, index);
         } finally {
             getReadWriteLock().readLock().unlock();
         }

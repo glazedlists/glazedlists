@@ -12,8 +12,6 @@ import junit.framework.*;
 import com.odellengineeringltd.glazedlists.*;
 // standard collections
 import java.util.*;
-// the integer array classes are useful for testing
-import com.odellengineeringltd.glazedlists.util.test.*;
 
 /**
  * This test verifies that the SortedList works.

@@ -25,12 +25,12 @@ public interface WritableTableFormat extends TableFormat {
      * For editing fields. This returns true if the specified column can
      * be edited by the user.
      */
-    public boolean isFieldEditable(int column);
+    public boolean isColumnEditable(int column);
     
     /**
      * Sets the specified field of the base object to the edited value. When
      * a column of a table is edited, this method is called so that the user
      * can specify how to modify the base object for each column.
      */
-    public void setFieldValue(Object baseObject, Object editedValue, int column);
+    public void setColumnValue(Object baseObject, Object editedValue, int column);
 }

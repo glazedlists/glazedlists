@@ -124,7 +124,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * Fetch the name for the specified column.
      */
     public String getColumnName(int column) {
-        return tableFormat.getFieldName(column);
+        return tableFormat.getColumnName(column);
     }
     
     /**
@@ -143,7 +143,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * Get the column count as specified by the table format.
      */
     public int getColumnCount() {
-        return tableFormat.getFieldCount();
+        return tableFormat.getColumnCount();
     }
 
     /**
@@ -163,7 +163,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         try {
             // ensure that this value still exists before retrieval
             if(row < getRowCount()) {
-                return tableFormat.getFieldValue(source.get(row), column);
+                return tableFormat.getColumnValue(source.get(row), column);
             } else {
                 return null;
             }
@@ -181,7 +181,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         if(tableFormat instanceof WritableTableFormat) {
             WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
             // test if this cell is editable
-            return writableTableFormat.isFieldEditable(column);
+            return writableTableFormat.isColumnEditable(column);
         // this is not a writable table
         } else {
             return false;
@@ -199,7 +199,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
             // get the object being edited from the source list
             Object baseObject = source.get(row);
             // tell the table format to set the value based on what it knows
-            writableTableFormat.setFieldValue(baseObject, editedValue, column);
+            writableTableFormat.setColumnValue(baseObject, editedValue, column);
         // this is not a writable table
         } else {
             throw new UnsupportedOperationException("Unexpected set() on read-only table");

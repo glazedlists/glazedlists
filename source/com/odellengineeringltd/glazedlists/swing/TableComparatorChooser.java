@@ -339,7 +339,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         public ColumnClickTracker(int column) {
             this.column = column;
             // add a default comparator
-            comparators.add(new TableFieldComparator(eventTableModel.getTableFormat(), column));
+            comparators.add(new TableColumnComparator(eventTableModel.getTableFormat(), column));
         }
 
         /**
@@ -513,7 +513,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
 /**
  * A comparator that sorts a table by the column that was clicked.
  */
-class TableFieldComparator implements Comparator {
+class TableColumnComparator implements Comparator {
 
     /** the table format knows to map objects to their fields */
     private TableFormat tableFormat;
@@ -525,10 +525,10 @@ class TableFieldComparator implements Comparator {
     private static ComparableComparator comparableComparator = new ComparableComparator();
 
     /**
-     * Creates a new TableFieldComparator that sorts objects by the specified
+     * Creates a new TableColumnComparator that sorts objects by the specified
      * column using the specified table format.
      */
-    public TableFieldComparator(TableFormat tableFormat, int column) {
+    public TableColumnComparator(TableFormat tableFormat, int column) {
         this.column = column;
         this.tableFormat = tableFormat;
     }
@@ -538,8 +538,8 @@ class TableFieldComparator implements Comparator {
      */
     public int compare(Object alpha, Object beta) {
         try {
-            Object alphaField = tableFormat.getFieldValue(alpha, column);
-            Object betaField = tableFormat.getFieldValue(beta, column);
+            Object alphaField = tableFormat.getColumnValue(alpha, column);
+            Object betaField = tableFormat.getColumnValue(beta, column);
             return comparableComparator.compare(alphaField, betaField);
         // throw a 'nicer' exception if the class does not implement Comparable
         } catch(ClassCastException e) {
@@ -550,15 +550,15 @@ class TableFieldComparator implements Comparator {
     }
 
     /**
-     * Test if this TableFieldComparator is equal to the other specified
-     * TableFieldComparator.
+     * Test if this TableColumnComparator is equal to the other specified
+     * TableColumnComparator.
      */
     public boolean equals(Object other) {
-        if(!(other instanceof TableFieldComparator)) return false;
+        if(!(other instanceof TableColumnComparator)) return false;
 
-        TableFieldComparator otherTableFieldComparator = (TableFieldComparator)other;
-        if(!otherTableFieldComparator.tableFormat.equals(tableFormat)) return false;
-        if(otherTableFieldComparator.column != column) return false;
+        TableColumnComparator otherTableColumnComparator = (TableColumnComparator)other;
+        if(!otherTableColumnComparator.tableFormat.equals(tableFormat)) return false;
+        if(otherTableColumnComparator.column != column) return false;
 
         return true;
     }

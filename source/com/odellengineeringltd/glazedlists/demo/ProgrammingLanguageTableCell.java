@@ -14,15 +14,15 @@ import javax.swing.*;
  */
 public class ProgrammingLanguageTableCell implements TableFormat {
 
-    public int getFieldCount() {
+    public int getColumnCount() {
         return 1;
     }
 
-    public String getFieldName(int column) { 
+    public String getColumnName(int column) { 
         return "Programming Language";
     }
     
-    public Object getFieldValue(Object baseObject, int column) {
+    public Object getColumnValue(Object baseObject, int column) {
         ProgrammingLanguage lang = (ProgrammingLanguage)baseObject;
         return lang;
     }
