@@ -1107,6 +1107,29 @@ public class UniqueListTest extends TestCase {
         boolean fourthTest = unique.contains(ten);
         assertEquals(false, fourthTest);
     }
+    
+    /**
+     * Tests that the unique list works correctly when using a renegate comparator.
+     */
+    public void testReverseComparator() {
+        // prepare a unique list with data in reverse order
+        UniqueList uniqueSource = new UniqueList(new BasicEventList(), new ReverseComparator());
+        uniqueSource.add("E");
+        uniqueSource.add("D");
+        uniqueSource.add("C");
+        
+        // modify the unique list
+        SortedSet data = new TreeSet(new ReverseComparator());
+        data.add("A");
+        data.add("B");
+        data.add("C");
+        uniqueSource.replaceAll(data);
+        
+        // verify the modifications are consistent
+        List consistencyTestList = new ArrayList();
+        consistencyTestList.addAll(data);
+        assertEquals(consistencyTestList, uniqueSource);
+    }
 
     /**
 	 * Explicit comparator for Kevin's sanity!

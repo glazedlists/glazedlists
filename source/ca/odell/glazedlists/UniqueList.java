@@ -621,6 +621,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
             getReadWriteLock().writeLock().unlock();
         }
     }
+    
+    public boolean debug = false;
 
     /**
      * Replaces the contents of this list with the contents of the specified
@@ -628,6 +630,10 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * objects that exist in both the current and the new revision.
      */
     public void replaceAll(SortedSet revision) {
+        //if(debug) System.out.println("REPLACING " + this);
+        //if(debug) System.out.println("    WITH  " + revision);
+        
+        
         // skip these results if the set is null
         if(revision == null) return;
 
@@ -654,7 +660,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
                 // when the before list holds items smaller than the after list item,
                 // the before list items are out-of-date and must be deleted
-                while(originalElement != null && revisionElement.compareTo(originalElement) > 0) {
+                while(originalElement != null && comparator.compare(originalElement, revisionElement) < 0) {
                     remove(originalIndex);
                     // replace the original element
                     originalElement = getOrNull(this, originalIndex);
@@ -662,7 +668,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
                 // when the before list holds an item identical to the after list item,
                 // the item has not changed
-                if(originalElement != null && revisionElement.compareTo(originalElement) == 0) {
+                if(originalElement != null && comparator.compare(originalElement, revisionElement) == 0) {
+                    if(debug) System.out.println("REPLACING " + originalIndex + "/" + originalElement + " with " + revisionElement);
                     set(originalIndex, revisionElement);
                     // replace the original element
                     originalIndex++;
@@ -671,6 +678,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 // when the before list holds no more items or an item that is larger than
                 // the current after list item, insert the after list item
                 } else {
+                    if(debug) System.out.println("ADDING " + originalIndex + "/" + revisionElement);
                     add(originalIndex, revisionElement);
                     // adjust the index of the original element
                     originalIndex++;
@@ -680,6 +688,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // when the before list holds items larger than the largest after list item,
             // the before list items are out-of-date and must be deleted
             while(originalIndex < size()) {
+                if(debug) System.out.println("REMOVING " + originalIndex + "/" + get(originalIndex));
                 remove(originalIndex);
             }
             
