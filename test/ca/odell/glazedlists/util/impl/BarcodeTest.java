@@ -200,16 +200,9 @@ public class BarcodeTest extends TestCase {
 
         System.out.println("Barcode:");
         startTime = System.currentTimeMillis();
-        Barcode testTree = new Barcode();
+        Barcode testBarcode = new Barcode();
         endTime = System.currentTimeMillis();
         System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
-
-        System.out.println("BooleanList:");
-        startTime = System.currentTimeMillis();
-        BooleanList testList = new BooleanList();
-        endTime = System.currentTimeMillis();
-        System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
-
 
         for(int r = 1;r < 5;r++) {
             System.out.println("Testing Round " + r);
@@ -247,17 +240,7 @@ public class BarcodeTest extends TestCase {
             counter = 0;
             startTime = System.currentTimeMillis();
             for(;counter < 500000;counter++) {
-                testTree.add(indexes[counter], values[counter], 1);
-                //testTree.printDebug();
-            }
-            endTime = System.currentTimeMillis();
-            System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
-
-            System.out.println("BooleanList:");
-            counter = 0;
-            startTime = System.currentTimeMillis();
-            for(;counter < 500000;counter++) {
-                testList.add(indexes[counter], values[counter]);
+                testBarcode.add(indexes[counter], values[counter], 1);
             }
             endTime = System.currentTimeMillis();
             System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
@@ -273,16 +256,7 @@ public class BarcodeTest extends TestCase {
             counter = 0;
             startTime = System.currentTimeMillis();
             for(;counter < 500000;counter++) {
-                testTree.get(indexes[counter]);
-            }
-            endTime = System.currentTimeMillis();
-            System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
-
-            System.out.println("BooleanList:");
-            counter = 0;
-            startTime = System.currentTimeMillis();
-            for(;counter < 500000;counter++) {
-                testList.get(indexes[counter]);
+                testBarcode.get(indexes[counter]);
             }
             endTime = System.currentTimeMillis();
             System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
@@ -311,22 +285,9 @@ public class BarcodeTest extends TestCase {
 
             System.out.println("Barcode:");
             counter = 0;
-            try{
             startTime = System.currentTimeMillis();
             for(;counter < 500000;counter++) {
-                testTree.set(indexes[counter], values[counter], 1);
-            }
-            endTime = System.currentTimeMillis();
-            }catch(Exception e) {
-                System.out.println("I am slowly going crazy 654321 switch..");
-            }
-            System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
-
-            System.out.println("BooleanList:");
-            counter = 0;
-            startTime = System.currentTimeMillis();
-            for(;counter < 500000;counter++) {
-                testList.set(indexes[counter], values[counter]);
+                testBarcode.set(indexes[counter], values[counter], 1);
             }
             endTime = System.currentTimeMillis();
             System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
@@ -345,16 +306,7 @@ public class BarcodeTest extends TestCase {
             counter = 0;
             startTime = System.currentTimeMillis();
             for(;counter < 500000;counter++) {
-                testTree.remove(indexes[counter], 1);
-            }
-            endTime = System.currentTimeMillis();
-            System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
-
-            System.out.println("BooleanList:");
-            counter = 0;
-            startTime = System.currentTimeMillis();
-            for(;counter < 500000;counter++) {
-                testList.remove(indexes[counter]);
+                testBarcode.remove(indexes[counter], 1);
             }
             endTime = System.currentTimeMillis();
             System.out.println("Test completed in " + (endTime - startTime) + " milliseconds.\n");
