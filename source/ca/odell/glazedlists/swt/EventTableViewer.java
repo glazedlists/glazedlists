@@ -132,7 +132,7 @@ public class EventTableViewer implements ListEventListener {
         // save the former selection
         List selection = new ArrayList();
         for(int i = 0; i < table.getItemCount(); i++) {
-            selection.add(i, new Boolean(table.isSelected(i)));
+            selection.add(i, Boolean.valueOf(table.isSelected(i)));
         }
         
         // walk the list
