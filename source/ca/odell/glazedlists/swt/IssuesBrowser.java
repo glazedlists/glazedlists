@@ -112,7 +112,7 @@ public class IssuesBrowser {
     }
 
     private Table createIssuesTable(Shell shell) {
-        Table issuesTable = new Table(shell, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER);
+        Table issuesTable = new Table(shell, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER | SWT.VIRTUAL);
         GridData issuesTableLayout = new GridData();
         issuesTableLayout.horizontalSpan = 2;
         issuesTableLayout.verticalSpan = 1;

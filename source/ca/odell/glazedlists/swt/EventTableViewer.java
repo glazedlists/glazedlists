@@ -16,9 +16,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.graphics.*;
 // standard collections as support
 import java.util.*;
 
@@ -34,16 +31,19 @@ import java.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class EventTableViewer implements ListEventListener {
-    
+
     /** the heavyweight table */
     private Table table;
+
+    /** whether the underlying table is Virtual */
+    private boolean tableIsVirtual = false;
 
     /** the complete list of messages before filters */
     protected EventList source;
 
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
-    
+
     /** Enables check support */
     private TableCheckFilterList checkFilter = null;
 
@@ -56,15 +56,23 @@ public class EventTableViewer implements ListEventListener {
             this.checkFilter = new TableCheckFilterList(source, table, tableFormat);
             source = checkFilter;
         }
-        
+
         // save table, source list and table format
         this.table = table;
         this.source = source;
         this.tableFormat = tableFormat;
 
-        // prepare the table's initial rows
-        populateTable();
-        
+        // determine if the provided table is Virtual
+        tableIsVirtual = SWT.VIRTUAL == (table.getStyle() & SWT.VIRTUAL);
+
+        initTable();
+        if(!tableIsVirtual) {
+            populateTable();
+        } else {
+            table.setItemCount(source.size());
+            table.addListener(SWT.SetData, new VirtualTableListener());
+        }
+
         // listen for events, using the user interface thread
         if(source == checkFilter) {
             source.addListEventListener(this);
@@ -72,74 +80,84 @@ public class EventTableViewer implements ListEventListener {
             source.addListEventListener(new UserInterfaceThreadProxy(this, table.getDisplay()));
         }
     }
-    
+
     /**
-     * Populates the table with the initial data from the list.
+     * Builds the tables columns and table headers
      */
-    private void populateTable() {
-        // set the headers
+    private void initTable() {
         table.setHeaderVisible(true);
         for(int c = 0; c < tableFormat.getColumnCount(); c++) {
             TableColumn column = new TableColumn(table, SWT.LEFT, c);
             column.setText((String)tableFormat.getColumnName(c));
             column.setWidth(80);
         }
+    }
 
-        // set the initial data
+    /**
+     * Populates the table with the initial data from the list.
+     */
+    private void populateTable() {
         for(int r = 0; r < source.size(); r++) {
             addRow(r, source.get(r));
         }
     }
-    
+
     /**
      * Adds the item at the specified row.
      */
     private void addRow(int row, Object value) {
-        TableItem item = new TableItem(table, 0, row);
-        for(int c = 0; c < tableFormat.getColumnCount(); c++) {
-            Object cellValue = tableFormat.getColumnValue(value, c);
-            if(cellValue != null) item.setText(c, cellValue.toString());
-            else item.setText(c, "");
+        // Table isn't Virtual, or adding in the middle
+        if(!tableIsVirtual || row < table.getItemCount()) {
+            TableItem item = new TableItem(table, 0, row);
+            setItemText(item, value);
+
+        // Table is Virtual and adding at the end
+        } else {
+            table.setItemCount(table.getItemCount() + 1);
         }
     }
-    
+
     /**
      * Updates the item at the specified row.
      */
     private void updateRow(int row, Object value) {
         TableItem item = table.getItem(row);
-        for(int c = 0; c < tableFormat.getColumnCount(); c++) {
-            Object cellValue = tableFormat.getColumnValue(value, c);
-            if(cellValue != null) item.setText(c, cellValue.toString());
-            else item.setText(c, "");
+        setItemText(item, value);
+    }
+
+    /**
+     * Sets all of the column values on a TableItem.
+     */
+    private void setItemText(TableItem item, Object value) {
+        for(int i = 0; i < tableFormat.getColumnCount(); i++) {
+            Object cellValue = tableFormat.getColumnValue(value, i);
+            if(cellValue != null) item.setText(i, cellValue.toString());
+            else item.setText(i, "");
         }
     }
-    
+
     /**
      * Gets the Table Format.
      */
     public TableFormat getTableFormat() {
         return tableFormat;
     }
-    
+
     /**
      * Gets the table being managed by this {@link EventTableViewer}.
      */
     public Table getTable() {
         return table;
     }
-        
+
 
     /**
      * Sets this table to be rendered by a different table format.
      */
     public void setTableFormat(TableFormat tableFormat) {
         throw new UnsupportedOperationException();
-        //this.tableFormat = tableFormat;
-        //tableModelEvent.setStructureChanged();
-        //fireTableChanged(tableModelEvent);
     }
-    
+
     /**
      * Set whether this shall show only checked elements.
      */
@@ -152,22 +170,22 @@ public class EventTableViewer implements ListEventListener {
     public boolean getCheckedOnly() {
         return checkFilter.getCheckedOnly();
     }
-    
+
     /**
      * Gets all checked items.
      */
     public List getAllChecked() {
         return checkFilter.getAllChecked();
     }
-    
+
     /**
      * Get the source of this {@link EventTableViewer}.
      */
     public EventList getSourceList() {
         return source;
     }
-    
-    
+
+
     /**
      * When the source list is changed, this forwards the change to the
      * displayed table.
@@ -190,12 +208,12 @@ public class EventTableViewer implements ListEventListener {
             for(int i = 0; i < table.getItemCount(); i++) {
                 selection.add(i, Boolean.valueOf(table.isSelected(i)));
             }
-            
+
             // walk the list
             while(listChanges.next()) {
                 int changeIndex = listChanges.getIndex();
                 int changeType = listChanges.getType();
-                
+
                 if(changeType == ListEvent.INSERT) {
                     selection.add(changeIndex, Boolean.FALSE);
                     addRow(changeIndex, source.get(changeIndex));
@@ -206,7 +224,7 @@ public class EventTableViewer implements ListEventListener {
                     table.remove(changeIndex);
                 }
             }
-            
+
             // apply the saved selection
             for(int i = 0; i < table.getItemCount(); i++) {
                 boolean selected = ((Boolean)selection.get(i)).booleanValue();
@@ -218,6 +236,18 @@ public class EventTableViewer implements ListEventListener {
             }
         } finally {
             source.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    /**
+     * Respond to view changes on a Virtual Table
+     */
+    protected final class VirtualTableListener implements Listener {
+        public void handleEvent(Event e) {
+            TableItem item = (TableItem)e.item;
+            int tableIndex = table.indexOf(item);
+            Object value = source.get(tableIndex);
+            setItemText(item, value);
         }
     }
 }
