@@ -712,7 +712,7 @@ public class UniqueListTest extends TestCase {
     public void testReSortSource() {
         // create a unique list with a sorted source
         source = new BasicEventList();
-        SortedList sortedList = new SortedList(source/*, new IntArrayComparator(0)*/);
+        SortedList sortedList = new SortedList(source);
         unique = new UniqueList(sortedList);
         
         // populate the source
@@ -734,7 +734,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(unique, controlList);
         
         // verify the unique list is correct when the sorted list is sorted
-        sortedList.setComparator(new ComparableComparator());
+        sortedList.setComparator(new ReverseComparator(new ComparableComparator()));
         assertEquals(unique, controlList);
     }
 
