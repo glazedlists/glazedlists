@@ -124,7 +124,7 @@ public class SelectionModelEventList {
          */
         public SelectionEventList(EventList source) {
             super(source);
-            source.addListChangeListener(this);
+            source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
             SelectionModelEventList.this.updates = super.updates;
         }
     
@@ -497,12 +497,18 @@ public class SelectionModelEventList {
             return flagList.getIndex(flagList.getCompressedList().size() - 1);
         }
         /**
-         * Returns true if the specified index is selected.
+         * Returns true if the specified index is selected. If the specified
+         * index has not been seen before, this will return false. This is
+         * in the case where the table painting and selection have fallen
+         * out of sync. Usually in this case there is an update event waiting
+         * in the event queue that notifies this model of the change
+         * in table size.
          */
         public boolean isSelectedIndex(int index) {
             // bail if index is too high
             if(index < 0 || index >= flagList.size()) {
-                throw new ArrayIndexOutOfBoundsException("Cannot get selection index " + index + ", list size " + flagList.size());
+                //throw new ArrayIndexOutOfBoundsException("Cannot get selection index " + index + ", list size " + flagList.size() + " pending " + source.size());
+                return false;
             }
             
             // a value is selected if it is not null in the flag list
