@@ -67,15 +67,20 @@ public class UniqueListPerformance {
         // Now set up the transformations
         System.out.print("Setting up list transformations");
         long setUpStart = System.currentTimeMillis();
-        AllOrOneValueFilter firstFilter =  new AllOrOneValueFilter(source, GlazedLists.beanPropertyComparator(MozillaEntry.class, "user"));
+        
+        UniqueList firstUnique = new UniqueList(source, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
+        validateUniqueList(firstUnique, source, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
+        AllOrOneValueFilter firstFilter =  new AllOrOneValueFilter(firstUnique);
         System.out.print(".");
-        UniqueList secondFilter = new UniqueList(firstFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
+        UniqueList secondFilter = new UniqueList(firstFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity"));
+        validateUniqueList(secondFilter, firstFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity"));
         System.out.print(".");
         UniqueList thirdFilter =  new UniqueList(secondFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
         System.out.print(".");
         UniqueList fourthFilter = new UniqueList(thirdFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
         System.out.print(".");
         UniqueList fifthFilter =  new UniqueList(fourthFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
+        validateUniqueList(fifthFilter, fourthFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
         System.out.print(".");
         UniqueList sixthFilter =  new UniqueList(fifthFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
         
@@ -88,12 +93,33 @@ public class UniqueListPerformance {
         long startTime = System.currentTimeMillis();
         for(int i = 0;i < filterIterations;i++) {
             firstFilter.pickANewFilterAtRandom();
-            if(i % 20 == 0) System.out.print(".");
+            if(i % 20 == 0) {
+                System.out.println("FIRST FILTER SIZE: " + firstFilter.size());
+                int index = dice.nextInt(firstFilter.size());
+                System.out.println("A RANDOM ELEMENT AT " + index + " = " + firstFilter.get(index));
+            }
         }
         
         long endTime = System.currentTimeMillis();
         long testTime = endTime - startTime;
         System.out.println("Done.\nTest completed in " + testTime + " milliseconds");
+    }
+    
+    private static void validateUniqueList(UniqueList unique, Collection parent, Comparator comparator) {
+        TreeSet allUniqueElements = new TreeSet(comparator);
+        allUniqueElements.addAll(parent);
+        
+        Iterator a = unique.iterator();
+        Iterator b = allUniqueElements.iterator();
+        for(; a.hasNext() && b.hasNext(); ) {
+            Object eA = a.next();
+            Object eB = b.next();
+            if(0 != comparator.compare(eA, eB)) throw new IllegalStateException("NO MATCH: " + eA + " != " + eB);
+        }
+        if(a.hasNext() || b.hasNext()) throw new IllegalStateException("DIFFERENT SIZES: " + unique.size() + " != " + allUniqueElements.size());
+        
+        // they're equal
+        System.out.println("EQUAL SETS OF SIZE : " + unique.size() + ", " + allUniqueElements.size() );
     }
 
     /**
@@ -103,28 +129,21 @@ public class UniqueListPerformance {
     private static class AllOrOneValueFilter extends AbstractFilterList {
 
         /** the only index to filter in */
-        private boolean matchAll = false;
-
-        /** the only thing in the list if not all */
-        private Object objectToMatch = null;
-
-        /** the comparator to use to compare objects */
-        private Comparator comparator;
+        private int matchModulus = 1;
 
         /**
          * Create a filter list that contains a unique, sorted set of data
          * that either contains all elements which match the selected unique
          * value, or source.size() elements.
          */
-        public AllOrOneValueFilter(EventList source, Comparator comparator) {
-            super(new UniqueList(source, comparator));
-            this.comparator = comparator;
+        public AllOrOneValueFilter(EventList source) {
+            super(source);
         }
 
         /** {@inheritDoc} */
         public boolean filterMatches(Object element) {
-            if(matchAll) return true;
-            return 0 == comparator.compare(element, objectToMatch);
+            MozillaEntry entry = (MozillaEntry)element;
+            return (entry.getId() % matchModulus == 0);
         }
 
         /**
@@ -132,17 +151,7 @@ public class UniqueListPerformance {
          * call this method with -1
          */
         public void pickANewFilterAtRandom() {
-            matchAll = dice.nextInt(2) == 0;
-            
-            // match everything
-            if(matchAll) {
-                // do nothing
-                
-            // match a particular element
-            } else {
-                int unfilteredIndex = dice.nextInt(source.size());
-                objectToMatch = source.get(unfilteredIndex);
-            }
+            matchModulus = dice.nextInt(6) + 1;
             
             handleFilterChanged();
         }
@@ -153,8 +162,8 @@ public class UniqueListPerformance {
      */
     public static class MozillaEntry {
         /** some JavaBean properties */
-        private String id;
-        private String user;
+        private int id;
+        private String severity;
         private String priority;
         private String os;
         private String email;
@@ -165,9 +174,9 @@ public class UniqueListPerformance {
         /**
          * Models an entry in the Mozilla bug db.
          */
-        MozillaEntry(String id, String user, String priority, String os, String email, String result, String status, String desc) {
-            this.id = id;
-            this.user = user;
+        MozillaEntry(String id, String severity, String priority, String os, String email, String result, String status, String desc) {
+            this.id = Integer.parseInt(id);
+            this.severity = severity;
             this.priority = priority;
             this.os = os;
             this.email = email;
@@ -177,12 +186,12 @@ public class UniqueListPerformance {
         }
 
         /** getters for the JavaBean properties */
-        public String getId() {
+        public int getId() {
             return id;
         }
 
-        public String getUser() {
-            return user;
+        public String getSeverity() {
+            return severity;
         }
 
         public String getPriority() {
@@ -207,6 +216,9 @@ public class UniqueListPerformance {
 
         public String getDesc() {
             return desc;
+        }
+        public String toString() {
+            return "" + id;
         }
     }
 }
