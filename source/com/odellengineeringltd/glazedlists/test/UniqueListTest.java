@@ -864,4 +864,48 @@ public class UniqueListTest extends TestCase {
         assertEquals(5, source.size());
         assertEquals(3, unique.size());
     }
+    
+    /**
+     * Verify that setAll() works in the simplest of cases.
+     */
+    public void testSetAll() {
+        unique.add("B");
+        unique.add("D");
+        unique.add("E");
+        unique.add("F");
+
+        SortedSet replacementSet = new TreeSet();
+        replacementSet.add("A");
+        replacementSet.add("B");
+        replacementSet.add("C");
+        replacementSet.add("D");
+        replacementSet.add("G");
+        
+        unique.setAll(replacementSet);
+
+        ArrayList controlList = new ArrayList();
+        controlList.addAll(replacementSet);
+        assertEquals(controlList, unique);
+    }
+    
+    /**
+     * Verify that setAll() works in a more sophisticated case.
+     */
+    public void testSetAllRigorous() {
+        for(int i = 0; i < 100; i++) {
+            unique.add(new Integer(random.nextInt(100)));
+        }
+        
+        SortedSet replacementSet = new TreeSet();
+        for(int i = 0; i < 100; i++) {
+            replacementSet.add(new Integer(random.nextInt(100)));
+        }
+        
+        unique.setAll(replacementSet);
+
+        ArrayList controlList = new ArrayList();
+        controlList.addAll(replacementSet);
+        assertEquals(controlList, unique);
+    }
+    
 }

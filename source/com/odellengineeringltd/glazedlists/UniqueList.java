@@ -473,4 +473,66 @@ public final class UniqueList extends TransformedList implements ListEventListen
             getReadWriteLock().writeLock().unlock();
         }
     }
+    
+    /**
+     * Replaces the contents of this list with the contents of the specified
+     * SortedSet. This walks through both lists in parallel in order to retain
+     * objects that exist in both the current and the new revision.
+     */
+    public void setAll(SortedSet revision) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            // skip these results if the set is null
+            if(revision == null) return;
+
+            // iterate through the all values simultaneously, looking for differences
+            ListIterator originalIterator = listIterator();
+            Iterator revisionIterator = revision.iterator();
+
+            // set up the current objects to examine
+            Comparable revisionElement = null;
+            Comparable originalElement = nextOrNull(originalIterator);
+
+            // for all elements in the revised set
+            while((revisionElement = nextOrNull(revisionIterator)) != null) {
+
+                // when the before list holds items smaller than the after list item,
+                // the before list items are out-of-date and must be deleted 
+                while(originalElement != null && revisionElement.compareTo(originalElement) > 0) {
+                    originalIterator.remove();
+                    originalElement = nextOrNull(originalIterator);
+                }
+
+                // when the before list holds an item identical to the after list item,
+                // the item has not changed
+                if(originalElement != null && revisionElement.compareTo(originalElement) == 0) {
+                    originalIterator.set(revisionElement);
+                    originalElement = nextOrNull(originalIterator);
+
+                // when the before list holds no more items or an item that is larger than
+                // the current after list item, insert the after list item
+                } else {
+                    originalIterator.add(revisionElement);
+                }
+            }
+
+            // when the before list holds items larger than the largest after list item,
+            // the before list items are out-of-date and must be deleted 
+            while(originalElement != null) {
+                originalIterator.remove();
+                originalElement = nextOrNull(originalIterator);
+            }
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+    
+    /**
+     * Utility method fetches the next Comparable from the iterator if there 
+     * is another element in the Iterator.
+     */
+    private Comparable nextOrNull(Iterator i) {
+        if(i.hasNext()) return (Comparable)i.next();
+        else return null;
+    }
 }
