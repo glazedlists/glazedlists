@@ -15,6 +15,47 @@ import ca.odell.glazedlists.util.concurrent.*;
 
 /**
  * An {@link EventList} composed of multiple source {@link EventList}s.
+ */
+public class CompositeList extends CollectionList {
+
+    public CompositeList() {
+        super(new BasicEventList(), new NaturalCollectionListModel());
+    }
+    
+    /**
+     * Adds the specified {@link EventList} as a source to this {@link CompositeList}.
+     */
+    public void addMemberList(EventList list) {
+        source.add(list);
+    }
+    
+    /**
+     * Removes the specified {@link EventList} as a source {@link EventList}
+     * to this {@link CompositeList}.
+     */
+    public void removeMemberList(EventList list) {
+        for(Iterator i = source.iterator(); i.hasNext(); ) {
+            if(i.next() == list) {
+                i.remove();
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Cannot remove list " + list + " which is not in this CompositeList");
+    }
+
+    /**
+     * Returns the List itself for a List of Lists.
+     */
+    private static class NaturalCollectionListModel implements CollectionListModel {
+        public List getChildren(Object parent) {
+            return (List)parent;
+        }
+    }
+}
+
+
+/**
+ * An {@link EventList} composed of multiple source {@link EventList}s.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This
  * {@link EventList}'s {@link ReadWriteLock} recursively acquires the locks
@@ -38,7 +79,8 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class CompositeList extends AbstractEventList {
+final class OldCompositeList extends AbstractEventList {
+//public final class CompositeList extends AbstractEventList {
     
     /** the lists that we are following events on */
     private List memberLists = new ArrayList();
@@ -50,7 +92,7 @@ public final class CompositeList extends AbstractEventList {
      * Creates a {@link CompositeList} that is initially composed of zero source
      * {@link EventList}s.
      */
-    public CompositeList() {
+    public OldCompositeList() {
         super(null);
         readWriteLock = new CompositeReadWriteLock();
     }
@@ -271,7 +313,7 @@ public final class CompositeList extends AbstractEventList {
          * loop
          */
         public void listChanged(ListEvent listChanges) {
-            synchronized(CompositeList.this) {
+            synchronized(OldCompositeList.this) {
                 changeQueue.addLast(listChanges);
                 globalChangeQueue.addLast(MemberList.this);
             }

@@ -64,9 +64,15 @@ public class CollectionList extends TransformedList implements ListEventListener
             List children = collectionListModel.getChildren(source.get(i));
 
             // prepare the children to the barcode
-            childLists.addByNode(i, children);
+            IndexedTreeNode node = childLists.addByNode(i, children);
             barcode.addBlack(barcode.size(), 1);
             if(!children.isEmpty()) barcode.addWhite(barcode.size(), children.size());
+
+            // if the child list fires events, handle them
+            if(children instanceof EventList) {
+                ChildListListener listener = new ChildListListener((EventList)children, node);
+                node.setValue(listener);
+            }
         }
 
         // Listen for events
@@ -90,11 +96,21 @@ public class CollectionList extends TransformedList implements ListEventListener
 
         // get the parent
         int parentIndex = barcode.getBlackBeforeWhite(index);
-        List children = (List)childLists.getNode(parentIndex).getValue();
+        List children = getChildren(parentIndex);
 
         // get the child
         int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return children.get(childIndexInParent);
+    }
+    
+    /**
+     * Hack method for getting the children from the specified child index.
+     * This uses some ugly instanceof code on the childLists mixed data structure.
+     */
+    private List getChildren(int parentIndex) {
+        IndexedTreeNode node = childLists.getNode(parentIndex);
+        if(node.getValue() instanceof List) return (List)node.getValue();
+        else return ((ChildListListener)node.getValue()).getChildren();
     }
 
     /**
@@ -180,19 +196,14 @@ public class CollectionList extends TransformedList implements ListEventListener
      */
     private void handleInsert(int parentIndex) {
         // Find the index of the black node with that index
-        int absoluteIndex;
-        if(parentIndex == barcode.blackSize()) {
-            absoluteIndex = barcode.size();
-        } else {
-            absoluteIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
-        }
+        int absoluteIndex = getAbsoluteIndex(parentIndex);
 
         // Find the size of the new node and add it to the total
         Object parent = source.get(parentIndex);
         List children = collectionListModel.getChildren(parent);
 
         // Add the parent node
-        childLists.addByNode(parentIndex, children);
+        IndexedTreeNode node = childLists.addByNode(parentIndex, children);
         barcode.addBlack(absoluteIndex, 1);
         
         // Add the children and fire the event
@@ -201,6 +212,12 @@ public class CollectionList extends TransformedList implements ListEventListener
             int childIndex = absoluteIndex - parentIndex;
             updates.addInsert(childIndex, childIndex + children.size() - 1);
         }
+
+        // if the child list fires events, handle them
+        if(children instanceof EventList) {
+            ChildListListener listener = new ChildListListener((EventList)children, node);
+            node.setValue(listener);
+        }
     }
     
     /**
@@ -208,27 +225,82 @@ public class CollectionList extends TransformedList implements ListEventListener
      */
     private void handleDelete(int parentIndex) {
         // Find the index of the black node with that index
-        int absoluteIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
-
-        // Find the index of the NEXT black node (so we know what to delete)
-        int nextNodeIndex;
-        if(parentIndex + 1 < barcode.blackSize()) {
-            nextNodeIndex = barcode.getIndex(parentIndex + 1, Barcode.BLACK);
-        // If there are no more black nodes, simulate it with the full barcode size
-        } else {
-            nextNodeIndex = barcode.size();
-        }
+        int absoluteIndex = getAbsoluteIndex(parentIndex);
+        int nextNodeIndex = getAbsoluteIndex(parentIndex+1);
         
         // Remove the nodes
         int removeRange = nextNodeIndex - absoluteIndex;
         barcode.remove(absoluteIndex, removeRange);
-        childLists.removeByIndex(parentIndex);
+        IndexedTreeNode removedNode = childLists.removeByIndex(parentIndex);
         
         // fire the event
         int childIndex = absoluteIndex - parentIndex;
         int childrenToDelete = removeRange - 2; // 1 for parent and 1 for inclusive ranges
         if(childrenToDelete > 0) {
             updates.addDelete(childIndex, childIndex + childrenToDelete);
+        }
+        
+        // stop listening for events
+        if(removedNode.getValue() instanceof ChildListListener) {
+            ((ChildListListener)removedNode.getValue()).dispose();
+        }
+    }
+    
+    /**
+     * Get the absolute index for the specified parent index. This may be virtual
+     * if the parent index is one greater than the last element. This is useful
+     * for calculating the size of a range by using the location of its follower.
+     */
+    private int getAbsoluteIndex(int parentIndex) {
+        if(parentIndex < barcode.blackSize()) {
+            return barcode.getIndex(parentIndex, Barcode.BLACK);
+        } else if(parentIndex == barcode.blackSize()) {
+            return barcode.size();
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+    
+    /**
+     * Monitors changes to a member EventList and forwards changes to all listeners
+     * of the CollectionList.
+     */
+    private class ChildListListener implements ListEventListener {
+        private EventList children;
+        private IndexedTreeNode node;
+        public ChildListListener(EventList children, IndexedTreeNode node) {
+            this.children = children;
+            this.node = node;
+            children.addListEventListener(this);
+        }
+        public EventList getChildren() {
+            return children;
+        }
+        public void listChanged(ListEvent listChanges) {
+            int parentIndex = node.getIndex();
+            int absoluteIndex = getAbsoluteIndex(parentIndex);
+            int nextNodeIndex = getAbsoluteIndex(parentIndex+1);
+            
+            // update the barcode
+            int firstChildIndex = absoluteIndex + 1;
+            int previousChildrenCount = nextNodeIndex - firstChildIndex;
+            if(previousChildrenCount > 0) barcode.remove(firstChildIndex, previousChildrenCount);
+            if(!children.isEmpty()) barcode.addWhite(firstChildIndex, children.size());
+            
+            // get the offset of this child list
+            int childOffset = absoluteIndex - parentIndex;
+
+            // forward the offset event
+            updates.beginEvent();
+            while(listChanges.next()) {
+                int index = listChanges.getIndex();
+                int type = listChanges.getType();
+                updates.addChange(type, index + childOffset);
+            }
+            updates.commitEvent();
+        }
+        public void dispose() {
+            children.removeListEventListener(this);
         }
     }
 }
