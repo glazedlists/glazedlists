@@ -186,7 +186,7 @@ final class ListEventBlock {
         }
         
         // test if these two require an swap
-        if(second.type == ListEvent.INSERT) {
+        if(second.type == ListEvent.INSERT && first.type != ListEvent.DELETE) {
             return second.startIndex <= first.startIndex;
         } else {
             return second.startIndex < first.startIndex;
