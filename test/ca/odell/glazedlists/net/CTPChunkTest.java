@@ -31,6 +31,8 @@ public class CTPChunkTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
+        System.err.println("");
+        System.err.println("");
         handlerFactory = new StaticCTPHandlerFactory();
         connectionManager = new CTPConnectionManager(handlerFactory);
         connectionManager.start();
@@ -40,6 +42,7 @@ public class CTPChunkTest extends TestCase {
      * Clean up after the test.
      */
     public void tearDown() {
+        connectionManager.stop();
     }
 
     /**
@@ -56,7 +59,8 @@ public class CTPChunkTest extends TestCase {
         handlerFactory.addHandler(server);
         connectionManager.connect("localhost", client);
         
-        connectionManager.stop();
+        client.waitForCompletion((long)1000);
+        server.waitForCompletion((long)1000);
         
         assertTrue("Server did not complete", server.isDone());
         assertTrue("Client did not complete", client.isDone());
@@ -77,9 +81,64 @@ public class CTPChunkTest extends TestCase {
         handlerFactory.addHandler(server);
         connectionManager.connect("localhost", client);
         
-        connectionManager.stop();
+        client.waitForCompletion((long)1000);
+        server.waitForCompletion((long)1000);
         
         assertTrue("Server did not complete", server.isDone());
         assertTrue("Client did not complete", client.isDone());
+    }
+
+
+    /**
+     * Verifies that chunks can be sent from the client to the server. This simply
+     * sends data to itself.
+     */
+    public void testSendLargeString() {
+        String clientSendData = randomString(2000);
+        String serverSendData = randomString(3000);
+        
+        StaticCTPHandler client = new StaticCTPHandler();
+        client.addEnqueued(clientSendData);
+        client.addExpected(serverSendData);
+        
+        StaticCTPHandler server = new StaticCTPHandler();
+        server.addExpected(clientSendData);
+        server.addEnqueued(serverSendData);
+        
+        handlerFactory.addHandler(server);
+        connectionManager.connect("localhost", client);
+        
+        client.waitForCompletion((long)1000);
+        server.waitForCompletion((long)1000);
+        
+        assertTrue("Server did not complete", server.isDone());
+        assertTrue("Client did not complete", client.isDone());
+    }
+    
+    /**
+     * Constructs a random string of the specified length.
+     */
+    public static String randomString(int length) {
+        StringBuffer result = new StringBuffer();
+        for(int i = 0; i < length; i++) {
+            result.append(randomCharacter());
+        }
+        return result.toString();
+    }
+    /**
+     * Gets a random character.
+     */
+    public static char randomCharacter() {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        Random dice = new Random();
+        return alphabet.charAt(dice.nextInt(alphabet.length()));
+    }
+    
+    public static void main(String[] args) {
+        
+        CTPChunkTest test = new CTPChunkTest();
+        test.setUp();
+        test.testSendLargeString();
+        test.tearDown();
     }
 }

@@ -18,17 +18,44 @@ import java.io.UnsupportedEncodingException;
  * A CTPHandler where all data is known beforehand.
  */
 class StaticCTPHandler implements CTPHandler {
+    
+    /** the actions to be performed on this connection */
     private List tasks = new ArrayList();
+    
+    /** whether this connection has connected */
+    private boolean ready = false;
+    
+    /** whether this connection has disconnected */
+    private boolean closed = false;
+    
+    
+    /**
+     * Add expected incoming data.
+     */
     public void addExpected(String data) {
         tasks.add(new Expected(data));
     }
+    
+    /**
+     * Add queued outgoing data.
+     */
     public void addEnqueued(String data) {
         tasks.add(new Enqueued(data));
     }
-    public void connectionReady(CTPConnection source) {
-        sendEnqueued(source);
+    
+    /**
+     * Notify that this connection is ready for use.
+     */
+    public synchronized void connectionReady(CTPConnection source) {
+        if(ready) throw new IllegalStateException("Connection already ready");
+        ready = true;
+        handlePendingTasks(source);
     }
-    public void receiveChunk(CTPConnection source, ByteBuffer data) {
+    
+    /**
+     * Handle the specified incoming data.
+     */
+    public synchronized void receiveChunk(CTPConnection source, ByteBuffer data) {
         if(!data.hasRemaining()) return;
         
         if(tasks.size() == 0) throw new IllegalStateException("Unexpected data " + data);
@@ -36,13 +63,23 @@ class StaticCTPHandler implements CTPHandler {
         int remain = expected.consume(data);
         if(remain == 0) {
             tasks.remove(0);
-            sendEnqueued(source);
+            handlePendingTasks(source);
         }
     }
-    public void connectionClosed(CTPConnection source, Exception reason) {
-        if(!tasks.isEmpty()) throw new IllegalStateException("Close " + this + " with " + tasks.size() + " events pending: " + tasks);
+    
+    /**
+     * Notify that this connection is no longer ready for use.
+     */
+    public synchronized void connectionClosed(CTPConnection source, Exception reason) {
+        if(closed) throw new IllegalStateException("Connection already closed");
+        closed = true;
+        notifyAll();
     }
-    private void sendEnqueued(CTPConnection connection) {
+    
+    /**
+     * Handle pending tasks that can be performed immediately.
+     */
+    private void handlePendingTasks(CTPConnection connection) {
         while(tasks.size() > 0 && tasks.get(0) instanceof Enqueued) {
             Enqueued enqueued = (Enqueued)tasks.remove(0);
             connection.sendChunk(enqueued.getData());
@@ -51,8 +88,25 @@ class StaticCTPHandler implements CTPHandler {
             connection.close();
         }
     }
-    public boolean isDone() {
-        return tasks.isEmpty();
+    
+    /**
+     * Whether all tasks have completed.
+     */
+    public synchronized boolean isDone() {
+        return (tasks.isEmpty() && closed);
+    }
+    
+    /**
+     * Waits for this connection to be completed.
+     */
+    public synchronized void waitForCompletion(long timeout) {
+        if(closed) return;
+        try {
+            wait(timeout);
+        } catch(InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        if(!closed) throw new IllegalStateException("Complete timed out without close");
     }
 }
 
@@ -115,8 +169,7 @@ class StaticCTPHandlerFactory implements CTPHandlerFactory {
         handlers.add(handler);
     }
     public CTPHandler constructHandler() {
+        if(handlers.isEmpty()) throw new IllegalStateException("No more handlers");
         return (CTPHandler)handlers.remove(0);
     }
 }
-
-

@@ -63,11 +63,13 @@ class CTPConnectionToClose implements CTPRunnable {
         }
         
         // try to flush what we have left
+        boolean flushSuccess = false;
         try {
-            connection.writer.flush();
+            flushSuccess = connection.writer.flush();
         } catch(IOException e) {
             // if this flush failed, there's nothing we can do
         }
+        if(!flushSuccess) logger.warning("Close proceeding with unsent data");
 
         // close the socket
         try {
@@ -79,9 +81,9 @@ class CTPConnectionToClose implements CTPRunnable {
 
         // log the close
         if(reason != null) {
-            logger.log(Level.FINE, "Closed connection to " + this + " due to " + reason, reason);
+            logger.warning("Closed connection to " + connection + " due to " + reason);
         } else {
-            logger.log(Level.FINE, "Closed connection to " + this);
+            logger.info("Closed connection to " + connection);
         }
         
         // close the connection for use

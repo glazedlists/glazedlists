@@ -37,12 +37,15 @@ public class ByteChannelReader {
     /** the CharSequence for this ByteBuffer */
     private CharSequence bytesAsCharSequence;
     
+    /** initially the read buffer consumes a single kilobyte of memory */
+    private static final int INITIAL_BUFFER_SIZE = 1024;
+
     /**
      * Create a reader for the specified channel.
      */
     public ByteChannelReader(SocketChannel channel) {
         this.channel = channel;
-        this.buffer = ByteBuffer.allocateDirect(1024);
+        this.buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
         bytesAsCharSequence = new ByteBufferSequence(buffer);
         // buffer is always ready to be read from
         buffer.limit(0);
@@ -74,10 +77,7 @@ public class ByteChannelReader {
      */
     public int indexOf(String regex) throws IOException {
         Matcher matcher = Pattern.compile(regex).matcher(bytesAsCharSequence);
-        while(!matcher.find()) {
-            int bytesRead = suck();
-            if(bytesRead == 0) return -1;
-        }
+        if(!matcher.find()) return -1;
         return matcher.start();
     }
     
@@ -86,13 +86,11 @@ public class ByteChannelReader {
      * position to the end of the regular expression.
      *
      * @throws ParseException if the specified expression is not in the input buffer
+     * @return the number of bytes consumed.
      */
     public int consume(String regex) throws IOException, ParseException {
         Matcher matcher = Pattern.compile(regex).matcher(bytesAsCharSequence);
-        while(!matcher.find()) {
-            int bytesRead = suck();
-            if(bytesRead == 0) throw new ParseException(regex + " is not in current buffer", 0);
-        }
+        if(!matcher.find()) throw new ParseException(regex + " is not in current buffer", 0);
         if(matcher.start() != 0) throw new ParseException(regex + " is not a prefix of " + bytesAsCharSequence.toString(), 0);
         buffer.position(buffer.position() + matcher.end());
         return matcher.end();
@@ -104,7 +102,7 @@ public class ByteChannelReader {
      * the next method call to ByteChannelReader.
      */
     public ByteBuffer readBytes(int bytes) throws IOException {
-        if(bytesAvailable() < bytes) throw new IllegalArgumentException();
+        if(!bytesAvailable(bytes)) throw new IllegalArgumentException();
 
         // prepare the result
         ByteBuffer result = buffer.asReadOnlyBuffer();
@@ -114,6 +112,13 @@ public class ByteChannelReader {
         buffer.position(buffer.position() + bytes);
         
         return result;
+    }
+
+    /**
+     * Reads all remaining bytes. 
+     */
+    public ByteBuffer readBytes() throws IOException {
+        return readBytes(buffer.remaining());
     }
 
     /**
@@ -127,17 +132,6 @@ public class ByteChannelReader {
     }
     
     /**
-     * Calculate how many bytes are ready to be read immediately.
-     */
-    public int bytesAvailable() throws IOException {
-        // read more bytes if possible
-        suckle();
-
-        // return the number of bytes available
-        return buffer.remaining();
-    }
-    
-    /**
      * Reads the String up until the specified regular expression and returns it.
      *
      * @param consume true to advance the buffer's position to the end of the
@@ -146,10 +140,7 @@ public class ByteChannelReader {
      */
     public String readUntil(String regex, boolean consume) throws IOException, ParseException {
         Matcher matcher = Pattern.compile(regex).matcher(bytesAsCharSequence);
-        while(!matcher.find()) {
-            int bytesRead = suck();
-            if(bytesRead == 0) throw new ParseException(regex + " is not in current buffer", 0);
-        }
+        if(!matcher.find()) throw new ParseException(regex + " is not in current buffer", 0);
         String result = bytesAsCharSequence.subSequence(0, matcher.start()).toString();
         if(consume) buffer.position(buffer.position() + matcher.end());
         return result;
@@ -163,39 +154,46 @@ public class ByteChannelReader {
     }
     
     /**
-     * Fills the buffer with the contents of the channel.
-     *
-     * <p>This temporarily flips the buffer from read mode into write mode in order
-     * to add more bytes from the channel.
-     *
-     * @return the number of bytes read, possibly 0 if there is nothing to read immediately
-     * @throws IOException if the input buffer is full or if the end of the stream is reached
+     * Returns true if the specified number of bytes are available.
      */
-    private int suck() throws IOException {
-        if(buffer.remaining() == buffer.capacity()) throw new IOException("Input buffer is full");
-        
-        // read in another chunk
-        int bytesRead = suckle();
-        
-        // throw an exception if nothing is read, or the end of file is reached
-        if(bytesRead < 0) throw new EOFException("End of stream");
-        
-        // return the number of bytes read
-        return bytesRead;
+    public boolean bytesAvailable(int required) throws IOException {
+        return(buffer.remaining() >= required);
     }
     
     /**
-     * Fills the buffer with as much content as possible. Unlike {@link #suck()},
-     * {@link #suckle()} does not mandate that more data be available.
+     * Fills the input buffer with as much content as possible.
      *
      * @return the number of bytes read, possibly 0 or possibly a negative value
      *      if the end of stream is reached.
      */
-    private int suckle() throws IOException {
+    public int fill() throws IOException {
         buffer.compact();
-        int bytesRead = channel.read(buffer);
-        buffer.flip();
-        return bytesRead;
+        int totalBytesRead = 0;
+        while(true) {
+            // make sure there's room to read
+            if(!buffer.hasRemaining()) growLocalBuffer();
+            
+            // read in some bytes if possible
+            int bytesRead = channel.read(buffer);
+            
+            // if there's nothing to read
+            if(bytesRead <= 0) {
+                buffer.flip();
+                if(totalBytesRead != 0) return totalBytesRead;
+                else throw new EOFException("End of stream");
+                
+            // keep reading
+            } else {
+                totalBytesRead += bytesRead;
+            }
+        }
+    }
+    
+    /**
+     * Grow the local buffer.
+     */
+    private void growLocalBuffer() throws IOException {
+        throw new IOException("Failed to grow local read buffer");
     }
 }
 

@@ -162,10 +162,15 @@ public final class CTPConnection {
      * Handles the incoming bytes.
      */
     void handleRead() {
-        // whether the read was fully satisfied by the amount of data
-        boolean satisfied = true;
+        // read at least a byte of data
+        try {
+            int bytesIn = parser.fill();
+        } catch(IOException e) {
+            close(e);
+        }
         
         // continually handle incoming data
+        boolean satisfied = true;
         while(satisfied) {
             // read a request
             if(state == STATE_SERVER_AWAITING_REQUEST) {
@@ -300,7 +305,7 @@ public final class CTPConnection {
             }
 
         } catch(ParseException e) {
-            return close(e);
+            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
         } catch(IOException e) {
             return close(e);
         }
@@ -335,6 +340,7 @@ public final class CTPConnection {
             writer.requestFlush();
             
             // we're ready
+            logger.info("Accepted connection from " + this);
             state = STATE_READY;
             handler.connectionReady(this);
 
@@ -374,6 +380,7 @@ public final class CTPConnection {
             
             // handle the response
             if(code == RESPONSE_OK) {
+                logger.info("Established connected to " + this);
                 state = STATE_READY;
                 handler.connectionReady(this);
                 return true;
@@ -382,9 +389,9 @@ public final class CTPConnection {
             }
 
         } catch(ParseException e) {
-            return close(e);
+            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
         } catch(NumberFormatException e) {
-            return close(e);
+            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
         } catch(IOException e) {
             return close(e);
         }
@@ -431,7 +438,7 @@ public final class CTPConnection {
                 
                 // if the full chunk has not loaded, load more
                 int bytesRequired = chunkEndIndex + 2 + chunkSize + 2;
-                if(bytesRequired > parser.bytesAvailable()) {
+                if(!parser.bytesAvailable(bytesRequired)) {
                     return false;
                 }
             
@@ -449,11 +456,10 @@ public final class CTPConnection {
                 }
 
             } else {
-                int bytesAvailable = parser.bytesAvailable();
-                ByteBuffer chunkBuffer = parser.readBytes(bytesAvailable);
+                ByteBuffer chunkBuffer = parser.readBytes();
             
                 // handle the simulated chunk
-                if(bytesAvailable != 0) {
+                if(chunkBuffer.hasRemaining()) {
                     handler.receiveChunk(this, chunkBuffer);
                     return true;
                 } else {
@@ -462,11 +468,10 @@ public final class CTPConnection {
             }
             
         } catch(NumberFormatException e) {
-            return close(e);
+            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
         } catch(ParseException e) {
-            return close(e);
+            return close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
         } catch(IOException e) {
-            e.printStackTrace();
             return close(e);
         }
     }

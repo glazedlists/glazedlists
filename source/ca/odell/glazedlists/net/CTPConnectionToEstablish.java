@@ -27,6 +27,7 @@ class CTPConnectionToEstablish implements CTPRunnable {
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnectionToEstablish.class.toString());
 
+    /** the place to connect to */
     private String host;
     private int port;
     private CTPHandler handler;

@@ -16,7 +16,7 @@ import java.io.*;
 import java.util.logging.*;
 
 /**
- * A task that simply stops the CTP Connection manager.
+ * A task that gracefully shuts down the CTP Connection manager.
  */
 class CTPShutdown implements CTPRunnable {
     
@@ -31,7 +31,7 @@ class CTPShutdown implements CTPRunnable {
      *      an unrecoverable failure.
      */
     public void run(Selector selector, CTPConnectionManager manager) {
-        logger.info("Cleaning up " + (selector.keys().size()-1) + " open connections");
+        logger.info("Cleaning up listening socket and closing " + (selector.keys().size()-1) + " connections");
 
         // kill all connections
         for(Iterator k = selector.keys().iterator(); k.hasNext(); ) {
@@ -56,29 +56,5 @@ class CTPShutdown implements CTPRunnable {
         
         // stop the server
         manager.invokeLater(new CTPStop());
-    }
-    
-    /**
-     * Stops the server.
-     */
-    class CTPStop implements CTPRunnable {
-        public void run(Selector selector, CTPConnectionManager manager) {
-            // warn if unsatisfied keys remain
-            if(selector.keys().size() != 0) {
-                logger.warning("Sever stopping with " + selector.keys() + " open connections");
-            } else {
-                logger.warning("Server stopping with no open connections");
-            }
-
-            // break out of the server dispatch loop
-            manager.keepRunning = false;
-        }
-    }
-    
-    /**
-     * Reason a connection is closed when the server is shutdown.
-     */
-    class ServerShutdownException extends Exception {
-        // just the default constructor
     }
 }

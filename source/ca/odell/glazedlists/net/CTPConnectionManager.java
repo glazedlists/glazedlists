@@ -37,11 +37,11 @@ public final class CTPConnectionManager implements Runnable {
     /** asynch queue of tasks to execute */
     private List pendingRunnables = new ArrayList();
     
-    /** the selector to awaken when necessary */
-    private Selector selector;
-    
     /** the only thread that shall access the network resources of this manager */
     private Thread networkThread = null;
+    
+    /** the selector to awaken when necessary */
+    Selector selector;
     
     /** factory for handlers of incoming connections */
     CTPHandlerFactory handlerFactory;
@@ -72,7 +72,7 @@ public final class CTPConnectionManager implements Runnable {
      *
      * @return true if the server successfully binds to the listen port.
      */
-    public boolean start() {
+    public synchronized boolean start() {
         // verify we haven't already started
         if(networkThread != null) throw new IllegalStateException();
         
@@ -132,13 +132,28 @@ public final class CTPConnectionManager implements Runnable {
             }
         }
         
-        logger.info("Server stopped");
+        // do final clean up of state
+        synchronized(this) {
+            listenPort = -1;
+            pendingRunnables.clear();
+            selector = null;
+            networkThread = null;
+            handlerFactory = null;
+            keepRunning = false;
+        }
     }
     
     /**
+     * Tests whether this connection manager has started.
+     */
+    public synchronized boolean isRunning() {
+        return (networkThread != null);
+    }
+
+    /**
      * Tests whether the current thread is the network thread.
      */
-    public boolean isNetworkThread() {
+    public synchronized boolean isNetworkThread() {
         return Thread.currentThread() == networkThread;
     }
     
@@ -153,6 +168,9 @@ public final class CTPConnectionManager implements Runnable {
      * Runs the specified task on the CTPConnectionManager thread.
      */
     void invokeAndWait(CTPRunnable runnable) {
+        // if the server has not yet been started
+        if(!isRunning()) throw new IllegalStateException(); 
+
         // invoke immediately if possible
         if(isNetworkThread()) {
             runnable.run(selector, this);
@@ -182,55 +200,31 @@ public final class CTPConnectionManager implements Runnable {
      * a chance.
      */
     void invokeLater(CTPRunnable runnable) {
-        pendingRunnables.add(runnable);
-        wakeUp();
+        synchronized(this) {
+            // if the server has not yet been started
+            if(!isRunning()) throw new IllegalStateException(); 
+            
+            pendingRunnables.add(runnable);
+            wakeUp();
+        }
     }
     
     /**
      * Stops the CTPConnectionManager and closes all connections.
      */
-    public synchronized void stop() {
-        pendingRunnables.add(new CTPShutdown());
-        wakeUp();
+    public void stop() {
+        invokeAndWait(new CTPShutdown());
     }
     
     /**
      * Connect to the specified host.
      */
-    public synchronized void connect(String host, int port, CTPHandler handler) {
-        pendingRunnables.add(new CTPConnectionToEstablish(host, port, handler));
-        wakeUp();
+    public void connect(String host, int port, CTPHandler handler) {
+        invokeLater(new CTPConnectionToEstablish(host, port, handler));
     }
-    public synchronized void connect(String host, CTPHandler handler) {
+    public void connect(String host, CTPHandler handler) {
         connect(host, DEFAULT_PORT, handler);
     }
-
-    /**
-     * Listens for connections and echoes data back to them.
-     */
-    public static void main(String[] args) {
-        
-        if(args.length == 0) {
-            System.out.println("Usage: CTPConnectionManager <mode>");
-            System.out.println("");
-            System.out.println(" mode: server");
-            System.out.println("       client");
-            return;
-        }
-
-        if(args[0].equals("server")) {
-            new CTPConnectionManager(new EmptyCTPConnectHandler()).start();
-            
-        } else if(args[0].equals("client")) {
-            CTPConnectionManager connectionManager = new CTPConnectionManager(new EmptyCTPConnectHandler());
-            connectionManager.start();
-            connectionManager.connect("localhost", 5310, new EmptyCTPHandler());
-            
-        } else {
-            throw new IllegalArgumentException(args[0]);
-        }
-    }
-
 
     /**
      * Handles a connection

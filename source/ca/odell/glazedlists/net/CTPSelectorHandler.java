@@ -49,27 +49,34 @@ class CTPSelectorHandler implements CTPRunnable {
             i.remove();
             
             // Is a new connection coming in?
-            if(key.isAcceptable()) {
+            if(key.isValid() && key.isAcceptable()) {
                 handleAccept(key, selector, manager);
             }
             
-            if(key.isConnectable()) {
+            // an outgoing connection has been established
+            if(key.isValid() && key.isConnectable()) {
                 CTPConnection connection = (CTPConnection)key.attachment();
                 connection.handleConnect();
-                if(!key.isValid()) continue;
             }
 
-            if(key.isReadable()) {
+            // incoming data can be read
+            if(key.isValid() && key.isReadable()) {
                 CTPConnection connection = (CTPConnection)key.attachment();
                 connection.handleRead();
-                if(!key.isValid()) continue;
             }
             
-            if(key.isWritable()) {
+            // outgoing data can be written
+            if(key.isValid() && key.isWritable()) {
                 CTPConnection connection = (CTPConnection)key.attachment();
                 connection.handleWrite();
-                if(!key.isValid()) continue;
             }
+
+            // clean up broken connections
+            if(!key.isValid()) {
+                CTPConnection connection = (CTPConnection)key.attachment();
+                connection.close(new IOException("Connection closed"));
+            }
+            System.out.println("");
         }
     }
 
