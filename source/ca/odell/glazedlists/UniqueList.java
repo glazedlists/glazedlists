@@ -56,6 +56,9 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
     /** the sparse list tracks which elements are duplicates */
     private SparseList duplicatesList = new SparseList();
+    
+    /** a count of the inserts to be processed by an active listChanged() method */
+    private int updateIndexOffset = 0; 
 
     /**
      * Creates a new UniqueList that determines uniqueness using the specified
@@ -138,8 +141,12 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
             if(changeResult != -1) {
                 nonUniqueInserts.add(new Integer(changeResult));
+                updateIndexOffset++;
             }
         }
+        
+        // done offseting inserts
+        updateIndexOffset = 0;
 
         // Clean up after potentially non unique insertions
         int uniqueInsertSize = nonUniqueInserts.size();
@@ -270,6 +277,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 // The element was unique and is now a duplicate
                 duplicatesList.set(changeIndex, null);
                 addChange(ListEvent.DELETE, compressedIndex, true);
+                // jesse, 23-june-04: we should add the following line? 
+                // addChange(ListEvent.UPDATE, compressedIndex - 1, false);
             }
         } else {
             // this is still unique, but we must handle the follower
@@ -296,6 +305,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
                     // - This will cause a DELETE then an INSERT of the same
                     // value if B -> B
                     addChange(ListEvent.DELETE, compressedIndex, true);
+                    // jesse, 23-june-04: i don't get the above line! shouln't there be
+                    // a corresponding change to the duplicatesList ?
                     return changeIndex;
                 }
             // the follower does not exist
@@ -338,7 +349,9 @@ public final class UniqueList extends TransformedList implements ListEventListen
      */
     private void addChange(int type, int index, boolean mandatory) {
         if(mandatory) {
-            updates.addChange(type, index);
+            // jesse, 23-june-04: the subtract of updateIndexOffset is experimental 
+            //updates.addChange(type, index);
+            updates.addChange(type, index - updateIndexOffset);
         } else {
             // Does nothing currently
             // This is a hook for overlaying the Bag ADT over top of the UniqueList
