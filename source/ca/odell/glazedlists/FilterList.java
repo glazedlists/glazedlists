@@ -287,9 +287,25 @@ public final class FilterList extends TransformedList {
                 
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
-        
+                
+                // debugs
+                /*System.out.print("BEFORE: ");
+                for(int i = 0; i < flagList.size(); i++) {
+                    if(i > 0) System.out.print(", ");
+                    if(flagList.get(i) == Barcode.WHITE) System.out.print("0");
+                    else System.out.print("1");
+                }
+                System.out.print("\n");
+                System.out.print("AFTER : ");
+                for(int i = 0; i < source.size(); i++) {
+                    if(i > 0) System.out.print(", ");
+                    if(currentMatcher.matches(source.get(i))) System.out.print("1");
+                    else System.out.print("0");
+                }
+                System.out.print("\n");*/
+
                 // for all filtered items, see what the change is
-                for(BarcodeIterator i = flagList.iterator();i.hasNextWhite(); ) {
+                for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite(); ) {
                     i.nextWhite();
                     if(currentMatcher.matches(source.get(i.getIndex()))) {
                         updates.addInsert(i.setBlack());
