@@ -542,6 +542,12 @@ public class SelectionModelEventList {
             // update anchor
             this.anchorSelectionIndex = anchorSelectionIndex;
 
+            // handle a clear
+            if(anchorSelectionIndex == -1) {
+                clearSelection();
+                return;
+            }
+            
             // select the interval to be the anchor
             if(selectionMode == SINGLE_SELECTION) {
                 setSubRangeOfRange(true, anchorSelectionIndex, anchorSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
@@ -567,6 +573,12 @@ public class SelectionModelEventList {
             int originalLeadIndex = this.leadSelectionIndex;
             this.leadSelectionIndex = leadSelectionIndex;
 
+            // handle a clear
+            if(leadSelectionIndex == -1) {
+                clearSelection();
+                return;
+            }
+            
             // select the interval to be the lead
             if(selectionMode == SINGLE_SELECTION) {
                 setSubRangeOfRange(true, leadSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
