@@ -96,18 +96,18 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Returns the element at the specified position in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     *
-     * @param index The index of the element to retrieve
-     *
-     * @return The element at the given index
+     * Gets the index into the source list for the object with the specified
+     * index in this list.
      */
-    public Object get(int index) {
-        int sourceIndex = duplicatesList.getIndex(index);
-        return source.get(sourceIndex);
+    protected int getSourceIndex(int index) {
+        return duplicatesList.getIndex(index);
+    }
+
+    /**
+     * The UniqueList is writable.
+     */
+    protected boolean isWritable() {
+        return true;
     }
 
     /**
@@ -379,5 +379,98 @@ public final class UniqueList extends TransformedList implements ListEventListen
         if(sourceIndex == 0) return false;
         if(sourceIndex >= source.size()) return false;
         return (0 == comparator.compare(source.get(sourceIndex - 1), source.get(sourceIndex)));
+    }
+    
+    /**
+     * Removes the element at the specified index from the source list.
+     *
+     * <p>This has been modified for UniqueList in order to remove all of
+     * the duplicate elements from the source list.
+     */
+    public Object remove(int index) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+            
+            // keep the removed object to return
+            Object removed = get(index);
+            
+            // calculate the start (inclusive) and end (exclusive) of the range to remove
+            int removeStart = -1;
+            int removeEnd = -1;
+            // if this is before the end, remove everything up to the first different element
+            if(index < size() - 1) {
+                removeStart = getSourceIndex(index);
+                removeEnd = getSourceIndex(index + 1);
+            // if this is before the end, remove everything up to the first different element
+            } else {
+                removeStart = getSourceIndex(index);
+                removeEnd = source.size();
+            }
+            
+            // remove the range from the source list
+            source.subList(removeStart, removeEnd).clear();
+            
+            // return the first of the removed objects
+            return removed;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+    
+    /**
+     * Removes the specified element from the source list.
+     *
+     * <p>This has been modified for UniqueList in order to remove all of
+     * the duplicate elements from the source list.
+     */
+    public boolean remove(Object toRemove) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+            int index = indexOf(toRemove);
+            
+            if(index == -1) return false;
+            
+            remove(index);
+            return true;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+    
+    /**
+     * Replaces the object at the specified index in the source list with
+     * the specified value.
+     *
+     * <p>This has been modified for UniqueList in order to remove all of
+     * the elements at the source index with a single instance of the specified
+     * element.
+     *
+     * <p><strong>Warning:</strong> Because the set() method is implemented
+     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
+     * events will be propogated. Therefore this method has been carefully
+     * implemented to keep this list in a consistent state for each such modifying
+     * operation.
+     */
+    public Object set(int index, Object value) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
+            
+            // save the replaced value
+            Object replaced = get(index);
+            
+            // remove the existing value
+            remove(index);
+            // now add the new value
+            add(index, value);
+            
+            return replaced;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
     }
 }

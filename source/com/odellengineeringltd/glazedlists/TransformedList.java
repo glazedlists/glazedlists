@@ -224,6 +224,12 @@ public abstract class TransformedList implements EventList, ListEventListener {
      * several changes atomically, obtain the write lock before the first change
      * and release it after the last change.
      *
+     * <p><strong>Warning:</strong> Because this method is implemented
+     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
+     * events will be propogated. Therefore this method has been carefully
+     * implemented to keep this list in a consistent state for each such modifying
+     * operation.
+     *
      * @throws IllegalStateException if this mutation cannot be modified in its
      *      current state.
      */
@@ -449,6 +455,12 @@ public abstract class TransformedList implements EventList, ListEventListener {
      * several changes atomically, obtain the write lock before the first change
      * and release it after the last change.
      *
+     * <p><strong>Warning:</strong> Because this method is implemented
+     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
+     * events will be propogated. Therefore this method has been carefully
+     * implemented to keep this list in a consistent state for each such modifying
+     * operation.
+     *
      * @throws IllegalStateException if this mutation cannot be modified in its
      *      current state.
      */
@@ -475,6 +487,12 @@ public abstract class TransformedList implements EventList, ListEventListener {
      * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
      * several changes atomically, obtain the write lock before the first change
      * and release it after the last change.
+     *
+     * <p><strong>Warning:</strong> Because this method is implemented
+     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
+     * events will be propogated. Therefore this method has been carefully
+     * implemented to keep this list in a consistent state for each such modifying
+     * operation.
      *
      * @throws IllegalStateException if this mutation cannot be modified in its
      *      current state.

@@ -804,4 +804,64 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", (String)unique.get(1));
         assertEquals("D", (String)unique.get(2));
     }
+    
+    /**
+     * Verify that a unique list can be cleared.
+     */
+    public void testUniqueListClear() {
+        unique.add("A");
+        unique.add("A");
+        unique.add("A");
+        unique.add("B");
+        unique.add("B");
+        unique.add("C");
+        unique.clear();
+        assertEquals(0, source.size());
+        assertEquals(0, unique.size());
+    }
+
+    /**
+     * Verify that a unique list can have elements removed.
+     */
+    public void testUniqueListRemoveByValue() {
+        unique.add("A");
+        unique.add("A");
+        unique.add("A");
+        unique.add("B");
+        unique.add("B");
+        unique.add("C");
+        unique.remove("B");
+        assertEquals(4, source.size());
+        assertEquals(2, unique.size());
+    }
+
+    /**
+     * Verify that a unique list can have elements removed.
+     */
+    public void testUniqueListRemoveByIndex() {
+        unique.add("A");
+        unique.add("A");
+        unique.add("A");
+        unique.add("B");
+        unique.add("B");
+        unique.add("C");
+        unique.remove(1);
+        assertEquals(4, source.size());
+        assertEquals(2, unique.size());
+    }
+
+    /**
+     * Verify that a unique list can have elements removed.
+     */
+    public void testUniqueSet() {
+        unique.add("A");
+        unique.add("A");
+        unique.add("A");
+        unique.add("B");
+        unique.add("B");
+        unique.add("D");
+        unique.set(1, "C");
+        assertEquals(5, source.size());
+        assertEquals(3, unique.size());
+    }
 }
