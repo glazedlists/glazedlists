@@ -21,6 +21,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 // regular expressions are used to match case insensitively
 import java.util.regex.*;
+// for recycling filter strings
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -61,6 +64,9 @@ public class TextFilterList extends AbstractFilterList {
     /** the action listener performs a refilter when fired */
     private FilterActionListener filterActionListener = null;
     
+    /** a heavily recycled list of filter Strings, call clear() before use */
+    private List filterStrings = new ArrayList();
+
     /**
      * Creates a new filter list that filters elements out of the
      * specified source list.
@@ -217,19 +223,19 @@ public class TextFilterList extends AbstractFilterList {
      */
     public boolean filterMatches(Object element) {
         // populate the strings for this object
-        String values[] = null;
+        filterStrings.clear();
         if(filterator == null) {
             TextFilterable item = (TextFilterable)element;
-            values = item.getFilterStrings();
+            item.getFilterStrings(filterStrings);
         } else {
-            values = filterator.getFilterStrings(element);
+            filterator.getFilterStrings(filterStrings, element);
         }
         // ensure each filter matches at least one field
         filters:
         for(int f = 0; f < filters.length; f++) {
-            for(int c = 0; c < values.length; c++) {
-                if(values[c] != null) {
-                    filters[f].reset(values[c]);
+            for(int c = 0; c < filterStrings.size(); c++) {
+                if(filterStrings.get(c) != null) {
+                    filters[f].reset((String)filterStrings.get(c));
                     if(filters[f].find()) continue filters;
                 }
             }

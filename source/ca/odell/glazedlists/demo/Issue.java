@@ -294,12 +294,22 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * Gets the strings to filter this issue by.
      */
-    public String[] getFilterStrings() {
-        return new String[] {
-            status, priority, resolution, component, version, repPlatform,
-            assignedTo, subcomponent, reporter, targetMilestone, issueType,
-            qaContact, statusWhiteboard, operatingSystem, shortDescription
-        };
+    public void getFilterStrings(List baseList) {
+        baseList.add(status);
+        baseList.add(priority);
+        baseList.add(resolution);
+        baseList.add(component);
+        baseList.add(version);
+        baseList.add(repPlatform);
+        baseList.add(assignedTo);
+        baseList.add(subcomponent);
+        baseList.add(reporter);
+        baseList.add(targetMilestone);
+        baseList.add(issueType);
+        baseList.add(qaContact);
+        baseList.add(statusWhiteboard);
+        baseList.add(operatingSystem);
+        baseList.add(shortDescription);
     }
 
     /**

@@ -6,8 +6,7 @@
  */
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
+import java.util.List;
 
 /**
  * An utility class that can get a list of Strings for a given object
@@ -26,6 +25,11 @@ public interface TextFilterator {
      * Gets the specified object as a list of Strings. These Strings
      * should contain all object information so that it can be compared
      * to the filter set.
+     *
+     * @param baseList a list that the implementor shall add their filter
+     *      strings to via <code>baseList.add()</code>. This may be a non-empty
+     *      List and it is an error to call any method other than add().
+     * @param element the object to extract the filter strings from.
      */
-    public String[] getFilterStrings(Object element);
+    public void getFilterStrings(List baseList, Object element);
 }

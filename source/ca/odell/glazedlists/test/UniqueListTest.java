@@ -1167,6 +1167,25 @@ public class UniqueListTest extends TestCase {
     }
 
     /**
+     * Tests that getCount() works.
+     */
+    public void testGetCount() {
+        source.add("A");
+        source.add("A");
+        source.add("A");
+        source.add("B");
+        source.add("C");
+        source.add("C");
+        assertEquals(3, unique.getCount(0));
+        assertEquals(1, unique.getCount(1));
+        assertEquals(2, unique.getCount(2));
+        assertEquals(3, unique.getCount("A"));
+        assertEquals(1, unique.getCount("B"));
+        assertEquals(2, unique.getCount("C"));
+        assertEquals(0, unique.getCount("D"));
+    }
+
+    /**
 	 * Explicit comparator for Kevin's sanity!
 	 */
 	class IntegerComparator implements Comparator {

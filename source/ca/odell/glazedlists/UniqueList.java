@@ -274,186 +274,6 @@ public final class UniqueList extends TransformedList implements ListEventListen
         }
     }
 
-
-    /**
-     * Called to handle all INSERT events
-     *
-     * @param changeIndex The index which the UPDATE event affects
-     */
-    /*private int processInsertEvent(int changeIndex) {
-        if(valueIsDuplicate(changeIndex)) {
-            // The element is a duplicate so add a nullity and forward a
-            // non-mandatory change event since the number of duplicates changed.
-            duplicatesList.add(changeIndex, null);
-            int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
-            addChange(ListEvent.UPDATE, compressedIndex, false);
-            return -1;
-        } else {
-            // The value might not be a duplicate so add it to the unique view
-            duplicatesList.add(changeIndex, Boolean.TRUE);
-            return changeIndex;
-        }
-    }*/
-
-    /**
-     * Called to handle all DELETE events
-     *
-     * @param changeIndex The index which the UPDATE event affects
-     */
-    /*private void processDeleteEvent(int changeIndex) {
-        // The element is a duplicate, the remove doesn't alter the unique view
-        if(duplicatesList.get(changeIndex) == null) {
-            // Remove and forward a non-mandatory change event since the number
-            // of duplicates changed
-            int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
-            duplicatesList.remove(changeIndex);
-            addChange(ListEvent.UPDATE, compressedIndex, false);
-        // The element is in the unique view
-        } else {
-            int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
-            if(changeIndex < duplicatesList.size() - 1 && duplicatesList.get(changeIndex + 1) == null) {
-                // The next element is null and thus is a duplicate
-                // Add it to the unique view and remove the current element.
-                duplicatesList.set(changeIndex + 1, Boolean.TRUE);
-                duplicatesList.remove(changeIndex);
-
-                if(source.size() > compressedIndex) {
-                    addChange(ListEvent.UPDATE, compressedIndex, false);
-                }
-            } else {
-                // The element has no duplicates
-                duplicatesList.remove(changeIndex);
-                addChange(ListEvent.DELETE, compressedIndex, true);
-            }
-        }
-    }*/
-
-    /**
-     * Called to handle all UPDATE events
-     *
-     * @param changeIndex The index which the UPDATE event affects
-     */
-    /*private int processUpdateEvent(int changeIndex) {
-        if(duplicatesList.get(changeIndex) == null) {
-            // Handle all cases where the change does not affect an element of the unique view
-            return updateDuplicate(changeIndex);
-        } else {
-            // Handle all cases where the change does affect an element of the unique view
-            return updateNonDuplicate(changeIndex);
-        }
-    }*/
-
-    /**
-     * Handles the UPDATE case where the element being updated was
-     * previously a duplicate.
-     *
-     * <p>It affects the unique view with either an INSERT if the value is
-     * unique, an UPDATE if the value creates a duplicate in the unique view or
-     * no change if it is still a duplicate.
-     *
-     * @param changeIndex The index which the UPDATE event affects
-     */
-    /*private int updateDuplicate(int changeIndex) {
-        if(!valueIsDuplicate(changeIndex)) {
-            // The nullity at this index is no longer valid
-            duplicatesList.set(changeIndex, Boolean.TRUE);
-            return changeIndex;
-        } else {
-            // Otherwise, it is still a duplicate and must be NULL, no event forwarded
-            return -1;
-        }
-    }*/
-
-    /**
-     * Handles the UPDATE case where the element being updated was
-     * previously in the unique view.
-     *
-     * <p>It affects the unique view with either an DELETE if the value is now
-     * a duplicate, an UPDATE if the value creates a duplicate in the unique
-     * view, or an INSERT if the value is unique.
-     *
-     * @param changeIndex The index which the UPDATE event affects
-     */
-    /*private int updateNonDuplicate(int changeIndex) {
-        int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
-        if(valueIsDuplicate(changeIndex)) {
-            // The value at this index should be NULL as it is the same as previous
-            // values in the list
-            if(changeIndex < duplicatesList.size() - 1 && duplicatesList.get(changeIndex + 1) == null) {
-                // The next element was previously a duplicate but should now
-                // be in the unique view.
-                duplicatesList.set(changeIndex + 1, Boolean.TRUE);
-                duplicatesList.set(changeIndex, null);
-                // Need to send non-mandatory updates for this and previous index
-                // since a duplicate was added.  valueIsDuplicate() guarantees
-                // that a previous value exists.
-                addChange(ListEvent.UPDATE, compressedIndex, false);
-                addChange(ListEvent.UPDATE, compressedIndex - 1, false);
-
-            } else {
-                // The element was unique and is now a duplicate
-                duplicatesList.set(changeIndex, null);
-                addChange(ListEvent.DELETE, compressedIndex, true);
-                // jesse, 23-june-04: we should add the following line?
-                // addChange(ListEvent.UPDATE, compressedIndex - 1, false);
-            }
-        } else {
-            // this is still unique, but we must handle the follower
-            if(changeIndex < duplicatesList.size() - 1) {
-
-                // The next value was a duplicate before the UPDATE
-                if(duplicatesList.get(changeIndex + 1) == null) {
-                    // Set the next value to be non-null, forward an
-                    // UPDATE event and return
-
-                    // This could be OPTIMIZED:
-                    // Example : D D D
-                    // - causes 2 unnecessary non-mandatory UPDATEs when
-                    // D -> D when 0 should be forwarded.
-                    duplicatesList.set(changeIndex + 1, Boolean.TRUE);
-                    addChange(ListEvent.UPDATE, compressedIndex, false);
-                    return changeIndex;
-                // The next value is in the unique view
-                } else {
-                    // Forward a remove for the current element and return.
-
-                    // This could be OPTIMIZED:
-                    // Example : B D D
-                    // - This will cause a DELETE then an INSERT of the same
-                    // value if B -> B
-                    addChange(ListEvent.DELETE, compressedIndex, true);
-                    // jesse, 23-june-04: i don't get the above line! shouln't there be
-                    // a corresponding change to the duplicatesList ?
-                    return changeIndex;
-                }
-            // the follower does not exist
-            } else {
-                // The value is at the end of the list and thus has no duplicates
-                addChange(ListEvent.UPDATE, compressedIndex, true);
-            }
-        }
-        return -1;
-    }*/
-
-    /**
-     * Guarantee that a value is unique with respect to its follower.
-     *
-     * @param changeIndex the index to inspect for duplicates.
-     */
-    /*private void guaranteeUniqueness(int changeIndex) {
-        int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
-
-        // Duplicate was created in the unique view, correct this
-        if(compressedIndex < size() - 1 && 0 == comparator.compare(get(compressedIndex), get(compressedIndex + 1))) {
-            int duplicateIndex = duplicatesList.getIndex(compressedIndex + 1);
-            duplicatesList.set(duplicateIndex, null);
-            addChange(ListEvent.UPDATE, compressedIndex, false);
-        // Element has no duplicate follower
-        } else {
-            addChange(ListEvent.INSERT, compressedIndex, true);
-        }
-    }*/
-
     /**
      * Appends a change to the ListEventAssembler.
      *
@@ -473,6 +293,28 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // Does nothing currently
             // This is a hook for overlaying the Bag ADT over top of the UniqueList
         }
+    }
+    
+    /**
+     * Gets the count of repetitions of the value at the specified index.
+     */
+    public int getCount(int index) {
+        // if this is before the end, its everything up to the first different element
+        if(index < size() - 1) {
+            return duplicatesList.getIndex(index + 1) - duplicatesList.getIndex(index);
+        // if this is at the end, its everything after
+        } else {
+            return source.size() - duplicatesList.getIndex(index);
+        }
+    }
+
+    /**
+     * Gets the count of repetitions of the specified value.
+     */
+    public int getCount(Object value) {
+        int index = indexOf(value);
+        if(index == -1) return 0;
+        return getCount(index);
     }
 
     /**
@@ -527,17 +369,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
             Object removed = get(index);
 
             // calculate the start (inclusive) and end (exclusive) of the range to remove
-            int removeStart = -1;
-            int removeEnd = -1;
-            // if this is before the end, remove everything up to the first different element
-            if(index < size() - 1) {
-                removeStart = getSourceIndex(index);
-                removeEnd = getSourceIndex(index + 1);
-            // if this is at the end, remove everything after
-            } else {
-                removeStart = getSourceIndex(index);
-                removeEnd = source.size();
-            }
+            int removeStart = getSourceIndex(index);
+            int removeEnd = removeStart + getCount(index);
 
             // remove the range from the source list
             source.subList(removeStart, removeEnd).clear();
@@ -596,17 +429,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
             updates.beginEvent(true);
 
             // calculate the start (inclusive) and end (exclusive) of the duplicates to remove
-            int removeStart = -1;
-            int removeEnd = -1;
-            // if this is before the end, remove everything up to the first different element
-            if(index < size() - 1) {
-                removeStart = getSourceIndex(index) + 1;
-                removeEnd = getSourceIndex(index + 1);
-            // if this is at the end, remove everything after
-            } else {
-                removeStart = getSourceIndex(index) + 1;
-                removeEnd = source.size();
-            }
+            int removeStart = getSourceIndex(index) + 1;
+            int removeEnd = removeStart + getCount(index) - 1;
             // remove the range from the source list if it is non-empty
             if(removeStart < removeEnd) {
                 source.subList(removeStart, removeEnd).clear();

@@ -6,8 +6,7 @@
  */
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
+import java.util.List;
 
 /**
  * An item that can be compared to a list of filters to see if it matches.
@@ -25,6 +24,10 @@ public interface TextFilterable {
      * Gets this object as a list of Strings. These Strings
      * should contain all object information so that it can be compared
      * to the filter set.
+     *
+     * @param baseList a list that the implementor shall add their filter
+     *      strings to via <code>baseList.add()</code>. This may be a non-empty
+     *      List and it is an error to call any method other than add().
      */
-    public String[] getFilterStrings();
+    public void getFilterStrings(List baseList);
 }

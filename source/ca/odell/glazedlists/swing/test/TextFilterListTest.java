@@ -159,8 +159,8 @@ public class TextFilterListTest extends TestCase {
      * A filterator for strings.
      */
     class StringFilterator implements TextFilterator {
-        public String[] getFilterStrings(Object element) {
-            return new String[] { (String)element };
+        public void getFilterStrings(List baseList, Object element) {
+            baseList.add(element);
         }
     }
 }
