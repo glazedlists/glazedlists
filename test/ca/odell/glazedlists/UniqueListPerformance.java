@@ -16,6 +16,8 @@ import java.io.*;
  */
 public class UniqueListPerformance {
 
+    private static Random dice = new Random(137);
+    
     /**
      * Execute a performance test that is specified on the command line.
      */
@@ -34,7 +36,6 @@ public class UniqueListPerformance {
         System.out.println();
         System.out.println("Reading data from testfile...");
         BasicEventList source = new BasicEventList();
-        Random random = new Random(137);
         BufferedReader in = new BufferedReader(new FileReader(args[0]));
         String line = "";
 
@@ -77,21 +78,22 @@ public class UniqueListPerformance {
         UniqueList fifthFilter =  new UniqueList(fourthFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
         System.out.print(".");
         UniqueList sixthFilter =  new UniqueList(fifthFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
-        System.out.println(".");
+        
         long setUpEnd = System.currentTimeMillis();
         long setUpTime = setUpEnd - setUpStart;
-        System.out.println("Done.  List transformations took " + setUpTime + " to initialize.\n");
+        System.out.println("Done.\nList transformations took " + setUpTime + " to initialize.\n");
 
         System.out.println("Starting event handling performance test...");
         int filterIterations = Integer.parseInt(args[1]);
         long startTime = System.currentTimeMillis();
         for(int i = 0;i < filterIterations;i++) {
-            firstFilter.setUnfilteredIndex(random.nextInt(source.size()) - 1);
+            firstFilter.pickANewFilterAtRandom();
+            if(i % 20 == 0) System.out.print(".");
         }
+        
         long endTime = System.currentTimeMillis();
         long testTime = endTime - startTime;
-        System.out.println("Done.\n");
-        System.out.println("Test completed in " + testTime + " milliseconds");
+        System.out.println("Done.\nTest completed in " + testTime + " milliseconds");
     }
 
     /**
@@ -101,10 +103,10 @@ public class UniqueListPerformance {
     private static class AllOrOneValueFilter extends AbstractFilterList {
 
         /** the only index to filter in */
-        private int unfilteredIndex = -1;
+        private boolean matchAll = false;
 
         /** the only thing in the list if not all */
-        private Object unfilteredItem = null;
+        private Object objectToMatch = null;
 
         /** the comparator to use to compare objects */
         private Comparator comparator;
@@ -121,19 +123,27 @@ public class UniqueListPerformance {
 
         /** {@inheritDoc} */
         public boolean filterMatches(Object element) {
-            if(unfilteredIndex == -1) return true;
-
-            return 0 == comparator.compare(element, unfilteredItem);
+            if(matchAll) return true;
+            return 0 == comparator.compare(element, objectToMatch);
         }
 
         /**
          * Sets which element is unfiltered.  For all elements to be unfiltered
          * call this method with -1
          */
-        public void setUnfilteredIndex(int index) {
-            unfilteredIndex = index;
-            if(unfilteredIndex == -1) unfilteredItem = null;
-            else unfilteredItem = source.get(unfilteredIndex);
+        public void pickANewFilterAtRandom() {
+            matchAll = dice.nextInt(2) == 0;
+            
+            // match everything
+            if(matchAll) {
+                // do nothing
+                
+            // match a particular element
+            } else {
+                int unfilteredIndex = dice.nextInt(source.size());
+                objectToMatch = source.get(unfilteredIndex);
+            }
+            
             handleFilterChanged();
         }
     }
