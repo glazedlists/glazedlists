@@ -176,31 +176,31 @@ public class CollectionList extends TransformedList implements ListEventListener
 		int child_index_in_parent = index - node_indices[ parent_index ];
 
 		// Lookup and return the child
-		try {
+//		try {
 			List children = collection_list_model.getChildren(source.get(parent_index));
 			return children.get(child_index_in_parent);
-		} catch(IndexOutOfBoundsException ex) {
-			System.out.println("Index: " + index);
-			System.out.println("Parent index: " + parent_index);
-			System.out.println("Node size usage: " + node_sizes_usage);
-			System.out.println("Node sizes:");
-			for (int i = 0; i < node_sizes_usage; i++) {
-				if (i != 0) System.out.print(", ");
-				if ((i % 50) == 0) System.out.println();
-
-				System.out.print(node_sizes[ i ]);
-			}
-			System.out.println();
-			System.out.println("Node indices:");
-			for (int i = 0; i < node_sizes_usage; i++) {
-				if (i != 0) System.out.print(", ");
-				System.out.print(node_indices[ i ]);
-			}
-			System.out.println();
-
-			ex.printStackTrace();
-			throw ex;
-		}
+//		} catch(IndexOutOfBoundsException ex) {
+//			System.out.println("Index: " + index);
+//			System.out.println("Parent index: " + parent_index);
+//			System.out.println("Node size usage: " + node_sizes_usage);
+//			System.out.println("Node sizes:");
+//			for (int i = 0; i < node_sizes_usage; i++) {
+//				if (i != 0) System.out.print(", ");
+//				if ((i % 50) == 0) System.out.println();
+//
+//				System.out.print(node_sizes[ i ]);
+//			}
+//			System.out.println();
+//			System.out.println("Node indices:");
+//			for (int i = 0; i < node_sizes_usage; i++) {
+//				if (i != 0) System.out.print(", ");
+//				System.out.print(node_indices[ i ]);
+//			}
+//			System.out.println();
+//
+//			ex.printStackTrace();
+//			throw ex;
+//		}
 	}
 
 	/**
