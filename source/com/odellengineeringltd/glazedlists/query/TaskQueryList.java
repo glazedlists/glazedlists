@@ -26,14 +26,18 @@ public class TaskQueryList extends QueryList {
     /** the task manager to run the task on */
     public TaskManager taskManager;
     
-    /** the previously executing query task */
-    public TaskContext queryTaskContext = null;
+    /** the previously executing query timer task */
+    public TimerTask queryTimerTask = null;
+    
+    /** the period to refresh queries */
+    private long repeatPeriod;
     
     /**
      * Create a new TaskQueryList with no query.
      */
-    public TaskQueryList(TaskManager taskManager) {
+    public TaskQueryList(TaskManager taskManager, long repeatPeriod) {
         this.taskManager = taskManager;
+        this.repeatPeriod = repeatPeriod;
     }
     
     /**
@@ -42,13 +46,16 @@ public class TaskQueryList extends QueryList {
      * the specified query has loaded. As a woraround, consider
      * setting the query to an empty query to clear the list and then
      * to the desired query.
+     *
+     * @param period the number if milliseconds before the query is
+     *      re-executed to refresh the table.
      */
     public synchronized void setQuery(Query query) {
         // interrupt the previous query!
-        if(queryTaskContext != null) queryTaskContext.cancelTask();
+        if(queryTimerTask != null) queryTimerTask.cancel();
         
         // execute this query on a task
-        queryTaskContext = taskManager.runTask(new QueryTask(query));
+        queryTimerTask = taskManager.scheduleTask(new QueryTask(query), repeatPeriod);
     }
     
     /**
@@ -86,6 +93,7 @@ public class TaskQueryList extends QueryList {
          * sets the query results and sets itself as completed.
          */
         public int doTask(int callSequence) throws InterruptedException, Exception {
+            if(Thread.interrupted()) throw new InterruptedException();
             // do the query
             taskContext.setBusy(true);
             SortedSet results = query.doQuery();
@@ -103,7 +111,7 @@ public class TaskQueryList extends QueryList {
          * Gets this task's name.
          */
         public String toString() {
-            return "Running query: " + query;
+            return "Running query: " + query.getName();
         }
     }
 }

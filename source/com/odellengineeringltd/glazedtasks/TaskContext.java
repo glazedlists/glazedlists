@@ -111,6 +111,13 @@ public class TaskContext {
     public Task getTask() {
         return task;
     }
+    
+    /**
+     * Tests if this task can be cancelled.
+     */
+    public boolean isCancellable() {
+        return cancellable;
+    }
 
     /**
      * When a task runner finishes a task, it tells the task manager so that
@@ -129,6 +136,7 @@ public class TaskContext {
      * task runners may complete their tasks simultaneously.
      */
     public synchronized void taskInterrupted(InterruptedException e) {
+        System.out.println("[tasks] Task interrupted: " + task);
         e.printStackTrace();
         taskDone("Cancelled");
     }
@@ -139,6 +147,7 @@ public class TaskContext {
      * task runners may complete their tasks simultaneously.
      */
     public synchronized void taskFailed(Exception e) {
+        System.out.println("[tasks] Task failed: " + task);
         e.printStackTrace();
         taskDone("Failed");
     }

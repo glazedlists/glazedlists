@@ -33,6 +33,9 @@ public class TaskManager implements Runnable {
     /** listeners to receive updates when tasks are updated. */
     private List taskListeners = new ArrayList();
     
+    /** timer to notify when fixed-rate tasks need executing */
+    private Timer timer = new Timer(true);
+    
     /**
      * Default constructor.
      */
@@ -40,7 +43,7 @@ public class TaskManager implements Runnable {
     }
     
     /**
-     * Directs the progress bar task manager to execute the specified
+     * Directs the task manager to execute the specified
      * task on an available thread and to display the task's progress
      * in a Swing progress bar.
      *
@@ -68,6 +71,61 @@ public class TaskManager implements Runnable {
         taskUpdated(context);
         
         return context;
+    }
+    
+    /**
+     * Schedules the task manager to execute the specified task at
+     * the specified fixed rate.
+     *
+     * @return a TimerTask (from java.util, not a Glazed Task) that can
+     *      be cancelled if this task should no longer be scheduled.
+     */
+    public synchronized TimerTask scheduleTask(Task task, long period) {
+        TimerTask reminder = new ReminderTimerTask(task);
+        timer.scheduleAtFixedRate(reminder, 0, period);
+        return reminder;
+    }
+    
+    /**
+     * A reminder timer task reminds the task manager to execute a
+     * specified task when it is run. It should be run on a Timer
+     * to enable the repeated execution of tasks that require
+     * repetition.
+     */
+    class ReminderTimerTask extends TimerTask {
+
+        /** the task to remind execution is needed */
+        private Task task;
+        /** the context of the currently running task */
+        private TaskContext taskContext = null;
+        
+        /**
+         * Creates a new reminder task that reminds the task
+         * manager to execute the specified task.
+         */
+        public ReminderTimerTask(Task task) {
+            this.task = task;
+        }
+        
+        /**
+         * Each time the reminder task is executed, it simply requests
+         * that the task manager run its task.
+         */
+        public synchronized void run() {
+            taskContext = runTask(task);
+        }
+        
+        /**
+         * When a reminder timer task is cancelled, it first cancels
+         * the timer's repeated execution of the task. It then attempts
+         * to cancel the task's current execution, if the task is currently
+         * executing.
+         */
+        public synchronized boolean cancel() {
+            boolean result = super.cancel();
+            if(taskContext.isCancellable()) taskContext.cancelTask();
+            return result;
+        }
     }
     
     /**
