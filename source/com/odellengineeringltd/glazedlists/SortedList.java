@@ -6,33 +6,25 @@
  */
 package com.odellengineeringltd.glazedlists;
 
-// the Glazed Lists' change objects
+// the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.event.*;
-// the Glazed Lists util package provides indexed AVL-trees
 import com.odellengineeringltd.glazedlists.util.*;
 // Java collections are used for underlying data storage
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.TreeSet;
-import java.util.SortedSet;
+import java.util.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
-// for specifying a sorting order
-import java.util.Comparator;
 
 
 /**
  * A list that provides a sorted view on its elements.
  *
- * The sorting algorithm may be dynamic. In effect, user may specify the
+ * <p>The sorting algorithm may be dynamic. In effect, user may specify the
  * criteria that is used to choose a sorting order.
  *
  * @see <a href="https://glazedlists.dev.java.net/tutorial/part4/index.html">Glazed
  * Lists Tutorial Part 4 - Sorting</a>
+ * @see java.util.Comparator
+ * @see java.lang.Comparable
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -48,18 +40,20 @@ public final class SortedList extends WritableMutationList implements ListChange
     
     /**
      * Creates a new filter list that provides a sorted view on the source data.
+     * By not specifying a <code>Comparator</code> to sort by, the list elements
+     * must implement the <code>Comparable</code> interface.
      */
     public SortedList(EventList source) {
-        super(source);
-        // trees are instantiated when a comparator is set
-        setComparator(new ComparableComparator());
-        source.addListChangeListener(this);
+        this(source, new ComparableComparator());
     }
+
     /**
      * Creates a new filter list that provides a sorted view on the source data.
      *
-     * @param comparator the initial mechanism for sorting values in the source
-     *      list.
+     * @param comparator the comparator to specify how to sort the list. You
+     *      may also specify <code>null</code>, which will leave the list in
+     *      the same order as the source list until a different <code>Comparator</code>
+     *      is applied via the <code>setComparator()</code> method.
      */
     public SortedList(EventList source, Comparator comparator) {
         super(source);
@@ -74,7 +68,7 @@ public final class SortedList extends WritableMutationList implements ListChange
      * changes, this notification allows the object to repaint itself or update
      * itself as necessary.
      *
-     * This is implemented in two phases. The first phase updates the unsorted
+     * <p>This is implemented in two phases. The first phase updates the unsorted
      * indexes of all nodes. The second phase updates the sorted indexes, removing
      * and deleting nodes as necessary. Two phases are necessary because the sorted
      * nodes cannot be inserted until all of the final offsets are known. This
@@ -196,13 +190,22 @@ public final class SortedList extends WritableMutationList implements ListChange
      * and will take <code>O(N * Log N)</code> time. For large lists, it may
      * be worthwhile to create multiple SortedList views, each of which uses
      * a different Comparator to specify the ordering.
+     *
+     * @param comparator the comparator to specify how to sort the list. If
+     *      the list elements implement <code>Comparable</code>, you may use
+     *      a <code>ComparableComparator</code> instance to sort them in their
+     *      natural order. You may also specify <code>null</code>, which will
+     *      leave the list in the same order as the source list.
      */
     public void setComparator(Comparator comparator) {
         synchronized(getRootList()) {
             // save this comparator
             this.comparator = comparator;
             // create the sorted list with a simple comparator
-            sorted = new IndexedTree(new IndexedTreeNodeComparator(comparator));
+            Comparator treeComparator = null;
+            if(comparator != null) treeComparator = new IndexedTreeNodeComparator(comparator);
+            else treeComparator = new IndexedTreeNodeRawOrderComparator();
+            sorted = new IndexedTree(treeComparator);
             // create a list which knows the offsets of the indexes
             unsorted = new IndexedTree();
             
@@ -267,6 +270,23 @@ public final class SortedList extends WritableMutationList implements ListChange
     protected boolean isWritable() {
         return true;
     }
+    
+    /**
+     * A comparator that takes an indexed node, and compares the index
+     * of that node.
+     */
+    class IndexedTreeNodeRawOrderComparator implements Comparator {
+        /**
+         * Compares the alpha object to the beta object by their indicies.
+         */
+        public int compare(Object alpha, Object beta) {
+            IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
+            IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
+            int alphaIndex = alphaTreeNode.getIndex();
+            int betaIndex = betaTreeNode.getIndex();
+            return alphaIndex - betaIndex;
+        }
+    }
 
     /**
      * A comparator that takes an indexed node, and compares the value
@@ -287,16 +307,7 @@ public final class SortedList extends WritableMutationList implements ListChange
         }
         
         /**
-         * Returns the comparator that does the comparisons between
-         * the indexes at the nodes.
-         */
-        public Comparator getSourceComparator() {
-            return comparator;
-        }
-        
-        /**
-         * Compares object alpha to object beta by casting object one
-         * to Comparable, and calling its compareTo method.
+         * Compares object alpha to object beta by using the source comparator.
          */
         public int compare(Object alpha, Object beta) {
             IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
@@ -306,65 +317,4 @@ public final class SortedList extends WritableMutationList implements ListChange
             return comparator.compare(source.get(alphaIndex), source.get(betaIndex));
         }
     }
-    
-    /**
-     * Test methods for the Sorted List.
-     */
-    public static void main(String[] args) {
-        
-        BasicEventList eventArrayList = new BasicEventList();
-        SortedList sortedList = new SortedList(eventArrayList);
-        
-        //String[] strings = new String[] { "Jesse", "David", "Bruce", "Wilson" };
-        String[] strings = new String[] { "M", "N", "O", "P", "Q", "R", "S", "T", "U", "A", "B", "C", "Dd", "E", "F", "G", "H", "I", "J", "K", "L", "V", "W", "X", "Y", "Z" };
-
-        for(int i = 0; i < strings.length; i++) {
-            eventArrayList.add(strings[i]);
-            for(int j = 0; j < sortedList.size(); j++) {
-                System.out.print(sortedList.get(j));
-                System.out.print(" ");
-            }
-            System.out.println("");
-        }
-        
-        sortedList.setComparator(new StringLengthComparator());
-            for(int j = 0; j < sortedList.size(); j++) {
-                System.out.print(sortedList.get(j));
-                System.out.print(" ");
-            }
-            System.out.println("");
-        
-        //String[] removeStrings = new String[] { "Jesse", "Bruce" };
-        int[] setIndexes = new int[] { 3, 16, 0, 3 };
-        String[] setStrings = new String[] { "Pizza", "Hawaiian", "Pepsi", "123" };
-        for(int i = 0; i < setStrings.length; i++) {
-            eventArrayList.set(setIndexes[i], setStrings[i]);
-            for(int j = 0; j < sortedList.size(); j++) {
-                System.out.print(sortedList.get(j));
-                System.out.print(" ");
-            }
-            System.out.println("");
-        }
-        
-        //String[] removeStrings = new String[] { "Jesse", "Bruce" };
-        String[] removeStrings = new String[] { "O", "I", "A", "E", "U", "B", "Dd", "C", "Z", "Y", "X", "Hawaiian", "R", "S", "K", "L", "N", "G", "J", "Q", "V", "T", "W" , "Pepsi" ,"123", "F" };
-        for(int i = 0; i < removeStrings.length; i++) {
-            eventArrayList.remove(removeStrings[i]);
-            for(int j = 0; j < sortedList.size(); j++) {
-                System.out.print(sortedList.get(j));
-                System.out.print(" ");
-            }
-            System.out.println("");
-        }
-    }
 }
-
-class StringLengthComparator implements Comparator {
-    public int compare(Object alpha, Object beta) {
-        String alphaString = (String)alpha;
-        String betaString = (String)beta;
-        if(alphaString.length() != betaString.length()) return betaString.length() - alphaString.length();
-        return betaString.compareToIgnoreCase(alphaString);
-    }
-}
-

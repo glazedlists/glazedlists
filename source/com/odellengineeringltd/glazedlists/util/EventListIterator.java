@@ -47,7 +47,6 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * source list.
      *
      * @param source the list to iterate
-     * @param nextIndex the starting point within the list
      */
     public EventListIterator(EventList source) {
         this(source, 0, true);

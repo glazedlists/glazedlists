@@ -106,9 +106,9 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
      *
      * @param listTable the table with headers that can be clicked on.
      * @param sortedList the sorted list to update.
-     * @param singleColumnSort true to sort by only one column at a time, or
-     *      false to sort by multiple columns. Although sorting by multiple
-     *      columns is more powerful, the user interface is not as powerful and
+     * @param multipleColumnSort true to sort by multiple columns at a time, or
+     *      true to sort by a single column. Although sorting by multiple
+     *      columns is more powerful, the user interface is not as simple and
      *      this strategy should only be used where necessary.
      */
     public TableComparatorChooser(ListTable listTable, SortedList sortedList, boolean multipleColumnSort) {
