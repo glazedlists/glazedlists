@@ -58,6 +58,13 @@ public class ConsistencyTestList implements ListEventListener {
     public ConsistencyTestList(EventList source, String name) {
         this(source, name, false);
     }
+    
+    /**
+     * Validate that this list is as expected.
+     */
+    public void assertConsistent() {
+        Assert.assertEquals(expected, source);
+    }
 
     /**
      * For implementing the ListEventListener interface.

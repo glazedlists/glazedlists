@@ -29,6 +29,9 @@ public final class ListEventPublisher {
     /** whether a change is currently in progress */
     private int changesInProgress = 0;
     
+    /** the first caught RuntimeException that must be rethrown */
+    private RuntimeException toRethrow = null;
+    
     /** a list of EventLists that have their dependencies satisfied */
     private List satisfiedEventLists = new ArrayList();
     
@@ -132,39 +135,46 @@ public final class ListEventPublisher {
         // populate the list of satisfied EventLists
         if(!listContains(satisfiedEventLists, source)) satisfiedEventLists.add(source);
 
-        // notify all listeners
+        // process listeners that don't have dependencies
         for(int i = 0; i < listeners.size(); i++) {
             ListEventListener listener = (ListEventListener)listeners.get(i);
             ListEvent event = (ListEvent)events.get(i);
 
-            // if our listener is managed, fulfill its dependencies first
-            if(dependenciesSatisfied(listener)) {
-                listener.listChanged(event);
-                //if(no events come through) lists dependent on this do not need
-                    // events from this to be satisfied
-                if(listener instanceof EventList) {
-                    satisfiedEventLists.add((EventList)listener);
-                }
             // if the dependencies are not satisfied
-            } else {
-                //System.out.println("Saving pending event");
+            if(!dependenciesSatisfied(listener)) {
                 DependentListener dependentListener = getDependentListener(listener);
                 dependentListener.addPendingEvent(event);
                 unsatisfiedListeners.add(dependentListener);
+                continue;
+            }
+
+            // satisfy this listener
+            try {
+                listener.listChanged(event);
+                if(listener instanceof EventList) {
+                    satisfiedEventLists.add((EventList)listener);
+                }
+            // if notification failed, handle that problem later
+            } catch(RuntimeException newProblem) {
+                if(toRethrow == null) toRethrow = newProblem;
             }
         }
         
-        // process all safe pending events
+        // process listeners that have dependencies
         for(Iterator i = unsatisfiedListeners.iterator(); i.hasNext(); ) {
             DependentListener dependentListener = (DependentListener)i.next();
-            if(dependenciesSatisfied(dependentListener)) {
-                //System.out.println("Executing pending event");
-                i.remove();
+            if(!dependenciesSatisfied(dependentListener)) continue;
+
+            // satisfy this listener
+            i.remove();
+            try {
                 dependentListener.firePendingEvents();
-                // this is now satisfied
                 if(dependentListener.getListener() instanceof EventList) {
                     satisfiedEventLists.add((EventList)dependentListener.getListener());
                 }
+            // if notification failed, handle that problem later
+            } catch(RuntimeException newProblem) {
+                if(toRethrow == null) toRethrow = newProblem;
             }
         }
         
@@ -173,12 +183,21 @@ public final class ListEventPublisher {
         
         // clean up if this is the last change
         if(changesInProgress == 0) {
+            // reset state, including the list of who has been satisfied
             eventCause = null;
+            satisfiedEventLists.clear();
+            
+            // if there are listeners not yet notified
             if(!unsatisfiedListeners.isEmpty()) {
                 throw new IllegalStateException("Unsatisfied ListEventListeners: " + unsatisfiedListeners);
             }
             
-            satisfiedEventLists.clear();
+            // pass any saved RuntimeExceptions up to the source
+            if(toRethrow != null) {
+                RuntimeException usersProblem = toRethrow;
+                toRethrow = null;
+                throw usersProblem;
+            }
         }
     }
     
@@ -295,11 +314,14 @@ public final class ListEventPublisher {
          * Fires all pending events.
          */
         public void firePendingEvents() {
-            for(int i = 0; i < pendingEvents.size(); i++) {
-                ListEvent event = (ListEvent)pendingEvents.get(i);
-                listener.listChanged(event);
+            try {
+                for(int i = 0; i < pendingEvents.size(); i++) {
+                    ListEvent event = (ListEvent)pendingEvents.get(i);
+                    listener.listChanged(event);
+                }
+            } finally {
+                pendingEvents.clear();
             }
-            pendingEvents.clear();
         }
     }
 }
