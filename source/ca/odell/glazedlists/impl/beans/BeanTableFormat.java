@@ -15,6 +15,7 @@ import ca.odell.glazedlists.*;
  * JavaBean-like Object with getProperty() and setProperty() style API.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:andrea.aime@aliceposta.it">Andrea Aime</a>
  */
 public class BeanTableFormat implements TableFormat, WritableTableFormat, AdvancedTableFormat {
 

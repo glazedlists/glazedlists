@@ -23,8 +23,9 @@ import ca.odell.glazedlists.gui.*;
  */
 public class BeanTableFormatTest extends TestCase {
 
-    /** the format to test */
+    /** the formats to test */
     private TableFormat footballFormat;
+    private TableFormat classedFootballFormat;
 
     /** the objects to test */
     private FootballTeam riders = new FootballTeam("Roughriders", "Saskatchewan", Color.green, Color.white);
@@ -38,6 +39,7 @@ public class BeanTableFormatTest extends TestCase {
         String[] columnNames = new String[] { "Name", "Home", "Primary Color", "Secondary Color" };
         boolean[] writable = new boolean[] { false, true, false, false };
         footballFormat = GlazedLists.tableFormat(propertyNames, columnNames, writable);
+        classedFootballFormat = GlazedLists.tableFormat(FootballTeam.class, propertyNames, columnNames, writable);
     }
 
     /**
@@ -91,11 +93,25 @@ public class BeanTableFormatTest extends TestCase {
      * Tests that BeanTableFormat works as an AdvancedTableFormat.
      */
     public void testAdvancedTableFormat() {
-        AdvancedTableFormat advancedFootballFormat = (AdvancedTableFormat)footballFormat;
-        assertEquals(String.class,       advancedFootballFormat.getColumnClass(0));
-        assertEquals(String.class,       advancedFootballFormat.getColumnClass(1));
-        assertEquals(Color.class,        advancedFootballFormat.getColumnClass(2));
-        assertEquals(Color.class,        advancedFootballFormat.getColumnClass(3));
+        AdvancedTableFormat emptyAdvancedFootballFormat = (AdvancedTableFormat)footballFormat;
+        assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(0));
+        assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(1));
+        assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(2));
+        assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(3));
+        assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(0));
+        assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(1));
+        assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(2));
+        assertEquals(GlazedLists.comparableComparator(), emptyAdvancedFootballFormat.getColumnComparator(3));
+
+        AdvancedTableFormat fullAdvancedFootballFormat = (AdvancedTableFormat)classedFootballFormat;
+        assertEquals(String.class,       fullAdvancedFootballFormat.getColumnClass(0));
+        assertEquals(String.class,       fullAdvancedFootballFormat.getColumnClass(1));
+        assertEquals(Color.class,        fullAdvancedFootballFormat.getColumnClass(2));
+        assertEquals(Color.class,        fullAdvancedFootballFormat.getColumnClass(3));
+        assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(0));
+        assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(1));
+        assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(2));
+        assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(3));
     }
 }
 
