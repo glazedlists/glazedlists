@@ -325,6 +325,39 @@ public class SortedListTest extends TestCase {
         assertEquals(4, counter.getChangeCount(0));
     }
 
+
+    /**
+     * Test if the SortedList fires update events rather than delete/insert
+     * pairs, even if there are duplicate copies of the same value.
+     */
+    public void testUpdateEventsFiredWithDuplicates() {
+        // create comparators for zero and one
+        Comparator intCompareAt0 = new IntArrayComparator(0);
+        Comparator intCompareAt1 = new IntArrayComparator(1);
+	    
+        // prepare a unique list with simple data
+        UniqueList uniqueSource = new UniqueList(new BasicEventList(), intCompareAt0);
+        sortedList = new SortedList(uniqueSource, intCompareAt1);
+        SortedSet data = new TreeSet(intCompareAt0);
+        data.add(new int[] { 0, 0 });
+        data.add(new int[] { 1, 0 });
+        data.add(new int[] { 2, 0 });
+        data.add(new int[] { 3, 0 });
+        uniqueSource.replaceAll(data);
+        
+        // listen to changes on the sorted list
+        ListEventCounter counter = new ListEventCounter();
+        sortedList.addListEventListener(counter);
+
+        // replace the data with an identical copy
+        uniqueSource.replaceAll(data);
+        
+        // verify that only one event has occured
+        assertEquals(1, counter.getEventCount());
+        assertEquals(4, counter.getChangeCount(0));
+    }
+
+
     
     /**
      * Test if the SortedList fires update events rather than delete/insert
