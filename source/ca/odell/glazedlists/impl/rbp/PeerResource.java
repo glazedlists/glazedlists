@@ -117,7 +117,9 @@ class PeerResource {
                 // send the block to interested subscribers
                 for(int s = 0; s < subscribers.size(); s++) {
                     ResourceConnection subscriber = (ResourceConnection)subscribers.get(s);
+                    if(subscriber.getUpdateId() >= updateId) continue;
                     subscriber.getConnection().writeBlock(PeerResource.this, block);
+                    subscriber.setUpdateId(updateId);
                 }
             }
         }
@@ -258,14 +260,7 @@ class PeerResource {
         resource.getReadWriteLock().writeLock().lock();
         try {
             // confirm this update is consistent with the update ID
-            if(block.getUpdateId() != (resourceUpdateId+1)) {
-                if(block.getUpdateId() < (resourceUpdateId + 1)) {
-                    logger.warning("Expected update id " + (resourceUpdateId+1) + " but found " + block.getUpdateId());
-                    return;
-                } else {
-                    throw new IllegalStateException("Expected update id " + (resourceUpdateId+1) + " but found " + block.getUpdateId());
-                }
-            }
+            if(block.getUpdateId() != (resourceUpdateId+1)) throw new IllegalStateException("Expected update id " + (resourceUpdateId+1) + " but found " + block.getUpdateId());
             // apply locally
             resource.update(block.getPayload());
             // update state and propagate
