@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.impl.rbp;
 
 import java.util.*;
 import javax.swing.*;
@@ -17,7 +17,6 @@ import java.awt.Insets;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
-import ca.odell.glazedlists.net.*;
 import ca.odell.glazedlists.io.*;
 
 /**

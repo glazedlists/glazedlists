@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.impl.rbp;
 
 import java.util.*;
 // for being a JUnit test case
