@@ -10,6 +10,8 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
 import ca.odell.glazedlists.util.impl.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.util.concurrent.*;
 // For the execution of the performance test
 import java.util.Random;
 
@@ -62,6 +64,7 @@ public class CachingList extends TransformedList implements ListEventListener {
      */
     public CachingList(EventList source, int maxSize) {
         super(source);
+        readWriteLock = new CacheLock(readWriteLock);
         this.maxSize = maxSize;
 
         cache = new IndexedTree(new AgedNodeComparator());
@@ -230,6 +233,36 @@ public class CachingList extends TransformedList implements ListEventListener {
         }
         lastKnownSize = source.size();
         updates.commitEvent();
+    }
+
+   /**
+    * A special lock to prevent deadlock in CachingList.
+    */
+   private class CacheLock implements ReadWriteLock {
+
+        /** The lock this CacheLock decorates */
+        private ReadWriteLock sourceLock;
+
+        /**
+         * Creates a new lock for CachingList.
+         */
+        public CacheLock(ReadWriteLock sourceLock) {
+            this.sourceLock = sourceLock;
+        }
+
+        /**
+         * Since reads are write ops on caches, return the lock used for writing.
+         */
+        public Lock readLock() {
+            return writeLock();
+        }
+
+        /**
+         * Return the lock used for writing.
+         */
+        public Lock writeLock() {
+            return sourceLock.writeLock();
+        }
     }
 
     /**
