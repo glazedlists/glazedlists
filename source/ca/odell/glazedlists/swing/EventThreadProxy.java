@@ -4,8 +4,11 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.event;
+package ca.odell.glazedlists.swing;
 
+// the core Glazed Lists packages
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.*;
 // for calling the notification on the Swing thread
 import javax.swing.SwingUtilities;
 
@@ -16,7 +19,7 @@ import javax.swing.SwingUtilities;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class EventThreadProxy implements ListEventListener, Runnable {
+public class EventThreadProxy implements ListEventListener, Runnable {
 
     /** the list change listener who actually wants notification */
     private ListEventListener proxyTarget;
