@@ -84,7 +84,7 @@ class PeerConnection implements CTPHandler {
     public void connectionClosed(CTPConnection source, Exception reason) {
         this.connection = null;
         this.state = CLOSED;
-        peer.removeConnection(this);
+        peer.connections.remove(this);
         
         // notify resources of the close
         List resourcesToNotify = new ArrayList();
@@ -121,7 +121,7 @@ class PeerConnection implements CTPHandler {
                     resource = peer.getPublishedResource(resourceName);
                 } else if(block.isUnsubscribe()) {
                     resource = (PeerResource)outgoingPublications.get(resourceName);
-                } else if(block.isSubscribeConfirm() || block.isUpdate()) {
+                } else if(block.isSubscribeConfirm() || block.isUpdate() || block.isUnpublish()) {
                     resource = (PeerResource)incomingSubscriptions.get(resourceName);
                 } else {
                     throw new UnsupportedOperationException();
@@ -169,7 +169,7 @@ class PeerConnection implements CTPHandler {
 
         if(connection == null) throw new UnsupportedOperationException();
         connection.close();
-        peer.removeConnection(this);
+        peer.connections.remove(this);
     }
     
     /**

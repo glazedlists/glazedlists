@@ -49,6 +49,10 @@ public class ListPeer {
         peer.stop();
     }
     
+    public void print() {
+        peer.print();
+    }
+    
     /**
      * Publish the specified EventList with the specified name.
      */

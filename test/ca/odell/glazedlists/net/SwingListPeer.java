@@ -27,82 +27,7 @@ import ca.odell.glazedlists.util.ByteCoderFactory;
  * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SwingListPeer implements ActionListener {
-    
-    /** the shared data */
-    private NetworkList localData = null;
-    private NetworkList remoteData = null;
-    
-    /** fields for editing the local list */
-    JTextField enterNumber = null;
-
-    /**
-     * Creates a new SwingListPeer client.
-     */
-    public SwingListPeer(String localHost, int localPort, String targetHost, int targetPort) throws IOException {
-        prepareService(localHost, localPort, targetHost, targetPort);
-        constructStandalone();
-    }
-    
-    /**
-     * Constructs the browser as a standalone frame.
-     */
-    private void constructStandalone() {
-        // create a frame with that panel
-        JFrame frame = new JFrame("Swing List Peer");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(640, 480);
-        frame.getContentPane().setLayout(new GridBagLayout());
-        frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        frame.show();
-    }
-    
-    /**
-     * Sets up all service stuff.
-     */
-    private void prepareService(String localHost, int localPort, String targetHost, int targetPort) throws IOException {
-        String localResourceName = "glazedlists://" + localHost + ":" + localPort + "/integers";
-        ListPeer peer = new ListPeer(localPort);
-        peer.start();
-        localData = peer.publish(new BasicEventList(), localResourceName, ByteCoderFactory.serializable());
-        
-        if(targetHost != null) {
-            String remoteResourceName = "glazedlists://" + targetHost + ":" + targetPort + "/integers";
-            remoteData = peer.subscribe(remoteResourceName, targetHost, targetPort, ByteCoderFactory.serializable());
-        }
-    }
-    
-    /**
-     * Display a frame for browsing issues.
-     */
-    private JPanel constructView() {
-        // create a panel with a table
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-
-        // integer table
-        EventTableModel localTableModel = new EventTableModel(localData, new IntegerTableFormat());
-        EventTableModel remoteTableModel = new EventTableModel(remoteData, new IntegerTableFormat());
-        JTable localJTable = new JTable(localTableModel);
-        JTable remoteJTable = new JTable(remoteTableModel);
-        JScrollPane localScrollPane = new JScrollPane(localJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        JScrollPane remoteScrollPane = new JScrollPane(remoteJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        
-        enterNumber = new JTextField();
-        enterNumber.addActionListener(this);
-        
-
-        panel.add(localScrollPane, new GridBagConstraints(0, 0, 1, 1, 0.5, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-        panel.add(remoteScrollPane, new GridBagConstraints(1, 0, 1, 1, 0.5, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0));
-        panel.add(enterNumber, new GridBagConstraints(0, 1, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0));
-
-        return panel;
-    }
-    
-    public void actionPerformed(ActionEvent e) {
-        localData.add(enterNumber.getText());
-        enterNumber.setText("");
-    }
+public class SwingListPeer {
     
     /**
      * When started via a main method, this creates a standalone issues browser.
@@ -113,11 +38,22 @@ public class SwingListPeer implements ActionListener {
             return;
         }
         
-        // load the issues and display the browser
-        if(args.length == 2) {
-            SwingListPeer peer = new SwingListPeer(args[0], Integer.parseInt(args[1]), null, -1);
-        } else if(args.length == 4) {
-            SwingListPeer peer = new SwingListPeer(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
+        String localHost = args[0];
+        int localPort = Integer.parseInt(args[1]);
+        
+        ListPeer peer = new ListPeer(localPort);
+        peer.start();
+        
+        // start the publisher
+        if(args.length >= 2) {
+            new PublishFrame(peer, "/slp", localHost, localPort);
+        }
+        
+        // start the subscriber
+        if(args.length >= 4) {
+            String targetHost = args[2];
+            int targetPort = Integer.parseInt(args[3]);
+            new SubscribeFrame(peer, "/slp", targetHost, targetPort);
         }
     }
 }

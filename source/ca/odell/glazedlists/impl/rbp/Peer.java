@@ -32,7 +32,7 @@ public class Peer implements CTPHandlerFactory {
     private Map published = new TreeMap();
      
     /** the active connections to peers */
-    private List connections = new ArrayList();
+    List connections = new ArrayList();
     
     /** the connection management */
     private CTPConnectionManager connectionManager;
@@ -90,7 +90,8 @@ public class Peer implements CTPHandlerFactory {
     /**
      * Prints the current state of this peer.
      */
-    void print() {
+    public void print() {
+        System.out.println(" --------  --------  --------  --------  --------  --------  --------  -------- ");
         System.out.println("Subscribed Resources:");
         for(Iterator s = subscribed.values().iterator(); s.hasNext(); ) {
             PeerResource resource = (PeerResource)s.next();
@@ -144,12 +145,5 @@ public class Peer implements CTPHandlerFactory {
          connectionManager.connect(peerConnection, host, port);
          connections.add(peerConnection);
          return peerConnection;
-     }
-     
-     /**
-      * Removes the specified connection.
-      */
-     void removeConnection(PeerConnection peerConnection) {
-         connections.remove(peerConnection);
      }
 }

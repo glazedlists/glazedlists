@@ -67,8 +67,8 @@ class PeerResource {
         // listen for updates
         resource.addResourceListener(resourceListener);
         
-        // a server is initially connected
-        resourceStatus.setConnected(true, null);
+        // subscribe to the resource
+        resourceStatus.connect();
     }
     
     /**
@@ -153,34 +153,41 @@ class PeerResource {
         
         /** {@inheritDoc} */
         public void connect() {
-            if(publisher != null) return;
+            // if this is remote, subscribe to this resource
+            if(publisherHost != null) {
+                publisher = peer.getConnection(publisherHost, publisherPort);
             
-            // connect to the publisher
-            publisher = peer.getConnection(publisherHost, publisherPort);
-            
-            // subscribe to this resource
-            publisher.incomingSubscriptions.put(resourceName, PeerResource.this);
-            PeerBlock block = PeerBlock.subscribe(resourceName);
-            publisher.writeBlock(PeerResource.this, block);
+                publisher.incomingSubscriptions.put(resourceName, PeerResource.this);
+                PeerBlock block = PeerBlock.subscribe(resourceName);
+                publisher.writeBlock(PeerResource.this, block);
+
+            // if this is local, we're immediately connected
+            } else {
+                resourceStatus.setConnected(true, null);
+            }
         }
         
         /** {@inheritDoc} */
         public void disconnect() {
-            // if we're not connected
-            if(publisher == null) return;
-                
-            // we can't unsubscribe until we have no subscribers
-            if(!subscribers.isEmpty()) throw new IllegalStateException();
-            
-            // mark this as done
-            PeerConnection oldPublisher = publisher;
-            publisher = null;
+            // we're immediately disconnected
             resourceStatus.setConnected(false, null);
             
-            // unsubscribe from this resource
-            oldPublisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
-            oldPublisher.incomingSubscriptions.remove(resourceName);
-            if(oldPublisher.isIdle()) oldPublisher.close();
+            // unpublish the subscribers
+            for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
+                PeerConnection subscriber = (PeerConnection)s.next();
+                subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceName));
+                subscriber.outgoingPublications.remove(resourceName);
+                if(subscriber.isIdle()) subscriber.close();
+                s.remove();
+            }
+            
+            // clean up the publisher
+            if(publisher != null) {
+                publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
+                publisher.incomingSubscriptions.remove(resourceName);
+                if(publisher.isIdle()) publisher.close();
+                publisher = null;
+            }
         }
         
         /** {@inheritDoc} */
@@ -219,6 +226,7 @@ class PeerResource {
         else if(block.isSubscribeConfirm()) remoteSubscribeConfirm(source, block);
         else if(block.isUpdate()) remoteUpdate(source, block);
         else if(block.isUnsubscribe()) remoteUnsubscribe(source, block);
+        else if(block.isUnpublish()) remoteUnpublish(source, block);
         else throw new IllegalStateException();
     }
     private void remoteUpdate(PeerConnection publisher, PeerBlock block) {
@@ -233,28 +241,50 @@ class PeerResource {
         resource.update(block.getPayload());
     }
     private void remoteSubscribe(PeerConnection subscriber, PeerBlock block) {
-        // lock peer resource //////////////////////////////
-        
-        // first create the subscription
-        subscriber.outgoingPublications.put(resourceName, this);
-        subscribers.add(subscriber);
-        
-        // now send the snapshot to this subscriber
-        PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceName, sessionId, updateId, resource.toSnapshot());
-        subscriber.writeBlock(this, subscribeConfirm);
-        // unlock peer resource //////////////////////////////
+        // we're accepting connections
+        if(resourceStatus.isConnected()) {
+            // first create the subscription
+            subscriber.outgoingPublications.put(resourceName, this);
+            subscribers.add(subscriber);
+            
+            // now send the snapshot to this subscriber
+            PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceName, sessionId, updateId, resource.toSnapshot());
+            subscriber.writeBlock(this, subscribeConfirm);
+
+        // we're not accepting connections for now
+        } else {
+            PeerBlock unpublish = PeerBlock.unpublish(resourceName);
+            subscriber.writeBlock(this, unpublish);
+            if(subscriber.isIdle()) subscriber.close();
+        }
     }
     private void remoteSubscribeConfirm(PeerConnection publisher, PeerBlock block) {
+        // update publisher
         publisher.incomingSubscriptions.put(resourceName, this);
         
+        // update state
         updateId = block.getUpdateId();
         sessionId = block.getSessionId();
-        resourceStatus.setConnected(true, null);
         resource.fromSnapshot(block.getPayload());
+        
+        // finally we're connected
+        resourceStatus.setConnected(true, null);
     }
     private void remoteUnsubscribe(PeerConnection subscriber, PeerBlock block) {
+        // remove the subscription
         subscribers.remove(subscriber);
         subscriber.outgoingPublications.remove(resourceName);
+    }
+    private void remoteUnpublish(PeerConnection subscriber, PeerBlock block) {
+        // immediately disconnected
+        resourceStatus.setConnected(false, new Exception("Resource became unavailable"));
+        
+        // clean up the publisher
+        if(publisher != null) {
+            publisher.incomingSubscriptions.remove(resourceName);
+            if(publisher.isIdle()) publisher.close();
+            publisher = null;
+        }
     }
     
 

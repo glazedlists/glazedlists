@@ -29,6 +29,7 @@ class PeerBlock {
     private static final String ACTION_SUBSCRIBE_CONFIRM = "Subscribe-Confirm";
     private static final String ACTION_UPDATE = "Update";
     private static final String ACTION_UNSUBSCRIBE = "Unsubscribe";
+    private static final String ACTION_UNPUBLISH = "Unpublish";
 
     /** the resource this block is concerned with */
     private String resourceName = null;
@@ -83,6 +84,13 @@ class PeerBlock {
     public static PeerBlock unsubscribe(String resourceName) {
         return new PeerBlock(resourceName, -1, PeerBlock.ACTION_UNSUBSCRIBE, -1, null);
     }
+
+    /**
+     * Create a new subscribe block.
+     */
+    public static PeerBlock unpublish(String resourceName) {
+        return new PeerBlock(resourceName, -1, PeerBlock.ACTION_UNPUBLISH, -1, null);
+    }
     
     /**
      * Whether this is a subscribe-confirm block.
@@ -110,6 +118,13 @@ class PeerBlock {
      */
     public boolean isUnsubscribe() {
         return ACTION_UNSUBSCRIBE.equals(action);
+    }
+
+    /**
+     * Whether this is an unpublish block.
+     */
+    public boolean isUnpublish() {
+        return ACTION_UNPUBLISH.equals(action);
     }
     
     /**
