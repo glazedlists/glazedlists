@@ -46,6 +46,8 @@ public class SortedListTest extends TestCase {
     /**
      * Test that the indexOf() and lastIndexOf() methods work if the SortedList
      * is not actually sorted.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=170">Bug 170</a>
      */
     public void testIndexOfUnsorted() {
         sortedList.setComparator(null);
