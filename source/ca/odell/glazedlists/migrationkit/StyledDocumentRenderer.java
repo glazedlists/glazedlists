@@ -44,6 +44,10 @@ import javax.swing.UIManager;
  * @see <a href="https://glazedlists.dev.java.net/tutorial/part5/index.html">Glazed
  * Lists Tutorial Part 5 - Custom Renderers</a>
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *      Users should visit the new Renderpack project, http://renderpack.dev.java.net.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class StyledDocumentRenderer implements TableCellRenderer {

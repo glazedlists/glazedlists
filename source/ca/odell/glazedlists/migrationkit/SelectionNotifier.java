@@ -21,6 +21,9 @@ import java.util.ArrayList;
  * listeners when there is a change. It is a utility class currently used
  * only by ListTable to provide notification of selection events.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 class SelectionNotifier implements ListEventListener {

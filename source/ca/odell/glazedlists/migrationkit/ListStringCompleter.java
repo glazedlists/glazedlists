@@ -26,6 +26,9 @@ import java.util.ArrayList;
 /**
  * A string completer that gets completions from a dynamic list.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class ListStringCompleter implements StringCompleter {

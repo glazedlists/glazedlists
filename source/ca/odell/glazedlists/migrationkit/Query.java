@@ -30,6 +30,12 @@ import java.util.SortedSet;
  * Some implementations may be scheduled to run frequently, such as a query
  * that gets a set of remote data for a local cache.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *      QueryList users should review the method UniqueList.replaceAll() as it
+ *      provides similar functionality to the QueryList without as much
+ *      domain-specific overhead.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public interface Query {

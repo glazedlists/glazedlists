@@ -18,6 +18,10 @@ import java.awt.Component;
  * A renderer that simply takes a base table cell renderer and adds
  * stripes to alternating rows. This makes the rows look more like a ledger.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *      Users should visit the new Renderpack project, http://renderpack.dev.java.net.
+ *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=11">bug 11</a>
  */
 public class StripedTableCellRenderer implements TableCellRenderer {

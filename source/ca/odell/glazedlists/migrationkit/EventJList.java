@@ -38,6 +38,11 @@ import java.util.*;
  * <p>This class still does not have any extra renderer support. For now if
  * styled rendering is necessary, the use of ListTable is a sufficient work
  * around.
+ *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *      Users of EventJList should consider EventListModel which does not restrict
+ *      them to a specific JList base class.
  * 
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=14">Bug 14</a>
  *

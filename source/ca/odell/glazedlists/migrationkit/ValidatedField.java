@@ -27,6 +27,9 @@ import java.awt.Color;
  * A field that has a preset map of valid values, but that will also accept
  * a user-typed value.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class ValidatedField extends CompletedField implements StringCompleter, DocumentListener {

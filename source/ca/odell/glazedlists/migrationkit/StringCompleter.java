@@ -16,6 +16,9 @@ package ca.odell.glazedlists.migrationkit;
  * any mechanism necessary to guess, such as database, preconstructed
  * tables or even software-ESP.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public interface StringCompleter {

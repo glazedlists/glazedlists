@@ -18,6 +18,12 @@ import java.util.*;
  * query list requires its own thread, which is either sleeping
  * or updating the list with the freshest query update.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *      QueryList users should review the method UniqueList.replaceAll() as it
+ *      provides similar functionality to the QueryList without as much
+ *      domain-specific overhead.
+ * 
  * @see <a href="https://glazedlists.dev.java.net/tutorial/part6/index.html">Glazed
  * Lists Tutorial Part 6 - Query Lists</a>
  *

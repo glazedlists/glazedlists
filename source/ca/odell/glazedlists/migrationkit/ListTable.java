@@ -35,6 +35,11 @@ import java.util.*;
  *
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *      Users of ListTable should consider EventTableModel which does not restrict
+ *      them to a specific JTable base class.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class ListTable implements MouseListener {

@@ -13,6 +13,9 @@ import ca.odell.glazedlists.event.*;
 /**
  * Listens and responds to changes in the selection of a table.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public interface SelectionListener {

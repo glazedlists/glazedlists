@@ -18,6 +18,9 @@ import java.util.*;
  * Simple class remembers the currently selected object. This class
  * can enable and disable actions based on whether or not a record
  * is selected.
+ *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
  */
 public class BasicSelectionListener implements SelectionListener {
 

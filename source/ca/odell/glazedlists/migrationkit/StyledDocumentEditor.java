@@ -26,6 +26,10 @@ import java.util.ArrayList;
  * which focus events should be accepted. When this is fixed, the Editor will
  * be marked as fixed and it will be given a public constructor.
  *
+ * @deprecated This class will not be available in future releases of Glazed Lists.
+ *      It exists to help users migrate between Glazed Lists < 0.8 and Glazed Lists >= 0.9.
+ *      Users should visit the new Renderpack project, http://renderpack.dev.java.net.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class StyledDocumentEditor extends StyledDocumentRenderer implements TableCellEditor {
