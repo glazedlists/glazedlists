@@ -1,5 +1,5 @@
 /**
-* Glazed Lists
+ * Glazed Lists
  * http://glazedlists.dev.java.net/
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 
 
 /**
-* A non-optimized list iterator for iterating event lists. This non-clever
+ * A non-optimized list iterator for iterating event lists. This non-clever
  * iterator simply keeps an index of where it is and what it last saw. It
  * knows nothing about the underlying storage of the List that it iterates,
  * and therefore provides generic, possibly slow access to its elements.

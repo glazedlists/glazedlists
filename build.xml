@@ -7,16 +7,17 @@
 
 <project name="glazedlists" default="jar" basedir=".">
 
+
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      BUILD ADMINISTRATION
+     Create build directories and set up necessary paths.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-  <target name="init"
-    description="Create build directories and set up necessary paths">
+  <target name="init">
   </target>
 
   <target name="clean"
-    description="clean up generated files so they are rebuilt" >
+    description="Clean up generated files, forcing them to be rebuilt." >
     <!-- Delete the directories where generated files fall -->
     <delete dir="classes"/>
     <!-- Delete the documentation directories -->
@@ -33,13 +34,14 @@
     <delete file="glazedlists-source.zip"/>        
   </target>
 
+
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      JAVADOC
      Construct a browsable API.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     
   <target name="docs" depends="init"
-    description="Scan the source code to generate the API">
+    description="Scan the source code to generate the Javadoc API.">
     <mkdir dir="docs"/>
     <!-- document all the source with @todo tags -->
     <javadoc packagenames="com.odellengineeringltd.glazedlists.*" 
@@ -51,6 +53,7 @@
     </javadoc>
   </target>
 
+
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      JAR
      Construct the .jar file for use in a library.
@@ -60,7 +63,7 @@
         description="Creates glazedlists.jar file containing all UI libraries.">
     <jar destfile="glazedlists.jar" update="true">
       <fileset dir="classes">
-        <include name="**/*.class"/>
+        <exclude name="**/**Test.class"/>
       </fileset>
       <manifest>
         <attribute name="Main-Class" value="com.odellengineeringltd.glazedlists.demo.ProgrammingLanguageBrowser"/>
@@ -69,28 +72,61 @@
     </jar>
   </target>
 
+
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      COMPILE
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
   <target name="compile" depends="init"
-        description="Compile the source">
+        description="Compile the source.">
     <mkdir dir="classes"/>
     <!-- Compile the java code from source/ into classes/ -->
     <javac destdir="classes" srcdir="source" debug="on" source="1.4">
+      <exclude name="**/**Test.java"/>
     </javac>
   </target>
   
+
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      REDISTRIBUTING THE SOURCE
      Package the entire Glazed Lists source tree in a .zip file.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
   <target name="dist" depends="init"
-    description="Create a .zip file of the source for backup or distribution">
+    description="Create a .zip file of the source for backup or distribution.">
     <zip destfile="glazedlists-source.zip"
-       basedir="${basedir}"
-       excludes="classes/**, glazedlists-source.zip"/>
+       basedir="."
+       excludes="classes/**, docs/api/**, glazedlists-source.zip"/>
   </target>
   
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     TEST
+     Compile unit tests and run them using JUnit.
+     This task depends on JUnit, available free at http://www.junit.org
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <target name="test" depends="init,compile"
+        description="Compile unit tests and run them using JUnit.">
+    <mkdir dir="classes"/>
+    <!-- Verify that JUnit is available on the classpath -->
+    <available file="${ant.home}/lib/junit.jar" property="junit.present"/>
+    <fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
+    <!-- Compile the test classes from source/ into classes/ -->
+    <javac destdir="classes" srcdir="source" debug="on" source="1.4">
+      <classpath path="${ant.home}/lib/junit.jar"/>
+      <include name="**/**Test.java"/>
+    </javac>
+    <!-- Execute JUnit tests -->
+    <junit printsummary="true" showoutput="false" fork="true"
+      errorProperty="test.failed" failureProperty="test.failed">
+      <classpath path="classes:${ant.home}/lib/junit.jar"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest>
+        <fileset dir="classes/" includes="**/**Test.class"/>
+      </batchtest>
+    </junit>
+    <fail message="Tests failed. Check test output." if="test.failed"/>
+  </target>
+
 </project>
