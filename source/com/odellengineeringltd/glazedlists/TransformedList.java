@@ -231,7 +231,10 @@ public abstract class TransformedList implements EventList, ListEventListener {
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            source.clear();
+            for(ListIterator i = listIterator(); i.hasNext(); ) {
+                i.next();
+                i.remove();
+            }
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -429,7 +432,10 @@ public abstract class TransformedList implements EventList, ListEventListener {
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            return source.remove(toRemove);
+            int index = indexOf(toRemove);
+            if(index == -1) return false;
+            source.remove(getSourceIndex(index));
+            return true;
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -450,7 +456,12 @@ public abstract class TransformedList implements EventList, ListEventListener {
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            return source.removeAll(values);
+            boolean overallChanged = false;
+            for(Iterator i = values.iterator(); i.hasNext(); ) {
+                boolean removeChanged = remove(i.next());
+                if(removeChanged) overallChanged = true;
+            }
+            return overallChanged;
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -472,7 +483,14 @@ public abstract class TransformedList implements EventList, ListEventListener {
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            return source.retainAll(values);
+            boolean changed = false;
+            for(ListIterator i = listIterator(); i.hasNext(); ) {
+                if(!values.contains(i.next())) {
+                    i.remove();
+                    changed = true;
+                }
+            }
+            return changed;
         } finally {
             getReadWriteLock().writeLock().unlock();
         }

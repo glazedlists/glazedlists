@@ -16,8 +16,7 @@ import com.odellengineeringltd.glazedlists.*;
  *
  * <p>Although the <code>SubEventList</code>'s size is initially fixed, the 
  * <code>SubEventList</code> can change size as a consequence of changes to
- * the source list that occur within the range covered by
- *  the <code>SubEventList</code>.
+ * the source list that occur within the range covered by the <code>SubEventList</code>.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -79,22 +78,11 @@ public final class SubEventList extends TransformedList implements ListEventList
     }
     
     /**
-     * Returns the element at the specified position in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object get(int index) {
-        if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException();
-        return source.get(index + startIndex);
-    }
-    
-    /**
      * Gets the index into the source list for the object with the specified
      * index in this list.
      */
     protected int getSourceIndex(int mutationIndex) {
-        return mutationIndex - startIndex;
+        return mutationIndex + startIndex;
     }
     
     /**

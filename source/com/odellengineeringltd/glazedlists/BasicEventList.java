@@ -381,7 +381,7 @@ public class BasicEventList implements EventList, Serializable {
             updates.beginEvent();
             for(Iterator i = collection.iterator(); i.hasNext(); ) {
                 int index = -1;
-                while((index = data.indexOf(i.next())) != -1) {
+                if((index = data.indexOf(i.next())) != -1) {
                     updates.addDelete(index);
                     data.remove(index);
                     changed = true;
