@@ -392,12 +392,37 @@ public final class Barcode extends AbstractList {
 
         // if it is beyond the tree
         } else if(index >= treeSize) {
-            if(left) return treeSize - 1;
-            return treeSize;
+            if(left) return root.blackSize() - 1;
+            return root.blackSize();
 
         // get from the tree
         } else {
             return root.getBlackIndex(index, left);
         }
     }
+
+    /**
+     * Gets the index of the WHITE element at whiteIndex relative to the WHITE
+     * element after the previous BLACK element or the start of the list if no
+     * BLACK element exists before this node.
+     */
+    public int getWhiteSequenceIndex(int whiteIndex) {
+        // There is no tree sequence is beyond the tree
+        if(root == null) {
+            return whiteIndex;
+
+        // The sequence is beyond the tree
+        } else if(whiteIndex >= root.whiteSize()) {
+            return whiteIndex - root.whiteSize();
+
+        // lookup the sequence index within the tree
+        } else {
+            return root.getWhiteSequenceIndex(whiteIndex);
+        }
+    }
+
+    /**
+     *
+     */
+
 }

@@ -354,6 +354,23 @@ final class BarcodeNode {
     }
 
     /**
+     * Gets the sequence relative index given a white-centric index.
+     */
+    public int getWhiteSequenceIndex(int whiteIndex) {
+        int localIndex = whiteIndex - (treeLeftSize - blackLeftSize);
+
+        // Recurse to the Left
+        if(localIndex < 0) return left.getWhiteSequenceIndex(whiteIndex);
+
+        // Recurse to the Right
+        else if(localIndex >= whiteSpace) {
+            return right.getWhiteSequenceIndex(localIndex - whiteSpace);
+
+        // once the recursion is done you have the relative index
+        } else return localIndex;
+    }
+
+    /**
      * Sets the values from index to index + length.
      */
     void set(int index, Object value, int length) {

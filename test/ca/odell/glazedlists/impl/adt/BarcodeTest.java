@@ -119,6 +119,34 @@ public class BarcodeTest extends TestCase {
     }
 
     /**
+     * Tests that WHITE based sequence indexing is working correctly.
+     */
+    public void testWhiteSequenceIndex() {
+        barcode.addWhite(0, 1000);
+        int filler = 1000;
+
+        // randomly add blocks of black values
+        while(filler > 0) {
+            int whereToAdd = random.nextInt(barcode.size());
+            int amountToAdd = random.nextInt(filler + 1);
+
+            barcode.addBlack(whereToAdd, amountToAdd);
+            filler -= amountToAdd;
+        }
+
+        // since accesses don't alter state just look things up in order
+        for(int i = 0;i < barcode.whiteSize();i++) {
+            int sequenceIndex = barcode.getWhiteSequenceIndex(i);
+            int actualWhiteIndex = barcode.getIndex(i, Barcode.WHITE);
+            int previousBlack = barcode.getBlackIndex(actualWhiteIndex, true);
+            int actualBlackIndex = -1;
+            if(previousBlack != -1) actualBlackIndex = barcode.getIndex(previousBlack, Barcode.BLACK);
+
+            assertEquals(actualWhiteIndex - (actualBlackIndex + 1), sequenceIndex);
+        }
+    }
+
+    /**
      * Tests to verify that the sparse list is consistent after a long
      * series of list operations.
      */
