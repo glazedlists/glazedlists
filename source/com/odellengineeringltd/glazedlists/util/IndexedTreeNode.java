@@ -186,7 +186,7 @@ public class IndexedTreeNode {
     /**
      * Inserts the specified object into the tree in sorted order. The 
      *
-     * @return the SortedTreeNode node where the object was inserted. This
+     * @return the IndexedTreeNode node where the object was inserted. This
      *      node can be used to call the deleteUp() method, which will
      *      delete the node from it's parent tree. It is also possible to
      *      use the getIndex() method on the node to discover what the sorted
@@ -222,7 +222,7 @@ public class IndexedTreeNode {
     /**
      * Inserts the specified object into the tree with the specified index.
      *
-     * @return the SortedTreeNode node where the object was inserted. This
+     * @return the IndexedTreeNode node where the object was inserted. This
      *      node can be used to call the deleteUp() method, which will
      *      delete the node from it's parent tree. It is also possible to call
      *      the getIndex() method on the node. As new nodes are inserted, the
