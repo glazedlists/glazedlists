@@ -248,7 +248,7 @@ public final class ListEvent extends EventObject {
         // figure out which change to show
         int atomicChangeToShow = 0;
         if(atomicCount < masterSequence.getAtomicCount()) atomicChangeToShow = masterSequence.getAtomicCount();
-        else atomicChangeToShow = masterSequence.getAtomicCount() = 1;
+        else atomicChangeToShow = masterSequence.getAtomicCount() - 1;
         
         // figure out how many blocks in that change
         int blocksToShow = masterSequence.getBlockCount(atomicChangeToShow); 
