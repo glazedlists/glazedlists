@@ -23,13 +23,13 @@ public class ConsistencyTestList implements ListEventListener {
     
     /** a name for reporting problems with the list */
     private String name;
-    
+
     /** the source list to compare against */
     private EventList source;
-    
+
     /** keep a count of the number of changes, for reporting */
     private int changeCount = 0;
-    
+
     /**
      * Creates a new ConsistencyTestList that ensures events from the source
      * list are consistent.
@@ -39,9 +39,9 @@ public class ConsistencyTestList implements ListEventListener {
         this.name = name;
         size = source.size();
     }
-    
+
     /**
-     * For implementing the ListEventListener interface.     
+     * For implementing the ListEventListener interface.
      */
     public void listChanged(ListEvent listChanges) {
         // keep track of the highest change index so far

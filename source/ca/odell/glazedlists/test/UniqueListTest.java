@@ -897,7 +897,34 @@ public class UniqueListTest extends TestCase {
         assertEquals(5, source.size());
         assertEquals(3, unique.size());
     }
-    
+
+    /**
+     * Verifies that the UniqueList sends update events and
+     * not insert/delete event combinations.
+     */
+    public void testUpdateCount() {
+        unique.add("A");
+        unique.add("A");
+        unique.add("A");
+        unique.add("B");
+        unique.add("B");
+        unique.add("C");
+
+        SortedSet replacementSet = new TreeSet();
+	replacementSet.addAll(source);
+
+        // listen to changes on the unique list
+        ListEventCounter counter = new ListEventCounter();
+        unique.addListEventListener(counter);
+
+        // replace the values with the replacement set
+        unique.replaceAll(replacementSet);
+
+        // verify that only one event has occured
+        assertEquals(1, counter.getEventCount());
+	assertEquals(3, counter.getChangeCount(0));
+    }
+
     /**
      * Verify that replaceAll() works in the simplest of cases.
      */
@@ -913,14 +940,14 @@ public class UniqueListTest extends TestCase {
         replacementSet.add("C");
         replacementSet.add("D");
         replacementSet.add("G");
-        
+
         unique.replaceAll(replacementSet);
 
         ArrayList controlList = new ArrayList();
         controlList.addAll(replacementSet);
         assertEquals(controlList, unique);
     }
-    
+
     /**
      * Verify that replaceAll() works in a more sophisticated case.
      */
@@ -928,12 +955,12 @@ public class UniqueListTest extends TestCase {
         for(int i = 0; i < 100; i++) {
             unique.add(new Integer(random.nextInt(100)));
         }
-        
+
         SortedSet replacementSet = new TreeSet();
         for(int i = 0; i < 100; i++) {
             replacementSet.add(new Integer(random.nextInt(100)));
         }
-        
+
         // listen to changes on the unique list
         ListEventCounter counter = new ListEventCounter();
         unique.addListEventListener(counter);
@@ -949,5 +976,5 @@ public class UniqueListTest extends TestCase {
         controlList.addAll(replacementSet);
         assertEquals(controlList, unique);
     }
-    
+
 }

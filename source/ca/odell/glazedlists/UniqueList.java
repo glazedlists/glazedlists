@@ -56,9 +56,16 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
     /** the sparse list tracks which elements are duplicates */
     private SparseList duplicatesList = new SparseList();
-    
+
     /** a count of the inserts to be processed by an active listChanged() method */
-    private int updateIndexOffset = 0; 
+    private int updateIndexOffset = 0;
+
+    /** duplicates list entries are either unique or duplicates */
+    private static final Object UNIQUE = Boolean.TRUE;
+    private static final Object DUPLICATE = null;
+
+    /** some inserts are unique until they can be proven otherwise */
+    private static final Object TEMP_UNIQUE = Boolean.FALSE;
 
     /**
      * Creates a new UniqueList that determines uniqueness using the specified
@@ -118,52 +125,160 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * duplicates.  The list is then altered to restore uniqeness and the events
      * describing the alteration of the unique view are forwarded on.
      *
+     * <p>The approach to handling list changes in UniqueList uses two passes
+     * through the list of change events. In the first pass, the duplicates list
+     * is updated to reflect the changes yet no events are fired. All inserted
+     * values receive a value of TEMP_UNIQUE in the duplicates list. Deleted
+     * and updated original duplicates list entries are stored in a temporary
+     * array. Updated values' duplicates list entries are set to UNIQUE. In
+     * pass 2, the change events are reviewed again. Inserted elements are tested
+     * to see if the inserted value equals any elements in the source list that
+     * existed prior to this change. If they are equal, the insert is not new
+     * and an UPDATE is fired, otherwise the INSERT is fired. In either case, the
+     * TEMP_UNIQUE is replaced with a UNIQUE in the duplicates list. For update events
+     * the value is tested for equality with adjacent values, and the result may
+     * be a forwarded DELETE, INSERT or UPDATE. Finally DELETED events may be
+     * forwarded with a resultant DELETE or UPDATE event, depending on whether
+     * the deleted value was unique.
+     *
+     *
      * @param listChanges The group of list changes to process
      */
     public void listChanged(ListEvent listChanges) {
-        List nonUniqueInserts = new ArrayList();
 
-        updates.beginEvent();
+        // divide the change event for two passes
+        ListEvent firstPass = new ListEvent(listChanges);
+        ListEvent secondPass = listChanges;
 
-        while(listChanges.next()) {
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-            int changeResult = -1;
+        // first pass, update unique list
+        LinkedList removedValues = new LinkedList();
+        while(firstPass.next()) {
+            int changeIndex = firstPass.getIndex();
+            int changeType = firstPass.getType();
 
-            // Process the event
             if(changeType == ListEvent.INSERT) {
-                changeResult = processInsertEvent(changeIndex);
-            } else if(changeType == ListEvent.DELETE) {
-                processDeleteEvent(changeIndex);
+                duplicatesList.add(changeIndex, TEMP_UNIQUE);
             } else if(changeType == ListEvent.UPDATE) {
-                changeResult = processUpdateEvent(changeIndex);
-            }
-
-            if(changeResult != -1) {
-                nonUniqueInserts.add(new Integer(changeResult));
-                updateIndexOffset++;
+                Object replaced = duplicatesList.set(changeIndex, UNIQUE);
+                // if the deleted value has a duplicate, remove the dup instead
+                if(replaced == UNIQUE) {
+                    if(changeIndex+1 < duplicatesList.size() && duplicatesList.get(changeIndex+1) == DUPLICATE) {
+                        duplicatesList.set(changeIndex+1, UNIQUE);
+                        replaced = null;
+                    }
+                }
+                removedValues.addLast(replaced);
+            } else if(changeType == ListEvent.DELETE) {
+                Object deleted = duplicatesList.remove(changeIndex);
+                // if the deleted value has a duplicate, remove the dup instead
+                if(deleted == UNIQUE) {
+                    if(changeIndex < duplicatesList.size() && duplicatesList.get(changeIndex) == DUPLICATE) {
+                        duplicatesList.set(changeIndex, UNIQUE);
+                        deleted = null;
+                    }
+                }
+                removedValues.addLast(deleted);
             }
         }
-        
-        // done offseting inserts
-        updateIndexOffset = 0;
 
-        // Clean up after potentially non unique insertions
-        int uniqueInsertSize = nonUniqueInserts.size();
-        for(int i = 0; i < uniqueInsertSize; i++) {
-            int insertIndex = ((Integer)nonUniqueInserts.get(i)).intValue();
-            guaranteeUniqueness(insertIndex);
+        // second pass, fire events
+        updates.beginEvent();
+        while(secondPass.next()) {
+            int changeIndex = secondPass.getIndex();
+            int changeType = secondPass.getType();
+
+            // inserts can result in UPDATE or INSERT events
+            if(changeType == ListEvent.INSERT) {
+                boolean hasNeighbour = handleOldNeighbour(changeIndex);
+                // finally fire the event
+                if(hasNeighbour) {
+                    addEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
+                } else {
+                    addEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
+                }
+            // updates can result in INSERT, UPDATE or DELETE events
+            } else if(changeType == ListEvent.UPDATE) {
+                boolean hasNeighbour = handleOldNeighbour(changeIndex);
+                boolean wasUnique = (removedValues.removeFirst() == UNIQUE);
+                if(hasNeighbour) {
+                    if(wasUnique) {
+                        addEvent(ListEvent.DELETE, duplicatesList.getCompressedIndex(changeIndex, true), true);
+                    } else {
+                        addEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
+                    }
+                } else {
+                    if(wasUnique) {
+                        addEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex), true);
+                    } else {
+                        addEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
+                    }
+                }
+            // deletes can result in UPDATE or DELETE events
+            } else if(changeType == ListEvent.DELETE) {
+                boolean wasUnique = (removedValues.removeFirst() == UNIQUE);
+                // calculate the compressed index where  the delete occured
+                int deletedIndex = -1;
+                if(changeIndex < duplicatesList.size()) deletedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
+                else deletedIndex = duplicatesList.getCompressedList().size();
+                // fire the change event
+                if(wasUnique) {
+                    addEvent(ListEvent.DELETE, deletedIndex, true);
+                } else {
+                    addEvent(ListEvent.UPDATE, deletedIndex, false);
+                }
+            }
+
         }
-
         updates.commitEvent();
     }
+
+    /**
+     * Handles whether this change index has a neighbour that existed prior
+     * to a current change and that the values are equal. This adjusts the
+     * duplicates list a found pair of such changes if they exist.
+     *
+     * @return true if a neighbour was found and the duplicates list has been
+     *      updated in response. returns false if the specified index has no such
+     *      neighbour. In this case the value at the specified index will be
+     *      marked as unique (but not temporarily so).
+     */
+    private boolean handleOldNeighbour(int changeIndex) {
+        // test if equal by value to predecessor which is always old
+        if(valuesEqual(changeIndex-1, changeIndex)) {
+            duplicatesList.set(changeIndex, DUPLICATE);
+            return true;
+        }
+
+        // search for an old follower that is equal
+        int followerIndex = changeIndex + 1;
+        while(true) {
+            // we have an equal follower
+            if(valuesEqual(changeIndex, followerIndex)) {
+                Object followerType = duplicatesList.get(followerIndex);
+                // this insert equals the following insert, continue looking for an old match
+                if(followerType == TEMP_UNIQUE) {
+                    followerIndex++;
+                // this insert equals an existing value, swap & update
+                } else {
+                    duplicatesList.set(changeIndex, UNIQUE);
+                    duplicatesList.set(followerIndex, null);
+                    return true;
+                }
+            // we have no equal follower that is old, this is a new value
+            } else {
+                duplicatesList.set(changeIndex, UNIQUE);
+                return false;
+            }
+        }
+    }
+
 
     /**
      * Called to handle all INSERT events
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private int processInsertEvent(int changeIndex) {
+    /*private int processInsertEvent(int changeIndex) {
         if(valueIsDuplicate(changeIndex)) {
             // The element is a duplicate so add a nullity and forward a
             // non-mandatory change event since the number of duplicates changed.
@@ -176,14 +291,14 @@ public final class UniqueList extends TransformedList implements ListEventListen
             duplicatesList.add(changeIndex, Boolean.TRUE);
             return changeIndex;
         }
-    }
+    }*/
 
     /**
      * Called to handle all DELETE events
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private void processDeleteEvent(int changeIndex) {
+    /*private void processDeleteEvent(int changeIndex) {
         // The element is a duplicate, the remove doesn't alter the unique view
         if(duplicatesList.get(changeIndex) == null) {
             // Remove and forward a non-mandatory change event since the number
@@ -209,14 +324,14 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 addChange(ListEvent.DELETE, compressedIndex, true);
             }
         }
-    }
+    }*/
 
     /**
      * Called to handle all UPDATE events
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private int processUpdateEvent(int changeIndex) {
+    /*private int processUpdateEvent(int changeIndex) {
         if(duplicatesList.get(changeIndex) == null) {
             // Handle all cases where the change does not affect an element of the unique view
             return updateDuplicate(changeIndex);
@@ -224,7 +339,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // Handle all cases where the change does affect an element of the unique view
             return updateNonDuplicate(changeIndex);
         }
-    }
+    }*/
 
     /**
      * Handles the UPDATE case where the element being updated was
@@ -236,7 +351,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private int updateDuplicate(int changeIndex) {
+    /*private int updateDuplicate(int changeIndex) {
         if(!valueIsDuplicate(changeIndex)) {
             // The nullity at this index is no longer valid
             duplicatesList.set(changeIndex, Boolean.TRUE);
@@ -245,7 +360,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // Otherwise, it is still a duplicate and must be NULL, no event forwarded
             return -1;
         }
-    }
+    }*/
 
     /**
      * Handles the UPDATE case where the element being updated was
@@ -257,7 +372,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private int updateNonDuplicate(int changeIndex) {
+    /*private int updateNonDuplicate(int changeIndex) {
         int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
         if(valueIsDuplicate(changeIndex)) {
             // The value at this index should be NULL as it is the same as previous
@@ -277,7 +392,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 // The element was unique and is now a duplicate
                 duplicatesList.set(changeIndex, null);
                 addChange(ListEvent.DELETE, compressedIndex, true);
-                // jesse, 23-june-04: we should add the following line? 
+                // jesse, 23-june-04: we should add the following line?
                 // addChange(ListEvent.UPDATE, compressedIndex - 1, false);
             }
         } else {
@@ -316,14 +431,14 @@ public final class UniqueList extends TransformedList implements ListEventListen
             }
         }
         return -1;
-    }
+    }*/
 
     /**
      * Guarantee that a value is unique with respect to its follower.
      *
      * @param changeIndex the index to inspect for duplicates.
      */
-    private void guaranteeUniqueness(int changeIndex) {
+    /*private void guaranteeUniqueness(int changeIndex) {
         int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
 
         // Duplicate was created in the unique view, correct this
@@ -335,7 +450,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
         } else {
             addChange(ListEvent.INSERT, compressedIndex, true);
         }
-    }
+    }*/
 
     /**
      * Appends a change to the ListEventAssembler.
@@ -347,9 +462,9 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * @param type The type of this change
      * @param mandatory Whether or not to propagate this change to all listeners
      */
-    private void addChange(int type, int index, boolean mandatory) {
+    private void addEvent(int type, int index, boolean mandatory) {
         if(mandatory) {
-            // jesse, 23-june-04: the subtract of updateIndexOffset is experimental 
+            // jesse, 23-june-04: the subtract of updateIndexOffset is experimental
             //updates.addChange(type, index);
             updates.addChange(type, index - updateIndexOffset);
         } else {
@@ -368,10 +483,10 @@ public final class UniqueList extends TransformedList implements ListEventListen
             if(!duplicatesList.isEmpty()) throw new IllegalStateException();
 
             for(int i = 0; i < source.size(); i++) {
-                if(!valueIsDuplicate(i)) {
-                    duplicatesList.add(i, Boolean.TRUE);
+                if(!valuesEqual(i, i-1)) {
+                    duplicatesList.add(i, UNIQUE);
                 } else {
-                    duplicatesList.add(i, null);
+                    duplicatesList.add(i, DUPLICATE);
                 }
             }
         } finally {
@@ -380,20 +495,20 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Tests if the specified value is a duplicate. It is a duplicate if and
-     * only if it equals its immediate predecessor in the list.
+     * Tests if the specified values match.
      *
-     * @param sourceIndex The index to check for duplicity
+     * @param index0 the first index to test
+     * @param index1 the second index to test
      *
-     * @return true iff the preceeding value is deemed equal to the value at
-     *         index by the comparator for this list.
+     * @return true iff the values at the specified index are equal. false if
+     *      either index is out of range or the values are not equal.
      */
-    private boolean valueIsDuplicate(int sourceIndex) {
-        if(sourceIndex == 0) return false;
-        if(sourceIndex >= source.size()) return false;
-        return (0 == comparator.compare(source.get(sourceIndex - 1), source.get(sourceIndex)));
+    private boolean valuesEqual(int index0, int index1) {
+        if(index0 < 0 || index0 >= source.size()) return false;
+        if(index1 < 0 || index1 >= source.size()) return false;
+        return (0 == comparator.compare(source.get(index0), source.get(index1)));
     }
-    
+
     /**
      * Removes the element at the specified index from the source list.
      *
@@ -405,10 +520,10 @@ public final class UniqueList extends TransformedList implements ListEventListen
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
-            
+
             // keep the removed object to return
             Object removed = get(index);
-            
+
             // calculate the start (inclusive) and end (exclusive) of the range to remove
             int removeStart = -1;
             int removeEnd = -1;
@@ -421,17 +536,17 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 removeStart = getSourceIndex(index);
                 removeEnd = source.size();
             }
-            
+
             // remove the range from the source list
             source.subList(removeStart, removeEnd).clear();
-            
+
             // return the first of the removed objects
             return removed;
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Removes the specified element from the source list.
      *
@@ -443,16 +558,16 @@ public final class UniqueList extends TransformedList implements ListEventListen
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             int index = indexOf(toRemove);
-            
+
             if(index == -1) return false;
-            
+
             remove(index);
             return true;
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Replaces the object at the specified index in the source list with
      * the specified value.
@@ -471,10 +586,10 @@ public final class UniqueList extends TransformedList implements ListEventListen
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
-            
+
             // save the replaced value
             Object replaced = get(index);
-            
+
             // wrap this update in a nested change set
             updates.beginEvent(true);
 
@@ -497,16 +612,16 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
             // replace the non-duplicate with the new value
             source.set(getSourceIndex(index), value);
-            
+
             // commit the nested change set
             updates.commitEvent();
-            
+
             return replaced;
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Replaces the contents of this list with the contents of the specified
      * SortedSet. This walks through both lists in parallel in order to retain
@@ -530,7 +645,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 Comparable revisionElement = (Comparable)revisionIterator.next();
 
                 // when the before list holds items smaller than the after list item,
-                // the before list items are out-of-date and must be deleted 
+                // the before list items are out-of-date and must be deleted
                 while(originalElement != null && revisionElement.compareTo(originalElement) > 0) {
                     remove(originalIndex);
                     // replace the original element
@@ -555,7 +670,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             }
 
             // when the before list holds items larger than the largest after list item,
-            // the before list items are out-of-date and must be deleted 
+            // the before list items are out-of-date and must be deleted
             while(originalIndex < size()) {
                 remove(originalIndex);
             }
@@ -566,13 +681,13 @@ public final class UniqueList extends TransformedList implements ListEventListen
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Gets the element at the specified index of the specified list
      * or null if the list is too small.
      */
     private Comparable getOrNull(List source, int index) {
         if(index < source.size()) return (Comparable)source.get(index);
-        else return null; 
+        else return null;
     }
 }

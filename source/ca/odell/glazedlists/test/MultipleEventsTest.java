@@ -123,21 +123,31 @@ public class MultipleEventsTest extends TestCase {
  */
 class ListEventCounter implements ListEventListener {
     
-    /** count the number of events */
-    private int eventCount;
-    
+    /** count the number of changes per event */
+    private List changeCounts = new ArrayList();
+
     /**
      * When an event occurs, count that.
      */
     public void listChanged(ListEvent listChanges) {
-        eventCount++;
-        listChanges.clearEventQueue();
+        int changesForEvent = 0;
+        while(listChanges.next()) {
+            changesForEvent++;
+        }
+        changeCounts.add(new Integer(changesForEvent));
     }
-    
+
     /**
      * Gets the number of events that have occured thus far.
      */
     public int getEventCount() {
-        return eventCount;
+        return changeCounts.size();
+    }
+
+    /**
+     * Gets the number of changes for the specified event.
+     */
+    public int getChangeCount(int event) {
+        return ((Integer)changeCounts.get(event)).intValue();
     }
 }
