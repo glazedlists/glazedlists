@@ -42,18 +42,16 @@ public class MutableTableModelEvent extends TableModelEvent {
         this.type = type;
     }
     
-    /*
-     * Sets the table model event to reflect the changes from the
-     * specified ListChange event.
+    /**
+     * Sets the table model event to notify that the table structure
+     * has changed.
      */
-    /*public void setValues(ListChange listChange) {
-        firstRow = listChange.getStartIndex();
-        lastRow = listChange.getEndIndex();
-        if(listChange.getType() == ListChange.INSERT) type = INSERT;
-        else if(listChange.getType() == ListChange.DELETE) type = DELETE;
-        else if(listChange.getType() == ListChange.UPDATE) type = UPDATE;
+    public void setStructureChanged() {
+        firstRow = HEADER_ROW;
+        lastRow = HEADER_ROW;
         column = ALL_COLUMNS;
-    }*/
+        type = UPDATE;
+    }
 
     /**
      * Sets the table model event to reflect the specified changes.

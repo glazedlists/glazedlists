@@ -16,8 +16,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 // for responding to user actions
 import java.awt.event.*;
-// this class uses tables for displaying contact lists
-import java.awt.event.MouseAdapter;
+import javax.swing.event.*;
 // for keeping lists of comparators
 import java.util.*;
 // for looking up icon files in jars
@@ -48,7 +47,7 @@ import java.net.URL;
  * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TableComparatorChooser extends MouseAdapter {
+public class TableComparatorChooser extends MouseAdapter implements TableModelListener {
     
     /** the table being sorted */
     private ListTable listTable;
@@ -57,12 +56,10 @@ public class TableComparatorChooser extends MouseAdapter {
     /** the sorted list to choose the comparators for */
     private SortedList sortedList;
     
-    /** the first comparator in the comparator chain */
-    private int primaryColumn = -1;
-    
     /** the columns and their click counts */
     private ColumnClickTracker[] columnClickTrackers;
-    
+    /** the first comparator in the comparator chain */
+    private int primaryColumn = -1;
     /** an array that contains all columns with non-zero click counts */
     private ArrayList recentlyClickedColumns = new ArrayList();
     
@@ -120,11 +117,8 @@ public class TableComparatorChooser extends MouseAdapter {
         this.sortedList = sortedList;
         this.multipleColumnSort = multipleColumnSort;
         
-        // build the column click managers
-        columnClickTrackers = new ColumnClickTracker[table.getColumnCount()];
-        for(int i = 0; i < columnClickTrackers.length; i++) {
-            columnClickTrackers[i] = new ColumnClickTracker(i);
-        }
+        // set up the column click listeners
+        rebuildColumns();
         
         // set the table header
         table.getTableHeader().setDefaultRenderer(new SortArrowHeaderRenderer());
@@ -132,7 +126,23 @@ public class TableComparatorChooser extends MouseAdapter {
         // listen for events on the specified table
         table.setColumnSelectionAllowed(false);
         table.getTableHeader().addMouseListener(this);
+        table.getModel().addTableModelListener(this);
     }
+    
+    /**
+     * When the column model is changed, this resets the column clicks and
+     * comparator list for each column.
+     */
+    private void rebuildColumns() {
+        // build the column click managers
+        columnClickTrackers = new ColumnClickTracker[table.getColumnCount()];
+        for(int i = 0; i < columnClickTrackers.length; i++) {
+            columnClickTrackers[i] = new ColumnClickTracker(i);
+        }
+        primaryColumn = -1;
+        recentlyClickedColumns.clear();
+    }
+        
     
     /**
      * Gets the list of comparators for the specified column. The user is
@@ -158,6 +168,17 @@ public class TableComparatorChooser extends MouseAdapter {
         int clicks = e.getClickCount();
         if(clicks >= 1 && column != -1) {
             columnClicked(column, clicks);
+        }
+    }
+    
+    /**
+     * When the number of columns changes in the table, we need to
+     * clear the comparators and columns.
+     */
+    public void tableChanged(TableModelEvent event) {
+        if(event.getFirstRow() == TableModelEvent.HEADER_ROW
+        && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
+            rebuildColumns();
         }
     }
     
