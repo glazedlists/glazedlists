@@ -43,6 +43,9 @@ public class IndexedTreeNode {
     private int rightSize = 0;
     private int rootSize = 0;
     
+    /** the height of this subtree */
+    private int height = 0;
+    
     /** the value of this node, assuming it is a leaf */
     private Object value;
     
@@ -127,11 +130,14 @@ public class IndexedTreeNode {
      * Retrieves the height of this subtree.
      */
     private int height() {
+        return height;
+    }
+    /*private int height() {
         if(left == null && right == null) return 1;
         else if(right == null) return 1 + left.height();
         else if(left == null) return 1 + right.height();
         else return 1 + Math.max(left.height(), right.height());
-    }
+    }*/
 
     /**
      * Retrieves the subtree node with the largest value.
@@ -192,6 +198,7 @@ public class IndexedTreeNode {
             if(leftSize > 0 || rightSize > 0) throw new IllegalStateException("insert into non-leaf node with null value");
             rootSize++;
             value = inserted;
+            recalculateHeight();
             return this;
         }
         // if it sorts on the left side, insert there
@@ -230,6 +237,7 @@ public class IndexedTreeNode {
             if(leftSize > 0 || rightSize > 0) throw new IllegalStateException("insert into non-leaf node with null value");
             rootSize++;
             value = inserted;
+            recalculateHeight();
             return this;
         // if the index is on the left side, insert there
         } else if(index <= leftSize) {
@@ -264,6 +272,7 @@ public class IndexedTreeNode {
             if(parent != null) {
                 parent.notifyChildNodeRemoved(this);
                 parent.replaceChildNode(this, null);
+                parent.recalculateHeight();
             } else {
                 host.setRootNode(null);
             }
@@ -277,6 +286,7 @@ public class IndexedTreeNode {
             if(parent != null) {
                 parent.notifyChildNodeRemoved(this);
                 parent.replaceChildNode(this, left);
+                parent.recalculateHeight();
                 parent.doRotationsUpTheTree();
             } else {
                 host.setRootNode(left);
@@ -289,6 +299,7 @@ public class IndexedTreeNode {
             if(parent != null) {
                 parent.notifyChildNodeRemoved(this);
                 parent.replaceChildNode(this, right);
+                parent.recalculateHeight();
                 parent.doRotationsUpTheTree();
             } else {
                 host.setRootNode(right);
@@ -313,6 +324,8 @@ public class IndexedTreeNode {
             middle.right = right;
             middle.rightSize = rightSize;
             if(right != null) right.parent = middle;
+            // update the height
+            middle.height = height;
             // update the parent
             middle.parent = parent;
             if(parent != null) {
@@ -356,6 +369,16 @@ public class IndexedTreeNode {
      * IllegalStateException if any infraction is found.
      */
     public void validate() {
+        // first validate the children
+        if(left != null) left.validate();
+        if(right != null) right.validate();
+        
+        // validate height
+        /*if(height() != cachedHeight()) {
+            throw new IllegalStateException("Height " + height() + " does not match cached height " + cachedHeight() + " at " + this);
+        }*/
+        
+        // validate sort order
         if(host.getComparator() != null) {
             if(leftSize > 0 && rootSize > 0 && host.getComparator().compare(left.value, value) > 0) {
                 throw new IllegalStateException("" + this + "left larger than middle");
@@ -364,12 +387,32 @@ public class IndexedTreeNode {
                 throw new IllegalStateException("" + this + " middle larger than right");
             }
         }
+        // validate left size
         if((left == null && leftSize != 0) || (left != null && leftSize != left.size())) {
             throw new IllegalStateException("Cached leftSize " + leftSize + " != reported left.size() " + left.size());
         }
+        // validate right size
         if((right == null && rightSize != 0) || (right != null && rightSize != right.size())) {
             throw new IllegalStateException("Cached rightSize " + rightSize + " != reported right.size() " + right.size());
         }
+    }
+    
+    /**
+     * When the height of a subtree changes, propogate that change up the
+     * tree.
+     */
+    private void recalculateHeight() {
+        // save the old height to test for a difference
+        int oldHeight = height;
+
+        // calculate the new height
+        if(left == null && right == null) height = 1;
+        else if(right == null) height = 1 + left.height();
+        else if(left == null) height = 1 + right.height();
+        else height = 1 + Math.max(left.height(), right.height());
+
+        // propagate changes upstream if the height changed
+        if(height != oldHeight && parent != null) parent.recalculateHeight();
     }
     
     /**
@@ -439,6 +482,9 @@ public class IndexedTreeNode {
         // set the right child of the replacement to this
         replacement.right = this;
         replacement.rightSize = size();
+        // recalculate heights
+        recalculateHeight();
+        if(replacement.parent != null) replacement.parent.recalculateHeight();
     }
     /**
      * AVL-Rotates this subtree with its right child.
@@ -466,6 +512,9 @@ public class IndexedTreeNode {
         // set the right child of the replacement to this
         replacement.left = this;
         replacement.leftSize = size();
+        // recalculate heights
+        recalculateHeight();
+        if(replacement.parent != null) replacement.parent.recalculateHeight();
     }
 
     
@@ -473,8 +522,8 @@ public class IndexedTreeNode {
      * Prints the tree by its contents.
      */
     public String toString() {
-        String valueString = "" + height();
-        //String valueString = value.toString();
+        //String valueString = "" + height();
+        String valueString = value.toString();
         if(left != null && right != null) {
             return "(" + left.toString() + " " + valueString + " " + right.toString() + ")";
         } else if(left != null) {

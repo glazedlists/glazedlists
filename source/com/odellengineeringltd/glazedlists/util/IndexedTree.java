@@ -148,4 +148,44 @@ public class IndexedTree {
     public void setRootNode(IndexedTreeNode root) {
         this.root = root;
     }
+    
+    
+    /**
+     * Test method for the indexed tree compares it in sort time to the
+     * TreeSet.
+     */
+    public static void main(String[] args) {
+        if(args.length != 2) {
+            System.out.println("Usage: IndexedTree <operations> <repetitions>");
+            return;
+        }
+        
+        int operations = Integer.parseInt(args[0]);
+        int repetitions = Integer.parseInt(args[1]);
+        
+        java.util.Random random = new java.util.Random();
+        
+        System.out.print("Indexed Tree ");
+        long start = System.currentTimeMillis();
+
+        for(int r = 0; r < repetitions; r++) {
+            IndexedTree tree = new IndexedTree(new ComparableComparator());
+            for(int i = 0; i < operations; i++) {
+                int operation = (int)(random.nextDouble() * 3.0);
+                
+                if(operation <= 1 || tree.size() == 0) {
+                    Integer value = new Integer((int)(random.nextDouble() * (double)Integer.MAX_VALUE));
+                    tree.addByNode(value);
+                } else {
+                    int index = (int)(random.nextDouble() * (double)tree.size());
+                    tree.removeByIndex(index);
+                }
+                
+                //tree.validate();
+            }
+        }
+
+        long total = System.currentTimeMillis() - start;
+        System.out.println("time: " + total);
+    }
 }
