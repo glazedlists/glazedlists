@@ -63,13 +63,13 @@ public final class ThresholdList extends TransformedList {
     /** the evaluator to use to compare Objects against the threshold */
     private ThresholdEvaluator evaluator = null;
 
-	/**
-	 * Creates a {@link ThresholdList} that provides range-filtering based on the
-	 * specified {@link EventList} based on the specified integer JavaBean property.
-	 */
-	public ThresholdList(EventList source, String propertyName) {
-		this(source, BeanToolFactory.thresholdEvaluator(propertyName));
-	}
+    /**
+     * Creates a {@link ThresholdList} that provides range-filtering based on the
+     * specified {@link EventList} based on the specified integer JavaBean property.
+     */
+    public ThresholdList(EventList source, String propertyName) {
+        this(source, BeanToolFactory.thresholdEvaluator(propertyName));
+    }
 
     /**
      * Creates a {@link ThresholdList} that provides range-filtering on the
@@ -124,6 +124,9 @@ public final class ThresholdList extends TransformedList {
                     if(value < lowerThreshold) {
                         lowerThresholdIndex ++;
                         upperThresholdIndex++;
+
+                    } else if(value > upperThreshold) {
+                        // Do nothing
 
                     } else {
                         upperThresholdIndex ++;
@@ -187,9 +190,12 @@ public final class ThresholdList extends TransformedList {
             } else if(sortedIndex == upperThresholdIndex + 1) {
                 int transformedIndex = sortedIndex - Math.max(lowerThresholdIndex, 0);
                 if(type == ListEvent.INSERT) {
-                    if(value <= upperThreshold) {
+                    if(value >= lowerThreshold && value <= upperThreshold) {
                         upperThresholdIndex ++;
                         updates.addInsert(transformedIndex);
+                    } else if(sortedIndex == lowerThresholdIndex) {
+                        lowerThresholdIndex ++;
+                        upperThresholdIndex ++;
                     }
                 } else if(type == ListEvent.DELETE) {
                     // Do Nothing
@@ -253,9 +259,8 @@ public final class ThresholdList extends TransformedList {
 
         // the index at the threshold has changed but no event should be thrown
         if((newListIndex == -1 && lowerThresholdIndex == 0) ||
-            (newListIndex == 0 && lowerThresholdIndex == -1) ||
-            (newListIndex == size() && lowerThresholdIndex == size() - 1) ||
-            (newListIndex == size() - 1 && lowerThresholdIndex == size())) {
+            (newListIndex == 0 && lowerThresholdIndex == -1)) {
+
             lowerThresholdIndex = newListIndex;
             return;
         }
@@ -324,10 +329,8 @@ public final class ThresholdList extends TransformedList {
         }
 
         // the index at the threshold has changed but no event should be thrown
-        if((newListIndex == -1 && upperThresholdIndex == 0) ||
-            (newListIndex == 0 && upperThresholdIndex == -1) ||
-            (newListIndex == size() && upperThresholdIndex == size() - 1) ||
-            (newListIndex == size() - 1 && upperThresholdIndex == size())) {
+        if((newListIndex == size() && upperThresholdIndex == size() - 1) ||
+           (newListIndex == size() - 1 && upperThresholdIndex == size())) {
             upperThresholdIndex = newListIndex;
             return;
         }
