@@ -35,11 +35,12 @@ public class CTPChunkTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
+        throw new IllegalStateException("CTP Tests are broken");
         // increment the server port as to not bind to a previously used one
-        serverPort++;
+        /*serverPort++;
         handlerFactory = new StaticCTPHandlerFactory();
         connectionManager = new CTPConnectionManager(handlerFactory, serverPort);
-        connectionManager.start();
+        connectionManager.start();*/
     }
 
     /**

@@ -132,7 +132,7 @@ public class Bufferlo {
      * a duplicate if it is to be reused.
      */
     public Bufferlo append(ByteBuffer data) {
-        ByteBuffer myCopy = data.splice();
+        ByteBuffer myCopy = data.slice();
         myCopy.position(myCopy.limit());
         buffers.add(myCopy);
         data.position(data.limit());
