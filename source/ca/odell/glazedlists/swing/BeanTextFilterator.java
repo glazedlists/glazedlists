@@ -9,8 +9,7 @@ package ca.odell.glazedlists.swing;
 import java.util.*;
 import ca.odell.glazedlists.TextFilterator;
 // for using beans' reflection on property names
-import java.beans.*;
-import java.lang.reflect.*;
+import ca.odell.glazedlists.util.impl.BeanProperty;
 
 /**
  * TextFilterator implementation that uses reflection to be used for any
@@ -21,16 +20,16 @@ import java.lang.reflect.*;
 class BeanTextFilterator implements TextFilterator {
 
     /** Java Beans property names */
-    private List propertyNames;
+    private String[] propertyNames;
     
     /** methods for extracting field values */
-    private List propertyDescriptors = null;
+    private BeanProperty[] beanProperties = null;
     
     /**
      * Create a BeanTextFilterator that uses the specified property names.
      */
     public BeanTextFilterator(String[] propertyNames) {
-        this.propertyNames = Arrays.asList(propertyNames);
+        this.propertyNames = propertyNames;
     }
     
     /**
@@ -41,22 +40,13 @@ class BeanTextFilterator implements TextFilterator {
         if(element == null) return;
         
         // load the property descriptors on first request
-        if(propertyDescriptors == null) loadPropertyDescriptors(element);
+        if(beanProperties == null) loadPropertyDescriptors(element);
         
         // get the filter strings
-        try {
-            for(Iterator i = propertyDescriptors.iterator(); i.hasNext(); ) {
-                PropertyDescriptor property = (PropertyDescriptor)i.next();
-                Method getter = property.getReadMethod();
-                if(getter == null) throw new IllegalStateException("Bean property " + property + " not readable");
-                Object propertyValue = getter.invoke(element, null);
-                if(propertyValue == null) continue;
-                baseList.add(propertyValue.toString());
-            }
-        } catch(InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch(IllegalAccessException e) {
-            throw new RuntimeException(e);
+        for(int p = 0; p < beanProperties.length; p++) {
+            Object propertyValue = beanProperties[p].get(element);
+            if(propertyValue == null) continue;
+            baseList.add(propertyValue.toString());
         }
     }
 
@@ -65,14 +55,10 @@ class BeanTextFilterator implements TextFilterator {
      * access methods using the property names.
      */
     private void loadPropertyDescriptors(Object beanObject) {
-        try {
-            Class beanClass = beanObject.getClass();
-            propertyDescriptors = new ArrayList();
-            for(Iterator i = propertyNames.iterator(); i.hasNext(); ) {
-                propertyDescriptors.add(new PropertyDescriptor((String)i.next(), beanClass));
-            }
-        } catch(IntrospectionException e) {
-            throw new RuntimeException(e);
+        Class beanClass = beanObject.getClass();
+        beanProperties = new BeanProperty[propertyNames.length];
+        for(int p = 0; p < propertyNames.length; p++) {
+            beanProperties[p] = new BeanProperty(beanClass, propertyNames[p], true, false);
         }
     }
 }

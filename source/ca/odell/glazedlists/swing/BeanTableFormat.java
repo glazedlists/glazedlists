@@ -8,8 +8,7 @@ package ca.odell.glazedlists.swing;
 
 import java.util.*;
 // for using beans' reflection on property names
-import java.beans.*;
-import java.lang.reflect.*;
+import ca.odell.glazedlists.util.impl.BeanProperty;
 
 /**
  * TableFormat implementation that uses reflection to be used for any
@@ -20,13 +19,13 @@ import java.lang.reflect.*;
 class BeanTableFormat implements WritableTableFormat {
 
     /** Java Beans property names */
-    private List propertyNames;
+    private String[] propertyNames;
     
     /** methods for extracting field values */
-    private List propertyDescriptors = null;
+    private BeanProperty[] beanProperties = null;
     
     /** column labels are pretty-print column header labels */
-    private List columnLabels;
+    private String[] columnLabels;
     
     /** whether all columns can be edited */
     private boolean[] editable;
@@ -36,8 +35,8 @@ class BeanTableFormat implements WritableTableFormat {
      * and the specified field names.
      */
     public BeanTableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        this.propertyNames = Arrays.asList(propertyNames);
-        this.columnLabels = Arrays.asList(columnLabels);
+        this.propertyNames = propertyNames;
+        this.columnLabels = columnLabels;
         this.editable = editable;
     }
     
@@ -45,14 +44,14 @@ class BeanTableFormat implements WritableTableFormat {
      * The number of columns to display.
      */
     public int getColumnCount() {
-        return columnLabels.size();
+        return columnLabels.length;
     }
 
     /**
      * Gets the title of the specified column. 
      */
     public String getColumnName(int column) {
-        return (String)columnLabels.get(column);
+        return columnLabels[column];
     }
     
     /**
@@ -65,19 +64,10 @@ class BeanTableFormat implements WritableTableFormat {
         if(baseObject == null) return null;
 
         // load the property descriptors on first request
-        if(propertyDescriptors == null) loadPropertyDescriptors(baseObject);
+        if(beanProperties == null) loadPropertyDescriptors(baseObject);
 
         // get the property
-        try {
-            PropertyDescriptor property = (PropertyDescriptor)propertyDescriptors.get(column);
-            Method getter = property.getReadMethod();
-            if(getter == null) throw new IllegalStateException("Bean property " + property + " not readable");
-            return getter.invoke(baseObject, null);
-        } catch(InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch(IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return beanProperties[column].get(baseObject);
     }
     
     /**
@@ -85,17 +75,12 @@ class BeanTableFormat implements WritableTableFormat {
      * access methods using the property names.
      */
     private void loadPropertyDescriptors(Object beanObject) {
-        try {
-            Class beanClass = beanObject.getClass();
-            propertyDescriptors = new ArrayList();
-            for(Iterator i = propertyNames.iterator(); i.hasNext(); ) {
-                propertyDescriptors.add(new PropertyDescriptor((String)i.next(), beanClass));
-            }
-        } catch(IntrospectionException e) {
-            throw new RuntimeException(e);
+        Class beanClass = beanObject.getClass();
+        beanProperties = new BeanProperty[propertyNames.length];
+        for(int p = 0; p < propertyNames.length; p++) {
+            beanProperties[p] = new BeanProperty(beanClass, propertyNames[p], true, editable[p]);
         }
     }
-
 
     /**
      * For editing fields. This returns true if the specified Object in the
@@ -108,16 +93,7 @@ class BeanTableFormat implements WritableTableFormat {
      * @since 2004-August-27, as a replacement for isColumnEditable(int).
      */
     public boolean isEditable(Object baseObject, int column) {
-        // if not editable at all
-        if(!editable[column]) return false;
-        
-        // if there is no setter
-        PropertyDescriptor property = (PropertyDescriptor)propertyDescriptors.get(column);
-        Method setter = property.getWriteMethod();
-        if(setter == null) return false;
-        
-        // it must be writable
-        return true;
+        return editable[column];
     }
     
     /**
@@ -135,18 +111,10 @@ class BeanTableFormat implements WritableTableFormat {
      */
     public Object setColumnValue(Object baseObject, Object editedValue, int column) {
         // load the property descriptors on first request
-        if(propertyDescriptors == null) loadPropertyDescriptors(baseObject);
+        if(beanProperties == null) loadPropertyDescriptors(baseObject);
 
         // set the property
-        try {
-            PropertyDescriptor property = (PropertyDescriptor)propertyDescriptors.get(column);
-            Method setter = property.getWriteMethod();
-            setter.invoke(baseObject, new Object[] { editedValue });
-        } catch(InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch(IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        beanProperties[column].set(baseObject, editedValue);
         
         // return the modified result
         return baseObject;
