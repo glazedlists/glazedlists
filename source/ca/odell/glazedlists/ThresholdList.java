@@ -8,8 +8,6 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
-// need access to the ThresholdEvaluator interface
-import ca.odell.glazedlists.util.ThresholdEvaluator;
 // need access to volatile implementation classes
 import ca.odell.glazedlists.util.impl.*;
 // to use standard collections
