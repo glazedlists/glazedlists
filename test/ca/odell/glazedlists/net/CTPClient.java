@@ -10,7 +10,7 @@ import java.util.*;
 import java.io.*;
 import java.nio.*;
 // Glazed Lists I/O
-import ca.odell.glazedlists.util.impl.Bufferlo;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 import java.text.ParseException;
 import java.io.*;
 

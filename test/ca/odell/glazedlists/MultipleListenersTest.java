@@ -10,8 +10,8 @@ package ca.odell.glazedlists;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.util.*;
-// the volatile package
-import ca.odell.glazedlists.util.impl.*;
+// the volatile Glazed Lists pacakge
+import ca.odell.glazedlists.impl.sort.*;
 // standard collections
 import java.util.*;
 

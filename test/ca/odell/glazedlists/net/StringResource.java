@@ -13,7 +13,7 @@ import junit.framework.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.io.UnsupportedEncodingException;
-import ca.odell.glazedlists.util.impl.Bufferlo;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 
 /**
  * A simple resource for a String.
