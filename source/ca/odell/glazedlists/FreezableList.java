@@ -26,7 +26,7 @@ import java.util.ArrayList;
  * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>writable when thawed (default), not writable when frozen</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(1), writes O(1), freezes O(N)</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>frozen: 4 bytes per element, thawed: 0 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>

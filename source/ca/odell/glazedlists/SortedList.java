@@ -34,7 +34,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N), change comparator O(N log N)</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>88 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>

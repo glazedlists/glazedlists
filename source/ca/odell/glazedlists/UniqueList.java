@@ -30,7 +30,7 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N)</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>88 bytes per element, plus 52 bytes per unique element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
