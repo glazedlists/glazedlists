@@ -68,17 +68,17 @@ public final class IndexedTreeNode {
      * Gets the object with the specified index in the tree.
      */
     IndexedTreeNode getNodeWithIndex(int index) {
-        // ensure the index value is valid
-        if(index >= leftSize + rightSize + 1) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         // recurse to the left
         if(index < leftSize) {
             return left.getNodeWithIndex(index);
-        // return this node's root
-        } else if(index < leftSize + 1) {
-            return this;
+
         // recurse on the right side
-        } else {
+        } else if(index > leftSize) {
             return right.getNodeWithIndex(index - (leftSize + 1));
+
+        // return this node's root
+        } else {
+            return this;
         }
     }
 
@@ -92,13 +92,15 @@ public final class IndexedTreeNode {
         if(sortSide < 0) {
             if(left == null) return null;
             return left.getNodeByValue(comparator, searchValue);
-        // if it equals this node, return this
-        } else if(sortSide == 0) {
-            return this;
+
         // if it sorts on the right side, search there
-        } else {
+        } else if(sortSide > 0) {
             if(right == null) return null;
             return right.getNodeByValue(comparator, searchValue);
+
+        // if it equals this node, return this
+        } else {
+            return this;
         }
     }
 
@@ -152,14 +154,14 @@ public final class IndexedTreeNode {
         if(child == left) {
             if(parent != null) return parent.getIndex(this);
             return 0;
-        }
+
         // if there is no child, get the index of the current node
-        if(child == null) {
+        } else if(child == null) {
             if(parent != null) return parent.getIndex(this) + leftSize;
             return leftSize;
-        }
+
         // if the child is on the right, return the index recursively
-        if(child == right) {
+        } else if(child == right) {
             if(parent != null) return parent.getIndex(this) + leftSize + 1;
             return leftSize + 1;
         }

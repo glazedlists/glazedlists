@@ -52,6 +52,7 @@ public final class IndexedTree {
      * Gets the value of the sorted tree node with the specified index.
      */
     public Object get(int index) {
+        if(index > size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         IndexedTreeNode treeNode = root.getNodeWithIndex(index);
         return treeNode.getValue();
     }
@@ -59,6 +60,7 @@ public final class IndexedTree {
      * Gets the tree node with the specified index.
      */
     public IndexedTreeNode getNode(int index) {
+        if(index > size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         return root.getNodeWithIndex(index);
     }
 
@@ -103,6 +105,7 @@ public final class IndexedTree {
      * Deletes the node with the specified sort-order from the tree.
      */
     public IndexedTreeNode removeByIndex(int index) {
+        if(index > size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         IndexedTreeNode treeNode = root.getNodeWithIndex(index);
         treeNode.removeFromTree(this);
         return treeNode;
