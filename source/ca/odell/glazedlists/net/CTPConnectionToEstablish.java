@@ -44,7 +44,7 @@ class CTPConnectionToEstablish implements CTPRunnable {
      * Establish the connection. This creates a CTPProtocol for the client and
      * registers it with the selector.
      */
-    public boolean run(Selector selector) {
+    public void run(Selector selector, CTPConnectionManager manager) {
         CTPConnection client = null;
         try {
             // prepare a channel to connect
@@ -56,7 +56,7 @@ class CTPConnectionToEstablish implements CTPRunnable {
             SelectionKey selectionKey = channel.register(selector, SelectionKey.OP_CONNECT);
     
             // prepare the handler for the connection
-            client = CTPConnection.client(host, selectionKey, handler);
+            client = CTPConnection.client(host, selectionKey, handler, manager);
             selectionKey.attach(client);
 
             // connect (non-blocking)
@@ -65,7 +65,5 @@ class CTPConnectionToEstablish implements CTPRunnable {
         } catch(IOException e) {
             handler.connectionClosed(client, e);
         }
-        
-        return true;
     }
 }

@@ -27,5 +27,5 @@ interface CTPRunnable {
      * @return true unless the server shall shutdown due to a shutdown request or
      *      an unrecoverable failure.
      */
-    public boolean run(Selector selector);
+    public void run(Selector selector, CTPConnectionManager manager);
 }

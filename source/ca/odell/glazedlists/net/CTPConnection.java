@@ -78,22 +78,22 @@ public final class CTPConnection {
     private static Logger logger = Logger.getLogger(CTPConnection.class.toString());
     
     /** track the current state of this protocol */
-    private static final int STATE_SERVER_AWAITING_CONNECT = 0;
-    private static final int STATE_CLIENT_AWAITING_CONNECT = 1;
-    private static final int STATE_CLIENT_CONSTRUCTING_REQUEST = 2;
-    private static final int STATE_SERVER_AWAITING_REQUEST = 3;
-    private static final int STATE_SERVER_CONSTRUCTING_RESPONSE = 4;
-    private static final int STATE_CLIENT_AWAITING_RESPONSE = 5;
-    private static final int STATE_READY = 6;
-    private static final int STATE_RECEIVED_CLOSE = 7;
-    private static final int STATE_CLOSED_PERMANENTLY = 8;
+    static final int STATE_SERVER_AWAITING_CONNECT = 0;
+    static final int STATE_CLIENT_AWAITING_CONNECT = 1;
+    static final int STATE_CLIENT_CONSTRUCTING_REQUEST = 2;
+    static final int STATE_SERVER_AWAITING_REQUEST = 3;
+    static final int STATE_SERVER_CONSTRUCTING_RESPONSE = 4;
+    static final int STATE_CLIENT_AWAITING_RESPONSE = 5;
+    static final int STATE_READY = 6;
+    static final int STATE_RECEIVED_CLOSE = 7;
+    static final int STATE_CLOSED_PERMANENTLY = 8;
     
     /** standard HTTP response headers, see HTTP/1.1 RFC, 6.1.1 */
     private static final int RESPONSE_OK = 200;
     private static final int RESPONSE_ERROR = 500;
 
     /** the current state of this protocol */
-    private int state = -1;
+    int state = -1;
     
     /** the key to this protocol's channel */
     private SelectionKey selectionKey = null;
@@ -102,13 +102,16 @@ public final class CTPConnection {
     private SocketChannel socketChannel = null;
     
     /** parse the input channel */
-    private ByteChannelReader parser;
+    ByteChannelReader parser;
 
     /** write the output channel */
-    private ByteChannelWriter writer;
+    ByteChannelWriter writer;
 
     /** the handler to delegate data interpretation to */
     private CTPHandler handler;
+    
+    /** the manager that owns this connection */
+    private CTPConnectionManager manager;
     
     /** the remote host */
     private String host = "";
@@ -124,11 +127,12 @@ public final class CTPConnection {
      *
      * @param selectionKey the connection managed by this higher-level protocol.
      */
-    private CTPConnection(SelectionKey selectionKey, CTPHandler handler) {
+    private CTPConnection(SelectionKey selectionKey, CTPHandler handler, CTPConnectionManager manager) {
         if(selectionKey == null) throw new IllegalArgumentException();
         
         this.selectionKey = selectionKey;
         this.handler = handler;
+        this.manager = manager;
         this.socketChannel = (SocketChannel)selectionKey.channel();
         this.parser = new ByteChannelReader(socketChannel);
         this.writer = new ByteChannelWriter(socketChannel, selectionKey);
@@ -137,8 +141,8 @@ public final class CTPConnection {
     /**
      * Create a new CTPConnection for use as a client.
      */
-    static CTPConnection client(String host, SelectionKey selectionKey, CTPHandler handler) {
-        CTPConnection client = new CTPConnection(selectionKey, handler);
+    static CTPConnection client(String host, SelectionKey selectionKey, CTPHandler handler, CTPConnectionManager manager) {
+        CTPConnection client = new CTPConnection(selectionKey, handler, manager);
         client.state = STATE_CLIENT_AWAITING_CONNECT;
         client.host = host;
         return client;
@@ -147,8 +151,8 @@ public final class CTPConnection {
     /**
      * Create a new CTPConnection for use as a server.
      */
-    static CTPConnection server(SelectionKey selectionKey, CTPHandler handler) {
-        CTPConnection server = new CTPConnection(selectionKey, handler);
+    static CTPConnection server(SelectionKey selectionKey, CTPHandler handler, CTPConnectionManager manager) {
+        CTPConnection server = new CTPConnection(selectionKey, handler, manager);
         server.state = STATE_SERVER_AWAITING_CONNECT;
         server.host = ((InetSocketAddress)server.socketChannel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
         return server;
@@ -157,7 +161,7 @@ public final class CTPConnection {
     /**
      * Handles the incoming bytes.
      */
-    synchronized void handleRead() {
+    void handleRead() {
         // whether the read was fully satisfied by the amount of data
         boolean satisfied = true;
         
@@ -185,7 +189,7 @@ public final class CTPConnection {
     /**
      * When we can write, flush the output stream.
      */
-    synchronized void handleWrite() {
+    void handleWrite() {
         try {
             writer.flush();
         } catch(IOException e) {
@@ -196,7 +200,7 @@ public final class CTPConnection {
     /**
      * When connected, prepare the higher-level connection.
      */
-    synchronized void handleConnect() {
+    void handleConnect() {
         // finish up the connect() process
         try {
             socketChannel.finishConnect();
@@ -396,20 +400,8 @@ public final class CTPConnection {
      *      buffer needs to be valid for the duration of this method call, but
      *      may be modified afterwards.
      */
-    public synchronized void sendChunk(ByteBuffer data) {
-        if(state != STATE_READY) throw new IllegalStateException();
-        
-        try {
-            String chunkSizeInHex = Integer.toString(data.remaining(), 16);
-            writer.write(chunkSizeInHex);
-            writer.write("\r\n");
-            writer.write(data);
-            writer.write("\r\n");
-            writer.requestFlush();
-            
-        } catch(IOException e) {
-            close(e);
-        }
+    public void sendChunk(ByteBuffer data) {
+        manager.invokeAndWait(new CTPChunkToSend(this, data));
     }
 
     /**
@@ -507,7 +499,7 @@ public final class CTPConnection {
      * @return This method returns false because the connection is always in an
      *      unreadable and unwritable state after a close.
      */
-    private boolean close(Exception reason) {
+    boolean close(Exception reason) {
         // if this is already closed, we're done
         if(state == STATE_CLOSED_PERMANENTLY) return false;
         

@@ -30,10 +30,9 @@ class CTPShutdown implements CTPRunnable {
      * @return true unless the server shall shutdown due to a shutdown request or
      *      an unrecoverable failure.
      */
-    public boolean run(Selector selector) {
+    public void run(Selector selector, CTPConnectionManager manager) {
         logger.warning("selector not cleaned up!");
         logger.warning("pending tasks not completed!");
-        
-        return false;
+        manager.keepRunning = false;
     }
 }

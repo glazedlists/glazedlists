@@ -36,7 +36,7 @@ class CTPSelectorHandler implements CTPRunnable {
     /**
      * Handle each selection key.
      */
-    public boolean run(Selector selector) {
+    public void run(Selector selector, CTPConnectionManager manager) {
         // This may block for a long time. Upon returning, the
         // selected set contains keys of the ready channels
         try {
@@ -52,7 +52,7 @@ class CTPSelectorHandler implements CTPRunnable {
             
             // Is a new connection coming in?
             if(key.isAcceptable()) {
-                handleAccept(key, selector);
+                handleAccept(key, selector, manager);
             }
             
             if(key.isConnectable()) {
@@ -73,8 +73,6 @@ class CTPSelectorHandler implements CTPRunnable {
                 if(!key.isValid()) continue;
             }
         }
-        
-        return true;
     }
 
     /**
@@ -82,7 +80,7 @@ class CTPSelectorHandler implements CTPRunnable {
      *
      * <p>This creates a CTPServerProtocol to handle the connection.
      */
-    private void handleAccept(SelectionKey key, Selector selector) {
+    private void handleAccept(SelectionKey key, Selector selector, CTPConnectionManager manager) {
         // construct the channels and selectors
         SocketChannel channel = null;
         SelectionKey channelKey = null;
@@ -102,7 +100,7 @@ class CTPSelectorHandler implements CTPRunnable {
 
         // construct handlers for this connection
         CTPHandler handler = handlerFactory.constructHandler();
-        CTPConnection server = CTPConnection.server(channelKey, handler);
+        CTPConnection server = CTPConnection.server(channelKey, handler, manager);
         channelKey.attach(server);
         server.handleConnect();
     }

@@ -46,6 +46,9 @@ public final class CTPConnectionManager implements Runnable {
     /** the only thread that shall access the network resources of this manager */
     private Thread networkThread = null;
     
+    /** whether the connection manager shall shut down */
+    boolean keepRunning = false;
+    
     /**
      * Creates a connection manager that handles incoming connections using the
      * specified connect handler. This binds to the default port.
@@ -70,6 +73,9 @@ public final class CTPConnectionManager implements Runnable {
      * @return true if the server successfully binds to the listen port.
      */
     public boolean start() {
+        // verify we haven't already started
+        if(networkThread != null) throw new IllegalStateException();
+        
         // open a channel and bind
         try {
             ServerSocketChannel serverChannel = ServerSocketChannel.open();
@@ -90,6 +96,7 @@ public final class CTPConnectionManager implements Runnable {
         }
 
         // start handling connections
+        keepRunning = true;
         networkThread = new Thread(this, "GlazedLists net");
         networkThread.start();
         
@@ -108,8 +115,7 @@ public final class CTPConnectionManager implements Runnable {
         CTPSelectorHandler selectorHandler = new CTPSelectorHandler(handlerFactory);
 
         // continuously select a socket and action on it
-        EventDispatch:
-        while(true) {
+        while(keepRunning) {
 
             // get the list of runnables to run
             synchronized(this) {
@@ -119,11 +125,10 @@ public final class CTPConnectionManager implements Runnable {
             }
             
             // run the runnables
-            for(Iterator i = toExecute.iterator(); i.hasNext(); ) {
+            for(Iterator i = toExecute.iterator(); keepRunning && i.hasNext(); ) {
                 CTPRunnable runnable = (CTPRunnable)i.next();
                 i.remove();
-                boolean keepRunning = runnable.run(selector);
-                if(!keepRunning) break EventDispatch;
+                runnable.run(selector, this);
             }
         }
         
@@ -142,6 +147,34 @@ public final class CTPConnectionManager implements Runnable {
      */
     private void wakeUp() {
         selector.wakeup();
+    }
+    
+    /**
+     * Runs the specified task on the CTPConnectionManager thread.
+     */
+    void invokeAndWait(CTPRunnable runnable) {
+        // invoke immediately if possible
+        if(isNetworkThread()) {
+            runnable.run(selector, this);
+
+        // run on the network thread while waiting on the current thread
+        } else {
+            CTPBlockingRunnable blockingRunnable = new CTPBlockingRunnable(runnable);
+            synchronized(blockingRunnable) {
+                // start the event
+                synchronized(pendingRunnables) {
+                    pendingRunnables.add(blockingRunnable);
+                }
+                wakeUp();
+                
+                // wait for it to be completed
+                try {
+                    blockingRunnable.wait();
+                } catch(InterruptedException e) {
+                    throw new RuntimeException("Wait interrupted " + e.getMessage());
+                }
+            }
+        }
     }
     
     /**
