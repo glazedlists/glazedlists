@@ -166,9 +166,15 @@ public final class ListEventAssembler {
             
             // notify listeners
             try {
-                for(int i = 0; i < listeners.size(); i++) {
-                    ListEventListener listener = (ListEventListener)listeners.get(i);
-                    ListEvent event = (ListEvent)listenerEvents.get(i);
+                // protect against the listener set changing via a duplicate list
+                List listenersToNotify = new ArrayList();
+                List listenerEventsToNotify = new ArrayList();
+                listenersToNotify.addAll(listeners);
+                listenerEventsToNotify.addAll(listenerEvents);
+                // perform the notification on the duplicate list
+                for(int i = 0; i < listenersToNotify.size(); i++) {
+                    ListEventListener listener = (ListEventListener)listenersToNotify.get(i);
+                    ListEvent event = (ListEvent)listenerEventsToNotify.get(i);
                     listener.listChanged(event);
                 }
             // clear the change for the next caller
