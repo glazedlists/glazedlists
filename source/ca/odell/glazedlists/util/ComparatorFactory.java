@@ -21,7 +21,6 @@ public final class ComparatorFactory {
 
     /** Provide Singleton access for all Comparators with no internal state */
     private static Comparator booleanComparator = null;
-    private static Comparator caseInsensitiveComparator = null;
     private static Comparator comparableComparator = null;
 
     /**
@@ -51,15 +50,12 @@ public final class ComparatorFactory {
     }
 
     /**
-     * Creates a {@link Comparator} for use with {@link Boolean} objects.
-     *
-     *<strong>Warning:</strong> Not Yet Implemented.  Throws an UnsupportedOperationException.
-     *
+     * Creates a {@link Comparator} that compares {@link String} objects in
+     * a case-insensitive way.  This {@link Comparator} is equivalent to using
+     * {@link String#CASE_INSENSITIVE_ORDER} and exists here for convenience.
      */
     public static Comparator caseInsensitive() {
-        //if(caseInsensitiveComparator == null) caseInsensitiveComparator = new CaseInsensitiveComparator();
-        //return caseInsensitiveComparator;
-        throw new UnsupportedOperationException("This method has not yet been implemented.");
+        return String.CASE_INSENSITIVE_ORDER;
     }
 
     /**

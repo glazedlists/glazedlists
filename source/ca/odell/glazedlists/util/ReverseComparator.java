@@ -32,7 +32,7 @@ public final class ReverseComparator implements Comparator {
      * Create a new reverse comparator that reverses Comparable elements.
      */
     public ReverseComparator() {
-        this(new ComparableComparator());
+        this(ComparatorFactory.comparable());
     }
 
     /**
@@ -48,7 +48,7 @@ public final class ReverseComparator implements Comparator {
     public Comparator getSourceComparator() {
         return source;
     }
-    
+
     /**
      * This is equal to another comparator if and only if they both
      * are reverse comparators for equal source comparators.
