@@ -76,7 +76,6 @@ class CTPSelectorHandler implements CTPRunnable {
                 CTPConnection connection = (CTPConnection)key.attachment();
                 connection.close(new IOException("Connection closed"));
             }
-            System.out.println("");
         }
     }
 

@@ -64,9 +64,9 @@ public class ByteChannelReaderTest extends TestCase {
             parser.consume("earth");
             fail();
         } catch(ParseException e) {
-            fail(e.getMessage());
-        } catch(IOException e) {
             // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
         }
     }
 
@@ -114,9 +114,9 @@ public class ByteChannelReaderTest extends TestCase {
             String result = parser.readUntil("earth");
             fail();
         } catch(ParseException e) {
-            fail(e.getMessage());
-        } catch(IOException e) {
             // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
         }
     }
 
@@ -141,9 +141,9 @@ public class ByteChannelReaderTest extends TestCase {
         try {
             ByteChannelReader parser = new ByteChannelReader("hello world");
             int tIndex = parser.indexOf("t");
-            fail();
+            assertEquals(-1, tIndex);
         } catch(IOException e) {
-            // exception is desired output
+            fail(e.getMessage());
         }
     }
 }
