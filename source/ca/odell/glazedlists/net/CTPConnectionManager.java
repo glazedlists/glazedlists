@@ -27,25 +27,37 @@ final class CTPConnectionManager implements Runnable {
     
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnectionManager.class.toString());
+    
+    /** default port to bind to */
+    private static final int DEFAULT_PORT = 5309;
 
     /** factory for handlers of incoming connections */
     private CTPHandlerFactory handlerFactory;
     
     /** port to listen for incoming connections */
-    private int listenPort = 5309;
+    private int listenPort = -1;
     
     /** used to multiplex I/O resources */
-    Selector selector = null;
+    private Selector selector = null;
     
-    /** connections to establish */
+    /** asynch queue of connections to establish */
     private List connectionsToEstablish = new ArrayList();
     
     /**
      * Creates a connection manager that handles incoming connections using the
-     * specified connect handler.
+     * specified connect handler. This binds to the default port.
      */
     public CTPConnectionManager(CTPHandlerFactory handlerFactory) {
+        this(handlerFactory, DEFAULT_PORT);
+    }
+    
+    /**
+     * Creates a connection manager that handles incoming connections using the
+     * specified connect handler. This binds to the specified port.
+     */
+    public CTPConnectionManager(CTPHandlerFactory handlerFactory, int listenPort) {
         this.handlerFactory = handlerFactory;
+        this.listenPort = listenPort;
     }
     
     /**
@@ -181,7 +193,7 @@ final class CTPConnectionManager implements Runnable {
      * Connect to the specified host.
      */
     public void connect(String host, CTPHandler handler) {
-        connect(host, listenPort, handler);
+        connect(host, DEFAULT_PORT, handler);
     }
 
     
@@ -311,17 +323,4 @@ final class CTPConnectionManager implements Runnable {
             }
         }
     }
-}
-
-
-/**
- * The CTPHandlerFactory provides a factory to handle incoming connections.
- */
-interface CTPHandlerFactory {
-    
-    /**
-     * Upon a connect, a CTPHandler is required to handle the data of this connection.
-     * The returned CTPHandler will be delegated to handle the connection's data.
-     */
-    public CTPHandler constructHandler();
 }

@@ -179,6 +179,39 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
             columnClicked(column, clicks);
         }
     }
+    
+    /**
+     * Get the columns that the TableComparatorChooser is sorting by.
+     *
+     * @return a List of Integers. The first Integer is the primary sorting column,
+     *      the second is the secondary, etc. This list may be empty but never null.
+     */
+    public List getSortingColumns() {
+        List sortingColumns = new ArrayList();
+        for(int c = 0; c < recentlyClickedColumns.size(); c++) {
+            ColumnClickTracker clickedColumn = (ColumnClickTracker)recentlyClickedColumns.get(c);
+            sortingColumns.add(new Integer(clickedColumn.getColumn()));
+        }
+        return sortingColumns;
+    }
+    
+    /**
+     * Gets the index comparator in use for the specified column. This comparator
+     * may be retrieved using {@link getComparatorsForColumn()}.
+     *
+     * @return the comparator index for the specified column, or -1 if that column
+     *      is not being used to sort.
+     */
+    public int getColumnComparatorIndex(int column) {
+        return columnClickTrackers[column].getComparatorIndex();
+    }
+    
+    /**
+     * Gets whether the comparator in use for the specified column is reverse.
+     */
+    public boolean getColumnReverse(int column) {
+        return columnClickTrackers[column].isReverse();
+    }
 
     /**
      * When the number of columns changes in the table, we need to
