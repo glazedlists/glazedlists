@@ -209,7 +209,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     /**
      * Gets whether the comparator in use for the specified column is reverse.
      */
-    public boolean getColumnReverse(int column) {
+    public boolean isColumnReverse(int column) {
         return columnClickTrackers[column].isReverse();
     }
 
