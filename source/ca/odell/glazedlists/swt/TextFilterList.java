@@ -9,7 +9,7 @@ package ca.odell.glazedlists.swt;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 // access to the volatile implementation pacakge
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.filter.*;
 // for working with SWT Text widgets
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.*;

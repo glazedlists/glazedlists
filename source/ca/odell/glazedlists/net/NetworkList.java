@@ -11,7 +11,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.event.*;
 // access to the volatile implementation pacakge
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 // NIO is used for BRP
 import java.util.*;
 import java.nio.*;

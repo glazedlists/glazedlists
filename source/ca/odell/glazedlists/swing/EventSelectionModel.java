@@ -12,7 +12,7 @@ import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.util.*;
 import ca.odell.glazedlists.util.concurrent.*;
 // volatile implementation support
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.adt.*;
 // for listening to list selection events
 import javax.swing.*;
 import javax.swing.event.*;

@@ -11,7 +11,8 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // the Glazed Lists util and volatile packages for default comparators
 import ca.odell.glazedlists.util.*;
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.*;
+import ca.odell.glazedlists.impl.sort.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 // for keeping lists of comparators

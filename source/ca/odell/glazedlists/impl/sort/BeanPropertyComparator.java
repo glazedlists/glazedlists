@@ -4,10 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.util.impl;
+package ca.odell.glazedlists.impl.sort;
 
 // for specifying a sorting algorithm
 import java.util.Comparator;
+// Bean reflection
+import ca.odell.glazedlists.impl.BeanProperty;
 
 /**
  * A {@link Comparator} that uses Reflection to compare two instances

@@ -8,7 +8,7 @@ package ca.odell.glazedlists.net;
 
 import java.util.*;
 import java.nio.*;
-import ca.odell.glazedlists.util.impl.Bufferlo;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 
 /**
  * A callback interface for classes that implement a CTPConnection.

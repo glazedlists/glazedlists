@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.util.impl;
+package ca.odell.glazedlists.impl.adt;
 
 // for use in creating the underlying containers
 import java.util.*;

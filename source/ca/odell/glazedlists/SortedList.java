@@ -10,7 +10,8 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.util.*;
 // volatile implementation support
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.sort.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5

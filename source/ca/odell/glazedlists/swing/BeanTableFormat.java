@@ -7,8 +7,8 @@
 package ca.odell.glazedlists.swing;
 
 import java.util.*;
-// for using beans' reflection on property names
-import ca.odell.glazedlists.util.impl.BeanProperty;
+// Bean reflection
+import ca.odell.glazedlists.impl.BeanProperty;
 
 /**
  * TableFormat implementation that uses reflection to be used for any

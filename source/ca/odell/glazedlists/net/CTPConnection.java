@@ -13,7 +13,7 @@ import java.nio.channels.*;
 import java.net.*;
 import java.io.*;
 import java.text.ParseException;
-import ca.odell.glazedlists.util.impl.Bufferlo;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 // logging
 import java.util.logging.*;
 

@@ -4,12 +4,14 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.util.impl;
+package ca.odell.glazedlists.impl.filter;
 
 // To work with Lists
 import java.util.*;
 // To implement the interface
 import ca.odell.glazedlists.TextFilterator;
+// Bean reflection
+import ca.odell.glazedlists.impl.BeanProperty;
 
 /**
  * TextFilterator implementation that uses reflection to be used for any

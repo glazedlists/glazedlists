@@ -6,7 +6,7 @@
  */
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.filter.*;
 import ca.odell.glazedlists.util.concurrent.InternalReadWriteLock;
 // for recycling filter strings
 import java.util.*;

@@ -10,7 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 
 /**
  * A resource is a dynamic Object that can publish its changes as a series of deltas.

@@ -9,7 +9,7 @@ package ca.odell.glazedlists.io;
 import java.util.*;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.io.*;
 import java.nio.*;
 import java.io.*;
 

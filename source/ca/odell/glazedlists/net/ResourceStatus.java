@@ -10,7 +10,6 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
-import ca.odell.glazedlists.util.impl.*;
 
 /**
  * Tracks the current status of a resource with respect to the network.

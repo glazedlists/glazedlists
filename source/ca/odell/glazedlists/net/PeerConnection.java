@@ -11,7 +11,7 @@ import java.util.*;
 import java.nio.*;
 import java.io.*;
 import java.text.ParseException;
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 
 
 /**

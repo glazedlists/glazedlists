@@ -10,7 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 
 /**
  * A resource that is being published on the network.

@@ -11,7 +11,8 @@ import ca.odell.glazedlists.event.*;
 // for event list utilities, iterators and comparators
 import ca.odell.glazedlists.util.*;
 // volatile implementation support
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.util.concurrent.*;
 // Java collections are used for underlying data storage
 import java.util.*;

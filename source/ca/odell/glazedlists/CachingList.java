@@ -9,7 +9,7 @@ package ca.odell.glazedlists;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.adt.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 // For the execution of the performance test

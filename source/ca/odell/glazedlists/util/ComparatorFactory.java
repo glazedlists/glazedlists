@@ -9,7 +9,7 @@ package ca.odell.glazedlists.util;
 // for Comparators and Lists
 import java.util.*;
 // for access to volatile classes
-import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.impl.sort.*;
 
 
 /**
