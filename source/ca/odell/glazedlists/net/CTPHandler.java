@@ -16,21 +16,16 @@ import java.nio.*;
  */
 interface CTPHandler {
     
-    /** standard HTTP response headers, see HTTP/1.1 RFC, 6.1.1 */
-    public static final int OK = 200;
-    public static final int NOT_FOUND = 404;
-    public static final int ERROR = 500;
-
-    /**
+    /*
      * Handles an HTTP response from the specified connection.
      *
      * @param code the HTTP  response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1.
      *      This will be null if this is an HTTP request.
      * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
      */
-    public void receiveResponse(CTPProtocol source, Integer code, Map headers);
+    //public void receiveResponse(CTPProtocol source, Integer code, Map headers);
 
-    /**
+    /*
      * Handles an HTTP request from the specified connection.
      *
      * @param uri the address requested by the client, in the format of a file
@@ -38,7 +33,7 @@ interface CTPHandler {
      *      HTTP response.
      * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
      */
-    public void receiveRequest(CTPProtocol source, String uri, Map headers);
+    //public void receiveRequest(CTPProtocol source, String uri, Map headers);
     
     /**
      * Handles reception of the specified chunk of data. This chunk should be able

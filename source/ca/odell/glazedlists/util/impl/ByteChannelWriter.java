@@ -60,12 +60,27 @@ public class ByteChannelWriter {
     
     /**
      * Flushes the contents of the buffer to the socket channel.
+     *
+     * <p>This only flushes what can be written immediately. This is limited by
+     * the underlying socket implementation's buffer size, network load, etc.
      */
     public void flush() throws IOException {
         buffer.flip();
-        while(buffer.hasRemaining()) {
-            channel.write(buffer);
+        while(true) {
+            // if we have nothing more to write
+            if(!buffer.hasRemaining()) {
+                buffer.clear();
+                return;
+            }
+
+            // write some bytes
+            int written = channel.write(buffer);
+
+            // if we cannot write anything more at the current time
+            if(written == 0) {
+                buffer.compact();
+                return;
+            }
         }
-        buffer.clear();
     }
 }

@@ -80,11 +80,22 @@ final class CTPConnectionManager {
                     handleAccept(key);
                 }
                 
-                // Is there data to be read on this channel?
+                if(key.isConnectable()) {
+                    CTPProtocol protocol = (CTPProtocol)key.attachment();
+                    protocol.handleConnect();
+                    if(!key.isValid()) continue;
+                }
+
                 if(key.isReadable()) {
                     CTPProtocol protocol = (CTPProtocol)key.attachment();
-                    logger.finest("Key is readable " + protocol);
                     protocol.handleRead();
+                    if(!key.isValid()) continue;
+                }
+                
+                if(key.isWritable()) {
+                    CTPProtocol protocol = (CTPProtocol)key.attachment();
+                    protocol.handleWrite();
+                    if(!key.isValid()) continue;
                 }
                 
                 // Remove key from selected set; it's been handled
@@ -118,8 +129,9 @@ final class CTPConnectionManager {
 
         // construct handlers for this connection
         CTPHandler handler = handlerFactory.constructHandler();
-        CTPServerProtocol serverProtocol = new CTPServerProtocol(channelKey, handler);
+        CTPProtocol serverProtocol = CTPProtocol.server(channelKey, handler);
         channelKey.attach(serverProtocol);
+        serverProtocol.handleConnect();
 
         // document our success
         logger.fine("Accepted connection from " + channel.socket().getRemoteSocketAddress());
@@ -135,8 +147,12 @@ final class CTPConnectionManager {
     /**
      * Connect to the specified host.
      */
-    public CTPClientProtocol connect(String host, CTPHandler handler) {
-        return null;
+    public CTPProtocol connect(String host, CTPHandler handler) throws IOException {
+        InetSocketAddress address = new InetSocketAddress(host, listenPort);
+        SocketChannel channel = SocketChannel.open(address);
+        SelectionKey selectionKey = channel.register(selector, SelectionKey.OP_CONNECT);
+        CTPProtocol client = CTPProtocol.client(host, selectionKey, handler);
+        return client;
     }
     
     /**
@@ -171,31 +187,6 @@ final class CTPConnectionManager {
      * level of the protocol and handlers are used to interpret the data.
      */
     static class EmptyCTPHandler implements CTPHandler {
-        
-        /**
-         * Handles an HTTP response from the specified connection.
-         *
-         * @param code the HTTP  response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1.
-         *      This will be null if this is an HTTP request.
-         * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
-         */
-        public void receiveResponse(CTPProtocol source, Integer code, Map headers) {
-            throw new IllegalStateException("write code here");
-        }
-    
-        /**
-         * Handles an HTTP request from the specified connection.
-         *
-         * @param uri the address requested by the client, in the format of a file
-         *      address. See HTTP/1.1 RFC, 5.1.2. This will be null if this is an
-         *      HTTP response.
-         * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
-         */
-        public void receiveRequest(CTPProtocol source, String uri, Map headers) {
-            logger.info("Received request for " + uri + " from " + source + " headers: " + headers);
-            CTPServerProtocol server = (CTPServerProtocol)source;
-            server.sendResponse(OK, Collections.EMPTY_MAP);
-        }
         
         /**
          * Handles reception of the specified chunk of data. This chunk should be able

@@ -26,17 +26,17 @@ import java.util.logging.*;
  * client:
  * AWAITING_CONNECT
  *   --[connect]-->
- *     CONSTRUCTING_REQUEST
+ *     CLIENT_CONSTRUCTING_REQUEST
  *     --[send request]-->
- *       AWAITING_RESPONSE
+ *       CLIENT_AWAITING_RESPONSE
  *         --[received response]-->
  *           READY
  * server:
  * AWAITING_CONNECT
  *   --[connect]-->
- *     AWAITING_REQUEST
+ *     SERVER_AWAITING_REQUEST
  *       --[received request]-->
- *         CONSTRUCTING_RESPONSE
+ *         SERVER_CONSTRUCTING_RESPONSE
  *           --[sent response]-->
  *             READY
  *
@@ -62,23 +62,28 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-abstract class CTPProtocol {
+class CTPProtocol {
 
     /** logging */
     private static Logger logger = Logger.getLogger(CTPProtocol.class.toString());
     
     /** track the current state of this protocol */
-    protected static final int STATE_AWAITING_CONNECT = 0;
-    protected static final int STATE_CONSTRUCTING_REQUEST = 1;
-    protected static final int STATE_AWAITING_REQUEST = 2;
-    protected static final int STATE_CONSTRUCTING_RESPONSE = 3;
-    protected static final int STATE_AWAITING_RESPONSE = 4;
-    protected static final int STATE_READY = 5;
-    protected static final int STATE_RECEIVED_CLOSE = 6;
-    protected static final int STATE_CLOSED_PERMANENTLY = 7;
+    protected static final int STATE_SERVER_AWAITING_CONNECT = 0;
+    protected static final int STATE_CLIENT_AWAITING_CONNECT = 1;
+    protected static final int STATE_CLIENT_CONSTRUCTING_REQUEST = 2;
+    protected static final int STATE_SERVER_AWAITING_REQUEST = 3;
+    protected static final int STATE_SERVER_CONSTRUCTING_RESPONSE = 4;
+    protected static final int STATE_CLIENT_AWAITING_RESPONSE = 5;
+    protected static final int STATE_READY = 6;
+    protected static final int STATE_RECEIVED_CLOSE = 7;
+    protected static final int STATE_CLOSED_PERMANENTLY = 8;
     
+    /** standard HTTP response headers, see HTTP/1.1 RFC, 6.1.1 */
+    protected static final int RESPONSE_OK = 200;
+    protected static final int RESPONSE_ERROR = 500;
+
     /** the current state of this protocol */
-    protected int state = STATE_AWAITING_CONNECT;
+    protected int state = -1;
     
     /** the key to this protocol's channel */
     protected SelectionKey selectionKey = null;
@@ -97,13 +102,16 @@ abstract class CTPProtocol {
     
     /** the remote host */
     protected String host = "";
-
+    
+    /** the only URI allowed by CTP Protocol */
+    private static final String CTP_URI = "/glazedlists";
+    
     /**
      * Creates a new CTPProtocol.
      *
      * @param selectionKey the connection managed by this higher-level protocol.
      */
-    protected CTPProtocol(SelectionKey selectionKey, CTPHandler handler) {
+    private CTPProtocol(SelectionKey selectionKey, CTPHandler handler) {
         if(selectionKey == null) throw new IllegalArgumentException();
         
         this.selectionKey = selectionKey;
@@ -113,22 +121,38 @@ abstract class CTPProtocol {
         this.writer = new ByteChannelWriter(socketChannel);
         this.host = ((InetSocketAddress)socketChannel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
     }
+    
+    /**
+     * Create a new CTPProtocol for use as a client.
+     */
+    static CTPProtocol client(String host, SelectionKey selectionKey, CTPHandler handler) {
+        CTPProtocol client = new CTPProtocol(selectionKey, handler);
+        client.host = host;
+        client.state = STATE_CLIENT_AWAITING_CONNECT;
+        return client;
+    }
+    
+    /**
+     * Create a new CTPProtocol for use as a server.
+     */
+    static CTPProtocol server(SelectionKey selectionKey, CTPHandler handler) {
+        CTPProtocol server = new CTPProtocol(selectionKey, handler);
+        server.state = STATE_SERVER_AWAITING_CONNECT;
+        return server;
+    }
 
     /**
      * Handles the incoming bytes.
-     *
-     * @param data a ByteBuffer that must not be written to or accessed after
-     *      this method has returned.
      */
     void handleRead() {
         logger.fine("handling read from " + this + " state " + state);
         
         // read a request
-        if(state == STATE_AWAITING_REQUEST) {
+        if(state == STATE_SERVER_AWAITING_REQUEST) {
             handleRequest();
             
         // read a response
-        } else if(state == STATE_AWAITING_RESPONSE) {
+        } else if(state == STATE_CLIENT_AWAITING_RESPONSE) {
             handleResponse();
             
         // read a chunk
@@ -142,22 +166,125 @@ abstract class CTPProtocol {
     }
     
     /**
+     * When we can write, flush the output stream.
+     */
+    void handleWrite() throws IOException {
+        try {
+            writer.flush();
+        } catch(IOException e) {
+            close(e);
+        }
+    }
+    
+    /**
+     * When connected, prepare the higher-level connection.
+     */
+    void handleConnect() {
+        if(state == STATE_CLIENT_AWAITING_CONNECT) {
+            state = STATE_CLIENT_CONSTRUCTING_REQUEST;
+            sendRequest(CTP_URI, Collections.EMPTY_MAP);
+            
+            
+        } else if(state == STATE_SERVER_AWAITING_CONNECT) {
+            state = STATE_SERVER_AWAITING_REQUEST;
+            
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Sends the request header to the server.
+     *
+     * @param code an HTTP response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1
+     * @param headers a Map of HTTP request headers. See HTTP/1.1 RFC, 6.2. This can
+     *      be null to indicate no headers.
+     */
+    private void sendRequest(String uri, Map headers) {
+        if(state != STATE_CLIENT_CONSTRUCTING_REQUEST) throw new IllegalStateException();
+        
+        try {
+            // write the request line
+            writer.write("POST ");
+            writer.write(uri);
+            writer.write(" HTTP/1.1\r\n");
+            
+            // write all the headers provided, plus some extras
+            Map responseHeaders = new TreeMap();
+            responseHeaders.putAll(headers);
+            responseHeaders.put("Transfer-Encoding", "chunked");
+            responseHeaders.put("Host:", host);
+            writeHeaders(responseHeaders);
+            writer.write("\r\n");
+            writer.flush();
+            
+            // we're waiting for the response
+            state = STATE_CLIENT_AWAITING_RESPONSE;
+            
+        } catch(IOException e) {
+            close(e);
+        }
+    }
+     
+    /**
+     * Handle a request by parsing the contents of the input buffer. If the input
+     * buffer does not contain a complete request, this will return. If it does
+     * contain a request:
+     *   <li>the request will be processed
+     *   <li>the buffer will be advanced, and
+     *   <li>the state will be updated
+     */
+    private void handleRequest() {
+        if(state != STATE_SERVER_AWAITING_REQUEST) throw new IllegalStateException();
+        
+        logger.finest("Handling request from " + this);
+        try {
+            // if the entire header has not loaded, load more
+            if(parser.indexOf("\\r\\n\\r\\n") == -1) return;
+
+            // parse the status line
+            parser.consume("POST( )+");
+            String uri = parser.readUntil("( )+");
+            parser.consume("HTTP\\/1\\.1 *");
+            parser.consume("\\r\\n");
+            logger.finest("Reading request " + uri + " from " + this);
+            
+            // parse the headers
+            Map headers = readHeaders();
+            parser.consume("\\r\\n");
+            
+            // handle the request
+            if(CTP_URI.equals(uri)) {
+                state = STATE_SERVER_CONSTRUCTING_RESPONSE;
+                sendResponse(RESPONSE_OK, Collections.EMPTY_MAP);
+            } else {
+                close(new Exception("Could not find URI \"" + uri + "\""));
+            }
+
+        } catch(ParseException e) {
+            close(e);
+        } catch(IOException e) {
+            close(e);
+        }
+    }
+
+
+    
+    /**
      * Sends the response header to the client.
      *
      * @param code an HTTP response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1
      * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2. This can
      *      be null to indicate no headers.
      */
-    public void sendResponse(int code, Map headers) {
-        if(state != STATE_CONSTRUCTING_RESPONSE) throw new IllegalStateException();
+    private void sendResponse(int code, Map headers) {
+        if(state != STATE_SERVER_CONSTRUCTING_RESPONSE) throw new IllegalStateException();
         
         try {
             // write the status line
-            if(code == CTPHandler.OK) {
+            if(code == RESPONSE_OK) {
                 writer.write("HTTP/1.1 200 OK\r\n");
-            } else if(code == CTPHandler.NOT_FOUND) {
-                writer.write("HTTP/1.1 404 Not Found\r\n");
-            } else if(code == CTPHandler.ERROR) {
+            } else if(code == RESPONSE_ERROR) {
                 writer.write("HTTP/1.1 500 Error\r\n");
             } else {
                 throw new IllegalArgumentException("Unsupported code: " + code);
@@ -188,6 +315,8 @@ abstract class CTPProtocol {
      *   <li>the state will be updated
      */
     private void handleResponse() {
+        if(state != STATE_CLIENT_AWAITING_RESPONSE) throw new IllegalStateException();
+        
         logger.finest("Handling response from " + this);
         try {
             // if the entire header has not loaded, load more
@@ -196,7 +325,7 @@ abstract class CTPProtocol {
             // parse the status line
             parser.consume("HTTP\\/1\\.1( )+");
             String codeString = parser.readUntil("( )+");
-            Integer code = new Integer(codeString);
+            int code = Integer.parseInt(codeString);
             String description = parser.readUntil("\\r\\n");
             logger.finest("Reading response " + code + " from " + this);
             
@@ -205,81 +334,15 @@ abstract class CTPProtocol {
             parser.consume("\\r\\n");
             
             // handle the response
-            state = STATE_READY;
-            handler.receiveResponse(this, code, headers);
+            if(code == RESPONSE_OK) {
+                state = STATE_READY;
+            } else {
+                close(null);
+            }
 
         } catch(ParseException e) {
             close(e);
         } catch(NumberFormatException e) {
-            close(e);
-        } catch(IOException e) {
-            close(e);
-        }
-    }
-
-    /**
-     * Sends the response header to the client.
-     *
-     * @param code an HTTP response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1
-     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2. This can
-     *      be null to indicate no headers.
-     */
-    public void sendRequest(String uri, Map headers) {
-        if(state != STATE_CONSTRUCTING_REQUEST) throw new IllegalStateException();
-        
-        try {
-            // write the request line
-            writer.write("POST ");
-            writer.write(uri);
-            writer.write(" HTTP/1.1\r\n");
-            
-            // write all the headers provided, plus some extras
-            Map responseHeaders = new TreeMap();
-            responseHeaders.putAll(headers);
-            responseHeaders.put("Transfer-Encoding", "chunked");
-            responseHeaders.put("Host:", host);
-            writeHeaders(responseHeaders);
-            writer.write("\r\n");
-            writer.flush();
-            
-            // we're waiting for the response
-            state = STATE_AWAITING_RESPONSE;
-            
-        } catch(IOException e) {
-            close(e);
-        }
-    }
-     
-    /**
-     * Handle a request by parsing the contents of the input buffer. If the input
-     * buffer does not contain a complete request, this will return. If it does
-     * contain a request:
-     *   <li>the request will be processed
-     *   <li>the buffer will be advanced, and
-     *   <li>the state will be updated
-     */
-    private void handleRequest() {
-        logger.finest("Handling request from " + this);
-        try {
-            // if the entire header has not loaded, load more
-            if(parser.indexOf("\\r\\n\\r\\n") == -1) return;
-
-            // parse the status line
-            parser.consume("POST( )+");
-            String uri = parser.readUntil("( )+");
-            parser.consume("HTTP\\/1\\.1 *");
-            parser.consume("\\r\\n");
-            logger.finest("Reading request " + uri + " from " + this);
-            
-            // parse the headers
-            Map headers = readHeaders();
-            parser.consume("\\r\\n");
-            
-            // handle the request
-            state = STATE_CONSTRUCTING_RESPONSE;
-            handler.receiveRequest(this, uri, headers);
-
-        } catch(ParseException e) {
             close(e);
         } catch(IOException e) {
             close(e);
@@ -343,7 +406,11 @@ abstract class CTPProtocol {
             parser.consume("\\r\\n");
             
             // handle the chunk
-            handler.receiveChunk(this, chunkBuffer);
+            if(chunkSize != 0) {
+                handler.receiveChunk(this, chunkBuffer);
+            } else {
+                close();
+            }
             
         } catch(NumberFormatException e) {
             close(e);
@@ -377,7 +444,7 @@ abstract class CTPProtocol {
      * <li>If the reason is an IOException, the socket is closed immediately
      * <li>Otherwise a "goodbye" message is sent to notify the other party of the close
      * <li>If the state is READY, the goodbye is a single 0-byte chunk
-     * <li>If the state is AWAITING_REQUEST, the goodbye is a request error
+     * <li>If the state is SERVER_AWAITING_REQUEST, the goodbye is a request error
      * <li>If the state is RECEIVED_CLOSE, no goodbye message is sent
      */
     protected void close(Exception reason) {
@@ -386,22 +453,18 @@ abstract class CTPProtocol {
         
         // close is not a result of a connection error, so say goodbye
         if(reason == null || !(reason instanceof IOException)) {
-            logger.log(Level.INFO, "Closing due to " + reason.getMessage(), reason);
+            logger.log(Level.INFO, "Closing due to " + reason, reason);
             
             // if we haven't yet responded, respond now
-            if(state == STATE_AWAITING_REQUEST) {
-                state = STATE_CONSTRUCTING_RESPONSE;
-                Map errorResponse = new TreeMap();
-                errorResponse.put("Content-Length", "0");
-                ((CTPServerProtocol)this).sendResponse(CTPHandler.ERROR, errorResponse);
+            if(state == STATE_SERVER_AWAITING_REQUEST) {
+                state = STATE_SERVER_CONSTRUCTING_RESPONSE;
+                sendResponse(RESPONSE_ERROR, Collections.EMPTY_MAP);
+            }
 
             // if we've already responded, send an empty chunk
-            } else if(state == STATE_READY) {
+            if(state == STATE_READY) {
                 sendChunk(ByteBuffer.wrap(new byte[0]));
-            
-            // we don't know how to respond in an arbitrary state
-            } else {
-                throw new IllegalStateException();
+
             }
         }
         
@@ -411,6 +474,7 @@ abstract class CTPProtocol {
         state = STATE_CLOSED_PERMANENTLY;
         try {
             socketChannel.close();
+            selectionKey.cancel();
         } catch(IOException e) {
             // if this close failed, there's nothing we can do
         }

@@ -37,9 +37,6 @@ public class ByteChannelReader {
     /** the CharSequence for this ByteBuffer */
     private CharSequence bytesAsCharSequence;
     
-    /** whether the channel is out of data */
-    private boolean eof = false;
-    
     /**
      * Create a reader for the specified channel.
      */
@@ -63,7 +60,6 @@ public class ByteChannelReader {
             throw new RuntimeException(e);
         }
 
-        eof = true;
         channel = null;
         bytesAsCharSequence = new ByteBufferSequence(buffer);
     }
@@ -107,7 +103,9 @@ public class ByteChannelReader {
      * containing the consumed bytes. The returned ByteBuffer is only valid until
      * the next method call to ByteChannelReader.
      */
-    public ByteBuffer readBytes(int bytes) {
+    public ByteBuffer readBytes(int bytes) throws IOException {
+        if(bytesAvailable() < bytes) throw new IllegalArgumentException();
+
         // prepare the result
         ByteBuffer result = buffer.asReadOnlyBuffer();
         result.limit(result.position() + bytes);
@@ -174,11 +172,10 @@ public class ByteChannelReader {
      * to add more bytes from the channel.
      *
      * @return the number of bytes read, possibly 0 if there is nothing to read immediately
-     * @throws IOException if the input buffer is full
+     * @throws IOException if the input buffer is full or if the end of the stream is reached
      */
     private int suck() throws IOException {
         if(buffer.remaining() == buffer.capacity()) throw new IOException("Input buffer is full");
-        if(eof) return 0;
         
         // read in another chunk
         buffer.compact();
@@ -186,10 +183,7 @@ public class ByteChannelReader {
         buffer.flip();
         
         // throw an exception if nothing is read, or the end of file is reached
-        if(bytesRead < 0) {
-            eof = true;
-            return 0;
-        }
+        if(bytesRead < 0) throw new IOException("End of stream, no more bytes to read");
         
         // return the number of bytes read
         return bytesRead;
