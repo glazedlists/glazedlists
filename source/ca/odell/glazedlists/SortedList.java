@@ -177,14 +177,14 @@ public final class SortedList extends TransformedList {
             int deletedIndex = indexNodePair.index;
             // adjust the out of order insert with respect to the delete list
             insertedIndex = indicesPendingDeletion.adjustDeleteAndInsert(deletedIndex, insertedIndex); 
-            if(debug) System.out.println("HANDLE RM " + deletedIndex + ", ADD " + insertedIndex + "... " + indicesPendingDeletion); 
+            //if(debug) System.out.println("HANDLE RM " + deletedIndex + ", ADD " + insertedIndex + "... " + indicesPendingDeletion); 
             
             // fire the events
             if(deletedIndex == insertedIndex) {
-                if(debug == true) System.out.println("UPDATE! UPDATE " + insertedIndex);
+                //if(debug == true) System.out.println("UPDATE! UPDATE " + insertedIndex);
                 updates.addUpdate(insertedIndex);
             } else {
-                if(debug == true) System.out.println("UPDATE! RM " + deletedIndex + ", ADD " + insertedIndex);
+                //if(debug == true) System.out.println("UPDATE! RM " + deletedIndex + ", ADD " + insertedIndex);
                 updates.addDelete(deletedIndex);
                 updates.addInsert(insertedIndex);
             }
@@ -506,7 +506,7 @@ public final class SortedList extends TransformedList {
          * Adds the specified index to the list of indices pending deletion.
          */
         public void addPair(IndexNodePair nodePair) {
-            if(debug) System.out.println("Adding RM'd node " + nodePair.index + ", " + this);
+            //if(debug) System.out.println("Adding RM'd node " + nodePair.index + ", " + this);
             indexNodePairs.add(nodePair);
 
             // move this index into sorted order with a bubble-sort
@@ -518,10 +518,16 @@ public final class SortedList extends TransformedList {
                 int compareResult = comparator.compare(firstObject, secondObject);
                 //if(debug) System.out.println("COMPARING " + first.node.getIndex() + ":" + firstObject + " WITH " + second.node.getIndex() + ":" + secondObject + ", class " + firstObject.getClass()); 
                 
-                
                 // these values need no swap
                 if(compareResult < 0) {
                     return;
+                } else if(compareResult == 0 && first.index < second.index) {
+                    if(debug) System.out.println("NO SWAP  EQUALS " + first + ", " + second);
+                    return;
+                } else if(compareResult == 0) {
+                    if(debug) System.out.println("SWAPPING EQUALS " + first + ", " + second);
+                    indexNodePairs.set(swapIndex, second);
+                    indexNodePairs.set(swapIndex+1, first);
                 } else {
                     indexNodePairs.set(swapIndex, second);
                     indexNodePairs.set(swapIndex+1, first);
