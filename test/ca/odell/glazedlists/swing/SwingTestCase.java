@@ -21,9 +21,22 @@ import javax.swing.event.*;
 /**
  * Utility class for running JUnit tests with Swing code.
  *
+ * <p>This class has the following limitations:
+ *  <li>Extending classes must create a method called <code>testGui()</code> which
+ *      contains the single statement, <code>super.testGui()</code>. This provides
+ *      an entry point for normal JUnit to run on the Swing thread.
+ *  <li>Extending classes must not define any other <code>testXXX()</code> methods. Instead they
+ *      shall define only <code>guiTestXXX()</code> methods.
+ *  <li>If one test fails, they all fail.
+ *
+ * <p>This is a hack, but it makes testing our GUI code much easier and more valid.
+ *
+ * <p>Planned extensions include support to run code simultaneously with the
+ * event dispatch thread to support testing Swing in a concurrent environment.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SwingTestCase extends TestCase {
+public abstract class SwingTestCase extends TestCase {
     
     /** test only methods that start with this prefix */
     public static final String TEST_METHOD_PREFIX = "guiTest";
