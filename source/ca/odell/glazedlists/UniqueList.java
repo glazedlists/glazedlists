@@ -316,7 +316,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
         if(index == -1) return 0;
         return getCount(index);
     }
-    
+
     /**
      * Gets a list of the repetitions of the value at the specified index.
      *
@@ -335,7 +335,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             return source.subList(duplicatesList.getIndex(index), source.size());
         }
     }
-    
+
     /**
      * Gets a list of the repetitions of the specified value.
      *
@@ -397,7 +397,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
             // keep the removed object to return
             Object removed = get(index);
@@ -454,7 +454,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
+            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
 
             // save the replaced value
             Object replaced = get(index);
@@ -600,7 +600,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
     public int lastIndexOf(Object object) {
         return indexOf(object);
     }
-    
+
     /**
      * Release the resources consumed by this TransformedList so that it may be garbage
      * collected. It is an error to call any method on a TransformedList after it

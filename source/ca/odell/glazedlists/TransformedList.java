@@ -65,7 +65,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
     protected int getSourceIndex(int mutationIndex) {
         return mutationIndex;
     }
-    
+
     /**
      * Tests if this mutation shall accept calls to <code>add()</code>,
      * <code>remove()</code>, <code>set()</code> etc. This method is called
@@ -82,7 +82,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
      * adjustment to downstream listeners.
      */
     public abstract void listChanged(ListEvent listChanges);
-    
+
     /**
      * Adds the specified element into this list. The added value may not
      * be visible in this mutated view.
@@ -122,7 +122,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index > size()) throw new ArrayIndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
+            if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
             int sourceIndex = 0;
             if(index < size()) sourceIndex = getSourceIndex(index);
             else sourceIndex = source.size();
@@ -150,7 +150,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index > size()) throw new ArrayIndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
+            if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
             int sourceIndex = 0;
             if(index < size()) sourceIndex = getSourceIndex(index);
             else sourceIndex = source.size();
@@ -217,7 +217,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Returns the element at the specified position in this list.
      *
@@ -226,7 +226,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
      * via <code>getReadWriteLock().readLock()</code>.
      */
     public Object get(int index) {
-        if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot get at " + index + " on list of size " + size());
+        if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot get at " + index + " on list of size " + size());
         return source.get(getSourceIndex(index));
     }
 
@@ -245,7 +245,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
             return source.remove(getSourceIndex(index));
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -297,7 +297,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            // nest changes and let the other methods compose the event  
+            // nest changes and let the other methods compose the event
             updates.beginEvent(true);
             boolean overallChanged = false;
             for(Iterator i = values.iterator(); i.hasNext(); ) {
@@ -333,7 +333,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            // nest changes and let the other methods compose the event  
+            // nest changes and let the other methods compose the event
             updates.beginEvent(true);
             boolean changed = false;
             for(int i = 0; i < size(); ) {
@@ -370,7 +370,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
+            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
             return source.set(getSourceIndex(index), value);
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -378,7 +378,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
     }
 
     /**
-     * Returns the number of elements in this list. 
+     * Returns the number of elements in this list.
      *
      * <p>Like all read-only methods, this method <strong>does not</strong> manage
      * its own thread safety. Callers can obtain thread safe access to this method
@@ -387,7 +387,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
     public int size() {
         return source.size();
     }
-    
+
     /**
      * Release the resources consumed by this TransformedList so that it may be garbage
      * collected. It is an error to call any method on a TransformedList after it
@@ -399,7 +399,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
      * This is useful for situations where a TransformedList is short-lived with a
      * source EventList that is long-lived.
      *
-     * <p>This method simply removes this list as a listener to its source. 
+     * <p>This method simply removes this list as a listener to its source.
      */
     public void dispose() {
         source.removeListEventListener(this);

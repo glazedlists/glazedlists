@@ -40,10 +40,10 @@ import java.io.Serializable;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class AbstractEventList implements EventList, Serializable {
-    
+
     /** the change event and notification system */
     protected ListEventAssembler updates = new ListEventAssembler(this);
-    
+
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock = null;
 
@@ -63,7 +63,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
     public void addListEventListener(ListEventListener listChangeListener) {
         updates.addListEventListener(listChangeListener);
     }
-    
+
     /**
      * Removes the specified listener from receiving change updates for this list.
      */
@@ -77,7 +77,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
     public abstract Object get(int index);
 
     /**
-     * Returns the number of elements in this list. 
+     * Returns the number of elements in this list.
      *
      * <p>Like all read-only methods, this method <strong>does not</strong> manage
      * its own thread safety. Callers can obtain thread safe access to this method
@@ -152,7 +152,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
 
         getReadWriteLock().writeLock().lock();
         try {
-            if(index < 0 || index > size()) throw new ArrayIndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
+            if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
             int count = 0;
             for(Iterator i = values.iterator(); i.hasNext(); ) {
                 add(index + count, i.next());
@@ -213,7 +213,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Returns true if this list contains the specified element.
      *
@@ -260,11 +260,11 @@ public abstract class AbstractEventList implements EventList, Serializable {
         if(object == this) return true;
         if(object == null) return false;
         if(!(object instanceof List)) return false;
-        
+
         // ensure the lists are the same size
         List otherList = (List)object;
         if(otherList.size() != size()) return false;
-        
+
         // compare element wise, via iterators
         ListIterator iterA = listIterator();
         ListIterator iterB = otherList.listIterator();
@@ -272,7 +272,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
             // get the ith object from each list to compare
             Object a = iterA.next();
             Object b = iterB.next();
-            
+
             // handle the both null case
             if(a == b) continue;
             // if one is null and the other is not, die
@@ -280,7 +280,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
             // if they are not equal die
             if(!a.equals(b)) return false;
         }
-        
+
         // if we haven't failed yet, they match
         return true;
     }
@@ -322,7 +322,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
         // not found
         return -1;
     }
-    
+
     /**
      * Returns true if this list contains no elements.
      *
@@ -333,7 +333,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
     public boolean isEmpty() {
         return (size() == 0);
     }
-    
+
     /**
      * Returns an iterator over the elements in this list in proper sequence.
      */
@@ -479,7 +479,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
         } else if(array.length > size()) {
             array[size()] = null;
         }
-        
+
         // copy values into the array
         int index = 0;
         for(Iterator i = iterator(); i.hasNext(); ) {
@@ -506,7 +506,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
         result.append("]");
         return result.toString();
     }
-    
+
 
     /**
      * Returns the index in this list of the last occurrence of the specified
