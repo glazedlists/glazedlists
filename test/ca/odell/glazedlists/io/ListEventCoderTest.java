@@ -32,7 +32,7 @@ import java.text.ParseException;
 public class ListEventCoderTest extends TestCase {
     
     /** encodes java.lang.Integer */
-    private ByteCoder intCoder = new IntCoder();
+    private ByteCoder intCoder = new IntegerCoder();
 
     /**
      * Prepare for the test.
@@ -78,8 +78,6 @@ public class ListEventCoderTest extends TestCase {
     public void testSnapshotDecode() throws IOException {
         // prepare the encoding list
         EventList toEncode = new BasicEventList();
-        EventEncoderListener encoder = new EventEncoderListener(intCoder);
-        toEncode.addListEventListener(encoder);
         
         // prepare the decoding list
         EventList toDecode = new BasicEventList();
@@ -90,47 +88,8 @@ public class ListEventCoderTest extends TestCase {
         // change, encode, decode
         List entireList = Arrays.asList(new Object[] { new Integer(8), new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
         toEncode.addAll(entireList);
-        Bufferlo entireListEncoding = (Bufferlo)encoder.getEncodings().remove(0);
+        Bufferlo entireListEncoding = ListEventCoder.listToBytes(toEncode, intCoder);
         ListEventCoder.bytesToListEvent(entireListEncoding, toDecode, intCoder);
         assertEquals(toEncode, toDecode);
-    }
-    
-    /**
-     * Encodes List events as they arrive.
-     */
-    class EventEncoderListener implements ListEventListener {
-        public List encodings = new ArrayList();
-        public ByteCoder byteCoder = null;
-        public EventEncoderListener(ByteCoder byteCoder) {
-            this.byteCoder = byteCoder;
-        }
-        public void listChanged(ListEvent listChanges) {
-            try {
-                Bufferlo encoding = ListEventCoder.listEventToBytes(listChanges, byteCoder);
-                encodings.add(encoding);
-            } catch(IOException e) {
-                fail(e.getMessage());
-            }
-        }
-        public List getEncodings() {
-            return encodings;
-        }
-    }
-    
-    /**
-     * Encodes integers and decodes them.
-     */
-    class IntCoder implements ByteCoder {
-        public void encode(Object source, OutputStream target) throws IOException {
-            DataOutputStream dataOut = new DataOutputStream(target);
-            Integer sourceInt = (Integer)source;
-            dataOut.writeInt(sourceInt.intValue());
-            dataOut.flush();
-        }
-        public Object decode(InputStream source) throws IOException {
-            DataInputStream dataIn = new DataInputStream(source);
-            int value = dataIn.readInt();
-            return new Integer(value);
-        }
     }
 }

@@ -280,7 +280,7 @@ public class Bufferlo implements CharSequence {
         public int read() {
             ByteBuffer readBuffer = getReadFromBuffer();
             if(readBuffer == null) return -1;
-            byte result = readBuffer.get();
+            int result = 0xFF & readBuffer.get();
             doneReading();
             return result;
         }
@@ -463,7 +463,7 @@ public class Bufferlo implements CharSequence {
      * Gets a new buffer by creating it or removing it from the pool.
      */
     private ByteBuffer getNewBuffer() {
-        int BUFFER_SIZE = 8 * 1024; 
+        int BUFFER_SIZE = 8196; 
         return ByteBuffer.allocateDirect(BUFFER_SIZE);
     }
 }

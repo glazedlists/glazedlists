@@ -215,6 +215,73 @@ public class BufferloTest extends TestCase {
     }
 
     /**
+     * Tests that streams mixed with data works.
+     */
+    public void testMix() throws IOException, ParseException {
+        Bufferlo bufferlo = new Bufferlo();
+        Writer writer = new OutputStreamWriter(bufferlo.getOutputStream(), "US-ASCII");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(bufferlo.getInputStream(), "US-ASCII"));
+        
+        // write a bunch of bytes
+        int bytesWritten = 0;
+        for(int i = 0; i < 10; i++) {
+            // write some strings
+            writer.write("Hello World");
+            writer.flush();
+            bytesWritten += 11;
+            
+            // write some buffers
+            bufferlo.write("World O Hell");
+            bytesWritten += 12;
+
+            // we should be consistent
+            assertEquals(bytesWritten, bufferlo.length());
+        }
+        
+        // verify we wrote what we thought
+        int bytesRemaining = bytesWritten;
+        for(int i = 0; i < 10; i++) {
+            // read some bytes
+            byte[] data = bufferlo.consumeBytes(5);
+            assertEquals(data[0], (byte)'H');
+            assertEquals(data[4], (byte)'o');
+            bytesRemaining -= 5;
+            
+            // read some text
+            bufferlo.consume(" WorldWorld ");
+            bytesRemaining -= 12;
+            
+            // read some bytes
+            byte[] data2 = bufferlo.consumeBytes(6);
+            assertEquals(data2[0], (byte)'O');
+            assertEquals(data2[5], (byte)'l');
+            bytesRemaining -= 6;
+            
+            // we should be consistent
+            assertEquals(bytesRemaining, bufferlo.length());
+        }
+    }
+    
+    /**
+     * Tests that all bytes from -128 thru 127 work. This is necessary to verfiy
+     * that there are no problems with byte encoding.
+     */
+    public void testAllByteValues() throws IOException {
+        Bufferlo bufferlo = new Bufferlo();
+        InputStream in = bufferlo.getInputStream();
+        OutputStream out = bufferlo.getOutputStream();
+        for(int i = -128; i <= 127; i++) {
+            byte b = (byte)i;
+            byte[] valueOut = new byte[] { b };
+            out.write(valueOut);
+            out.flush();
+            byte[] valueIn = new byte[1];
+            in.read(valueIn);
+            assertEquals(valueOut[0], valueIn[0]);
+        }
+    }
+    
+    /**
      * Gets a Bufferlo with the specified contents.
      */
     private Bufferlo getBufferlo(String contents) throws IOException {
@@ -223,5 +290,9 @@ public class BufferloTest extends TestCase {
         writer.write(contents);
         writer.flush();
         return bufferlo;
+    }
+    
+    public static void main(String[] args) throws IOException {
+        new BufferloTest().testAllByteValues();
     }
 }
