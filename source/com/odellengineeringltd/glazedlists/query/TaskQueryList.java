@@ -55,6 +55,7 @@ public class TaskQueryList extends QueryList {
         if(queryTimerTask != null) queryTimerTask.cancel();
         
         // execute this query on a task
+        this.query = query;
         queryTimerTask = taskManager.scheduleTask(new QueryTask(query), repeatPeriod);
     }
     
@@ -62,7 +63,7 @@ public class TaskQueryList extends QueryList {
      * Simple task that executes a query and sets the results of that
      * query to the body of this list.
      */
-    class QueryTask implements Task {
+    class QueryTask extends AbstractTask {
         
         /** the context of this task */
         private TaskContext taskContext;
@@ -77,16 +78,6 @@ public class TaskQueryList extends QueryList {
             this.query = query;
         }
         
-        /**
-         * Manage the task context.
-         */
-        public void setTaskContext(TaskContext taskContext) {
-            this.taskContext = taskContext;
-        }
-        public void unsetTaskContext() { 
-            this.taskContext = null;
-        }
-
         /**
          * When this task is executed it sets it's context as busy
          * and performs the query on its background thread. It then
