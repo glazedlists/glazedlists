@@ -139,7 +139,7 @@ public class CachingList extends TransformedList implements ListEventListener {
                     IndexedTreeNode cachedValue = cache.addByNode(new AgedNode(treeNode, value));
                     treeNode.setValue(cachedValue);
                 } else {
-                    IndexedTreeNode oldValue = cache.getNode(currentSize - 1);
+                    IndexedTreeNode oldValue = cache.getNode(0);
                     oldValue.removeFromTree();
                     AgedNode oldNode = (AgedNode)oldValue.getValue();
                     IndexedTreeNode oldTreeNode = oldNode.getIndexNode();
