@@ -31,8 +31,8 @@ import java.util.*;
  * a high-performance tree-based data structure. This data structure has potentially
  * slower access for get() but with significantly better performance for updates.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part3/index.html">Glazed
- * Lists Tutorial Part 3 - Custom Filtering</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
+ * Lists Tutorial</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

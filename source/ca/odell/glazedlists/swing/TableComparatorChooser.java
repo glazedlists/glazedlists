@@ -45,8 +45,8 @@ import java.lang.reflect.*;
  * clicks subsequent columns. The list is sorted by the first column and ties
  * are broken by the second column.
  *
- * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=4">Issue #4</a>
- * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=31">Issue #31</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=4">Bug 4</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=31">Bug 31</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

@@ -16,7 +16,11 @@ import java.util.regex.*;
 import java.text.ParseException;
 
 /**
- * Helper class for writing Strings to a Channel with one-byte characters..
+ * Helper class for writing Strings to a Channel with one-byte characters.
+ *
+ * <p>Currently there are some problems with this implementation. If the buffer is
+ * flushed by a non-network thread, the flush proceeds. What should happen is the
+ * network thread is fetched to perform the flush directly.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */

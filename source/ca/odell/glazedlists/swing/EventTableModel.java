@@ -22,14 +22,16 @@ import javax.swing.table.*;
 import java.util.*;
 
 /**
- * A table model that holds an event list.
+ * A {@link TableModel} that holds an {@link EventList}. Each element of the list
+ * corresponds to a row in the {@link TableModel}. The columns of the table must
+ * be specified using a {@link TableFormat}.
  *
  * <p>The EventTableModel class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the event dispatch thread.
  * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)}.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part1/index.html#listtable">Glazed
- * Lists Tutorial Part 1 - Basics</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
+ * Lists Tutorial</a>
  *
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
@@ -64,23 +66,24 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     
     /**
      * Creates a new table that renders the specified list with an automatically
-     * generated {@link TableFormat}. This uses a convenience {@link TableFormat} that 
-     * may not be flexible enough for some applications. In this case consider
-     * implementing a custom {@link TableFormat} directly.
+     * generated {@link TableFormat}. It uses JavaBeans and reflection to create
+     * a TableFormat as specified.
+     *
+     * <p>Note that the classes which will be obfuscated may not work with
+     * reflection. In this case, implement a {@link TableFormat} manually.
      *
      * @param propertyNames an array of property names in the Java Beans format.
      *      For example, if your list contains Objects with the methods getFirstName(),
      *      setFirstName(String), getAge(), setAge(Integer), then this array should
      *      contain the two strings "firstName" and "age". This format is specified
-     *      by the Java Beans {@link java.beans.PropertyDescriptor}.
+     *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
      * @param columnLabels the corresponding column names for the listed property
      *      names. For example, if your columns are "firstName" and "age", then
      *      your labels might be "First Name" and "Age".
-     * @param writable whether the columns in your table are writable. Use true to
-     *      specify all columns as editable or false to specify no columns as
-     *      editable.
+     * @param writable an array of booleans specifying which of the columns in
+     *      your table are writable.
      */
-    public EventTableModel(EventList source, String[] propertyNames, String[] columnLabels, boolean writable) {
+    public EventTableModel(EventList source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
         this(source, new BeanTableFormat(propertyNames, columnLabels, writable));
     }
     
@@ -249,7 +252,6 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public int getRepaintAllThreshhold() {
         return changeSizeRepaintAllThreshhold;
     }
-    
     /**
      * Sets the threshhold of the number of change blocks that will be handled
      * individually before the ListTable collapses such changes into one and simply
@@ -268,8 +270,6 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * height rows.
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=30">Bug 30</a>
-     * @see <a href="https://glazedlists.dev.java.net/tutorial/part8/index.html#rowheight">Glazed
-     * Lists Tutorial Part 8 - Performance Tuning</a>
      */
     public void setRepaintAllThreshhold(int repaintAllThreshhold) {
         this.changeSizeRepaintAllThreshhold = repaintAllThreshhold;

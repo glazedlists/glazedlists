@@ -29,13 +29,13 @@ class BeanTableFormat implements WritableTableFormat {
     private List columnLabels;
     
     /** whether all columns can be edited */
-    private boolean editable;
+    private boolean[] editable;
     
     /**
      * Create a BeanTableFormat that uses the specified column names
      * and the specified field names.
      */
-    public BeanTableFormat(String[] propertyNames, String[] columnLabels, boolean editable) {
+    public BeanTableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
         this.propertyNames = Arrays.asList(propertyNames);
         this.columnLabels = Arrays.asList(columnLabels);
         this.editable = editable;
@@ -109,7 +109,7 @@ class BeanTableFormat implements WritableTableFormat {
      */
     public boolean isEditable(Object baseObject, int column) {
         // if not editable at all
-        if(!editable) return false;
+        if(!editable[column]) return false;
         
         // if there is no setter
         PropertyDescriptor property = (PropertyDescriptor)propertyDescriptors.get(column);

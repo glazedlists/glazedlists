@@ -22,8 +22,8 @@ import javax.swing.event.*;
  * <p>The implementation of setSelection and getSelection is not in any way tied
  * to the contents of the list.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part7/index.html">Glazed
- * Lists Tutorial Part 7 - JComboBox</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
+ * Lists Tutorial</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

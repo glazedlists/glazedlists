@@ -23,8 +23,8 @@ import ca.odell.glazedlists.util.concurrent.*;
  * <p>The sorting algorithm may be dynamic. In effect, user may specify the
  * criteria that is used to choose a sorting order.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part4/index.html">Glazed
- * Lists Tutorial Part 4 - Sorting</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
+ * Lists Tutorial</a>
  * @see java.util.Comparator
  * @see java.lang.Comparable
  *

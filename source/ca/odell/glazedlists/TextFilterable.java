@@ -11,10 +11,8 @@ import java.util.List;
 /**
  * An item that can be compared to a list of filters to see if it matches.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part2/index.html">Glazed
- * Lists Tutorial Part 2 - Text Filtering</a>
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part8/index.html#filtering">Glazed
- * Lists Tutorial Part 8 - Performance Tuning</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
+ * Lists Tutorial</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
