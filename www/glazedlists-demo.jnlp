@@ -9,7 +9,7 @@
     <vendor>Jesse Wilson</vendor> 
     <homepage href="index.html"/> 
     <description>See Glazed Lists sorting, filtering and transformations in action.</description> 
-    <!--<icon href="images/swingset2.jpg"/>-->
+    <icon href="glazedlists-demo.gif"/>
     <!--<icon kind="splash" href="images/splash.gif"/>-->
     <offline-allowed/>
   </information> 
