@@ -23,13 +23,13 @@ import java.io.UnsupportedEncodingException;
 public class CTPChunkTest extends TestCase {
 
     /** connection manager to handle incoming connects */
-    CTPConnectionManager connectionManager = null;
+    private CTPConnectionManager connectionManager = null;
 
     /** handler factory manages connection handlers */
-    StaticCTPHandlerFactory handlerFactory;
+    private StaticCTPHandlerFactory handlerFactory;
     
     /** the port to listen on */
-    private int serverPort = 5000;
+    private static int serverPort = 5000;
     
     /**
      * Prepare for the test.
