@@ -67,8 +67,8 @@ public class IteratorTest extends TestCase {
     }
 
     /**
-     * Tests to verify that the Iterator can iterate through the list both
-     * and remove its elements.
+     * Tests to verify that the ListIterator can iterate through the list
+     * while removes are performed directly on the list.
      */
     public void testIterateWithExternalRemove() {
         // create a list of values
@@ -81,7 +81,7 @@ public class IteratorTest extends TestCase {
         }
 
         List iteratedElements = new ArrayList();
-        Iterator iterator = deleteFromList.iterator();
+        Iterator iterator = deleteFromList.listIterator();
 
         // iterate through the list forwards for the first 50 values
         for(int a = 0; a < 50; a++) {
