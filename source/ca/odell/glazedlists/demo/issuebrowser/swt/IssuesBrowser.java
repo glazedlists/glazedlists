@@ -71,7 +71,7 @@ public class IssuesBrowser {
         demoForm.setLayout(demoFormContentLayout);
 
         // A panel containing all of the filters
-        Canvas filterPanel = new Canvas(demoForm, SWT.NONE);
+        Canvas filterPanel = new Canvas(demoForm, SWT.BORDER);
 
         // Set the layout for the panel containing all of the filters
         GridData filterPanelLayout = new GridData();
@@ -82,9 +82,10 @@ public class IssuesBrowser {
         filterPanel.setLayoutData(filterPanelLayout);
 
         // Set the layout for the contents of that panel
-        GridLayout filterPanelContentLayout = new GridLayout(2, false);
-        filterPanelContentLayout.marginHeight = 0;
-        filterPanelContentLayout.marginWidth = 0;
+        GridLayout filterPanelContentLayout = new GridLayout(1, false);
+        filterPanelContentLayout.marginHeight = 10;
+        filterPanelContentLayout.marginWidth = 10;
+        filterPanelContentLayout.verticalSpacing = 15;
         filterPanel.setLayout(filterPanelContentLayout);
 
         // Add the various filters
@@ -123,7 +124,7 @@ public class IssuesBrowser {
         issuePanel.setWeights(new int[] {50,50});
 
         // balance the filter panel and the issue panel
-        demoForm.setWeights(new int[]{30, 80});
+        demoForm.setWeights(new int[]{30, 70});
 
         // Start the demo
         issueLoader.start();
@@ -131,9 +132,35 @@ public class IssuesBrowser {
     }
 
     private Text createFilterText(Composite parent) {
+        // A panel containing text filter
+        Canvas textPanel = new Canvas(parent, SWT.NONE);
+
+        // Set the layout for the panel containing the text filter
+        GridData textPanelLayout = new GridData();
+        textPanelLayout.horizontalAlignment = GridData.FILL;
+        textPanelLayout.verticalAlignment = GridData.BEGINNING;
+        textPanelLayout.grabExcessHorizontalSpace = true;
+        textPanelLayout.grabExcessVerticalSpace = false;
+        textPanel.setLayoutData(textPanelLayout);
+
+        // Set the layout for the contents of that panel
+        GridLayout textPanelContentLayout = new GridLayout(1, false);
+        textPanelContentLayout.marginHeight = 0;
+        textPanelContentLayout.marginWidth = 0;
+        textPanelContentLayout.verticalSpacing = 5;
+        textPanel.setLayout(textPanelContentLayout);
+
         // Create the Label first
-        Label filterLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        Label filterLabel = new Label(textPanel, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
         filterLabel.setText("Text Filter");
+
+        // Change the font
+        FontData[] fontData = filterLabel.getFont().getFontData();
+        fontData[0].setStyle(SWT.BOLD);
+        //fontData[0].setHeight(fontData[0].getHeight() + 1);
+        filterLabel.setFont(new Font(textPanel.getDisplay(), fontData));
+
+        // Set the layout for the label
         GridData filterLabelLayout = new GridData();
         filterLabelLayout.horizontalAlignment = GridData.BEGINNING;
         filterLabelLayout.verticalAlignment = GridData.CENTER;
@@ -141,7 +168,7 @@ public class IssuesBrowser {
         filterLabel.setLayoutData(filterLabelLayout);
 
         // Create the actual text box to user for filtering
-        Text filterText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+        Text filterText = new Text(textPanel, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
         GridData filterTextLayout = new GridData();
         filterTextLayout.horizontalAlignment = GridData.FILL;
         filterTextLayout.verticalAlignment = GridData.BEGINNING;
@@ -153,9 +180,35 @@ public class IssuesBrowser {
     }
 
     private void createPrioritySlider(Composite parent, ThresholdList priorityList) {
+        // A panel containing the priority slider
+        Canvas priorityPanel = new Canvas(parent, SWT.NONE);
+
+        // Set the layout for the panel containing the priority slider
+        GridData priorityPanelLayout = new GridData();
+        priorityPanelLayout.horizontalAlignment = GridData.FILL;
+        priorityPanelLayout.verticalAlignment = GridData.BEGINNING;
+        priorityPanelLayout.grabExcessHorizontalSpace = true;
+        priorityPanelLayout.grabExcessVerticalSpace = false;
+        priorityPanel.setLayoutData(priorityPanelLayout);
+
+        // Set the layout for the contents of that panel
+        GridLayout priorityPanelContentLayout = new GridLayout(2, false);
+        priorityPanelContentLayout.marginHeight = 0;
+        priorityPanelContentLayout.marginWidth = 0;
+        priorityPanelContentLayout.verticalSpacing = 5;
+        priorityPanel.setLayout(priorityPanelContentLayout);
+
         // Create the Label first
-        Label priorityLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        Label priorityLabel = new Label(priorityPanel, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
         priorityLabel.setText("Minimum Priority");
+
+        // Change the font
+        FontData[] fontData = priorityLabel.getFont().getFontData();
+        fontData[0].setStyle(SWT.BOLD);
+        //fontData[0].setHeight(fontData[0].getHeight() + 1);
+        priorityLabel.setFont(new Font(priorityPanel.getDisplay(), fontData));
+
+        // Set the layout for the label
         GridData priorityLabelLayout = new GridData();
         priorityLabelLayout.horizontalAlignment = GridData.BEGINNING;
         priorityLabelLayout.verticalAlignment = GridData.CENTER;
@@ -163,8 +216,8 @@ public class IssuesBrowser {
         priorityLabel.setLayoutData(priorityLabelLayout);
 
         // Create the slider widget to control priority filtering
-        Slider prioritySlider = new Slider(parent, SWT.HORIZONTAL);
-        prioritySlider.setValues(0, 0, 100, 15, 1, 25);
+        Slider prioritySlider = new Slider(priorityPanel, SWT.HORIZONTAL);
+        prioritySlider.setValues(0, 0, 100, 10, 1, 25);
         ThresholdViewerFactory.createLower(priorityList, prioritySlider);
         GridData prioritySliderLayout = new GridData();
         prioritySliderLayout.horizontalAlignment = GridData.FILL;
@@ -175,16 +228,30 @@ public class IssuesBrowser {
         prioritySlider.setLayoutData(prioritySliderLayout);
 
         // Create the lower end Label
-        Label lowPriorityLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        Label lowPriorityLabel = new Label(priorityPanel, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
         lowPriorityLabel.setText("Low");
+
+        // Change the font to bold
+        FontData[] lowerEndFontData = lowPriorityLabel.getFont().getFontData();
+        lowerEndFontData[0].setStyle(SWT.BOLD);
+        lowPriorityLabel.setFont(new Font(priorityPanel.getDisplay(), lowerEndFontData));
+
+        // Set the layout for the label
         GridData lowPriorityLabelLayout = new GridData();
         lowPriorityLabelLayout.horizontalAlignment = GridData.BEGINNING;
         lowPriorityLabelLayout.verticalAlignment = GridData.CENTER;
         lowPriorityLabel.setLayoutData(lowPriorityLabelLayout);
 
         // Create the higher end Label
-        Label highPriorityLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        Label highPriorityLabel = new Label(priorityPanel, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
         highPriorityLabel.setText("High");
+
+        // Change the font to bold
+        FontData[] higherEndFontData = highPriorityLabel.getFont().getFontData();
+        higherEndFontData[0].setStyle(SWT.BOLD);
+        highPriorityLabel.setFont(new Font(priorityPanel.getDisplay(), higherEndFontData));
+
+        // Set the layout for the label
         GridData highPriorityLabelLayout = new GridData();
         highPriorityLabelLayout.horizontalAlignment = GridData.END;
         highPriorityLabelLayout.verticalAlignment = GridData.CENTER;
@@ -192,9 +259,35 @@ public class IssuesBrowser {
     }
 
     private void createUsersList(Composite parent) {
+        // A panel containing tthe users list
+        Canvas usersListPanel = new Canvas(parent, SWT.NONE);
+
+        // Set the layout for the panel containing the users list
+        GridData usersListPanelLayout = new GridData();
+        usersListPanelLayout.horizontalAlignment = GridData.FILL;
+        usersListPanelLayout.verticalAlignment = GridData.FILL;
+        usersListPanelLayout.grabExcessHorizontalSpace = true;
+        usersListPanelLayout.grabExcessVerticalSpace = true;
+        usersListPanel.setLayoutData(usersListPanelLayout);
+
+        // Set the layout for the contents of that panel
+        GridLayout usersListPanelContentLayout = new GridLayout(1, false);
+        usersListPanelContentLayout.marginHeight = 0;
+        usersListPanelContentLayout.marginWidth = 0;
+        usersListPanelContentLayout.verticalSpacing = 5;
+        usersListPanel.setLayout(usersListPanelContentLayout);
+
         // Create the Label first
-        Label usersListLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        Label usersListLabel = new Label(usersListPanel, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
         usersListLabel.setText("Issue Owner");
+
+        // Change the font
+        FontData[] fontData = usersListLabel.getFont().getFontData();
+        fontData[0].setStyle(SWT.BOLD);
+        //fontData[0].setHeight(fontData[0].getHeight() + 1);
+        usersListLabel.setFont(new Font(usersListPanel.getDisplay(), fontData));
+
+        // Set the layout for the label
         GridData usersListLabelLayout = new GridData();
         usersListLabelLayout.horizontalAlignment = GridData.BEGINNING;
         usersListLabelLayout.verticalAlignment = GridData.BEGINNING;
@@ -202,7 +295,7 @@ public class IssuesBrowser {
         usersListLabel.setLayoutData(usersListLabelLayout);
 
         // Create the issue owner's list
-        usersList = new List(parent, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+        usersList = new List(usersListPanel, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
         GridData usersListLayout = new GridData();
         usersListLayout.horizontalAlignment = GridData.FILL;
         usersListLayout.verticalAlignment = GridData.FILL;
