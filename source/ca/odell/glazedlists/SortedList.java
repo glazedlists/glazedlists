@@ -249,19 +249,19 @@ public final class SortedList extends TransformedList {
             // if this is the first sort, we're done 
             if(previousSorted == null && previousUnsorted == null) return;
 
-            // construct the reordering array
+            // construct the reorder map
             int[] reorderMap = new int[size()];
             for(int i = 0; i < reorderMap.length; i++) {
-                // get the previous index
-                IndexedTreeNode previousSortedNode = previousSorted.getNode(i);
-                IndexedTreeNode previousUnsortedNode = (IndexedTreeNode)previousSortedNode.getValue();
-                int previousUnsortedIndex = previousUnsortedNode.getIndex();
-                // get the new index
-                IndexedTreeNode currentSortedNode = sorted.getNode(i);
-                IndexedTreeNode currentUnsortedNode = (IndexedTreeNode)currentSortedNode.getValue();
-                int currentUnsortedIndex = currentUnsortedNode.getIndex();
-                // create the reordering
-                reorderMap[currentUnsortedIndex] = previousUnsortedIndex;  
+                // first get unsorted index at i
+                IndexedTreeNode sortedNode = sorted.getNode(i);
+                IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
+                int unsortedIndex = unsortedNode.getIndex();
+                // now find original index for that unsorted index
+                IndexedTreeNode previousUnsortedNode = previousUnsorted.getNode(unsortedIndex);
+                IndexedTreeNode previousSortedNode = (IndexedTreeNode)previousUnsortedNode.getValue();
+                int previousIndex = previousSortedNode.getIndex();
+                // save the values in the reorder map
+                reorderMap[i] = previousIndex;
             }
 
             // notification about the big change

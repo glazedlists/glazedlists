@@ -212,10 +212,15 @@ public final class EventSelectionModel {
                 // adjust the flaglist & construct a reorder map to propagate
                 SparseList previousFlagList = flagList;
                 flagList = new SparseList();
-                for(int i = 0; i < sourceReorderMap.length; i++) {
-                    Object flag = previousFlagList.get(sourceReorderMap[i]); 
-                    flagList.add(flag);
-                    if(flag != null) selectReorderMap[flagList.getCompressedIndex(i)] = previousFlagList.getCompressedIndex(sourceReorderMap[i]);
+                for(int c = 0; c < sourceReorderMap.length; c++) {
+                    Object flag = previousFlagList.get(sourceReorderMap[c]);
+                    boolean wasSelected = (flag != null);
+                    flagList.add(c, flag);
+                    if(wasSelected) {
+                        int previousIndex = previousFlagList.getCompressedIndex(sourceReorderMap[c]);
+                        int currentIndex = flagList.getCompressedIndex(c); 
+                        selectReorderMap[currentIndex] = previousIndex;
+                    }
                 }
                 
                 // fire the reorder
