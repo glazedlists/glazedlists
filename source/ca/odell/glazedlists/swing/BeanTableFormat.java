@@ -23,7 +23,7 @@ class BeanTableFormat implements WritableTableFormat {
     private List propertyNames;
     
     /** methods for extracting field values */
-    private List propertyDescriptors;
+    private List propertyDescriptors = null;
     
     /** column labels are pretty-print column header labels */
     private List columnLabels;
@@ -88,8 +88,8 @@ class BeanTableFormat implements WritableTableFormat {
         try {
             Class beanClass = beanObject.getClass();
             propertyDescriptors = new ArrayList();
-            for(int i = 0; i < propertyNames.size(); i++) {
-                propertyDescriptors.add(new PropertyDescriptor((String)propertyNames.get(i), beanClass));
+            for(Iterator i = propertyNames.iterator(); i.hasNext(); ) {
+                propertyDescriptors.add(new PropertyDescriptor((String)i.next(), beanClass));
             }
         } catch(IntrospectionException e) {
             throw new RuntimeException(e);

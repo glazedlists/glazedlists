@@ -67,12 +67,12 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     /**
      * Creates a new table that renders the specified list with an automatically
      * generated {@link TableFormat}. It uses JavaBeans and reflection to create
-     * a TableFormat as specified.
+     * a {@link TableFormat} as specified.
      *
      * <p>Note that the classes which will be obfuscated may not work with
      * reflection. In this case, implement a {@link TableFormat} manually.
      *
-     * @param propertyNames an array of property names in the Java Beans format.
+     * @param propertyNames an array of property names in the JavaBeans format.
      *      For example, if your list contains Objects with the methods getFirstName(),
      *      setFirstName(String), getAge(), setAge(Integer), then this array should
      *      contain the two strings "firstName" and "age". This format is specified

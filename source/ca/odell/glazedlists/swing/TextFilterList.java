@@ -87,7 +87,26 @@ public class TextFilterList extends AbstractFilterList {
     public TextFilterList(EventList source, TextFilterator filterator) {
         this(source, filterator, new JTextField(""));
     }
-
+    
+    /**
+     * Creates a new filter list that filters elements out of the
+     * specified source list with an automatically generated {@link TextFilterator}.
+     * It uses JavaBeans and reflection to create a {@link TextFilterator} as
+     * specified.
+     *
+     * <p>Note that the classes which will be obfuscated may not work with
+     * reflection. In this case, implement a {@link TextFilterator} manually.
+     *
+     * @param propertyNames an array of property names in the JavaBeans format.
+     *      For example, if your list contains Objects with the methods getFirstName(),
+     *      setFirstName(String), getAge(), setAge(Integer), then this array should
+     *      contain the two strings "firstName" and "age". This format is specified
+     *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
+     */
+    public TextFilterList(EventList source, String[] propertyNames) {
+        this(source, new BeanTextFilterator(propertyNames), new JTextField(""));
+    }
+    
     /**
      * Creates a new filter list that filters elements out of the
      * specified source list.
