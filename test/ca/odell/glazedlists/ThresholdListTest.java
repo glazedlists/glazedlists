@@ -997,6 +997,68 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setUpperThreshold(3069);
     }
 
+    /** 
+     * Verifies that the ThresholdList fires consistent events.
+     */
+    public void testNumberOfEventsFired() {
+        // count events
+        ListEventCounter counter = new ListEventCounter();
+        thresholdList.addListEventListener(counter);
+        
+        // putz around with the thresholds on an empty list
+        thresholdList.setLowerThreshold(-14922);
+        thresholdList.setUpperThreshold(-1922);
+        thresholdList.setLowerThreshold(-13923);
+        thresholdList.setUpperThreshold(-923);
+        assertEquals(0, counter.getEventCount());
+        
+        // add an element that is not in range
+        source.add(new Integer(1139));
+        assertEquals(0, counter.getEventCount());
+        thresholdList.setLowerThreshold(-12923);
+        thresholdList.setUpperThreshold(77);
+        thresholdList.setLowerThreshold(-11922);
+        thresholdList.setUpperThreshold(1078);
+        thresholdList.setLowerThreshold(-10923);
+        
+        // adjust the range to include our element
+        thresholdList.setUpperThreshold(2077);
+        assertEquals(source, thresholdList);
+        assertEquals(1, counter.getEventCount());
+        assertEquals(1, counter.getChangeCount(0));
+
+        // keep the element in range for some changes
+        thresholdList.setLowerThreshold(-9923);
+        thresholdList.setUpperThreshold(3077);
+        thresholdList.setLowerThreshold(-8923);
+        thresholdList.setUpperThreshold(4077);
+        thresholdList.setLowerThreshold(-7921);
+        thresholdList.setUpperThreshold(5079);
+        thresholdList.setLowerThreshold(-6923);
+        thresholdList.setUpperThreshold(6077);
+        thresholdList.setLowerThreshold(-5923);
+        thresholdList.setUpperThreshold(7077);
+        thresholdList.setLowerThreshold(-4922);
+        thresholdList.setUpperThreshold(8078);
+        thresholdList.setLowerThreshold(-3923);
+        thresholdList.setUpperThreshold(9077);
+        thresholdList.setLowerThreshold(-2923);
+        thresholdList.setUpperThreshold(10077);
+        thresholdList.setLowerThreshold(-1922);
+        thresholdList.setUpperThreshold(11078);
+        thresholdList.setLowerThreshold(-923);
+        thresholdList.setUpperThreshold(12077);
+        thresholdList.setLowerThreshold(77);
+        thresholdList.setUpperThreshold(13077);
+        thresholdList.setLowerThreshold(1077);
+        thresholdList.setUpperThreshold(14077);
+        
+        // move past our element
+        thresholdList.setLowerThreshold(2078);
+        assertEquals(2, counter.getEventCount());
+        assertEquals(1, counter.getChangeCount(1));
+        assertEquals(Collections.EMPTY_LIST, thresholdList);
+    }
     
     /**
      * Tests that the JavaBean constructor and supporting code
