@@ -17,6 +17,7 @@ import java.awt.Color;
  * This test verifies that the BeanProperty works as expected.
  *
  * @author <a href="mailto;kevin@swank.ca">Kevin Maltby</a>
+ * @author manningj
  */
 public class BeanPropertyTest extends TestCase {
 
@@ -98,6 +99,27 @@ public class BeanPropertyTest extends TestCase {
         rainbowCar.setColor(Color.red);
         assertEquals(new Integer(255), red.get(towTruck));
     }
+    
+    /**
+     * Test that BeanProperties work for interfaces.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=183">Issue 183</a>
+     */
+    public void testInterfaces() {
+        BeanProperty beanProperty = new BeanProperty(SubInterface.class, "code", true, true);
+    }
+}
+
+/**
+ * Test interfaces.
+ */
+interface BaseInterface {
+    String getCode();
+    void setCode(String code);
+}
+interface SubInterface extends BaseInterface {
+    public String getName();
+    public void setName(String name);
 }
 
 /**
