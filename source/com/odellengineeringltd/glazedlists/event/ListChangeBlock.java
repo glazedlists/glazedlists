@@ -8,6 +8,8 @@ package com.odellengineeringltd.glazedlists.event;
 
 // the core Glazed Lists package
 import com.odellengineeringltd.glazedlists.*;
+// for sorting the list
+import java.util.List;
 
 /**
  * Models a change to a list that may require a GUI object
@@ -141,6 +143,136 @@ public final class ListChangeBlock {
         return this;
     }
     
+    /**
+     * Gets the length of this block.
+     */
+    public int getLength() {
+        return endIndex - startIndex + 1;
+    }
+    
+    /**
+     * Sorts the blocks of the specified list of changes. This ensures that
+     * the user iterating the list of change blocks can view changes in
+     * increasing order. This ensures that indicies will not be shifted.
+     *
+     * <p>This performs a bubble sort, swapping adjacent change blocks if
+     * they should be swapped. The bubble sort is used instead of a more
+     * efficient sort because it is necessary to adjust offsets when swapping
+     * and therefore it is preferred to only swap adjacent elements. Bubble
+     * sort is a sort that only swaps adjacent elements.
+     */
+    static void sortListChangeBlocks(List changes) {
+        // bubblesort the changes
+        while(true) {
+            // count the number of swaps made on this repetition
+            int swapCount = 0;
+            // for each adjacent pair, make any swaps necessary
+            int j = 0;
+            while(j < changes.size() - 1) {
+                ListChangeBlock first = (ListChangeBlock)changes.get(j);
+                ListChangeBlock second = (ListChangeBlock)changes.get(j+1);
+                
+                if(canBeCombined(first, second)) {
+                    combine(first, second);
+                    changes.remove(j+1);
+                    if(j > 0) j--;
+                } else if(requiresSwap(first, second)) {
+                    swapCount++;
+                    shift(first, second);
+                    changes.set(j, second);
+                    changes.set(j+1, first);
+                    j++;
+                } else {
+                    j++;
+                }
+            }
+            // we're done if there were no changes this iteration
+            if(swapCount == 0) break;
+        }
+    }
+    
+    /**
+     * When there is a sequence of list changes, sometimes these changes are not
+     * created in increasing order. Users usually need to receive changes in
+     * increasing order, so it becomes necessary to reorder list change blocks.
+     * This returns true if two adjacent blocks are out of order.
+     */
+    private static boolean requiresSwap(ListChangeBlock first, ListChangeBlock second) {
+        // verify no intersection
+        if(first.type != DELETE && first.type != second.type) {
+            if(first.endIndex >= second.startIndex && first.startIndex <= second.endIndex) {
+                throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
+            }
+        }
+        
+        // test if these two require an swap
+        if(second.type == INSERT) {
+            return second.startIndex <= first.startIndex;
+        } else {
+            return second.startIndex < first.startIndex;
+        }
+    }
+    
+    /**
+     * Tests if the specified pair of list change blocks can be combined into
+     * a single larget list change block.
+     */
+    private static boolean canBeCombined(ListChangeBlock first, ListChangeBlock second) {
+        if(first.type != second.type) return false;
+        
+        if(first.type == INSERT) {
+            return (second.startIndex >= first.startIndex && second.startIndex <= first.endIndex + 1);
+        } else if(first.type == DELETE) {
+            return (second.startIndex <= first.startIndex && second.endIndex >= first.startIndex - 1);
+        } else if(first.type == UPDATE) {
+            return (second.startIndex <= first.endIndex && second.endIndex >= first.startIndex);
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+    
+    /**
+     * Combines the specified pair of list change blocks. After the change blocks
+     * have been combined, the first block contains all data from the first and second
+     * blocks.
+     */
+    private static void combine(ListChangeBlock first, ListChangeBlock second) {
+        if(first.type == INSERT || first.type == DELETE) {
+            int startIndex = Math.min(first.startIndex, second.startIndex);
+            int length = first.getLength() + second.getLength();
+            first.startIndex = startIndex;
+            first.endIndex = startIndex + length - 1;
+        } else if(first.type == UPDATE) {
+            int startIndex = Math.min(first.startIndex, second.startIndex);
+            int endIndex = Math.max(first.endIndex, second.endIndex);
+            first.startIndex = startIndex;
+            first.endIndex = endIndex;
+        }
+        second.valid = false;
+    }
+    
+    /**
+     * When reordering blocks, the indicies within each block should be shifted
+     * so that they represent the same change. This shifts this ListChangeBlock
+     * as a consequence of the specified list change block being inserted in front
+     * of it in a sequence.
+     */
+    private static void shift(ListChangeBlock alpha, ListChangeBlock beta) {
+        int movedLength = beta.getLength();
+        
+        if(beta.type == INSERT) {
+            alpha.startIndex += movedLength;
+            alpha.endIndex += movedLength;
+        } else if(beta.type == UPDATE) {
+            // no shift
+        } else if(beta.type == DELETE) {
+            alpha.startIndex -= movedLength;
+            alpha.endIndex -= movedLength;
+            assert(alpha.startIndex >= 0);
+        }
+    }
+    
+
     /**
      * Gets this ListChangeBlock represented as a String
      */
