@@ -107,6 +107,22 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     public TableFormat getTableFormat() {
         return tableFormat;
     }
+    /**
+     * Sets this table to be rendered by a different table format. This has
+     * some very important consequences. The selection will be lost - this is
+     * due to the fact that the table formats may have different numbers of
+     * columns. Another consequence is that the entire table will require
+     * repainting. In a ScrollPane, only the currently displayed cells and
+     * those above (before) them will require repainting. In order to provide
+     * the best performance, the scroll pane may be scrolled to the top to
+     * prevent a delay while rendering off-screen cells.
+     */
+    public void setTableFormat(TableFormat tableFormat) {
+        this.tableFormat = tableFormat;
+        tableFormat.configureTable(table);
+        tableModelEvent.setValues(0, 0, TableModelEvent.HEADER_ROW);
+        fireTableChanged(tableModelEvent);
+    }
     
     /** whenever a list change covers greater than this many rows, redraw the whole thing */
     public int changeSizeRepaintAllThreshhold = 25;
