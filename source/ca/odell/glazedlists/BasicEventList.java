@@ -17,14 +17,15 @@ import java.util.*;
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
  * or {@link LinkedList}.
  *
- * <p>This {@link EventList} supports all write operations.
- *
- * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
- * are thread ready but not thread safe. See {@link EventList} for an example
- * of thread safe code.
- *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
- * Lists Tutorial</a>
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(1), writes O(1) amortized</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

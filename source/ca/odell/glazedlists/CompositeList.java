@@ -16,21 +16,25 @@ import ca.odell.glazedlists.util.concurrent.*;
 /**
  * An {@link EventList} composed of multiple source {@link EventList}s.
  *
- * <p><strong><font color="#FF0000">Warning:</font></strong> This class is not
- * generally writable via its API. It supports only two writing methods,
- * {@link #set(int,Object) set()} and {@link #remove(int) remove()}. Other calls
- * such as {@link #add(Object) add()}, etc. will throw a {@link RuntimeException}.
- * To modify this {@link EventList}, modify its source {@link EventList}s directly.
- *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This
  * {@link EventList}'s {@link ReadWriteLock} recursively acquires the locks
  * for all source {@link EventList}s. This can cause deadlock if multiple
  * {@link CompositeList}s share the same source {@link EventList}s. Therefore
  * {@link CompositeList}s must not share source {@link EventList}s.
  *
- * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
- * thread ready but not thread safe. See {@link EventList} for an example
- * of thread safe code.
+ * <p><font size="5"><strong><font color="#FF0000">Warning:</font></strong> This
+ * class is going to be merged with {@link CollectionList} in a future release.
+ * Therefore the API is subject to change.</font>
+ *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>only {@link #set(int,Object) set()} and {@link #remove(int) remove()}</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

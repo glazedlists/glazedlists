@@ -56,13 +56,19 @@ import java.io.*;
  * Eventually the protocol will be finalized but the current protocol is a work
  * in progress.
  *
- * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
- * thread ready but not thread safe. See {@link EventList} for an example
- * of thread safe code.
- *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
+ *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>Requires {@link ReadWriteLock} for every access, even for single-threaded use</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

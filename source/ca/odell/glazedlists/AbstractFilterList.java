@@ -28,16 +28,21 @@ import ca.odell.glazedlists.util.concurrent.*;
  * has changed in order to update the subset of included elements. This method
  * must also be called at the end of the extending class's constructor.
  *
- * <p>This {@link EventList} supports all write operations.
- *
- * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
- * thread ready but not thread safe. See {@link EventList} for an example
- * of thread safe code.
- *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
  *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N), filter changes O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * </table>
+ *
+ * @since 2004
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class AbstractFilterList extends TransformedList {

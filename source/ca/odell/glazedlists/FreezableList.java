@@ -21,14 +21,15 @@ import java.util.ArrayList;
  * <p>When this {@link EventList} is <i>thawed</i>, changes to its source
  * {@link EventList} will be reflected.
  *
- * <p><strong><font color="#FF0000">Warning:</font></strong> When a
- * {@link FreezableList} is <i>frozen</i>, it is not writable via its API. Calls to
- * {@link #set(int,Object) set()}, {@link #add(Object) add()}, etc. will throw a
- * {@link RuntimeException}.
- *
- * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
- * thread ready but not thread safe. See {@link EventList} for an example
- * of thread safe code.
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>writable when thawed (default), not writable when frozen</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(1), writes O(1), freezes O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
