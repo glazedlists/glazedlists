@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<!-- JNLP File for Glazed Lists demo --> 
-<jnlp 
-  spec="1.0+" 
-  codebase="https://glazedlists.dev.java.net/" 
-  href="glazedlists-demo.jnlp"> 
-  <information>
-    <title>Glazed Lists Demo</title> 
-    <vendor>Jesse Wilson</vendor> 
-    <homepage href="index.html"/> 
-    <description>See Glazed Lists sorting, filtering and transformations in action.</description> 
-    <icon href="glazedlists-demo.gif"/>
-    <!--<icon kind="splash" href="images/splash.gif"/>-->
-    <offline-allowed/>
-  </information> 
-  <security>
-  </security>
-  <resources> 
-    <j2se version="1.4+"/> 
-    <jar href="/glazedlists-demo.jar"/> 
-  </resources> 
-  <application-desc main-class="ca.odell.glazedlists.demo.IssuesBrowser"/> 
+<!-- JNLP File for Glazed Lists demo -->
+<jnlp
+	spec="1.0+"
+	codebase="https://glazedlists.dev.java.net/"
+	href="glazedlists-demo.jnlp">
+	<information>
+		<title>Glazed Lists Demo</title>
+		<vendor>Jesse Wilson</vendor>
+		<homepage href="index.html"/>
+		<description>See Glazed Lists sorting, filtering and transformations in action.</description>
+		<icon href="glazedlists-demo.gif"/>
+		<!--<icon kind="splash" href="images/splash.gif"/>-->
+		<offline-allowed/>
+	</information>
+	<security>
+	</security>
+	<resources>
+		<j2se version="1.4+"/>
+		<jar href="/glazedlists-demo.jar"/>
+	</resources>
+	<application-desc main-class="ca.odell.glazedlists.demo.issuebrowser.swing.IssuesBrowser"/>
 </jnlp>
