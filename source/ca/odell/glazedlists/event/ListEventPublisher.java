@@ -62,11 +62,17 @@ public final class ListEventPublisher {
 
     /**
      * Removes the specified {@link EventList} as a dependency for the specified
-     * {@link ListEventListener}.
+     * {@link ListEventListener}. This {@link ListEventListener} will continue to
+     * receive {@link ListEvent}s, but there will be no dependency tracking when
+     * such events are fired.
      */
     public void removeDependency(EventList dependency, ListEventListener listener) {
         DependentListener dependentListener = getDependentListener(listener);
-        if(dependentListener == null) throw new IllegalArgumentException();
+
+        // if this dependency is explicitly unmanaged
+        if(dependentListener == null) return;
+        
+        // remove the dependency
         List dependencies = dependentListener.getDependencies();
         for(int i = 0; i < dependencies.size(); i++) {
             if(dependencies.get(i) == dependency) {
@@ -185,6 +191,10 @@ public final class ListEventPublisher {
         return dependenciesSatisfied(getDependentListener(listener));
     }
     public boolean dependenciesSatisfied(DependentListener dependentListener) {
+        // if this dependency is explicitly unmanaged
+        if(dependentListener == null) return true;
+        
+        // this dependency is managed, test if it is satisfied
         List dependenciesToSatisfy = dependentListener.getDependencies();
         for(int d = 0; d < dependenciesToSatisfy.size(); d++) {
             EventList dependency = (EventList)dependenciesToSatisfy.get(d);

@@ -79,9 +79,15 @@ public class EventListIterator implements ListIterator, ListEventListener {
 
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            source.addListEventListener(new WeakReferenceProxy(source, this));
+            WeakReferenceProxy gcProxy = new WeakReferenceProxy(source, this);
+            source.addListEventListener(gcProxy);
+            // do not manage dependencies for iterators, they never have multiple sources
+            source.getPublisher().removeDependency(source, gcProxy);
+
         } else {
             source.addListEventListener(this);
+            // do not manage dependencies for iterators, they never have multiple sources
+            source.getPublisher().removeDependency(source, this);
         }
     }
 
