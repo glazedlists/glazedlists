@@ -12,14 +12,8 @@ import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 // SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.SelectionListener;
-// standard collections support
-import java.util.*;
 
 /**
  * A view helper that displays an EventList in an SWT table.
@@ -199,7 +193,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
     /**
      * Gets all checked items.
      */
-    public List getAllChecked() {
+    public java.util.List getAllChecked() {
         return checkFilter.getAllChecked();
     }
 
@@ -283,13 +277,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
     }
 
     /** {@inheritDoc} */
-    public void addListener(int type, Listener listener) {
-        table.addListener(type, listener);
-    }
-
-    /** {@inheritDoc}*/
-    public void removeListener(int type, Listener listener) {
-        table.removeListener(type, listener);
+    public Display getDisplay() {
+        return table.getDisplay();
     }
 
     /** {@inheritDoc} */

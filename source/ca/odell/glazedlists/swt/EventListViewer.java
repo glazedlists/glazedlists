@@ -7,8 +7,7 @@
 package ca.odell.glazedlists.swt;
 
 // for swt Lists
-import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.SelectionListener;
 // glazed lists
 import ca.odell.glazedlists.*;
@@ -188,13 +187,8 @@ public class EventListViewer implements ListEventListener, Selectable {
     }
 
     /** {@inheritDoc} */
-    public void addListener(int type, Listener listener) {
-        list.addListener(type, listener);
-    }
-
-    /** {@inheritDoc}*/
-    public void removeListener(int type, Listener listener) {
-        list.removeListener(type, listener);
+    public Display getDisplay() {
+        return list.getDisplay();
     }
 
     /** {@inheritDoc} */

@@ -9,6 +9,7 @@ package ca.odell.glazedlists.swt;
 // to proxy access to listeners
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * This interface is used by the Viewer classes that represent
@@ -21,64 +22,57 @@ import org.eclipse.swt.widgets.Listener;
  */
 interface Selectable {
 
-	/**
-	 * Adds the provided {@link SelectionListener} to the underlying
-	 * widget.
-	 */
-	public void addSelectionListener(SelectionListener listener);
+    /**
+     * Adds the provided {@link SelectionListener} to the underlying
+     * widget.
+     */
+    public void addSelectionListener(SelectionListener listener);
 
-	/**
-	 * Removes the provided {@link SelectionListener} from the underlying
-	 * widget.
-	 */
-	public void removeSelectionListener(SelectionListener listener);
+    /**
+     * Removes the provided {@link SelectionListener} from the underlying
+     * widget.
+     */
+    public void removeSelectionListener(SelectionListener listener);
 
-	/**
-	 * Adds the provided {@link Listener} of the specified type to the underlying
-	 * widget.
-	 */
-	public void addListener(int type, Listener listener);
+    /**
+     * Gets the Display for this Selectable widget
+     */
+    public Display getDisplay();
 
-	/**
-	 * Removes the provided {@link Listener} of the specified type from the underlying
-	 * widget.
-	 */
-	public void removeListener(int type, Listener listener);
+    /**
+     * Gets the number of items selected.
+     */
+    public int getSelectionCount();
 
-	/**
-	 * Gets the number of items selected.
-	 */
-	public int getSelectionCount();
+    /**
+     * Gets the index of the most recently selected item.
+     */
+    public int getSelectionIndex();
 
-	/**
-	 * Gets the index of the most recently selected item.
-	 */
-	public int getSelectionIndex();
+    /**
+     * Gets an array of indices that are selected.
+     */
+    public int[] getSelectionIndices();
 
-	/**
-	 * Gets an array of indices that are selected.
-	 */
-	public int[] getSelectionIndices();
+    /**
+     * Gets the style bitmask.  This is necessary as the selection mode
+     * is specified via style constants.
+     */
+    public int getStyle();
 
-	/**
-	 * Gets the style bitmask.  This is necessary as the selection mode
-	 * is specified via style constants.
-	 */
-	public int getStyle();
+    /**
+     * Returns whether or not the item at index is selected.
+     */
+    public boolean isSelected(int index);
 
-	/**
-	 * Returns whether or not the item at index is selected.
-	 */
-	public boolean isSelected(int index);
+    /**
+     * Clears the selection
+     */
+    public void deselectAll();
 
-	/**
-	 * Clears the selection
-	 */
-	public void deselectAll();
-
-	/**
-	 * Selects items at the indices specified in the array.  This
-	 * appends to the currect selection rather than replacing it.
-	 */
-	public void select(int[] selectionIndices);
+    /**
+     * Selects items at the indices specified in the array.  This
+     * appends to the currect selection rather than replacing it.
+     */
+    public void select(int[] selectionIndices);
 }
