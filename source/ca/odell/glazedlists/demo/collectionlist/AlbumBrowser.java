@@ -9,6 +9,7 @@ package ca.odell.glazedlists.demo.collectionlist;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CollectionList;
 import ca.odell.glazedlists.CollectionListModel;
+import ca.odell.glazedlists.demo.Launcher;
 import ca.odell.glazedlists.swing.EventListModel;
 
 import javax.swing.*;
@@ -187,7 +188,7 @@ public class AlbumBrowser {
 		JFrame frame = new JFrame("Test");
 
 		// Make sure we're not running in the launcher
-		if (System.getProperty("in_launcher") == null) {
+		if (!Launcher.runningInLauncher()) {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		} else {
 			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -14,15 +14,18 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.jnlp.ServiceManager;
+import javax.jnlp.BasicService;
+import javax.jnlp.UnavailableServiceException;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -50,9 +53,32 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	private static final Color FOREGROUND_COLOR = new Color(255, 204, 0);
 
 	/**
+	 * Background of section headers
+	 */
+	private static final Color SECTION_HEADER_BACKGROUND = new Color(255, 119, 0);
+	/**
+	 * Foreground of section headers
+	 */
+	private static final Color SECTION_HEADER_FOREGROUND = BACKGROUND_COLOR;
+
+	/**
+	 * Background of link bar labels
+	 */
+	private static final Color LINK_BAR_BACKGROUND = BACKGROUND_COLOR;
+	/**
+	 * Background of link bar labels when the mouse is over them
+	 */
+	private static final Color LINK_BAR_BACKGROUND_ROLLOVER = new Color(119, 72, 0);
+	/**
+	 * Foreground of link bar labels
+	 */
+	private static final Color LINK_BAR_FOREGROUND = new Color(255, 153, 0);
+
+	/**
 	 * Color of help text
 	 */
-	private static final String HELP_TEXT_COLOR = "#ff7700";
+//	private static final String HELP_TEXT_COLOR = "#ff7700";
+	private static final String HELP_TEXT_COLOR = "#663300";
 
 	/**
 	 * Welcome text
@@ -66,6 +92,8 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 	private static final Class STRING_ARRAY_CLASS = new String[ 0 ].getClass();
 
+	private static boolean in_launcher = false;
+
 
 	private JList demo_list;
 	private JButton launch_button;
@@ -74,9 +102,21 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 	public static void main(String[] args) {
 		// Set this system property so that anything we launch knows not to System.exit().
-		System.setProperty("in_launcher", "true");
+//		System.setProperty("in_launcher", "true");
+		in_launcher = true;
+
+		// Use the system look and feel
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch(Exception ex) {
+		}
 
 		new Launcher();
+	}
+
+
+	public static boolean runningInLauncher() {
+		return in_launcher;
 	}
 
 
@@ -85,16 +125,27 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		JLabel logo_label = null;
 		if (duke_of != null) {
 			logo_label = new JLabel(new ImageIcon(duke_of));
+			logo_label.setBackground(BACKGROUND_COLOR);
+			logo_label.setOpaque(true);
 		}
 
-		// Left panel containing logo and filler
+		JPanel top_left = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 100.0, 1,
+			GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0),
+			0, 0);
+		if (logo_label != null) {
+			top_left.add(logo_label, gbc);
+			gbc.gridy++;
+
+			addWebStartLinks(top_left, gbc);
+		}
+
+		// Left panel containing logo and jump labels
 		JPanel left_panel = new JPanel(new BorderLayout(0, 0));
 		left_panel.setOpaque(true);
 		left_panel.setBackground(BACKGROUND_COLOR);
-		left_panel.setBorder(new EmptyBorder(5, 5, 0, 0));
-		if (logo_label != null) {
-			left_panel.add(logo_label, BorderLayout.PAGE_START);
-		}
+		left_panel.setBorder(new EmptyBorder(5, 0, 0, 0));
+		left_panel.add(top_left, BorderLayout.PAGE_START);
 
 		// Header
 		JLabel header = new JLabel("Glazed Lists");
@@ -124,7 +175,8 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		frame.setContentPane(outer_panel);
 
-		frame.setSize(new Dimension(550, 300));
+		frame.setSize(new Dimension(550, 350));
+		centerWindow(frame);
 		frame.setVisible(true);
 	}
 
@@ -151,12 +203,13 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		help_text_viewer.setEditable(false);
 		help_text_viewer.setBorder(null);
 		help_text_viewer.setContentType("text/html");
-		help_text_viewer.setOpaque(false);
+		help_text_viewer.setOpaque(true);
+		help_text_viewer.setBackground(Color.WHITE);
 		JScrollPane help_scroller = new JScrollPane(help_text_viewer,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		help_scroller.setPreferredSize(new Dimension( 150, dim.height));
-		help_scroller.setBorder( null );
+		help_scroller.setPreferredSize(new Dimension(150, dim.height));
+		help_scroller.setBorder(null);
 		help_scroller.getViewport().setOpaque(false);
 
 		launch_button = new JButton("Launch...");
@@ -186,6 +239,79 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		return panel;
 	}
 
+
+	/**
+	 * If we're running within WebStart, we'll add links to the web site and documentation.
+	 *
+	 * @param box The box to add buttons to.
+	 */
+	private void addWebStartLinks(JPanel box, GridBagConstraints gbc) {
+		String[] services = ServiceManager.getServiceNames();
+		if (services == null) return;			// not running in WebStart
+
+		System.out.println("Service names: " + java.util.Arrays.asList(services));
+
+		BasicService basic_service;
+		try {
+			basic_service =
+				(BasicService) ServiceManager.lookup(BasicService.class.getName());
+			if (!basic_service.isWebBrowserSupported()) return;
+		} catch(UnavailableServiceException ex) {
+			return;
+		}
+
+		box.add(createHeaderLabel("Links"), gbc);
+		gbc.gridy++;
+		try {
+			box.add(createLinkBarLabel("Main Website",
+				new URL("http://publicobject.com/glazedlists/"), basic_service), gbc);
+			gbc.gridy++;
+		} catch(MalformedURLException ex) {
+		}
+
+		try {
+			box.add(createLinkBarLabel("Java.net",
+				new URL("http://glazedlists.dev.java.net/"), basic_service), gbc);
+			gbc.gridy++;
+		} catch(MalformedURLException ex) {
+		}
+
+		JPanel filler = new JPanel();
+		filler.setBackground(BACKGROUND_COLOR);
+		filler.setPreferredSize(new Dimension(1, 5));
+		filler.setMinimumSize(new Dimension(1, 5));
+		filler.setMaximumSize(new Dimension(10000, 5));
+		box.add(filler, gbc);
+		gbc.gridy++;
+
+		box.add(createHeaderLabel("Documentation"), gbc);
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.gridy++;
+		try {
+			box.add(createLinkBarLabel("Tutorial",
+				new URL("http://publicobject.com/glazedlists/tutorial-0.9.4/index.html"),
+				basic_service), gbc);
+			gbc.gridy++;
+		} catch(MalformedURLException ex) {
+		}
+
+		try {
+			box.add(createLinkBarLabel("Javadoc API",
+				new URL("http://publicobject.com/glazedlists/glazedlists-0.9.4/api/"),
+				basic_service), gbc);
+			gbc.gridy++;
+		} catch(MalformedURLException ex) {
+		}
+
+		try {
+			box.add(createLinkBarLabel("FAQ",
+				new URL("http://publicobject.com/glazedlists/faq.html"), basic_service),
+				gbc);
+			gbc.gridy++;
+		} catch(MalformedURLException ex) {
+		}
+	}
+
 	public void valueChanged(ListSelectionEvent e) {
 		Object selected_value = demo_list.getSelectedValue();
 
@@ -194,8 +320,9 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		if (selected_value == null)
 			help_text_viewer.setText("");
 		else {
-			help_text_viewer.setText("<html><font color=\"" + HELP_TEXT_COLOR + "\">" +
-				((Demo) selected_value).help_text + "</font></html>");
+			help_text_viewer.setText("<html><body bgcolor=\"#ffffff\"><font color=\"" +
+				HELP_TEXT_COLOR + "\">" + ((Demo) selected_value).help_text +
+				"</font></body></html>");
 		}
 	}
 
@@ -299,6 +426,64 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		buf.append(writer.getBuffer());
 
 		JOptionPane.showMessageDialog(null, buf, "Error", JOptionPane.ERROR_MESSAGE);
+	}
+
+
+	/**
+	 * Create a label that looks like a section header on the Glazed Lists website.
+	 */
+	private JLabel createHeaderLabel(String text) {
+		JLabel label = new JLabel(text);
+		label.setOpaque(true);
+		label.setBackground(SECTION_HEADER_BACKGROUND);
+		label.setForeground(SECTION_HEADER_FOREGROUND);
+		label.setBorder(new EmptyBorder(3, 3, 3, 3));
+
+		Font font = label.getFont();
+		label.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() + 5));
+
+		return label;
+	}
+
+	/**
+	 * Create a label that looks like a link bar button on the Glazed Lists website.
+	 */
+	private JLabel createLinkBarLabel(String text, final URL url,
+		final BasicService basic_service) {
+
+		final JLabel label = new JLabel(text);
+		label.setOpaque(true);
+		label.setBackground(LINK_BAR_BACKGROUND);
+		label.setForeground(LINK_BAR_FOREGROUND);
+		label.setBorder(new EmptyBorder(0, 3, 0, 0));
+
+		Font font = label.getFont();
+		label.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 2));
+
+		label.addMouseListener(new MouseAdapter() {
+			public void mouseEntered(MouseEvent e) {
+				label.setBackground(LINK_BAR_BACKGROUND_ROLLOVER);
+			}
+
+			public void mouseExited(MouseEvent e) {
+				label.setBackground(LINK_BAR_BACKGROUND);
+			}
+
+			public void mouseClicked(MouseEvent e) {
+				basic_service.showDocument(url);
+			}
+		});
+
+		return label;
+	}
+
+
+	private void centerWindow(Window window) {
+		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
+		Dimension win_size = window.getSize();
+		Point window_point = new Point(center.x - (win_size.width / 2),
+			center.y - (win_size.height / 2));
+		window.setLocation(window_point);
 	}
 
 

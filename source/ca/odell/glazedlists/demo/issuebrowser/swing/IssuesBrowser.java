@@ -19,6 +19,7 @@ import java.net.URL;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.demo.issuebrowser.*;
+import ca.odell.glazedlists.demo.Launcher;
 import ca.odell.glazedlists.swing.*;
 
 
@@ -103,10 +104,9 @@ public class IssuesBrowser extends Applet {
 	private void constructStandalone() {
 		// create a frame with that panel
 		JFrame frame = new JFrame("Issues");
-		if (System.getProperty("in_launcher") == null) {
+		if (!Launcher.runningInLauncher()) {
 			frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		}
-		else {
+		} else {
 			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
 
@@ -192,9 +192,9 @@ public class IssuesBrowser extends Applet {
 		iconBar.setLayout(new GridBagLayout());
 		ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
 		URL url = jarLoader.getResource("resources/demo/throbber-static.gif");
-		if ( url != null ) throbberStatic = new ImageIcon(url);
+		if (url != null) throbberStatic = new ImageIcon(url);
 		url = jarLoader.getResource("resources/demo/throbber-active.gif");
-		if ( url != null ) throbberActive = new ImageIcon(url);
+		if (url != null) throbberActive = new ImageIcon(url);
 		throbber = new JLabel(throbberStatic);
 		iconBar.add(projectsCombo, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		iconBar.add(throbber, new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
