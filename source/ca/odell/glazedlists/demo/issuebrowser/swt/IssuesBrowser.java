@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.custom.*;
 // glazed lists
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.swt.*;
 
@@ -359,7 +360,7 @@ public class IssuesBrowser {
         descriptionsTable.getColumn(0).setWidth(618);
         descriptionsTable.getColumn(0).setText("Descriptions");
         descriptionsTable.setHeaderVisible(true);
-        issuesTableViewer.getTable().addSelectionListener(new IssueSelectionListener(issuesTableViewer, descriptionsTable));
+        new IssueSelectionListener(issuesTableViewer.getSelected(), descriptionsTable);
 
     }
 
@@ -367,40 +368,39 @@ public class IssuesBrowser {
      * A listener to selection on the issues table that reflects the change
      * in selection within the description table.
      */
-    class IssueSelectionListener implements SelectionListener {
+    class IssueSelectionListener implements ListEventListener {
 
-        private EventTableViewer issuesTableViewer = null;
+        private EventList source = null;
         private Table descriptionsTable = null;
-        int oldSelectionIndex = 0;
 
-        IssueSelectionListener(EventTableViewer issuesTableViewer, Table descriptionsTable) {
-            this.issuesTableViewer = issuesTableViewer;
+        IssueSelectionListener(EventList source, Table descriptionsTable) {
+            this.source = source;
             this.descriptionsTable = descriptionsTable;
+            source.addListEventListener(this);
         }
 
-        public void widgetSelected(SelectionEvent e) {
-            respondToSelection();
-        }
+        /** {@inheritDoc} */
+        public void listChanged(ListEvent listChanges) {
+            boolean selectionAffected = false;
+            while(listChanges.next()) {
+                if(!selectionAffected) {
+                    selectionAffected = listChanges.getIndex() == 0;
+                }
+            }
 
-        public void widgetDefaultSelected(SelectionEvent e) {
-            respondToSelection();
-        }
+            // Fix the description display value as selection changed
+            if(selectionAffected) {
+                descriptionsTable.removeAll();
 
-        private void respondToSelection() {
-            int selectionIndex = issuesTableViewer.getTable().getSelectionIndex();
-            if (selectionIndex == oldSelectionIndex) return;
-
-            // There was a change in selection so respond to it
-            oldSelectionIndex = selectionIndex;
-            descriptionsTable.removeAll();
-            if (selectionIndex == -1) return;
-
-            // There is a new issue selected so display its description
-            Issue selected = (Issue) issuesTableViewer.getSourceList().get(selectionIndex);
-            java.util.List descriptions = selected.getDescriptions();
-            for (int i = 0; i < descriptions.size(); i++) {
-                int rowOffset = descriptionsTable.getItemCount();
-                formatDescription((Description) descriptions.get(i), rowOffset);
+                // The selected value to display was changed
+                if(source.size() != 0) {
+                    Issue selected = (Issue)source.get(0);
+                    java.util.List descriptions = selected.getDescriptions();
+                    for (int i = 0; i < descriptions.size(); i++) {
+                       int rowOffset = descriptionsTable.getItemCount();
+                       formatDescription((Description)descriptions.get(i), rowOffset);
+                    }
+                }
             }
         }
 

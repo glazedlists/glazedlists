@@ -33,7 +33,7 @@ class SelectionList extends TransformedList {
     private boolean disposed = false;
 
     /** the mirror to this view of selection */
-    private DeselectedList deselected = null;
+    private DeselectedList deselectedList = null;
 
     /** the Selectable SWT Viewer */
     private Selectable selectable = null;
@@ -47,6 +47,10 @@ class SelectionList extends TransformedList {
     /** the selection listener */
     private AdvancedSelectionListener selectionListener = null;
 
+    /** to allow selection inversion without changing the barcode*/
+    private Object selected = Barcode.BLACK;
+    private Object deselected = Barcode.WHITE;
+
     /**
      * Creates a {@link SelectionList} that provides a view of the selected
      * items in an SWT widget.  Deselected items exist in a view accessible
@@ -54,7 +58,7 @@ class SelectionList extends TransformedList {
      */
     SelectionList(EventList source, Selectable selectable) {
         super(source);
-        deselected = new DeselectedList(source);
+        deselectedList = new DeselectedList(source);
         this.selectable = selectable;
         barcode = new Barcode();
         source.addListEventListener(this);
@@ -71,7 +75,7 @@ class SelectionList extends TransformedList {
 
     /** {@inheritDoc} */
     public int size() {
-        return barcode.blackSize();
+        return barcode.colourSize(selected);
     }
 
     /** {@inheritDoc} */
@@ -80,27 +84,27 @@ class SelectionList extends TransformedList {
         if(listChanges.isReordering()) {
             // prepare a reorder map for both of the EventLists
             int[] sourceReorderMap = listChanges.getReorderMap();
-            int[] selectReorderMap = new int[barcode.blackSize()];
-            int[] deselectReorderMap = new int[barcode.whiteSize()];
+            int[] selectReorderMap = new int[barcode.colourSize(selected)];
+            int[] deselectReorderMap = new int[barcode.colourSize(deselected)];
 
             // adjust the barcode & build the reorder maps to forward
             Barcode oldBarcode = barcode;
             barcode = new Barcode();
             for(int i = 0; i < sourceReorderMap.length; i++) {
                 Object flag = oldBarcode.get(sourceReorderMap[i]);
-                boolean wasSelected = (flag != Barcode.WHITE);
+                boolean wasSelected = (flag != deselected);
                 barcode.add(i, flag, 1);
 
                 // reordering a selected value
                 if(wasSelected) {
-                    int previousIndex = oldBarcode.getBlackIndex(sourceReorderMap[i]);
-                    int currentIndex = barcode.getBlackIndex(i);
+                    int previousIndex = oldBarcode.getColourIndex(sourceReorderMap[i], selected);
+                    int currentIndex = barcode.getColourIndex(i, selected);
                     selectReorderMap[currentIndex] = previousIndex;
 
                 // reordering a deselected value
                 } else {
-                    int previousIndex = oldBarcode.getWhiteIndex(sourceReorderMap[i]);
-                    int currentIndex = barcode.getWhiteIndex(i);
+                    int previousIndex = oldBarcode.getColourIndex(sourceReorderMap[i], deselected);
+                    int currentIndex = barcode.getColourIndex(i, deselected);
                     deselectReorderMap[currentIndex] = previousIndex;
                 }
             }
@@ -111,9 +115,9 @@ class SelectionList extends TransformedList {
             updates.commitEvent();
 
             // fire the reorder for deselected values
-            deselected.updates().beginEvent();
-            deselected.updates().reorder(deselectReorderMap);
-            deselected.updates().commitEvent();
+            deselectedList.updates().beginEvent();
+            deselectedList.updates().reorder(deselectReorderMap);
+            deselectedList.updates().commitEvent();
 
             return;
         }
@@ -134,59 +138,59 @@ class SelectionList extends TransformedList {
             // process a DELETE event
             if(changeType == ListEvent.DELETE) {
                 // only delete selected values
-                int blackIndex = barcode.getBlackIndex(index);
+                int blackIndex = barcode.getColourIndex(index, selected);
                 if(blackIndex != -1) {
                     barcode.remove(index, 1);
                     updates.addDelete(blackIndex);
                 } else {
-                    int whiteIndex = barcode.getWhiteIndex(index);
+                    int whiteIndex = barcode.getColourIndex(index, deselected);
                     deselectedDeletes.add(new Integer(whiteIndex));
                     barcode.remove(index, 1);
                 }
 
             // process an UPDATE event
             } else if(changeType == ListEvent.UPDATE) {
-                int blackIndex = barcode.getBlackIndex(index);
+                int blackIndex = barcode.getColourIndex(index, selected);
                 if(blackIndex != -1) {
                     updates.addUpdate(blackIndex);
                 } else {
-                    int whiteIndex = barcode.getWhiteIndex(index);
+                    int whiteIndex = barcode.getColourIndex(index, deselected);
                     deselectedUpdates.add(new Integer(whiteIndex));
                 }
 
             // process an INSERT event
             } else if(changeType == ListEvent.INSERT) {
-                barcode.addWhite(index, 1);
-                int whiteIndex = barcode.getWhiteIndex(index);
+                barcode.add(index, deselected, 1);
+                int whiteIndex = barcode.getColourIndex(index, deselected);
                 deselectedInserts.add(new Integer(whiteIndex));
             }
         }
         updates.commitEvent();
 
         // Process the deselected values
-        deselected.updates().beginEvent();
+        deselectedList.updates().beginEvent();
 
         // process all deletes of deselected values
         for(int i = 0;i < deselectedDeletes.size();i++) {
             int whiteIndex = ((Integer)deselectedDeletes.get(i)).intValue();
-            deselected.updates().addDelete(whiteIndex);
+            deselectedList.updates().addDelete(whiteIndex);
         }
         deselectedDeletes.clear();
 
         // process all inserts which are implicitly deselected
         for(int i = 0;i < deselectedInserts.size();i++) {
             int whiteIndex = ((Integer)deselectedInserts.get(i)).intValue();
-            deselected.updates().addInsert(whiteIndex);
+            deselectedList.updates().addInsert(whiteIndex);
         }
         deselectedInserts.clear();
 
         // process all updates of deselected values
         for(int i = 0;i < deselectedUpdates.size();i++) {
             int whiteIndex = ((Integer)deselectedUpdates.get(i)).intValue();
-            deselected.updates().addUpdate(whiteIndex);
+            deselectedList.updates().addUpdate(whiteIndex);
         }
         deselectedUpdates.clear();
-        deselected.updates().commitEvent();
+        deselectedList.updates().commitEvent();
     }
 
     /**
@@ -194,7 +198,7 @@ class SelectionList extends TransformedList {
      * that are NOT currently selected in the widget.
      */
     public EventList getDeselected() {
-        return deselected;
+        return deselectedList;
     }
 
     /**
@@ -212,12 +216,48 @@ class SelectionList extends TransformedList {
      * is selected.
      */
     public boolean isSelected(int sourceIndex) {
-        return barcode.getBlackIndex(sourceIndex) != -1;
+        return barcode.getColourIndex(sourceIndex, selected) != -1;
     }
+
+    /**
+     * Inverts the current selection.
+     */
+    public void invertSelection() {
+		// Switch what colour is considered 'selected' in the barcode
+		if(selected == Barcode.BLACK) {
+			selected = Barcode.WHITE;
+			deselected = Barcode.BLACK;
+		} else {
+			selected = Barcode.BLACK;
+			deselected = Barcode.WHITE;
+		}
+
+		// Inspect the new selection
+		int[] newSelection = new int[barcode.colourSize(selected)];
+		for(int i = 0;i < newSelection.length;i++) {
+			newSelection[i] = barcode.getIndex(i, selected);
+		}
+
+		// Invert selection in the Selectable widget
+		//selectable.deselectAll();
+		//selectable.select(newSelection);
+
+		// Update the selected list to reflect the selection inversion
+		updates.beginEvent();
+		updates.addDelete(0, barcode.colourSize(deselected));
+		updates.addInsert(0, barcode.colourSize(selected));
+		updates.commitEvent();
+
+		// Update the deselected list to reflect the selection inversion
+		deselectedList.updates().beginEvent();
+		deselectedList.updates().addDelete(0, barcode.colourSize(selected));
+		deselectedList.updates().addInsert(0, barcode.colourSize(deselected));
+		deselectedList.updates().commitEvent();
+	}
 
     /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
-        return barcode.getIndex(mutationIndex, Barcode.BLACK);
+        return barcode.getIndex(mutationIndex, selected);
     }
 
     /** {@inheritDoc} */
@@ -255,12 +295,12 @@ class SelectionList extends TransformedList {
 
         /** {@inheritDoc} */
         public int size() {
-            return barcode.whiteSize();
+            return barcode.colourSize(deselected);
         }
 
         /** {@inheritDoc} */
         protected int getSourceIndex(int mutationIndex) {
-            return barcode.getIndex(mutationIndex, Barcode.WHITE);
+            return barcode.getIndex(mutationIndex, deselected);
         }
 
         /** {@inheritDoc} */
@@ -358,41 +398,41 @@ class SelectionList extends TransformedList {
          * selection mode.
          */
         public void handleSelectionChanged(SelectionEvent event) {
-            int selected = selectable.getSelectionIndex();
+            int selectedIndex = selectable.getSelectionIndex();
 
             // there is no actual change
-            if(selected == lastSelected) {
+            if(selectedIndex == lastSelected) {
                 return;
 
             // the change was a deselection
-            } else if(selected == -1) {
-                barcode.setWhite(lastSelected, 1);
+            } else if(selectedIndex == -1) {
+                barcode.set(lastSelected, deselected, 1);
 
                 updates.beginEvent();
                 updates.addDelete(0);
                 updates.commitEvent();
 
-                deselected.updates().beginEvent();
-                deselected.updates().addInsert(lastSelected);
-                deselected.updates().commitEvent();
+                deselectedList.updates().beginEvent();
+                deselectedList.updates().addInsert(lastSelected);
+                deselectedList.updates().commitEvent();
 
                 lastSelected = -1;
 
             // a new line is selected
             } else {
-                barcode.setWhite(lastSelected, 1);
-                barcode.setBlack(selected, 1);
+                barcode.set(lastSelected, deselected, 1);
+                barcode.set(selectedIndex, selected, 1);
 
                 updates.beginEvent();
                 updates.addUpdate(0);
                 updates.commitEvent();
 
-                deselected.updates().beginEvent();
-                deselected.updates().addInsert(lastSelected);
-                deselected.updates().addDelete(selected);
-                deselected.updates().commitEvent();
+                deselectedList.updates().beginEvent();
+                deselectedList.updates().addInsert(lastSelected);
+                deselectedList.updates().addDelete(selectedIndex);
+                deselectedList.updates().commitEvent();
 
-                lastSelected = selected;
+                lastSelected = selectedIndex;
             }
         }
     }
@@ -433,49 +473,49 @@ class SelectionList extends TransformedList {
          * the selection of exactly one item.
          */
         private void handleUnmodifiedSelection() {
-            int selected = selectable.getSelectionIndex();
-            int blackIndex = barcode.getBlackIndex(selected);
+            int selectedIndex = selectable.getSelectionIndex();
+            int blackIndex = barcode.getColourIndex(selectedIndex, selected);
             boolean wasSelected = blackIndex != -1;
 
             // Remove all but one from the current selection
             if(wasSelected) {
-                int[] oldSelection = new int[barcode.blackSize() - 1];
+                int[] oldSelection = new int[barcode.colourSize(selected) - 1];
                 updates.beginEvent();
                 for(int i = 0;i < blackIndex;i++) {
-                    oldSelection[i] = barcode.getIndex(0, Barcode.BLACK);
-                    barcode.setWhite(oldSelection[i], 1);
+                    oldSelection[i] = barcode.getIndex(0, selected);
+                    barcode.set(oldSelection[i], deselected, 1);
                     updates.addDelete(0);
                 }
                 for(int i = blackIndex + 1;i < oldSelection.length;i++) {
-                    oldSelection[i - 1] = barcode.getIndex(1, Barcode.BLACK);
-                    barcode.setWhite(oldSelection[i - 1], 1);
+                    oldSelection[i - 1] = barcode.getIndex(1, selected);
+                    barcode.set(oldSelection[i - 1], deselected, 1);
                     updates.addDelete(1);
                 }
                 updates.commitEvent();
-                deselected.updates().beginEvent();
+                deselectedList.updates().beginEvent();
                 for(int i = 0;i < oldSelection.length;i++) {
-                    deselected.updates().addInsert(oldSelection[i]);
+                    deselectedList.updates().addInsert(oldSelection[i]);
                 }
-                deselected.updates().commitEvent();
+                deselectedList.updates().commitEvent();
 
             // Remove the current selection then add the new one
             } else {
-                int[] oldSelection = new int[barcode.blackSize()];
+                int[] oldSelection = new int[barcode.colourSize(selected)];
                 updates.beginEvent();
                 for(int i = 0;i < oldSelection.length;i++) {
-                    oldSelection[i] = barcode.getIndex(0, Barcode.BLACK);
-                    barcode.setWhite(oldSelection[i], 1);
+                    oldSelection[i] = barcode.getIndex(0, selected);
+                    barcode.set(oldSelection[i], deselected, 1);
                     updates.addDelete(0);
                 }
-                barcode.setBlack(selected, 1);
+                barcode.set(selectedIndex, selected, 1);
                 updates.addInsert(0);
                 updates.commitEvent();
-                deselected.updates().beginEvent();
+                deselectedList.updates().beginEvent();
                 for(int i = 0;i < oldSelection.length;i++) {
-                    deselected.updates().addInsert(oldSelection[i]);
+                    deselectedList.updates().addInsert(oldSelection[i]);
                 }
-                deselected.updates().addDelete(selected);
-                deselected.updates().commitEvent();
+                deselectedList.updates().addDelete(selectedIndex);
+                deselectedList.updates().commitEvent();
             }
         }
 
@@ -486,26 +526,26 @@ class SelectionList extends TransformedList {
          */
         private void handleCtrlModifiedSelection() {
             // Selection has increased in size
-            if(selectable.getSelectionCount() > barcode.blackSize()) {
-                int selected = selectable.getSelectionIndex();
-                barcode.setBlack(selected, 1);
-                int blackIndex = barcode.getBlackIndex(selected);
+            if(selectable.getSelectionCount() > barcode.colourSize(selected)) {
+                int selectedIndex = selectable.getSelectionIndex();
+                barcode.set(selectedIndex, selected, 1);
+                int blackIndex = barcode.getColourIndex(selectedIndex, selected);
                 updates.beginEvent();
                 updates.addInsert(blackIndex);
                 updates.commitEvent();
-                deselected.updates().beginEvent();
-                deselected.updates().addDelete(selected);
-                deselected.updates().commitEvent();
+                deselectedList.updates().beginEvent();
+                deselectedList.updates().addDelete(selectedIndex);
+                deselectedList.updates().commitEvent();
 
             // Selection has decreased in size
-            } else if(selectable.getSelectionCount() < barcode.blackSize()) {
+            } else if(selectable.getSelectionCount() < barcode.colourSize(selected)) {
                 int index = -1;
                 int blackIndex = -1;
                 int[] selectedValues = selectable.getSelectionIndices();
 
                 // search for what value is missing
                 for(int i = 0;i < selectedValues.length;i++) {
-                    int selectedIndex = barcode.getIndex(i, Barcode.BLACK);
+                    int selectedIndex = barcode.getIndex(i, selected);
                     if(selectedIndex != selectedValues[i]) {
                         index = selectedIndex;
                         blackIndex = i;
@@ -516,18 +556,18 @@ class SelectionList extends TransformedList {
                 // The different value is the last selected value
                 if(index == -1) {
                     blackIndex = selectedValues.length;
-                    index = barcode.getIndex(blackIndex, Barcode.BLACK);
+                    index = barcode.getIndex(blackIndex, selected);
                 }
 
                 // update the barcode and forward the events
-                barcode.setWhite(index, 1);
+                barcode.set(index, deselected, 1);
                 updates.beginEvent();
                 updates.addDelete(blackIndex);
                 updates.commitEvent();
-                int whiteIndex = barcode.getWhiteIndex(index);
-                deselected.updates().beginEvent();
-                deselected.updates().addInsert(whiteIndex);
-                deselected.updates().commitEvent();
+                int whiteIndex = barcode.getColourIndex(index, deselected);
+                deselectedList.updates().beginEvent();
+                deselectedList.updates().addInsert(whiteIndex);
+                deselectedList.updates().commitEvent();
             }
         }
 
@@ -542,42 +582,84 @@ class SelectionList extends TransformedList {
          */
         private void handleShiftModifiedSelection() {
             int[] selectedValues = selectable.getSelectionIndices();
-            int[] oldSelection = new int[barcode.blackSize()];
+            int[] oldSelection = new int[barcode.colourSize(selected)];
             updates.beginEvent();
             for(int i = 0;i < oldSelection.length;i++) {
-                oldSelection[i] = barcode.getIndex(i, Barcode.BLACK);
+                oldSelection[i] = barcode.getIndex(i, selected);
             }
             barcode = new Barcode();
-            barcode.addWhite(0, source.size());
+            barcode.add(0, deselected, source.size());
             updates.addDelete(0, oldSelection.length);
             updates.addInsert(0, selectedValues.length);
             updates.commitEvent();
 
-            barcode.setBlack(selectedValues[0], selectedValues.length);
-            deselected.updates().beginEvent();
+            barcode.set(selectedValues[0], selected, selectedValues.length);
+            deselectedList.updates().beginEvent();
             int unchangedSelections = 0;
             for(int i = 0;i < oldSelection.length;i++) {
                 int current = oldSelection[i];
                 if(current < selectedValues[0] || current > selectedValues[selectedValues.length - 1]) {
-                    deselected.updates().addInsert(oldSelection[i]);
+                    deselectedList.updates().addInsert(oldSelection[i]);
                 } else {
                     unchangedSelections++;
                 }
             }
-            deselected.updates().addDelete(selectedValues[0], selectedValues.length - unchangedSelections);
-            deselected.updates().commitEvent();
+            deselectedList.updates().addDelete(selectedValues[0], selectedValues.length - unchangedSelections);
+            deselectedList.updates().commitEvent();
         }
 
         /**
          * Handles the case where a selection occurs that is applied
-         * programmatically rather than by user input.  This means that
+         * programmatically rather than by mouse or key input.  This means that
          * one of the selection methods are called on the Selectable widget
-         * directly.  This implies that no assumptions can be made about
-         * how this event affects the current selection.
+         * directly.  This implies that no assumptions can be made about how
+         * this event affects the current selection.  This results in having to
+         * process the selection for each item in the widget.
+         *
+         * THIS COULD BE OPTIMIZED SO THAT REPAINTING SELECTION ON LIST CHANGES
+         * AND INVERTING SELECTION DOESN'T REQUIRE WIDGET INSPECTION.
          */
         private void handleCustomSelection() {
-            // Fail silently because XP sucks and wants to send error reports on the demo app
-            //throw new UnsupportedOperationException();
+			int selectedSoFar = 0;
+			ArrayList changes = new ArrayList();
+
+			// Update the barcode and forward events on the selected EventList
+			updates.beginEvent();
+			for(int i = 0;i < barcode.size();i++) {
+				// The item is selected
+				if(selectable.isSelected(i)) {
+					// previously wasn't selected
+					if(barcode.get(i) == deselected) {
+						barcode.set(i, selected, 1);
+						updates.addInsert(selectedSoFar);
+						changes.add(new Integer(i));
+					}
+					selectedSoFar++;
+
+				// The item is deselected and was previously selected
+				} else if(barcode.get(i) == selected) {
+					barcode.set(i, deselected, 1);
+					updates.addDelete(selectedSoFar);
+					changes.add(new Integer(i));
+				}
+			}
+			updates.commitEvent();
+
+			// Forward change events on the deselected EventList
+			deselectedList.updates().beginEvent();
+			for(int i = 0;i < changes.size();i++) {
+				// Changed from deselected to selected
+				int index = ((Integer)changes.get(i)).intValue();
+				if(barcode.get(index) == selected) {
+					deselectedList.updates().addDelete(barcode.getColourIndex(index, false, deselected));
+
+				// Changed from selected to deselected
+				} else {
+					deselectedList.updates().addInsert(barcode.getColourIndex(index, deselected));
+				}
+			}
+			deselectedList.updates().commitEvent();
+			changes.clear();
         }
     }
 }

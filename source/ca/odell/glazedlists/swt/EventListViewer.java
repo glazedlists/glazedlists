@@ -45,7 +45,7 @@ public class EventListViewer implements ListEventListener, Selectable {
     /**
      * Creates a new List that displays and responds to changes in source.
      * List elements will simply be displayed as the result of calling
-     * {@link Object#toString()} on the contents of the source list.
+     * toString() on the contents of the source list.
      */
     public EventListViewer(EventList source, List list) {
         this(source, list, new LabelProvider());
@@ -81,7 +81,7 @@ public class EventListViewer implements ListEventListener, Selectable {
     }
 
     /**
-     * Gets the List LabelProvider.
+     * Gets the List's {@link ILabelProvider}.
      */
     public ILabelProvider getLabelProvider() {
         return labelProvider;
@@ -168,6 +168,13 @@ public class EventListViewer implements ListEventListener, Selectable {
         }
     }
 
+    /**
+     * Inverts the current selection.
+     */
+    public void invertSelection() {
+        selectionList.invertSelection();
+    }
+
     /** Methods for the Selectable Interface */
 
     /** {@inheritDoc} */
@@ -213,6 +220,16 @@ public class EventListViewer implements ListEventListener, Selectable {
     /** {@inheritDoc} */
     public boolean isSelected(int index) {
         return list.isSelected(index);
+    }
+
+    /** {@inheritDoc} */
+    public void deselectAll() {
+        list.deselectAll();
+    }
+
+    /** {@inheritDoc} */
+    public void select(int[] selectionIndices) {
+        list.select(selectionIndices);
     }
 
     /**

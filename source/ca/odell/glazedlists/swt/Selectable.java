@@ -70,4 +70,15 @@ interface Selectable {
 	 * Returns whether or not the item at index is selected.
 	 */
 	public boolean isSelected(int index);
+
+	/**
+	 * Clears the selection
+	 */
+	public void deselectAll();
+
+	/**
+	 * Selects items at the indices specified in the array.  This
+	 * appends to the currect selection rather than replacing it.
+	 */
+	public void select(int[] selectionIndices);
 }

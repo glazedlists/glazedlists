@@ -42,10 +42,10 @@ public class EventTableViewer implements ListEventListener, Selectable {
 
     /** the first source event list to dispose */
     private TransformedList disposeSource = null;
-    
+
     /** the proxy moves events to the SWT user interface thread */
     private TransformedList swtSource = null;
-    
+
     /** Enables check support */
     private TableCheckFilterList checkFilter = null;
 
@@ -74,7 +74,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
         disposeSource = swtSource;
-        
+
         // insert a checked source if supported by the table
         if((table.getStyle() & SWT.CHECK) > 0) {
             checkFilter = new TableCheckFilterList(swtSource, table, tableFormat);
@@ -263,6 +263,13 @@ public class EventTableViewer implements ListEventListener, Selectable {
         }
     }
 
+    /**
+     * Inverts the current selection.
+     */
+    public void invertSelection() {
+        selectionList.invertSelection();
+    }
+
     /** Methods for the Selectable Interface */
 
     /** {@inheritDoc} */
@@ -308,6 +315,16 @@ public class EventTableViewer implements ListEventListener, Selectable {
     /** {@inheritDoc} */
     public boolean isSelected(int index) {
         return table.isSelected(index);
+    }
+
+    /** {@inheritDoc} */
+    public void deselectAll() {
+        table.deselectAll();
+    }
+
+    /** {@inheritDoc} */
+    public void select(int[] selectionIndices) {
+        table.select(selectionIndices);
     }
 
     /**
