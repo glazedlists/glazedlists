@@ -717,7 +717,7 @@ public class UniqueListTest extends TestCase {
         
         // populate the source
         for(int i = 0; i < 1000; i++) {
-            source.add(new Integer(random.nextInt(1000)));
+            source.add(new Integer(random.nextInt(100)));
         }
         
         // build a control list
