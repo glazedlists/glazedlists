@@ -40,7 +40,8 @@ class PeerConnection implements CTPHandler {
     /** the state of this connection */
     private static final int AWAITING_CONNECT = 0;
     private static final int READY = 1;
-    private static final int CLOSED = 2;
+    private static final int AWAITING_CLOSE = 2;
+    private static final int CLOSED = 3;
     private int state = AWAITING_CONNECT;
 
     /** the incoming bytes pending a full block */
@@ -66,10 +67,20 @@ class PeerConnection implements CTPHandler {
      * Handles the connection being ready for chunks to be sent.
      */
     public void connectionReady(CTPConnection connection) {
+        // know where we were before
+        int priorState = state;
+        
+        // now that we're connected
         this.connection = connection;
         this.state = READY;
+        
+        // handle any pending operations: data
         if(pendingConnect.length() > 0) {
             connection.sendChunk(pendingConnect);
+        }
+        // handle any pending operations: close
+        if(priorState == AWAITING_CLOSE) {
+            close();
         }
     }
 
@@ -159,14 +170,18 @@ class PeerConnection implements CTPHandler {
      * Close this peer connection.
      */
     public void close() {
+        // if we're already done
         if(state == CLOSED) {
             logger.warning("Closing a closed connection");
             return;
         }
-
-        if(connection == null) throw new UnsupportedOperationException();
-        connection.close();
-        peer.connections.remove(this);
+        
+        // close now
+        state = AWAITING_CLOSE;
+        if(connection != null) {
+            connection.close();
+            peer.connections.remove(this);
+        }
     }
     
     /**
@@ -177,7 +192,7 @@ class PeerConnection implements CTPHandler {
             pendingConnect.append(block.toBytes(null, -1));
         } else if(state == READY) {
             connection.sendChunk(block.toBytes(connection.getLocalHost(), connection.getLocalPort()));
-        } else if(state == CLOSED) {
+        } else if(state == CLOSED || state == AWAITING_CLOSE) {
             logger.warning("Write block to closed connection: " + this);
         } else {
             throw new IllegalStateException();
@@ -191,6 +206,7 @@ class PeerConnection implements CTPHandler {
         if(state == AWAITING_CONNECT) return "pending";
         else if(state == READY) return connection.toString();
         else if(state == CLOSED) return "closed";
+        else if(state == AWAITING_CLOSE) return "closing";
         else throw new IllegalStateException();
     }
     
