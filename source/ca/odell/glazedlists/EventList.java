@@ -30,6 +30,7 @@ import java.util.*;
  *    // access myList here
  *    if(myList.size() > 3) {
  *       System.out.println(myList.get(3));
+ *       myList.remove(3);
  *    }
  * } finally {
  *    myList.getReadWriteLock().writeLock().unlock();
