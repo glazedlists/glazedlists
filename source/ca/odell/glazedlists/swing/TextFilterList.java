@@ -8,24 +8,16 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
-import ca.odell.glazedlists.util.impl.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // for automatically responding to changes in the filter field 
-import javax.swing.text.Document;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-// for recycling filter strings
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
+import java.util.Arrays;
 
 /**
  * An {@link EventList} that shows only elements that contain a filter text string.
@@ -57,19 +49,10 @@ import java.util.HashMap;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class TextFilterList extends AbstractFilterList {
-
-    /** the filters list is currently just a list of Substrings to include */
-    private String[] filters = new String[0];
-
-    /** a map from each filter to a Strategy for locating that filter in arbitrary text */
-    private Map filterToTextContainmentStrategyMap = new HashMap();
+public final class TextFilterList extends DefaultTextFilterList {
 
     /** the field where the filter strings are edited */
     private JTextField filterEdit = null;
-    
-    /** the filterator is used as an alternative to implementing the TextFilterable interface */
-    private TextFilterator filterator = null;
     
     /** the document listener responds to changes, it is null when we're not listening */
     private FilterEditListener filterEditListener = null;
@@ -77,9 +60,6 @@ public final class TextFilterList extends AbstractFilterList {
     /** the action listener performs a refilter when fired */
     private FilterActionListener filterActionListener = new FilterActionListener();
     
-    /** a heavily recycled list of filter Strings, call clear() before use */
-    private List filterStrings = new ArrayList();
-
     /**
      * Creates a {@link TextFilterList} that filters the specified {@link EventList}
      * of elements that implement the {@link TextFilterable} interface.
@@ -142,11 +122,10 @@ public final class TextFilterList extends AbstractFilterList {
      * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, TextFilterator filterator, JTextField filterEdit) {
-        super(source);
-        this.filterator = filterator;
+        super(source, filterator);
 
         // listen to filter events
-        setFilterEdit(filterEdit);
+        this.setFilterEdit(filterEdit);
     }
     
     /**
@@ -238,94 +217,15 @@ public final class TextFilterList extends AbstractFilterList {
     }
     
     /**
-     * When the filter changes, first update the regex pattern used
+     * When the filter changes, first update the filter values used
      * to do filtering, then apply the filter on all elements.
      */
     private void reFilter() {
         ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
-            // build the regex pattern from the filter strings
-            updateFilterPattern();
-            // refilter the whole list
-            handleFilterChanged();
+            this.setFilterText(filterEdit.getText().split("[ \t]"));
         } finally {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
-    }
-
-    /**
-     * Recompiles the filter regular expression patterns. When the user enters
-     * a regular expression that is not recognized, the error is silently ignored
-     * and no filters apply.
-     */
-    private void updateFilterPattern() {
-        filters = filterEdit.getText().split("[ \t]");
-
-        // rebuild the filter -> TextSearchStrategy map
-        this.filterToTextContainmentStrategyMap.clear();
-        for (int i = 0; i < this.filters.length; i++) {
-            final String filter = this.filters[i];
-            final TextSearchStrategy strategy = this.selectTextSearchStrategy(filter);
-            strategy.setSubtext(filter);
-            this.filterToTextContainmentStrategyMap.put(filter, strategy);
-        }
-    }
-
-    /**
-     * This local factory method allows fine grained control over the choice of
-     * text search strategies for a given <code>filter</code>. Subclasses are
-     * welcome to override this method to return any custom TextSearchStrategy
-     * implementations which may exploit valid assumptions about the text being
-     * searched or the subtext being found.
-     *
-     * @param filter the filter for which to locate a TextSearchStrategy
-     * @return a TextSearchStrategy capable of location the given
-     *      <code>filter</code> within arbitrary text
-     */
-    protected TextSearchStrategy selectTextSearchStrategy(String filter) {
-        // uncomment me to test the old text search algorithm
-        //return new OldCaseInsensitiveTextSearchStrategy();
-
-        // if the filter is only 1 character, use the optimized SingleCharacter strategy
-        if(filter.length() == 1) {
-            return new SingleCharacterCaseInsensitiveTextSearchStrategy();
-        }
-
-        // default the using the Boyer-Moore algorithm
-        return new BoyerMooreCaseInsensitiveTextSearchStrategy();
-    }
-
-    /** {@inheritDoc} */
-    public boolean filterMatches(Object element) {
-        // populate the strings for this object
-        filterStrings.clear();
-        if(filterator == null) {
-            TextFilterable item = (TextFilterable)element;
-            item.getFilterStrings(filterStrings);
-        } else {
-            filterator.getFilterStrings(filterStrings, element);
-        }
-
-        TextSearchStrategy textSearchStrategy;
-        Object filterString;
-
-        // ensure each filter matches at least one field
-        filters:
-        for(int f = 0; f < filters.length; f++) {
-            // get the text search strategy for the current filter
-            textSearchStrategy = (TextSearchStrategy) this.filterToTextContainmentStrategyMap.get(filters[f]);
-
-            // search through all fields for the current filter
-            for(int c = 0; c < filterStrings.size(); c++) {
-                filterString = filterStrings.get(c);
-                if(filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1) {
-                    continue filters;
-                }
-            }
-            // no field matched this filter 
-            return false;
-        }
-        // all filters have been matched
-        return true;
     }
 }

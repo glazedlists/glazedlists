@@ -13,7 +13,6 @@ import ca.odell.glazedlists.util.impl.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 
-
 /**
  * An {@link EventList} that shows a subset of the elements of a source
  * {@link EventList}. This subset is composed of all elements of the source
@@ -43,7 +42,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  */
 public abstract class AbstractFilterList extends TransformedList implements ListEventListener {
 
-    /** the flag list contains Boolean.TRUE for selected items and null or others */
+    /** the flag list contains Boolean.TRUE for items that match the current filter and null or others */
     private CompressableList flagList = new CompressableList();
 
     /**
@@ -67,11 +66,12 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
     /**
      * Prepares the flagList by populating it with information from the source
-     * {@link EventList}. Initially all elements are filtered out.
+     * {@link EventList}. Initially no elements are filtered out since the list
+     * begins with no filter value.
      */
     private void prepareFlagList() {
         for(int i = 0; i < source.size(); i++) {
-            flagList.add(null);
+            flagList.add(Boolean.TRUE);
         }
     }
 
@@ -172,6 +172,83 @@ public abstract class AbstractFilterList extends TransformedList implements List
     }
 
     /**
+     * Handles a clearing of the filter. That is, the filter list will act as
+     * a passthrough and not discriminate any of the elements of the wrapped
+     * source list.
+     */
+    protected void handleFilterCleared() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // ensure all flags are set in the flagList indicating all
+        // source list elements are matched with no filter
+        for (int i = 0; i < source.size(); i++) {
+            if (flagList.get(i) == null) {
+                flagList.set(i, Boolean.TRUE);
+                int filteredIndex = flagList.getCompressedIndex(i);
+                updates.addInsert(filteredIndex);
+            }
+        }
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
+     * Handles a relaxing or widening of the filter. This may change the
+     * contents of this {@link EventList} as filtered elements are unfiltered
+     * due to the relaxation of the filter.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
+     */
+    protected final void handleFilterRelaxed() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // for all source items, see what the change is
+        for(int i = 0; i < source.size(); i++) {
+            // if this source item is now matched as a result of the relaxed filter
+            if(flagList.get(i) == null && filterMatches(source.get(i))) {
+                flagList.set(i, Boolean.TRUE);
+                int filteredIndex = flagList.getCompressedIndex(i);
+                updates.addInsert(filteredIndex);
+            }
+        }
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
+     * Handles a constraining or narrowing of the filter. This may change the
+     * contents of this {@link EventList} as elements are further filtered due
+     * to the constraining of the filter.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
+     */
+    protected final void handleFilterConstrained() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // for all source items, see what the change is
+        for(int i = 0; i < source.size(); i++) {
+            // if this source item is no longer matched as a result of the constrained filter
+            if (flagList.get(i) != null && !filterMatches(source.get(i))) {
+                int filteredIndex = flagList.getCompressedIndex(i);
+                flagList.set(i, null);
+                updates.addDelete(filteredIndex);
+            }
+        }
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
      * Handles changes to the behavior of the filter. This may change the contents
      * of this {@link EventList} as elements are filtered and unfiltered.
      *
@@ -208,6 +285,57 @@ public abstract class AbstractFilterList extends TransformedList implements List
         // commit the changes and notify listeners
         updates.commitEvent();
     }
+
+    /*
+     * Returns <tt>true</tt> if <code>filter1</code> is the same logical filter
+     * as <code>filter2</code>, meaning <code>filter1</code> would discriminate
+     * the source list elements precisely the same way as <code>filter2</code>.
+     * The default implementation simply returns
+     * <code>filter1.equals(filter2)</code> if filter1 is non-null, however,
+     * subclasses may have further strategies for determining
+     *
+     * @param filter1 a filter value
+     * @param filter2 another filter value
+     * @return <tt>true</tt> if <code>filter1</code> is the same logical filter
+     *      as <code>filter2</code>; <tt>false</tt> otherwise
+     */
+    /*public boolean isFilterEqual(Object filter1, Object filter2) {
+        return filter1 == null ? filter2 == null : filter1.equals(filter2);
+    }*/
+
+    /*
+     * Tests if the <code>newFilter</code> represents a relaxed version of the
+     * <code>oldFilter</code>. If <code>newFilter</code> is a relaxed version
+     * of <code>oldFilter</code> then it is guaranteed to accept the same
+     * source list items as <code>oldFilter</code> and possibly more. By
+     * default, this method returns <tt>false</tt>, but subclasses may override
+     * it if filter relaxation can be detected.
+     *
+     * @param oldFilter the current value filtering the source list
+     * @param newFilter the next value to filter the source list
+     * @return <tt>true</tt> if <code>newFilter</code> is a relaxed version of
+     *      <code>oldFilter</code>; <tt>false</tt> otherwise
+     */
+    /*public boolean isFilterRelaxed(Object oldFilter, Object newFilter) {
+        return false;
+    }*/
+
+    /*
+     * Tests if the <code>newFilter</code> represents a constrained version of
+     * the <code>oldFilter</code>. If <code>newFilter</code> is a constrained
+     * version of <code>oldFilter</code> then it is guaranteed to reject the
+     * same source list items as <code>oldFilter</code> and possibly more. By
+     * default, this method returns <tt>false</tt>, but subclasses may override
+     * it if filter constrainment can be detected.
+     *
+     * @param oldFilter the current value filtering the source list
+     * @param newFilter the next value to filter the source list
+     * @return <tt>true</tt> if <code>newFilter</code> is a constrained version
+     *      of <code>oldFilter</code>; <tt>false</tt> otherwise
+     */
+    /*public boolean isFilterConstrained(Object oldFilter, Object newFilter) {
+        return false;
+    }*/
 
     /**
      * Tests if the specified item from the source {@link EventList} is matched by
