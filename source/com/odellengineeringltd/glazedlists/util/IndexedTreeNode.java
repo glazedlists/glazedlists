@@ -373,11 +373,6 @@ public class IndexedTreeNode {
         if(left != null) left.validate();
         if(right != null) right.validate();
         
-        // validate height
-        /*if(height() != cachedHeight()) {
-            throw new IllegalStateException("Height " + height() + " does not match cached height " + cachedHeight() + " at " + this);
-        }*/
-        
         // validate sort order
         if(host.getComparator() != null) {
             if(leftSize > 0 && rootSize > 0 && host.getComparator().compare(left.value, value) > 0) {

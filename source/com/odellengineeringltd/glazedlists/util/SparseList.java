@@ -345,6 +345,7 @@ public class SparseList extends AbstractList {
                 } else if(operation == 3) {
                     testList.set(insertLocation, values[insertValue]);
                 }
+                //((SparseList)testList).validate();
             }
         }
         

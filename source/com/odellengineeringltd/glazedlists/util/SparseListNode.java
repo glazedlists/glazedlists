@@ -197,16 +197,6 @@ class SparseListNode {
         
         return allSubtreeSize;
     }
-    
-    /*
-     * Retrieves the height of this subtree.
-     */
-    /*private int height() {
-        if(left == null && right == null) return 1;
-        else if(right == null) return 1 + left.height();
-        else if(left == null) return 1 + right.height();
-        else return 1 + Math.max(left.height(), right.height());
-    }*/
 
     /**
      * Retrieves the subtree node with the largest value.
