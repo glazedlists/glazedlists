@@ -6,6 +6,10 @@
  */
 package ca.odell.glazedlists.demo.issuebrowser.swing;
 
+// demo
+import ca.odell.glazedlists.demo.issuebrowser.*;
+import ca.odell.glazedlists.demo.Launcher;
+// swing
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.event.*;
@@ -17,8 +21,6 @@ import java.awt.Insets;
 import java.net.URL;
 // glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.demo.issuebrowser.*;
-import ca.odell.glazedlists.demo.Launcher;
 import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;

@@ -6,6 +6,8 @@
  */
 package ca.odell.glazedlists.demo.issuebrowser.swt;
 
+// demo
+import ca.odell.glazedlists.demo.issuebrowser.*;
 // swt
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
@@ -13,8 +15,6 @@ import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.custom.*;
-// demo
-import ca.odell.glazedlists.demo.issuebrowser.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
@@ -367,67 +367,4 @@ public class IssuesBrowser {
             //else throbber.setIcon(throbberStatic);
         }
     }
-}
-
-/**
- * The IssueTableFormat specifies how an issue is displayed in a table.
- *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
- */
-class IssueTableFormat implements CheckableTableFormat {
-
-	public int getColumnCount() {
-		return 6;
-	}
-
-	public String getColumnName(int column) {
-		if (column == 0) {
-			return "ID";
-		} else if (column == 1) {
-			return "Type";
-		} else if (column == 2) {
-			return "Priority";
-		} else if (column == 3) {
-			return "State";
-		} else if (column == 4) {
-			return "Result";
-		} else if (column == 5) {
-			return "Summary";
-		}
-		return null;
-	}
-
-	public Object getColumnValue(Object baseObject, int column) {
-		if (baseObject == null) return null;
-		Issue issue = (Issue) baseObject;
-		if (column == 0) {
-			return issue.getId();
-		} else if (column == 1) {
-			return issue.getIssueType();
-		} else if (column == 2) {
-			return issue.getPriority();
-		} else if (column == 3) {
-			return issue.getStatus();
-		} else if (column == 4) {
-			return issue.getResolution();
-		} else if (column == 5) {
-			return issue.getShortDescription();
-		}
-		return null;
-	}
-
-	/**
-	 * Sets the specified object as checked.
-	 */
-	public void setChecked(Object baseObject, boolean checked) {
-		// Do Nothing
-	}
-
-	/**
-	 * Gets whether the specified object is checked.
-	 */
-	public boolean getChecked(Object baseObject) {
-		Issue issue = (Issue) baseObject;
-		return issue.getPriority().equals("P3");
-	}
 }

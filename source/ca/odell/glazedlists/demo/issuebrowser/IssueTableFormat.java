@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.demo.issuebrowser.swing;
+package ca.odell.glazedlists.demo.issuebrowser;
 
 import java.util.Comparator;
 // glazed lists
