@@ -54,7 +54,7 @@ public class ListPeer {
      */
     public NetworkList publish(EventList source, String resourceName, ByteCoder byteCoder) {
         NetworkList published = new NetworkList(source, byteCoder);
-        ResourceStatus resourceStatus = peer.publish(published, resourceName);
+        ResourceStatus resourceStatus = peer.publish(published.getResource(), resourceName);
         published.setResourceStatus(resourceStatus);
         published.setWritable(true);
         return published;
@@ -65,7 +65,7 @@ public class ListPeer {
      */
     public NetworkList subscribe(String resourceName, String host, int port, ByteCoder byteCoder) {
         NetworkList subscribed = new NetworkList(new BasicEventList(), byteCoder);
-        ResourceStatus resourceStatus = peer.subscribe(subscribed, resourceName, host, port);
+        ResourceStatus resourceStatus = peer.subscribe(subscribed.getResource(), resourceName, host, port);
         subscribed.setResourceStatus(resourceStatus);
         return subscribed;
     }

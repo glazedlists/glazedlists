@@ -23,5 +23,4 @@ public interface ResourceListener {
      * Handles a change in a resource contained by the specified delta.
      */
     public void resourceUpdated(Resource resource, Bufferlo delta);
-
 }
