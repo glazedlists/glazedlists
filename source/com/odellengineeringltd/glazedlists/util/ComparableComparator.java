@@ -14,6 +14,9 @@ import java.util.Comparator;
  * A trivial comparator that requires that compared objects implement
  * the comparable interface.
  *
+ * <p>When this finds <code>null</code> objects, it orders them before all
+ * other objects.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class ComparableComparator implements Comparator {
@@ -23,7 +26,18 @@ public class ComparableComparator implements Comparator {
      * to Comparable, and calling its compareTo method.
      */
     public int compare(Object alpha, Object beta) {
-        Comparable alphaComparable = (Comparable)alpha;
-        return alphaComparable.compareTo(beta);
+        // compare using Comparable
+        if(alpha != null && beta != null) {
+            Comparable alphaComparable = (Comparable)alpha;
+            return alphaComparable.compareTo(beta);
+        }
+        
+        // compare nulls
+        if(alpha == null) {
+            if(beta == null) return 0;
+            return -1;
+        } else {
+            return 1;
+        }
     }
 }

@@ -43,6 +43,9 @@ public final class SortedList extends WritableMutationList implements ListChange
     /** a map from the sorted index to the unsorted index */
     private IndexedTree sorted = null;
     
+    /** the comparator that this list uses for sorting */
+    private Comparator comparator = null;
+    
     /**
      * Creates a new filter list that provides a sorted view on the source data.
      */
@@ -181,6 +184,12 @@ public final class SortedList extends WritableMutationList implements ListChange
         return sortedIndex;
     }
     
+    /**
+     * Gets the comparator used to sort this list.
+     */
+    public Comparator getComparator() {
+        return comparator;
+    }
     
     /**
      * Set the comparator used to sort this list. This will resort the list
@@ -190,6 +199,8 @@ public final class SortedList extends WritableMutationList implements ListChange
      */
     public void setComparator(Comparator comparator) {
         synchronized(getRootList()) {
+            // save this comparator
+            this.comparator = comparator;
             // create the sorted list with a simple comparator
             sorted = new IndexedTree(new IndexedTreeNodeComparator(comparator));
             // create a list which knows the offsets of the indexes
