@@ -139,6 +139,13 @@ public class EventTableViewer implements ListEventListener {
         return checkFilter.getCheckedOnly();
     }
     
+    /**
+     * Gets all checked items.
+     */
+    public List getAllChecked() {
+        return checkFilter.getAllChecked();
+    }
+    
     
     /**
      * When the source list is changed, this forwards the change to the
