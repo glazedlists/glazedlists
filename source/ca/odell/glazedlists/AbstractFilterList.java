@@ -43,7 +43,7 @@ import ca.odell.glazedlists.util.concurrent.*;
 public abstract class AbstractFilterList extends TransformedList implements ListEventListener {
 
     /** the flag list contains Boolean.TRUE for items that match the current filter and null or others */
-    private CompressableList flagList = new CompressableList();
+    private BooleanList flagList = new BooleanList();
 
     /**
      * Creates a {@link AbstractFilterList} that includes a subset of the specified
@@ -86,8 +86,8 @@ public abstract class AbstractFilterList extends TransformedList implements List
             int[] filterReorderMap = new int[flagList.getCompressedList().size()];
 
             // adjust the flaglist & construct a reorder map to propagate
-            CompressableList previousFlagList = flagList;
-            flagList = new CompressableList();
+            BooleanList previousFlagList = flagList;
+            flagList = new BooleanList();
             for(int i = 0; i < sourceReorderMap.length; i++) {
                 Object flag = previousFlagList.get(sourceReorderMap[i]);
                 flagList.add(flag);
