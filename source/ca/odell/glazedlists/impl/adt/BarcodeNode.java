@@ -391,6 +391,49 @@ final class BarcodeNode {
     }
 
     /**
+     * Finds a sequence of the given colour that is at least size elements
+     * in length.
+     *
+     * @param size the minimum size of a matching sequence.
+     *
+     * @return The natural index of the first element in the sequence or -1 if
+     *         no sequences of that length exist.
+     */
+    public int findSequenceOfMinimumSize(int size, Object colour) {
+        return findFirstFitSequence(size, colour, 0);
+    }
+    /**
+     * The depth-first, FIRST FIT implementation.
+     */
+    private int findFirstFitSequence(int size, Object colour, int accumulation) {
+        int result = -1;
+
+        // Recurse to the Left
+        if(left != null) {
+            result = left.findFirstFitSequence(size, colour, accumulation);
+        }
+
+        // Inspect this node
+        if(result == -1) {
+            // Looking for a WHITE sequence
+            if(colour == Barcode.WHITE && size <= whiteSpace) {
+                return accumulation + treeLeftSize;
+
+            // Looking for a BLACK sequence
+            } else if(colour == Barcode.BLACK && size <= rootSize) {
+                return accumulation + treeLeftSize + whiteSpace;
+            }
+        }
+
+        // Recurse to the Right
+        if(result == -1 && right != null) {
+            result = right.findFirstFitSequence(size, colour, accumulation + treeLeftSize + whiteSpace + rootSize);
+        }
+
+        return result;
+    }
+
+    /**
      * Sets the values from index to index + length.
      */
     void set(int index, Object value, int length) {

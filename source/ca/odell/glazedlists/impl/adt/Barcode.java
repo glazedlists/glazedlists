@@ -440,4 +440,36 @@ public final class Barcode extends AbstractList {
         }
     }
 
+    /**
+     * Finds a sequence of the given colour that is at least size elements
+     * in length.
+     *
+     * @param size the minimum size of a matching sequence.
+     *
+     * @return The natural index of the first element in the sequence or -1 if
+     *         no sequences of that length exist.
+     */
+    public int findSequenceOfMinimumSize(int size, Object colour) {
+        // there is no tree
+        if(root == null) {
+            // There are no black sequences
+            if(colour == BLACK) return -1;
+
+            // The trailing whitespace matches
+            else if(whiteSpace >= size) return 0;
+
+            // nothing matches
+            else return -1;
+
+        // focus only within the tree
+        } else if(colour == BLACK) {
+            return root.findSequenceOfMinimumSize(size, colour);
+
+        // check the tree first, if it fails check the trailing whitespace
+        } else {
+            int result = root.findSequenceOfMinimumSize(size, colour);
+            if(result == -1 && whiteSpace >= size) result = treeSize;
+            return result;
+        }
+    }
 }

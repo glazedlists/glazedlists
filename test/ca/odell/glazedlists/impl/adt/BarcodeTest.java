@@ -173,6 +173,29 @@ public class BarcodeTest extends TestCase {
     }
 
     /**
+     * Test that findSequenceOfMinimumSize() is working correctly for the
+     * FIRST FIT implementation.
+     */
+    public void testFindSequenceOfMinimumSize() {
+        barcode.addBlack(0, 10);
+        barcode.addWhite(10, 3);
+        barcode.addWhite(7, 3);
+        barcode.addWhite(5, 5);
+        barcode.addWhite(3, 7);
+        barcode.addWhite(1, 3);
+
+        assertEquals(0, barcode.findSequenceOfMinimumSize(1, Barcode.BLACK));
+        assertEquals(4, barcode.findSequenceOfMinimumSize(2, Barcode.BLACK));
+        assertEquals(-1, barcode.findSequenceOfMinimumSize(4, Barcode.BLACK));
+
+        assertEquals(1, barcode.findSequenceOfMinimumSize(1, Barcode.WHITE));
+        assertEquals(1, barcode.findSequenceOfMinimumSize(3, Barcode.WHITE));
+        assertEquals(6, barcode.findSequenceOfMinimumSize(5, Barcode.WHITE));
+        assertEquals(6, barcode.findSequenceOfMinimumSize(7, Barcode.WHITE));
+        assertEquals(-1, barcode.findSequenceOfMinimumSize(8, Barcode.WHITE));
+    }
+
+    /**
      * Tests to verify that the sparse list is consistent after a long
      * series of list operations.
      */
