@@ -7,6 +7,7 @@
 package ca.odell.glazedlists.demo;
 
 import java.util.*;
+import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.applet.*;
@@ -26,13 +27,17 @@ import ca.odell.glazedlists.swing.*;
 public class IssuesBrowser extends Applet {
     
     /** an event list to host the issues */
-    private IssuesList issuesEventList = new IssuesList();
+    private UniqueList issuesEventList = new UniqueList(new BasicEventList());
     
     /** the currently selected issues */
     private EventSelectionModel issuesSelectionModel;
     
     /** an event list to host the descriptions */
     private EventList descriptions = new BasicEventList();
+    
+    /** monitor loading the issues */
+    private JProgressBar issuesLoading = null;
+    private JTextField issuesLoadingText = null;
     
     /**
      * Load the issues browser as an applet.
@@ -50,8 +55,9 @@ public class IssuesBrowser extends Applet {
         } else {
             constructStandalone();
         }
-
-        issuesEventList.start();
+        
+        // start loading the issues
+        new Thread(new IssueLoader()).start();
     }
      
     /**
@@ -124,11 +130,11 @@ public class IssuesBrowser extends Applet {
         prioritySlider.setPaintTicks(true);
         prioritySlider.setMajorTickSpacing(25);*/
         
+        
         // create the filters panel
         JPanel filtersPanel = new JPanel();
         filtersPanel.setLayout(new GridBagLayout());
         filtersPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-        
         filtersPanel.add(new JLabel("Text Filter"),          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(10, 10, 5,   10), 0, 0));
         filtersPanel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,  10, 15,  10), 0, 0));
         //filtersPanel.add(new JLabel("Minimum Prioriy"),      new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  10, 5,   10), 0, 0));
@@ -136,12 +142,25 @@ public class IssuesBrowser extends Applet {
         filtersPanel.add(new JLabel("Issue Owner"),          new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  10, 5,   10), 0, 0));
         filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets(0,  10, 10,  10), 0, 0));
         
+        // create the progress bar panel
+        issuesLoading = new JProgressBar();
+        issuesLoadingText = new JTextField();
+        issuesLoadingText.setEnabled(false);
+        issuesLoadingText.setForeground(UIManager.getColor("Panel.foreground"));
+        issuesLoadingText.setBackground(UIManager.getColor("Panel.background"));
+        issuesLoadingText.setDisabledTextColor(UIManager.getColor("Panel.foreground"));
+        JPanel progressPanel = new JPanel();
+        progressPanel.setLayout(new GridBagLayout());
+        progressPanel.add(issuesLoadingText,               new GridBagConstraints(0, 0, 1, 1, 0.90, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0,  0,  0,  5), 0, 0));
+        progressPanel.add(issuesLoading,                   new GridBagConstraints(1, 0, 2, 1, 0.10, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 0,  0,  0,  0), 0, 0));
+        
         // a panel with a table
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
-        panel.add(filtersPanel,                new GridBagConstraints(0, 0, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 5,  5,  5,  5), 0, 0));
-        panel.add(issuesTableScrollPane,       new GridBagConstraints(1, 0, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 5,  5,  5,  5), 0, 0));
-        panel.add(descriptionsTableScrollPane, new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(filtersPanel,                new GridBagConstraints(0, 0, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(issuesTableScrollPane,       new GridBagConstraints(1, 0, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(descriptionsTableScrollPane, new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(progressPanel,               new GridBagConstraints(0, 2, 2, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets( 2,  2,  2,  2), 0, 0));
 
         return panel;
     }
@@ -159,8 +178,6 @@ public class IssuesBrowser extends Applet {
         }
     }
     
-    
-    
     /**
      * When started via a main method, this creates a standalone issues browser.
      */
@@ -173,4 +190,49 @@ public class IssuesBrowser extends Applet {
         // load the issues and display the browser
         IssuesBrowser browser = new IssuesBrowser(false);
     }
+        
+    /**
+     * Load the issues from the Internet.
+     */
+    class IssueLoader implements Runnable {
+        public void run() {
+            // start the progress bar
+            SwingUtilities.invokeLater(new IndeterminateToggler(true, "Downloading issues..."));
+                
+            // load the issues
+            List urlIssues = null;
+            try {
+                String issuesUrl = "https://glazedlists.dev.java.net/issues/xml.cgi";
+                urlIssues = IssuezillaXMLParser.loadIssues(issuesUrl, 1, 150);
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+    
+            // apply the issues to the event list
+            SortedSet urlIssuesAsSet = new TreeSet();
+            urlIssuesAsSet.addAll(urlIssues);
+            
+            issuesEventList.getReadWriteLock().writeLock().lock();
+            try {
+                issuesEventList.replaceAll(urlIssuesAsSet);
+            } finally {
+                issuesEventList.getReadWriteLock().writeLock().unlock();
+            }
+            
+            // stop the progress bar
+            SwingUtilities.invokeLater(new IndeterminateToggler(false, ""));
+        }
+        private class IndeterminateToggler implements Runnable {
+            private boolean indeterminite;
+            private String message;
+            public IndeterminateToggler(boolean indeterminite, String message) {
+                this.indeterminite = indeterminite;
+                this.message = message;
+            }
+            public void run() {
+                issuesLoading.setIndeterminate(indeterminite);
+                issuesLoadingText.setText(message);
+            }
+        }
+    }    
 }

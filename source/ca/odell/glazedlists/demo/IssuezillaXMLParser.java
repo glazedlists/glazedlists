@@ -8,6 +8,7 @@ package ca.odell.glazedlists.demo;
 
 import java.util.*;
 import java.io.*;
+import java.net.URL;
 // parse XML using SAX
 import javax.xml.parsers.*;
 import org.xml.sax.*;
@@ -112,11 +113,32 @@ public class IssuezillaXMLParser {
      */
     public static void main(String[] args) {
         try {
-            parseIssuezillaXML(new FileInputStream(args[0]));
+            InputStream streamIn = new FileInputStream(args[0]);
+            parseIssuezillaXML(streamIn);
+            
         } catch(IOException e) {
             e.printStackTrace();
             return;
         }
+    }
+    
+    /**
+     * Loads issues from the specified URL.
+     */
+    public static List loadIssues(String baseUrl, int first, int last) throws IOException {
+        // assemble the issue ID argument
+        StringBuffer idArg = new StringBuffer();
+        for(int i = first; i <= last; i++) {
+            idArg.append(i);
+            if(i < last) idArg.append(":");
+        }
+        
+        // prepare a stream
+        URL issuesUrl = new URL(baseUrl + "?id=" + idArg);
+        InputStream issuesInStream = issuesUrl.openStream();
+        
+        // parse
+        return parseIssuezillaXML(issuesInStream);
     }
 
     /**
@@ -144,16 +166,18 @@ public class IssuezillaXMLParser {
             // ignore issuezilla tags
             if(qName.equals("issuezilla")) {
                 // write the necessary Java code
+                /*
                 System.out.println("List issues = new ArrayList();");
                 System.out.println("Issue currentIssue = null;");
                 System.out.println("Description description = null;");
+                */
                 // ignore
             // create a new issue
             } else if(currentIssue == null) {
                 if(qName.equals("issue")) {
                     currentIssue = new Issue();
                     // write the necessary Java code
-                    System.out.println("currentIssue = new Issue();");
+                    /*System.out.println("currentIssue = new Issue();");*/
                 } else {
                     addException(this + " encountered unexpected element \"" + qName + "\"");
                 }
@@ -186,12 +210,12 @@ public class IssuezillaXMLParser {
                 issues.add(currentIssue);
                 currentIssue = null;
                 // write the necessary Java code
-                System.out.println("issues.add(currentIssue);");
-                System.out.println("currentIssue = null;");
+                /*System.out.println("issues.add(currentIssue);");
+                System.out.println("currentIssue = null;");*/
             // ignore issuezilla tags
             } else if(qName.equals("issuezilla")) {
                 // write the necessary Java code
-                System.out.println("return issues;");
+                /*System.out.println("return issues;");*/
             // handle all other cases in an error
             } else {
                 addException(this + " encountered unexpected end of element \"" + qName + "\"");
@@ -232,7 +256,7 @@ public class IssuezillaXMLParser {
             else parent.addException(this + " encountered unexpected element " + currentField);
 
             // print the executed Java command
-            if(currentField.equals("issue_id")) System.out.println("currentIssue.setId(new Integer(" + Integer.valueOf(value) + "));"); 
+            /*if(currentField.equals("issue_id")) System.out.println("currentIssue.setId(new Integer(" + Integer.valueOf(value) + "));"); 
             else if(currentField.equals("issue_status")) System.out.println("currentIssue.setStatus(\"" + escapeToJava(value) + "\");");
             else if(currentField.equals("priority")) System.out.println("currentIssue.setPriority(Priority." + value + ");");
             else if(currentField.equals("resolution")) System.out.println("currentIssue.setResolution(\"" + escapeToJava(value) + "\");");
@@ -242,7 +266,7 @@ public class IssuezillaXMLParser {
             else if(currentField.equals("subcomponent")) System.out.println("currentIssue.setSubcomponent(\"" + escapeToJava(value) + "\");");
             else if(currentField.equals("issue_type")) System.out.println("currentIssue.setIssueType(\"" + escapeToJava(value) + "\");");
             else if(currentField.equals("qa_contact")) System.out.println("currentIssue.setQAContact(\"" + escapeToJava(value) + "\");");
-            else if(currentField.equals("short_desc")) System.out.println("currentIssue.setShortDescription(\"" + escapeToJava(value) + "\");");
+            else if(currentField.equals("short_desc")) System.out.println("currentIssue.setShortDescription(\"" + escapeToJava(value) + "\");");*/
         }
         public void endSimpleElement() {
             if(simpleElementHandler.hostElement.equals("long_desc")) {
@@ -250,8 +274,8 @@ public class IssuezillaXMLParser {
                 currentIssue.getDescriptions().add(descriptionHandler.description);
                 simpleElementHandler = null;
                 // write the necessary Java code
-                System.out.println("currentIssue.getDescriptions().add(description);");
-                System.out.println("description = null;");
+                /*System.out.println("currentIssue.getDescriptions().add(description);");
+                System.out.println("description = null;");*/
             } else if(simpleElementHandler.hostElement.equals("attachment")) {
                 AttachmentHandler attachmentHandler = (AttachmentHandler)simpleElementHandler;
                 currentIssue.getAttachments().add(attachmentHandler.attachment);
@@ -279,7 +303,7 @@ public class IssuezillaXMLParser {
             super(parent, "long_desc", DESCRIPTION_SIMPLE_FIELDS);
             description = new Description();
             // print the executed Java command
-            System.out.println("description = new Description();");
+            /*System.out.println("description = new Description();");*/
         }
         public void addFieldAndValue(String currentField, String value) {
             if(currentField.equals("who")) description.setWho(value); 
@@ -288,9 +312,9 @@ public class IssuezillaXMLParser {
             else parent.addException(this + " encountered unexpected element " + currentField);
 
             // print the executed Java command
-            if(currentField.equals("who")) System.out.println("description.setWho(\"" + escapeToJava(value) + "\");");
+            /*if(currentField.equals("who")) System.out.println("description.setWho(\"" + escapeToJava(value) + "\");");
             else if(currentField.equals("issue_when")) System.out.println("description.setWhen(null);");
-            else if(currentField.equals("thetext")) System.out.println("description.setText(\"" + escapeToJava(value) + "\");");
+            else if(currentField.equals("thetext")) System.out.println("description.setText(\"" + escapeToJava(value) + "\");");*/
         }
     }
     
