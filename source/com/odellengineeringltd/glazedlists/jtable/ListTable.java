@@ -353,6 +353,8 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * height rows.
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=30">Bug 30</a>
+     * @see <a href="https://glazedlists.dev.java.net/tutorial/part8/index.html#rowheight">Glazed
+     * Lists Tutorial Part 8 - Performance Tuning</a>
      */
     public void setRepaintAllThreshhold(int repaintAllThreshhold) {
         this.changeSizeRepaintAllThreshhold = repaintAllThreshhold;
