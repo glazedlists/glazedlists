@@ -272,7 +272,6 @@ public final class NetworkList extends TransformedList {
     public void dispose() {
         resourceStatus.removeResourceStatusListener(privateInterfaces);
         disconnect();
-        resourceStatus = null;
         super.dispose();
     }
 }

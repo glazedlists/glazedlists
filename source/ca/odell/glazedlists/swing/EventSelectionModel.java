@@ -166,8 +166,11 @@ public final class EventSelectionModel implements ListSelectionModel {
      * responsible for listening to changes in the JTable's size and modifying
      * the internal list model to match.
      */
-    class SelectionEventList extends TransformedList {
+    private class SelectionEventList extends TransformedList {
 
+        /** the proxy moves events to the Swing Event Dispatch thread */
+        private EventThreadProxy eventThreadProxy = new EventThreadProxy(this);
+    
         /**
          * Creates a new SelectionEventList that listens to changes from the
          * source event list.
@@ -175,10 +178,10 @@ public final class EventSelectionModel implements ListSelectionModel {
         public SelectionEventList(EventList source) {
             super(source);
 
-            // use an Internal Lock to avoid locking the source list during a sort
+            // use an Internal Lock to avoid locking the source list during a selection change
             readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
 
-            source.addListEventListener(new EventThreadProxy(this));
+            source.addListEventListener(eventThreadProxy);
             EventSelectionModel.this.updates = super.updates;
         }
 
@@ -350,6 +353,11 @@ public final class EventSelectionModel implements ListSelectionModel {
             } finally {
                 ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
+        }
+
+        /** {@inheritDoc} */
+        public void dispose() {
+            source.removeListEventListener(eventThreadProxy);
         }
     }
 
@@ -879,5 +887,23 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     public void removeListSelectionListener(ListSelectionListener listener) {
         listeners.remove(listener);
+    }
+    
+    /**
+     * Releases the resources consumed by this {@link EventSelectionModel} so that it
+     * may eventually be garbage collected.
+     *
+     * <p>An {@link EventSelectionModel} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link EventSelectionModel}
+     * to be garbage collected before its source {@link EventList}. This is 
+     * necessary for situations where an {@link EventSelectionModel} is short-lived but
+     * its source {@link EventList} is long-lived.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link EventSelectionModel} after it has been disposed.
+     */
+    public void dispose() {
+        eventList.dispose();
     }
 }

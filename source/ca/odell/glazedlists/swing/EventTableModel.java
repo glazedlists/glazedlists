@@ -36,12 +36,14 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
 
     /** the complete list of messages before filters */
     private EventList source;
+    /** the proxy moves events to the Swing Event Dispatch thread */
+    private EventThreadProxy eventThreadProxy = new EventThreadProxy(this);
 
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
 
     /** Reusable table event for broadcasting changes */
-    private MutableTableModelEvent tableModelEvent;
+    private MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
 
     /** whenever a list change covers greater than this many rows, redraw the whole thing */
     private int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
@@ -52,11 +54,10 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      */
     public EventTableModel(EventList source, TableFormat tableFormat) {
         this.source = source;
-        tableModelEvent = new MutableTableModelEvent(this);
         this.tableFormat = tableFormat;
 
         // prepare listeners
-        source.addListEventListener(new EventThreadProxy(this));
+        source.addListEventListener(eventThreadProxy);
     }
 
     /**
@@ -288,5 +289,23 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      */
     public void setRepaintAllThreshhold(int repaintAllThreshhold) {
         this.changeSizeRepaintAllThreshhold = repaintAllThreshhold;
+    }
+    
+    /**
+     * Releases the resources consumed by this {@link EventTableModel} so that it
+     * may eventually be garbage collected.
+     *
+     * <p>An {@link EventTableModel} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link EventTableModel}
+     * to be garbage collected before its source {@link EventList}. This is 
+     * necessary for situations where an {@link EventTableModel} is short-lived but
+     * its source {@link EventList} is long-lived.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link EventTableModel} after it has been disposed.
+     */
+    public void dispose() {
+        source.removeListEventListener(eventThreadProxy);
     }
 }

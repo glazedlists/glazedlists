@@ -44,6 +44,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
 
     /** the complete list of messages before filters */
     protected EventList source;
+    /** the proxy moves events to the User Interface thread */
+    private UserInterfaceThreadProxy uiThreadProxy = null;
 
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
@@ -97,11 +99,8 @@ public class EventTableViewer implements ListEventListener, Selectable {
         }
 
         // listen for events, using the user interface thread
-        if(source == checkFilter) {
-            source.addListEventListener(this);
-        } else {
-            source.addListEventListener(new UserInterfaceThreadProxy(this, table.getDisplay()));
-        }
+        uiThreadProxy = new UserInterfaceThreadProxy(this, table.getDisplay());
+        source.addListEventListener(uiThreadProxy);
     }
 
     /**
@@ -321,5 +320,26 @@ public class EventTableViewer implements ListEventListener, Selectable {
             Object value = source.get(tableIndex);
             setItemText(item, value);
         }
+    }
+    
+    /**
+     * Releases the resources consumed by this {@link EventTableViewer} so that it
+     * may eventually be garbage collected.
+     *
+     * <p>An {@link EventTableViewer} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link EventTableViewer}
+     * to be garbage collected before its source {@link EventList}. This is 
+     * necessary for situations where an {@link EventTableViewer} is short-lived but
+     * its source {@link EventList} is long-lived.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link EventTableViewer} after it has been disposed.
+     */
+    public void dispose() {
+        if(checkFilter != null) {
+            checkFilter.dispose();
+        }
+        source.removeListEventListener(uiThreadProxy);
     }
 }

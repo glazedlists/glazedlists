@@ -225,11 +225,6 @@ class SelectionList extends TransformedList {
 			selectable.removeListener(SWT.KeyUp, selectionListener);
 			selectable.removeListener(SWT.KeyDown, selectionListener);
 		}
-		selectable = null;
-		selectionListener = null;
-		deselected = null;
-		barcode.clear();
-		barcode = null;
 		super.dispose();
 	}
 

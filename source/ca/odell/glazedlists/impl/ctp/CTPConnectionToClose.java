@@ -80,7 +80,7 @@ class CTPConnectionToClose implements CTPRunnable {
 
         // log the close
         if(reason != null) {
-            logger.warning("Closed connection to " + connection + " due to " + reason);
+            logger.log(Level.WARNING, "Closed connection to " + connection + " due to " + reason, reason);
         } else {
             logger.info("Closed connection to " + connection);
         }

@@ -34,6 +34,8 @@ public class EventListViewer implements ListEventListener, Selectable {
 
     /** the EventList to respond to */
     private EventList source = null;
+    /** the proxy moves events to the User Interface thread */
+    private UserInterfaceThreadProxy uiThreadProxy = null;
 
     /** the formatter for list elements */
     private ListFormat listFormat = null;
@@ -63,7 +65,10 @@ public class EventListViewer implements ListEventListener, Selectable {
 		selectionList = new SelectionList(source, this);
 
         populateList();
-        source.addListEventListener(new UserInterfaceThreadProxy(this, list.getDisplay()));
+        
+        // listen for changes
+        uiThreadProxy = new UserInterfaceThreadProxy(this, list.getDisplay());
+        source.addListEventListener(uiThreadProxy);
     }
 
     /**
@@ -223,5 +228,23 @@ public class EventListViewer implements ListEventListener, Selectable {
         public String getDisplayValue(Object element) {
             return element.toString();
         }
+    }
+    
+    /**
+     * Releases the resources consumed by this {@link EventListViewer} so that it
+     * may eventually be garbage collected.
+     *
+     * <p>An {@link EventListViewer} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link EventListViewer}
+     * to be garbage collected before its source {@link EventList}. This is 
+     * necessary for situations where an {@link EventListViewer} is short-lived but
+     * its source {@link EventList} is long-lived.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link EventListViewer} after it has been disposed.
+     */
+    public void dispose() {
+        source.removeListEventListener(uiThreadProxy);
     }
 }

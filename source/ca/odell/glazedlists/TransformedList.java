@@ -197,9 +197,5 @@ public abstract class TransformedList extends AbstractEventList implements ListE
      */
     public void dispose() {
         source.removeListEventListener(this);
-        source = null;
-        readWriteLock = null;
-        updates = null;
-        publisher = null;
     }
 }

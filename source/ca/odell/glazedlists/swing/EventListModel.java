@@ -48,6 +48,8 @@ public class EventListModel implements ListEventListener, ListModel {
 
     /** the list data */
     protected EventList source;
+    /** the proxy moves events to the Swing Event Dispatch thread */
+    private EventThreadProxy eventThreadProxy = new EventThreadProxy(this);
 
     /** whom to notify of data changes */
     private ArrayList listeners = new ArrayList();
@@ -65,7 +67,7 @@ public class EventListModel implements ListEventListener, ListModel {
         this.source = source;
 
         // prepare listeners
-        source.addListEventListener(new EventThreadProxy(this));
+        source.addListEventListener(eventThreadProxy);
     }
     
     /**
@@ -176,5 +178,23 @@ public class EventListModel implements ListEventListener, ListModel {
                 listDataListener.intervalRemoved(listDataEvent);
             }
         }
+    }
+    
+    /**
+     * Releases the resources consumed by this {@link EventListModel} so that it
+     * may eventually be garbage collected.
+     *
+     * <p>An {@link EventListModel} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link EventListModel}
+     * to be garbage collected before its source {@link EventList}. This is 
+     * necessary for situations where an {@link EventListModel} is short-lived but
+     * its source {@link EventList} is long-lived.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link EventListModel} after it has been disposed.
+     */
+    public void dispose() {
+        source.removeListEventListener(eventThreadProxy);
     }
 }

@@ -227,10 +227,18 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         }
     }
 
+    /** {@inheritDoc} */
+    public void dispose() {
+        if(source instanceof CheckableWrapperList) {
+            ((CheckableWrapperList)source).dispose();
+        }
+        super.dispose();
+    }
+    
     /**
      * The TableChecker checks the table rows after they have been updated.
      */
-    class TableChecker implements ListEventListener {
+    private class TableChecker implements ListEventListener {
         public TableChecker() {
             for(int i = 0; i < size(); i++) {
                 boolean checked = getChecked(i);
