@@ -37,14 +37,11 @@ public final class UniqueList extends TransformedList {
     private Comparator comparator;
 
     /** the sparse list tracks which elements are duplicates */
-    private CompressableList duplicatesList = new CompressableList();
+    private Barcode duplicatesList = new Barcode();
 
     /** duplicates list entries are either unique or duplicates */
-    private static final Object UNIQUE = Boolean.TRUE;
-    private static final Object DUPLICATE = null;
-
-    /** some inserts are unique until they can be proven otherwise */
-    private static final Object TEMP_UNIQUE = Boolean.FALSE;
+    private static final Object UNIQUE = Barcode.BLACK;
+    private static final Object DUPLICATE = Barcode.WHITE;
 
     /** the index of an update event that has not yet been added to the change */
     private int pendingUpdateIndex = -1;
@@ -104,12 +101,12 @@ public final class UniqueList extends TransformedList {
 
     /** {@inheritDoc} */
     public int size() {
-        return duplicatesList.getCompressedList().size();
+        return duplicatesList.blackSize();
     }
 
     /** {@inheritDoc} */
     protected int getSourceIndex(int index) {
-        return duplicatesList.getIndex(index);
+        return duplicatesList.getIndex(index, Barcode.BLACK);
     }
 
     /** {@inheritDoc} */
@@ -126,14 +123,14 @@ public final class UniqueList extends TransformedList {
         // <p>The approach to handling list changes in UniqueList uses two passes
         // through the list of change events. In the first pass, the duplicates list
         // is updated to reflect the changes yet no events are fired. All inserted
-        // values receive a value of TEMP_UNIQUE in the duplicates list. Deleted
+        // values receive a value of null in the duplicates list. Deleted
         // and updated original duplicates list entries are stored in a temporary
         // array. Updated values' duplicates list entries are set to UNIQUE. In
         // pass 2, the change events are reviewed again. Inserted elements are tested
         // to see if the inserted value equals any elements in the source list that
         // existed prior to this change. If they are equal, the insert is not new
         // and an UPDATE is fired, otherwise the INSERT is fired. In either case, the
-        // TEMP_UNIQUE is replaced with a UNIQUE in the duplicates list. For update events
+        // null is replaced with a UNIQUE in the duplicates list. For update events
         // the value is tested for equality with adjacent values, and the result may
         // be a forwarded DELETE, INSERT or UPDATE. Finally DELETED events may be
         // forwarded with a resultant DELETE or UPDATE event, depending on whether
@@ -143,6 +140,11 @@ public final class UniqueList extends TransformedList {
         ListEvent firstPass = new ListEvent(listChanges);
         ListEvent secondPass = listChanges;
 
+        // a Barcode to track values that could be unique but it can't be
+        // determined until a later pass through the change events.
+        Barcode tempUniqueList = new Barcode();
+        tempUniqueList.addWhite(0, duplicatesList.size());
+
         // first pass, update unique list
         LinkedList removedValues = new LinkedList();
         while(firstPass.next()) {
@@ -150,26 +152,28 @@ public final class UniqueList extends TransformedList {
             int changeType = firstPass.getType();
 
             if(changeType == ListEvent.INSERT) {
-                duplicatesList.add(changeIndex, TEMP_UNIQUE);
+                duplicatesList.addBlack(changeIndex, 1);
+                tempUniqueList.addBlack(changeIndex, 1);
+
             } else if(changeType == ListEvent.UPDATE) {
                 Object replaced = duplicatesList.get(changeIndex);
                 // if the deleted value has a duplicate, remove the dup instead
                 if(replaced == UNIQUE) {
                     if(changeIndex+1 < duplicatesList.size() && duplicatesList.get(changeIndex+1) == DUPLICATE) {
-                        duplicatesList.set(changeIndex, TEMP_UNIQUE);
-                        duplicatesList.set(changeIndex+1, UNIQUE);
-                        replaced = null;
+                        duplicatesList.setBlack(changeIndex, 2);
+                        tempUniqueList.setBlack(changeIndex, 1);
                     }
                 }
-                //removedValues.addLast(replaced);
+
             } else if(changeType == ListEvent.DELETE) {
-                Object deleted = duplicatesList.remove(changeIndex);
+                Object deleted = duplicatesList.get(changeIndex);
+                duplicatesList.remove(changeIndex, 1);
+                tempUniqueList.remove(changeIndex, 1);
                 // if the deleted value has a duplicate, remove the dup instead
                 if(deleted == UNIQUE) {
                     if(changeIndex < duplicatesList.size() && duplicatesList.get(changeIndex) == DUPLICATE) {
-                        duplicatesList.set(changeIndex, UNIQUE);
-                        //deleted = null;
-                        deleted = TEMP_UNIQUE;
+                        duplicatesList.setBlack(changeIndex, 1);
+                        deleted = null;
                     }
                 }
                 removedValues.addLast(deleted);
@@ -184,12 +188,12 @@ public final class UniqueList extends TransformedList {
 
             // inserts can result in UPDATE or INSERT events
             if(changeType == ListEvent.INSERT) {
-                int neighbourSide = handleOldNeighbour(changeIndex);
+                int neighbourSide = handleOldNeighbour(changeIndex, tempUniqueList);
                 // finally fire the event
                 if(neighbourSide != NEIGHBOUR_NONE) {
-                    enqueueEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
+                    enqueueEvent(ListEvent.UPDATE, duplicatesList.getBlackIndex(changeIndex, true), false);
                 } else {
-                    enqueueEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
+                    enqueueEvent(ListEvent.INSERT, duplicatesList.getBlackIndex(changeIndex), true);
                 }
             // updates can result in INSERT, UPDATE or DELETE events
             } else if(changeType == ListEvent.UPDATE) {
@@ -197,15 +201,16 @@ public final class UniqueList extends TransformedList {
                 // get the previous state, the side where duplicates were found
                 int oldNeighbourSide = 0;
                 Object updated = duplicatesList.get(changeIndex);
+                if(tempUniqueList.get(changeIndex) == Barcode.BLACK) updated = null;
                 if(updated == DUPLICATE) oldNeighbourSide = NEIGHBOUR_LEFT;
-                else if(updated == TEMP_UNIQUE) oldNeighbourSide = NEIGHBOUR_RIGHT;
+                else if(updated == null) oldNeighbourSide = NEIGHBOUR_RIGHT;
                 else if(updated == UNIQUE) oldNeighbourSide = NEIGHBOUR_NONE;
 
                 // get the current state, the side where a duplicate value is found
-                int newNeighbourSide = handleOldNeighbour(changeIndex);
+                int newNeighbourSide = handleOldNeighbour(changeIndex, tempUniqueList);
 
                 // fire events
-                int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
+                int compressedIndex = duplicatesList.getBlackIndex(changeIndex, true);
 
                 // we're unique now
                 if(newNeighbourSide == NEIGHBOUR_NONE) {
@@ -228,7 +233,8 @@ public final class UniqueList extends TransformedList {
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
                     } else if(oldNeighbourSide == NEIGHBOUR_RIGHT) {
                         enqueueEvent(ListEvent.UPDATE, compressedIndex, false);
-                        if(compressedIndex+1 < duplicatesList.getCompressedList().size()) enqueueEvent(ListEvent.UPDATE, compressedIndex+1, false);
+                        // if(compressedIndex+1 < duplicatesList.getCompressedList().size()) enqueueEvent(ListEvent.UPDATE, compressedIndex+1, false);
+                        if(compressedIndex+1 < duplicatesList.blackSize()) enqueueEvent(ListEvent.UPDATE, compressedIndex+1, false);
                     }
 
                 // we have a duplicate that follows
@@ -253,8 +259,8 @@ public final class UniqueList extends TransformedList {
                 else uncompressedIndex = changeIndex;
                 // calculate the compressed index where the delete occured
                 int deletedIndex = -1;
-                if(uncompressedIndex < duplicatesList.size()) deletedIndex = duplicatesList.getCompressedIndex(uncompressedIndex, true);
-                else deletedIndex = duplicatesList.getCompressedList().size();
+                if(uncompressedIndex < duplicatesList.size()) deletedIndex = duplicatesList.getBlackIndex(uncompressedIndex, true);
+                else deletedIndex = duplicatesList.blackSize();
                 // fire the change event
                 if(deleted == UNIQUE) {
                     enqueueEvent(ListEvent.DELETE, deletedIndex, true);
@@ -277,10 +283,10 @@ public final class UniqueList extends TransformedList {
      *      a neighbour was found on the left, and NEIGHBOUR_RIGHT if a neighbour was found on the
      *      right. In non-zero cases the duplicates list is updated.
      */
-    private int handleOldNeighbour(int changeIndex) {
+    private int handleOldNeighbour(int changeIndex, Barcode tempUniqueList) {
         // test if equal by value to predecessor which is always old
         if(valuesEqual(changeIndex-1, changeIndex)) {
-            duplicatesList.set(changeIndex, DUPLICATE);
+            duplicatesList.setWhite(changeIndex, 1);
             return NEIGHBOUR_LEFT;
         }
 
@@ -289,19 +295,24 @@ public final class UniqueList extends TransformedList {
         while(true) {
             // we have an equal follower
             if(valuesEqual(changeIndex, followerIndex)) {
-                Object followerType = duplicatesList.get(followerIndex);
+                Object followerType;
+                if(tempUniqueList.get(followerIndex) == Barcode.BLACK) {
+                    followerType = null;
+                } else {
+                    followerType = duplicatesList.get(followerIndex);
+                }
                 // this insert equals the following insert, continue looking for an old match
-                if(followerType == TEMP_UNIQUE) {
+                if(followerType == null) {
                     followerIndex++;
                 // this insert equals an existing value, swap & update
                 } else {
-                    duplicatesList.set(changeIndex, UNIQUE);
-                    duplicatesList.set(followerIndex, null);
+                    duplicatesList.setBlack(changeIndex, 1);
+                    duplicatesList.setWhite(followerIndex, 1);
                     return NEIGHBOUR_RIGHT;
                 }
             // we have no equal follower that is old, this is a new value
             } else {
-                duplicatesList.set(changeIndex, UNIQUE);
+                duplicatesList.setBlack(changeIndex, 1);
                 return NEIGHBOUR_NONE;
             }
         }
@@ -369,10 +380,10 @@ public final class UniqueList extends TransformedList {
     public int getCount(int index) {
         // if this is before the end, its everything up to the first different element
         if(index < size() - 1) {
-            return duplicatesList.getIndex(index + 1) - duplicatesList.getIndex(index);
+            return duplicatesList.getIndex(index + 1, Barcode.BLACK) - duplicatesList.getIndex(index, Barcode.BLACK);
         // if this is at the end, its everything after
         } else {
-            return source.size() - duplicatesList.getIndex(index);
+            return source.size() - duplicatesList.getIndex(index, Barcode.BLACK);
         }
     }
 
@@ -396,10 +407,10 @@ public final class UniqueList extends TransformedList {
     public List getAll(int index) {
         // if this is before the end, its everything up to the first different element
         if(index < size() - 1) {
-            return source.subList(duplicatesList.getIndex(index), duplicatesList.getIndex(index + 1));
+            return source.subList(duplicatesList.getIndex(index, Barcode.BLACK), duplicatesList.getIndex(index + 1, Barcode.BLACK));
         // if this is at the end, its everything after
         } else {
-            return source.subList(duplicatesList.getIndex(index), source.size());
+            return source.subList(duplicatesList.getIndex(index, Barcode.BLACK), source.size());
         }
     }
 
@@ -426,9 +437,9 @@ public final class UniqueList extends TransformedList {
 
         for(int i = 0; i < source.size(); i++) {
             if(!valuesEqual(i, i-1)) {
-                duplicatesList.add(i, UNIQUE);
+                duplicatesList.addBlack(i, 1);
             } else {
-                duplicatesList.add(i, DUPLICATE);
+                duplicatesList.addWhite(i, 1);
             }
         }
     }
@@ -593,7 +604,7 @@ public final class UniqueList extends TransformedList {
     public int indexOf(Object object) {
         int sourceIndex = source.indexOf(object);
         if(sourceIndex == -1) return -1;
-        return duplicatesList.getCompressedIndex(sourceIndex, true);
+        return duplicatesList.getBlackIndex(sourceIndex, true);
     }
 
     /** {@inheritDoc} */
