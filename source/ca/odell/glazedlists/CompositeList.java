@@ -35,6 +35,18 @@ public class CompositeList extends CollectionList {
     }
     
     /**
+     * Creates a new {@link EventList} that shares its {@link ReadWriteLock} with
+     * this {@link CompositeList}. This is necessary when this {@link CompositeList}
+     * will be used by multiple threads.
+     *
+     * <p>Note that the created {@link EventList} must be explicitly added as a member
+     * to this {@link CompositeList} using {@link addMemberList(EventList)}.
+     */
+    public EventList createMemberList() {
+        return new BasicEventList(getReadWriteLock());
+    }
+    
+    /**
      * Removes the specified {@link EventList} as a source {@link EventList}
      * to this {@link CompositeList}.
      */

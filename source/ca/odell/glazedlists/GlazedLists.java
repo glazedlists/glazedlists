@@ -218,6 +218,17 @@ public final class GlazedLists {
     // EventLists // // // // // // // // // // // // // // // // // // // // //
 
     /**
+     * Creates a new {@link EventList} which contains the contents of the specified
+     * {@link Collection}. The {@link EventList}'s order will be determined by
+     * {@link Collection#iterator() contents.iterator()}.
+     */
+    public static EventList eventList(Collection contents) {
+        BasicEventList result = new BasicEventList();
+        result.addAll(contents);
+        return result;
+    }
+    
+    /**
      * Wraps the source in an {@link EventList} that does not allow writing operations.
      *
      * <p>The returned {@link EventList} is useful for programming defensively. A

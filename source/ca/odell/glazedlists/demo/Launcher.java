@@ -6,9 +6,8 @@
  */
 package ca.odell.glazedlists.demo;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventListModel;
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.swing.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -202,7 +201,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		// Ok, this is overkill. But this is what we do!
 		// Had to use an EventList in here somewhere...
-		BasicEventList root_list = new BasicEventList(loadDemos());
+		EventList root_list = GlazedLists.eventList(loadDemos());
 		SortedList sorter = new SortedList(root_list);
 		demo_list = new JList(new EventListModel(sorter));
 		demo_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

@@ -35,11 +35,20 @@ public final class BasicEventList extends AbstractEventList {
     private List data;
 
     /**
-     * Creates a {@link BasicEventList} that uses a {@link ArrayList} as the
-     * underlying list implementation.
+     * Creates a {@link BasicEventList}.
      */
     public BasicEventList() {
         this(new ArrayList());
+    }
+
+    /**
+     * Creates a {@link BasicEventList} that uses the specified {@link ReadWriteLock}
+     * for concurrent access.
+     */
+    public BasicEventList(ReadWriteLock readWriteLock) {
+        super(null);
+        this.data = new ArrayList();
+        this.readWriteLock = readWriteLock;
     }
 
     /**
@@ -50,13 +59,18 @@ public final class BasicEventList extends AbstractEventList {
      * the specified {@link List} <strong>must</strong> be done through via this
      * {@link BasicEventList} interface. Otherwise this {@link BasicEventList} will
      * become out of sync and operations will fail.
+     *
+     * @deprecated As of 2005/03/06, this constructor has been declared unsafe
+     *     because the source list is exposed. This allows it to be modified without
+     *     the required events being fired. This constructor has been replaced by
+     *     the factory method {@link GlazedLists#eventList(Collection)}.
      */
     public BasicEventList(List list) {
         super(null);
         data = list;
         readWriteLock = new J2SE12ReadWriteLock();
     }
-
+    
     /** {@inheritDoc} */
     public void add(int index, Object element) {
         // create the change event
