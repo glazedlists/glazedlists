@@ -120,10 +120,10 @@ class PeerConnection implements CTPHandler {
         try {
             PeerBlock block = null;
             while((block = PeerBlock.fromBytes(currentBlock)) != null) {
-                if(block.getAction().equals(PeerBlock.ACTION_SUBSCRIBE)) remoteSubscribe(block);
-                else if(block.getAction().equals(PeerBlock.ACTION_SUBSCRIBE_CONFIRM)) remoteSubscribeConfirm(block);
-                else if(block.getAction().equals(PeerBlock.ACTION_UPDATE)) remoteUpdate(block);
-                else if(block.getAction().equals(PeerBlock.ACTION_UNSUBSCRIBE)) remoteUnsubscribe(block);
+                if(block.isSubscribe()) remoteSubscribe(block);
+                else if(block.isSubscribeConfirm()) remoteSubscribeConfirm(block);
+                else if(block.isUpdate()) remoteUpdate(block);
+                else if(block.isUnsubscribe()) remoteUnsubscribe(block);
                 else throw new IllegalStateException();
             }
         // if the data is corrupted, close the connection

@@ -21,16 +21,14 @@ import java.text.ParseException;
 class PeerBlock {
     
     /** constants used in the protocol */
-    public static final String RESOURCE_NAME = "Resource-Name";
-    public static final String DELTA = "Delta";
-    public static final String SNAPSHOT = "Snapshot";
-    public static final String SESSION_ID = "Session-Id";
-    public static final String UPDATE_ID = "Update-Id";
-    public static final String ACTION = "Action";
-    public static final String ACTION_SUBSCRIBE = "Subscribe";
-    public static final String ACTION_SUBSCRIBE_CONFIRM = "Subscribe-Confirm";
-    public static final String ACTION_UPDATE = "Update";
-    public static final String ACTION_UNSUBSCRIBE = "Unsubscribe";
+    private static final String RESOURCE_NAME = "Resource-Name";
+    private static final String SESSION_ID = "Session-Id";
+    private static final String UPDATE_ID = "Update-Id";
+    private static final String ACTION = "Action";
+    private static final String ACTION_SUBSCRIBE = "Subscribe";
+    private static final String ACTION_SUBSCRIBE_CONFIRM = "Subscribe-Confirm";
+    private static final String ACTION_UPDATE = "Update";
+    private static final String ACTION_UNSUBSCRIBE = "Unsubscribe";
 
     /** the resource this block is concerned with */
     private String resourceName = null;
@@ -84,6 +82,34 @@ class PeerBlock {
      */
     public static PeerBlock unsubscribe(String resourceName) {
         return new PeerBlock(resourceName, -1, PeerBlock.ACTION_UNSUBSCRIBE, -1, null);
+    }
+    
+    /**
+     * Whether this is a subscribe-confirm block.
+     */
+    public boolean isSubscribeConfirm() {
+        return ACTION_SUBSCRIBE_CONFIRM.equals(action);
+    }
+    
+    /**
+     * Whether this is an update block.
+     */
+    public boolean isUpdate() {
+        return ACTION_UPDATE.equals(action);
+    }
+    
+    /**
+     * Whether this is a subscribe block.
+     */
+    public boolean isSubscribe() {
+        return ACTION_SUBSCRIBE.equals(action);
+    }
+    
+    /**
+     * Whether this is an unsubscribe block.
+     */
+    public boolean isUnsubscribe() {
+        return ACTION_UNSUBSCRIBE.equals(action);
     }
     
     /**
