@@ -16,7 +16,7 @@ import java.util.Collections;
  * Models a tree which keeps its elements either in sorted order
  * or by index.
  *
- * When an <code>IndexedTree</code> is being used in sorted order, it
+ * <p>When an <code>IndexedTree</code> is being used in sorted order, it
  * <strong>must</strong> be accessed using sorted order exclusively.
  * This means that the <code>setValue()</code> method of
  * <code>IndexedTreeNode</code> shall not be used, and neither should
@@ -86,6 +86,8 @@ public class IndexedTree {
     /**
      * Gets an iterator for this tree. The iterator moves in sorted order
      * for sorted trees and order of increasing index for indexed trees.
+     * This iterator returns <code>IndexedTreeNode</code>s, so to get the
+     * values use the node's <code>getValue()</code> method.
      */
     public Iterator iterator() {
         if(root != null) return root.getSmallestChildNode().iterator();
