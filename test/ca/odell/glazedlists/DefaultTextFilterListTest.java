@@ -29,6 +29,8 @@ public class DefaultTextFilterListTest extends TestCase {
         assertTrue(Arrays.equals(new String[] {"XYZ"}, list.normalizeFilter(new String[] {null, "", "xyz", null, "", "xy", null, "", "x", null, ""})));
         assertTrue(Arrays.equals(new String[] {"XYZ"}, list.normalizeFilter(new String[] {null, "", "xy", null, "", "xyz", null, "", "x", null, ""})));
         assertTrue(Arrays.equals(new String[] {"XYZ"}, list.normalizeFilter(new String[] {null, "", "xyz", null, "", "xyz", null, "", "xyz", null, ""})));
+        assertTrue(Arrays.equals(new String[] {"BLACKENED"}, list.normalizeFilter(new String[] {"black", "blackened"})));
+        assertTrue(Arrays.equals(new String[] {"THIS"}, list.normalizeFilter(new String[] {"this", "his"})));
     }
 
     public void testIsFilterRelaxed() {

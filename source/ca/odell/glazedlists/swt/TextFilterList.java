@@ -30,7 +30,7 @@ import org.eclipse.swt.graphics.*;
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
  *
- * <p><strong>Warning:</strong> This class is a a developer preview and subject to
+ * <p><strong>Warning:</strong> This class is a developer preview and subject to
  * many bugs and API changes.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
@@ -104,15 +104,10 @@ public class TextFilterList extends DefaultTextFilterList {
     }
     
     /**
-     * When the filter changes, first update the regex pattern used
-     * to do filtering, then apply the filter on all elements.
+     * When the filter changes, first update the filter values used
+     * to do filtering, then apply the filter on all list elements.
      */
     private void reFilter() {
-        ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
-        try {
-            setFilterText(filterEdit.getText().split("[ \t]"));
-        } finally {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
-        }
+        setFilterText(filterEdit.getText().split("[ \t]"));
     }
 }

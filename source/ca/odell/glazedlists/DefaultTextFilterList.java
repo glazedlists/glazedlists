@@ -7,6 +7,7 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.util.concurrent.InternalReadWriteLock;
 // for recycling filter strings
 import java.util.*;
 
@@ -74,18 +75,45 @@ public class DefaultTextFilterList extends AbstractFilterList {
 
     /**
      * Adjusts the filters of this {@link DefaultTextFilterList} and then
-     * applies the new filters to the list.
+     * applies the new filters to this list. This method is thread safe. It
+     * delegates to {@link #updateFilter(String[])} to perform the actual logic
+     * of updating the filter value and applying the new filters to this list.
+     * Subclasses should override that method to alter the filtering process,
+     * but clients should always use this method when changing the filter.
      *
-     * @param newFilters the {@link String}s representing all of the filter values
+     * @param newFilter the {@link String}s representing all of the filter values
      */
-    public void setFilterText(final String[] newFilters) {
+    public final void setFilterText(final String[] newFilter) {
         // adjusting the filters and refiltering the source list happens "atomically"
         updates.beginEvent(true);
+        try {
+            // acquire the lock before updating this list
+            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
 
+            // delegate to updateFilter (which is overridable) to perform the work
+            this.updateFilter(newFilter);
+
+        } finally {
+            // release the lock
+            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
+            // commit the changes and notify listeners
+            updates.commitEvent();
+        }
+    }
+
+    /**
+     * Performs the actual filtering of this list based on the
+     * <code>newFilter</code>. It is called from
+     * {@link #setFilterText(String[])} which guarantees thread safety
+     * and atomicity.
+     *
+     * @param newFilter the {@link String}s representing all of the filter values
+     */
+    protected void updateFilter(String[] newFilter) {
         // store the oldFilters so later we can determine the type of change that has occurred
         final String[] oldFilters = filters;
         // update the filters
-        filters = normalizeFilter(newFilters);
+        filters = normalizeFilter(newFilter);
 
         // rebuild the filter -> TextSearchStrategy map for the new filters
         filterStrategies = new TextSearchStrategy[filters.length];
@@ -107,20 +135,23 @@ public class DefaultTextFilterList extends AbstractFilterList {
                 handleFilterChanged();
             }
         }
-
-        // commit the changes and notify listeners
-        updates.commitEvent();
     }
 
     /**
      * This convenience method returns a copy of the <code>filterStrings</code>
      * in upper case format with null and <code>""</code> values removed. It
      * also removes irrelevant search filters which are search filters that do
-     * not constrain the filter. For example, if <code>filterStrings</code>
-     * contained both <code>"black"</code> and <code>"blackened"</code> then
-     * this method's return value would not contain <code>"black"</code> since
+     * not constrain the filter. <p>
+     *
+     * For example, if <code>filterStrings</code> contained both
+     * <code>"black"</code> and <code>"blackened"</code> then this method's
+     * return value would not contain <code>"black"</code> since
      * <code>"blackened"</code> is a more precise search term that contains
-     * <code>"black"</code>.
+     * <code>"black"</code>.<p>
+     *
+     * Similarly, <code>"this"</code> and <code>"his"</code> would prune
+     * <code>"his"</code> since <code>"his"</code> is less precise than
+     * <code>"this"</code> and thus adds no filtering value.
      *
      * @param filterStrings an array of Strings to convert to upper case
      * @return a copy of the minimal array of <code>filterStrings</code> in
@@ -147,7 +178,8 @@ public class DefaultTextFilterList extends AbstractFilterList {
                 // with minimalFilter[i] to prove that minimalFilter[i] is not
                 // a *required* filter
                 for(int j = 0; j < minimalFilter.length; j++) {
-                    if(minimalFilter[j] && i != j && filterStrings[j].startsWith(filterStrings[i])) {
+                    if(minimalFilter[j] && i != j && filterStrings[j].indexOf(filterStrings[i]) != -1) {
+                        System.out.println("removing " + filterStrings[i]);
                         minimalFilter[i] = false;
                         validFilters--;
                         break;

@@ -218,14 +218,9 @@ public final class TextFilterList extends DefaultTextFilterList {
     
     /**
      * When the filter changes, first update the filter values used
-     * to do filtering, then apply the filter on all elements.
+     * to do filtering, then apply the filter on all list elements.
      */
     private void reFilter() {
-        ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
-        try {
-            this.setFilterText(filterEdit.getText().split("[ \t]"));
-        } finally {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
-        }
+        this.setFilterText(filterEdit.getText().split("[ \t]"));
     }
 }
