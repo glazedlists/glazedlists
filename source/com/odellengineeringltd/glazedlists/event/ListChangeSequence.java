@@ -208,7 +208,7 @@ public class ListChangeSequence {
     
     /**
      * Registers the specified listener to be notified whenever new changes
-     * are appended to this list change set.
+     * are appended to this list change sequence.
      *
      * For each listener, a ListChangeEvent is created, which provides
      * a read-only view to the list changes in the list. The same
@@ -219,5 +219,14 @@ public class ListChangeSequence {
     public synchronized void addListChangeListener(ListChangeListener listChangeListener) {
         listeners.add(listChangeListener);
         listenerEvents.add(new ListChangeEvent(this));
+    }
+    /**
+     * Removes the specified listener from receiving notification when new
+     * changes are appended to this list change sequence.
+     */
+    public synchronized void removeListChangeListener(ListChangeListener listChangeListener) {
+        int index = listeners.indexOf(listChangeListener);
+        listeners.remove(index);
+        listenerEvents.remove(index);
     }
 }

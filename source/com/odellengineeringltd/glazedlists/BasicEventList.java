@@ -343,6 +343,12 @@ public class BasicEventList implements EventList, Serializable {
     public final void addListChangeListener(ListChangeListener listChangeListener) {
         updates.addListChangeListener(listChangeListener);
     }
+    /**
+     * Removes the specified listener from receiving change updates for this list.
+     */
+    public void removeListChangeListener(ListChangeListener listChangeListener) {
+        updates.removeListChangeListener(listChangeListener);
+    }
 
     /**
      * For implementing the EventList interface. This returns this list, which does

@@ -25,9 +25,6 @@ import com.odellengineeringltd.glazedlists.event.*;
  */
 public class CachingList extends MutationList {
 
-    /** the change event and notification system */
-    protected ListChangeSequence updates = new ListChangeSequence();
-    
     /** the cache is implemented using a bounded map with indexes as keys */
     private BoundedMap cache;
     

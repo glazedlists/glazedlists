@@ -34,6 +34,16 @@ public interface EventList extends List {
     public void addListChangeListener(ListChangeListener listChangeListener);
 
     /**
+     * Removes the specified listener from receiving change updates for this
+     * list.
+     *
+     * @since 2004-01-30. This has been added to support the new FreezableList.
+     *      If you need to implement this method, please review the implementation
+     *      in MutationList for an example.
+     */
+    public void removeListChangeListener(ListChangeListener listChangeListener);
+
+    /**
      * Gets the source list that this list depends on. This may return the same
      * object, or another object. This is useful for synchronization of chained
      * lists, so that dependent lists can be synchronized on the root list to
