@@ -163,11 +163,17 @@ public class Issue implements TextFilterable, Comparable {
     public Integer getId() {
         return id;
     }
+    public void setId(Integer id) {
+        this.id = id;
+    }
     /**
      * Current status of this issue.
      */
     public String getStatus() {
         return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
     }
     /**
      * Priority (severity) assigned to issue.
@@ -175,11 +181,17 @@ public class Issue implements TextFilterable, Comparable {
     public String getPriority() {
         return priority;
     }
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
     /**
      * The issue's resolution, if any
      */
     public String getResolution() {
         return resolution;
+    }
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
     }
     /**
      * Product against which issue is reported.
@@ -235,6 +247,9 @@ public class Issue implements TextFilterable, Comparable {
     public String getIssueType() {
         return issueType;
     }
+    public void setIssueType(String issueType) {
+        this.issueType = issueType;
+    }
     /**
      * Issue creation timestamp ('yyyy-mm-dd hh:mm:ss').
      */
@@ -270,6 +285,9 @@ public class Issue implements TextFilterable, Comparable {
      */
     public String getShortDescription() {
         return shortDescription;
+    }
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
     }
     /**
      * List of keywords for this issue. 

@@ -39,7 +39,7 @@ import java.io.Serializable;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-abstract class AbstractEventList implements EventList, Serializable {
+public abstract class AbstractEventList implements EventList, Serializable {
     
     /** the change event and notification system */
     protected ListEventAssembler updates = new ListEventAssembler(this);

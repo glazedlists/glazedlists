@@ -93,6 +93,9 @@ public class IssuesBrowser extends Applet {
         IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
         SortedList issuesSortedList = new SortedList(issuesUserFiltered);
         TextFilterList issuesTextFiltered = new TextFilterList(issuesSortedList);
+        //String[] fields = new String[] { "id", "issueType", "priority", "status", "resolution", "shortDescription" };
+        //String[] labels = new String[] { "ID", "Issue Type", "Priority", "State", "Result", "Summary" };
+        //EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, fields, labels, false);
         EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesJTable.setSelectionModel(new EventSelectionModel(issuesTextFiltered).getListSelectionModel());

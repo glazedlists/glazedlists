@@ -63,6 +63,28 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     }
     
     /**
+     * Creates a new table that renders the specified list with an automatically
+     * generated {@link TableFormat}. This uses a convenience {@link TableFormat} that 
+     * may not be flexible enough for some applications. In this case consider
+     * implementing a custom {@link TableFormat} directly.
+     *
+     * @param propertyNames an array of property names in the Java Beans format.
+     *      For example, if your list contains Objects with the methods getFirstName(),
+     *      setFirstName(String), getAge(), setAge(Integer), then this array should
+     *      contain the two strings "firstName" and "age". This format is specified
+     *      by the Java Beans {@link java.beans.PropertyDescriptor}.
+     * @param columnLabels the corresponding column names for the listed property
+     *      names. For example, if your columns are "firstName" and "age", then
+     *      your labels might be "First Name" and "Age".
+     * @param writable whether the columns in your table are writable. Use true to
+     *      specify all columns as editable or false to specify no columns as
+     *      editable.
+     */
+    public EventTableModel(EventList source, String[] propertyNames, String[] columnLabels, boolean writable) {
+        this(source, new BeanTableFormat(propertyNames, columnLabels, writable));
+    }
+    
+    /**
      * Gets the Table Format.
      */
     public TableFormat getTableFormat() {
