@@ -15,7 +15,7 @@ import com.odellengineeringltd.glazedlists.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListChangeBlock {
+public final class ListChangeBlock {
     
     /** different types of changes */
     public static final int DELETE = 0;
@@ -36,7 +36,7 @@ public class ListChangeBlock {
     /**
      * Create a new single-entry list change of the specified index and type.
      */
-    public ListChangeBlock(int index, int type) {
+    ListChangeBlock(int index, int type) {
         this.startIndex = index;
         this.endIndex = index;
         this.type = type;
@@ -47,24 +47,24 @@ public class ListChangeBlock {
      * Create a new single-entry list change of the specified start index, end
      * index and type.
      */
-    public ListChangeBlock(int startIndex, int endIndex, int type) {
+    ListChangeBlock(int startIndex, int endIndex, int type) {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.type = type;
         this.valid = true;
         assert(startIndex >= 0 && endIndex >= startIndex);
     }
-    public ListChangeBlock() {
+    ListChangeBlock() {
         this.valid = false;
     }
-    public void setData(int index, int type) {
+    void setData(int index, int type) {
         this.startIndex = index;
         this.endIndex = index;
         this.type = type;
         this.valid = true;
         assert(startIndex >= 0 && endIndex >= startIndex);
     }
-    public void setData(int startIndex, int endIndex, int type) {
+    void setData(int startIndex, int endIndex, int type) {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.type = type;
@@ -76,30 +76,30 @@ public class ListChangeBlock {
      * Setting a change to being valid means it is in use. Invalid
      * means that it can be recycled via object pooling.
      */
-    public void setInvalid() {
+    void setInvalid() {
         this.valid = false;
     }
-    public boolean isValid() {
+    boolean isValid() {
         return valid;
     }
 
     /**
      * Get the first index in the range of this change.
      */
-    public int getStartIndex() {
+    int getStartIndex() {
         return startIndex;
     }
     /**
      * Get the last index in the range of this change.
      */
-    public int getEndIndex() {
+    int getEndIndex() {
         return endIndex;
     }
 
     /**
      * Get the type of this change.
      */
-    public int getType() {
+    int getType() {
         return type;
     }
     
@@ -118,7 +118,7 @@ public class ListChangeBlock {
      *      change if it is non-null. Otherwise the source list change has
      *      increased in size and no new object is necessary.
      */
-    public ListChangeBlock append(int appendStartIndex, int appendEndIndex, int type) {
+    ListChangeBlock append(int appendStartIndex, int appendEndIndex, int type) {
         // bail if the types are different
         if(type != this.type) return null;
         // insert events: join if the ends touch

@@ -26,15 +26,15 @@ import java.util.ConcurrentModificationException;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListChangeSequence {
+public final class ListChangeSequence {
     
     /** the list of lists of change blocks */
     private ArrayList atomicChanges = new ArrayList();
     private int oldestChange = 0;
     /** the total count of simple changes */
-    public int changeCount = 0;
+    private int changeCount = 0;
     /** the total number of change blocks */
-    public int blockCount = 0;
+    private int blockCount = 0;
     
     /** the current working copy of the atomic change */
     private ArrayList atomicChangeBlocks = null;
@@ -44,7 +44,7 @@ public class ListChangeSequence {
     private ListChangeBlock atomicLatestBlock = null;
     
     /** the pool of list change objects */
-    public ArrayList changePool = new ArrayList();
+    private ArrayList changePool = new ArrayList();
     
     /** the sequences that provide a view on this queue */
     private ArrayList listeners = new ArrayList();
@@ -169,7 +169,7 @@ public class ListChangeSequence {
     /**
      * Gets the total number of blocks in the specified atomic change.
      */
-    public int getBlockCount(int atomicCount) {
+    int getBlockCount(int atomicCount) {
         List atomicChange = (List)atomicChanges.get(atomicCount);
         return atomicChange.size();
     }
@@ -193,7 +193,7 @@ public class ListChangeSequence {
      * that not blocks may be cleaned up after they are viewed by all
      * monitoring sequences. Such blocks may not be available.
      */
-    public ListChangeBlock getBlock(int atomicCount, int block) {
+    ListChangeBlock getBlock(int atomicCount, int block) {
         List atomicChange = (List)atomicChanges.get(atomicCount);
         return (ListChangeBlock)atomicChange.get(block);
     }

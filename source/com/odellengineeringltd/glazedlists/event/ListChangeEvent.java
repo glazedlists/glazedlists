@@ -32,7 +32,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListChangeEvent {
+public final class ListChangeEvent {
     
     /** the number of atomic changes seen by this view */
     private int atomicCount;
@@ -50,7 +50,7 @@ public class ListChangeEvent {
      * Create a new list change sequence that uses the source master list
      * for the source of changes.
      */
-    public ListChangeEvent(ListChangeSequence masterSequence) {
+    ListChangeEvent(ListChangeSequence masterSequence) {
         this.masterSequence = masterSequence;
         atomicCount = masterSequence.getAtomicCount();
         blockCount = 0;
