@@ -65,7 +65,7 @@
         <include name="**/*.class"/>
       </fileset>
       <manifest>
-        <attribute name="Main-Class" value="com.odellengineeringltd.glazedlists.demo.Demo"/>
+        <attribute name="Main-Class" value="com.odellengineeringltd.glazedlists.demo.ProgrammingLanguageBrowser"/>
         <attribute name="Sealed" value="true"/>
       </manifest>
     </jar>
