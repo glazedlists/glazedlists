@@ -27,7 +27,7 @@ public class TaskQueryList extends QueryList {
     public TaskManager taskManager;
     
     /** the previously executing query task */
-    public TaskContext queryTaskContext;
+    public TaskContext queryTaskContext = null;
     
     /**
      * Create a new TaskQueryList with no query.
@@ -45,7 +45,7 @@ public class TaskQueryList extends QueryList {
      */
     public synchronized void setQuery(Query query) {
         // interrupt the previous query!
-        queryTaskContext.cancelTask();
+        if(queryTaskContext != null) queryTaskContext.cancelTask();
         
         // execute this query on a task
         queryTaskContext = taskManager.runTask(new QueryTask(query));
