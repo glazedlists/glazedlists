@@ -38,8 +38,6 @@ public class ListChangeSequence {
     
     /** the current working copy of the atomic change */
     private ArrayList atomicChangeBlocks = null;
-    /** the atomic change's count of simple changes */
-    private int atomicBlockCount = 0;
     /** the atomic change's count of change blocks */
     private int atomicChangeCount = 0;
     /** the most recent list change; this is the only change we can append to */
@@ -66,7 +64,6 @@ public class ListChangeSequence {
             throw new java.util.ConcurrentModificationException("Cannot change this list while another change is taking place");
         }
         atomicChangeBlocks = new ArrayList();
-        atomicBlockCount = 0;
         atomicChangeCount = 0;
         atomicLatestBlock = null;
         
@@ -115,17 +112,15 @@ public class ListChangeSequence {
         // create a new change for the first change
         if(atomicLatestBlock == null) {
             atomicLatestBlock = createListChangeBlock(startIndex, endIndex, type);
-            atomicBlockCount++;
             atomicChangeBlocks.add(atomicLatestBlock);
             return;
         }
         
         // append the change if possible
         ListChangeBlock appended = atomicLatestBlock.append(startIndex, endIndex, type);
-        // if appended is not null, the changes couldn't be merged
+        // if appended is null the changes couldn't be merged
         if(appended == null) {
             appended = createListChangeBlock(startIndex, endIndex, type);
-            atomicBlockCount++;
             atomicChangeBlocks.add(appended);
             atomicLatestBlock = appended;
         }
@@ -139,11 +134,11 @@ public class ListChangeSequence {
         // do a 'real' commit only on non-empty changes
         if(atomicChangeBlocks.size() > 0) {
             // sort and simplify this block
-            //sortChanges(atomicChangeBlocks);
+            sortChangeBlocks(atomicChangeBlocks);
             // add this to the complete set
             atomicChanges.add(atomicChangeBlocks);
             changeCount = changeCount + atomicChangeCount;
-            blockCount = blockCount + atomicBlockCount;
+            blockCount = blockCount + atomicChangeBlocks.size();
             
             // notify listeners
             for(int i = 0; i < listeners.size(); i++) {
@@ -155,7 +150,6 @@ public class ListChangeSequence {
 
         // clear the change for the next caller
         atomicChangeBlocks = null;
-        atomicBlockCount = 0;
         atomicChangeCount = 0;
         atomicLatestBlock = null;
     }
@@ -259,13 +253,11 @@ public class ListChangeSequence {
      * @param index the index of the first block to change. The second block will
      *      be at <code>index+1</code>.
      * @return the number of blocks remaining from the attempt to combine the two
-     *      source blocks.
+     *      source blocks. This will be 2 if no combine was made.
      */
     private int combineBlocks(List changes, int index) {
         ListChangeBlock first = (ListChangeBlock)changes.get(index);
         ListChangeBlock second = (ListChangeBlock)changes.get(index + 1);
-        
-        //System.out.println("EXAMINING " + first +  " THEN " + second);
 
         // the variables for the first block
         int firstType = first.getType();
@@ -283,10 +275,10 @@ public class ListChangeSequence {
         if(firstType == secondType) {
             if(firstType == ListChangeBlock.INSERT) {
                 if(secondStartIndex >= firstStartIndex && secondStartIndex <= firstEndIndex - 1) {
-                    //System.out.println("COMBINING " + first +  " WITH " + second);
                     firstEndIndex = firstEndIndex + secondLength;
                     first.setData(firstStartIndex, firstEndIndex, firstType);
                     changes.remove(index + 1);
+                    changePool.add(second);
                     return 1;
                 } else {
                     return 2;
@@ -297,15 +289,19 @@ public class ListChangeSequence {
                     firstEndIndex = Math.max(firstEndIndex, secondEndIndex);
                     first.setData(firstStartIndex, firstEndIndex, firstType);
                     changes.remove(index + 1);
+                    changePool.add(second);
                     return 1;
                 } else {
                     return 2;
                 }
             } else if(firstType == ListChangeBlock.DELETE) {
                 if(secondStartIndex <= firstStartIndex && secondEndIndex >= firstStartIndex - 1) {
-                    firstEndIndex = firstEndIndex + secondLength;
+                    int deleteLength = firstLength + secondLength;
+                    firstStartIndex = Math.min(firstStartIndex, secondStartIndex);
+                    firstEndIndex = firstStartIndex + deleteLength - 1;
                     first.setData(firstStartIndex, firstEndIndex, firstType);
                     changes.remove(index + 1);
+                    changePool.add(second);
                     return 1;
                 } else {
                     return 2;
@@ -313,9 +309,8 @@ public class ListChangeSequence {
             }
         }
         
-        // if it is an INSERT and a DELETE
-        if((firstType == ListChangeBlock.INSERT && secondType == ListChangeBlock.DELETE)
-        || (firstType == ListChangeBlock.DELETE && secondType == ListChangeBlock.INSERT)) {
+        // if it is an INSERT and then a DELETE
+        if(firstType == ListChangeBlock.INSERT && secondType == ListChangeBlock.DELETE) {
             // ensure there is an intersection
             if(firstEndIndex >= secondStartIndex && firstStartIndex <= secondEndIndex) {
 
@@ -325,14 +320,6 @@ public class ListChangeSequence {
                 int intersectionLength = intersectionEndIndex - intersectionStartIndex + 1;
                 assert(intersectionLength > 0);
                 
-                // add an UPDATE for DELETE then INSERT
-                int addedBlocksCount = 0;
-                if(firstType == ListChangeBlock.DELETE && secondType == ListChangeBlock.INSERT) {
-                    ListChangeBlock update = createListChangeBlock(intersectionStartIndex, intersectionEndIndex, ListChangeBlock.UPDATE);
-                    changes.add(index + 2, update);
-                    addedBlocksCount++;
-                }
-
                 // keep track of the number of blocks removed
                 int removedBlocksCount = 0;
                 
@@ -343,6 +330,7 @@ public class ListChangeSequence {
                     first.setData(firstStartIndex, firstEndIndex, firstType);
                 } else {
                     changes.remove(index);
+                    changePool.add(first);
                     removedBlocksCount++;
                 }
                 
@@ -353,73 +341,39 @@ public class ListChangeSequence {
                     second.setData(secondStartIndex, secondEndIndex, secondType);
                 } else {
                     changes.remove(index + 1 - removedBlocksCount);
+                    changePool.add(second);
                     removedBlocksCount++;
                 }
                 
                 // return the number of blocks remaining
-                return (2 - removedBlocksCount + addedBlocksCount);
+                return (2 - removedBlocksCount);
             
-            } else {
-                return 2;
             }
         }
         
-        // if it is an UPDATE and an INSERT or DELETE
-        if(firstType == ListChangeBlock.UPDATE || secondType == ListChangeBlock.UPDATE) {
-            // handle this case
-            return 2;
-        }
-        
-        throw new RuntimeException();
+        // all other cases we cannot combine
+        return 2;
     }
     
     /**
-     * Sorts the blocks of the specified list of changes.
-     */
-    private void sortChanges(List changes) {
-        //System.out.println("SORTING BLOCKS! " + changes.size());
-        for(int i = 0; i < changes.size() - 1; i++) {
-            // prepare to debug the change
-            String firstBefore = "" + changes.get(i);
-            String secondBefore = "" + changes.get(i + 1);
-
-            // combine the adjacent blocks
-            int blocksRemaining = combineBlocks(changes, i);
-
-            // debug the change
-            /*if(blocksRemaining == 0) {
-                System.out.println(firstBefore + " AND " + secondBefore + " cancelled each other out!");
-            } else if(blocksRemaining == 1) {
-                String firstAfter = "" + changes.get(i);
-                System.out.println(firstBefore + " AND " + secondBefore + " became " + firstAfter);
-            } else if(blocksRemaining == 2) {
-                String firstAfter = "" + changes.get(i);
-                String secondAfter = "" + changes.get(i + 1);
-                if(!firstBefore.equals(firstAfter) || !secondBefore.equals(secondAfter)) {
-                    System.out.println(firstBefore + " AND " + secondBefore + " became " + firstAfter + " AND " + secondAfter);
-                }
-            }*/
-        }
-    }
-    
-    
-    /**
-     * Ensures that two list change blocks are in proper sequence and discrete.
-     * This will change the blocks so that the following are true:
-     * <li>the action described by the blocks does not change
-     * <li>the blocks are not redundant
-     * <li>the blocks are in increasing order
+     * Attempts to swap the specified list change blocks. Blocks will be swapped
+     * whenever the second change occurs before the first change in the final
+     * list.
      *
-     * <p>This applies to a adjacent blocks within a List. This method can be used
-     * within a bubble-sort to ensure the entire list holds the required properties.
+     * <p>The specified blocks may <strong>not</strong> be <i>combinable</i>, that
+     * is, they may not be able to be replaced by a single block.
      *
      * @param changes the list where the two blocks are located
      * @param index the index of the first block to change. The second block will
      *      be at <code>index+1</code>.
+     * @return true if the blocks were swapped.
      */
-    /*private int simplifyAndOrderBlocks(List changes, int index) {
-        ListChangeBlock first = changes.get(index);
-        ListChangeBlock second = changes.get(index + 1);
+    private boolean swapBlocks(List changes, int index) {
+        ListChangeBlock first = (ListChangeBlock)changes.get(index);
+        ListChangeBlock second = (ListChangeBlock)changes.get(index + 1);
+
+        // get rid of this assertion later, it is just for sanity
+        assert(combineBlocks(changes, index) != 2);
         
         // the variables for the first block
         int firstType = first.getType();
@@ -432,167 +386,85 @@ public class ListChangeSequence {
         int secondStartIndex = second.getStartIndex();
         int secondEndIndex = second.getEndIndex();
         int secondLength = secondEndIndex - secondStartIndex + 1;
-
-        // handle cases starting with an INSERT
-        if(firstType == ListChangeBlock.INSERT) {
-            
-            // handle INSERT followed by INSERT
-            if(secondType == ListChangeBlock.INSERT) {
-                // if the second precedes the first, swap and shift
-                if(secondStartIndex < firstStartIndex) {
-                    // swap
-                    changes.set(index, second);
-                    changes.set(index + 1, first);
-
-                    // shift
-                    firstStartIndex = firstStartIndex + secondLength;
-                    firstEndIndex = firstEndIndex + secondLength;
-                    first.setData(firstStartIndex, firstEndIndex, firstType);
-                    
-                    // we have processed this pair
-                    return 1;
+        
+        if(secondType == ListChangeBlock.INSERT) {
+            if(secondStartIndex <= firstStartIndex) {
+                // swap
+                changes.set(index, second);
+                changes.set(index + 1, first);
                 
-                // if the inserts overlap, merge them
-                } else if(secondStartIndex <= firstEndIndex) {
-                    // merge
-                    firstEndIndex = firstEndIndex + secondLength;
-                    
-                    // remove the second
-                    changes.remove(index + 1);
-                    
-                    // we must process the new replacement for second
-                    return 0;
-                // if the second change happens after the first, do nothing
-                } else {
-                    // we have processed this pair
-                    return 1;
-                }
-                assert(false);
+                // shift first
+                firstStartIndex = firstStartIndex + secondLength;
+                firstEndIndex = firstEndIndex + secondLength;
+                first.setData(firstStartIndex, firstEndIndex, firstType);
 
-            // handle INSERT followed by DELETE
-            } else if(secondType == ListChangeBlock.DELETE) {
-                // if the second precedes the first, swap and shift
-                if(secondEndIndex < firstStartIndex) {
-                    // swap
-                    changes.set(index, second);
-                    changes.set(index + 1, first);
-                    
-                    // shift
-                    firstStartIndex = firstStartIndex - secondLength;
-                    firstEndIndex = firstEndIndex - secondLength;
-                    first.setData(firstStartIndex, firstEndIndex, firstType);
-                    
-                    // we have processed this pair
-                    return 1;
+                return true;
+            } else {
+                return false;
+            }
+        } else if(secondType == ListChangeBlock.DELETE) {
+            if(secondStartIndex <= firstStartIndex) {
+                // swap
+                changes.set(index, second);
+                changes.set(index + 1, first);
                 
-                // if the second intersects the first and it does not trail, contract both
-                } else if(secondEndIndex <= firstEndIndex) {
-                    // if the remove leads
-                    if(secondHeadIndex < firstHeadIndex) {
-                        // swap
-                        changes.set(index, second);
-                        changes.set(index + 1, first);
-                        
-                        // contract the remove
-                        secondEndIndex = firstHeadIndex - 1;
-                        second.setData(secondStartIndex, secondEndIndex, secondType);
-                        
-                        // contract the insert and remove it if necessary
-                        int contractedSecondLength = secondEndIndex - secondStartIndex + 1;
-                        int deltaSecondLength = secondLength - contractedSecondLength;
-                        firstEndIndex = firstEndIndex - deltaSecondLength;
-                        firstLength = firstEndIndex - firstStartIndex + 1;
-                        
-                        // the insert is now unnecessary
-                        if(firstLength == 0) {
-                            changes.remove(index + 1);
-                            return 0;
-                        // we have processed this pair
-                        } else {
-                            first.setData(firstStartIndex, firstEndIndex, firstType);
-                            return 1;
-                        }
-                        
-                    // if the remove is contained by the insert, the remove is unnecessary
-                    } else if(secondHeadIndex >= firstHeadIndex) {
-                        // the remove is now unnecessary
-                        changes.remove(index + 1);
-                        
-                        // adjust the first length
-                        firstEndIndex = firstEndIndex - secondLength;
-                        firstLength = firstEndIndex - firstStartIndex + 1;
-                        
-                        // if the first length is now zero, the insert is also unnecessary
-                        if(firstLength == 0) {
-                            changes.remove(index);
-                            return -1;
-                        // we must process the new replacement for second
-                        } else {
-                            return 0;
-                        }
-                    }
-                    assert(false);
+                // shift first
+                firstStartIndex = firstStartIndex - secondLength;
+                firstEndIndex = firstEndIndex - secondLength;
+                first.setData(firstStartIndex, firstEndIndex, firstType);
 
-                // if the second trails, and may intersect with the first
-                } else if(secondEndIndex > firstEndIndex) {
-                    // if the remove contains the insert, the insert is unnecessary
-                    if(secondStartIndex <= firstStartIndex) {
-                        // the insert is now unnecessary
-                        changes.remove(index);
-                        
-                        // adjust the remove length
-                        secondEndIndex = secondEndIndex - firstLength;
-                        secondLength = secondEndIndex - secondStartIndex + 1;
-                        
-                        assert(secondLength > 0);
-                        
-                        // we must find a new replacement for the first
-                        return 0;
-
-                    // if they intersect, contract them both
-                    } else if(secondStartIndex <= firstEndIndex) {
-                        // contract the insert
-                        firstEndIndex = secondStartIndex - 1;
-                        first.setData(firstStartIndex, firstEndIndex, firstType);
-                        
-                        // contract the remove
-                        int contractedFirstLength = firstEndIndex - firstStartIndex + 1;
-                        int deltaFirstLength = firstLength - contractedFirstLength;
-                        secondEndIndex = secondEndIndex - deltaFirstLength;
-                        secondLength = secondEndIndex - secondStartIndex + 1;
-                        second.setData(secondStartIndex, secondEndIndex, secondType);
-                        
-                        assert(secondLength >= 0);
-                        
-                        // we have processed this pair
-                        return 1;
-
-                    // if the second change happens after the first, do nothing
-                    } else {
-                        // we have processed this pair
-                        return 1;
-                    }
-                    assert(false);
-                }
+                return true;
+            } else {
+                return false;
+            }
+        } else if(secondType == ListChangeBlock.UPDATE) {
+            if(secondStartIndex < firstStartIndex) {
+                // swap
+                changes.set(index, second);
+                changes.set(index + 1, first);
                 
-            // handle INSERT followed by UPDATE
-            } else if (secondType == ListChangeBlock.UPDATE) {
-                // if the update precedes the insert, swap
-                if(secondStartIndex <= firstStartIndex) {
-                    // swap
-                    changes.set(index, second);
-                    changes.set(index + 1, first);
-                    
-                    // we have processed this pair
-                    return 1;
-
-                // if the second change happens after the first, do nothing
-                } else if(secondStartIndex >= firstStartIndex) {
-                    // we have processed this pair
-                    return 1;
-                }
-                assert(false);
+                return true;
+            } else {
+                return false;
             }
         }
-    }*/
+        
+        throw new RuntimeException();
+    }
+    
+    /**
+     * Sorts the blocks of the specified list of changes. This ensures that
+     * the user iterating the list of change blocks can view changes in
+     * increasing order. This ensures that indicies will not be shifted.
+     *
+     * <p>This performs a bubble sort, swapping adjacent change blocks if
+     * they should be swapped. The bubble sort is used instead of a more
+     * efficient sort because it is necessary to adjust offsets when swapping
+     * and therefore it is preferred to only swap adjacent elements. Bubble
+     * sort is a sort that only swaps adjacent elements.
+     */
+    private void sortChangeBlocks(List changes) {
+        // repeat bubbling an element down the list
+        for(int repetition = 0; repetition < changes.size(); repetition++) {
+            // count the number of swaps made on this repetition
+            int repetitionSwaps = 0;
+            // keep track of the curent block to compress
+            int currentBlock = 0;
+            
+            // iterate through through all blocks, combining adjacent ones
+            while(currentBlock < changes.size() - 1 - repetition) {
+
+                // combine the adjacent blocks
+                int combineResult = combineBlocks(changes, currentBlock);
+    
+                // advance to the next block when there was no change
+                if(combineResult == 2) {
+                    boolean swapped = swapBlocks(changes, currentBlock);
+                    if(swapped) repetitionSwaps++;
+        
+                    currentBlock++;
+                }
+            }
+        }
+    }
 }
