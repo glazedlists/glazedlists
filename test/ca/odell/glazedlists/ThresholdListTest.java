@@ -973,6 +973,31 @@ public class ThresholdListTest extends TestCase {
         validateListsEquals(sortedBase, sortedCover);
     }
 
+    /** 
+     * Verifies that the ThresholdList fires consistent events.
+     */
+    public void testEventFiringIsConsistent() {
+        thresholdList.setLowerThreshold(-14931);
+        thresholdList.setUpperThreshold(-1931);
+        thresholdList.setLowerThreshold(-13931);
+        thresholdList.setUpperThreshold(-931);
+        source.add(new Integer(1401));
+        thresholdList.setLowerThreshold(-12926);
+        thresholdList.setUpperThreshold(74);
+        source.add(new Integer(2168));
+        source.add(new Integer(2996));
+        thresholdList.setLowerThreshold(-11930);
+        thresholdList.setUpperThreshold(1070);
+        source.add(new Integer(3895));
+        thresholdList.setLowerThreshold(-10931);
+        thresholdList.setUpperThreshold(2069);
+        source.add(new Integer(4235));
+        source.add(new Integer(4507));
+        thresholdList.setLowerThreshold(-9931);
+        thresholdList.setUpperThreshold(3069);
+    }
+
+    
     /**
      * Tests that the JavaBean constructor and supporting code
      * works as expected.
@@ -1018,7 +1043,7 @@ public class ThresholdListTest extends TestCase {
             return value;
         }
     }
-
+    
     private class IntegerEvaluator implements ThresholdEvaluator {
         /**
          * Returns an integer value which represents the object.
