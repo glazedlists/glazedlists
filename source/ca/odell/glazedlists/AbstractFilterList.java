@@ -170,11 +170,12 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
         // ensure all flags are set in the flagList indicating all
         // source list elements are matched with no filter
-        while(flagList.whiteSize() > 0) {
-            int sourceIndex = flagList.getIndex(0, Barcode.WHITE);
-            flagList.setBlack(sourceIndex, 1);
-            updates.addInsert(flagList.getBlackIndex(sourceIndex));
+        for(int i = 0; i < flagList.whiteSize(); i++) {
+            int sourceIndex = flagList.getIndex(i, Barcode.WHITE);
+            updates.addInsert(sourceIndex);
         }
+        flagList.clear();
+        flagList.addBlack(0, source.size());
 
         // commit the changes and notify listeners
         updates.commitEvent();
@@ -194,7 +195,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
         updates.beginEvent();
 
         // for all filtered items, see what the change is
-        for (int i = 0; i < flagList.whiteSize(); ) {
+        for(int i = 0; i < flagList.whiteSize(); ) {
             int sourceIndex = flagList.getIndex(i, Barcode.WHITE);
             if(filterMatches(source.get(sourceIndex))) {
                 flagList.setBlack(sourceIndex, 1);
@@ -222,7 +223,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
         updates.beginEvent();
 
         // for all unfiltered items, see what the change is
-        for (int i = 0; i < flagList.blackSize(); ) {
+        for(int i = 0; i < flagList.blackSize(); ) {
             int sourceIndex = flagList.getIndex(i, Barcode.BLACK);
             if(!filterMatches(source.get(sourceIndex))) {
                 flagList.setWhite(sourceIndex, 1);
