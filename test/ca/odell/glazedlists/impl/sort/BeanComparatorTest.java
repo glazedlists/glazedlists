@@ -18,6 +18,7 @@ import ca.odell.glazedlists.GlazedLists;
  * This test verifies that the BeanComparator works as expected.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author Andrea Aime
  */
 public class BeanComparatorTest extends TestCase {
 
