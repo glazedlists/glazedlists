@@ -61,7 +61,7 @@ public final class GlazedListsSwing {
      * a range of Objects between the results of getValue() and getMaximum()
      * on the BoundedRangeModel.
      */
-    public static BoundedRangeModel createLower(ThresholdList target) {
+    public static BoundedRangeModel lowerRangeModel(ThresholdList target) {
         return new LowerThresholdRangeModel(target);
     }
 
@@ -71,7 +71,7 @@ public final class GlazedListsSwing {
      * a range of Objects between the results of getMinimum() and getValue()
      * on the BoundedRangeModel.
      */
-    public static BoundedRangeModel createUpper(ThresholdList target) {
+    public static BoundedRangeModel upperRangeModel(ThresholdList target) {
         return new UpperThresholdRangeModel(target);
     }
 }

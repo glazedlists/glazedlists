@@ -164,7 +164,7 @@
 		</javac>
 	</target>
 
-	<target name="demo" depends="core,swing,swt">
+	<target name="demo" depends="core,swing">
 		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
 			<include name="**/demo/**"/>
 			<exclude name="**/swt/**"/>
