@@ -837,7 +837,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", (String)unique.get(1));
         assertEquals("D", (String)unique.get(2));
     }
-    
+
     /**
      * Verify that a unique list can be cleared.
      */
@@ -911,7 +911,7 @@ public class UniqueListTest extends TestCase {
         unique.add("C");
 
         SortedSet replacementSet = new TreeSet();
-	replacementSet.addAll(source);
+        replacementSet.addAll(source);
 
         // listen to changes on the unique list
         ListEventCounter counter = new ListEventCounter();
@@ -922,7 +922,7 @@ public class UniqueListTest extends TestCase {
 
         // verify that only one event has occured
         assertEquals(1, counter.getEventCount());
-	assertEquals(3, counter.getChangeCount(0));
+        assertEquals(3, counter.getChangeCount(0));
     }
 
     /**
@@ -977,4 +977,146 @@ public class UniqueListTest extends TestCase {
         assertEquals(controlList, unique);
     }
 
+
+
+    /**
+     * Test indexOf() consistency
+     */
+    public void testIndexOf() {
+        BasicEventList source = new BasicEventList();
+        UniqueList unique = new UniqueList(source, new IntegerComparator());
+
+        // Add 12 leading 1's
+        Integer one = new Integer(1);
+        for(int i = 0; i < 12; i++) {
+            source.add(one);
+        }
+
+        // Add 13 5's in the middle
+        Integer five = new Integer(5);
+        for(int i = 0; i < 13; i++) {
+            source.add(five);
+        }
+
+        // Add 10 trailing 9's
+        Integer nine = new Integer(9);
+        for(int i = 0; i < 10; i++) {
+            source.add(nine);
+        }
+
+        // Look for the index of a 1
+        int firstTestIndex = unique.indexOf(one);
+        assertEquals(0, firstTestIndex);
+
+        // Look for the index of a 5
+        int secondTestIndex = unique.indexOf(five);
+        assertEquals(1, secondTestIndex);
+
+        // Look for the index of a 9
+        int thirdTestIndex = unique.indexOf(nine);
+        assertEquals(2, thirdTestIndex);
+
+        // Test containment of a 10
+        Integer ten = new Integer(10);
+        int fourthTest = unique.indexOf(ten);
+        assertEquals(-1, fourthTest);
+    }
+
+    /**
+     * Test lastIndexOf() consistency
+     */
+    public void testLastIndexOf() {
+        BasicEventList source = new BasicEventList();
+        UniqueList unique = new UniqueList(source, new IntegerComparator());
+
+        // Add 12 leading 1's
+        Integer one = new Integer(1);
+        for(int i = 0; i < 12; i++) {
+            source.add(one);
+        }
+
+        // Add 13 5's in the middle
+        Integer five = new Integer(5);
+        for(int i = 0; i < 13; i++) {
+            source.add(five);
+        }
+
+        // Add 10 trailing 9's
+        Integer nine = new Integer(9);
+        for(int i = 0; i < 10; i++) {
+            source.add(nine);
+        }
+
+        // Look for the index of a 1
+        int firstTestIndex = unique.lastIndexOf(one);
+        assertEquals(0, firstTestIndex);
+
+        // Look for the index of a 5
+        int secondTestIndex = unique.lastIndexOf(five);
+        assertEquals(1, secondTestIndex);
+
+        // Look for the index of a 9
+        int thirdTestIndex = unique.lastIndexOf(nine);
+        assertEquals(2, thirdTestIndex);
+
+        // Test containment of a 10
+        Integer ten = new Integer(10);
+        int fourthTest = unique.lastIndexOf(ten);
+        assertEquals(-1, fourthTest);
+    }
+
+    /**
+     * Test containment accuracy
+     */
+    public void testContains() {
+        BasicEventList source = new BasicEventList();
+        UniqueList unique = new UniqueList(source, new IntegerComparator());
+
+        // Add 12 leading 1's
+        Integer one = new Integer(1);
+        for(int i = 0; i < 12; i++) {
+            source.add(one);
+        }
+
+        // Add 13 5's in the middle
+        Integer five = new Integer(5);
+        for(int i = 0; i < 13; i++) {
+            source.add(five);
+        }
+
+        // Add 10 trailing 9's
+        Integer nine = new Integer(9);
+        for(int i = 0; i < 10; i++) {
+            source.add(nine);
+        }
+
+        // Test containment of a 1
+        boolean firstTest = unique.contains(one);
+        assertEquals(true, firstTest);
+
+        // Test containment of a 5
+        boolean secondTest = unique.contains(five);
+        assertEquals(true, secondTest);
+
+        // Test containment of a 9
+        boolean thirdTest = unique.contains(nine);
+        assertEquals(true, thirdTest);
+
+        // Test containment of a 10
+        Integer ten = new Integer(10);
+        boolean fourthTest = unique.contains(ten);
+        assertEquals(false, fourthTest);
+    }
+
+    /**
+	 * Explicit comparator for Kevin's sanity!
+	 */
+	class IntegerComparator implements Comparator {
+        public int compare(Object a, Object b) {
+            int number1 = ((Integer)a).intValue();
+            int number2 = ((Integer)b).intValue();
+
+            return number1 - number2;
+        }
+    }
 }

@@ -39,7 +39,10 @@ public final class SortedList extends TransformedList {
     
     /** the comparator that this list uses for sorting */
     private Comparator comparator = null;
-    
+
+    /** the unwrapped comparator that doesn't use IndexedTreeNodes */
+    private Comparator underlyingComparator = null;
+
     /**
      * Creates a new filter list that provides a sorted view on the source data.
      * By not specifying a <code>Comparator</code> to sort by, the list elements
@@ -229,6 +232,7 @@ public final class SortedList extends TransformedList {
         try {
             // save this comparator
             this.comparator = comparator;
+            this.underlyingComparator = comparator;
             // keep the old trees to construct the reordering
             IndexedTree previousSorted = sorted;
             IndexedTree previousUnsorted = unsorted;
@@ -284,7 +288,7 @@ public final class SortedList extends TransformedList {
         int unsortedIndex = unsortedNode.getIndex();
         return unsortedIndex;
     }
-    
+
     /**
      * Tests if this mutation shall accept calls to <code>add()</code>,
      * <code>remove()</code>, <code>set()</code> etc.
@@ -292,8 +296,132 @@ public final class SortedList extends TransformedList {
     protected boolean isWritable() {
         return true;
     }
-    
+
     /**
+     * Returns true if this list contains the specified element.
+     *
+     * <p>Like all read-only methods, this method <strong>does not</strong> manage
+     * its own thread safety. Callers can obtain thread safe access to this method
+     * via <code>getReadWriteLock().readLock()</code>.
+     */
+    public boolean contains(Object object) {
+        return (binarySearch(object) != -1);
+    }
+
+    /**
+     * Returns the index in this list of the first occurrence of the specified
+     * element, or -1 if this list does not contain this element.
+     *
+     * <p>Like all read-only methods, this method <strong>does not</strong> manage
+     * its own thread safety. Callers can obtain thread safe access to this method
+     * via <code>getReadWriteLock().readLock()</code>.
+     */
+    public int indexOf(Object object) {
+        return binarySearchForFirst(object);
+    }
+
+    /**
+     * Returns the index in this list of the last occurrence of the specified
+     * element, or -1 if this list does not contain this element.  Since
+     * uniqueness is guaranteed for this list, the value returned by this
+     * method will always be indentical to calling <code>indexOf()</code>.
+     *
+     * <p>Like all read-only methods, this method <strong>does not</strong> manage
+     * its own thread safety. Callers can obtain thread safe access to this method
+     * via <code>getReadWriteLock().readLock()</code>.
+     */
+    public int lastIndexOf(Object object) {
+        return binarySearchForLast(object);
+    }
+
+    /**
+     * Returns the index of where the value is found or -1 if that value doesn't exist.
+     */
+    private int binarySearch(Object object) {
+        int start = 0;
+        int end = size() - 1;
+
+        while(start <= end) {
+            int current = (start + end) / 2;
+            int comparisonResult = underlyingComparator.compare(object, get(current));
+            // The object is larger than current so focus on right half of list
+            if(comparisonResult > 0) {
+                start = current + 1;
+            // The object is smaller than current so focus on left half of list
+            } else if (comparisonResult < 0) {
+                end = current - 1;
+            // The object equals the object at current, so return
+            } else {
+                return current;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the first index of the value if found or -1 if that value doesn't exist.
+     */
+    private int binarySearchForFirst(Object object) {
+        int start = 0;
+        int end = size() - 1;
+        int current = 0;
+
+        while(start <= end) {
+            current = (start + end) / 2;
+            int comparisonResult = underlyingComparator.compare(object, get(current));
+            // The object is larger than current so focus on right half of list
+            if(comparisonResult > 0) {
+                start = current + 1;
+            // The object is smaller than current so focus on left half of list
+            } else if (comparisonResult < 0) {
+                end = current - 1;
+            // The object equals the object at current, so return
+            } else {
+                // if it's the first or the one to the left isn't the same, return
+                if(current == 0 || 0 != underlyingComparator.compare(get(current-1), get(current))) {
+                    return current;
+                }
+                else {
+                    end = current - 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Returns the last index of the value if found or -1 if that value doesn't exist.
+     */
+    private int binarySearchForLast(Object object) {
+        int start = 0;
+        int end = size() - 1;
+        int current = 0;
+
+        while(start <= end) {
+            current = (start + end) / 2;
+            int comparisonResult = underlyingComparator.compare(object, get(current));
+            // The object is larger than current so focus on right half of list
+            if(comparisonResult > 0) {
+                start = current + 1;
+            // The object is smaller than current so focus on left half of list
+            } else if (comparisonResult < 0) {
+                end = current - 1;
+            // The object equals the object at current, so return
+            } else {
+                // if it's the last or the one to the left isn't the same, return
+                if(current == size() - 1 || 0 != underlyingComparator.compare(get(current), get(current+1))) {
+                    return current;
+                }
+                else {
+                    start = current + 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+
+	/**
      * A comparator that takes an indexed node, and compares the index
      * of that node.
      */
