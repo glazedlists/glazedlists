@@ -8,7 +8,8 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.util.*;
+import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.matchers.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.impl.filter.*;
 // Swing toolkit stuff for displaying widgets
@@ -52,8 +53,11 @@ import java.awt.event.ActionEvent;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TextFilterList extends DefaultTextFilterList {
+public class TextFilterList extends TransformedList {
 
+    /** the text matcher editor does all the real work */
+    private TextMatcherEditor textMatcherEditor;
+    
     /** the field where the filter strings are edited */
     private JTextField filterEdit = null;
 
@@ -125,10 +129,15 @@ public class TextFilterList extends DefaultTextFilterList {
      * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, TextFilterator filterator, JTextField filterEdit) {
-        super(source, filterator);
+        super(new FilterList(source));
+        textMatcherEditor = new TextMatcherEditor(filterator);
+        ((FilterList)this.source).setMatcherEditor(textMatcherEditor);
 
         // listen to filter events
         this.setFilterEdit(filterEdit);
+        
+        // handle changes
+        this.source.addListEventListener(this);
     }
 
     /**
@@ -224,6 +233,24 @@ public class TextFilterList extends DefaultTextFilterList {
      * to do filtering, then apply the filter on all list elements.
      */
     private void reFilter() {
-        this.setFilterText(filterEdit.getText().split("[ \t]"));
+        textMatcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
+    }
+
+    /** {@inheritDoc} */
+    public void listChanged(ListEvent listChanges) {
+        // just pass on the changes
+        updates.forwardEvent(listChanges);
+    }
+
+    /** {@inheritDoc} */
+    protected boolean isWritable() {
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    public void dispose() {
+        FilterList filteredSource = (FilterList)source;
+        super.dispose();
+        filteredSource.dispose();
     }
 }
