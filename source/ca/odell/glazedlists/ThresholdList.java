@@ -35,7 +35,7 @@ import java.util.*;
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
- * 
+ *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
@@ -302,7 +302,11 @@ public final class ThresholdList extends TransformedList implements ListEventLis
 
         // Threshold is changed
         } else {
-            newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold+1)) - 1;
+            if(threshold == Integer.MAX_VALUE) {
+                newListIndex = sourceSize - 1;
+            } else {
+                newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold+1)) - 1;
+            }
         }
 
         // update the threshold
@@ -437,7 +441,10 @@ public final class ThresholdList extends TransformedList implements ListEventLis
             int betaValue = 0;
             if(beta instanceof Integer) betaValue = ((Integer)beta).intValue();
             else betaValue = evaluator.evaluate(beta);
-            return alphaValue - betaValue;
+
+            if(alphaValue > betaValue) return 1;
+            else if(alphaValue < betaValue) return -1;
+            else return 0;
         }
 
         /**

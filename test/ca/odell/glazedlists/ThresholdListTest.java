@@ -873,6 +873,42 @@ public class ThresholdListTest extends TestCase {
     }
 
     /**
+     * Tests to see if pre-built source lists are initialized correctly on a
+     * freshly constructed ThresholdList without setting any thresholds.
+     */
+    public void testInitialization() {
+        // Prime a sorted source list with data
+        SortedList sortedBase = new SortedList(source, new ThresholdComparator(new IntegerEvaluator()));
+        for(int i = 0; i < 500; i++) {
+            sortedBase.add(i, new Integer(i));
+        }
+
+        // Wrap that preconstructed list with a ThresholdList but do not change the default thresholds
+        thresholdList = new ThresholdList(sortedBase, new IntegerEvaluator());
+
+        // Wrap the threshold list in another sorted list and see if it is all the same
+        SortedList sortedCover = new SortedList(thresholdList, new ThresholdComparator(new IntegerEvaluator()));
+        validateListsEquals(sortedBase, sortedCover);
+    }
+
+    /**
+     * Tests to see if events are handled correctly by a freshly
+     * constructed ThresholdList without setting any thresholds.
+     */
+    public void testEventsOnNewThresholdList() {
+        // Layer a new threshold list between two sorted lists and do not change defaults
+        SortedList sortedBase = new SortedList(source, new ThresholdComparator(new IntegerEvaluator()));
+        thresholdList = new ThresholdList(sortedBase, new IntegerEvaluator());
+        SortedList sortedCover = new SortedList(thresholdList, new ThresholdComparator(new IntegerEvaluator()));
+
+        // Now add values before a threshold is set and validate sortedBase equals sortedCover
+        for(int i = 0; i < 500; i++) {
+            source.add(i, new Integer(i));
+        }
+        validateListsEquals(sortedBase, sortedCover);
+    }
+
+    /**
      * A helper method to compare two lists for equality
      */
     private void validateListsEquals(EventList alpha, EventList beta) {
@@ -936,7 +972,10 @@ public class ThresholdListTest extends TestCase {
             int betaValue = 0;
             if(beta instanceof Integer) betaValue = ((Integer)beta).intValue();
             else betaValue = evaluator.evaluate(beta);
-            return alphaValue - betaValue;
+
+            if(alphaValue > betaValue) return 1;
+            else if(alphaValue < betaValue) return -1;
+            else return 0;
         }
 
         /**
