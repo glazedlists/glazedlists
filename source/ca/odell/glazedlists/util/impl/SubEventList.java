@@ -18,6 +18,16 @@ import ca.odell.glazedlists.*;
  * <code>SubEventList</code> can change size as a consequence of changes to
  * the source list that occur within the range covered by the <code>SubEventList</code>.
  *
+ * <p>This {@link EventList} supports all write operations.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class
+ * breaks the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class SubEventList extends TransformedList implements ListEventListener {
@@ -61,37 +71,22 @@ public final class SubEventList extends TransformedList implements ListEventList
         }
     }
     
-    /**
-     * Returns the number of elements in this list. 
-     *
-     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
-     * thread ready but not thread safe. See {@link EventList} for an example
-     * of thread safe code.
-     */
+    /** {@inheritDoc} */
     public int size() {
         return endIndex - startIndex;
     }
     
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     */
+    /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
         return mutationIndex + startIndex;
     }
     
-    /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc.
-     */
+    /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
     }
 
-    /**
-     * When the list is changed, the SubEventList only forwards changes that occur
-     * within the bounds of the SubEventList.
-     */
+    /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
         updates.beginEvent();
 
