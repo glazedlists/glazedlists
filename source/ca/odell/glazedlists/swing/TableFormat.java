@@ -19,6 +19,9 @@ import javax.swing.JTable;
  * Lists Tutorial</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ *
+ * @see AdvancedTableFormat
+ * @see WritableTableFormat
  */
 public interface TableFormat {
 

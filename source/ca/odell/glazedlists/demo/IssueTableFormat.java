@@ -14,8 +14,9 @@ import ca.odell.glazedlists.swing.*;
  * The IssueTableFormat specifies how an issue is displayed in a table.
  * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class IssueTableFormat implements TableFormat {
+public class IssueTableFormat implements AdvancedTableFormat {
     
     public int getColumnCount() {
         return 6;
@@ -37,6 +38,17 @@ public class IssueTableFormat implements TableFormat {
         }
         return null;
     }
+
+	public Class getColumnClass( int column ) {
+		switch( column ) {
+			case 0:
+				return Integer.class;
+			case 2:
+				return Priority.class;
+			default:
+				return String.class;
+		}
+	}
 
     public Object getColumnValue(Object baseObject, int column) {
         if(baseObject == null) return null;

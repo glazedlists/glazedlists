@@ -97,6 +97,7 @@ public class IssuesBrowser extends Applet {
         issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
+		issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
         TableComparatorChooser tableSorter = new TableComparatorChooser(issuesJTable, issuesSortedList, true);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         

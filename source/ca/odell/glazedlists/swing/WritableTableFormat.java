@@ -22,6 +22,9 @@ import javax.swing.JTable;
  * only.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ *
+ * @see AdvancedTableFormat
+ * @see TableFormat
  */
 public interface WritableTableFormat extends TableFormat {
 

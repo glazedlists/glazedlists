@@ -22,7 +22,7 @@ public class Issue implements TextFilterable, Comparable {
     // mandatory issue fields
     private Integer id = null;
     private String status = null;
-    private String priority = null;
+    private Priority priority = null;
     private String resolution = null;
     private String component = null;
     private String version = null;
@@ -109,10 +109,10 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * Priority (severity) assigned to issue.
      */
-    public String getPriority() {
+    public Priority getPriority() {
         return priority;
     }
-    public void setPriority(String priority) {
+    public void setPriority(Priority priority) {
         this.priority = priority;
     }
     /**
@@ -325,7 +325,7 @@ public class Issue implements TextFilterable, Comparable {
         // the displayed strings
         baseList.add(id);
         baseList.add(issueType);
-        baseList.add(priority);
+        baseList.add(priority.toString());
         baseList.add(status);
         baseList.add(resolution);
         baseList.add(shortDescription);
@@ -356,7 +356,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(1));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -400,7 +400,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(2));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -432,7 +432,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(3));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -464,7 +464,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(4));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -502,7 +502,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(5));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -534,7 +534,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(6));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("INVALID");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -566,7 +566,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(7));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -598,7 +598,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(8));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -630,7 +630,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(9));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -662,7 +662,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(10));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -694,7 +694,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(11));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -738,7 +738,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(12));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -776,7 +776,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(13));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("INVALID");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -808,7 +808,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(14));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -846,7 +846,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(15));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -896,7 +896,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(16));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -928,7 +928,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(17));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P1");
+        currentIssue.setPriority(Priority.P1);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -960,7 +960,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(18));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1016,7 +1016,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(19));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1036,7 +1036,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(20));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1092,7 +1092,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(21));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1136,7 +1136,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(22));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1186,7 +1186,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(23));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1230,7 +1230,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(24));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1262,7 +1262,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(25));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1336,7 +1336,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(26));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1374,7 +1374,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(27));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1430,7 +1430,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(28));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P1");
+        currentIssue.setPriority(Priority.P1);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1486,7 +1486,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(29));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1518,7 +1518,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(30));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1556,7 +1556,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(31));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1600,7 +1600,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(32));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1620,7 +1620,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(33));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1658,7 +1658,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(34));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1690,7 +1690,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(35));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1728,7 +1728,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(36));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1784,7 +1784,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(37));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1828,7 +1828,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(38));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1860,7 +1860,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(39));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1910,7 +1910,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(40));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1942,7 +1942,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(41));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -1986,7 +1986,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(42));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2018,7 +2018,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(43));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2044,7 +2044,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(44));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2076,7 +2076,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(45));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2108,7 +2108,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(46));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2140,7 +2140,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(47));
         currentIssue.setStatus("STARTED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2190,7 +2190,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(48));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2222,7 +2222,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(49));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2260,7 +2260,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(50));
         currentIssue.setStatus("STARTED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2304,7 +2304,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(51));
         currentIssue.setStatus("STARTED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2330,7 +2330,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(52));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2362,7 +2362,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(53));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2394,7 +2394,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(54));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2426,7 +2426,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(55));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2464,7 +2464,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(56));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2514,7 +2514,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(57));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2534,7 +2534,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(58));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2590,7 +2590,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(59));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("WORKSFORME");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2622,7 +2622,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(60));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2672,7 +2672,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(61));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2704,7 +2704,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(62));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2742,7 +2742,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(63));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2780,7 +2780,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(64));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("WORKSFORME");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2818,7 +2818,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(65));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P1");
+        currentIssue.setPriority(Priority.P1);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2850,7 +2850,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(66));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P1");
+        currentIssue.setPriority(Priority.P1);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -2882,7 +2882,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(67));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -2914,7 +2914,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(68));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -2946,7 +2946,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(69));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -2984,7 +2984,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(70));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("INVALID");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -3022,7 +3022,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(71));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -3054,7 +3054,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(72));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -3086,7 +3086,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(73));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -3118,7 +3118,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(74));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("DUPLICATE");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("1.1");
@@ -3162,7 +3162,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(75));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -3182,7 +3182,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(76));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("WORKSFORME");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -3214,7 +3214,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(77));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -3246,7 +3246,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(78));
         currentIssue.setStatus("CLOSED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -3278,7 +3278,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(79));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("WONTFIX");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.1");
@@ -3310,7 +3310,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(80));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3330,7 +3330,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(81));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3350,7 +3350,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(82));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3370,7 +3370,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(83));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3420,7 +3420,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(84));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3446,7 +3446,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(85));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P4");
+        currentIssue.setPriority(Priority.P4);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3472,7 +3472,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(86));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3498,7 +3498,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(87));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3530,7 +3530,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(88));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("INVALID");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3556,7 +3556,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(89));
         currentIssue.setStatus("STARTED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3600,7 +3600,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(90));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.2");
@@ -3620,7 +3620,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(91));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("current");
@@ -3652,7 +3652,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(92));
         currentIssue.setStatus("STARTED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.3");
@@ -3678,7 +3678,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(93));
         currentIssue.setStatus("STARTED");
-        currentIssue.setPriority("P2");
+        currentIssue.setPriority(Priority.P2);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.3");
@@ -3704,7 +3704,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(94));
         currentIssue.setStatus("NEW");
-        currentIssue.setPriority("P5");
+        currentIssue.setPriority(Priority.P5);
         currentIssue.setResolution("");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.3");
@@ -3730,7 +3730,7 @@ public class Issue implements TextFilterable, Comparable {
         currentIssue = new Issue();
         currentIssue.setId(new Integer(95));
         currentIssue.setStatus("RESOLVED");
-        currentIssue.setPriority("P3");
+        currentIssue.setPriority(Priority.P3);
         currentIssue.setResolution("FIXED");
         currentIssue.setComponent("glazedlists");
         currentIssue.setVersion("0.9.3");

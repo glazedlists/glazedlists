@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.custom.*;
 // demo
 import ca.odell.glazedlists.demo.Issue;
+import ca.odell.glazedlists.demo.Priority;
 // glazed lists
 import ca.odell.glazedlists.*;
 
@@ -131,8 +132,8 @@ class IssueTableFormat implements CheckableTableFormat {
      */
     public void setChecked(Object baseObject, boolean checked) {
          Issue issue = (Issue)baseObject;
-         if(checked) issue.setPriority("P3");
-         else issue.setPriority("P2");
+         if(checked) issue.setPriority(Priority.P3);
+         else issue.setPriority(Priority.P2);
     }
     
     /**

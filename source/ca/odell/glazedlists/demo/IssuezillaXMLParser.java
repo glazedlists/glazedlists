@@ -209,7 +209,7 @@ public class IssuezillaXMLParser {
         public void addFieldAndValue(String currentField, String value) {
             if(currentField.equals("issue_id")) currentIssue.setId(Integer.valueOf(value));
             else if(currentField.equals("issue_status")) currentIssue.setStatus(value); 
-            else if(currentField.equals("priority")) currentIssue.setPriority(value);
+            else if(currentField.equals("priority")) currentIssue.setPriority(Priority.lookup(value));
             else if(currentField.equals("resolution")) currentIssue.setResolution(value);
             else if(currentField.equals("component")) currentIssue.setComponent(value);
             else if(currentField.equals("version")) currentIssue.setVersion(value);

@@ -11,15 +11,8 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-import java.awt.GridBagLayout;
-import java.awt.Point;
-// for responding to user actions
-import javax.swing.event.*;
-import java.awt.event.*;
 // tables for displaying lists
 import javax.swing.table.*;
-// standard collections as support
-import java.util.*;
 
 /**
  * A {@link TableModel} that holds an {@link EventList}. Each element of the list
@@ -175,6 +168,21 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public int getColumnCount() {
         return tableFormat.getColumnCount();
     }
+
+
+	/**
+     * Gets the class of elements in the specified column. This behaviour can be
+     * customized by implementing the {@link AdvancedTableFormat} interface.
+	 */
+	public Class getColumnClass(int columnIndex) {
+		// See if the TableFormat is specifies a column class
+		if(tableFormat instanceof AdvancedTableFormat) {
+			return ((AdvancedTableFormat)tableFormat).getColumnClass(columnIndex);
+		// If not, use the default...
+		} else {
+            return super.getColumnClass(columnIndex);
+        }
+	}
 
     /**
      * Retrieves the value at the specified location from the table.
