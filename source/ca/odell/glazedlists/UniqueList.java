@@ -40,15 +40,21 @@ public final class UniqueList extends TransformedList implements ListEventListen
     /** the sparse list tracks which elements are duplicates */
     private CompressableList duplicatesList = new CompressableList();
 
-    /** a count of the inserts to be processed by an active listChanged() method */
-    private int updateIndexOffset = 0;
-
     /** duplicates list entries are either unique or duplicates */
     private static final Object UNIQUE = Boolean.TRUE;
     private static final Object DUPLICATE = null;
 
     /** some inserts are unique until they can be proven otherwise */
     private static final Object TEMP_UNIQUE = Boolean.FALSE;
+
+    /** the index of an update event that has not yet been added to the change */
+    private int pendingUpdateIndex = -1;
+    
+    /** the index of the add event that was most recently added to the change */
+    private int lastInsertIndex = -1;
+    
+    /** whether changes in an objects count should be fired as events */
+    private boolean includeCountChangeEvents = false;
 
     /**
      * Creates a {@link UniqueList} that determines uniqueness using the specified
@@ -177,9 +183,9 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 boolean hasNeighbour = handleOldNeighbour(changeIndex);
                 // finally fire the event
                 if(hasNeighbour) {
-                    addEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
+                    enqueueEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
                 } else {
-                    addEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
+                    enqueueEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
                 }
             // updates can result in INSERT, UPDATE or DELETE events
             } else if(changeType == ListEvent.UPDATE) {
@@ -187,15 +193,15 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 boolean hasNeighbour = handleOldNeighbour(changeIndex);
                 if(hasNeighbour) {
                     if(wasUnique) {
-                        addEvent(ListEvent.DELETE, duplicatesList.getCompressedIndex(changeIndex, true), true);
+                        enqueueEvent(ListEvent.DELETE, duplicatesList.getCompressedIndex(changeIndex, true), true);
                     } else {
-                        addEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
+                        enqueueEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex, true), false);
                     }
                 } else {
                     if(wasUnique) {
-                        addEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex), true);
+                        enqueueEvent(ListEvent.UPDATE, duplicatesList.getCompressedIndex(changeIndex), true);
                     } else {
-                        addEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
+                        enqueueEvent(ListEvent.INSERT, duplicatesList.getCompressedIndex(changeIndex), true);
                     }
                 }
             // deletes can result in UPDATE or DELETE events
@@ -207,13 +213,13 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 else deletedIndex = duplicatesList.getCompressedList().size();
                 // fire the change event
                 if(wasUnique) {
-                    addEvent(ListEvent.DELETE, deletedIndex, true);
+                    enqueueEvent(ListEvent.DELETE, deletedIndex, true);
                 } else {
-                    addEvent(ListEvent.UPDATE, deletedIndex, false);
+                    enqueueEvent(ListEvent.UPDATE, deletedIndex, false);
                 }
             }
         }
-
+        flushEnqueuedEvents();
         updates.commitEvent();
     }
 
@@ -258,24 +264,59 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Appends a change to the ListEventAssembler.
-     *
-     * <p>This is to handle the case where more verbosity could add value to
-     * lists listening to changes on the unique list.
+     * Appends a change to the ListEventAssembler. If the change is an UPDATE,
+     * the index is queued and not added to the change event immediately. This
+     * allows UPDATE events to be discarded if they intersect with an INSERT or
+     * REMOVE event. Because of this queueing, it is always necessary to call
+     * {@link #flushPendingEvents()} before {@link #commitEvent()} to guarantee
+     * that all UPDATE events have been sent.
      *
      * @param index The index of the change
      * @param type The type of this change
      * @param mandatory Whether or not to propagate this change to all listeners
      */
-    private void addEvent(int type, int index, boolean mandatory) {
-        if(mandatory) {
-            // jesse, 23-june-04: the subtract of updateIndexOffset is experimental
-            //updates.addChange(type, index);
-            updates.addChange(type, index - updateIndexOffset);
-        } else {
-            // Does nothing currently
-            // This is a hook for overlaying the Bag ADT over top of the UniqueList
+    private void enqueueEvent(int type, int index, boolean mandatory) {
+        if(mandatory || includeCountChangeEvents) {
+            // fire queued update events if necessary
+            if(pendingUpdateIndex != -1 && pendingUpdateIndex != index) {
+                updates.addChange(ListEvent.UPDATE, pendingUpdateIndex);
+            }
+            pendingUpdateIndex = -1;
+            
+            // queue update events
+            if(type == ListEvent.UPDATE && index != lastInsertIndex) {
+                pendingUpdateIndex = index;
+                
+            // fire insert events immediately and save the inserted index
+            } else if(type == ListEvent.INSERT) {
+                lastInsertIndex = index;
+                updates.addChange(type, index);
+                
+            // fire remove events immediately
+            } else if(type == ListEvent.DELETE) {
+                updates.addChange(type, index);
+            }
         }
+    }
+
+    /**
+     * Flush any events that were not fired immediately.
+     */
+    private void flushEnqueuedEvents() {
+        if(pendingUpdateIndex != -1) {
+            updates.addChange(ListEvent.UPDATE, pendingUpdateIndex);
+        }
+        pendingUpdateIndex = -1;
+        lastInsertIndex = -1;
+    }
+
+    /**
+     * Configure this UniqueList to fire count change events. Because this method
+     * affects how all listeners receive their change events, it should only be called
+     * if there is a single listener to the UniqueList.
+     */
+    void setFireCountChangeEvents(boolean includeCountChangeEvents) {
+        this.includeCountChangeEvents = includeCountChangeEvents;
     }
 
     /**
