@@ -394,8 +394,9 @@ public final class ThresholdList extends TransformedList implements ListEventLis
 
     /** {@inheritDoc} */
     public void dispose() {
-        ((TransformedList)source).dispose();
+        SortedList sortedSource = (SortedList)source;
         super.dispose();
+        sortedSource.dispose();
     }
 
     /**

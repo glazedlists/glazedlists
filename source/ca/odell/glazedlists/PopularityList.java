@@ -30,10 +30,16 @@ import java.util.*;
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
  *
+ * <p><font size="5"><strong><font color="#FF0000">Warning:</font></strong> This
+ * class is a technology preview and is subject to API changes.</font>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class PopularityList extends TransformedList {
 
+    /** the list of distinct elements */
+    private UniqueList uniqueList;
+    
     /**
      * @param comparator The {@link Comparator} used to determine equality.
      */
@@ -45,7 +51,11 @@ public final class PopularityList extends TransformedList {
     }
     private PopularityList(EventList source, UniqueList uniqueList) {
         super(new SortedList(uniqueList, new PopularityComparator(uniqueList)));
+        this.uniqueList = uniqueList;
         uniqueList.setFireCountChangeEvents(true);
+
+        // listen for changes to the source list
+        ((SortedList)super.source).addListEventListener(this);
     }
 
     /** {@inheritDoc} */
@@ -60,8 +70,10 @@ public final class PopularityList extends TransformedList {
 
     /** {@inheritDoc} */
     public void dispose() {
-        ((TransformedList)source).dispose();
+        SortedList sortedSource = (SortedList)source;
         super.dispose();
+        sortedSource.dispose();
+        uniqueList.dispose();
     }
 }
 

@@ -69,12 +69,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         return false;
     }
 
-    /**
-     * Respond to a change in the source {@link EventList} by updating the internal
-     * state of this {@link TransformedList}. If the state of this {@link TransformedList}
-     * changes as a consequence, all interested {@link ListEventListener}s will
-     * be notified in turn.
-     */
+    /** {@inheritDoc} */
     public abstract void listChanged(ListEvent listChanges);
 
     /** {@inheritDoc} */
@@ -204,5 +199,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         source.removeListEventListener(this);
         source = null;
         readWriteLock = null;
+        updates = null;
+        publisher = null;
     }
 }

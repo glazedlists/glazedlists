@@ -73,11 +73,7 @@ public final class SortedList extends TransformedList {
         source.addListEventListener(this);
     }
 
-    /**
-     * For implementing the ListEventListener interface. When the underlying list
-     * changes, this notification allows the object to repaint itself or update
-     * itself as necessary.
-     */
+    /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
         // This is implemented in four phases. These phases are:
         // 1. Update the unsorted tree for all event types. Update the sorted tree
