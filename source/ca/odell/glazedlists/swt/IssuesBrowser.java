@@ -232,32 +232,32 @@ public class IssuesBrowser {
             Issue selected = (Issue)issuesTableViewer.getSourceList().get(selectionIndex);
             java.util.List descriptions = selected.getDescriptions();
             for(int i = 0; i < descriptions.size(); i ++) {
-                formatDescription((Description)descriptions.get(i));
+                int rowOffset = descriptionsTable.getItemCount();
+                formatDescription((Description)descriptions.get(i), rowOffset);
             }
         }
 
-        private void formatDescription(Description description) {
+        private void formatDescription(Description description, int rowOffset) {
             // Print the user name
-            TableItem userName = new TableItem(descriptionsTable, SWT.LEFT);
+            TableItem userName = new TableItem(descriptionsTable, SWT.LEFT, rowOffset);
             FontData[] userNameFontData = userName.getFont().getFontData();
             userNameFontData[0].setStyle(SWT.BOLD);
             Font userNameFont = new Font(descriptionsTable.getDisplay(), userNameFontData);
             userName.setFont(userNameFont);
             userName.setText(description.getWho() + ":");
-            descriptionsTable.showItem(userName);
+            rowOffset++;
 
             // Print the details on several lines if necessary
             String[] detailLines = description.getText().split("\n");
             for(int i = 0; i < detailLines.length; i++) {
-                TableItem details = new TableItem(descriptionsTable, SWT.LEFT);
+                TableItem details = new TableItem(descriptionsTable, SWT.LEFT, rowOffset);
                 details.setText(detailLines[i]);
-                descriptionsTable.showItem(details);
+                rowOffset++;
             }
 
             // Print a seperator
-            TableItem seperator = new TableItem(descriptionsTable, SWT.LEFT);
+            TableItem seperator = new TableItem(descriptionsTable, SWT.LEFT, rowOffset);
             seperator.setText("___________________________________________________________________");
-            descriptionsTable.showItem(seperator);
         }
     }
 
