@@ -109,10 +109,10 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      *
      * @param table the table with headers that can be clicked on.
      * @param sortedList the sorted list to update.
-     * @param multipleColumnSort true to sort by multiple columns at a time, or
-     *      true to sort by a single column. Although sorting by multiple
-     *      columns is more powerful, the user interface is not as simple and
-     *      this strategy should only be used where necessary.
+     * @param multipleColumnSort <code>true</code> to sort by multiple columns
+     *      at a time, or <code>false</code> to sort by a single column. Although
+     *      sorting by multiple columns is more powerful, the user interface is
+     *      not as simple and this strategy should only be used where necessary.
      */
     public TableComparatorChooser(JTable table, SortedList sortedList, boolean multipleColumnSort) {
         this.table = table;
