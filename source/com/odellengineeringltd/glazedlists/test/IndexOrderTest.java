@@ -10,6 +10,7 @@ package com.odellengineeringltd.glazedlists.test;
 import junit.framework.*;
 // the core Glazed Lists package
 import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.event.*;
 import com.odellengineeringltd.glazedlists.util.*;
 // standard collections
 import java.util.*;
@@ -38,6 +39,43 @@ public class IndexOrderTest extends TestCase {
     }
 
     /**
+     * Test to verify that the list changes occur in increasing order.
+     *
+     * <p>This creates a long chain of lists designed to cause events where the indicies
+     * are out of order. The resultant list is a list of integer arrays of size two.
+     * That list has been filtered to not contain any elements where the first index is
+     * greater than 50. It has been sorted in increasing order.
+     */
+    public void testIncreasingOrder() {
+        EventList unsorted = new BasicEventList();
+        IntegerArrayFilterList filteredOnce = new IntegerArrayFilterList(unsorted, 0, 50);
+        SortedList sortedOnce = new SortedList(filteredOnce, new IntegerArrayComparator(0));
+        SortedList sortedTwice = new SortedList(sortedOnce, new IntegerArrayComparator(1));
+        
+        //unsorted.addListChangeListener(new IncreasingChangeIndexListener());
+        //sortedOnce.addListChangeListener(new IncreasingChangeIndexListener());
+        //sortedTwice.addListChangeListener(new IncreasingChangeIndexListener());
+        //filteredOnce.addListChangeListener(new IncreasingChangeIndexListener());
+        
+        // add a block of new elements one hundred times
+        for(int a = 0; a < 100; a++) {
+
+            // create a block of ten elements
+            List currentChange = new ArrayList();
+            for(int b = 0; b < 10; b++) {
+                currentChange.add(new int[] { random.nextInt(100), random.nextInt(100) });
+            }
+            
+            // add that block
+            unsorted.addAll(currentChange);
+        }
+        
+        for(int b = 0; b < 100; b++) {
+            filteredOnce.setFilter(random.nextInt(2), random.nextInt(100));
+        }
+    }
+
+    /**
      * Test to verify that the lists work with change indicies out of order.
      *
      * <p>This creates a long chain of lists designed to cause events where the indicies
@@ -48,8 +86,12 @@ public class IndexOrderTest extends TestCase {
     public void testIndexOutOfOrder() {
         EventList unsorted = new BasicEventList();
         SortedList sortedOnce = new SortedList(unsorted, new IntegerArrayComparator(0));
-        SortedList sortedTwice = new SortedList(sortedOnce, new IntegerArrayComparator(1));
-        AbstractFilterList filteredOnce = new IntegerArrayFilterList(sortedTwice, 0, 50);
+        AbstractFilterList filteredOnce = new IntegerArrayFilterList(sortedOnce, 0, 50);
+        SortedList sortedTwice = new SortedList(filteredOnce, new IntegerArrayComparator(0));
+        
+        unsorted.addListChangeListener(new IncreasingChangeIndexListener());
+        sortedOnce.addListChangeListener(new IncreasingChangeIndexListener());
+        filteredOnce.addListChangeListener(new IncreasingChangeIndexListener());
         
         ArrayList controlList = new ArrayList();
         
@@ -74,12 +116,12 @@ public class IndexOrderTest extends TestCase {
             }
             
             // print the two lists
-            /*System.out.println("MODIFICATION #: " + a);
+            System.out.println("MODIFICATION #: " + a);
             for(int i = 0; i < controlList.size(); i++) {
                 int[] filter = (int[])filteredOnce.get(i);
                 int[] control = (int[])controlList.get(i);
                 System.out.println(filter[0] + " " + control[0] + "   " + filter[1] + " " + control[1]);
-            }*/
+            }
             
             // verify the replica matches
             assertEquals(controlList, filteredOnce);
@@ -121,10 +163,65 @@ public class IndexOrderTest extends TestCase {
             this.index = index;
             this.threshhold = threshhold;
         }
+        public void setFilter(int index, int threshhold) {
+            this.index = index;
+            this.threshhold = threshhold;
+            handleFilterChanged();
+        }
         public boolean filterMatches(Object element) {
             int[] array = (int[])element;
             if(array[index] <= threshhold) return true;
             return false;
+        }
+    }
+    
+    /**
+     * A special list change listener that verifies that the change indicies
+     * within each atomic change are in increasing order.
+     */
+    class IncreasingChangeIndexListener implements ListChangeListener {
+        public void notifyListChanges(ListChangeEvent listChanges) {
+            StringBuffer changeDescription = new StringBuffer();
+            int previousChangeIndex = -1;
+            boolean increasingOrder = true;
+            
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+                
+                // maintain the change string
+                if(changeType == ListChangeBlock.UPDATE) {
+                    changeDescription.append("U");
+                } else if(changeType == ListChangeBlock.INSERT) {
+                    changeDescription.append("I");
+                } else if(changeType == ListChangeBlock.DELETE) {
+                    changeDescription.append("D");
+                }
+                changeDescription.append(changeIndex);
+                
+                // see if this was a failure
+                if(changeType == ListChangeBlock.DELETE) {
+                    if(changeIndex < previousChangeIndex) {
+                        increasingOrder = false;
+                        changeDescription.append("*");
+                    }
+                } else {
+                    if(changeIndex <= previousChangeIndex) {
+                        increasingOrder = false;
+                        changeDescription.append("*");
+                    }
+                }
+                
+                // prepare for the next change
+                changeDescription.append(" ");
+                previousChangeIndex = changeIndex;
+            }
+            
+            if(!increasingOrder) {
+                fail("List changes not in increasing order: " + changeDescription);
+            } else {
+                System.out.println("Success: " + changeDescription);
+            }
         }
     }
 }

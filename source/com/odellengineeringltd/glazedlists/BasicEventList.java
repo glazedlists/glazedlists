@@ -299,18 +299,51 @@ public class BasicEventList implements EventList, Serializable {
 
     /**
      * Removes from this collection all of its elements that are contained
-     * in the specified collection (optional operation).
+     * in the specified collection (optional operation). This method has been
+     * is available in this implementation, although the not particularly
+     * high performance.
      */
     public boolean removeAll(Collection collection) {
-        throw new RuntimeException("The removeAll() method has not been implemented in the glazedlists package!");
+        boolean changed = false;
+        synchronized(getRootList()) {
+            updates.beginAtomicChange();
+            for(Iterator i = collection.iterator(); i.hasNext(); ) {
+                int index = -1;
+                while((index = data.indexOf(i.next())) != -1) {
+                    updates.appendChange(index, ListChangeBlock.DELETE);
+                    data.remove(index);
+                    changed = true;
+                }
+            }
+            updates.commitAtomicChange();
+        }
+        return changed;
     }
+
     /**
      * Retains only the elements in this collection that are contained in 
-     * the specified collection (optional operation).
+     * the specified collection (optional operation). This method is available
+     * in this implementation, although not particularly high performance.
      */
     public boolean retainAll(Collection collection) {
-        throw new RuntimeException("The retainAll() method has not been implemented in the glazedlists package!");
+        boolean changed = false;
+        synchronized(getRootList()) {
+            updates.beginAtomicChange();
+            int index = 0;
+            while(index < data.size()) {
+                if(collection.contains(data.get(index))) {
+                    index++;
+                } else {
+                    updates.appendChange(index, ListChangeBlock.DELETE);
+                    data.remove(index);
+                    changed = true;
+                }
+            }
+            updates.commitAtomicChange();
+        }
+        return changed;
     }
+
     /**
      * Returns an iterator over the elements in this list in proper sequence.
      */
