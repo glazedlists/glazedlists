@@ -381,7 +381,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
      */
     public boolean retainAll(Collection values) {
         boolean changed = false;
-        for(ListIterator i = listIterator(); i.hasNext(); ) {
+        for(Iterator i = iterator(); i.hasNext(); ) {
             if(!values.contains(i.next())) {
                 i.remove();
                 changed = true;
@@ -399,7 +399,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
      *        not supported by this list.
      */
     public void clear() {
-        for(ListIterator i = listIterator(); i.hasNext(); ) {
+        for(Iterator i = iterator(); i.hasNext(); ) {
             i.next();
             i.remove();
         }
@@ -429,8 +429,8 @@ public abstract class AbstractEventList implements EventList, Serializable {
         if(otherList.size() != size()) return false;
 
         // compare element wise, via iterators
-        ListIterator iterA = listIterator();
-        ListIterator iterB = otherList.listIterator();
+        Iterator iterA = iterator();
+        Iterator iterB = otherList.iterator();
         while(iterA.hasNext() && iterB.hasNext()) {
             if(!GlazedListsImpl.equal(iterA.next(), iterB.next())) return false;
         }
