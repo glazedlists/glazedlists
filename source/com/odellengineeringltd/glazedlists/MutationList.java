@@ -18,7 +18,8 @@ import java.util.SortedSet;
 import java.util.Collection;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
-
+// for iterating over a mutation list the lazy way
+import com.odellengineeringltd.glazedlists.util.EventListIterator;
 
 /**
  * A mutation list is an altered view on an Event List. This may be a sorted
@@ -247,21 +248,21 @@ public class MutationList implements EventList, ListChangeListener {
      * Returns an iterator over the elements in this list in proper sequence.
      */
     public Iterator iterator() {
-        throw new UnsupportedOperationException("The method is not implemented.");
+        return new EventListIterator(this);
     }
     /**
      * Returns a list iterator of the elements in this list (in proper
      * sequence).
      */
     public ListIterator listIterator() {
-        throw new UnsupportedOperationException("The method is not implemented.");
+        return new EventListIterator(this);
     }
     /**
      * Returns a list iterator of the elements in this list (in proper
      * sequence), starting at the specified position in this list.
      */
     public ListIterator listIterator(int index) {
-        throw new UnsupportedOperationException("The method is not implemented.");
+        return new EventListIterator(this, index);
     }
     /**
      * Returns a view of the portion of this list between the specified

@@ -18,7 +18,8 @@ import java.util.SortedSet;
 import java.util.Collection;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
-
+// for iterating over a mutation list the lazy way
+import com.odellengineeringltd.glazedlists.util.EventListIterator;
 
 /**
  * An event list that wraps a Java Collections list. This list provides an
@@ -294,22 +295,21 @@ public class BasicEventList implements EventList {
      * Returns an iterator over the elements in this list in proper sequence.
      */
     public Iterator iterator() {
-        throw new RuntimeException("The iterator() method has not been implemented in the glazedlists package!");
-        //return data.iterator();
+        return new EventListIterator(this);
     }
     /**
      * Returns a list iterator of the elements in this list (in proper
      * sequence).
      */
     public ListIterator listIterator() {
-        throw new RuntimeException("The listIterator() method has not been implemented in the glazedlists package!");
+        return new EventListIterator(this);
     }
     /**
      * Returns a list iterator of the elements in this list (in proper
      * sequence), starting at the specified position in this list.
      */
     public ListIterator listIterator(int index) {
-        throw new RuntimeException("The listIterator() method has not been implemented in the glazedlists package!");
+        return new EventListIterator(this, index);
     }
 
 

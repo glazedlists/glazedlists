@@ -67,15 +67,15 @@ public class QueryList extends MutationList implements EventList {
         // when it matches the query and its not in the list, add it!
         if(queryMatches && listIndex == -1) {
             // find the best place to insert this item into the list
-            int insetLocation = 0;
-            for(; insetLocation < values.size(); insetLocation++) {
-                Comparable listElement = (Comparable)values.get(insetLocation);
+            int insertLocation = 0;
+            for(; insertLocation < values.size(); insertLocation++) {
+                Comparable listElement = (Comparable)values.get(insertLocation);
                 if(updated.compareTo(listElement) > 0) continue;
                 else break;
             }
-            updates.appendChange(insetLocation, ListChangeBlock.INSERT);
+            updates.appendChange(insertLocation, ListChangeBlock.INSERT);
             before.add(updated);
-            values.add(insetLocation, updated);
+            values.add(insertLocation, updated);
         // when it matches and it is in the list, update it!
         } else if(queryMatches && listIndex != -1) {
             updates.appendChange(listIndex, ListChangeBlock.UPDATE);
