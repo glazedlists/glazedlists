@@ -42,6 +42,8 @@ import java.util.*;
  * styled rendering is necessary, the use of ListTable is a sufficient work
  * around.
  * 
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=14">Bug 14</a>
+ *
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
