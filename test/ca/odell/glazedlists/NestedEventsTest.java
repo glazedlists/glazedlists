@@ -110,8 +110,8 @@ public class NestedEventsTest extends TestCase {
         source.set(4, "e");
         nestingList.commitEvent();
         
-        // net change is: remove 1 element at 1 and add 1 element at 1
-        assertEquals(nestingList, Arrays.asList(new String[] { "A", "b", "c", "d", "E", "F", "G" }));
+        // net change is: add 'c', 'd', 'e'
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "B", "c", "d", "e", "F", "G" }));
         assertEquals(2, counter.getEventCount());
         assertEquals(3, counter.getChangeCount(1));
     }
@@ -135,10 +135,10 @@ public class NestedEventsTest extends TestCase {
         source.set(3, "d");
         nestingList.commitEvent();
         
-        // net change is: remove 1 element at 1 and add 1 element at 1
+        // net change is: replace 'B' with 'b' and add 'd', 'E'
         assertEquals(nestingList, Arrays.asList(new String[] { "A", "b", "c", "d", "E", "F", "G" }));
         assertEquals(2, counter.getEventCount());
-        assertEquals(3, counter.getChangeCount(1));
+        assertEquals(4, counter.getChangeCount(1));
     }
 
     /**
@@ -156,8 +156,8 @@ public class NestedEventsTest extends TestCase {
         source.set(3, "d");
         source.set(4, "e");
         source.remove(2);
-        source.remove(3);
-        source.remove(4);
+        source.remove(2);
+        source.remove(2);
         nestingList.commitEvent();
         
         // net change is: remove 1 element at 1 and add 1 element at 1
@@ -181,8 +181,8 @@ public class NestedEventsTest extends TestCase {
         source.set(3, "d");
         source.set(4, "e");
         source.remove(1);
-        source.remove(2);
-        source.remove(3);
+        source.remove(1);
+        source.remove(1);
         nestingList.commitEvent();
         
         // net change is: remove 1 element at 1 and add 1 element at 1

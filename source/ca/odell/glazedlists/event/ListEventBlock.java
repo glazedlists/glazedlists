@@ -218,13 +218,38 @@ final class ListEventBlock {
         int commonEnd = Math.min(first.endIndex, second.endIndex);
         int commonLength = (commonEnd - commonStart + 1);
         
-        // insert and delete kill each other
+        // insert then delete kill each other
         if(first.type == ListEvent.INSERT && second.type == ListEvent.DELETE) {
             first.endIndex -= commonLength;
             second.endIndex -= commonLength;
             if(second.getLength() == 0) contradictingPair.remove(1);
             if(first.getLength() == 0) contradictingPair.remove(0);
             return;
+
+        // insert then update shortens update and reorders the two changes
+        } else if(first.type == ListEvent.INSERT && second.type == ListEvent.UPDATE) {
+            // remove the update and shorten it
+            contradictingPair.remove(1);
+            second.endIndex -= commonLength;
+            int secondLength = second.getLength();
+            if(secondLength == 0) return;
+            // shift the update and make it first, chronologically
+            second.startIndex = Math.min(first.startIndex, second.startIndex);
+            second.endIndex = second.startIndex + secondLength - 1;
+            contradictingPair.add(0, second); 
+
+        // update then delete shortens update and reorders the two changes
+        } else if(first.type == ListEvent.UPDATE && second.type == ListEvent.DELETE) {
+            // remove the update and shorten it
+            contradictingPair.remove(0);
+            first.endIndex -= commonLength;
+            int firstLength = first.getLength();
+            if(firstLength == 0) return;
+            // shift the update and make it second, chronologically
+            first.startIndex = Math.min(first.startIndex, second.startIndex);
+            first.endIndex = first.startIndex + firstLength - 1;
+            contradictingPair.add(1, first);
+
         } else {
             throw new UnsupportedOperationException();
         }
