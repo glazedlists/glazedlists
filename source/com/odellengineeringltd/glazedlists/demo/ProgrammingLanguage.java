@@ -51,5 +51,9 @@ class ProgrammingLanguage implements Filterable, Serializable {
     public boolean isVirtualMachine() {
         return virtualMachine;
     }
+    
+    public String toString() {
+        return name;
+    }
 }
 
