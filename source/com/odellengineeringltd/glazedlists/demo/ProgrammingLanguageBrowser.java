@@ -7,9 +7,8 @@
 package com.odellengineeringltd.glazedlists.demo;
 
 import com.odellengineeringltd.glazedlists.*;
-import com.odellengineeringltd.glazedlists.jcombobox.*;
-import com.odellengineeringltd.glazedlists.jtable.*;
-import com.odellengineeringltd.glazedlists.jlist.*;
+import com.odellengineeringltd.glazedlists.swing.*;
+import com.odellengineeringltd.glazedlists.migrationkit.*;
 import com.odellengineeringltd.glazedlists.util.*;
 import java.applet.*;
 import javax.swing.*;
@@ -64,7 +63,7 @@ public class ProgrammingLanguageBrowser extends Applet {
 
         // add a JTable
         ListTable listTable = new ListTable(customFilteredLanguages, new ProgrammingLanguageTableCell());
-        TableComparatorChooser tableSorter = new TableComparatorChooser(listTable, sortedLanguages, false);
+        TableComparatorChooser tableSorter = new TableComparatorChooser(listTable.getTable(), sortedLanguages, false);
         tableSorter.getComparatorsForColumn(0).clear();
         tableSorter.getComparatorsForColumn(0).add(new ProgrammingLanguageNameComparator());
         tableSorter.getComparatorsForColumn(0).add(new ProgrammingLanguageYearComparator());
@@ -75,7 +74,7 @@ public class ProgrammingLanguageBrowser extends Applet {
         listWidgetTabs.addTab("JList", new JScrollPane(eventJList.getJList()));
 
         // add a JComboBox
-        ListComboBoxModel comboModel = new ListComboBoxModel(customFilteredLanguages);
+        EventComboBoxModel comboModel = new EventComboBoxModel(customFilteredLanguages);
         JComboBox eventJComboBox = new JComboBox(comboModel);
         listWidgetTabs.addTab("JComboBox", new JScrollPane(eventJComboBox));
 

@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtextfield;
+package com.odellengineeringltd.glazedlists.migrationkit;
 
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;

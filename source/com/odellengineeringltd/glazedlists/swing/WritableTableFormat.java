@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtable;
+package com.odellengineeringltd.glazedlists.swing;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;

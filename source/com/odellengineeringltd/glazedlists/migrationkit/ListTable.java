@@ -4,13 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtable;
+package com.odellengineeringltd.glazedlists.migrationkit;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
-// for responding to selection the Glazed Lists way
-import com.odellengineeringltd.glazedlists.listselectionmodel.*;
+import com.odellengineeringltd.glazedlists.swing.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -24,7 +23,8 @@ import javax.swing.table.*;
 import java.util.*;
 
 /**
- * A table that displays the contents of an event-driven list.
+ * An adaptor for the <code>ListTable</code> class found in Glazed Lists v. 0.8 and
+ * prior that uses the <code>EventTableModel</code> for implementation.
  *
  * <p>The ListTable class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the event dispatch thread.
@@ -37,8 +37,11 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListTable extends AbstractTableModel implements ListEventListener, MouseListener {
+public class ListTable implements MouseListener {
 
+    /** The event table model to defer */
+    private EventTableModel eventTableModel;
+    
     /** The Swing table for selecting a message from a list */
     private JTable table;
     private JScrollPane tableScrollPane;
@@ -47,20 +50,12 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
     protected EventList source;
 
     /** selection managent is all by a SelectionModelEventList */
-    private SelectionModelEventList selectionModelEventList;
+    private EventSelectionModel eventSelectionModel;
     private EventList selectionList;
     private ListSelectionModel listSelectionModel;
     
+    /** the selection notifier works with SelectionListeners */
     private SelectionNotifier selectionNotifier;
-    
-    /** Specifies how to render table headers and sort */
-    private TableFormat tableFormat;
-
-    /** Reusable table event for broadcasting changes */
-    private MutableTableModelEvent tableModelEvent;
-    
-    /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    public int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
     
     /**
      * Creates a new table that renders the specified list in the specified
@@ -68,23 +63,21 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
      */
     public ListTable(EventList source, TableFormat tableFormat) {
         this.source = source;
-        tableModelEvent = new MutableTableModelEvent(this);
-        this.tableFormat = tableFormat;
+        this.eventTableModel = new EventTableModel(source, tableFormat);
 
         // create the selection model
-        selectionModelEventList = new SelectionModelEventList(source);
-        selectionList = selectionModelEventList.getEventList();
-        listSelectionModel = selectionModelEventList.getListSelectionModel();
+        eventSelectionModel = new EventSelectionModel(source);
+        selectionList = eventSelectionModel.getEventList();
+        listSelectionModel = eventSelectionModel.getListSelectionModel();
         selectionNotifier = new SelectionNotifier(selectionList);
 
         // construct widgets
-        table = new JTable(this);
+        table = new JTable(eventTableModel);
         table.setSelectionModel(listSelectionModel);
         tableFormat.configureTable(table);
         tableScrollPane = new JScrollPane(table);
         
         // prepare listeners
-        source.addListEventListener(new EventThreadProxy(this));
         table.addMouseListener(this);
     }
     
@@ -102,7 +95,7 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
      * being modified on another thread.
      */
     public EventList getSelectionList() {
-        return selectionModelEventList.getEventList();
+        return eventSelectionModel.getEventList();
     }
     
     /**
@@ -111,6 +104,7 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
     public JScrollPane getTableScrollPane() {
         return tableScrollPane;
     }
+
     /**
      * Gets just the raw table. This should only be used to retrieve
      * information from the table model. To display the table, use the
@@ -124,7 +118,7 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
      * Gets the Table Format.
      */
     public TableFormat getTableFormat() {
-        return tableFormat;
+        return eventTableModel.getTableFormat();
     }
     /**
      * Sets this table to be rendered by a different table format. This has
@@ -137,48 +131,10 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
      * prevent a delay while rendering off-screen cells.
      */
     public void setTableFormat(TableFormat tableFormat) {
-        this.tableFormat = tableFormat;
-        tableModelEvent.setStructureChanged();
-        fireTableChanged(tableModelEvent);
+        eventTableModel.setTableFormat(tableFormat);
         tableFormat.configureTable(table);
     }
     
-    /**
-     * For implementing the ListEventListener interface. This sends changes
-     * to the table which can repaint the table cells. Because this class uses
-     * a EventThreadProxy, it is guaranteed that all natural
-     * calls to this method use the Swing thread.
-     *
-     * <p>This tests the size of the change to determine how to handle it. If the
-     * size of the change is greater than the changeSizeRepaintAllThreshhold,
-     * then the entire table is notified as changed. Otherwise only the descrete
-     * areas that changed are notified.
-     */
-    public void listChanged(ListEvent listChanges) {
-        // when all events hae already been processed by clearing the event queue
-        if(!listChanges.hasNext()) return;
-
-        // notify all changes simultaneously
-        if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
-            listChanges.clearEventQueue();
-            // first scroll to row zero
-            tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
-            fireTableDataChanged();
-
-        // for all changes, one block at a time
-        } else {
-            while(listChanges.nextBlock()) {
-                // get the current change info
-                int startIndex = listChanges.getBlockStartIndex();
-                int endIndex = listChanges.getBlockEndIndex();
-                int changeType = listChanges.getType();
-                // create a table model event for this block
-                tableModelEvent.setValues(startIndex, endIndex, changeType);
-                fireTableChanged(tableModelEvent);
-            }
-        }
-    }
-
     /**
      * Gets the currently selected object, or null if there is currently no
      * selection.
@@ -231,7 +187,6 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
             else selected = selectionList.get(0);
         }
     }
-
     
     /**
      * For implementing the MouseListener interface. When the cell is double
@@ -280,74 +235,11 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
     }
 
     /**
-     * Access methods for getting contact information to display. These are 
-     * table model methods that sit <strong>behind</strong> the sorted table.
-     * This means that all row-based access is not translated via the
-     * RecordSorter.
-     */
-    public String getColumnName(int column) {
-        return tableFormat.getFieldName(column);
-    }
-    public int getRowCount() {
-        source.getReadWriteLock().readLock().lock();
-        try {
-            return source.size();
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
-    }
-    public int getColumnCount() {
-        return tableFormat.getFieldCount();
-    }
-
-    /**
-     * Retrieves the value at the specified location from the table.
-     * 
-     * <p>Before every get, we need to validate the row because there may be an
-     * update waiting in the event queue. For example, it is possible that
-     * the source list has been updated by a database thread. Such a change
-     * may have been sent as notification, but after this request in the
-     * event queue. In the case where a row is no longer available, null is
-     * returned. The value returned is insignificant in this case because the
-     * Event queue will very shortly be repainting (or removing) the row
-     * anyway.
-     */
-    public Object getValueAt(int row, int column) {
-        source.getReadWriteLock().readLock().lock();
-        try {
-            // ensure that this value still exists before retrieval
-            if(row < getRowCount()) {
-                return tableFormat.getFieldValue(source.get(row), column);
-            } else {
-                return null;
-            }
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * The list table is not editable. For an editable list table, use the
-     * WritableListTable instead.
-     */
-    public boolean isCellEditable(int row, int column) {
-        return false;
-    }
-
-    /**
-     * The list table is not editable. For an editable list table, use the
-     * WritableListTable instead.
-     */
-    public void setValueAt(Object value, int row, int column) {
-        throw new UnsupportedOperationException("The basic list table is not editable, use a WritableListTable instead");
-    }
-    
-    /**
      * Gets the minimum number of changes that will be combined into one uniform
      * change and cause selection and scrolling to be lost.
      */
     public int getRepaintAllThreshhold() {
-        return changeSizeRepaintAllThreshhold;
+        return eventTableModel.getRepaintAllThreshhold();
     }
     
     /**
@@ -372,6 +264,6 @@ public class ListTable extends AbstractTableModel implements ListEventListener, 
      * Lists Tutorial Part 8 - Performance Tuning</a>
      */
     public void setRepaintAllThreshhold(int repaintAllThreshhold) {
-        this.changeSizeRepaintAllThreshhold = repaintAllThreshhold;
+        eventTableModel.setRepaintAllThreshhold(repaintAllThreshhold);
     }
 }

@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtable;
+package com.odellengineeringltd.glazedlists.swing;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
@@ -21,7 +21,7 @@ import javax.swing.table.TableModel;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class MutableTableModelEvent extends TableModelEvent {
+class MutableTableModelEvent extends TableModelEvent {
     
     /**
      * Constructors simply call the same on the superclass.

@@ -6,7 +6,7 @@
  */
 package com.odellengineeringltd.glazedlists.demo;
 
-import com.odellengineeringltd.glazedlists.jtable.*;
+import com.odellengineeringltd.glazedlists.migrationkit.*;
 import javax.swing.*;
 
 /**

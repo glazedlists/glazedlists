@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jcombobox;
+package com.odellengineeringltd.glazedlists.swing;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
@@ -14,47 +14,57 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 // for responding to user actions
 import java.awt.event.*;
-// for displaying lists in combo boxes
-import javax.swing.ListModel;
-import javax.swing.ComboBoxModel;
-import javax.swing.event.ListDataListener;
-import javax.swing.event.ListDataEvent;
-// for keeping track of a set of listeners
-import java.util.ArrayList;
-
+import java.awt.Point;
+import javax.swing.event.*;
+// this class uses tables for displaying message lists
+import java.util.*;
 
 /**
- * A combo box model for displaying Glazed Lists in a combo box.
+ * A JList that displays the contents of an event-driven list.
  *
- * The implementation of setSelection and getSelection is not in any way tied
- * to the contents of the list.
+ * <p>The EventJList class is <strong>not thread-safe</strong>. Unless otherwise
+ * noted, all methods are only safe to be called from the event dispatch thread.
+ * To do this programmatically, use <code>SwingUtilities.invokeAndWait()</code>.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part7/index.html">Glazed
- * Lists Tutorial Part 7 - JComboBox</a>
+ * <p>I have implemented EventJList. The class shares the following with ListTable:
+ * <li>SelectionListener interface
+ * <li>SelectionList / Selection Model
+ *
+ * <p>This class never batches groups of changes like ListTable does. It also
+ * does not use a Mutable change event. It may be necessary to create a mutable
+ * ListDataEvent if change event creation proves to be a bottleneck.
+ *
+ * <p>This class still does not have any extra renderer support. For now if
+ * styled rendering is necessary, the use of ListTable is a sufficient work
+ * around.
+ * 
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=14">Bug 14</a>
+ *
+ * @see SwingUtilities#invokeAndWait(Runnable)
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListComboBoxModel implements ListEventListener, ComboBoxModel {
+public class EventListModel implements ListEventListener, ListModel {
 
-    /** the complete list of messages before filters */
+    /** the list data */
     protected EventList source;
-        
+
     /** whom to notify of data changes */
     private ArrayList listeners = new ArrayList();
-    
-    /** the currently selected item, should belong to the source list */
-    private Object selected;
+
+    /** whenever a list change covers greater than this many rows, redraw the whole thing */
+    public int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
     
     /** recycle the list data event to prevent unnecessary object creation */
-    private MutableListDataEvent listDataEvent;
-    
+    protected MutableListDataEvent listDataEvent = new MutableListDataEvent(this);
+
     /**
-     * Creates a new combo box model that displays the specified source list
-     * in the combo box.
+     * Creates a new widget that renders the specified list.
      */
-    public ListComboBoxModel(EventList source) {
+    public EventListModel(EventList source) {
         this.source = source;
-        listDataEvent = new MutableListDataEvent(this);
+
+        // prepare listeners
         source.addListEventListener(new EventThreadProxy(this));
     }
     
@@ -91,41 +101,6 @@ public class ListComboBoxModel implements ListEventListener, ComboBoxModel {
         }
     }
 
-
-    /**
-     * Gets the currently selected item.
-     */
-    public Object getSelectedItem() {
-        return selected;
-    }
-
-    /**
-     * Sets the currently selected item.
-     *
-     * <p>The selection notification process is very much a hack. This fires
-     * a ListDataEvent where the range is between -1 and -1. This is identical
-     * to the notification process used by the <code>DefaultComboBoxModel</code>.
-     */
-    public void setSelectedItem(Object selected) {
-        this.selected = selected;
-        listDataEvent.setRange(-1, -1);
-        listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
-        fireListDataEvent(listDataEvent);
-    }
-
-    
-    /**
-     * Gets the size of the list.
-     */
-    public int getSize() {
-        source.getReadWriteLock().readLock().lock();
-        try {
-            return source.size();
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
-    }
-
     /**
      * Retrieves the value at the specified location from the table.
      * 
@@ -137,6 +112,8 @@ public class ListComboBoxModel implements ListEventListener, ComboBoxModel {
      * returned. The value returned is insignificant in this case because the
      * Event queue will very shortly be repainting (or removing) the row
      * anyway.
+     *
+     * @see com.odellengineeringltd.glazedlists.jtable.ListTable#getValueAt(int,int) ListTable
      */
     public Object getElementAt(int index) {
         source.getReadWriteLock().readLock().lock();
@@ -151,13 +128,24 @@ public class ListComboBoxModel implements ListEventListener, ComboBoxModel {
             source.getReadWriteLock().readLock().unlock();
         }
     }
-
+    
+    /**
+     * Gets the size of the list.
+     */
+    public int getSize() {
+        source.getReadWriteLock().readLock().lock();
+        try {
+            return source.size();
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
+    }
 
     /**
      * Registers the specified ListDataListener to receive updates whenever
      * this list changes.
      *
-     * The specified ListDataListener must <strong>not</strong> save a
+     * <p>The specified ListDataListener must <strong>not</strong> save a
      * reference to the ListDataEvent beyond the end of the notification
      * method. This is because the ListDataEvent is re-used to increase
      * the performance of this implementation.
@@ -172,7 +160,7 @@ public class ListComboBoxModel implements ListEventListener, ComboBoxModel {
     public void removeListDataListener(ListDataListener listDataListener) {
         listeners.remove(listDataListener);
     }
-    
+
     /**
      * Notifies all ListDataListeners about one block of changes in the list.
      */
@@ -189,5 +177,4 @@ public class ListComboBoxModel implements ListEventListener, ComboBoxModel {
             }
         }
     }
-
 }

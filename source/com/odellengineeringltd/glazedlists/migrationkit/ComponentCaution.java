@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtextfield;
+package com.odellengineeringltd.glazedlists.migrationkit;
 
 // for showing caution with a border
 import javax.swing.border.*;

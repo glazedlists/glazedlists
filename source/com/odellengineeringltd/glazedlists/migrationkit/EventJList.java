@@ -4,15 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jlist;
+package com.odellengineeringltd.glazedlists.migrationkit;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
-// for responding to selection the Glazed Lists way
-import com.odellengineeringltd.glazedlists.listselectionmodel.*;
-// for sharing selection listeners with jtable
-import com.odellengineeringltd.glazedlists.jtable.*;
+import com.odellengineeringltd.glazedlists.swing.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -48,8 +45,11 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventJList extends AbstractListModel implements ListEventListener, MouseListener {
+public class EventJList implements MouseListener {
 
+    /** the delegate event list model */
+    private EventListModel eventListModel;
+    
     /** The Swing list */
     private JList jList;
 
@@ -57,13 +57,10 @@ public class EventJList extends AbstractListModel implements ListEventListener, 
     protected EventList source;
 
     /** selection managent is all by a SelectionModelEventList */
-    private SelectionModelEventList selectionModelEventList;
+    private EventSelectionModel eventSelectionModel;
     private EventList selectionList;
     private ListSelectionModel listSelectionModel;
     private SelectionNotifier selectionNotifier;
-    
-    /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    public int changeSizeRepaintAllThreshhold = 25;
     
     /**
      * Creates a new widget that renders the specified list.
@@ -71,18 +68,20 @@ public class EventJList extends AbstractListModel implements ListEventListener, 
     public EventJList(EventList source) {
         this.source = source;
 
+        // create the delegate model
+        eventListModel = new EventListModel(source);
+        
         // create the selection model
-        selectionModelEventList = new SelectionModelEventList(source);
-        selectionList = selectionModelEventList.getEventList();
-        listSelectionModel = selectionModelEventList.getListSelectionModel();
+        eventSelectionModel = new EventSelectionModel(source);
+        selectionList = eventSelectionModel.getEventList();
+        listSelectionModel = eventSelectionModel.getListSelectionModel();
         selectionNotifier = new SelectionNotifier(selectionList);
 
         // construct widgets
-        jList = new JList(this);
+        jList = new JList(eventListModel);
         jList.setSelectionModel(listSelectionModel);
         
         // prepare listeners
-        source.addListEventListener(new EventThreadProxy(this));
         jList.addMouseListener(this);
     }
     
@@ -100,7 +99,7 @@ public class EventJList extends AbstractListModel implements ListEventListener, 
      * being modified on another thread.
      */
     public EventList getSelectionList() {
-        return selectionModelEventList.getEventList();
+        return eventSelectionModel.getEventList();
     }
     
     /**
@@ -109,29 +108,6 @@ public class EventJList extends AbstractListModel implements ListEventListener, 
     public JList getJList() {
         return jList;
     }
-    
-    /**
-     * For implementing the ListEventListener interface. This sends changes
-     * to the list which can repaint the table rows. Because this class uses
-     * a EventThreadProxy, it is guaranteed that all natural
-     * calls to this method use the Swing thread.
-     */
-    public void listChanged(ListEvent listChanges) {
-        while(listChanges.nextBlock()) {
-            // get the current change info
-            int startIndex = listChanges.getBlockStartIndex();
-            int endIndex = listChanges.getBlockEndIndex();
-            int changeType = listChanges.getType();
-            if(changeType == ListEvent.INSERT) {
-                fireIntervalAdded(this, startIndex, endIndex);
-            } else if(changeType == ListEvent.UPDATE) {
-                fireContentsChanged(this, startIndex, endIndex);
-            } else if(changeType == ListEvent.DELETE) {
-                fireIntervalRemoved(this, startIndex, endIndex);
-            }
-        }
-    }
-
 
     /**
      * Gets the currently selected object, or null if there is currently no
@@ -187,39 +163,5 @@ public class EventJList extends AbstractListModel implements ListEventListener, 
      */
     public void removeSelectionListener(SelectionListener selectionListener) {
         selectionNotifier.removeSelectionListener(selectionListener);
-    }
-    
-    /**
-     * Retrieves the value at the specified index from the list.
-     *
-     * Before each get, we need to validate the index because there may be
-     * an update waiting in the event queue.
-     *
-     * @see com.odellengineeringltd.glazedlists.jtable.ListTable#getValueAt(int,int) ListTable
-     */
-    public Object getElementAt(int index) {
-        source.getReadWriteLock().readLock().lock();
-        try {
-            // ensure that this value still exists before retrieval
-            if(index < source.size()) {
-                return source.get(index);
-            } else {
-                return null;
-            }
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
-    }
-    
-    /**
-     * Gets the number of objects to display in this list.
-     */
-    public int getSize() {
-        source.getReadWriteLock().readLock().lock();
-        try {
-            return source.size();
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
     }
 }

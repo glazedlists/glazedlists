@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtable;
+package com.odellengineeringltd.glazedlists.swing;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
@@ -50,8 +50,8 @@ import java.net.URL;
 public class TableComparatorChooser extends MouseAdapter implements TableModelListener {
 
     /** the table being sorted */
-    private ListTable listTable;
     private JTable table;
+    private EventTableModel eventTableModel;
 
     /** the sorted list to choose the comparators for */
     private SortedList sortedList;
@@ -107,18 +107,24 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
      * Creates a new TableComparatorChooser that responds to clicks
      * on the specified table and uses them to sort the specified list.
      *
-     * @param listTable the table with headers that can be clicked on.
+     * @param table the table with headers that can be clicked on.
      * @param sortedList the sorted list to update.
      * @param multipleColumnSort true to sort by multiple columns at a time, or
      *      true to sort by a single column. Although sorting by multiple
      *      columns is more powerful, the user interface is not as simple and
      *      this strategy should only be used where necessary.
      */
-    public TableComparatorChooser(ListTable listTable, SortedList sortedList, boolean multipleColumnSort) {
-        this.listTable = listTable;
-        table = listTable.getTable();
+    public TableComparatorChooser(JTable table, SortedList sortedList, boolean multipleColumnSort) {
+        this.table = table;
         this.sortedList = sortedList;
         this.multipleColumnSort = multipleColumnSort;
+
+        // get the table model from the table
+        try {
+            eventTableModel = (EventTableModel)table.getModel();
+        } catch(ClassCastException e) {
+            throw new IllegalArgumentException("Can not apply TableComparatorChooser to a table whose table model is not an EventTableModel");
+        }
 
         // set up the column click listeners
         rebuildColumns();
@@ -333,7 +339,7 @@ public class TableComparatorChooser extends MouseAdapter implements TableModelLi
         public ColumnClickTracker(int column) {
             this.column = column;
             // add a default comparator
-            comparators.add(new TableFieldComparator(listTable.getTableFormat(), column));
+            comparators.add(new TableFieldComparator(eventTableModel.getTableFormat(), column));
         }
 
         /**

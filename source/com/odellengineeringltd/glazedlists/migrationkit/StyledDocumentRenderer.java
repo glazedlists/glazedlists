@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtable;
+package com.odellengineeringltd.glazedlists.migrationkit;
 
 // for rendering this component inside of a table
 import javax.swing.table.TableCellRenderer;

@@ -4,20 +4,16 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jcombobox;
+package com.odellengineeringltd.glazedlists.migrationkit;
 
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // for including icons in a JComboBox
 import java.net.URL;
+import java.awt.Component;
 // for building a map from status strings to labels
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collections;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.util.Set;
-import java.util.Iterator;
 
 /**
  * To render an image and icon in a JComboBox, use a label as my renderer

@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jtable;
+package com.odellengineeringltd.glazedlists.swing;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
@@ -47,11 +47,4 @@ public interface TableFormat {
      * include setting the editors and renderers for the table.
      */
     public void configureTable(JTable table);
-    
-    /**
-     * For editing fields
-     */
-    //public boolean isFieldEditable(int column);
-    //public void setFieldValue(int column, Object value);
-
 }

@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.jcombobox;
+package com.odellengineeringltd.glazedlists.swing;
 
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
@@ -14,13 +14,10 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 // for responding to user actions
 import java.awt.event.*;
+import javax.swing.event.*;
 // for displaying lists in combo boxes
 import javax.swing.ListModel;
 import javax.swing.ComboBoxModel;
-import javax.swing.event.ListDataListener;
-import javax.swing.event.ListDataEvent;
-// for keeping track of a set of listeners
-import java.util.ArrayList;
 
 
 /**
@@ -30,7 +27,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class MutableListDataEvent extends ListDataEvent {
+class MutableListDataEvent extends ListDataEvent {
 
     /** what the change is, currently */
     private int index0;
