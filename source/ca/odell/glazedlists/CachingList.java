@@ -52,6 +52,7 @@ public class CachingList extends TransformedList implements ListEventListener {
     public CachingList(EventList source, int maxSize) {
         super(source);
         this.maxSize = maxSize;
+        source.addListEventListener(this);
         cache = new IndexedTree(new AgedNodeComparator());
         indexTree = new IndexedTree();
         for(int i = 0; i < source.size();i++) {
@@ -158,19 +159,6 @@ public class CachingList extends TransformedList implements ListEventListener {
      * @param index The index that was requested from the cache
      */
     protected void preFetch(int index) {
-    }
-
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     *
-     * @param mutationIndex The index of a value in the mutation list
-     *
-     * @return The index of the value in the source list
-     *         (THIS IS THE SAME AS THE PASSED VALUE).
-     */
-    protected int getSourceIndex(int mutationIndex) {
-        return mutationIndex;
     }
 
     /**
