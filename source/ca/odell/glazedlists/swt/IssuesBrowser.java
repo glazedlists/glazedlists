@@ -17,8 +17,6 @@ import org.eclipse.swt.custom.*;
 import ca.odell.glazedlists.demo.*;
 // glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-
 
 /**
  * This is the SWT version of the demo application designed to look good on a
@@ -86,7 +84,8 @@ public class IssuesBrowser {
         usersListLayout.grabExcessVerticalSpace = true;
         usersList.setLayoutData(usersListLayout);
         issuesUserFiltered.setList(usersList);
-        issuesUserFiltered.addUserListListener(new UserInterfaceThreadProxy(new UserListListener(), shell.getDisplay()));
+
+        EventListViewer listViewer = new EventListViewer(issuesUserFiltered.getUsersList(), usersList);
     }
 
     private void createFilterLabel(Shell shell) {
@@ -179,21 +178,6 @@ public class IssuesBrowser {
         statusTextLayout.grabExcessHorizontalSpace = true;
         statusText.setLayoutData(statusTextLayout);
         statusText.setText("Java Application Window");
-    }
-
-    /**
-     * A simple listener class to listen to events on the unique view of the
-     * users lists.  Totally not optimized, but I just want it to work.
-     */
-    class UserListListener implements ListEventListener {
-
-        public void listChanged(ListEvent listChanges) {
-            EventList list = issuesUserFiltered.getUsersList();
-            usersList.removeAll();
-            for(int i = 0; i < list.size(); i++) {
-                usersList.add((String)list.get(i));
-            }
-        }
     }
 
     /**

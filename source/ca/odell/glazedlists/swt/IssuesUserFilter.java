@@ -8,7 +8,6 @@ package ca.odell.glazedlists.swt;
 
 // glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
 // the public demo
 import ca.odell.glazedlists.demo.Issue;
 import ca.odell.glazedlists.demo.IssuesToUserList;
@@ -29,11 +28,11 @@ import org.eclipse.swt.events.SelectionEvent;
 public class IssuesUserFilter extends AbstractFilterList implements SelectionListener {
 
     /** a list of users */
-    EventList usersEventList;
-    ArrayList usersSelectedList;
+    EventList usersEventList = null;
+    ArrayList usersSelectedList = null;
 
     /** a widget for selecting users */
-    List userList;
+    List userList = null;
 
     /**
      * Create a filter list that filters the specified source list, which
@@ -45,12 +44,6 @@ public class IssuesUserFilter extends AbstractFilterList implements SelectionLis
         // create a unique users list from the source issues list
         usersEventList = new UniqueList(new IssuesToUserList(source));
         usersSelectedList = new ArrayList();
-    }
-
-    public void setList(List userList) {
-        this.userList = userList;
-        userList.addSelectionListener(this);
-        handleFilterChanged();
     }
 
     /**
@@ -81,14 +74,19 @@ public class IssuesUserFilter extends AbstractFilterList implements SelectionLis
         return usersSelectedList.contains(user);
     }
 
-    public EventList getUsersList() {
-        return usersEventList;
+    /**
+     * Sets the List widget whose selection determines user filtering.
+     */
+    void setList(List userList) {
+        this.userList = userList;
+        userList.addSelectionListener(this);
+        handleFilterChanged();
     }
 
     /**
-     * Adds a listener to the unique users list.
+     * Allow access to the unique list of users
      */
-    public void addUserListListener(ListEventListener userListListener) {
-        usersEventList.addListEventListener(userListListener);
+    EventList getUsersList() {
+        return usersEventList;
     }
 }
