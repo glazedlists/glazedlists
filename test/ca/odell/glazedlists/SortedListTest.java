@@ -507,6 +507,33 @@ public class SortedListTest extends TestCase {
         unsortedList.add(4, "eerie"); // a b c d e f g h
         assertEquals(unsortedList, sortedList);
     }
+    
+    /**
+     * Test that the SortedList doesn't get grumpy if everything is always equal.
+     */
+    public void testAlwaysEqualComparator() {
+        Comparator alwaysEqualComparator = new AlwaysEqualComparator();
+        sortedList.dispose();
+        sortedList = new SortedList(unsortedList, alwaysEqualComparator);
+        
+        unsortedList.add(new Integer(8));
+        unsortedList.add(new Integer(6));
+        unsortedList.add(new Integer(7));
+        unsortedList.add(new Integer(5));
+        unsortedList.add(new Integer(3));
+        unsortedList.add(new Integer(0));
+        unsortedList.add(new Integer(9));
+        assertEquals(unsortedList, sortedList);
+    }
+    
+    /**
+     * Compares two objects to be equal.
+     */
+    class AlwaysEqualComparator implements Comparator {
+        public int compare(Object a, Object b) {
+            return 0;
+        }
+    }
 
     /**
      * Compares Strings by their length.
