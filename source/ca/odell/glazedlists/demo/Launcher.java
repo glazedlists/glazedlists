@@ -69,7 +69,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 	private JList demo_list;
 	private JButton launch_button;
-	private JLabel help_text_label;
+	private JEditorPane help_text_viewer;
 
 
 	public static void main(String[] args) {
@@ -89,6 +89,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		// Left panel containing logo and filler
 		JPanel left_panel = new JPanel(new BorderLayout(0, 0));
+		left_panel.setOpaque(true);
 		left_panel.setBackground(BACKGROUND_COLOR);
 		left_panel.setBorder(new EmptyBorder(5, 5, 0, 0));
 		if (logo_label != null) {
@@ -107,6 +108,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		// Main panel containing header and content
 		JPanel main_panel = new JPanel(new BorderLayout());
+		main_panel.setOpaque(false);
 		main_panel.add(header, BorderLayout.PAGE_START);
 		JPanel content_panel = buildContentPanel();
 		main_panel.add(content_panel, BorderLayout.CENTER);
@@ -115,6 +117,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		JPanel outer_panel = new JPanel(new BorderLayout());
 		outer_panel.add(left_panel, BorderLayout.LINE_START);
 		outer_panel.add(main_panel, BorderLayout.CENTER);
+		outer_panel.setBackground(Color.WHITE);
 
 		JFrame frame = new JFrame("Glazed Lists");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -144,25 +147,38 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		dim.width += 10;
 		scroller.setPreferredSize(dim);
 
-		help_text_label = new JLabel();
-		help_text_label.setVerticalAlignment(JLabel.TOP);
+		help_text_viewer = new JEditorPane();
+		help_text_viewer.setEditable(false);
+		help_text_viewer.setBorder(null);
+		help_text_viewer.setContentType("text/html");
+		help_text_viewer.setOpaque(false);
+		JScrollPane help_scroller = new JScrollPane(help_text_viewer,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		help_scroller.setPreferredSize(new Dimension( 150, dim.height));
+		help_scroller.setBorder( null );
+		help_scroller.getViewport().setOpaque(false);
 
 		launch_button = new JButton("Launch...");
+		launch_button.setOpaque(false);
 		launch_button.addActionListener(this);
 		launch_button.setEnabled(false);
 		JPanel help_launch_panel = new JPanel(new BorderLayout());
 		help_launch_panel.setOpaque(false);
 		help_launch_panel.setBorder(new EmptyBorder(0, 7, 0, 0));
-		help_launch_panel.add(help_text_label, BorderLayout.CENTER);
+		help_launch_panel.add(help_scroller, BorderLayout.CENTER);
 		JPanel filler = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		filler.setOpaque(false);
 		filler.add(launch_button);
 		help_launch_panel.add(filler, BorderLayout.PAGE_END);
 
 		JPanel inner_panel = new JPanel(new BorderLayout());
+		inner_panel.setOpaque(false);
 		inner_panel.add(scroller, BorderLayout.LINE_START);
 		inner_panel.add(help_launch_panel, BorderLayout.CENTER);
 
 		JPanel panel = new JPanel(new BorderLayout(0, 10));
+		panel.setOpaque(false);
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		panel.add(welcome_label, BorderLayout.PAGE_START);
 		panel.add(inner_panel, BorderLayout.CENTER);
@@ -176,9 +192,9 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		launch_button.setEnabled(selected_value != null);
 
 		if (selected_value == null)
-			help_text_label.setText("");
+			help_text_viewer.setText("");
 		else {
-			help_text_label.setText("<html><font color=\"" + HELP_TEXT_COLOR + "\">" +
+			help_text_viewer.setText("<html><font color=\"" + HELP_TEXT_COLOR + "\">" +
 				((Demo) selected_value).help_text + "</font></html>");
 		}
 	}
