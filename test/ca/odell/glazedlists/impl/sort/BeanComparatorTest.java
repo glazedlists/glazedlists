@@ -34,6 +34,20 @@ public class BeanComparatorTest extends TestCase {
     }
     
     /**
+     * Tests that the equals() method of the comparator works.
+     */
+    public void testEquals() {
+        Comparator red = GlazedLists.beanPropertyComparator(Color.class, "red");
+        Comparator blue = GlazedLists.beanPropertyComparator(Color.class, "blue");
+        Comparator rouge = GlazedLists.beanPropertyComparator(Color.class, "red");
+        Comparator blueBeer = GlazedLists.beanPropertyComparator(LabattBeer.class, "blue");
+        
+        assertTrue(red.equals(rouge));
+        assertFalse(blue.equals(blueBeer));
+        assertFalse(red.equals(blue));
+    }
+    
+    /**
      * Tests that comparison by property works.
      */
     public void testSort() {
@@ -70,5 +84,15 @@ public class BeanComparatorTest extends TestCase {
         public int compareTo(Object o) { 
             return position - ((Position)o).position;
         }
+    }
+    
+    /**
+     * Simple class with a blue property.
+     */
+    public static class LabattBeer {
+        public int getBlue() { return 24; }
+        public int getBlueLight() { return 6; }
+        public int getDry() { return 6; }
+        public int getWildcat() { return 24; }
     }
 }
