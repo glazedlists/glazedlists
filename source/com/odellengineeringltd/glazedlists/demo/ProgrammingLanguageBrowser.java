@@ -11,7 +11,6 @@ import com.odellengineeringltd.glazedlists.jcombobox.*;
 import com.odellengineeringltd.glazedlists.jtable.*;
 import com.odellengineeringltd.glazedlists.jlist.*;
 import com.odellengineeringltd.glazedlists.util.*;
-import com.odellengineeringltd.glazedlists.test.*;
 import java.applet.*;
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +27,7 @@ public class ProgrammingLanguageBrowser extends Applet {
 
     ProgrammingLanguageNameComparator sortByName = new ProgrammingLanguageNameComparator();
     ProgrammingLanguageYearComparator sortByYear = new ProgrammingLanguageYearComparator();
-    
+
     public ProgrammingLanguageBrowser() {
         this(true);
     }
@@ -37,7 +36,7 @@ public class ProgrammingLanguageBrowser extends Applet {
         if(applet) constructApplet(this);
         else constructStandalone(this);
     }
-    
+
     private void constructModel() {
         languages = new BasicEventList();
         languages.add(new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems", true, true));
@@ -53,12 +52,12 @@ public class ProgrammingLanguageBrowser extends Applet {
         languages.add(new ProgrammingLanguage("Python", "1986", "Clear syntax object-oriented programming language", true, false));
         languages.add(new ProgrammingLanguage("Ruby", "1993", "Object-oriented scripting language", true, false));
         languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer", false, false));
-        
+
         sortedLanguages = new SortedList(languages, sortByName);
         filteredLanguages = new CaseInsensitiveFilterList(sortedLanguages);
         customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);
     }
-    
+
     private void constructView(Container container) {
         // start with a list of tabs for each display type
         JTabbedPane listWidgetTabs = new JTabbedPane(JTabbedPane.BOTTOM);
@@ -70,11 +69,11 @@ public class ProgrammingLanguageBrowser extends Applet {
         tableSorter.getComparatorsForColumn(0).add(new ProgrammingLanguageNameComparator());
         tableSorter.getComparatorsForColumn(0).add(new ProgrammingLanguageYearComparator());
         listWidgetTabs.addTab("JTable", listTable.getTableScrollPane());
-        
+
         // add a JList
         EventJList eventJList = new EventJList(customFilteredLanguages);
         listWidgetTabs.addTab("JList", new JScrollPane(eventJList.getJList()));
-        
+
         // add a JComboBox
         ListComboBoxModel comboModel = new ListComboBoxModel(customFilteredLanguages);
         JComboBox eventJComboBox = new JComboBox(comboModel);
@@ -88,22 +87,22 @@ public class ProgrammingLanguageBrowser extends Applet {
         panel.add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
         panel.add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(2, 2, 2, 2), 0, 0));
         panel.add(listWidgetTabs, new GridBagConstraints(0, 3, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-        
+
         // add that to the container
         container.setLayout(new GridBagLayout());
         container.add(panel, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
-    
+
     public static void constructApplet(ProgrammingLanguageBrowser browser) {
         browser.constructModel();
         browser.constructView(browser);
     }
-    
+
     public static void constructStandalone(ProgrammingLanguageBrowser browser) {
         // assemble the window
         JFrame frame = new JFrame("Programming Languages");
         ExitOnCloseHandler.addToFrame(frame);
-        
+
         browser.constructModel();
         browser.constructView(frame.getContentPane());
 
@@ -111,7 +110,7 @@ public class ProgrammingLanguageBrowser extends Applet {
         frame.setSize(640, 480);
         frame.show();
     }
-        
+
     public static void main(String[] args) {
         new ProgrammingLanguageBrowser(false);
     }
