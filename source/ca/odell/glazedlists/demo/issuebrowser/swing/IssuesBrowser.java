@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.net.URL;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.demo.issuebrowser.*;
@@ -102,7 +103,13 @@ public class IssuesBrowser extends Applet {
 	private void constructStandalone() {
 		// create a frame with that panel
 		JFrame frame = new JFrame("Issues");
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		if (System.getProperty("in_launcher") == null) {
+			frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		}
+		else {
+			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		}
+
 		frame.setSize(640, 480);
 		frame.getContentPane().setLayout(new GridBagLayout());
 		frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -184,8 +191,10 @@ public class IssuesBrowser extends Applet {
 		iconBar.setBackground(GLAZED_LISTS_ORANGE);
 		iconBar.setLayout(new GridBagLayout());
 		ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
-		throbberStatic = new ImageIcon(jarLoader.getResource("resources/demo/throbber-static.gif"));
-		throbberActive = new ImageIcon(jarLoader.getResource("resources/demo/throbber-active.gif"));
+		URL url = jarLoader.getResource("resources/demo/throbber-static.gif");
+		if ( url != null ) throbberStatic = new ImageIcon(url);
+		url = jarLoader.getResource("resources/demo/throbber-active.gif");
+		if ( url != null ) throbberActive = new ImageIcon(url);
 		throbber = new JLabel(throbberStatic);
 		iconBar.add(projectsCombo, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		iconBar.add(throbber, new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
