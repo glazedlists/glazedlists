@@ -12,8 +12,13 @@ import java.nio.*;
 /**
  * A callback interface for classes that implement a CTPConnection.
  */
-interface CTPHandler {
+public interface CTPHandler {
     
+    /**
+     * Handles the connection being ready for chunks to be sent.
+     */
+    public void connectionReady(CTPConnection source);
+
     /**
      * Handles reception of the specified chunk of data. This chunk should be able
      * to be cleanly concatenated with the previous and following chunks without

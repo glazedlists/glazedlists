@@ -33,85 +33,85 @@ import java.util.logging.*;
  * <li>as a server, it sends only the header, "Transfer-Encoding"
  * <li>it interprets only the header, "Transfer-Encoding".
  *
- * client:
- * AWAITING_CONNECT
- *   --[connect]-->
- *     CLIENT_CONSTRUCTING_REQUEST
- *     --[send request]-->
- *       CLIENT_AWAITING_RESPONSE
- *         --[received response]-->
- *           READY
- * server:
- * AWAITING_CONNECT
- *   --[connect]-->
- *     SERVER_AWAITING_REQUEST
- *       --[received request]-->
- *         SERVER_CONSTRUCTING_RESPONSE
- *           --[sent response]-->
- *             READY
- *
- * requested shutdown:
- * READY
- *   --[close()]-->
- *     --[sent close chunk]-->
- *       --[cleanup]-->
- *         CLOSED_PERMANENTLY
- *
- * received shutdown:
- * READY
- *   --[received close chunk]-->
- *     RECEIVED_CLOSE
- *       --[cleanup]-->
- *         CLOSED_PERMANENTLY
- *
- * IO error:
- * READY
- *   --[IO error]-->
- *     --[cleanup]-->
- *       CLOSED_PERMANENTLY
- *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-final class CTPConnection {
+public final class CTPConnection {
+    // client:
+    // AWAITING_CONNECT
+    //   --[connect]-->
+    //     CLIENT_CONSTRUCTING_REQUEST
+    //     --[send request]-->
+    //       CLIENT_AWAITING_RESPONSE
+    //         --[received response]-->
+    //           READY
+    // server:
+    // AWAITING_CONNECT
+    //   --[connect]-->
+    //     SERVER_AWAITING_REQUEST
+    //       --[received request]-->
+    //         SERVER_CONSTRUCTING_RESPONSE
+    //           --[sent response]-->
+    //             READY
+    //
+    // requested shutdown:
+    // READY
+    //   --[close()]-->
+    //     --[sent close chunk]-->
+    //       --[cleanup]-->
+    //         CLOSED_PERMANENTLY
+    //
+    // received shutdown:
+    // READY
+    //   --[received close chunk]-->
+    //     RECEIVED_CLOSE
+    //       --[cleanup]-->
+    //         CLOSED_PERMANENTLY
+    //
+    // IO error:
+    // READY
+    //   --[IO error]-->
+    //     --[cleanup]-->
+    //       CLOSED_PERMANENTLY
+    //
 
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnection.class.toString());
     
     /** track the current state of this protocol */
-    protected static final int STATE_SERVER_AWAITING_CONNECT = 0;
-    protected static final int STATE_CLIENT_AWAITING_CONNECT = 1;
-    protected static final int STATE_CLIENT_CONSTRUCTING_REQUEST = 2;
-    protected static final int STATE_SERVER_AWAITING_REQUEST = 3;
-    protected static final int STATE_SERVER_CONSTRUCTING_RESPONSE = 4;
-    protected static final int STATE_CLIENT_AWAITING_RESPONSE = 5;
-    protected static final int STATE_READY = 6;
-    protected static final int STATE_RECEIVED_CLOSE = 7;
-    protected static final int STATE_CLOSED_PERMANENTLY = 8;
+    private static final int STATE_SERVER_AWAITING_CONNECT = 0;
+    private static final int STATE_CLIENT_AWAITING_CONNECT = 1;
+    private static final int STATE_CLIENT_CONSTRUCTING_REQUEST = 2;
+    private static final int STATE_SERVER_AWAITING_REQUEST = 3;
+    private static final int STATE_SERVER_CONSTRUCTING_RESPONSE = 4;
+    private static final int STATE_CLIENT_AWAITING_RESPONSE = 5;
+    private static final int STATE_READY = 6;
+    private static final int STATE_RECEIVED_CLOSE = 7;
+    private static final int STATE_CLOSED_PERMANENTLY = 8;
     
     /** standard HTTP response headers, see HTTP/1.1 RFC, 6.1.1 */
-    protected static final int RESPONSE_OK = 200;
-    protected static final int RESPONSE_ERROR = 500;
+    private static final int RESPONSE_OK = 200;
+    private static final int RESPONSE_ERROR = 500;
 
     /** the current state of this protocol */
-    protected int state = -1;
+    private int state = -1;
     
     /** the key to this protocol's channel */
-    protected SelectionKey selectionKey = null;
+    private SelectionKey selectionKey = null;
     
     /** the channel where communication occurs */
-    protected SocketChannel socketChannel = null;
+    private SocketChannel socketChannel = null;
     
     /** parse the input channel */
-    protected ByteChannelReader parser;
+    private ByteChannelReader parser;
 
     /** write the output channel */
-    protected ByteChannelWriter writer;
+    private ByteChannelWriter writer;
 
     /** the handler to delegate data interpretation to */
-    protected CTPHandler handler;
+    private CTPHandler handler;
     
     /** the remote host */
-    protected String host = "";
+    private String host = "";
     
     /** the only URI allowed by CTPConnection */
     private static final String CTP_URI = "/glazedlists";
@@ -322,6 +322,7 @@ final class CTPConnection {
             
             // we're ready
             state = STATE_READY;
+            handler.connectionReady(this);
 
         } catch(IOException e) {
             close(e);
@@ -357,6 +358,7 @@ final class CTPConnection {
             // handle the response
             if(code == RESPONSE_OK) {
                 state = STATE_READY;
+                handler.connectionReady(this);
             } else {
                 close(null);
             }
@@ -380,7 +382,7 @@ final class CTPConnection {
      *      buffer needs to be valid for the duration of this method call, but
      *      may be modified afterwards.
      */
-    synchronized public void sendChunk(ByteBuffer data) {
+    public synchronized void sendChunk(ByteBuffer data) {
         if(state != STATE_READY) throw new IllegalStateException();
         
         try {
@@ -481,7 +483,7 @@ final class CTPConnection {
      * <li>If the state is SERVER_AWAITING_REQUEST, the goodbye is a request error
      * <li>If the state is RECEIVED_CLOSE, no goodbye message is sent
      */
-    protected void close(Exception reason) {
+    private void close(Exception reason) {
         // if this is already closed, we're done
         if(state == STATE_CLOSED_PERMANENTLY) return;
         
