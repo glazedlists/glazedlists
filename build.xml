@@ -52,7 +52,6 @@
       <packageset dir="source">
         <exclude name="**/impl/**"/>
         <exclude name="**/demo/**"/>
-        <exclude name="**/test/**"/>
         <exclude name="**/migrationkit/**"/>
         <exclude name="**/swt/**"/>
         <exclude name="**/net/**"/>
@@ -153,9 +152,8 @@
     <available file="${ant.home}/lib/junit.jar" property="junit.present"/>
     <fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
     <!-- Compile the test classes from source/ into classes/ -->
-    <javac destdir="classes" srcdir="source" debug="on" source="1.4">
+    <javac destdir="classes" srcdir="test" debug="on" source="1.4">
       <classpath path="${ant.home}/lib/junit.jar"/>
-      <include name="**/test/**"/>
     </javac>
     <!-- Execute JUnit tests -->
     <junit printsummary="true" showoutput="false" fork="true"

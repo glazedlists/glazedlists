@@ -4,12 +4,11 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.test;
+package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.util.*;
 import ca.odell.glazedlists.util.concurrent.*;
 // the Glazed Lists' change objects

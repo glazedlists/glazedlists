@@ -4,10 +4,8 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.test;
+package ca.odell.glazedlists;
 
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 
