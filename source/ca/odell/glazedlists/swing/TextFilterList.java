@@ -49,7 +49,7 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class TextFilterList extends DefaultTextFilterList {
+public class TextFilterList extends DefaultTextFilterList {
 
     /** the field where the filter strings are edited */
     private JTextField filterEdit = null;
