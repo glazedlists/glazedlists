@@ -537,9 +537,9 @@ class TableColumnComparator implements Comparator {
      * Compares the two objects, returning a result based on how they compare.
      */
     public int compare(Object alpha, Object beta) {
+        Object alphaField = tableFormat.getColumnValue(alpha, column);
+        Object betaField = tableFormat.getColumnValue(beta, column);
         try {
-            Object alphaField = tableFormat.getColumnValue(alpha, column);
-            Object betaField = tableFormat.getColumnValue(beta, column);
             return comparableComparator.compare(alphaField, betaField);
         // throw a 'nicer' exception if the class does not implement Comparable
         } catch(ClassCastException e) {
