@@ -19,7 +19,7 @@ public class DefaultTextFilterListTest extends TestCase {
     private List monotonicAlphabet = Arrays.asList(new Object[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
 
     public void testNormalizeValue() {
-        TrivialDefaultTextFilterList list = new TrivialDefaultTextFilterList(new BasicEventList());
+        DefaultTextFilterList list = new DefaultTextFilterList(new BasicEventList());
 
         assertTrue(Arrays.equals(new String[0], list.normalizeFilter(new String[0])));
         assertTrue(Arrays.equals(new String[0], list.normalizeFilter(new String[] {null, ""})));
@@ -32,62 +32,56 @@ public class DefaultTextFilterListTest extends TestCase {
     }
 
     public void testIsFilterRelaxed() {
-        DefaultTextFilterList list = new DefaultTextFilterList(new BasicEventList());
-
         // removing last filter term
-        assertTrue(list.isFilterRelaxed(new String[] {"x"}, new String[0]));
+        assertTrue(DefaultTextFilterList.isFilterRelaxed(new String[] {"x"}, new String[0]));
         // shortening filter term
-        assertTrue(list.isFilterRelaxed(new String[] {"xx"}, new String[] {"x"}));
+        assertTrue(DefaultTextFilterList.isFilterRelaxed(new String[] {"xx"}, new String[] {"x"}));
         // removing filter term
-        assertTrue(list.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"xx"}));
+        assertTrue(DefaultTextFilterList.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"xx"}));
         // removing filter term
-        assertTrue(list.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"y"}));
+        assertTrue(DefaultTextFilterList.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"y"}));
         // removing and shorterning filter term
-        assertTrue(list.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"x"}));
+        assertTrue(DefaultTextFilterList.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"x"}));
         // shortening filter term by multiple characters
-        assertTrue(list.isFilterRelaxed(new String[] {"xyz"}, new String[] {"x"}));
+        assertTrue(DefaultTextFilterList.isFilterRelaxed(new String[] {"xyz"}, new String[] {"x"}));
         // shortening filter term
-        assertTrue(list.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xy"}));
+        assertTrue(DefaultTextFilterList.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xy"}));
 
-        assertFalse(list.isFilterRelaxed(new String[0], new String[] {"abc"}));
-        assertFalse(list.isFilterRelaxed(new String[] {""}, new String[] {"abc"}));
-        assertFalse(list.isFilterRelaxed(new String[] {"xyz"}, new String[] {"abc"}));
-        assertFalse(list.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "abc"}));
-        assertFalse(list.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "xy", "x"}));
-        assertFalse(list.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz"}));
-        assertFalse(list.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz", "xyz"}));
+        assertFalse(DefaultTextFilterList.isFilterRelaxed(new String[0], new String[] {"abc"}));
+        assertFalse(DefaultTextFilterList.isFilterRelaxed(new String[] {""}, new String[] {"abc"}));
+        assertFalse(DefaultTextFilterList.isFilterRelaxed(new String[] {"xyz"}, new String[] {"abc"}));
+        assertFalse(DefaultTextFilterList.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "abc"}));
+        assertFalse(DefaultTextFilterList.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "xy", "x"}));
+        assertFalse(DefaultTextFilterList.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz"}));
+        assertFalse(DefaultTextFilterList.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz", "xyz"}));
     }
 
     public void testIsFilterEqual() {
-        DefaultTextFilterList list = new DefaultTextFilterList(new BasicEventList());
-
-        assertTrue(list.isFilterEqual(new String[0], new String[0]));
-        assertTrue(list.isFilterEqual(new String[] {"x"}, new String[] {"x"}));
-        assertTrue(list.isFilterEqual(new String[] {"x", "y"}, new String[] {"x", "y"}));
+        assertTrue(DefaultTextFilterList.isFilterEqual(new String[0], new String[0]));
+        assertTrue(DefaultTextFilterList.isFilterEqual(new String[] {"x"}, new String[] {"x"}));
+        assertTrue(DefaultTextFilterList.isFilterEqual(new String[] {"x", "y"}, new String[] {"x", "y"}));
     }
 
     public void testIsFilterConstrained() {
-        DefaultTextFilterList list = new DefaultTextFilterList(new BasicEventList());
-
         // adding the first filter term
-        assertTrue(list.isFilterConstrained(new String[0], new String[] {"x"}));
+        assertTrue(DefaultTextFilterList.isFilterConstrained(new String[0], new String[] {"x"}));
         // lengthening filter term
-        assertTrue(list.isFilterConstrained(new String[] {"x"}, new String[] {"xx"}));
+        assertTrue(DefaultTextFilterList.isFilterConstrained(new String[] {"x"}, new String[] {"xx"}));
         // adding filter term
-        assertTrue(list.isFilterConstrained(new String[] {"x"}, new String[] {"x", "y"}));
+        assertTrue(DefaultTextFilterList.isFilterConstrained(new String[] {"x"}, new String[] {"x", "y"}));
         // lengthening filter term by multiple characters
-        assertTrue(list.isFilterConstrained(new String[] {"x"}, new String[] {"xyz"}));
+        assertTrue(DefaultTextFilterList.isFilterConstrained(new String[] {"x"}, new String[] {"xyz"}));
         // lengthening multi character filter term
-        assertTrue(list.isFilterConstrained(new String[] {"xy"}, new String[] {"xyz"}));
+        assertTrue(DefaultTextFilterList.isFilterConstrained(new String[] {"xy"}, new String[] {"xyz"}));
         // removing search terms but covering the old with a single new
-        assertTrue(list.isFilterConstrained(new String[] {"xyz", "xy", "x"}, new String[] {"xyzz"}));
+        assertTrue(DefaultTextFilterList.isFilterConstrained(new String[] {"xyz", "xy", "x"}, new String[] {"xyzz"}));
 
-        assertFalse(list.isFilterConstrained(new String[] {"abc"}, new String[0]));
-        assertFalse(list.isFilterConstrained(new String[] {"abc"}, new String[] {""}));
-        assertFalse(list.isFilterConstrained(new String[] {"xyz"}, new String[] {"abc"}));
-        assertFalse(list.isFilterConstrained(new String[] {"xyz", "abc"}, new String[] {"xyz"}));
-        assertFalse(list.isFilterConstrained(new String[] {"xyz"}, new String[] {"xyz", ""}));
-        assertFalse(list.isFilterConstrained(new String[] {"xyz", "xyz"}, new String[] {"xyz", ""}));
+        assertFalse(DefaultTextFilterList.isFilterConstrained(new String[] {"abc"}, new String[0]));
+        assertFalse(DefaultTextFilterList.isFilterConstrained(new String[] {"abc"}, new String[] {""}));
+        assertFalse(DefaultTextFilterList.isFilterConstrained(new String[] {"xyz"}, new String[] {"abc"}));
+        assertFalse(DefaultTextFilterList.isFilterConstrained(new String[] {"xyz", "abc"}, new String[] {"xyz"}));
+        assertFalse(DefaultTextFilterList.isFilterConstrained(new String[] {"xyz"}, new String[] {"xyz", ""}));
+        assertFalse(DefaultTextFilterList.isFilterConstrained(new String[] {"xyz", "xyz"}, new String[] {"xyz", ""}));
     }
 
     public void testConstrainingFilter() {
@@ -169,20 +163,6 @@ public class DefaultTextFilterListTest extends TestCase {
         assertEquals(Arrays.asList(new String[] {"6"}), list);
         list.setFilterText(new String[0]);
         assertEquals(list, numbers);
-    }
-
-    private class TrivialDefaultTextFilterList extends DefaultTextFilterList {
-        public TrivialDefaultTextFilterList(EventList source) {
-            super(source);
-        }
-
-        public TrivialDefaultTextFilterList(EventList source, TextFilterator filterator) {
-            super(source, filterator);
-        }
-
-        protected String[] normalizeFilter(String[] strings) {
-            return super.normalizeFilter(strings);
-        }
     }
 
     private class StringTextFilterator implements TextFilterator {
