@@ -8,8 +8,6 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.util.impl.*;
 // Swing toolkit stuff for displaying widgets
@@ -19,7 +17,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
 
 /**
  * An {@link EventList} that shows only elements that contain a filter text string.

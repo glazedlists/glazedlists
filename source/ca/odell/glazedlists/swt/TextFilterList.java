@@ -8,23 +8,41 @@ package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.util.impl.*;
-// SWT toolkit stuff for displaying widgets
-import org.eclipse.swt.SWT;
+// for working with SWT Text widgets
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.graphics.*;
-
 
 /**
- * A filter list that shows only elements that contain the filter text.
+ * An {@link EventList} that shows only elements that contain a filter text
+ * string.  The {@link TextFilterList} uses a Text to allow the user to
+ * edit the filter text. As this filter text is edited, the contents of the
+ * {@link TextFilterList} are changed to reflect the elements that match
+ * the text.
  *
- * <p>This class is not thread safe. It must be used exclusively with the SWT
- * event handler thread.
+ * <p>The {@link TextFilterList} either requires that a {@link TextFilterator}
+ * be specified in its constructor, or that every object in the source
+ * list implements the {@link TextFilterable} interface.  These are used to
+ * specify the {@link String}s to search for each element.
+ *
+ * <p>The {@link TextFilterList} initially refilters the list after each
+ * change made to the Text. If this live filtering does not have adequate
+ * performance, it can be turned off. In this case, the list will be refiltered
+ * by pressing <tt>ENTER</tt> in the Text and on every SelectionEvent
+ * received by the SelectionListener.  This SelectionListener is available via
+ * the method {@link #getFilterSelectionListener()} and can be used to refilter
+ * in response to a Button click.
+ *
+ * <p>This {@link EventList} supports all write operations.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong>This class is
+ * not thread safe. It must be used exclusively with the SWT event
+ * handler thread.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class
+ * breaks the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
  *
  * <p><strong>Warning:</strong> This class is a developer preview and subject to
  * many bugs and API changes.
@@ -101,6 +119,8 @@ public class TextFilterList extends DefaultTextFilterList {
      * Creates a new filter list that uses a TextFilterator. A TextFilterator is something
      * that I made up. It is basically a class that knows how to take an arbitrary
      * object and get an array of strings for that object.
+     *
+     * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, Text filterEdit, TextFilterator filterator) {
         super(source, filterator);
@@ -120,17 +140,18 @@ public class TextFilterList extends DefaultTextFilterList {
      * Sets the Text used to edit the filter search {@link String}.
      */
     public void setFilterEdit(Text filterEdit) {
-
         boolean live = true;
 
         // stop listening on filter events from the old filter edit
         if(this.filterEdit != null) {
+            this.filterEdit.removeSelectionListener(filterSelectionListener);
             live = (filterModifyListener != null);
             setLive(false);
         }
 
         // start listening for filter events from the new filter edit
         this.filterEdit = filterEdit;
+        filterEdit.addSelectionListener(filterSelectionListener);
         setLive(live);
 
         // filter with the new filter edit
@@ -143,8 +164,8 @@ public class TextFilterList extends DefaultTextFilterList {
      * modified, the list is refiltered.
      *
      * <p>To avoid the processing overhead of filtering for each keystroke, use
-     * a not-live filter edit and trigger the ActionListener using a Button
-     * or by pressing <code>ENTER</code> in the filter edit field.
+     * a not-live filter edit and trigger the SelectionListener using a Button
+     * or by pressing <code>ENTER</code> in the filter edit Text field.
      */
     public void setLive(boolean live) {
         if(live) {
@@ -162,7 +183,7 @@ public class TextFilterList extends DefaultTextFilterList {
 
     /**
      * Gets a SelectionListener that refilters the list when it is fired. This
-     * listener can be used to filter when the user presses a button.
+     * listener can be used to filter when the user presses a 'Search' button.
      */
     public SelectionListener getFilterSelectionListener() {
         return filterSelectionListener;
@@ -180,7 +201,7 @@ public class TextFilterList extends DefaultTextFilterList {
     }
 
     /**
-     * Implement the SelectionListener interface for text filter updates. When
+     * Implements the SelectionListener interface for text filter updates. When
      * the user clicks a button (supplied by external code), this
      * SelectionListener can be used to update the filter in response.
      */
