@@ -14,6 +14,7 @@ import ca.odell.glazedlists.*;
 import java.util.*;
 // swing utilities for interacting with the event dispatch thread
 import javax.swing.SwingUtilities;
+import javax.swing.event.*;
 
 /**
  * This test verifies that the EventSelectionModel works.
@@ -67,7 +68,46 @@ public class EventSelectionModelTest extends TestCase {
         assertEquals(-1, eventSelectionModel.getMaxSelectionIndex());
         assertEquals(true, eventSelectionModel.isSelectionEmpty());
     }
+    
+    /**
+     * Tests a problem where the {@link EventSelectionModel} fails to fire events
+     *
+     * @author Sergey Bogatyrjov
+     */
+    public void testSelectionModel() {
+        String[] data = new String[] { "one", "two", "three" };
+        EventList source = new BasicEventList(Arrays.asList(data));
+        BooleanFilteredList filtered = new BooleanFilteredList(source);
 
+        // create selection model
+        EventSelectionModel model = new EventSelectionModel(filtered);
+        ListSelectionChangeCounter counter = new ListSelectionChangeCounter();
+        model.addListSelectionListener(counter);
+
+        // select the 1th
+        flushEventDispatchThread();
+        model.setSelectionInterval(1, 1);
+        assertEquals(1, counter.getCountAndReset());
+
+        // clear the filter
+        filtered.setMatchAll(false);
+        flushEventDispatchThread();
+        assertEquals(1, counter.getCountAndReset());
+
+        // unclear the filter
+        filtered.setMatchAll(true);
+        flushEventDispatchThread();
+        assertEquals(0, counter.getCountAndReset());
+
+        // select the 0th
+        model.setSelectionInterval(0, 0);
+        assertEquals(1, counter.getCountAndReset());
+
+        // clear the filter
+        filtered.setMatchAll(false);
+        flushEventDispatchThread();
+        assertEquals(1, counter.getCountAndReset());
+    }
 
     /**
      * Ensures that all waiting Swing events have been handled before proceeding.
@@ -88,6 +128,39 @@ public class EventSelectionModelTest extends TestCase {
             throw new RuntimeException(e);
         } catch(java.lang.reflect.InvocationTargetException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * A filter list that matches all or none.
+     */
+    private class BooleanFilteredList extends AbstractFilterList {
+        private boolean matchAll = true;
+        public BooleanFilteredList(EventList source) {
+            super(source);
+            handleFilterChanged();
+        }
+        public boolean filterMatches(Object element) {
+            return matchAll;
+        }
+        public void setMatchAll(boolean matchAll) {
+            this.matchAll = matchAll;
+            handleFilterChanged();
+        }
+    }
+
+    /**
+     * Counts the number of ListSelectionEvents fired.
+     */
+    private class ListSelectionChangeCounter implements ListSelectionListener {
+        private int count = 0;
+        public void valueChanged(ListSelectionEvent e) {
+            count++;
+        }
+        public int getCountAndReset() {
+            int result = count;
+            count = 0;
+            return result;
         }
     }
 }

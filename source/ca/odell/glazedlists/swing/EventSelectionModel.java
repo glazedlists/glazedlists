@@ -337,7 +337,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                 updates.commitEvent();
 
                 // fire the changes to ListSelectionListeners
-                if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
+                if(minSelectionIndexBefore != -1 && maxSelectionIndexBefore != -1) {
                     int minSelectionIndexAfter = getMinSelectionIndex();
                     int maxSelectionIndexAfter = getMaxSelectionIndex();
                     int changeStart = minSelectionIndexBefore;
