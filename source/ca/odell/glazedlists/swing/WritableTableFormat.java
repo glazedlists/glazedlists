@@ -31,6 +31,10 @@ public interface WritableTableFormat extends TableFormat {
      * Sets the specified field of the base object to the edited value. When
      * a column of a table is edited, this method is called so that the user
      * can specify how to modify the base object for each column.
+     *
+     * @return the revised Object, or null if the revision shall be discarded.
+     *      If not null, the EventTableModel will set() this revised value in
+     *      the list and overwrite the previous value.
      */
-    public void setColumnValue(Object baseObject, Object editedValue, int column);
+    public Object setColumnValue(Object baseObject, Object editedValue, int column);
 }

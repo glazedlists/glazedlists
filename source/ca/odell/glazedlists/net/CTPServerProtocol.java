@@ -56,7 +56,15 @@ interface CTPServerHandler {
      *      address. See HTTP/1.1 RFC, 5.1.2
      * @param headers a Map of HTTP request headers. See HTTP/1.1 RFC, 5.3
      */ 
-    public void receiveGet(CTPServerProtocol source, String uri, Map headers);
+    public void receivePost(CTPServerProtocol source, String uri, Map headers);
+    /**
+     * Handles reception of the specified chunk of data. This chunk should be able
+     * to be cleanly concatenated with the previous and following chunks without
+     * problem by the reader.
+     *
+     * @param data A non-empty array of bytes.
+     */
+    public void receiveChunk(CTPServerProtocol source, byte[] data);
     /**
      * Handles the connection being closed by the remote client. This will also
      * be called if there is a connection error, which is the case when a client
@@ -74,8 +82,27 @@ interface CTPServerHandler {
  * chunked encoding.
  */
 class CTPClientProtocol {
+    /**
+     * Sends the response header to the client.
+     *
+     * @param code an HTTP response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1
+     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2
+     */
     public void sendGet(String uri, Map headers) throws CTPException {
     }
+    /**
+     * Sends the specified chunk of data immediately. This chunk should be able to
+     * be cleanly concatenated with the previous and following chunks without
+     * problem by the reader.
+     *
+     * @param data A non-empty array of bytes.
+     */
+    public void sendChunk(byte[] data) throws CTPException {
+    }
+    /**
+     * Closes the connection to the client. As specified by the HTTP/1.1 RFC,
+     * this sends a single empty chunk and closes the TCP/IP connection.
+     */
     public void close() {
     }
 }
@@ -86,8 +113,29 @@ class CTPClientProtocol {
  * and handlers are used to interpret the data.
  */
 interface CTPClientHandler {
+    /**
+     * Handles an HTTP response from the specified connection.
+     *
+     * @param code the HTTP  response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1
+     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2
+     */
     public void receiveResponse(CTPClientProtocol source, int code, Map headers);
+    /**
+     * Handles reception of the specified chunk of data. This chunk should be able
+     * to be cleanly concatenated with the previous and following chunks without
+     * problem by the reader.
+     *
+     * @param data A non-empty array of bytes.
+     */
     public void receiveChunk(CTPClientProtocol source, byte[] data);
+    /**
+     * Handles the connection being closed by the remote client. This will also
+     * be called if there is a connection error, which is the case when a server
+     * sends data that cannot be interpretted by CTPServerProtocol.
+     *
+     * @param reason An exception if the connection was closed as the result of
+     *      a failure. This may be null.
+     */
     public void connectionClosed(CTPClientProtocol source, Exception reason);
 }
 

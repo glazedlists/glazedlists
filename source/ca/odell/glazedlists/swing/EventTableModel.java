@@ -195,11 +195,20 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public void setValueAt(Object editedValue, int row, int column) {
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
-            WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
-            // get the object being edited from the source list
-            Object baseObject = source.get(row);
-            // tell the table format to set the value based on what it knows
-            writableTableFormat.setColumnValue(baseObject, editedValue, column);
+            source.getReadWriteLock().writeLock().lock();
+            try {
+                WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
+                // get the object being edited from the source list
+                Object baseObject = source.get(row);
+                // tell the table format to set the value based on what it knows
+                Object updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
+                // update the list with the revised value
+                if(updatedObject != null) {
+                    source.set(row, updatedObject);
+                }
+            } finally {
+                source.getReadWriteLock().writeLock().unlock();
+            }
         // this is not a writable table
         } else {
             throw new UnsupportedOperationException("Unexpected set() on read-only table");
