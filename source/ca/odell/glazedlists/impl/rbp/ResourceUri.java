@@ -113,8 +113,7 @@ class ResourceUri {
     public int compareTo(Object other) {
         if(other == null) throw new NullPointerException();
         ResourceUri otherUri = (ResourceUri)other;
-        if(otherUri.local && !this.local) return 1;
-        if(!otherUri.local && this.local) return -1;
+        if(otherUri.local != this.local) throw new IllegalStateException("Cannot compare local URI with remote URI: " + other + " vs. " + this);
         
         int result = path.compareTo(otherUri.path);
         if(result != 0) return result;

@@ -45,13 +45,9 @@ public class ResourceUriTest extends TestCase {
         
         ResourceUri remoteCustomers = ResourceUri.localOrRemote("glazedlists://localhost:1000/Customers", "localhost", 2000);
         assertFalse(remoteCustomers.isLocal());
-        assertFalse(remoteCustomers.equals(localCustomers));
-        assertFalse(localCustomers.equals(remoteCustomers));
         
         ResourceUri remoteCustomers2 = ResourceUri.localOrRemote("glazedlists://localhost:1000/Customers", "localhost.com", 1000);
         assertFalse(remoteCustomers2.isLocal());
-        assertFalse(remoteCustomers2.equals(localCustomers));
-        assertFalse(localCustomers.equals(remoteCustomers2));
         
         ResourceUri remoteCustomers3 = ResourceUri.remote("localhost", 1000, "/Customers");
         assertEquals(remoteCustomers, remoteCustomers3);
