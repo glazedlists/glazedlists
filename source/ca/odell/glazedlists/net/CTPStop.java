@@ -22,7 +22,7 @@ class CTPStop implements CTPRunnable {
     
     /** logging */
     private static Logger logger = Logger.getLogger(CTPStop.class.toString());
-
+    
     /**
      * Stops the server.
      *
