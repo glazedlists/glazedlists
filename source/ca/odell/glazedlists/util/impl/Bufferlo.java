@@ -107,6 +107,23 @@ public class Bufferlo implements CharSequence {
     }
     
     /**
+     * Gets the bytes of this Bufferlo.
+     */
+    public byte[] consumeBytes(int bytes) {
+        try {
+            byte[] result = new byte[bytes];
+            int totalRead = 0;
+            while(totalRead < bytes) {
+                int read = getInputStream().read(result, totalRead, (bytes - totalRead));
+                totalRead += read;
+            }
+            return result;
+        } catch(IOException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
+    }
+    
+    /**
      * Gets an InputStream that reads this buffer.
      */
     public BufferloInputStream getInputStream() {
