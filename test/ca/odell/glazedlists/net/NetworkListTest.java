@@ -62,6 +62,7 @@ public class NetworkListTest extends TestCase {
             String path = "/integers";
             NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
+            waitFor(1000);
             assertTrue(sourceListener.isConnected());
             sourceList.add(new Integer(8));
             sourceList.add(new Integer(6));
