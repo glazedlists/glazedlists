@@ -29,21 +29,40 @@ public class ConsistencyTestList implements ListEventListener {
 
     /** keep a count of the number of changes, for reporting */
     private int changeCount = 0;
+    
+    /** whether to cough out changes to the console as they happen */
+    private boolean verbose = false;
+
+    /**
+     * Creates a new ConsistencyTestList that ensures events from the source
+     * list are consistent.
+     *
+     * @param verbose whether to print changes to the console as they happne
+     */
+    public ConsistencyTestList(EventList source, String name, boolean verbose) {
+        this.source = source;
+        this.name = name;
+        this.verbose = verbose;
+        size = source.size();
+    }
 
     /**
      * Creates a new ConsistencyTestList that ensures events from the source
      * list are consistent.
      */
     public ConsistencyTestList(EventList source, String name) {
-        this.source = source;
-        this.name = name;
-        size = source.size();
+        this(source, name, false);
     }
 
     /**
      * For implementing the ListEventListener interface.
      */
     public void listChanged(ListEvent listChanges) {
+        // print the changes if necessary
+        if(verbose) {
+            System.out.println(name + ": " + listChanges);
+        }
+        
         // keep track of the highest change index so far
         int highestChangeIndex = 0;
         

@@ -154,9 +154,9 @@ public final class SortedList extends TransformedList {
             
             for(ListIterator i = deleteIndices.listIterator(deleteIndices.size()); i.hasPrevious(); ) {
                 int currentDeletedIndex = ((Integer)i.previous()).intValue();
-                //if(currentDeletedIndex < insertedIndex ||
-                    //(currentDeletedIndex == insertedIndex && insertedIndex < deletedIndex)) {
-                if(currentDeletedIndex <= insertedIndex) {
+                if(currentDeletedIndex < insertedIndex ||
+                    (currentDeletedIndex == insertedIndex && insertedIndex < deletedIndex)) {
+                //if(currentDeletedIndex <= insertedIndex) {
                     insertedIndex++;
                 } else {
                     currentDeletedIndex++;
