@@ -45,7 +45,7 @@ public final class BeanPropertyComparator implements Comparator {
 
         // Inspect beta
         Object betaProperty = null;
-        if(beta != null) alphaProperty = beanProperty.get(beta);
+        if(beta != null) betaProperty = beanProperty.get(beta);
 
         // Compare the property values
         return propertyComparator.compare(alphaProperty, betaProperty);
