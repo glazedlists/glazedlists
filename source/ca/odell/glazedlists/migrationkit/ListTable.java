@@ -68,7 +68,6 @@ public class ListTable implements MouseListener {
      */
     public ListTable(EventList source, TableFormat tableFormat) {
         this.source = source;
-        this.eventTableModel = new EventTableModel(source, tableFormat);
 
         // create the selection model
         eventSelectionModel = new EventSelectionModel(source);
@@ -76,10 +75,12 @@ public class ListTable implements MouseListener {
         listSelectionModel = eventSelectionModel.getListSelectionModel();
         selectionNotifier = new SelectionNotifier(selectionList);
 
+        // construct the table model
+        this.eventTableModel = new EventTableModel(source, tableFormat);
+
         // construct widgets
         table = new JTable(eventTableModel);
         table.setSelectionModel(listSelectionModel);
-        //tableFormat.configureTable(table);
         tableScrollPane = new JScrollPane(table);
         
         // prepare listeners
