@@ -21,24 +21,31 @@ import javax.swing.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventSelectionModelTest extends TestCase {
+public class EventSelectionModelTest extends SwingTestCase {
 
     /**
      * Prepare for the test.
      */
-    public void setUp() {
+    public void guiSetUp() {
     }
 
     /**
      * Clean up after the test.
      */
-    public void tearDown() {
+    public void guiTearDown() {
     }
-
+    
+    /**
+     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
+     */
+    public void testGui() {
+        super.testGui();
+    }
+    
     /**
      * Verifies that the selected index is cleared when the selection is cleared.
      */
-    public void testClear() {
+    public void guiTestClear() {
         BasicEventList list = new BasicEventList();
         EventSelectionModel eventSelectionModel = new EventSelectionModel(list);
         
@@ -51,7 +58,7 @@ public class EventSelectionModelTest extends TestCase {
         list.add("F");
         
         // make sure Swing is caught up
-        flushEventDispatchThread();
+        //flushEventDispatchThread();
         
         // make a selection
         eventSelectionModel.addSelectionInterval(1, 4);
@@ -74,7 +81,7 @@ public class EventSelectionModelTest extends TestCase {
      *
      * @author Sergey Bogatyrjov
      */
-    public void testSelectionModel() {
+    public void guiTestSelectionModel() {
         String[] data = new String[] { "one", "two", "three" };
         EventList source = new BasicEventList(Arrays.asList(data));
         BooleanFilteredList filtered = new BooleanFilteredList(source);
@@ -85,18 +92,18 @@ public class EventSelectionModelTest extends TestCase {
         model.addListSelectionListener(counter);
 
         // select the 1th
-        flushEventDispatchThread();
+        //flushEventDispatchThread();
         model.setSelectionInterval(1, 1);
         assertEquals(1, counter.getCountAndReset());
 
         // clear the filter
         filtered.setMatchAll(false);
-        flushEventDispatchThread();
+        //flushEventDispatchThread();
         assertEquals(1, counter.getCountAndReset());
 
         // unclear the filter
         filtered.setMatchAll(true);
-        flushEventDispatchThread();
+        //flushEventDispatchThread();
         assertEquals(0, counter.getCountAndReset());
 
         // select the 0th
@@ -105,30 +112,8 @@ public class EventSelectionModelTest extends TestCase {
 
         // clear the filter
         filtered.setMatchAll(false);
-        flushEventDispatchThread();
+        //flushEventDispatchThread();
         assertEquals(1, counter.getCountAndReset());
-    }
-
-    /**
-     * Ensures that all waiting Swing events have been handled before proceeding.
-     * This hack method can be used when unit testing classes that interact with
-     * the Swing event dispatch thread.
-     *
-     * <p>This guarantees that all events in the event dispatch queue before this
-     * method is called will have executed. It provides no guarantee that the event
-     * dispatch thread will be empty upon return.
-     */
-    private void flushEventDispatchThread() {
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                }
-            });
-        } catch(InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch(java.lang.reflect.InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
