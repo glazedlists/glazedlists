@@ -62,6 +62,7 @@ public class ProgrammingLanguageBrowser extends Applet {
 
         // add a JTable
         ListTable listTable = new ListTable(customFilteredLanguages, new ProgrammingLanguageTableCell());
+        listTable.getTable().getColumnModel().getColumn(0).setCellRenderer(new ProgrammingLanguageRenderer());
         TableComparatorChooser tableSorter = new TableComparatorChooser(listTable.getTable(), sortedLanguages, false);
         tableSorter.getComparatorsForColumn(0).clear();
         tableSorter.getComparatorsForColumn(0).add(new ProgrammingLanguageNameComparator());
