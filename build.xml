@@ -177,6 +177,7 @@
     <!-- Execute JUnit tests -->
     <junit printsummary="true" showoutput="false" fork="true"
       errorProperty="test.failed" failureProperty="test.failed">
+      <assertions><enable/></assertions>
       <classpath path="classes:${ant.home}/lib/junit.jar"/>
       <formatter type="brief" usefile="false"/>
       <batchtest>

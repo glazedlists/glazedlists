@@ -75,9 +75,9 @@ class AddChunk implements Runnable {
                 oldValue.delete();
             }
 
+            logger.info("Successfully wrote value for key \"" + newValue.getKey() + "\"");
         } catch(IOException e) {
             persistentMap.fail(e, "Failed to write to file " + persistentMap.getFile().getPath());
         }
-        logger.info("Successfully wrote value for key \"" + newValue.getKey() + "\"");
     }
 }

@@ -25,7 +25,7 @@ import java.util.logging.*;
 class CloseFile implements Runnable {
      
     /** logging */
-    private static Logger logger = Logger.getLogger(OpenFile.class.toString());
+    private static Logger logger = Logger.getLogger(CloseFile.class.toString());
     
     /** the host map */
     private PersistentMap persistentMap = null;
@@ -41,10 +41,8 @@ class CloseFile implements Runnable {
      * Close the file.
      */
     public void run() {
-        FileChannel fileChannel = persistentMap.getFileChannel();
-        
         try {
-            fileChannel.close();
+            persistentMap.getFileChannel().close();
         } catch(IOException e) {
             persistentMap.fail(e, "Failed to close file " + persistentMap.getFile().getPath());
         }

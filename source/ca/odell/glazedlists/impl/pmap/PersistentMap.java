@@ -21,6 +21,10 @@ import java.util.logging.*;
 /**
  * A Map whose entries are persisted to disk transactionally.
  *
+ * <p>This class uses an extra thread to do all persistence. This means that all
+ * operations will be immediate, but will return without having taken effect on disk.
+ * To flush the disk, call {@link flush()}.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class PersistentMap implements Map {
@@ -93,6 +97,14 @@ public final class PersistentMap implements Map {
     }
     
     /**
+     * Blocks until all pending writes to disk have completed.
+     */
+    public void flush() {
+        // ensure all pending changes have been written
+        nioDaemon.invokeAndWait(NoOp.instance());
+    }
+    
+    /**
      * Removes all mappings from this map.
      */
     public void clear() {
@@ -154,8 +166,17 @@ public final class PersistentMap implements Map {
      * Removes the mapping for this key from this map if present.
      */
     public Object remove(Object key) {
-        // this marks a chunk as off, and deallocates it
-        throw new UnsupportedOperationException();
+        // remove from the memory-map
+        Chunk removed = (Chunk)map.remove(key);
+        
+        // if there was nothing to remove
+        if(removed == null) return null;
+        
+        // remove from disk
+        nioDaemon.invokeLater(new RemoveChunk(this, removed));
+        
+        // return the removed value
+        return removed;
     }
     
     /**

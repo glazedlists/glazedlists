@@ -43,8 +43,10 @@ public final class Chunk {
     /** the key for this chunk, should be immutable or treated as such */
     private Object key = null;
     private Bufferlo keyBytes = null;
+    private int keyBytesLength = -1;
     
     /** the value for this chunk */
+    private int valueBytesLength = -1;
     private Bufferlo valueBytes = null;
     
     /**
@@ -52,6 +54,7 @@ public final class Chunk {
      */
     public Chunk(Bufferlo value) {
         valueBytes = value.duplicate();
+        valueBytesLength = valueBytes.length();
     }
     
     /**
@@ -66,17 +69,10 @@ public final class Chunk {
     }
     
     /**
-     * Fetches the value for this chunk and sends it to teh specified ValueCallback.
+     * Fetches the value for this chunk and sends it to the specified ValueCallback.
      */
     public void fetchValue(ValueCallback valueCallback) {
-        synchronized(this) {
-            if(valueBytes != null) {
-                valueCallback.valueLoaded(this, valueBytes.duplicate());
-                return;
-            }
-        }
-        
-        throw new UnsupportedOperationException();
+        persistentMap.getNIODaemon().invokeLater(new LoadValue(this, valueCallback));
     }
 
     /**
@@ -88,6 +84,12 @@ public final class Chunk {
         return BlockingValueCallback.get(this);
     }
     
+    /**
+     * Gets the map that hosts this chunk.
+     */
+    PersistentMap getPersistentMap() {
+        return persistentMap;
+    }
     
     /**
      * Get the current size of this chunk.
@@ -146,6 +148,7 @@ public final class Chunk {
         try {
             keyBytes = new Bufferlo();
             persistentMap.getKeyCoder().encode(key, keyBytes.getOutputStream());
+            keyBytesLength = keyBytes.length();
         } catch(IOException e) {
             persistentMap.fail(e, "Unexpected encoding exception");
         }
@@ -167,8 +170,8 @@ public final class Chunk {
         required += 4; // sequence ID
         required += 4; // key size
         required += 4; // value size
-        required += keyBytes.length(); // key
-        required += valueBytes.length(); // value
+        required += keyBytesLength; // key
+        required += valueBytesLength; // value
         
         return required;
     }
@@ -204,9 +207,10 @@ public final class Chunk {
         assert(offset != -1);
         if(!on) return;
         
+        // turn the chunk off
         this.on = false;
 
-        // turn the chunk off
+        // write that to disk
         FileChannel fileChannel = persistentMap.getFileChannel();
         Bufferlo sizeData = new Bufferlo();
         DataOutputStream sizeDataOut = new DataOutputStream(sizeData.getOutputStream());
@@ -249,7 +253,7 @@ public final class Chunk {
         
         // read the data
         if(chunk.on) {
-            chunk.readData();
+            chunk.readHeader();
         }
         
         // adjust the position to after this chunk
@@ -273,8 +277,8 @@ public final class Chunk {
         
         // write the data
         chunkDataOut.writeInt(sequenceId);
-        chunkDataOut.writeInt(keyBytes.length());
-        chunkDataOut.writeInt(valueBytes.length());
+        chunkDataOut.writeInt(keyBytesLength);
+        chunkDataOut.writeInt(valueBytesLength);
         chunkData.append(keyBytes);
         chunkData.append(valueBytes);
         
@@ -286,12 +290,16 @@ public final class Chunk {
         chunkDataOut.writeInt(1); // on == true
         chunkData.writeToChannel(fileChannel.position(offset));
         fileChannel.force(false);
+        
+        // clean up stuff we don't need no more
+        keyBytes = null;
+        valueBytes = null;
     }
     
     /**
-     * Reads the data from the file to this chunk. This requires 1 read from disk.
+     * Reads the sequence ID, key and value size for this chunk.
      */
-    private void readData() throws IOException {
+    private void readHeader() throws IOException {
         assert(offset != -1);
         assert(size() != -1);
         
@@ -313,15 +321,59 @@ public final class Chunk {
         
         // read the data
         sequenceId = dataIn.readInt();
-        int keyBytesLength = dataIn.readInt();
-        int valueBytesLength = dataIn.readInt();
+        keyBytesLength = dataIn.readInt();
+        valueBytesLength = dataIn.readInt();
         keyBytes = chunkAsBytes.consume(keyBytesLength);
-        valueBytes = chunkAsBytes.consume(valueBytesLength);
         
         // skip any excess
-        chunkAsBytes.skip(chunkAsBytes.length());
+        chunkAsBytes.clear();
         
         // process the read data
         key = persistentMap.getKeyCoder().decode(keyBytes.getInputStream());
+    }
+
+    /**
+     * Reads the value for this chunk.
+     */
+    Bufferlo readValue() throws IOException {
+        assert(offset != -1);
+        assert(size() != -1);
+        assert(valueBytesLength != -1);
+        
+        // prepare to read
+        FileChannel fileChannel = persistentMap.getFileChannel();
+        Bufferlo valueBytes = new Bufferlo();
+        int valueLocation = offset;
+
+        // adjust the value location: header
+        valueLocation += 4; // on/off
+        valueLocation += 4; // sizeToUse
+        valueLocation += 4; // size one
+        valueLocation += 4; // size two
+
+        // adjust the value location: body
+        valueLocation += 4; // sequence ID
+        valueLocation += 4; // key size
+        valueLocation += 4; // value size
+        valueLocation += keyBytesLength; // key
+        
+        // read
+        int read = valueBytes.readFromChannel(fileChannel.position(valueLocation), valueBytesLength);
+        if(read < valueBytesLength) throw new IOException("Expected " + valueBytesLength + " but found " + read + " bytes");
+        
+        // done
+        return valueBytes;
+    }
+    
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append("<chunk      offset=\"").append(offset).append("\"");
+        result.append("\n              size=\"").append(size()).append("\"");
+        result.append("\n                on=\"").append(isOn()).append("\"");
+        result.append("\n       sequence_id=\"").append(sequenceId).append("\"");
+        result.append("\n               key=\"").append(key).append("\"");
+        result.append("\n    keyBytesLength=\"").append(keyBytesLength).append("\"");
+        result.append("\n  valueBytesLength=\"").append(valueBytesLength).append("\">");
+        return result.toString();
     }
 }

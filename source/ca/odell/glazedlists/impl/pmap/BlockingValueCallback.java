@@ -38,9 +38,7 @@ class BlockingValueCallback implements ValueCallback {
         synchronized(callback) {
             if(callback.value == null) {
                 try {
-                    System.out.println("WAITING");
                     callback.wait();
-                    System.out.println("DONE WAITING");
                 } catch(InterruptedException e) {
                     throw new RuntimeException(e);
                 }

@@ -33,8 +33,12 @@ public class Bufferlo implements CharSequence {
     /** read from this bufferlo */
     private BufferloInputStream in = new BufferloInputStream();
 
-    /** whether this is read only */
-    private boolean readOnly = false;
+    /**
+     * Clears the contents of this bufferlo.
+     */
+    public void clear() {
+        buffers.clear();
+    }
     
     /** 
      * Populate this Bufferlo with the data from the specified channel.
@@ -364,8 +368,6 @@ public class Bufferlo implements CharSequence {
      * Gets a buffer that we can write data into.
      */
     private ByteBuffer getWriteIntoBuffer() {
-        if(readOnly) throw new IllegalStateException("Read only");
-        
         // we have a buffer with space remaining
         if(!buffers.isEmpty()) {
             ByteBuffer last = (ByteBuffer)buffers.getLast();

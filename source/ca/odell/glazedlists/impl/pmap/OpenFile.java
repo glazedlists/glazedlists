@@ -59,7 +59,7 @@ class OpenFile implements Runnable {
                 if(chunk == null) break;
                 persistentMap.loadedChunk(chunk);
                 if(chunk.isOn()) {
-                    logger.info("Successfully loaded value for key \"" + chunk.getKey() + "\"");
+                    logger.info("Successfully loaded key \"" + chunk.getKey() + "\"");
                 }
             }
         
