@@ -62,6 +62,13 @@ public class FilterList extends AbstractFilterList implements MatcherListener {
             handleFilterCleared();
     }
 
+    /**
+     * @see #setMatcher
+     */
+    public Matcher getMatcher() {
+        return matcher;
+    }
+
 
     /**
      * {@inheritDoc}
