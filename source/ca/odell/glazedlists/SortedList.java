@@ -36,7 +36,7 @@ public final class SortedList extends TransformedList {
     private IndexedTree unsorted = null;
     /** a map from the sorted index to the unsorted index */
     private IndexedTree sorted = null;
-    
+
     /** the comparator that this list uses for sorting */
     private Comparator comparator = null;
 
@@ -59,7 +59,7 @@ public final class SortedList extends TransformedList {
      */
     public SortedList(EventList source, Comparator comparator) {
         super(source);
-        
+
         // use an Internal Lock to avoid locking the source list during a sort
         readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
 
@@ -73,7 +73,7 @@ public final class SortedList extends TransformedList {
             getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * For implementing the ListEventListener interface. When the underlying list
      * changes, this notification allows the object to repaint itself or update
@@ -86,7 +86,7 @@ public final class SortedList extends TransformedList {
      * <br>2. Update the sorted tree for update events by deleting nodes. Queue the
      *     unsorted nodes for updates in a list.
      * <br>3. Update the sorted tree for updates by inserting nodes. Fire insert
-     *     events. 
+     *     events.
      * <br>4. Process queue of unsorted nodes for inserts. Fire insert events.
      *
      * <p>This cycle is rather complex but necessarily so. The reason is that for
@@ -104,12 +104,12 @@ public final class SortedList extends TransformedList {
      * where the index does not change.
      */
     public void listChanged(ListEvent listChanges) {
-        
+
         // handle reordering events
         if(listChanges.isReordering()) {
             // the reorder map tells us what moved where
             int[] reorderMap = listChanges.getReorderMap();
-            
+
             // create an array with the sorted nodes
             IndexedTreeNode[] sortedNodes = new IndexedTreeNode[sorted.size()];
             int index = 0;
@@ -118,7 +118,7 @@ public final class SortedList extends TransformedList {
                 IndexedTreeNode sortedNode = (IndexedTreeNode)unsortedNode.getValue();
                 sortedNodes[index] = sortedNode;
             }
-            
+
             // set the unsorted nodes to point to the new set of sorted nodes
             index = 0;
             for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
@@ -126,21 +126,21 @@ public final class SortedList extends TransformedList {
                 unsortedNode.setValue(sortedNodes[reorderMap[index]]);
                 sortedNodes[reorderMap[index]].setValue(unsortedNode);
             }
-            
+
             // we have handled the reordering!
             return;
         }
 
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
-        
+
         // first update the offset tree for all changes, and keep the changed nodes in a list
         LinkedList insertNodes = new LinkedList();
 
         // perform the updates on the indexed tree
         ListEvent firstPass = new ListEvent(listChanges);
         while(firstPass.next()) {
-            
+
             // get the current change info
             int unsortedIndex = firstPass.getIndex();
             int changeType = firstPass.getType();
@@ -168,7 +168,7 @@ public final class SortedList extends TransformedList {
         // record the original indices of the nodes for update
         ListEvent secondPass = new ListEvent(listChanges);
         while(secondPass.next()) {
-            
+
             // get the current change info
             int unsortedIndex = secondPass.getIndex();
             int changeType = secondPass.getType();
@@ -178,14 +178,14 @@ public final class SortedList extends TransformedList {
                 IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
                 IndexedTreeNode sortedNode = (IndexedTreeNode)unsortedNode.getValue();
                 int originalIndex = sortedNode.getIndex();
-                indicesPendingDeletion.addPair(new IndexNodePair(originalIndex, unsortedNode)); 
+                indicesPendingDeletion.addPair(new IndexNodePair(originalIndex, unsortedNode));
             }
         }
-        
+
         // delete the indices of the updated nodes
         ListEvent thirdPass = listChanges;
         while(thirdPass.next()) {
-            
+
             // get the current change info
             int unsortedIndex = thirdPass.getIndex();
             int changeType = thirdPass.getType();
@@ -196,15 +196,15 @@ public final class SortedList extends TransformedList {
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
             }
         }
-        
+
         // fire all the update events
         while(indicesPendingDeletion.hasPair()) {
             IndexNodePair indexNodePair = indicesPendingDeletion.removePair();
             int insertedIndex = insertByUnsortedNode(indexNodePair.node);
             int deletedIndex = indexNodePair.index;
             // adjust the out of order insert with respect to the delete list
-            insertedIndex = indicesPendingDeletion.adjustDeleteAndInsert(deletedIndex, insertedIndex); 
-            
+            insertedIndex = indicesPendingDeletion.adjustDeleteAndInsert(deletedIndex, insertedIndex);
+
             // fire the events
             if(deletedIndex == insertedIndex) {
                 updates.addUpdate(insertedIndex);
@@ -213,18 +213,18 @@ public final class SortedList extends TransformedList {
                 updates.addInsert(insertedIndex);
             }
         }
-        
+
         // fire all the insert events
         while(!insertNodes.isEmpty()) {
             IndexedTreeNode insertNode = (IndexedTreeNode)insertNodes.removeFirst();
             int insertedIndex = insertByUnsortedNode(insertNode);
             updates.addInsert(insertedIndex);
         }
-        
+
         // commit the changes and notify listeners
         updates.commitEvent();
     }
-    
+
     /**
      * Inserts the specified unsorted node as the value in the sorted tree
      * and returns the sorted order.
@@ -255,14 +255,14 @@ public final class SortedList extends TransformedList {
         // return the sorted index
         return sortedIndex;
     }
-    
+
     /**
      * Gets the comparator used to sort this list.
      */
     public Comparator getComparator() {
         return comparator;
     }
-    
+
     /**
      * Set the comparator used to sort this list. This will resort the list
      * and will take <code>O(N * Log N)</code> time. For large lists, it may
@@ -290,7 +290,7 @@ public final class SortedList extends TransformedList {
             sorted = new IndexedTree(treeComparator);
             // create a list which knows the offsets of the indexes
             unsorted = new IndexedTree();
-            
+
             // if the lists are empty, we're done
             if(source.size() == 0) return;
 
@@ -299,8 +299,8 @@ public final class SortedList extends TransformedList {
                 IndexedTreeNode unsortedNode = unsorted.addByNode(i, this);
                 insertByUnsortedNode(unsortedNode);
             }
-            
-            // if this is the first sort, we're done 
+
+            // if this is the first sort, we're done
             if(previousSorted == null && previousUnsorted == null) return;
 
             // construct the reorder map
@@ -355,7 +355,8 @@ public final class SortedList extends TransformedList {
      * via <code>getReadWriteLock().readLock()</code>.
      */
     public boolean contains(Object object) {
-        return (binarySearch(object) != -1);
+        return sorted.contains(object);
+
     }
 
     /**
@@ -367,111 +368,22 @@ public final class SortedList extends TransformedList {
      * via <code>getReadWriteLock().readLock()</code>.
      */
     public int indexOf(Object object) {
-        return binarySearchForFirst(object);
+        return sorted.indexOf(object);
     }
 
     /**
      * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.  Since
-     * uniqueness is guaranteed for this list, the value returned by this
-     * method will always be indentical to calling <code>indexOf()</code>.
+     * element, or -1 if this list does not contain this element.
      *
      * <p>Like all read-only methods, this method <strong>does not</strong> manage
      * its own thread safety. Callers can obtain thread safe access to this method
      * via <code>getReadWriteLock().readLock()</code>.
      */
     public int lastIndexOf(Object object) {
-        return binarySearchForLast(object);
+        return sorted.lastIndexOf(object);
     }
 
     /**
-     * Returns the index of where the value is found or -1 if that value doesn't exist.
-     */
-    private int binarySearch(Object object) {
-        int start = 0;
-        int end = size() - 1;
-
-        while(start <= end) {
-            int current = (start + end) / 2;
-            int comparisonResult = comparator.compare(object, get(current));
-            // The object is larger than current so focus on right half of list
-            if(comparisonResult > 0) {
-                start = current + 1;
-            // The object is smaller than current so focus on left half of list
-            } else if (comparisonResult < 0) {
-                end = current - 1;
-            // The object equals the object at current, so return
-            } else {
-                return current;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Returns the first index of the value if found or -1 if that value doesn't exist.
-     */
-    private int binarySearchForFirst(Object object) {
-        int start = 0;
-        int end = size() - 1;
-        int current = 0;
-
-        while(start <= end) {
-            current = (start + end) / 2;
-            int comparisonResult = comparator.compare(object, get(current));
-            // The object is larger than current so focus on right half of list
-            if(comparisonResult > 0) {
-                start = current + 1;
-            // The object is smaller than current so focus on left half of list
-            } else if (comparisonResult < 0) {
-                end = current - 1;
-            // The object equals the object at current, so return
-            } else {
-                // if it's the first or the one to the left isn't the same, return
-                if(current == 0 || 0 != comparator.compare(get(current-1), get(current))) {
-                    return current;
-                }
-                else {
-                    end = current - 1;
-                }
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Returns the last index of the value if found or -1 if that value doesn't exist.
-     */
-    private int binarySearchForLast(Object object) {
-        int start = 0;
-        int end = size() - 1;
-        int current = 0;
-
-        while(start <= end) {
-            current = (start + end) / 2;
-            int comparisonResult = comparator.compare(object, get(current));
-            // The object is larger than current so focus on right half of list
-            if(comparisonResult > 0) {
-                start = current + 1;
-            // The object is smaller than current so focus on left half of list
-            } else if (comparisonResult < 0) {
-                end = current - 1;
-            // The object equals the object at current, so return
-            } else {
-                // if it's the last or the one to the left isn't the same, return
-                if(current == size() - 1 || 0 != comparator.compare(get(current), get(current+1))) {
-                    return current;
-                }
-                else {
-                    start = current + 1;
-                }
-            }
-        }
-        return -1;
-    }
-
-
-	/**
      * A comparator that takes an indexed node, and compares the index
      * of that node.
      */
@@ -493,48 +405,62 @@ public final class SortedList extends TransformedList {
      * of an object in a list that has the index of that node.
      */
     class IndexedTreeNodeComparator implements Comparator {
-        
+
         /** the actual comparator used on the values found */
         private Comparator comparator;
-        
+
         /**
-         * Create a new IndexedTreeNodeComparator that compares the
-         * objects in the array based on the indexes of the tree
+         * Creates a new IndexedTreeNodeComparator that compares the
+         * objects in the source list based on the indexes of the tree
          * nodes being compared.
+         *
+         * <p>If one of the objects passed to compare() is not a tree node,
+         * it will compare the object directly to the object in the source
+         * list referenced by the tree node.  This functionality was
+         * necessary to allow use of the underlying comparator within
+         * IndexedTree to support indexOf(), lastIndexOf, and contains().
          */
         public IndexedTreeNodeComparator(Comparator comparator) {
             this.comparator = comparator;
         }
-        
+
         /**
          * Compares object alpha to object beta by using the source comparator.
          */
         public int compare(Object alpha, Object beta) {
-            IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
-            IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
-            int alphaIndex = alphaTreeNode.getIndex();
-            int betaIndex = betaTreeNode.getIndex();
-            return comparator.compare(source.get(alphaIndex), source.get(betaIndex));
+            Object alphaObject = alpha;
+            Object betaObject = beta;
+            if(alpha instanceof IndexedTreeNode) {
+                IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
+                int alphaIndex = alphaTreeNode.getIndex();
+                alphaObject = source.get(alphaIndex);
+            }
+            if(beta instanceof IndexedTreeNode) {
+                IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
+                int betaIndex = betaTreeNode.getIndex();
+                betaObject = source.get(betaIndex);
+            }
+            return comparator.compare(alphaObject, betaObject);
         }
     }
-    
+
     /**
      * A class for managing a list of pending deletes. This class
      * presents deletes in order sorted by the index where they will be
      * reinserted.
      */
     static class IndicesPendingDeletion {
-        
+
         /** the underlying data storage */
         SortedSet indexNodePairs = new TreeSet();
-        
+
         /**
          * Adds the specified index to the list of indices pending deletion.
          */
         public void addPair(IndexNodePair nodePair) {
             indexNodePairs.add(nodePair);
         }
-        
+
         /**
          * Adjusts the indices for a delete and an insert at the specified indices. This is
          * necessary if an event is forwarded be fore this list of delete events is forwarded.
@@ -556,7 +482,7 @@ public final class SortedList extends TransformedList {
             }
             return insertedIndex;
         }
-        
+
         /**
          * Gets the next index/node pair to insert.
          */
@@ -565,14 +491,14 @@ public final class SortedList extends TransformedList {
             indexNodePairs.remove(first);
             return first;
         }
-        
+
         /**
          * Tests if there is a pair to remove.
          */
         public boolean hasPair() {
             return !(indexNodePairs.isEmpty());
         }
-        
+
         /**
          * Gets this as a String for debugging.
          */
@@ -580,7 +506,7 @@ public final class SortedList extends TransformedList {
             return "" + indexNodePairs;
         }
     }
-    
+
     /**
      * An IndexNodePair is simply a node and an index. This is useful for
      * keeping track of pending deletes.
@@ -588,12 +514,12 @@ public final class SortedList extends TransformedList {
     class IndexNodePair implements Comparable {
         private int index;
         private IndexedTreeNode node;
-        
+
         public IndexNodePair(int index, IndexedTreeNode node) {
             this.index = index;
             this.node = node;
         }
-        
+
         public String toString() {
             return "" + index + "(" + source.get(node.getIndex()) + ")";
         }

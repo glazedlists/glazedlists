@@ -70,6 +70,13 @@ class CTPServerProtocol extends CTPProtocol {
 class CTPClientProtocol extends CTPProtocol {
 
     /**
+     * Creates a server that connects to the specified address.
+     */
+    public CTPClientProtocol(String host) throws CTPException {
+        
+    }
+
+    /**
      * Sends the response header to the client.
      *
      * @param code an HTTP response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1

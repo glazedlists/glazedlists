@@ -23,13 +23,13 @@ public class SortedListTest extends TestCase {
 
     /** the source list */
     private BasicEventList unsortedList = null;
-    
+
     /** the sorted list */
     private SortedList sortedList = null;
-    
+
     /** for randomly choosing list indicies */
     private Random random = new Random(2);
-    
+
     /**
      * Prepare for the test.
      */
@@ -55,18 +55,18 @@ public class SortedListTest extends TestCase {
         for(int i = 0; i < 4000; i++) {
             unsortedList.add(new Integer(random.nextInt()));
         }
-        
+
         // build a control list of the desired results
         ArrayList controlList = new ArrayList();
         controlList.addAll(unsortedList);
         Collections.sort(controlList);
-        
+
         // verify the lists are equal
         assertEquals(controlList, sortedList);
-        
+
         // re-sort the list
         sortedList = new SortedList(unsortedList);
-        
+
         // verify the lists are equal
         assertEquals(controlList, sortedList);
     }
@@ -80,7 +80,7 @@ public class SortedListTest extends TestCase {
         for(int i = 0; i < 4000; i++) {
             int operation = random.nextInt(4);
             int index = unsortedList.isEmpty() ? 0 : random.nextInt(unsortedList.size());
-            
+
             if(operation <= 1 || unsortedList.isEmpty()) {
                 unsortedList.add(index, new Integer(random.nextInt()));
             } else if(operation == 2) {
@@ -89,16 +89,16 @@ public class SortedListTest extends TestCase {
                 unsortedList.set(index, new Integer(random.nextInt()));
             }
         }
-        
+
         // build a control list of the desired results
         ArrayList controlList = new ArrayList();
         controlList.addAll(unsortedList);
         Collections.sort(controlList);
-        
+
         // verify the lists are equal
         assertEquals(controlList, sortedList);
     }
-    
+
     /**
      * Tests to verify that the SortedList correctly handles modification.
      *
@@ -114,7 +114,7 @@ public class SortedListTest extends TestCase {
             else list = unsortedList;
             int operation = random.nextInt(4);
             int index = list.isEmpty() ? 0 : random.nextInt(list.size());
-            
+
             if(operation <= 1 || list.isEmpty()) {
                 list.add(index, new Integer(random.nextInt()));
             } else if(operation == 2) {
@@ -123,7 +123,7 @@ public class SortedListTest extends TestCase {
                 list.set(index, new Integer(random.nextInt()));
             }
         }
-        
+
         // build a control list of the desired results
         ArrayList controlList = new ArrayList();
         controlList.addAll(unsortedList);
@@ -175,6 +175,11 @@ public class SortedListTest extends TestCase {
         BasicEventList source = new BasicEventList();
         SortedList sorted = new SortedList(source, new IntegerComparator());
 
+        // Test containment of a 10 on an empty list
+        Integer ten = new Integer(10);
+        int emptyTest = sorted.indexOf(ten);
+        assertEquals(-1, emptyTest);
+
         // Add 12 leading 1's
         Integer one = new Integer(1);
         for(int i = 0; i < 12; i++) {
@@ -206,7 +211,6 @@ public class SortedListTest extends TestCase {
         assertEquals(25, thirdTestIndex);
 
         // Test containment of a 10
-        Integer ten = new Integer(10);
         int fourthTest = sorted.indexOf(ten);
         assertEquals(-1, fourthTest);
     }
@@ -217,6 +221,11 @@ public class SortedListTest extends TestCase {
     public void testLastIndexOf() {
         BasicEventList source = new BasicEventList();
         SortedList sorted = new SortedList(source, new IntegerComparator());
+
+        // Test containment of a 10 on an empty list
+        Integer ten = new Integer(10);
+        int emptyTest = sorted.lastIndexOf(ten);
+        assertEquals(-1, emptyTest);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -249,7 +258,6 @@ public class SortedListTest extends TestCase {
         assertEquals(34, thirdTestIndex);
 
         // Test containment of a 10
-        Integer ten = new Integer(10);
         int fourthTest = sorted.lastIndexOf(ten);
         assertEquals(-1, fourthTest);
     }
@@ -260,6 +268,11 @@ public class SortedListTest extends TestCase {
     public void testContains() {
         BasicEventList source = new BasicEventList();
         SortedList sorted = new SortedList(source, new IntegerComparator());
+
+        // Test containment of a 10 on an empty list
+        Integer ten = new Integer(10);
+        boolean emptyTest = sorted.contains(ten);
+        assertEquals(false, emptyTest);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -292,11 +305,10 @@ public class SortedListTest extends TestCase {
         assertEquals(true, thirdTest);
 
         // Test containment of a 10
-        Integer ten = new Integer(10);
         boolean fourthTest = sorted.contains(ten);
         assertEquals(false, fourthTest);
     }
-    
+
 
     /**
      * Test if the SortedList fires update events rather than delete/insert
@@ -312,14 +324,14 @@ public class SortedListTest extends TestCase {
         data.add("C");
         data.add("D");
         uniqueSource.replaceAll(data);
-        
+
         // listen to changes on the sorted list
         ListEventCounter counter = new ListEventCounter();
         sortedList.addListEventListener(counter);
 
         // replace the data with an identical copy
         uniqueSource.replaceAll(data);
-        
+
         // verify that only one event has occured
         assertEquals(1, counter.getEventCount());
         assertEquals(4, counter.getChangeCount(0));
@@ -334,7 +346,7 @@ public class SortedListTest extends TestCase {
         // create comparators for zero and one
         Comparator intCompareAt0 = new IntArrayComparator(0);
         Comparator intCompareAt1 = new IntArrayComparator(1);
-	    
+
         // prepare a unique list with simple data
         UniqueList uniqueSource = new UniqueList(new BasicEventList(), intCompareAt0);
         sortedList = new SortedList(uniqueSource, intCompareAt1);
@@ -344,14 +356,14 @@ public class SortedListTest extends TestCase {
         data.add(new int[] { 2, 0 });
         data.add(new int[] { 3, 0 });
         uniqueSource.replaceAll(data);
-        
+
         // listen to changes on the sorted list
         ListEventCounter counter = new ListEventCounter();
         sortedList.addListEventListener(counter);
 
         // replace the data with an identical copy
         uniqueSource.replaceAll(data);
-        
+
         // verify that only one event has occured
         assertEquals(1, counter.getEventCount());
         assertEquals(4, counter.getChangeCount(0));
@@ -369,18 +381,18 @@ public class SortedListTest extends TestCase {
         Comparator uniqueComparator = new ReverseStringComparator();
         UniqueList uniqueSource = new UniqueList(unsortedList, uniqueComparator);
         sortedList = new SortedList(uniqueSource);
-        
+
         // populate a unique source with some random elements
         for(int i = 0; i < 500; i++) {
             uniqueSource.add("" + random.nextInt(200));
         }
-        
+
         // populate a replacement set with some more random elements
         SortedSet data = new TreeSet(uniqueComparator);
         for(int i = 0; i < 500; i++) {
             data.add("" + random.nextInt(200));
         }
-        
+
         // calculate the number of changes expected
         List intersection = new ArrayList();
         intersection.addAll(uniqueSource);
@@ -388,8 +400,8 @@ public class SortedListTest extends TestCase {
         int expectedUpdateCount = intersection.size();
         int expectedDeleteCount = uniqueSource.size() - expectedUpdateCount;
         int expectedInsertCount = data.size() - expectedUpdateCount;
-        int expectedChangeCount = expectedUpdateCount + expectedDeleteCount + expectedInsertCount;   
-        
+        int expectedChangeCount = expectedUpdateCount + expectedDeleteCount + expectedInsertCount;
+
         // count the number of changes performed
         ListEventCounter uniqueCounter = new ListEventCounter();
         uniqueSource.addListEventListener(uniqueCounter);
@@ -401,7 +413,7 @@ public class SortedListTest extends TestCase {
         uniqueSource.addListEventListener(new ConsistencyTestList(uniqueSource, "unique", false));
         sortedList.addListEventListener(new ConsistencyTestList(sortedList, "sorted", false));
         uniqueSource.replaceAll(data);
-        
+
         // verify our guess on the change count is correct
         assertEquals(1, uniqueCounter.getEventCount());
         assertEquals(1, sortedCounter.getEventCount());
@@ -409,7 +421,7 @@ public class SortedListTest extends TestCase {
         assertEquals(expectedChangeCount, sortedCounter.getChangeCount(0));
     }
 
-     
+
     /**
      * Tests that the SortedList can handle reordering events.
      */
@@ -420,18 +432,18 @@ public class SortedListTest extends TestCase {
         source.add("BC");
         source.add("DD");
         source.add("AA");
-        
+
         // create a sorted view of that list
         SortedList sorted = new SortedList(source, new ReverseComparator());
-        
+
         // create a consistency test
         List consistencyTestList = new ArrayList();
         consistencyTestList.addAll(sorted);
-        
+
         // change the source, this should not impact its listener
         source.setComparator(new ReverseStringComparator());
         assertEquals(consistencyTestList, sorted);
-        
+
         // change the source, this should not impact its listener
         source.setComparator(null);
         assertEquals(consistencyTestList, sorted);
@@ -461,7 +473,7 @@ public class SortedListTest extends TestCase {
             String bString = (String)b;
             return delegate.compare(flip(aString), flip(bString));
         }
-        
+
         public String flip(String original) {
             char[] originalAsChars = original.toCharArray();
             int length = originalAsChars.length;

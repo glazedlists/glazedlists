@@ -11,40 +11,40 @@ import java.util.*;
 
 /**
  * A tree node that can be accessed either in sorted order or by
- * index. 
+ * index.
  *
  * <p>This tree-node uses AVL-Trees to ensure that access is always
  * logarithmic in terms of the size of the tree. AVL Trees use
  * rotations (single and double) when the height of a pair of
  * subtrees do not match in order to guarantee a bound on the
  * difference in their height. This bound can be shown to provide
- * an overall bound on the access time on the tree. 
+ * an overall bound on the access time on the tree.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class IndexedTreeNode {
-    
+
     /** the parent node, used to delete from leaf up */
     private IndexedTreeNode parent;
-    
+
     /** the indexed tree that this node is a member of */
     private IndexedTree host;
-    
+
     /** the left and right child nodes */
     private IndexedTreeNode left = null;
     private IndexedTreeNode right = null;
-    
+
     /** the size of the left and right subtrees */
     private int leftSize = 0;
     private int rightSize = 0;
     private int rootSize = 0;
-    
+
     /** the height of this subtree */
     private int height = 0;
-    
+
     /** the value of this node, assuming it is a leaf */
     private Object value;
-    
+
     /**
      * Creates a new IndexedTreeNode with the specified parent node.
      */
@@ -52,14 +52,14 @@ public final class IndexedTreeNode {
         this.host = host;
         this.parent = parent;
     }
-    
+
     /**
      * Gets the value of this tree node.
      */
     public Object getValue() {
         return value;
     }
-    
+
     /**
      * Sets the value of this tree node. <strong>Warning:</strong> changing
      * the value of a node in a sorted tree may cause sorting to break
@@ -68,7 +68,7 @@ public final class IndexedTreeNode {
     public void setValue(Object value) {
         this.value = value;
     }
-    
+
     /**
      * Gets the object with the specified index in the tree.
      */
@@ -86,13 +86,13 @@ public final class IndexedTreeNode {
             return right.getNodeWithIndex(index - (leftSize + rootSize));
         }
     }
-    
+
     /**
      * Gets the object with the specified value in the tree.
      */
     IndexedTreeNode getNodeByValue(Object searchValue) {
         int sortSide = host.getComparator().compare(searchValue, value);
-        
+
         // if it sorts on the left side, search there
         if(sortSide < 0) {
             if(left == null) return null;
@@ -106,14 +106,14 @@ public final class IndexedTreeNode {
             return right.getNodeByValue(searchValue);
         }
     }
-    
+
     /**
      * Retrieves the size of this subtree.
      */
     int size() {
         return leftSize + rootSize + rightSize;
     }
-    
+
     /**
      * Creates an iterator starting at this node and continuing from here
      * through the tree.
@@ -121,7 +121,7 @@ public final class IndexedTreeNode {
     Iterator iterator() {
         return new IndexedTreeIterator(this);
     }
-    
+
     /**
      * Retrieves the height of this subtree.
      */
@@ -143,8 +143,8 @@ public final class IndexedTreeNode {
         if(leftSize > 0) return left.getSmallestChildNode();
         else return this;
     }
-    
-    
+
+
     /**
      * Gets the index of the current node, based on a recurrsive
      * path up the tree.
@@ -352,7 +352,7 @@ public final class IndexedTreeNode {
         else if(original == right) right = replacement;
         else throw new IllegalArgumentException(this + " cannot replace a non-existant child");
     }
-    
+
     /**
      * A primitive way to validate that nodes are stored in sorted
      * order and that their sizes are consistent. This throws a
@@ -362,7 +362,7 @@ public final class IndexedTreeNode {
         // first validate the children
         if(left != null) left.validate();
         if(right != null) right.validate();
-        
+
         // validate sort order
         if(host.getComparator() != null) {
             if(leftSize > 0 && rootSize > 0 && host.getComparator().compare(left.value, value) > 0) {
@@ -381,7 +381,7 @@ public final class IndexedTreeNode {
             throw new IllegalStateException("Cached rightSize " + rightSize + " != reported right.size() " + right.size());
         }
     }
-    
+
     /**
      * When the height of a subtree changes, propogate that change up the
      * tree.
@@ -399,7 +399,7 @@ public final class IndexedTreeNode {
         // propagate changes upstream if the height changed
         if(height != oldHeight && parent != null) parent.recalculateHeight();
     }
-    
+
     /**
      * Checks the heights of the left and right child nodes, and does rotations
      * if necessary. This only does rotations at the current node. It is necessary
@@ -456,7 +456,7 @@ public final class IndexedTreeNode {
         left = replacement.right;
         leftSize = replacement.rightSize;
         if(replacement.right != null) replacement.right.parent = this;
-        // set the replacement's parent to my parent and mine to the replacement 
+        // set the replacement's parent to my parent and mine to the replacement
         if(parent != null) {
             parent.replaceChildNode(this, replacement);
         } else {
@@ -486,7 +486,7 @@ public final class IndexedTreeNode {
         right = replacement.left;
         rightSize = replacement.leftSize;
         if(replacement.left != null) replacement.left.parent = this;
-        // set the replacement's parent to my parent and mine to the replacement 
+        // set the replacement's parent to my parent and mine to the replacement
         if(parent != null) {
             parent.replaceChildNode(this, replacement);
         } else {
@@ -502,7 +502,134 @@ public final class IndexedTreeNode {
         if(replacement.parent != null) replacement.parent.recalculateHeight();
     }
 
-    
+    /**
+     * Returns true if this list contains the specified element.
+     *
+     * <p>This method has package-level protection as if it is
+     * called on a node directly it will have non-deterministic
+     * results.
+     */
+    boolean contains(Object object) {
+        int sortSide = host.getComparator().compare(object, value);
+
+        // if it sorts on the left side, search there
+        if(sortSide < 0) {
+            if(left == null) return false;
+            return left.contains(object);
+
+        // if it equals this node, return this
+        } else if(sortSide == 0) {
+            return true;
+
+        // if it sorts on the right side, search there
+        } else {
+            if(right == null) return false;
+            return right.contains(object);
+        }
+    }
+
+    /**
+     * Returns the index in this list of the first occurrence of the specified
+     * element, or -1 if this list does not contain this element.
+     *
+     * <p>This method has package-level protection as if it is
+     * called on a node directly it will have non-deterministic
+     * results.
+     */
+    int indexOf(Object object) {
+        int sortSide = host.getComparator().compare(object, value);
+
+        // if it sorts on the left side, search there
+        if(sortSide < 0) {
+            if(left == null) return -1;
+            return left.indexOf(object);
+
+        // if it equals this node, search to the left for equal values
+        } else if(sortSide == 0) {
+            return findLastNode(this, object, true);
+
+        // if it sorts on the right side, search there
+        } else {
+            if(right == null) return -1;
+            return right.indexOf(object);
+        }
+    }
+
+    /**
+     * Returns the index in this list of the last occurrence of the specified
+     * element, or -1 if this list does not contain this element.
+     *
+     * <p>This method has package-level protection as if it is
+     * called on a node directly it will have non-deterministic
+     * results.
+     */
+    int lastIndexOf(Object object) {
+        int sortSide = host.getComparator().compare(object, value);
+
+        // if it sorts on the left side, search there
+        if(sortSide < 0) {
+            if(left == null) return -1;
+            return left.lastIndexOf(object);
+
+        // if it equals this node, search to the right for equal values
+        } else if(sortSide == 0) {
+            return findLastNode(this, object, false);
+
+        // if it sorts on the right side, search there
+        } else {
+            if(right == null) return -1;
+            return right.lastIndexOf(object);
+        }
+    }
+
+    /**
+     * Helper method to the indexOf and lastIndexOf methods
+     */
+    private int findLastNode(IndexedTreeNode parentNode, Object object, boolean goLeft) {
+        IndexedTreeNode child = null;
+        if(goLeft) child = parentNode.left;
+        else child = parentNode.right;
+
+        // Child doesn't exist
+        if(child == null) {
+            return parentNode.getIndex();
+
+        // Child is different than the parent node
+        } else if(host.getComparator().compare(object, child.value) != 0) {
+            int result = secondaryLastNodeSearch(child, object, !goLeft);
+            if(result != -1) {
+                return result;
+            }
+            return parentNode.getIndex();
+
+        // Child is the same so recurse on the child
+        } else {
+            return findLastNode(child, object, goLeft);
+        }
+    }
+
+    /**
+     * Helper method to the indexOf and lastIndexOf methods
+     */
+    private int secondaryLastNodeSearch(IndexedTreeNode parentNode, Object object, boolean goLeft) {
+        IndexedTreeNode child = null;
+        if(goLeft) child = parentNode.left;
+        else child = parentNode.right;
+
+        // Child doesn't exist
+        if(child == null) {
+            return -1;
+
+        // Child is the same as the searched for node
+        } else if(host.getComparator().compare(object, child.value) == 0) {
+            return findLastNode(child, object, !goLeft);
+
+        // Child is different so recurse on the child
+        } else {
+            return secondaryLastNodeSearch(child, object, goLeft);
+        }
+    }
+
     /**
      * Prints the tree by its contents.
      */
@@ -517,7 +644,7 @@ public final class IndexedTreeNode {
             return "(. " + valueString + " " + right.toString() + ")";
         } else if(value == null) {
             return ".";
-        } else { 
+        } else {
             return valueString;
         }
     }
@@ -529,10 +656,10 @@ public final class IndexedTreeNode {
      *      motion to complete the ListIterator interface.
      */
     static class IndexedTreeIterator implements Iterator {
-    
+
         /** the last tree node returned by this iterator */
         private IndexedTreeNode next;
-        
+
         /**
          * Creates an iterator that iterates the tree starting at the specified
          * node.
@@ -540,14 +667,14 @@ public final class IndexedTreeNode {
         public IndexedTreeIterator(IndexedTreeNode first) {
             this.next = first;
         }
-    
-        /** 
+
+        /**
          * Returns true if the iteration has more elements.
          */
         public boolean hasNext() {
             return (next != null);
          }
-        
+
         /**
          * Returns the next element in the iteration.
          */
@@ -575,7 +702,7 @@ public final class IndexedTreeNode {
             }
             return result;
         }
-        
+
         /**
          * This operation is <strong>not implemented</strong>. Removes from
          * the underlying collection the last element returned by the iterator.

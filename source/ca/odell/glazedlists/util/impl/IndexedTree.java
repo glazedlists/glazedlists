@@ -27,20 +27,20 @@ import ca.odell.glazedlists.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class IndexedTree {
-    
+
     /** a decision maker for ordering elements */
     private Comparator comparator;
-    
+
     /** the root node of the tree, this may be replaced by a delete */
     private IndexedTreeNode root = null;
-    
+
     /**
      * Creates a new empty tree that uses the specified comparator to sort values.
      */
     public IndexedTree(Comparator comparator) {
         this.comparator = comparator;
     }
-    
+
     /**
      * Creates a new empty sorted tree that requires that objects in the
      * tree implement the Comparable interface.
@@ -73,7 +73,7 @@ public final class IndexedTree {
         if(root == null) return null;
         return root.getNodeByValue(value);
     }
-    
+
     /**
      * Gets the size of this tree.
      */
@@ -81,7 +81,7 @@ public final class IndexedTree {
         if(root == null) return 0;
         return root.size();
     }
-    
+
     /**
      * Gets an iterator for this tree. The iterator moves in sorted order
      * for sorted trees and order of increasing index for indexed trees.
@@ -92,8 +92,8 @@ public final class IndexedTree {
         if(root != null) return root.getSmallestChildNode().iterator();
         else return Collections.EMPTY_LIST.iterator();
     }
-    
-    /** 
+
+    /**
      * Gets the comparator used to sort the nodes in this tree.
      */
     public Comparator getComparator() {
@@ -108,7 +108,7 @@ public final class IndexedTree {
         treeNode.removeFromTree();
         return treeNode;
     }
-    
+
     /**
      * Inserts the specified object into the tree.
      *
@@ -131,7 +131,46 @@ public final class IndexedTree {
         if(root == null) root = new IndexedTreeNode(this, null);
         return root.insert(index, value);
     }
-    
+
+    /**
+     * Returns true if this list contains the specified element.
+     */
+    public boolean contains(Object object) {
+        if(root == null) return false;
+        return root.contains(object);
+    }
+
+    /**
+     * Returns true if this list contains all of the elements of the specified collection.
+     */
+    public boolean containsAll(Collection collection) {
+        // look for something that is missing
+        for(Iterator i = collection.iterator(); i.hasNext(); ) {
+            Object a = i.next();
+            if(!contains(a)) return false;
+        }
+        // contained everything we looked for
+        return true;
+    }
+
+    /**
+     * Returns the index in this list of the first occurrence of the specified
+     * element, or -1 if this list does not contain this element.
+     */
+    public int indexOf(Object object) {
+        if(root == null) return -1;
+        return root.indexOf(object);
+    }
+
+    /**
+     * Returns the index in this list of the last occurrence of the specified
+     * element, or -1 if this list does not contain this element.
+     */
+    public int lastIndexOf(Object object) {
+        if(root == null) return -1;
+        return root.lastIndexOf(object);
+    }
+
     /**
      * Validates the entire tree by iterating over its nodes and validating
      * them one at a time.
@@ -142,7 +181,7 @@ public final class IndexedTree {
             node.validate();
         }
     }
-    
+
     /**
      * Print the tree by its contents
      */
@@ -150,7 +189,7 @@ public final class IndexedTree {
         if(root == null) return ".";
         return root.toString();
     }
-    
+
     /**
      * Sets the root of this tree to be the specified node. This
      * method should not be called by client classes as it is an
@@ -159,8 +198,8 @@ public final class IndexedTree {
     void setRootNode(IndexedTreeNode root) {
         this.root = root;
     }
-    
-    
+
+
     /**
      * Test method for the indexed tree compares it in sort time to the
      * TreeSet.
@@ -170,12 +209,12 @@ public final class IndexedTree {
             System.out.println("Usage: IndexedTree <operations> <repetitions>");
             return;
         }
-        
+
         int operations = Integer.parseInt(args[0]);
         int repetitions = Integer.parseInt(args[1]);
-        
+
         java.util.Random random = new java.util.Random();
-        
+
         System.out.print("Indexed Tree ");
         long start = System.currentTimeMillis();
 
@@ -183,7 +222,7 @@ public final class IndexedTree {
             IndexedTree tree = new IndexedTree(new ComparableComparator());
             for(int i = 0; i < operations; i++) {
                 int operation = (int)(random.nextDouble() * 3.0);
-                
+
                 if(operation <= 1 || tree.size() == 0) {
                     Integer value = new Integer((int)(random.nextDouble() * (double)Integer.MAX_VALUE));
                     tree.addByNode(value);
@@ -191,7 +230,7 @@ public final class IndexedTree {
                     int index = (int)(random.nextDouble() * (double)tree.size());
                     tree.removeByIndex(index);
                 }
-                
+
                 //tree.validate();
             }
         }
