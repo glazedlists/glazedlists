@@ -38,7 +38,7 @@ import org.eclipse.swt.graphics.*;
 public class TextFilterList extends AbstractFilterList {
 
     /** the filters list is currently just a list of Substrings to include */
-    private Matcher[] filters = new Matcher[0];
+    private String[] filters = new String[0];
     
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private TextFilterator filterator = null;
@@ -130,51 +130,15 @@ public class TextFilterList extends AbstractFilterList {
     }
 
     /**
-     * Creates a matcher for the specified source. The matcher will match all
-     * Strings containing the source and is case insensitive.
-     */
-    private Matcher getMatcher(String source) {
-        // create a pattern for the source string
-        StringBuffer pattern = new StringBuffer();
-        for(int i = 0; i < source.length(); i++) {
-            char c = source.charAt(i);
-
-            // if the current character is plain, append it
-            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-                pattern.append(c);
-
-            // if the current character is not plain, escape it first
-            } else {
-                pattern.append("\\");
-                pattern.append(c);
-            }
-        }
-        
-        return Pattern.compile(pattern.toString(), Pattern.CASE_INSENSITIVE).matcher("");
-    }
-
-    /**
      * Recompiles the filter regular expression patterns. When the user enters
      * a regular expression that is not recognized, the error is silently ignored
      * and no filters apply.
      */
     private void updateFilterPattern() {
-        try {
-            String[] filterStrings = filterEdit.getText().toLowerCase().split("[ \t]");
-            filters = new Matcher[filterStrings.length];
-            for(int i = 0; i < filterStrings.length; i++) {
-                filters[i] = getMatcher(filterStrings[i]);
-            }
-        } catch(PatternSyntaxException e) {
-            filters = new Matcher[0];
-        }
+        filters = filterEdit.getText().toUpperCase().split("[ \t]");
     }
 
-    /**
-     * Tests if the specified item matches the current set of filters. This
-     * class uses a user-editable text field of strings that must be in the
-     * element to appear in the filtered list.
-     */
+    /** {@inheritDoc} */
     public boolean filterMatches(Object element) {
         // populate the strings for this object
         filterStrings.clear();
@@ -189,8 +153,7 @@ public class TextFilterList extends AbstractFilterList {
         for(int f = 0; f < filters.length; f++) {
             for(int c = 0; c < filterStrings.size(); c++) {
                 if(filterStrings.get(c) != null) {
-                    filters[f].reset((String)filterStrings.get(c));
-                    if(filters[f].find()) continue filters;
+                    if(caseInsensitiveIndexOf(filterStrings.get(c).toString(), filters[f]) != -1) continue filters;
                 }
             }
             // no field matched this filter 
@@ -198,5 +161,24 @@ public class TextFilterList extends AbstractFilterList {
         }
         // all filters have been matched
         return true;
+    }
+
+    /**
+     * Tests if one String contains the other. Originally this task was performed
+     * by Java's regular expressions library, but this is faster and less complex.
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=89">Bug 89</a>
+     * @param host the string to search within
+     * @param filter the string to search for, this must be upper case
+     */
+    private static int caseInsensitiveIndexOf(String host, String filter) {
+        int lastFirst = host.length() - filter.length();
+        sourceCharacter:
+        for(int c = 0; c <= lastFirst; c++) {
+            for(int f = 0; f < filter.length(); f++) {
+                if(Character.toUpperCase(host.charAt(c+f)) != filter.charAt(f)) continue sourceCharacter;
+            }
+            return c;
+        }
+        return -1;
     }
 }
