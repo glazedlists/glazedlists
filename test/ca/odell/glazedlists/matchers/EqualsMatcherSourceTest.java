@@ -6,9 +6,9 @@
  */
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class EqualsMatcherSourceTest extends TestCase {
 
 
     protected void setUp() throws Exception {
-        parent_list = new BasicEventList(new LinkedList(INITIAL_LIST));
+        parent_list = GlazedLists.eventList(new LinkedList(INITIAL_LIST));
 
         matcher = new EqualsMatcherSource();
         filter_list = new FilterList(parent_list, matcher);

@@ -6,14 +6,14 @@
  */
 package ca.odell.glazedlists.matchers;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import junit.framework.TestCase;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -44,7 +44,7 @@ public class ThresholdMatcherTest extends TestCase {
 
 
     protected void setUp() throws Exception {
-        parent_list = new BasicEventList(new LinkedList(INITIAL_LIST));
+        parent_list = GlazedLists.eventList(new LinkedList(INITIAL_LIST));
 
         threshold_matchersource = new ThresholdMatcherSource();
         threshold_list = new FilterList(parent_list, threshold_matchersource);
