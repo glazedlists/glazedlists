@@ -56,6 +56,7 @@ public abstract class StyledDocumentRenderer implements TableCellRenderer {
     //protected Style plainCritical;
     protected Style plainItalic;
     protected Style strong;
+    protected Style strongItalic;
     protected Style small;
     protected Style smallBold;
     
@@ -95,12 +96,6 @@ public abstract class StyledDocumentRenderer implements TableCellRenderer {
         // medium sized text
         plain = styledDocument.addStyle("plain", base);
         StyleConstants.setFontSize(plain, FONT_SIZE_MEDIUM);
-        // plain text with 'info' colour
-        //plainInfo = styledDocument.addStyle("plainInfo", plain);
-        //StyleConstants.setForeground(plainInfo, COLOR_INFO);
-        // plain text with 'critical' colour
-        //plainCritical = styledDocument.addStyle("plainCritical", plain);
-        //StyleConstants.setForeground(plainCritical, COLOR_CRITICAL);
         // plain text with italics
         plainItalic = styledDocument.addStyle("plainItalic", plain);
         StyleConstants.setItalic(plainItalic, true);
@@ -108,6 +103,9 @@ public abstract class StyledDocumentRenderer implements TableCellRenderer {
         strong = styledDocument.addStyle("strong", base);
         StyleConstants.setBold(strong, true);
         StyleConstants.setFontSize(strong, FONT_SIZE_BIG);
+        // strong text with italics
+        strongItalic = styledDocument.addStyle("strongItalic", strong);
+        StyleConstants.setItalic(strongItalic, true);
         // small text
         small = styledDocument.addStyle("small", base);
         StyleConstants.setFontSize(small, FONT_SIZE_SMALL);
