@@ -32,6 +32,8 @@ public class UniqueListTest extends TestCase {
     public void setUp() {
         source = new BasicEventList();
         unique = new UniqueList(source, new ComparableComparator());
+        // verify that the size is always consistent
+        unique.addListEventListener(new ConsistencyTestList(unique, "Unique"));
     }
 
     /**
@@ -925,9 +927,6 @@ public class UniqueListTest extends TestCase {
      * Verify that replaceAll() works in a more sophisticated case.
      */
     public void testReplaceAllRigorous() {
-        // verify that the size is always consistent
-        unique.addListEventListener(new ConsistencyTestList(unique, "Unique"));
-        
         for(int i = 0; i < 100; i++) {
             unique.add(new Integer(random.nextInt(100)));
         }

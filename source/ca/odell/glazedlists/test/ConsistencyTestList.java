@@ -51,10 +51,21 @@ public class ConsistencyTestList implements ListEventListener {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
             
-            if(changeType == ListEvent.INSERT) size++;
-            else if(changeType == ListEvent.DELETE) size--;
-            
+            // verify the index is big enough
+            if(changeIndex < 0) new Exception(name + "/" + changeCount + " cannot insert at " + changeIndex).printStackTrace();
+
+            // verify the index is small enough, and adjust the size
+            if(changeType == ListEvent.INSERT) {
+                if(changeIndex > size) new Exception(name + "/" + changeCount + " cannot insert at " + changeIndex + ", size is: " + size).printStackTrace();
+                size++;
+                
+            } else if(changeType == ListEvent.DELETE) {
+                if(changeIndex >= size) new Exception(name + "/" + changeCount + " cannot delete at " + changeIndex + ", size is: " + size).printStackTrace();
+                size--;
+            }
         }
+        
+        // verify the size is consistent with the source
         if(size != source.size()) {
             new Exception(name + "/" + changeCount + " size consistency problem! Expected " + size + ", got " + source.size()).printStackTrace();
         }
