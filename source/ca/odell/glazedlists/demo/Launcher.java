@@ -317,7 +317,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		gbc.gridy++;
 		try {
 			box.add(createLinkBarLabel("Tutorial",
-				new URL("http://publicobject.com/glazedlists/tutorial-0.9.4/index.html"),
+				new URL("http://publicobject.com/glazedlists/tutorial/"),
 				basic_service, show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
@@ -325,7 +325,7 @@ public class Launcher implements ActionListener, ListSelectionListener {
 
 		try {
 			box.add(createLinkBarLabel("Javadoc API",
-				new URL("http://publicobject.com/glazedlists/glazedlists-0.9.4/api/"),
+				new URL("http://publicobject.com/glazedlists/api/"),
 				basic_service, show_document_method), gbc);
 			gbc.gridy++;
 		} catch(MalformedURLException ex) {
