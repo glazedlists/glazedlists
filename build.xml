@@ -57,6 +57,7 @@
       <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
       <bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
       <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+      <link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
     </javadoc>
   </target>
 
@@ -79,6 +80,7 @@
       <doctitle><![CDATA[<h1>Glazed Lists - Developer Docs</h1>]]></doctitle>
       <bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
       <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+      <link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
     </javadoc>
   </target>
 
