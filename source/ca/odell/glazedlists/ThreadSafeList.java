@@ -49,11 +49,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
      */
     public void listChanged(ListEvent listChanges) {
         // just pass on the changes
-        updates.beginEvent();
-        while(listChanges.next()) {
-            updates.addChange(listChanges.getType(), listChanges.getIndex());
-        }
-        updates.commitEvent();
+        updates.forwardEvent(listChanges);
     }
 
     /**

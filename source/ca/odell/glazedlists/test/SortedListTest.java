@@ -411,6 +411,33 @@ public class SortedListTest extends TestCase {
 
      
     /**
+     * Tests that the SortedList can handle reordering events.
+     */
+    public void testReorder() {
+        // prepare a source list
+        SortedList source = new SortedList(new BasicEventList());
+        source.add("CB");
+        source.add("BC");
+        source.add("DD");
+        source.add("AA");
+        
+        // create a sorted view of that list
+        SortedList sorted = new SortedList(source, new ReverseComparator());
+        
+        // create a consistency test
+        List consistencyTestList = new ArrayList();
+        consistencyTestList.addAll(sorted);
+        
+        // change the source, this should not impact its listener
+        source.setComparator(new ReverseStringComparator());
+        assertEquals(consistencyTestList, sorted);
+        
+        // change the source, this should not impact its listener
+        source.setComparator(null);
+        assertEquals(consistencyTestList, sorted);
+    }
+
+    /**
      * Explicit comparator for Kevin's sanity!
      */
     class IntegerComparator implements Comparator {

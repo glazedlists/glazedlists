@@ -104,6 +104,32 @@ public final class SortedList extends TransformedList {
      * where the index does not change.
      */
     public void listChanged(ListEvent listChanges) {
+        
+        // handle reordering events
+        if(listChanges.isReordering()) {
+            // the reorder map tells us what moved where
+            int[] reorderMap = listChanges.getReorderMap();
+            
+            // create an array with the sorted nodes
+            IndexedTreeNode[] sortedNodes = new IndexedTreeNode[sorted.size()];
+            int index = 0;
+            for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
+                IndexedTreeNode unsortedNode = (IndexedTreeNode)i.next();
+                IndexedTreeNode sortedNode = (IndexedTreeNode)unsortedNode.getValue();
+                sortedNodes[index] = sortedNode;
+            }
+            
+            // set the unsorted nodes to point to the new set of sorted nodes
+            index = 0;
+            for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
+                IndexedTreeNode unsortedNode = (IndexedTreeNode)i.next();
+                unsortedNode.setValue(sortedNodes[reorderMap[index]]);
+                sortedNodes[reorderMap[index]].setValue(unsortedNode);
+            }
+            
+            // we have handled the reordering!
+            return;
+        }
 
         // all of these changes to this list happen "atomically"
         updates.beginEvent();

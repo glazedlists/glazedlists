@@ -163,11 +163,7 @@ public final class FreezableList extends TransformedList implements ListEventLis
             
         } else {
             // just pass on the changes
-            updates.beginEvent();
-            while(listChanges.next()) {
-                updates.addChange(listChanges.getType(), listChanges.getIndex());
-            }
-            updates.commitEvent();
+            updates.forwardEvent(listChanges);
         }
     }
 }

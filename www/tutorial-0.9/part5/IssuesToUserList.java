@@ -40,10 +40,7 @@ public class IssuesToUserList extends TransformedList {
      * for the users list.
      */
     public void listChanged(ListEvent listChanges) {
-        updates.beginEvent();
-        while(listChanges.next()) {
-            updates.addChange(listChanges.getType(), listChanges.getIndex());
-        }
-        updates.commitEvent();
+        // just pass on the changes
+        updates.forwardEvent(listChanges);
     }
 }

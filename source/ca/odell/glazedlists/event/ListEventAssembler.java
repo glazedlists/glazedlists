@@ -213,7 +213,28 @@ public final class ListEventAssembler {
         addChange(ListEvent.INSERT, 0, reorderMap.length - 1);
         this.reorderMap = reorderMap;
     }
-
+    /**
+     * Forwards the event. This is a convenience method that does the following:
+     * <br>1. beginEvent()
+     * <br>2. For all changes in sourceEvent, apply those changes to this
+     * <br>3. commitEvent()
+     *
+     * <p>This method should be preferred to manually forwarding events because
+     * it may be optimized. Note that this implementation is currently not optimized,
+     * but it should be real soon!
+     */
+    public void forwardEvent(ListEvent listChanges) {
+        beginEvent();
+        if(listChanges.isReordering()) {
+            int[] reorderMap = listChanges.getReorderMap();
+            reorder(reorderMap);
+        } else {
+            while(listChanges.next()) {
+                addChange(listChanges.getType(), listChanges.getIndex());
+            }
+        }
+        commitEvent();
+    }
     /**
      * Commits the current atomic change to this list change queue. This will
      * notify all listeners about the change.

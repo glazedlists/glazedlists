@@ -103,9 +103,10 @@ public final class IndexedTree {
     /**
      * Deletes the node with the specified sort-order from the tree.
      */
-    public void removeByIndex(int index) {
+    public IndexedTreeNode removeByIndex(int index) {
         IndexedTreeNode treeNode = root.getNodeWithIndex(index);
         treeNode.removeFromTree();
+        return treeNode;
     }
     
     /**
