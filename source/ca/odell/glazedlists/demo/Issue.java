@@ -14,11 +14,11 @@ import ca.odell.glazedlists.swing.*;
 /**
  * An issue models a work effort either due to an existing problem or a desired
  * enhancement.
- * 
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class Issue implements TextFilterable, Comparable {
-    
+
     // mandatory issue fields
     private Integer id = null;
     private String status = null;
@@ -55,7 +55,7 @@ public class Issue implements TextFilterable, Comparable {
     public Issue() {
         // do nothing
     }
-    
+
     /**
      * Creates a new issue that uses the specified issue as a template.
      */
@@ -87,7 +87,7 @@ public class Issue implements TextFilterable, Comparable {
         attachments.addAll(template.attachments);
         activities.addAll(template.activities);
     }
-    
+
     /**
      * ID of this issue (unique key).
      */
@@ -260,7 +260,7 @@ public class Issue implements TextFilterable, Comparable {
         this.shortDescription = shortDescription;
     }
     /**
-     * List of keywords for this issue. 
+     * List of keywords for this issue.
      */
     public List getKeywords() {
         return keywords;
@@ -285,7 +285,7 @@ public class Issue implements TextFilterable, Comparable {
     }
     /**
      * Data from the longdescs table for this issue id.  Essentially
-     * the log of additional comments.       
+     * the log of additional comments.
      */
     public List getDescriptions() {
         return descriptions;
@@ -308,16 +308,16 @@ public class Issue implements TextFilterable, Comparable {
     public String toString() {
         return "Issue " + id + ": " + shortDescription;
     }
-    
+
     /**
-     * Compares two issues by ID. 
+     * Compares two issues by ID.
      */
     public int compareTo(Object other) {
         if(other == null) return -1;
         Issue otherIssue = (Issue)other;
         return id.compareTo(otherIssue.id);
     }
-    
+
     /**
      * Gets the strings to filter this issue by.
      */
@@ -329,11 +329,11 @@ public class Issue implements TextFilterable, Comparable {
         baseList.add(status);
         baseList.add(resolution);
         baseList.add(shortDescription);
-        
+
         // extra strings
         baseList.add(component);
         baseList.add(subcomponent);
-        
+
         // recursively get filter strings from the descriptions
         for(int d = 0; d < getDescriptions().size(); d++) {
             Description description = (Description)getDescriptions().get(d);
@@ -343,9 +343,9 @@ public class Issue implements TextFilterable, Comparable {
 
     /**
      * Return a list of issues. This list is generated in an interesting way.
-     * First, an XML file is paresed into a list of Issue objects. Those Issue 
+     * First, an XML file is paresed into a list of Issue objects. Those Issue
      * Objects then write out the Java code necessary to create them. Finally
-     * that Java code is pasted here. 
+     * that Java code is pasted here.
      *
      * <p>This removes the need to include an XML file and reduces parse time.
      */
@@ -444,7 +444,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("ildella");
         description.setWhen(null);
-        description.setText("This code doesn't seem to work properly: \n(variable \"songs\" is a BasicEventList)\n\n	public int cleanFromMissingFiles() {\n		Iterator it = songs.iterator();\n		while (it.hasNext()) {\n			MP3Song song = (MP3Song) it.next();\n			File f = new File(song.getPath());\n			if (!f.exists())\n				it.remove();	\n		}\n	}\n\nif there are 2 items to remove, after removing the first, the iterator return\nfalse at the next call to hasNext()\nif, for example, there are 8 items to remove, the hasNext() return false after\nthe 4th remove() calls. \nAnd so on...\n\nthe rest of the code is right, in fact, with this code:\n\n	public int cleanFromMissingFiles() {\n		List list = new LinkedList();\n		list.addAll(songs);\n		Iterator it = list.iterator();\n		while (it.hasNext()) {\n			MP3Song song = (MP3Song) it.next();\n			File f = new File(song.getPath());\n			if (!f.exists())\n				it.remove();\n		}\n		songs.clear();\n		songs.addAll(list);\n	}\n\neverything is all right.\n\nhope this can help.\nbye.");
+        description.setText("This code doesn't seem to work properly: \n(variable \"songs\" is a BasicEventList)\n\n    public int cleanFromMissingFiles() {\n      Iterator it = songs.iterator();\n       while (it.hasNext()) {\n            MP3Song song = (MP3Song) it.next();\n           File f = new File(song.getPath());\n            if (!f.exists())\n              it.remove();    \n      }\n }\n\nif there are 2 items to remove, after removing the first, the iterator return\nfalse at the next call to hasNext()\nif, for example, there are 8 items to remove, the hasNext() return false after\nthe 4th remove() calls. \nAnd so on...\n\nthe rest of the code is right, in fact, with this code:\n\n  public int cleanFromMissingFiles() {\n      List list = new LinkedList();\n     list.addAll(songs);\n       Iterator it = list.iterator();\n        while (it.hasNext()) {\n            MP3Song song = (MP3Song) it.next();\n           File f = new File(song.getPath());\n            if (!f.exists())\n              it.remove();\n      }\n     songs.clear();\n        songs.addAll(list);\n   }\n\neverything is all right.\n\nhope this can help.\nbye.");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -546,7 +546,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("ildella");
         description.setWhen(null);
-        description.setText("MutationList getRootList was\n    \n    public EventList getRootList() {\n    	return source;\n    }\n\nas of revision 1.3 on CVS.\n\nIn revision 1.4, it is:\n\n    /**\n     * For implementing the EventList interface. This returns the root of the\n     * source list, or <code>this</code> if this list has no source.\n     */\n    /*\n    public EventList getRootList() {\n        if(source == this) return this;\n        return source.getRootList();\n    }\n\nand this broke all my code and my coomprehension of Glazed Lists.\n\nIs this correct?");
+        description.setText("MutationList getRootList was\n    \n    public EventList getRootList() {\n     return source;\n    }\n\nas of revision 1.3 on CVS.\n\nIn revision 1.4, it is:\n\n    /**\n     * For implementing the EventList interface. This returns the root of the\n     * source list, or <code>this</code> if this list has no source.\n     */\n    /*\n    public EventList getRootList() {\n        if(source == this) return this;\n        return source.getRootList();\n    }\n\nand this broke all my code and my coomprehension of Glazed Lists.\n\nIs this correct?");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -610,7 +610,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("jessewilson");
         description.setWhen(null);
-        description.setText("There are two things that happen when a list changes:\n  - the ListChangeEvent is populated with the change information\n  - the notifyListChanges() method is called on all listeners\n\nSometimes as a consequence of multi-threading, multiple change events are processed in \na single notifyListChanges() methods. When the notifyListChanges() is called on a different \nthread than where the changes were created, that method is required to verify that there \nare changes left to be processed using:\n    listChanges.hasNext()\n\nThis is performed by the ListTable because it receives all events on the SwingThread via \nListChangeListenerEventThreadProxy:\n    public void notifyListChanges(ListChangeEvent listChanges) {\n        ...\n        // when all events hae already been processed by clearing the event queue\n        if(!listChanges.hasNext()) {\n            return;\n        ...\n\nUnfortunately the listChanges.hasNext() method is broken, and throws an \nIndexOutOfBoundsException when there are no more changes:\njava.lang.IndexOutOfBoundsException: Index: 43, Size: 43\n	at java.util.ArrayList.RangeCheck(ArrayList.java:507)\n	at java.util.ArrayList.get(ArrayList.java:324)\n	at \ncom.odellengineeringltd.glazedlists.event.ListChangeSequence.getBlockCount(ListChangeSe\nquence.java:181)\n	at \ncom.odellengineeringltd.glazedlists.event.ListChangeEvent.hasNext(ListChangeEvent.java:\n124)\n	at com.odellengineeringltd.glazedlists.jtable.ListTable.notifyListChanges(ListTable.java:\n158)\n	at \ncom.odellengineeringltd.glazedlists.event.ListChangeListenerEventThreadProxy.run(ListCha\nngeListenerEventThreadProxy.java:54)\n	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:178)\n	at java.awt.EventQueue.dispatchEvent(EventQueue.java:454)\n	at \njava.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchThread.java:201)\n	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:\n151)\n	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:145)\n	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:137)\n	at java.awt.EventDispatchThread.run(EventDispatchThread.java:100)");
+        description.setText("There are two things that happen when a list changes:\n  - the ListChangeEvent is populated with the change information\n  - the notifyListChanges() method is called on all listeners\n\nSometimes as a consequence of multi-threading, multiple change events are processed in \na single notifyListChanges() methods. When the notifyListChanges() is called on a different \nthread than where the changes were created, that method is required to verify that there \nare changes left to be processed using:\n    listChanges.hasNext()\n\nThis is performed by the ListTable because it receives all events on the SwingThread via \nListChangeListenerEventThreadProxy:\n    public void notifyListChanges(ListChangeEvent listChanges) {\n        ...\n        // when all events hae already been processed by clearing the event queue\n        if(!listChanges.hasNext()) {\n            return;\n        ...\n\nUnfortunately the listChanges.hasNext() method is broken, and throws an \nIndexOutOfBoundsException when there are no more changes:\njava.lang.IndexOutOfBoundsException: Index: 43, Size: 43\n  at java.util.ArrayList.RangeCheck(ArrayList.java:507)\n at java.util.ArrayList.get(ArrayList.java:324)\n    at \ncom.odellengineeringltd.glazedlists.event.ListChangeSequence.getBlockCount(ListChangeSe\nquence.java:181)\n    at \ncom.odellengineeringltd.glazedlists.event.ListChangeEvent.hasNext(ListChangeEvent.java:\n124)\n    at com.odellengineeringltd.glazedlists.jtable.ListTable.notifyListChanges(ListTable.java:\n158)\n   at \ncom.odellengineeringltd.glazedlists.event.ListChangeListenerEventThreadProxy.run(ListCha\nngeListenerEventThreadProxy.java:54)\n   at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:178)\n  at java.awt.EventQueue.dispatchEvent(EventQueue.java:454)\n at \njava.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchThread.java:201)\n  at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:\n151)\n    at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:145)\n  at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:137)\n  at java.awt.EventDispatchThread.run(EventDispatchThread.java:100)");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -642,7 +642,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("ildella");
         description.setWhen(null);
-        description.setText("The problem is in this code:\n\nclass ListTable \n...\n\n    public void notifyListChanges(ListChangeEvent listChanges) {\n        // for avoiding extra selection events\n        ignoreSelectionEvents = true;\n        // when all events hae already been processed by clearing the event queue\n        if(!listChanges.hasNext()) {\n            return;\n        // notify all changes simultaneously\n        }\n\nit is needed to add this line\n\n     	ignoreSelectionEvents = false;\n\nbefore that return. Without that line, it could happen that\nignoreSelectionEvents remains false and selection event are no more propagated.");
+        description.setText("The problem is in this code:\n\nclass ListTable \n...\n\n    public void notifyListChanges(ListChangeEvent listChanges) {\n        // for avoiding extra selection events\n        ignoreSelectionEvents = true;\n        // when all events hae already been processed by clearing the event queue\n        if(!listChanges.hasNext()) {\n            return;\n        // notify all changes simultaneously\n        }\n\nit is needed to add this line\n\n       ignoreSelectionEvents = false;\n\nbefore that return. Without that line, it could happen that\nignoreSelectionEvents remains false and selection event are no more propagated.");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -718,7 +718,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("jessewilson");
         description.setWhen(null);
-        description.setText("On 30-Jan-04, at 10:54 AM, Philippe Blais wrote:\n\nHi,\n\nThe way it now it won't work.  The JTable's prepareRenderer method is called\ndynamically with the cell's renderer, the row index and the column index.\nIn my project I use the row index to decide what kind of background I want\nfor all the renderers on the row.\n\nI made a quick and dirty mod to ListTable for now since I couldn't simply\nsubclass it, my mod looks as follows in the constructWidgets method:\n\n--\ntable = new JTable(this)\n{\n	public Component prepareRenderer(TableCellRenderer renderer, int\nrowIndex,int colIndex)\n	{\n		Component c = super.prepareRenderer(renderer, \n				rowIndex, colIndex);\n		if (rowIndex % 2 == 0 && !isCellSelected(rowIndex,\ncolIndex)){\n		if (alternateShadingColor!=null) {\n			c.setBackground(alternateShadingColor);\n		} else {\n			c.setBackground(getBackground());\n		}\n	} else {\n		c.setBackground(getBackground());\n	}\n	\n	return c;\n}\n--\n\nOn simple way to allow extending ListTable for this functionality would be\nto delegate the creation of the table to a protected method of ListTable\nthat can be overridden by whoever wants to extend ListTable.\n\nMy suggestion is to change the \"new JTable(this)\" call to\n\"createTable(this)\" where the method would look like:\n\nprotected JTable createTable(TableModel model) {\n	return new JTable(model);\n}\n\nThis way I would have the ability to use my own extended JTable.\n\nThanks,\n\nPhil Blais\n");
+        description.setText("On 30-Jan-04, at 10:54 AM, Philippe Blais wrote:\n\nHi,\n\nThe way it now it won't work.  The JTable's prepareRenderer method is called\ndynamically with the cell's renderer, the row index and the column index.\nIn my project I use the row index to decide what kind of background I want\nfor all the renderers on the row.\n\nI made a quick and dirty mod to ListTable for now since I couldn't simply\nsubclass it, my mod looks as follows in the constructWidgets method:\n\n--\ntable = new JTable(this)\n{\n  public Component prepareRenderer(TableCellRenderer renderer, int\nrowIndex,int colIndex)\n  {\n     Component c = super.prepareRenderer(renderer, \n                rowIndex, colIndex);\n      if (rowIndex % 2 == 0 && !isCellSelected(rowIndex,\ncolIndex)){\n       if (alternateShadingColor!=null) {\n            c.setBackground(alternateShadingColor);\n       } else {\n          c.setBackground(getBackground());\n     }\n } else {\n      c.setBackground(getBackground());\n }\n \n  return c;\n}\n--\n\nOn simple way to allow extending ListTable for this functionality would be\nto delegate the creation of the table to a protected method of ListTable\nthat can be overridden by whoever wants to extend ListTable.\n\nMy suggestion is to change the \"new JTable(this)\" call to\n\"createTable(this)\" where the method would look like:\n\nprotected JTable createTable(TableModel model) {\n    return new JTable(model);\n}\n\nThis way I would have the ability to use my own extended JTable.\n\nThanks,\n\nPhil Blais\n");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -750,7 +750,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("ildella");
         description.setWhen(null);
-        description.setText("Sometimes I receive this exception that seems to be connected to a problem in\ngetSelected() methods in ListTable.\n\njava.lang.IndexOutOfBoundsException: cannot get from tree of size 14 at 47\n	at\ncom.odellengineeringltd.glazedlists.util.IndexedTreeNode.getNodeWithIndex(IndexedTreeNode.java:81)\n	at\ncom.odellengineeringltd.glazedlists.util.IndexedTree.getNode(IndexedTree.java:55)\n	at com.odellengineeringltd.glazedlists.SortedList.get(SortedList.java:228)\n	at\ncom.odellengineeringltd.glazedlists.jtable.ListTable.getSelected(ListTable.java:227)\n	at\nnet.della.mcube.outliner.OutlinersBuilder$2.filterMatches(OutlinersBuilder.java:77)\n	at\nnet.della.mcube.util.CustomFilteredList.filterMatches(CustomFilteredList.java:38)\n	at\ncom.odellengineeringltd.glazedlists.AbstractFilterList.notifyListChanges(AbstractFilterList.java:93)\n	at\ncom.odellengineeringltd.glazedlists.event.ListChangeSequence.commitAtomicChange(ListChangeSequence.java:154)\n	at net.della.mcube.util.QueryList.refresh(QueryList.java:110)\n	at net.della.mcube.util.QueryList$RefreshTask.run(QueryList.java:127)\n	at java.util.TimerThread.mainLoop(Timer.java:432)\n	at java.util.TimerThread.run(Timer.java:382)");
+        description.setText("Sometimes I receive this exception that seems to be connected to a problem in\ngetSelected() methods in ListTable.\n\njava.lang.IndexOutOfBoundsException: cannot get from tree of size 14 at 47\n at\ncom.odellengineeringltd.glazedlists.util.IndexedTreeNode.getNodeWithIndex(IndexedTreeNode.java:81)\n    at\ncom.odellengineeringltd.glazedlists.util.IndexedTree.getNode(IndexedTree.java:55)\n at com.odellengineeringltd.glazedlists.SortedList.get(SortedList.java:228)\n    at\ncom.odellengineeringltd.glazedlists.jtable.ListTable.getSelected(ListTable.java:227)\n  at\nnet.della.mcube.outliner.OutlinersBuilder$2.filterMatches(OutlinersBuilder.java:77)\n   at\nnet.della.mcube.util.CustomFilteredList.filterMatches(CustomFilteredList.java:38)\n at\ncom.odellengineeringltd.glazedlists.AbstractFilterList.notifyListChanges(AbstractFilterList.java:93)\n  at\ncom.odellengineeringltd.glazedlists.event.ListChangeSequence.commitAtomicChange(ListChangeSequence.java:154)\n  at net.della.mcube.util.QueryList.refresh(QueryList.java:110)\n at net.della.mcube.util.QueryList$RefreshTask.run(QueryList.java:127)\n at java.util.TimerThread.mainLoop(Timer.java:432)\n at java.util.TimerThread.run(Timer.java:382)");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -2438,7 +2438,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("jessewilson");
         description.setWhen(null);
-        description.setText("I ran into a problem when coupling EventSelectionModel\nand UniqueList, so I decided to enhance the ConsistencyTestList\nto verify that UniqueList is well behaved.\n\nFrom my tests, the UniqueList can sometimes delete indicies\nthat have not yet been created! For example, on a list of\nsize 5, it might delete at 6 and later on insert at 6 to\nretain size consistency.\n\nI am going to dive into the UniqueList code to attempt to\nfind the problem. Hopefully it is either a mis-reported\nproblem or an easy fix!\n\nTo reproduce, add the following line to the end of the\nUniqueList constructor, and run the JUnit tests.\n addListEventListener(new ca.odell.glazedlists.test.ConsistencyTestList(this,\n\"unique\"));\n\nThe (first of many) exception I received was:\n\n    [junit] java.lang.Exception: unique/1 cannot delete at 2, size is: 2\n    [junit] 	at\nca.odell.glazedlists.test.ConsistencyTestList.listChanged(ConsistencyTestList.java:63)\n    [junit] 	at\nca.odell.glazedlists.event.ListEventAssembler.fireEvent(ListEventAssembler.java:248)\n    [junit] 	at\nca.odell.glazedlists.event.ListEventAssembler.commitEvent(ListEventAssembler.java:221)\n    [junit] 	at ca.odell.glazedlists.UniqueList.listChanged(UniqueList.java:152)\n    [junit] 	at\nca.odell.glazedlists.event.ListEventAssembler.fireEvent(ListEventAssembler.java:248)\n    [junit] 	at\nca.odell.glazedlists.event.ListEventAssembler.commitEvent(ListEventAssembler.java:221)\n    [junit] 	at ca.odell.glazedlists.SortedList.listChanged(SortedList.java:174)\n    [junit] 	at\nca.odell.glazedlists.event.ListEventAssembler.fireEvent(ListEventAssembler.java:248)\n    [junit] 	at\nca.odell.glazedlists.event.ListEventAssembler.commitEvent(ListEventAssembler.java:221)\n    [junit] 	at\nca.odell.glazedlists.AbstractFilterList.handleFilterChanged(AbstractFilterList.java:196)\n    [junit] 	at\nca.odell.glazedlists.test.IntArrayFilterList.setFilter(IntArrayFilterList.java:33)\n    [junit] 	at\nca.odell.glazedlists.test.UniqueListTest.testUpdateDeleteCollide(UniqueListTest.java:514)\n    [junit] 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n    [junit] 	at\nsun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)\n    [junit] 	at\nsun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)\n    [junit] 	at java.lang.reflect.Method.invoke(Method.java:582)\n    [junit] 	at junit.framework.TestCase.runTest(TestCase.java:154)\n    [junit] 	at junit.framework.TestCase.runBare(TestCase.java:127)\n    [junit] 	at junit.framework.TestResult$1.protect(TestResult.java:106)\n    [junit] 	at junit.framework.TestResult.runProtected(TestResult.java:124)\n    [junit] 	at junit.framework.TestResult.run(TestResult.java:109)\n    [junit] 	at junit.framework.TestCase.run(TestCase.java:118)\n    [junit] 	at junit.framework.TestSuite.runTest(TestSuite.java:208)\n    [junit] 	at junit.framework.TestSuite.run(TestSuite.java:203)\n    [junit] 	at\norg.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner.run(JUnitTestRunner.java:325)\n    [junit] 	at\norg.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner.main(JUnitTestRunner.java:524)");
+        description.setText("I ran into a problem when coupling EventSelectionModel\nand UniqueList, so I decided to enhance the ConsistencyTestList\nto verify that UniqueList is well behaved.\n\nFrom my tests, the UniqueList can sometimes delete indicies\nthat have not yet been created! For example, on a list of\nsize 5, it might delete at 6 and later on insert at 6 to\nretain size consistency.\n\nI am going to dive into the UniqueList code to attempt to\nfind the problem. Hopefully it is either a mis-reported\nproblem or an easy fix!\n\nTo reproduce, add the following line to the end of the\nUniqueList constructor, and run the JUnit tests.\n addListEventListener(new ca.odell.glazedlists.test.ConsistencyTestList(this,\n\"unique\"));\n\nThe (first of many) exception I received was:\n\n    [junit] java.lang.Exception: unique/1 cannot delete at 2, size is: 2\n    [junit]   at\nca.odell.glazedlists.test.ConsistencyTestList.listChanged(ConsistencyTestList.java:63)\n    [junit]     at\nca.odell.glazedlists.event.ListEventAssembler.fireEvent(ListEventAssembler.java:248)\n    [junit]   at\nca.odell.glazedlists.event.ListEventAssembler.commitEvent(ListEventAssembler.java:221)\n    [junit]     at ca.odell.glazedlists.UniqueList.listChanged(UniqueList.java:152)\n    [junit]    at\nca.odell.glazedlists.event.ListEventAssembler.fireEvent(ListEventAssembler.java:248)\n    [junit]   at\nca.odell.glazedlists.event.ListEventAssembler.commitEvent(ListEventAssembler.java:221)\n    [junit]     at ca.odell.glazedlists.SortedList.listChanged(SortedList.java:174)\n    [junit]    at\nca.odell.glazedlists.event.ListEventAssembler.fireEvent(ListEventAssembler.java:248)\n    [junit]   at\nca.odell.glazedlists.event.ListEventAssembler.commitEvent(ListEventAssembler.java:221)\n    [junit]     at\nca.odell.glazedlists.AbstractFilterList.handleFilterChanged(AbstractFilterList.java:196)\n    [junit]   at\nca.odell.glazedlists.test.IntArrayFilterList.setFilter(IntArrayFilterList.java:33)\n    [junit]     at\nca.odell.glazedlists.test.UniqueListTest.testUpdateDeleteCollide(UniqueListTest.java:514)\n    [junit]  at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n    [junit]     at\nsun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)\n    [junit]  at\nsun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)\n    [junit]  at java.lang.reflect.Method.invoke(Method.java:582)\n    [junit]    at junit.framework.TestCase.runTest(TestCase.java:154)\n    [junit]     at junit.framework.TestCase.runBare(TestCase.java:127)\n    [junit]     at junit.framework.TestResult$1.protect(TestResult.java:106)\n    [junit]   at junit.framework.TestResult.runProtected(TestResult.java:124)\n    [junit]    at junit.framework.TestResult.run(TestResult.java:109)\n    [junit]     at junit.framework.TestCase.run(TestCase.java:118)\n    [junit]     at junit.framework.TestSuite.runTest(TestSuite.java:208)\n    [junit]   at junit.framework.TestSuite.run(TestSuite.java:203)\n    [junit]   at\norg.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner.run(JUnitTestRunner.java:325)\n    [junit]     at\norg.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner.main(JUnitTestRunner.java:524)");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -3098,7 +3098,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("jessewilson");
         description.setWhen(null);
-        description.setText("I got the following Exception upon starting the demo app.\n\ndeathstar:glazedlists$ java -jar glazedlists.jar \nException in thread \"AWT-EventQueue-0\" java.lang.ArrayIndexOutOfBoundsException:\nInvalid range for selection: 0-0, list size is 0\n	at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.setSubRangeOfRange(EventSelectionModel.java:420)\n	at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.removeSelectionInterval(EventSelectionModel.java:587)\n	at javax.swing.JTable.checkLeadAnchor(JTable.java:2963)\n	at javax.swing.JTable.tableRowsInserted(JTable.java:3079)\n	at javax.swing.JTable.tableChanged(JTable.java:3013)\n	at\njavax.swing.table.AbstractTableModel.fireTableChanged(AbstractTableModel.java:280)\n	at ca.odell.glazedlists.swing.EventTableModel.listChanged(EventTableModel.java:118)\n	at ca.odell.glazedlists.event.EventThreadProxy.run(EventThreadProxy.java:54)\n	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:209)\n	at java.awt.EventQueue.dispatchEvent(EventQueue.java:461)\n	at\njava.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchThread.java:234)\n	at\njava.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:163)\n	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:157)	at\njava.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:149)	at\njava.awt.EventDispatchThread.run(EventDispatchThread.java:110)");
+        description.setText("I got the following Exception upon starting the demo app.\n\ndeathstar:glazedlists$ java -jar glazedlists.jar \nException in thread \"AWT-EventQueue-0\" java.lang.ArrayIndexOutOfBoundsException:\nInvalid range for selection: 0-0, list size is 0\n at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.setSubRangeOfRange(EventSelectionModel.java:420)\n   at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.removeSelectionInterval(EventSelectionModel.java:587)\n  at javax.swing.JTable.checkLeadAnchor(JTable.java:2963)\n   at javax.swing.JTable.tableRowsInserted(JTable.java:3079)\n at javax.swing.JTable.tableChanged(JTable.java:3013)\n  at\njavax.swing.table.AbstractTableModel.fireTableChanged(AbstractTableModel.java:280)\n    at ca.odell.glazedlists.swing.EventTableModel.listChanged(EventTableModel.java:118)\n   at ca.odell.glazedlists.event.EventThreadProxy.run(EventThreadProxy.java:54)\n  at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:209)\n  at java.awt.EventQueue.dispatchEvent(EventQueue.java:461)\n at\njava.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchThread.java:234)\n   at\njava.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:163)\n at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:157)    at\njava.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:149)   at\njava.awt.EventDispatchThread.run(EventDispatchThread.java:110)");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -3194,7 +3194,7 @@ public class Issue implements TextFilterable, Comparable {
         description = new Description();
         description.setWho("ildella");
         description.setWhen(null);
-        description.setText("I have another problem with Java5\nThis exception raises up. The same code works perfectly under 1.4.2\nI am testing the CVS version of glazedlists.\n\nException in thread \"AWT-EventQueue-0\" java.lang.ArrayIndexOutOfBoundsException:\nInvalid range for selection: 0-0, list size is 0\n	at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.setSubRangeOfRange(EventSelectionModel.java:387)\n	at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.removeSelectionInterval(EventSelectionModel.java:548)\n	at javax.swing.JTable.checkLeadAnchor(JTable.java:2965)\n	at javax.swing.JTable.tableRowsInserted(JTable.java:3081)\n	at javax.swing.JTable.tableChanged(JTable.java:3015)\n	at\njavax.swing.table.AbstractTableModel.fireTableChanged(AbstractTableModel.java:280)\n	at ca.odell.glazedlists.swing.EventTableModel.listChanged(EventTableModel.java:118)\n	at ca.odell.glazedlists.event.EventThreadProxy.run(EventThreadProxy.java:54)\n	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:209)\n	at java.awt.EventQueue.dispatchEvent(EventQueue.java:461)\n	at\njava.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchThread.java:234)\n	at\njava.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:163)\n	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:157)\n	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:149)\n	at java.awt.EventDispatchThread.run(EventDispatchThread.java:110)");
+        description.setText("I have another problem with Java5\nThis exception raises up. The same code works perfectly under 1.4.2\nI am testing the CVS version of glazedlists.\n\nException in thread \"AWT-EventQueue-0\" java.lang.ArrayIndexOutOfBoundsException:\nInvalid range for selection: 0-0, list size is 0\n at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.setSubRangeOfRange(EventSelectionModel.java:387)\n   at\nca.odell.glazedlists.swing.EventSelectionModel$EventListSelectionModel.removeSelectionInterval(EventSelectionModel.java:548)\n  at javax.swing.JTable.checkLeadAnchor(JTable.java:2965)\n   at javax.swing.JTable.tableRowsInserted(JTable.java:3081)\n at javax.swing.JTable.tableChanged(JTable.java:3015)\n  at\njavax.swing.table.AbstractTableModel.fireTableChanged(AbstractTableModel.java:280)\n    at ca.odell.glazedlists.swing.EventTableModel.listChanged(EventTableModel.java:118)\n   at ca.odell.glazedlists.event.EventThreadProxy.run(EventThreadProxy.java:54)\n  at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:209)\n  at java.awt.EventQueue.dispatchEvent(EventQueue.java:461)\n at\njava.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchThread.java:234)\n   at\njava.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:163)\n at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:157)\n  at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:149)\n  at java.awt.EventDispatchThread.run(EventDispatchThread.java:110)");
         currentIssue.getDescriptions().add(description);
         description = null;
         description = new Description();
@@ -3758,50 +3758,6 @@ public class Issue implements TextFilterable, Comparable {
 }
 
 /**
- * An additional comment.       
- */
-class Description implements TextFilterable {
-    private String who = null;
-    private Date when = null;
-    private String text = null;
-    /**
-     * Email of person posting long_desc.
-     */
-    public String getWho() {
-        return who;
-    }
-    public void setWho(String who) {
-        this.who = who;
-    }
-    /**
-     * Timestamp when long_desc added ('yyy-mm-dd hh:mm')
-     */
-    public Date getWhen() {
-        return when;
-    }
-    public void setWhen(Date when) {
-        this.when = when;
-    }
-    /**
-     * Free text that comprises the long desc.
-     */
-    public String getText() {
-        return text;
-    }
-    public void setText(String text) {
-        this.text = text;
-    }
-    /**
-     * Gets the strings to filter this issue by.
-     */
-    public void getFilterStrings(List baseList) {
-        baseList.add(text);
-        baseList.add(who);
-    }
-}
-
-
-/**
  * Data pertaining to the issue's activity record.
  */
 class Activity {
@@ -3830,7 +3786,7 @@ class Activity {
         this.when = when;
     }
     /**
-     * name of db field (in fielddefs) 
+     * name of db field (in fielddefs)
      */
     public String getField() {
         return field;
@@ -3857,7 +3813,7 @@ class Activity {
         this.oldValue = oldValue;
     }
     /**
-     * value changed to 
+     * value changed to
      */
     public String getNewValue() {
         return newValue;
