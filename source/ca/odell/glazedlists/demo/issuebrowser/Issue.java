@@ -364,7 +364,8 @@ public class Issue implements TextFilterable, Comparable {
 	 * Write this issue for debugging.
 	 */
 	public String toString() {
-		return "Issue " + id + ": " + shortDescription;
+		//return "Issue " + id + ": " + shortDescription;
+		return "Issue " + id + ": " + getPriority().getRating();
 	}
 
 	/**

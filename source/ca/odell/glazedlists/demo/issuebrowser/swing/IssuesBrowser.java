@@ -124,14 +124,9 @@ public class IssuesBrowser extends Applet {
 		// create the lists
 		IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
 		TextFilterList issuesTextFiltered = new TextFilterList(issuesUserFiltered);
-		//ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-		//SortedList issuesSortedList = new SortedList(priorityList);
-		SortedList issuesSortedList = new SortedList(issuesTextFiltered);
-
-        //issuesUserFiltered.addListEventListener(new ConsistencyTestList(issuesUserFiltered, "user filtered", false));
-        //issuesTextFiltered.addListEventListener(new ConsistencyTestList(issuesTextFiltered, "text filtered", false));
-        //priorityList.addListEventListener(new ConsistencyTestList(priorityList, "priority", false));
-        //issuesSortedList.addListEventListener(new ConsistencyTestList(issuesSortedList, "sorted", true));
+		ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
+		SortedList issuesSortedList = new SortedList(priorityList);
+		//SortedList issuesSortedList = new SortedList(issuesTextFiltered);
 
 		// issues table
 	    EventTableModel issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
@@ -160,7 +155,7 @@ public class IssuesBrowser extends Applet {
 		JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
 		// priority slider
-		/*BoundedRangeModel priorityRangeModel = ThresholdRangeModelFactory.createLower(priorityList);
+		BoundedRangeModel priorityRangeModel = ThresholdRangeModelFactory.createLower(priorityList);
 		priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
 		JSlider prioritySlider = new JSlider(priorityRangeModel);
 		Hashtable prioritySliderLabels = new Hashtable();
@@ -170,7 +165,7 @@ public class IssuesBrowser extends Applet {
 		prioritySlider.setSnapToTicks(true);
 		prioritySlider.setPaintLabels(true);
 		prioritySlider.setPaintTicks(true);
-		prioritySlider.setMajorTickSpacing(25);*/
+		prioritySlider.setMajorTickSpacing(25);
 
 		// projects
 		EventList projects = new BasicEventList();
@@ -212,8 +207,8 @@ public class IssuesBrowser extends Applet {
 		filtersPanel.setBorder(BorderFactory.createLineBorder(Color.white));
 		filtersPanel.add(new JLabel("Text Filter"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 5, 10), 0, 0));
 		filtersPanel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
-		//filtersPanel.add(new JLabel("Minimum Prioriy"),      new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  10, 5,   10), 0, 0));
-		//filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,  10, 15,  10), 0, 0));
+		filtersPanel.add(new JLabel("Minimum Prioriy"),      new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  10, 5,   10), 0, 0));
+		filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,  10, 15,  10), 0, 0));
 		filtersPanel.add(new JLabel("Issue Owner"), new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
 		filtersPanel.add(usersListScrollPane, new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 10, 10), 0, 0));
 

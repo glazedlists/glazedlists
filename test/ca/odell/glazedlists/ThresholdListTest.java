@@ -37,6 +37,8 @@ public class ThresholdListTest extends TestCase {
         source = new BasicEventList();
         evaluator = new IntegerEvaluator();
         thresholdList = new ThresholdList(source, evaluator);
+        // monitor the fired events
+        thresholdList.addListEventListener(new ConsistencyTestList(thresholdList, "thresholdList", false));
     }
 
     /**
@@ -47,7 +49,20 @@ public class ThresholdListTest extends TestCase {
         source = null;
         random = null;
     }
-
+    
+    /**
+     * Verifies that ThresholdList fires the right events.
+     */
+    public void testEventFiring() {
+        // populate our sample list
+        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
+            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+            
+        // make some dealbreaking changes
+        thresholdList.setLowerThreshold(27);
+        thresholdList.setLowerThreshold(18);
+    }
+    
     /**
      * A simple test to validate that ThresholdList is
      * behaving as expected on a list with no missing elements.
