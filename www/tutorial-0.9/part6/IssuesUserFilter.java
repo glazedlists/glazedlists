@@ -38,7 +38,7 @@ public class IssuesUserFilter extends AbstractFilterList implements ListSelectio
         
         // create a unique users list from the source issues list
         source.addListEventListener(new ConsistencyTestList(source, "source"));
-        SortedList sortedSource = new SortedList(source);
+        SortedList sortedSource = new SortedList(new IssuesToUserList(source));
         sortedSource.addListEventListener(new ConsistencyTestList(sortedSource, "sortedSource", true));
         usersEventList = new UniqueList(new IssuesToUserList(source));
         usersEventList.addListEventListener(new ConsistencyTestList(usersEventList, "users-unique", true));
