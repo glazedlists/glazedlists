@@ -174,7 +174,7 @@ public final class IndexedTreeNode {
 
 
     /**
-     * Inserts the specified object into the tree in sorted order. The 
+     * Inserts the specified object into the tree in sorted order.
      *
      * @return the IndexedTreeNode node where the object was inserted. This
      *      node can be used to call the deleteUp() method, which will
@@ -192,7 +192,7 @@ public final class IndexedTreeNode {
             return this;
         }
         // if it sorts on the left side, insert there
-        if(host.getComparator().compare(inserted, value) <= 0) {
+        if(host.getComparator().compare(inserted, value) < 0) {
             if(left == null) left = new IndexedTreeNode(host, this);
             leftSize++;
             IndexedTreeNode result = left.insert(inserted);
