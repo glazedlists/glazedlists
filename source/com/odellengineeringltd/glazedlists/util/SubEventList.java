@@ -28,9 +28,6 @@ public final class SubEventList extends WritableMutationList implements ListChan
     
     /** the end index of this list, exclusive */
     private int endIndex;
-
-    /** whether this list automatically removes itself */
-    private boolean automaticallyRemove;
     
     /**
      * Creates a new SubEventList that covers the specified range of indicies
@@ -55,7 +52,6 @@ public final class SubEventList extends WritableMutationList implements ListChan
             
             this.startIndex = startIndex;
             this.endIndex = endIndex;
-            this.automaticallyRemove = automaticallyRemove;
         }
         
         // listen directly or via a proxy that will do garbage collection
@@ -139,20 +135,6 @@ public final class SubEventList extends WritableMutationList implements ListChan
             }
             assert(startIndex <= endIndex);
             updates.commitAtomicChange();
-        }
-    }
-
-
-
-    /**
-     * Registers the specified listener to receive notification of changes
-     * to this list.
-     */
-    public void addListChangeListener(ListChangeListener listChangeListener) {
-        if(automaticallyRemove) {
-            throw new IllegalStateException("Cannot listen to a sub list that automatically removes itself");
-        } else {
-            super.addListChangeListener(listChangeListener);
         }
     }
 }
