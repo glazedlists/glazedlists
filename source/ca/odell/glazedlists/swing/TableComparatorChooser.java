@@ -62,7 +62,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
     private ActionListener sortListener = null;
 
     /** the sort icons to use */
-    private static Icon[] icons = SortIconFactory.getIcons();
+    private static Icon[] icons = SortIconFactory.loadIcons();
 
     /**
      * Creates a new TableComparatorChooser that responds to clicks
@@ -216,6 +216,21 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
     public void dispose() {
         table.getTableHeader().removeMouseListener(listener);
         table.getModel().removeTableModelListener(listener);
+    }
+    
+    /**
+     * Set all {@link TableComparatorChooser}s to use the icons from the directory
+     * specified. The folder should contain the following eight icon files:
+     * <li>primary_sorted.png                      <li>secondary_sorted.png
+     * <li>primary_sorted_alternate.png            <li>secondary_sorted_alternate.png
+     * <li>primary_sorted_alternate_reverse.png    <li>secondary_sorted_alternate_reverse.png
+     * <li>primary_sorted_reverse.png              <li>secondary_sorted_reverse.png
+     *
+     * <p>Note that this path must be on the system classpath. It may be within a
+     * jar file.
+     */
+    public static void setIconPath(String path) {
+        icons = SortIconFactory.loadIcons(path);
     }
     
     /**

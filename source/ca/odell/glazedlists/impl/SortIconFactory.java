@@ -37,20 +37,13 @@ public final class SortIconFactory {
     }
 
     /** the icons to use for indicating sort order */
-    private static Icon[] icons = new Icon[] { null, null, null, null, null, null, null, null, null };
+    private static Icon[] defaultIcons = null;
     private static String[] iconFileNames = new String[] {
         "unsorted.png", "primary_sorted.png", "primary_sorted_reverse.png",
         "primary_sorted_alternate.png", "primary_sorted_alternate_reverse.png",
         "secondary_sorted.png", "secondary_sorted_reverse.png",
         "secondary_sorted_alternate.png", "secondary_sorted_alternate_reverse.png"
     };
-
-    /**
-     * load the icons at classloading time
-     */
-    static {
-        loadIcons();
-    }
 
     /**
      * A dummy constructor to prevent instantiation of this class
@@ -60,31 +53,40 @@ public final class SortIconFactory {
     }
 
     /**
-     * Retrieve the set of sort arrow icons that match the local system's
-     * Look and Feel.
+     * Loads the set of icons that match the current UIManager.
      */
-    public static Icon[] getIcons() {
-        return icons;
-    }
-
-    /**
-     * Loads the set of icons used to be consistent with the current UIManager.
-     */
-    private static void loadIcons() {
+    public static Icon[] loadIcons() {
+        // if we've already loaded the default icons, return them
+        if(defaultIcons != null) return defaultIcons;
+        
+        // detect the current look & feel
         String lookAndFeelName = UIManager.getLookAndFeel().getName();
         if(lookAndFeelName.equals("Metal")) lookAndFeelName = PLAFDetector.getMetalTheme();
         else if(lookAndFeelName.equals("Windows")) lookAndFeelName = PLAFDetector.getWindowsTheme();
         String resourcePath = (String)lookAndFeelResourcePathMap.get(lookAndFeelName);
         if(resourcePath == null) resourcePath = defaultResourcePath;
-
+        
+        // save and return the default icons
+        defaultIcons = getIcons(resourceRoot + "/" + resourcePath);
+        return defaultIcons;
+    }
+    
+    /**
+     * Loads the set of icons from the specified path.
+     */
+    public static Icon[] loadIcons(String path) {
         // use the classloader to look inside this jar file
         ClassLoader jarLoader = SortIconFactory.class.getClassLoader();
 
         // load each icon as a resource from the source .jar file
+        Icon[] pathIcons = new Icon[iconFileNames.length];
         for(int i = 0; i < icons.length; i++) {
-            URL iconLocation = jarLoader.getResource(resourceRoot + "/" + resourcePath + "/" + iconFileNames[i]);
-            if(iconLocation != null) icons[i] = new ImageIcon(iconLocation);
-            else icons[i] = null;
+            URL iconLocation = jarLoader.getResource(path + "/" + iconFileNames[i]);
+            if(iconLocation != null) pathIcons[i] = new ImageIcon(iconLocation);
+            else pathIcons[i] = null;
         }
+        
+        // return the loaded result
+        return pathIcons;
     }
 }
