@@ -53,8 +53,11 @@ import java.lang.reflect.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class TableComparatorChooser extends MouseAdapter implements TableModelListener {
+public class TableComparatorChooser {
 
+    /** listen for table and mouse events */
+    private Listener listener = new Listener();
+    
     /** the table being sorted */
     private JTable table;
     private EventTableModel eventTableModel;
@@ -145,10 +148,10 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
 
         // listen for events on the specified table
         table.setColumnSelectionAllowed(false);
-        table.getTableHeader().addMouseListener(this);
-        table.getModel().addTableModelListener(this);
+        table.getTableHeader().addMouseListener(listener);
+        table.getModel().addTableModelListener(listener);
     }
-
+    
     /**
      * When the column model is changed, this resets the column clicks and
      * comparator list for each column.
@@ -163,7 +166,6 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         recentlyClickedColumns.clear();
     }
 
-
     /**
      * Gets the list of comparators for the specified column. The user is
      * free to add comparators to this list or clear the list if the specified
@@ -171,26 +173,6 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      */
     public List getComparatorsForColumn(int column) {
         return columnClickTrackers[column].getComparators();
-    }
-
-    /**
-     * When the mouse is clicked, this selects the next comparator in
-     * sequence for the specified table. This will re-sort the table
-     * by a new criterea.
-     *
-     * This code is based on the Java Tutorial's TableSorter
-     * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html#sorting">The Java Tutorial</a>
-     */
-    public void mouseClicked(MouseEvent e) {
-        if(e.getButton() != MouseEvent.BUTTON1) return;
-        
-        TableColumnModel columnModel = table.getColumnModel();
-        int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-        int column = table.convertColumnIndexToModel(viewColumn);
-        int clicks = e.getClickCount();
-        if(clicks >= 1 && column != -1) {
-            columnClicked(column, clicks);
-        }
     }
 
     /**
@@ -226,28 +208,6 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         return columnClickTrackers[column].isReverse();
     }
 
-    /**
-     * When the number of columns changes in the table, we need to
-     * clear the comparators and columns.
-     */
-    public void tableChanged(TableModelEvent event) {
-        if(event.getFirstRow() == TableModelEvent.HEADER_ROW
-        && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
-            rebuildColumns();
-        }
-        
-        // if the comparator has changed
-        ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().lock();
-        try {
-            Comparator currentComparator = sortedList.getComparator();
-            if(currentComparator != sortedListComparator) {
-                redetectComparator(currentComparator);
-            }
-        } finally {
-            ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().unlock();
-        }
-    }
-    
     /**
      * Registers the specified {@link ActionListener} to receive notification whenever
      * the {@link JTable} is sorted by this {@link TableComparatorChooser}.
@@ -444,6 +404,64 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      */
     public Comparator createComparatorForElement(Comparator comparatorForColumn, int column) {
         return new TableColumnComparator(eventTableModel.getTableFormat(), column, comparatorForColumn);
+    }
+    
+    /**
+     * Determines if the specified mouse event shall be handled by this
+     * {@link TableComparatorChooser}. The default implementation handles only clicks
+     * with the left mouse button. Extending classes can customize which mouse
+     * events the table comparator chooser responds to by overriding this method.
+     */
+    protected boolean isSortingMouseEvent(MouseEvent e) {
+        return (e.getButton() != MouseEvent.BUTTON1);
+    }
+    
+    /**
+     * Nested Listener class handles table events and mouse events.
+     */
+    private class Listener extends MouseAdapter implements TableModelListener {
+
+        /**
+         * When the mouse is clicked, this selects the next comparator in
+         * sequence for the specified table. This will re-sort the table
+         * by a new criterea.
+         *
+         * This code is based on the Java Tutorial's TableSorter
+         * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html#sorting">The Java Tutorial</a>
+         */
+        public void mouseClicked(MouseEvent e) {
+            if(!isSortingMouseEvent(e)) return;
+            
+            TableColumnModel columnModel = table.getColumnModel();
+            int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+            int column = table.convertColumnIndexToModel(viewColumn);
+            int clicks = e.getClickCount();
+            if(clicks >= 1 && column != -1) {
+                columnClicked(column, clicks);
+            }
+        }
+        
+        /**
+         * When the number of columns changes in the table, we need to
+         * clear the comparators and columns.
+         */
+        public void tableChanged(TableModelEvent event) {
+            if(event.getFirstRow() == TableModelEvent.HEADER_ROW
+            && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
+                rebuildColumns();
+            }
+            
+            // if the comparator has changed
+            ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().lock();
+            try {
+                Comparator currentComparator = sortedList.getComparator();
+                if(currentComparator != sortedListComparator) {
+                    redetectComparator(currentComparator);
+                }
+            } finally {
+                ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().unlock();
+            }
+        }
     }
 
     /**
