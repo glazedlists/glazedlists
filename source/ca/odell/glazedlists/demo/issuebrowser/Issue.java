@@ -37,18 +37,21 @@ public class Issue implements TextFilterable, Comparable {
     private Date creationTimestamp = null;
     private String qaContact = null;
     private String statusWhiteboard = null;
+    private String fileLocation = null;
     private String votes = null;
     private String operatingSystem = null;
     private String shortDescription = null;
+    private PeerIssue isDuplicate = null;
     // optional fields
     private List keywords = new ArrayList();
     private List blocks = new ArrayList();
-    private List dependsOn = new ArrayList();
     private List cc = new ArrayList();
-    // issue lifecycle fields
+    // issue rich fields
     private List descriptions = new ArrayList();
     private List attachments = new ArrayList();
     private List activities = new ArrayList();
+    private List duplicates = new ArrayList();
+    private List dependsOn = new ArrayList();
 
     /**
      * Creates a new empty issue.
@@ -290,6 +293,18 @@ public class Issue implements TextFilterable, Comparable {
     }
 
     /**
+     * URL related to issue
+     */
+    public String getFileLocation() {
+        return fileLocation;
+    }
+
+    public void setFileLocation(String fileLocation) {
+        this.fileLocation = fileLocation;
+    }
+
+
+    /**
      * Operating system issue reported against.
      */
     public String getOperatingSystem() {
@@ -319,20 +334,6 @@ public class Issue implements TextFilterable, Comparable {
     }
 
     /**
-     * List of local issue IDs blocked by this one.
-     */
-    public List getBlocks() {
-        return blocks;
-    }
-
-    /**
-     * List of local issue IDs that depend on this one.
-     */
-    public List getDependsOn() {
-        return dependsOn;
-    }
-
-    /**
      * List of email addresses of interested parties.s
      */
     public List getCC() {
@@ -348,24 +349,54 @@ public class Issue implements TextFilterable, Comparable {
     }
 
     /**
-     * Set the attachments to this issue.
+     * Get the attachments to this issue.
      */
     public List getAttachments() {
         return attachments;
     }
 
     /**
-     * Set the activity upon this issue.
+     * Get the activity upon this issue.
      */
     public List getActivities() {
         return activities;
     }
 
     /**
+     * Other issues which were closed as a duplicate of this issue.
+     */
+    public List getDuplicates() {
+        return duplicates;
+    }
+
+    /**
+     * List of local issue IDs that depend on this one.
+     */
+    public List getDependsOn() {
+        return dependsOn;
+    }
+
+    /**
+     * List of local issue IDs blocked by this one.
+     */
+    public List getBlocks() {
+        return blocks;
+    }
+
+    /**
+     * The issue which this issue was closed as a duplicate of.
+     */
+    public PeerIssue getDuplicate() {
+        return isDuplicate;
+    }
+    public void setDuplicate(PeerIssue peerIssue) {
+        this.isDuplicate = isDuplicate;
+    }
+
+    /**
      * Write this issue for debugging.
      */
     public String toString() {
-        //return "Issue " + id + ": " + shortDescription;
         return "Issue " + id + ": " + getPriority().getRating();
     }
 
@@ -498,6 +529,49 @@ class Activity {
 
     public void setNewValue(String newValue) {
         this.newValue = newValue;
+    }
+}
+
+
+/**
+ * Reference to this issue's duplicate.
+ */
+class PeerIssue {
+    private String issueId = null;
+    private String who = null;
+    private Date when = null;
+
+    /**
+     * user who created the duplicate.
+     */
+    public String getWho() {
+        return who;
+    }
+
+    public void setWho(String who) {
+        this.who = who;
+    }
+
+    /**
+     * date the described change was made
+     */
+    public Date getWhen() {
+        return when;
+    }
+
+    public void setWhen(Date when) {
+        this.when = when;
+    }
+
+    /**
+     * ID of the duplicate.
+     */
+    public String getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(String issueId) {
+        this.issueId = issueId;
     }
 }
 

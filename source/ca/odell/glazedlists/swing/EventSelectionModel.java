@@ -9,7 +9,6 @@ package ca.odell.glazedlists.swing;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.*;
 import ca.odell.glazedlists.util.concurrent.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;

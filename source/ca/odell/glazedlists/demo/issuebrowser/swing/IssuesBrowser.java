@@ -227,13 +227,14 @@ public class IssuesBrowser extends Applet {
 	 * When started via a main method, this creates a standalone issues browser.
 	 */
 	public static void main(String[] args) {
-		if (args.length != 0) {
-			System.out.println("Usage: IssueBrowser");
-			return;
-		}
-
 		// load the issues and display the browser
 		IssuesBrowser browser = new IssuesBrowser(false);
+        
+        // load the initial project, if requested
+        if(args.length == 1) {
+            Project initialProject = new Project("url", "Url", args[0]);
+            browser.issueLoader.setProject(initialProject);
+        }
 	}
 
 

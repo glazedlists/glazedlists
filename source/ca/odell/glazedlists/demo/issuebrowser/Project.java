@@ -29,12 +29,18 @@ public class Project {
 		projects.add(new Project("jdnc", "JavaDesktop Network Components"));
     }
     
-    private String projectName;
-    private String projectTitle;
+    private String projectName = null;
+    private String projectTitle = null;
+    private String url = null;
 
     public Project(String projectName, String projectTitle) {
+        this(projectName, projectTitle, "https://" + projectName + ".dev.java.net/issues/xml.cgi");
+    }
+    
+    public Project(String projectName, String projectTitle, String url) {
         this.projectName = projectName;
         this.projectTitle = projectTitle;
+        this.url = url;
     }
 
     public boolean isValid() {
@@ -42,7 +48,7 @@ public class Project {
     }
 
     public String getXMLUri() {
-        return "https://" + projectName + ".dev.java.net/issues/xml.cgi";
+        return url;
     }
 
     public String toString() {

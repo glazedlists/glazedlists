@@ -116,22 +116,35 @@
 	   COMPILE
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="compile" depends="init"
+	<target name="compile" depends="core,swing,demo"
 		description="Compile the source.">
+	</target>
+
+	<target name="core" depends="init">
 		<mkdir dir="classes"/>
-		<!-- Compile the java code from source/ into classes/ -->
 		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+            <!-- swing -->
+			<exclude name="**/swing/**"/>
+            <!-- swt -->
 			<exclude name="**/swt/**"/>
+            <!-- io -->
+			<exclude name="**/ctp/**"/>
+			<exclude name="**/io/**"/>
+			<exclude name="**/nio/**"/>
+			<exclude name="**/pmap/**"/>
+			<exclude name="**/rbp/**"/>
+            <!-- demo -->
+			<exclude name="**/demo/**"/>
 		</javac>
 	</target>
 
+	<target name="swing" depends="core">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+			<include name="**/swing/**"/>
+		</javac>
+	</target>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	   SWT: The Standard Widget Toolkit from eclipse.org
-	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<target name="swt" depends="init,compile"
-		description="Compile the SWT classes.">
+	<target name="swt" depends="core">
 		<!-- Verify that SWT is available on the classpath -->
 		<available classname="org.eclipse.swt.SWT" property="swt.present"/>
 		<fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>
@@ -140,6 +153,25 @@
 			<include name="**/swt/**"/>
 		</javac>
 	</target>
+
+	<target name="io" depends="core">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+			<include name="**/ctp/**"/>
+			<include name="**/io/**"/>
+			<include name="**/nio/**"/>
+			<include name="**/pmap/**"/>
+			<include name="**/rbp/**"/>
+		</javac>
+	</target>
+
+	<target name="demo" depends="core,swing,swt">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+			<include name="**/demo/**"/>
+			<exclude name="**/swt/**"/>
+		</javac>
+	</target>
+
+
 
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
