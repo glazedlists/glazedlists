@@ -39,7 +39,7 @@ public class ThresholdListTest extends TestCase {
         source = new BasicEventList();
         evaluator = new IntegerEvaluator();
         thresholdList = new ThresholdList(source, evaluator);
-        thresholdList.debug = false;
+        //thresholdList.debug = false;
     }
 
     /**

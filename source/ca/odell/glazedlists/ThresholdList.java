@@ -12,27 +12,33 @@ import ca.odell.glazedlists.event.*;
 import java.util.*;
 
 /**
- * A ThresholdList is a transformation list that provides a dynamic
- * view of a range of values in a list.  This range is defined to
- * contain all elements at or above the lower threshold and all
- * elements at or below the upper threshold.  This allows a user
- * to filter data from their list in a powerful and sophisticated manner
- * by simply modifying the upper and lower thresholds.
+ * An {@link EventList} that shows a range of the elements of the source
+ * {@link EventList}. Each element in the source {@link EventList} is assigned
+ * an integer value via a {@link ThresholdEvaluator}. This integer is used
+ * to determine whether the element fits in the {@link ThresholdList}s range.
  *
- * <p>This list is designed to respond to a slider widget or combo box
- * that sets either one or both of the thresholds on a range of values.
- * This allows a user to easily refine their view of a list to contain
- * only values within a valid range.  The perfect use case for this list is
- * within a media player or P2P application. A user might want to filter
- * out all songs that aren't at least at a bitrate of 192 kbps and at most
- * a bitrate of 320 kbps to eliminate low quality MP3s and bloated WAV files.
+ * <p>By modifying the upper and lower thresholds in the range, the list can
+ * be filtered in a simple and powerful way.
  *
- * <p><strong>Note:</strong> For performance reasons, the transformation
- * performed by <code>ThresholdList</code> sorts the contents of the source
- * list using the provided <code>ThresholdEvaluator</code>.
+ * <p>The {@link ThresholdList} lends itself to use with a slider widget for
+ * manipulating the range's endpoints.
  *
- * <p><strong>Warning:</strong> this is a technology preview and is
- * subject to API changes.
+ * <p>One use case for {@link ThresholdList} is in a media player application.
+ * By creating a {@link ThresholdEvaluator} for a song's bitrate, the user could
+ * limit results to MP3 files between 192 and 320kbps.
+ *
+ * <p>Note that the elements in the {@link ThresholdList} will be presented in
+ * order sorted by their {@link ThresholdEvaluator} value.
+ *
+ * <p>This {@link EventList} supports all write operations.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class
+ * breaks the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
@@ -57,11 +63,11 @@ public final class ThresholdList extends TransformedList implements ListEventLis
     private ThresholdEvaluator evaluator = null;
 
     /** TODO: a flag to put this list in debug mode */
-    public boolean debug = false;
+    private boolean debug = false;
 
     /**
-     * Creates a new ThresholdList that is a range-filtered view
-     * of a specified list.
+     * Creates a {@link ThresholdList} that provides range-filtering on the
+     * specified {@link EventList} using the specified {@link ThresholdEvaluator}.
      */
     public ThresholdList(EventList source, ThresholdEvaluator evaluator) {
         super(new SortedList(source, new ThresholdComparator(evaluator)));
@@ -74,10 +80,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         setLowerThreshold(Integer.MIN_VALUE);
     }
 
-    /**
-     * For implementing the ListEventListener interface. When the underlying list
-     * changes, this sends notification to listening lists.
-     */
+    /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
 
         // recache the source size
@@ -206,7 +209,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
      * Sets the lower threshold for this list.
      *
      * <p>This list can be used programmatically rather than hooking it up to
-     * a UI component.  <strong>Calling this method directly while this list
+     * a UI component. <strong>Calling this method directly while this list
      * is connected to a particular widget could result in errors.</strong>
      */
     public void setLowerThreshold(int threshold) {
@@ -345,12 +348,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         return upperThreshold;
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int size() {
         // Check for the exclusionary edge condition
         if(lowerThresholdIndex == upperThresholdIndex) {
@@ -361,23 +359,12 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         return Math.min(upperThresholdIndex, sourceSize - 1) - Math.max(lowerThresholdIndex, 0) + 1;
     }
 
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list. This is the index such that the following works:
-     * <br><code>this.get(i) == source.get(getSourceIndex(i))</code> for all
-     * values.
-     */
+    /** {@inheritDoc} */
     protected int getSourceIndex(int transformationIndex) {
         return transformationIndex + Math.max(lowerThresholdIndex, 0);
     }
 
-    /**
-     * Returns true if this list contains the specified element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public boolean contains(Object object) {
         // Fast fail if the object isn't within the thresholds
         int objectEvaluation = evaluator.evaluate(object);
@@ -387,14 +374,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         return source.contains(object);
     }
 
-    /**
-     * Returns the index in this list of the first occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int indexOf(Object object) {
         // Fast fail if the object isn't within the thresholds
         int objectEvaluation = evaluator.evaluate(object);
@@ -404,14 +384,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         return source.indexOf(object);
     }
 
-    /**
-     * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
         // Fast fail if the object isn't within the thresholds
         int objectEvaluation = evaluator.evaluate(object);
@@ -421,14 +394,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         return source.lastIndexOf(object);
     }
 
-    /**
-     * Release the resources consumed by this TransformedList so that it may be garbage
-     * collected. It is an error to call any method on a TransformedList after it
-     * has been disposed.
-     *
-     * <p>This implementation of ThresholdList extends dispose() in order to first
-     * dispose the SortedList on which this implementation depends.
-     */
+    /** {@inheritDoc} */
     public void dispose() {
         ((TransformedList)source).dispose();
         super.dispose();

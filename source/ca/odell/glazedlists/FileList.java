@@ -26,8 +26,8 @@ import java.io.*;
  * that list in a CachingList:<br>
  * <code>EventList myList = new CachingList(new BasicEventList(new FileList()), 100);</code>
  *
- * <p><strong>Warning:</strong> this is a technology preview and is
- * subject to API changes. 
+ * <p><font size="5"><strong><font color="#FF0000">Warning:</font></strong> This
+ * class is a technology preview and is subject to API changes.</font>
  *
  * @author Petr Kuzel
  */

@@ -25,26 +25,32 @@ import java.util.List;
 
 
 /**
- * A filter list that shows only elements that contain the filter text. It also owns
- * a {@link JTextField}. When the text field contains tokens (Strings separated by spaces),
- * these are used as filters on the contents. The list elements that contain
- * all of the tokens are retained, while all others are (temporarily) removed
- * from the list. The list dynamically changes as its tokens are edited.
+ * An {@link EventList} that shows only elements that contain a filter text string.
+ * The {@link TextFilterList} uses a {@link JTextField} to allow the user to edit
+ * the filter text. As this filter text is edited, the contents of the
+ * {@link TextFilterList} are changed to reflect the elements that match the text.
  *
- * <p>The filter list either requires that a {@link TextFilterator} be specified
- * in its constructor, or that every object in the source list implements
- * the {@link TextFilterable} interface. This can be compared to the sorted
- * collections and the {@link Comparable}/{@link java.util.Comparator}
- * interfaces.
+ * <p>The {@link TextFilterList} either requires that a {@link TextFilterator} be
+ * specified in its constructor, or that every object in the source list implements
+ * the {@link TextFilterable} interface. These are used to specify the {@link String}s
+ * to search for each element.
  *
- * <p>Refiltering the list can be triggered in two ways. They are when the user
- * explicitly refilters by triggering the refilterActionListener or when the
- * user implicitly refilters by editing the filter edit field. For a performance
- * boost, turn off "live" mode that filters automatically as the text field is
- * edited. To do this, call <code>setLive(false)</code>.
+ * <p>The {@link TextFilterList} initially refilters the list after each change in
+ * the {@link JTextField}. If this live filtering does not have adequate performance,
+ * it can be turned off. In this case, the list will refiltered by pressing
+ * <tt>ENTER</tt> in the {@link JTextField} and on every action to the {@link ActionListener}.
+ * This {@link ActionListener} will be returned from the method {@link #getFilterActionListener()}
+ * and can be used to refilter in response to a button click.
  *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/part3/index.html">Glazed
- * Lists Tutorial Part 3 - Text Filtering</a>
+ * <p>This {@link EventList} supports all write operations.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class
+ * breaks the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -69,30 +75,26 @@ public final class TextFilterList extends AbstractFilterList {
     private List filterStrings = new ArrayList();
 
     /**
-     * Creates a new filter list that filters elements out of the
-     * specified source list.
+     * Creates a {@link TextFilterList} that filters the specified {@link EventList}
+     * of elements that implement the {@link TextFilterable} interface.
      */
     public TextFilterList(EventList source) {
         this(source, (TextFilterator)null, new JTextField(""));
     }
 
     /**
-     * Creates a new filter list that filters elements out of the
-     * specified source list.
-     *
-     * @param filterator a class that knows how to take a list element
-     *      and get a filter strings for it. If this is null, the list elements
-     *      must all implement {@link TextFilterable}.
+     * Creates a {@link TextFilterList} that filters the specified {@link EventList}
+     * of elements using the specified {@link TextFilterator} to get the
+     * {@link String}s to search.
      */
     public TextFilterList(EventList source, TextFilterator filterator) {
         this(source, filterator, new JTextField(""));
     }
     
     /**
-     * Creates a new filter list that filters elements out of the
-     * specified source list with an automatically generated {@link TextFilterator}.
-     * It uses JavaBeans and reflection to create a {@link TextFilterator} as
-     * specified.
+     * Creates a {@link TextFilterList} that filters the specified {@link EventList}
+     * of elements using the JavaBeans property names specified to get the
+     * {@link String}s to search.
      *
      * <p>Note that the classes which will be obfuscated may not work with
      * reflection. In this case, implement a {@link TextFilterator} manually.
@@ -108,10 +110,9 @@ public final class TextFilterList extends AbstractFilterList {
     }
 
     /**
-     * Creates a new filter list that filters elements out of the
-     * specified source list with an automatically generated {@link TextFilterator}.
-     * It uses JavaBeans and reflection to create a {@link TextFilterator} as
-     * specified.
+     * Creates a {@link TextFilterList} that filters the specified {@link EventList}
+     * of elements using the JavaBeans property names specified to get the
+     * {@link String}s to search.
      *
      * <p>Note that the classes which will be obfuscated may not work with
      * reflection. In this case, implement a {@link TextFilterator} manually.
@@ -128,12 +129,10 @@ public final class TextFilterList extends AbstractFilterList {
     }
     
     /**
-     * Creates a new filter list that filters elements out of the
-     * specified source list.
+     * Creates a {@link TextFilterList} that filters the specified {@link EventList}
+     * of elements using the specified {@link TextFilterator} to get the
+     * {@link String}s to search.
      *
-     * @param filterator a class that knows how to take a list element
-     *      and get a filter strings for it. If this is null, the list elements
-     *      must all implement {@link TextFilterable}.
      * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, TextFilterator filterator, JTextField filterEdit) {
@@ -145,14 +144,14 @@ public final class TextFilterList extends AbstractFilterList {
     }
     
     /**
-     * Gets the filter edit component for editing filters.
+     * Gets the {@link JTextField} used to edit the filter search {@link String}.
      */
     public JTextField getFilterEdit() {
         return filterEdit;
     }
     
     /**
-     * Sets the filter edit component for editing filters.
+     * Sets the {@link JTextField} used to edit the filter search {@link String}.
      */
     public void setFilterEdit(JTextField filterEdit) {
         boolean live = true;
@@ -174,13 +173,13 @@ public final class TextFilterList extends AbstractFilterList {
     }
     
     /**
-     * Directs this filter to respond to changes to the FilterEdit as they are
-     * made. This uses a DocumentListener and every time the FilterEdit is
-     * modified, the list is refiltered.
+     * Directs this filter to respond to changes to the {@link JTextField} as they are
+     * made. This uses a {@link DocumentListener} and every time the
+     * {@link JTextField} is modified, the list is refiltered.
      *
-     * To avoid the processing overhead of filtering for each keystroke, use
-     * a not-live filter edit and trigger the ActionListener using a Button
-     * or by pressing <code>ENTER</code> in the filter edit field.
+     * <p>To avoid the processing overhead of filtering for each keystroke, use
+     * a not-live filter edit and trigger the {@link ActionListener} using a
+     * button or by pressing <tt>ENTER</tt> in the {@link JTextField}.
      */
     public void setLive(boolean live) {
         if(live) {
@@ -197,19 +196,19 @@ public final class TextFilterList extends AbstractFilterList {
     }
     
     /**
-     * Gets an ActionListener that refilters the list when it is fired. This
-     * listener can be used to filter when the user presses a JButton.
+     * Gets an {@link ActionListener} that refilters the list when it is fired. This
+     * listener can be used to filter when the user presses a button.
      */
     public ActionListener getFilterActionListener() {
         return filterActionListener;
     }
     
     /**
-     * Implement the DocumentListener interface for text filter updates. When
-     * The user edits the filter text field, this updates the filter to reflect
-     * the current value of that text field.
+     * Implement the {@link DocumentListener} interface for text filter updates. When
+     * The user edits the filter {@link JTextField}, this updates the filter to reflect
+     * the current value of that {@link JTextField}.
      */
-    class FilterEditListener implements DocumentListener {
+    private class FilterEditListener implements DocumentListener {
         public void changedUpdate(DocumentEvent e) {
             reFilter();
         }
@@ -222,11 +221,11 @@ public final class TextFilterList extends AbstractFilterList {
     }
     
     /**
-     * Implement the ActionListener interface for text filter updates. When
+     * Implement the {@link ActionListener} interface for text filter updates. When
      * the user clicks a button (supplied by external code), this
-     * ActionListener can be used to update the filter in response.
+     * {@link ActionListener} can be used to update the filter in response.
      */
-    class FilterActionListener implements ActionListener {
+    private class FilterActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             reFilter();
         }
@@ -257,11 +256,7 @@ public final class TextFilterList extends AbstractFilterList {
         filters = filterEdit.getText().toUpperCase().split("[ \t]");
     }
 
-    /**
-     * Tests if the specified item matches the current set of filters. This
-     * class uses a user-editable text field of strings that must be in the
-     * element to appear in the filtered list.
-     */
+    /** {@inheritDoc} */
     public boolean filterMatches(Object element) {
         // populate the strings for this object
         filterStrings.clear();

@@ -37,7 +37,7 @@ import java.util.*;
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
  * may break the contract required by {@link java.util.List}. For example, when
- * you {@link #add(int,Object)} on a {@link SortedList}, it will ignore the specified
+ * you {@link #add(int,Object) add()} on a {@link SortedList}, it will ignore the specified
  * index so that the element will be inserted in sorted order.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

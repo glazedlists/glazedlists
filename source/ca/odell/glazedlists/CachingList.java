@@ -14,15 +14,24 @@ import ca.odell.glazedlists.util.impl.*;
 import java.util.Random;
 
 /**
- * A caching list is a mutation list that caches elements from the source list.
- * It should be used when a get() on the source list is deemed to be expensive.
- * It is used when there are too many objects to keep in memory simultaneously
- * and object access happens in clusters.
+ * An {@link EventList} that caches elements from its source {@link EventList}.
  *
- * <p>This list simply remembers the last <i>n</i> elements which were
- * requested.  Accesses to such elements does not perform a recursive operation
- * on the source list, instead the element is fetched from the cache.
+ * It is useful in cases when the {@link #get(int) get()} method of an
+ * {@link EventList} is expensive. It can be used when there are too many
+ * elements to keep in memory simultaneously. For caching to be effective, object
+ * access must be clustered.
  *
+ * <p>This {@link EventList} caches the most recently requested <i>n</i> elements.
+ *
+ * <p>By overriding the {@link #preFetch(int)} method, you can modify this
+ * CachingList to do predictive lookups for higher performance.
+ *
+ * <p>This {@link EventList} supports all write operations.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
 public class CachingList extends TransformedList implements ListEventListener {
@@ -46,8 +55,8 @@ public class CachingList extends TransformedList implements ListEventListener {
     private int lastKnownSize = 0;
 
     /**
-     * Creates a new Caching list that uses the specified source list and
-     * has the specified maximum cache size.
+     * Creates a {@link CachingList} that caches elements from the specified source
+     * {@link EventList}.
      *
      * @param source The source list to use to get values from
      * @param maxSize The maxiumum size of the cache
@@ -69,28 +78,12 @@ public class CachingList extends TransformedList implements ListEventListener {
         }
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return The number of elements in this list.
-     */
+    /** {@inheritDoc} */
     public final int size() {
         return source.size();
     }
 
-    /**
-     * Returns the element at the specified position in this list.
-     *
-     * If {@link #preFetch(int)} is overridden, this method
-     * also performs that pre-fetch operation to optimize what data
-     * is cached for a particular application.  That pre-fetch is
-     * conditional to the requested value being found.
-     *
-     * @param index The index of the value to retrieve
-     *
-     * @return The value associated with the given index,
-     *         or null if the index is not found.
-     */
+    /** {@inheritDoc} */
     public final Object get(int index) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -169,12 +162,7 @@ public class CachingList extends TransformedList implements ListEventListener {
     protected void preFetch(int index) {
     }
 
-    /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc.
-     *
-     * @return True as a CachingList is always writable
-     */
+    /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
     }
@@ -210,15 +198,12 @@ public class CachingList extends TransformedList implements ListEventListener {
         return (float)cacheHits / (float)(cacheHits + cacheMisses);
     }
 
-    /**
-     * When the list is changed the cache is updated appropriately.
-     * An INSERT causes the indexes of cached values to be offset.
-     * A DELETE causes an entry to be removed and/or the index values to be offset
-     * An UPDATE causes an existing entry to be removed
-     *
-     * @param listChanges The list of changes to apply to this list
-     */
+    /** {@inheritDoc} */
     public final void listChanged(ListEvent listChanges) {
+        // An INSERT causes the indexes of cached values to be offset.
+        // A DELETE causes an entry to be removed and/or the index values to be offset
+        // An UPDATE causes an existing entry to be removed
+
         updates.beginEvent();
         while(listChanges.next()) {
             // get the current change info
