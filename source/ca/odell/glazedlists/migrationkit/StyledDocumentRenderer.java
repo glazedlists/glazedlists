@@ -34,7 +34,7 @@ import javax.swing.UIManager;
  * Renders a table cell in a pretty way.
  *
  * A very small set of Styles are available by default. To create a new
- * style, use the protected <code>styledDocument</code> variable:
+ * style, use the protected {@link styledDocument} variable:
  *
  * <br>Style alert = styledDocument.addStyle("alert", null);
  * <br>StyleConstants.setFontFamily(alert, "sansserif");

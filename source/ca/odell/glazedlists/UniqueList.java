@@ -22,14 +22,14 @@ import java.util.*;
  * of a unique list view for a given list.
  *
  * <p>As such, this list is explicitly sorted via the provided Comparator or by
- * requiring all elements in the list to implement <code>Comparable</code>. This
+ * requiring all elements in the list to implement {@link Comparable}. This
  * allows the provision of uniquness without the need for exhaustive searches.
  * Also, this avoids having to define heuristics for unique entry ordering
  * (i.e. First Found, Last Found, First Occurrence, etc) which would add
  * a significant and unecessary level of complexity.
  *
  * <p><strong>Note:</strong> When values are indistinguishable to the given
- * <code>Comparator</code> (or by using <code>Comparable</code> elements),
+ * {@link Comparator} (or by using {@link Comparable} elements),
  * this list does not forward mandatory change events if those values are
  * added, removed, or updated in a way that they remain indistinguishable.
  * For example, if you have 5 String elements that are all equal to "B",

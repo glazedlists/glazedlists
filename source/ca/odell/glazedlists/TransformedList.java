@@ -24,15 +24,15 @@ import ca.odell.glazedlists.util.concurrent.*;
  * an EventList that provides a transformed view of a source EventList.
  *
  * <p>Because it is a decorator, the user should carefully implement the method
- * <code>getSourceIndex()</code> which is used to translate between the indicies
+ * {@link #getSourceIndex(int)} which is used to translate between the indicies
  * of this decorator and the indicies of the source list that it decorates.
  *
  * <p>TransformedLists can be made mutable via the API by overriding the
- * method <code>isWritable()</code>.
+ * method {@link #isWritable()}.
  *
- * <p>Although this class implements the <code>ListChangeListener</code> interface,
- * users must explicitly call addListEventListener() to register themselves as
- * listeners to the source list.
+ * <p>Although this class implements the {@link ListEventListener} interface,
+ * users must explicitly call {@link #addListEventListener(ListEventListener)} to
+ * register themselves as listeners to the source list.
  *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=18">Bug 18</a>
  *

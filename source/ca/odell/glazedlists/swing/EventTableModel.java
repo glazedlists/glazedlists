@@ -26,7 +26,7 @@ import java.util.*;
  *
  * <p>The EventTableModel class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the event dispatch thread.
- * To do this programmatically, use <code>SwingUtilities.invokeAndWait()</code>.
+ * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)}.
  *
  * @see <a href="https://glazedlists.dev.java.net/tutorial/part1/index.html#listtable">Glazed
  * Lists Tutorial Part 1 - Basics</a>

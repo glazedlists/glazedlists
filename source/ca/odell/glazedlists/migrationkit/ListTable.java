@@ -24,11 +24,11 @@ import java.util.*;
 
 /**
  * An adaptor for the <code>ListTable</code> class found in Glazed Lists v.0.8 and
- * prior that uses the <code>EventTableModel</code> for implementation.
+ * prior that uses the {@link EventTableModel} for implementation.
  *
  * <p>The ListTable class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the event dispatch thread.
- * To do this programmatically, use <code>SwingUtilities.invokeAndWait()</code>.
+ * To do this programmatically, use {@link SwingUtilities.invokeAndWait()}.
  *
  * @see <a href="https://glazedlists.dev.java.net/tutorial/part1/index.html#listtable">Glazed
  * Lists Tutorial Part 1 - Basics</a>

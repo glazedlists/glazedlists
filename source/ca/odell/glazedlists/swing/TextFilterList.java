@@ -36,7 +36,8 @@ import java.util.List;
  * <p>The filter list either requires that a {@link TextFilterator} be specified
  * in its constructor, or that every object in the source list implements
  * the {@link TextFilterable} interface. This can be compared to the sorted
- * collections and the {@link Comparable}/{@link Comparator} interfaces.
+ * collections and the {@link Comparable}/{@link java.util.Comparator}
+ * interfaces.
  *
  * <p>Refiltering the list can be triggered in two ways. They are when the user
  * explicitly refilters by triggering the refilterActionListener or when the
@@ -81,7 +82,7 @@ public class TextFilterList extends AbstractFilterList {
      *
      * @param filterator a class that knows how to take a list element
      *      and get a filter strings for it. If this is null, the list elements
-     *      must all implement {@link Filterable}.
+     *      must all implement {@link TextFilterable}.
      */
     public TextFilterList(EventList source, TextFilterator filterator) {
         this(source, filterator, new JTextField(""));
@@ -93,7 +94,7 @@ public class TextFilterList extends AbstractFilterList {
      *
      * @param filterator a class that knows how to take a list element
      *      and get a filter strings for it. If this is null, the list elements
-     *      must all implement {@link Filterable}.
+     *      must all implement {@link TextFilterable}.
      * @param filterEdit a text field for typing in the filter text.
      */
     public TextFilterList(EventList source, TextFilterator filterator, JTextField filterEdit) {

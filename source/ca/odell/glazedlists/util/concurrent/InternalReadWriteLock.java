@@ -19,7 +19,7 @@ import java.util.*;
  * source level with only a read-lock, while locking the local/internal level with
  * a write lock.
  *
- * <p>This is useful for classes such as <code>SortedList</code>, where changes
+ * <p>This is useful for classes such as {@link SortedList}, where changes
  * to the internal structure occur without modifying the source structure.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

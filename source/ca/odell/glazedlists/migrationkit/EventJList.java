@@ -25,7 +25,7 @@ import java.util.*;
  *
  * <p>The EventJList class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the event dispatch thread.
- * To do this programmatically, use <code>SwingUtilities.invokeAndWait()</code>.
+ * To do this programmatically, use {@link SwingUtilities.invokeAndWait()}.
  *
  * <p>I have implemented EventJList. The class shares the following with ListTable:
  * <li>SelectionListener interface

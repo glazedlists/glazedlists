@@ -15,7 +15,7 @@ import javax.swing.JTable;
 /**
  * Specifies how to edit the elements of table.
  *
- * <p>This class can be used as an alternative to the simple {@link Tableformat}
+ * <p>This class can be used as an alternative to the simple {@link TableFormat}
  * class to provide editable cells. The {@link EventTableModel} detects if a
  * class implements WritableTableFormat for modifying the table. If a table
  * is not editable at all, it is sufficient to implement {@link TableFormat}

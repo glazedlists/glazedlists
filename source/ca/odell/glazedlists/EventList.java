@@ -55,12 +55,12 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> changes to
  * <i>transformed lists</i> may break the contract normally required by all
- * implementations of <code>java.util.List</code>. This is because the
+ * implementations of {@link java.util.List}. This is because the
  * change made may be transformed itself. For example, calling the method
  * <code>add()</code> allows the user to specify at what index the value
- * is inserted. But a <code>SortedList</code> will <strong>ignore</strong>
+ * is inserted. But a {@link SortedList} will <strong>ignore</strong>
  * this index and insert the value in sorted order. Similarly, a value
- * added to a <code>AbstractFilterList</code> may appear not to be added
+ * added to a {@link AbstractFilterList} may appear not to be added
  * at all. This is because the filter may have filtered-out the added value.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

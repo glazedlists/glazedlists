@@ -16,11 +16,11 @@ import java.util.*;
  * The EventListIterator is an iterator that allows the user to iterate
  * on a list <i>that may be changed while it is iterated</i>. This is
  * possible because the iterator is a listener for change events to the
- * source list. It also defensively stores a reference to <code>next</code>
- * and <code>previous</code> so that if the user calls <code>hasNext()</code>,
- * the immediately following call to <code>next()</code> will not fail,
+ * source list. It also defensively stores a reference to {@link #next()}
+ * and {@link #previous()} so that if the user calls {@link #hasNext()},
+ * the immediately following call to {@link #next()} will not fail,
  * regardless of whether the next element is removed from the source list
- * in the interim. This property also holds for <code>hasPrevious()</code>.
+ * in the interim. This property also holds for {@link hasPrevious()}.
  *
  * <p>This iterator simply keeps an index of where it is and what it last
  * saw. It knows nothing about the underlying storage performance of the List
@@ -91,7 +91,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
      *
      * <p>This implementation saves a reference to <i>next</i> to be defensive in
      * case the <i>next</i> value is removed between a call to this method and a
-     * call to <code>next()</code>.
+     * call to {@link #next()}.
      */
     public boolean hasNext() {
         source.getReadWriteLock().readLock().lock();
@@ -144,7 +144,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
      *
      * <p>This implementation saves a reference to <i>previous</i> to be defensive in
      * case the <i>previous</i> value is removed between a call to this method and a
-     * call to <code>previous()</code>.
+     * call to {@link #previous()}.
      */
     public boolean hasPrevious() {
         source.getReadWriteLock().readLock().lock();

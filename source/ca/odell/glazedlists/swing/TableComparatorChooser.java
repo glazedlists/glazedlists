@@ -197,7 +197,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     
     /**
      * Gets the index comparator in use for the specified column. This comparator
-     * may be retrieved using {@link getComparatorsForColumn()}.
+     * may be retrieved using {@link #getComparatorsForColumn(int)}.
      *
      * @return the comparator index for the specified column, or -1 if that column
      *      is not being used to sort.
@@ -228,8 +228,8 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     }
 
     /**
-     * Examines the current <code>Comparator</code> of the SortedList and
-     * adds icons to the <code>TableHeaderRenderer</code>s in response.
+     * Examines the current {@link Comparator} of the SortedList and
+     * adds icons to the table header renderers in response.
      *
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.

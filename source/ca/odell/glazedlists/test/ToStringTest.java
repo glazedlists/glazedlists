@@ -15,7 +15,7 @@ import java.util.*;
 
 /**
  * This test verifies that the toString() method on all lists is consistent
- * with the toString() method of <code>ArrayList</code>.
+ * with the toString() method of {@link ArrayList}.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

@@ -17,7 +17,8 @@ import java.util.*;
  * A ThreadSafeList is a mutation list that guarantees that access
  * to the source list is thread-safe.
  *
- * <p>Synchronizing method calls using <code>ReadWriteLock</code>s for
+ * <p>Synchronizing method calls using
+ * {@link ca.odell.glazedlists.util.concurrent.ReadWriteLock}s for
  * each method is expensive and adds needless complexity to a user's code.
  * As such, we provide this thread-safe Decorator to alleviate the need to
  * focus on underlying details so that users can focus on building their

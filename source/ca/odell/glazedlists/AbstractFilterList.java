@@ -24,7 +24,7 @@ import java.util.*;
  *
  * <p>The filter may be static or dynamic. In effect, the subset may change
  * in size by modifying the source set, or the filter itself. When the filter
- * has changed, the user should call the <code>handleFilterChanged()</code>
+ * has changed, the user should call the {@link #handleFilterChanged()}
  * method.
  *
  * <p>As of April 8, 2004, the array-based filter data structure has been replaced with

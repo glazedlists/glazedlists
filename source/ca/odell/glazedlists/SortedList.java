@@ -42,8 +42,8 @@ public final class SortedList extends TransformedList {
 
     /**
      * Creates a new filter list that provides a sorted view on the source data.
-     * By not specifying a <code>Comparator</code> to sort by, the list elements
-     * must implement the <code>Comparable</code> interface.
+     * By not specifying a {@link Comparator} to sort by, the list elements
+     * must implement the {@link Comparable} interface.
      */
     public SortedList(EventList source) {
         this(source, new ComparableComparator());
@@ -54,8 +54,8 @@ public final class SortedList extends TransformedList {
      *
      * @param comparator the comparator to specify how to sort the list. You
      *      may also specify <code>null</code>, which will leave the list in
-     *      the same order as the source list until a different <code>Comparator</code>
-     *      is applied via the <code>setComparator()</code> method.
+     *      the same order as the source list until a different {@link Comparator}
+     *      is applied via the {@link #setComparator(Comparator)} method.
      */
     public SortedList(EventList source, Comparator comparator) {
         super(source);
@@ -270,8 +270,8 @@ public final class SortedList extends TransformedList {
      * a different Comparator to specify the ordering.
      *
      * @param comparator the comparator to specify how to sort the list. If
-     *      the list elements implement <code>Comparable</code>, you may use
-     *      a <code>ComparableComparator</code> instance to sort them in their
+     *      the list elements implement {@link Comparable}, you may use
+     *      a {@link ComparableComparator} instance to sort them in their
      *      natural order. You may also specify <code>null</code>, which will
      *      leave the list in the same order as the source list.
      */

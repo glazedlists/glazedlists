@@ -43,7 +43,7 @@ public final class ReverseComparator implements Comparator {
     }
 
     /**
-     * Retrieves the source <code>Comparator</code> for this ReverseComparator
+     * Retrieves the source {@link Comparator} for this ReverseComparator
      */
     public Comparator getSourceComparator() {
         return source;

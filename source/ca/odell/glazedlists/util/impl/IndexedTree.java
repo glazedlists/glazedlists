@@ -17,11 +17,10 @@ import ca.odell.glazedlists.util.*;
  *
  * <p>When an <code>IndexedTree</code> is being used in sorted order, it
  * <strong>must</strong> be accessed using sorted order exclusively.
- * This means that the <code>setValue()</code> method of
- * <code>IndexedTreeNode</code> shall not be used, and neither should
- * the method <code>addByNode(int,Object)</code> of <code>IndexedTree</code>.
- * Similarly, when an IndexedTree is being used in random order,
- * it does not support <code>addByNode(Object)</code> because that
+ * This means that {@link IndexedTreeNode.setValue(int,Object)} shall not be used,
+ * and neither should {@link IndexedTree.addByNode(int,Object)}.
+ * Similarly, when an <code>IndexedTree</code> is being used in random order,
+ * it does not support {@link #addByNode(Object)} because that
  * method specifies no index.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
@@ -85,8 +84,8 @@ public final class IndexedTree {
     /**
      * Gets an iterator for this tree. The iterator moves in sorted order
      * for sorted trees and order of increasing index for indexed trees.
-     * This iterator returns <code>IndexedTreeNode</code>s, so to get the
-     * values use the node's <code>getValue()</code> method.
+     * This iterator returns {@link IndexedTreeNode}s, so to get the
+     * values use the node's {@link IndexedTreeNode#getValue()} method.
      */
     public Iterator iterator() {
         if(root != null) return root.getSmallestChildNode().iterator();

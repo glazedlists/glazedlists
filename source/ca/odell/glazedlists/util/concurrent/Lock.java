@@ -9,7 +9,7 @@ package ca.odell.glazedlists.util.concurrent;
 /**
  * A lock is a tool for controlling access to a shared resource by multiple threads.
  *
- * <p>This interface is a back-port of the <code>java.util.concurrent.Locks.Lock</code>
+ * <p>This interface is a back-port of the {@link java.util.concurrent.Locks.Lock}
  * class that first appeared in J2SE 1.5. Due to a requirement for sophisticated
  * concurrency, this interface has been back-ported for use in J2SE 1.4 (and greater).
  * It shares similar method signatures to be consistent with the J2SE 1.5 API.

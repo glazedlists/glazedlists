@@ -58,8 +58,8 @@
         <exclude name="**/swt/**"/>
         <exclude name="**/net/**"/>
       </packageset>
-      <doctitle><![CDATA[<h1><a href="http://glazedlists.dev.java.net">Glazed Lists</a></h1>]]></doctitle>
-      <bottom><![CDATA[Generated ${javadoc.datestamp}<br><i>Copyright &#169; 2003-2004 O'Dell Engineering.</i>]]></bottom>
+      <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
+      <bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
       <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
     </javadoc>
   </target>
@@ -72,7 +72,10 @@
 
   <target name="jar" depends="init,compile"
         description="Creates glazedlists.jar file containing all UI libraries.">
-    <jar destfile="glazedlists.jar" update="true">
+    <tstamp prefix="jar">
+      <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
+    </tstamp>
+    <jar destfile="glazedlists.jar" update="true" index="true">
       <fileset dir="classes">
         <exclude name="**/test/**"/>
       </fileset>
@@ -82,6 +85,10 @@
       <manifest>
         <attribute name="Main-Class" value="ca.odell.glazedlists.demo.IssuesBrowser"/>
         <attribute name="Sealed" value="true"/>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Implementation-Version" value="${jar.datestamp}"/>
+        <attribute name="Implementation-Title" value="Glazed Lists"/>
+        <attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
       </manifest>
     </jar>
   </target>

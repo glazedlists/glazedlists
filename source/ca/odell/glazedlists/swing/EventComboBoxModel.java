@@ -52,7 +52,7 @@ public class EventComboBoxModel extends EventListModel implements ComboBoxModel 
      *
      * <p>The selection notification process is very much a hack. This fires
      * a ListDataEvent where the range is between -1 and -1. This is identical
-     * to the notification process used by the <code>DefaultComboBoxModel</code>.
+     * to the notification process used by the {@link DefaultComboBoxModel}.
      */
     public void setSelectedItem(Object selected) {
         this.selected = selected;

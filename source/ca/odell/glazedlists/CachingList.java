@@ -71,7 +71,7 @@ public class CachingList extends TransformedList implements ListEventListener {
     /**
      * Returns the element at the specified position in this list.
      *
-     * If <code>preFetch(int)</code> is overridden, this method
+     * If {@link #preFetch(int)} is overridden, this method
      * also performs that pre-fetch operation to optimize what data
      * is cached for a particular application.  That pre-fetch is
      * conditional to the requested value being found.
@@ -89,17 +89,17 @@ public class CachingList extends TransformedList implements ListEventListener {
     /**
      * Fetches a particular element.
      *
-     * <p>This might seem redundant with the existence of <code>get(int)</code>.
+     * <p>This might seem redundant with the existence of {@link #get(int)}.
      * However, the goals of the methods are different.  This method exists
-     * to be called by <code>get(int)</code> or <code>preFetch(int)</code>.
+     * to be called by {@link #get(int)} or {@link #preFetch(int)}.
      * This distinction allows users overriding this class a means of entry
      * retrieval which does not implicitly execute a pre-fetch.  This is
-     * particularly key for users overriding <code>preFecth(int)</code>.
+     * particularly key for users overriding {@link #preFetch(int)}
      *
      * @param index The index of the value to retrieve
      * @param recordHitsOrMisses Whether to increment the hit/miss counters
      *        (this should always be <code>false</code> when called from
-     *        <code>preFetch(int)</code>).
+     *        {@link #preFetch(int)}).
      *
      * @return The value associated with the given index,
      *         or null if the index is not found.

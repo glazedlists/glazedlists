@@ -45,7 +45,7 @@ public final class ComparatorChain implements Comparator {
     }
 
     /**
-     * Retrieves a <code>List</code> of the <code>Comparator</code>s in this
+     * Retrieves a {@link List} of the {@link Comparator}s in this
      * <code>ComparatorChain</code>.
      */
     public List getComparators() {
