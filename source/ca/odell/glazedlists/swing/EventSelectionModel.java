@@ -77,8 +77,8 @@ public final class EventSelectionModel implements ListSelectionModel {
     /** the flag list contains Barcode.BLACK for selected items and Barcode.WHITE for others */
     private Barcode flagList = new Barcode();
 
-    /** the source event list knows the table dimensions */
-    private EventList source;
+    /** the proxy moves events to the Swing Event Dispatch thread */
+    private TransformedList swingSource;
 
     /** list change updates */
     private ListEventAssembler updates = null;
@@ -105,13 +105,13 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Creates a new selection model that also presents a list of the selection.
      */
     public EventSelectionModel(EventList source) {
-        this.source = source;
-
+        swingSource = GlazedLists.swingThreadProxyList(source);
+        
         // build the initial state
-        flagList.addWhite(0, source.size());
+        flagList.addWhite(0, swingSource.size());
 
         // build a list for reading the selection
-        this.eventList = new SelectionEventList(source);
+        this.eventList = new SelectionEventList(swingSource);
     }
 
     /**
@@ -168,20 +168,18 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     private class SelectionEventList extends TransformedList {
 
-        /** the proxy moves events to the Swing Event Dispatch thread */
-        private EventThreadProxy eventThreadProxy = new EventThreadProxy(this);
-    
         /**
          * Creates a new SelectionEventList that listens to changes from the
          * source event list.
          */
-        public SelectionEventList(EventList source) {
-            super(source);
+        public SelectionEventList(TransformedList swingSource) {
+            super(swingSource);
 
             // use an Internal Lock to avoid locking the source list during a selection change
-            readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
+            readWriteLock = new InternalReadWriteLock(swingSource.getReadWriteLock(), new J2SE12ReadWriteLock());
 
-            source.addListEventListener(eventThreadProxy);
+            // prepare listeners
+            swingSource.addListEventListener(this);
             EventSelectionModel.this.updates = super.updates;
         }
 
@@ -203,8 +201,8 @@ public final class EventSelectionModel implements ListSelectionModel {
             int sourceIndex = flagList.getIndex(index, Barcode.BLACK);
 
             // ensure that this value still exists before retrieval
-            if(sourceIndex < source.size()) {
-                return source.get(sourceIndex);
+            if(sourceIndex < swingSource.size()) {
+                return swingSource.get(sourceIndex);
             } else {
                 //new Exception("Returning null for removed selection " + row).printStackTrace();
                 return null;
@@ -357,7 +355,7 @@ public final class EventSelectionModel implements ListSelectionModel {
 
         /** {@inheritDoc} */
         public void dispose() {
-            source.removeListEventListener(eventThreadProxy);
+            swingSource.removeListEventListener(this);
         }
     }
 
@@ -667,7 +665,6 @@ public final class EventSelectionModel implements ListSelectionModel {
         try {
             // bail if index is too high
             if(index < 0 || index >= flagList.size()) {
-                //throw new ArrayIndexOutOfBoundsException("Cannot get selection index " + index + ", list size " + flagList.size() + " pending " + source.size());
                 return false;
             }
 

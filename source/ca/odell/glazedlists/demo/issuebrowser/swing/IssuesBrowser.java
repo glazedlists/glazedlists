@@ -205,7 +205,7 @@ public class IssuesBrowser extends Applet {
 	class IssuesSelectionListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent e) {
 			descriptions.clear();
-			if (issuesSelectionModel.getEventList().size() > 0) {
+			if(issuesSelectionModel.getEventList().size() > 0) {
 				Issue selectedIssue = (Issue) issuesSelectionModel.getEventList().get(0);
 				descriptions.addAll(selectedIssue.getDescriptions());
 			}

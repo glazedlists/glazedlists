@@ -43,10 +43,8 @@ import java.util.*;
  */
 public class EventListModel implements ListEventListener, ListModel {
 
-    /** the list data */
-    protected EventList source;
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private EventThreadProxy eventThreadProxy = new EventThreadProxy(this);
+    private TransformedList swingSource = null;
 
     /** whom to notify of data changes */
     private ArrayList listeners = new ArrayList();
@@ -61,10 +59,10 @@ public class EventListModel implements ListEventListener, ListModel {
      * Creates a new widget that renders the specified list.
      */
     public EventListModel(EventList source) {
-        this.source = source;
+        swingSource = GlazedLists.swingThreadProxyList(source);
 
         // prepare listeners
-        source.addListEventListener(eventThreadProxy);
+        swingSource.addListEventListener(this);
     }
     
     /**
@@ -115,16 +113,16 @@ public class EventListModel implements ListEventListener, ListModel {
      * @see ca.odell.glazedlists.swing.EventTableModel#getValueAt(int,int) ListTable
      */
     public Object getElementAt(int index) {
-        source.getReadWriteLock().readLock().lock();
+        swingSource.getReadWriteLock().readLock().lock();
         try {
             // ensure that this value still exists before retrieval
-            if(index < source.size()) {
-                return source.get(index);
+            if(index < swingSource.size()) {
+                return swingSource.get(index);
             } else {
                 return null;
             }
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            swingSource.getReadWriteLock().readLock().unlock();
         }
     }
     
@@ -132,11 +130,11 @@ public class EventListModel implements ListEventListener, ListModel {
      * Gets the size of the list.
      */
     public int getSize() {
-        source.getReadWriteLock().readLock().lock();
+        swingSource.getReadWriteLock().readLock().lock();
         try {
-            return source.size();
+            return swingSource.size();
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            swingSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -192,6 +190,6 @@ public class EventListModel implements ListEventListener, ListModel {
      * to call any method on a {@link EventListModel} after it has been disposed.
      */
     public void dispose() {
-        source.removeListEventListener(eventThreadProxy);
+        swingSource.dispose();
     }
 }

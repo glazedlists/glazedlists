@@ -10,7 +10,6 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // tables for displaying lists
@@ -34,10 +33,8 @@ import javax.swing.table.*;
  */
 public class EventTableModel extends AbstractTableModel implements ListEventListener {
 
-    /** the complete list of messages before filters */
-    private EventList source;
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private EventThreadProxy eventThreadProxy = new EventThreadProxy(this);
+    private TransformedList swingSource = null;
 
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
@@ -53,11 +50,11 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * format.
      */
     public EventTableModel(EventList source, TableFormat tableFormat) {
-        this.source = source;
+        swingSource = GlazedLists.swingThreadProxyList(source);
         this.tableFormat = tableFormat;
 
         // prepare listeners
-        source.addListEventListener(eventThreadProxy);
+        swingSource.addListEventListener(this);
     }
 
     /**
@@ -117,7 +114,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * areas that changed are notified.
      */
     public void listChanged(ListEvent listChanges) {
-        source.getReadWriteLock().readLock().lock();
+        swingSource.getReadWriteLock().readLock().lock();
         try {
             // when all events hae already been processed by clearing the event queue
             if(!listChanges.hasNext()) return;
@@ -142,7 +139,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
                 }
             }
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            swingSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -157,11 +154,11 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * The number of rows equals the number of entries in the source event list.
      */
     public int getRowCount() {
-        source.getReadWriteLock().readLock().lock();
+        swingSource.getReadWriteLock().readLock().lock();
         try {
-            return source.size();
+            return swingSource.size();
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            swingSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -200,16 +197,16 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * anyway.
      */
     public Object getValueAt(int row, int column) {
-        source.getReadWriteLock().readLock().lock();
+        swingSource.getReadWriteLock().readLock().lock();
         try {
             // ensure that this value still exists before retrieval
             if(row < getRowCount()) {
-                return tableFormat.getColumnValue(source.get(row), column);
+                return tableFormat.getColumnValue(swingSource.get(row), column);
             } else {
                 return null;
             }
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            swingSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -221,12 +218,12 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
             WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
-            source.getReadWriteLock().readLock().lock();
+            swingSource.getReadWriteLock().readLock().lock();
             try {
-                Object toEdit = source.get(row);
+                Object toEdit = swingSource.get(row);
                 return writableTableFormat.isEditable(toEdit, column);
             } finally {
-                source.getReadWriteLock().readLock().unlock();
+                swingSource.getReadWriteLock().readLock().unlock();
             }
         // this is not a writable table
         } else {
@@ -241,19 +238,19 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public void setValueAt(Object editedValue, int row, int column) {
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
-            source.getReadWriteLock().writeLock().lock();
+            swingSource.getReadWriteLock().writeLock().lock();
             try {
                 WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
                 // get the object being edited from the source list
-                Object baseObject = source.get(row);
+                Object baseObject = swingSource.get(row);
                 // tell the table format to set the value based on what it knows
                 Object updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
                 // update the list with the revised value
                 if(updatedObject != null) {
-                    source.set(row, updatedObject);
+                    swingSource.set(row, updatedObject);
                 }
             } finally {
-                source.getReadWriteLock().writeLock().unlock();
+                swingSource.getReadWriteLock().writeLock().unlock();
             }
         // this is not a writable table
         } else {
@@ -306,6 +303,6 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * to call any method on a {@link EventTableModel} after it has been disposed.
      */
     public void dispose() {
-        source.removeListEventListener(eventThreadProxy);
+        swingSource.dispose();
     }
 }

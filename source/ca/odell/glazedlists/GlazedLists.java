@@ -13,6 +13,7 @@ import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.gui.*;
+import ca.odell.glazedlists.impl.swing.*;
 // implemented interfaces
 import ca.odell.glazedlists.io.ByteCoder;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -253,5 +254,13 @@ public final class GlazedLists {
      */
     public static TransformedList threadSafeList(EventList source) {
         return new ThreadSafeList(source);
+    }
+    
+    /**
+     * Wraps the source in an {@link EventList} that fires all of its update events
+     * from the Swing event dispatch thread.
+     */
+    public static TransformedList swingThreadProxyList(EventList source) {
+        return new SwingThreadProxyEventList(source);
     }
 }
