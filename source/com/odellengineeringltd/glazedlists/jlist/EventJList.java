@@ -30,8 +30,18 @@ import java.util.*;
  * noted, all methods are only safe to be called from the event dispatch thread.
  * To do this programmatically, use <code>SwingUtilities.invokeAndWait()</code>.
  *
- * <p>This list currently fails to send notification of double click events.
+ * <p>I have implemented EventJList. The class shares the following with ListTable:
+ * <li>SelectionListener interface
+ * <li>SelectionList / Selection Model
  *
+ * <p>This class never batches groups of changes like ListTable does. It also
+ * does not use a Mutable change event. It may be necessary to create a mutable
+ * ListDataEvent if change event creation proves to be a bottleneck.
+ *
+ * <p>This class still does not have any extra renderer support. For now if
+ * styled rendering is necessary, the use of ListTable is a sufficient work
+ * around.
+ * 
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
