@@ -42,6 +42,7 @@ public class CompositeListTest extends TestCase {
         wendys.add("Junior Bacon Cheeseburger");
         
         CompositeList fastFood = new CompositeList();
+        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         
         assertEquals(wendys, fastFood);
@@ -81,6 +82,7 @@ public class CompositeListTest extends TestCase {
         tacoBell.add("Bean Burrito");
         
         CompositeList fastFood = new CompositeList();
+        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
         fastFood.addMemberList(tacoBell);
@@ -134,6 +136,7 @@ public class CompositeListTest extends TestCase {
         BasicEventList tacoBell = new BasicEventList();
         
         CompositeList fastFood = new CompositeList();
+        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
         fastFood.addMemberList(tacoBell);
@@ -160,6 +163,7 @@ public class CompositeListTest extends TestCase {
         mcDonalds.add("McLean Deluxe");
         
         CompositeList fastFood = new CompositeList();
+        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
 

@@ -216,12 +216,59 @@ public class CollectionListTest extends TestCase {
 		assertEquivalent(new String[]{ DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collection_list);
 	}
 
+	/**
+	 * Test modifying the children.
+	 */
+	public void testChildModification() {
+        // use a list of Lists instead of Strings
+		parent_list = new BasicEventList();
+        collection_list = new CollectionList(parent_list, new ListCollectionListModel());
+        collection_list.addListEventListener(new ConsistencyTestList(collection_list, "collection list", false));
+        parent_list.add(stringToList(DEV_ROB));
+        parent_list.add(stringToList(DEV_JESSE));
+        parent_list.add(stringToList(DEV_KEVIN));
+        parent_list.add(stringToList(DEV_JAMES));
+        
+        StringBuffer DEV_ROB_MODIFIED = new StringBuffer();
+        DEV_ROB_MODIFIED.append(DEV_ROB);
+        StringBuffer DEV_KEVIN_MODIFIED = new StringBuffer();
+        DEV_KEVIN_MODIFIED.append(DEV_KEVIN);
 
+        // they should match out-of-the-gate
+		assertEquivalent(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, collection_list);
+        
+        // remove a single element
+        DEV_ROB_MODIFIED.deleteCharAt(2);
+        collection_list.remove(2);
+		assertEquivalent(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, collection_list);
+
+        // set a few elements
+        DEV_KEVIN_MODIFIED.setCharAt(2, 'r');
+        DEV_KEVIN_MODIFIED.setCharAt(1, 'a');
+        DEV_KEVIN_MODIFIED.setCharAt(3, 'e');
+        collection_list.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 2, new Character('r'));
+        collection_list.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 1, new Character('a'));
+        collection_list.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 3, new Character('e'));
+		assertEquivalent(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, collection_list);
+
+        // set a few more elements
+        DEV_ROB_MODIFIED.setCharAt(1, '.');
+        collection_list.set(1, new Character('.'));
+		assertEquivalent(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, collection_list);
+
+        // remove a few more elements
+        DEV_ROB_MODIFIED.deleteCharAt(1);
+        DEV_ROB_MODIFIED.deleteCharAt(1);
+        collection_list.remove(1);
+        collection_list.remove(1);
+		assertEquivalent(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, collection_list);
+	}
+    
 	/**
 	 * Check the basic data on a CollectionList to make sure it's showing the characters
 	 * from the given Strings.
 	 */
-	private void assertEquivalent(String[] data, CollectionList collection_list) {
+	private void assertEquivalent(CharSequence[] data, CollectionList collection_list) {
         assertEquals(stringsToList(data), collection_list);
     }
 
@@ -233,18 +280,26 @@ public class CollectionListTest extends TestCase {
 			return stringToList((String)parent);
         }
 	}
+    /**
+     * Returns the List itself for a List of Lists.
+     */
+    private static class ListCollectionListModel implements CollectionListModel {
+        public List getChildren(Object parent) {
+            return (List)parent;
+        }
+    }
 
     /**
      * Convert the characters of the specified String to a list.
      */
-    private static List stringToList(String chars) {
+    private static List stringToList(CharSequence chars) {
         List result = new ArrayList(chars.length());
         for (int i = 0; i < chars.length(); i++) {
             result.add(new Character(chars.charAt(i)));
         }
         return result;
     }
-    private static List stringsToList(String[] data) {
+    private static List stringsToList(CharSequence[] data) {
         List result = new ArrayList();
         for(int s = 0; s < data.length; s++) {
             result.addAll(stringToList(data[s]));
