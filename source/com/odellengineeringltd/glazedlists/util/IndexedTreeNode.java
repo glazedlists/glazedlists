@@ -89,6 +89,26 @@ public class IndexedTreeNode {
     }
     
     /**
+     * Gets the object with the specified value in the tree.
+     */
+    public IndexedTreeNode getNodeByValue(Object searchValue) {
+        int sortSide = host.getComparator().compare(searchValue, value);
+        
+        // if it sorts on the left side, search there
+        if(sortSide < 0) {
+            if(left == null) return null;
+            return left.getNodeByValue(searchValue);
+        // if it equals this node, return this
+        } else if(sortSide == 0) {
+            return this;
+        // if it sorts on the right side, search there
+        } else {
+            if(right == null) return null;
+            return right.getNodeByValue(searchValue);
+        }
+    }
+    
+    /**
      * Retrieves the size of this subtree.
      */
     public int size() {

@@ -38,9 +38,7 @@ public class IndexedTree {
      * tree implement the Comparable interface.
      */
     public IndexedTree() {
-        // debug
         comparator = null;
-        //comparator = new ComparableComparator();
     }
 
     /**
@@ -55,6 +53,17 @@ public class IndexedTree {
      */
     public IndexedTreeNode getNode(int index) {
         return root.getNodeWithIndex(index);
+    }
+
+    /**
+     * Gets the tree node with the specified value.
+     *
+     * @return the tree node containing the specified value, or null
+     *      if no such node is found.
+     */
+    public IndexedTreeNode getNode(Object value) {
+        if(root == null) return null;
+        return root.getNodeByValue(value);
     }
     
     /**
