@@ -31,7 +31,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class SortedList extends TransformedList {
-
+    
     /** a map from the unsorted index to the sorted index */
     private IndexedTree unsorted = null;
     /** a map from the sorted index to the unsorted index */
@@ -381,6 +381,19 @@ public final class SortedList extends TransformedList {
      */
     public int lastIndexOf(Object object) {
         return sorted.lastIndexOf(object);
+    }
+    
+    /**
+     * Returns the index in this list of the first occurrence of the specified
+     * element, or the index where that element would be in the list if it were
+     * in the list.
+     *
+     * <p>Like all read-only methods, this method <strong>does not</strong> manage
+     * its own thread safety. Callers can obtain thread safe access to this method
+     * via <code>getReadWriteLock().readLock()</code>.
+     */
+    public int indexOfSimulated(Object object) {
+        return sorted.indexOfSimulated(object);
     }
 
     /**

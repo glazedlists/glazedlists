@@ -536,13 +536,17 @@ public final class IndexedTreeNode {
      * called on a node directly it will have non-deterministic
      * results.
      */
-    int indexOf(Object object) {
+    int indexOf(Object object, boolean simulate) {
         int sortSide = host.getComparator().compare(object, value);
 
         // if it sorts on the left side, search there
         if(sortSide < 0) {
-            if(left == null) return -1;
-            return left.indexOf(object);
+            if(left == null) {
+                if(simulate) return getIndex();
+                else return -1;
+            } else {
+                return left.indexOf(object, simulate);
+            }
 
         // if it equals this node, search to the left for equal values
         } else if(sortSide == 0) {
@@ -550,8 +554,12 @@ public final class IndexedTreeNode {
 
         // if it sorts on the right side, search there
         } else {
-            if(right == null) return -1;
-            return right.indexOf(object);
+            if(right == null) {
+                if(simulate) return getIndex() + rootSize;
+                else return -1;
+            } else {
+                return right.indexOf(object, simulate);
+            }
         }
     }
 

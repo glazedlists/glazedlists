@@ -158,7 +158,7 @@ public final class IndexedTree {
      */
     public int indexOf(Object object) {
         if(root == null) return -1;
-        return root.indexOf(object);
+        return root.indexOf(object, false);
     }
 
     /**
@@ -168,6 +168,16 @@ public final class IndexedTree {
     public int lastIndexOf(Object object) {
         if(root == null) return -1;
         return root.lastIndexOf(object);
+    }
+
+    /**
+     * Returns the index in this list of the first occurrence of the specified
+     * element, or the index where that element would be in the list if it were
+     * in the list.
+     */
+    public int indexOfSimulated(Object object) {
+        if(root == null) return 0;
+        return root.indexOf(object, true);
     }
 
     /**
