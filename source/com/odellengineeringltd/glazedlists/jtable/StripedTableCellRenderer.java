@@ -22,9 +22,9 @@ import java.awt.Component;
  */
 public class StripedTableCellRenderer implements TableCellRenderer {
         
-    /** the colours for even and odd rows */
-    private Color evenRowsColor;
+    /** the colours for odd and even rows */
     private Color oddRowsColor;
+    private Color evenRowsColor;
     
     /** the renderer to perform the initial rendering, may be null */
     private TableCellRenderer baseRenderer = null;
@@ -60,7 +60,9 @@ public class StripedTableCellRenderer implements TableCellRenderer {
         // get the renderer to use for this cell
         TableCellRenderer renderer;
         if(baseRenderer == null) {
-            renderer = table.getDefaultRenderer(value.getClass());
+            Class rendererClass = Object.class;
+            if(value != null) rendererClass = value.getClass();
+            renderer = table.getDefaultRenderer(rendererClass);
         } else {
             renderer = baseRenderer;
         }
