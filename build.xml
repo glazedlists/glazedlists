@@ -114,7 +114,6 @@
 
   <target name="swt" depends="init,compile"
         description="Compile the SWT classes.">
-    <mkdir dir="classes"/>
     <!-- Verify that JUnit is available on the classpath -->
     <available classname="org.eclipse.swt.SWT" property="swt.present"/>
     <fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>

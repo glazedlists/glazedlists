@@ -62,11 +62,6 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
             this.checkableTableFormat = null;
         }
         
-        // initially, everything is unchecked
-        for(int i = 0; i < size(); i++) {
-            setChecked(i, false);
-        }
-        
         // listen for changes in checkedness
         table.addSelectionListener(this);
         
@@ -235,6 +230,12 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
      * The TableChecker checks the table rows after they have been updated.
      */
     class TableChecker implements ListEventListener {
+        public TableChecker() {
+            for(int i = 0; i < size(); i++) {
+                boolean checked = getChecked(i);
+                table.getItem(i).setChecked(checked);
+            }
+        }
         public void listChanged(ListEvent listChanges) {
             while(listChanges.next()) {
                 int changeIndex = listChanges.getIndex();
