@@ -584,7 +584,7 @@ public final class EventSelectionModel {
                 if(!enabled) return;
 
                 // handle a no-op
-                if(index0 < 0 || index1 < 0) {
+                if(index0 < 0 || index1 < 0 || flagList.isEmpty()) {
                     return;
                 }
 
