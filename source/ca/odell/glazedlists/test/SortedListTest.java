@@ -431,8 +431,8 @@ public class SortedListTest extends TestCase {
         //sortedList.debug = true;
 
         // perform the change
-        uniqueSource.addListEventListener(new ConsistencyTestList(uniqueSource, "unique", true));
-        sortedList.addListEventListener(new ConsistencyTestList(sortedList, "sorted", true));
+        uniqueSource.addListEventListener(new ConsistencyTestList(uniqueSource, "unique", false));
+        sortedList.addListEventListener(new ConsistencyTestList(sortedList, "sorted", false));
         uniqueSource.replaceAll(data);
         
         // verify our guess on the change count is correct

@@ -516,12 +516,12 @@ public final class SortedList extends TransformedList {
                 Object firstObject = source.get(first.node.getIndex());
                 Object secondObject = source.get(second.node.getIndex());
                 int compareResult = comparator.compare(firstObject, secondObject);
-                if(debug) System.out.println("COMPARING " + first.node.getIndex() + ":" + firstObject + " WITH " + second.node.getIndex() + ":" + secondObject + ", class " + firstObject.getClass()); 
+                //if(debug) System.out.println("COMPARING " + first.node.getIndex() + ":" + firstObject + " WITH " + second.node.getIndex() + ":" + secondObject + ", class " + firstObject.getClass()); 
                 
                 
                 // these values need no swap
                 if(compareResult < 0) {
-                    //return;
+                    return;
                 } else {
                     indexNodePairs.set(swapIndex, second);
                     indexNodePairs.set(swapIndex+1, first);
@@ -539,7 +539,7 @@ public final class SortedList extends TransformedList {
             for(ListIterator i = indexNodePairs.listIterator(); i.hasNext(); ) {
                 IndexNodePair indexNodePair = (IndexNodePair)i.next();
                 int originalIndex = indexNodePair.index;
-                if(debug) System.out.println("ADJUSTING FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index); 
+                //if(debug) System.out.println("ADJUSTING FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index); 
                 if(deletedIndex < indexNodePair.index) {
                     indexNodePair.index--;
                 }
@@ -548,7 +548,7 @@ public final class SortedList extends TransformedList {
                 } else {
                     insertedIndex++;
                 }
-                if(debug && indexNodePair.index != originalIndex) System.out.println("ADJUSTED  FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index);
+                //if(debug && indexNodePair.index != originalIndex) System.out.println("ADJUSTED  FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index);
             }
             return insertedIndex;
         }
