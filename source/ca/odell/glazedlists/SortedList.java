@@ -96,8 +96,6 @@ public final class SortedList extends TransformedList {
         
         // first update the offset tree for all changes, and keep the changed nodes in a list
         LinkedList insertNodes = new LinkedList();
-        LinkedList updateNodes = new LinkedList();
-        LinkedList deleteIndices = new LinkedList();
 
         // perform the updates on the indexed tree
         ListEvent firstPass = new ListEvent(listChanges);
@@ -123,9 +121,23 @@ public final class SortedList extends TransformedList {
                 // do not handle these till the next pass
             }
         }
+        
+        if(debug) {
+        System.out.print("BEFORE UPDATES: ");
+        for(int i = 0; i < sorted.size(); i++) {
+            System.out.print("S:" + i);
+            int unsortedIndex = ((IndexedTreeNode)sorted.getNode(i).getValue()).getIndex();
+            System.out.print("/U:" + unsortedIndex);
+            System.out.print("[" + source.get(unsortedIndex) + "] ");
+        }
+        System.out.print("\n");
+        }
 
-        // perform the updates on the indexed tree
-        ListEvent secondPass = listChanges;
+        // update indices which are all deleted and then inserted
+        IndicesPendingDeletion indicesPendingDeletion = new IndicesPendingDeletion();
+
+        // record the original indices of the nodes for update
+        ListEvent secondPass = new ListEvent(listChanges);
         while(secondPass.next()) {
             
             // get the current change info
@@ -135,34 +147,38 @@ public final class SortedList extends TransformedList {
             // on insert, insert the index node
             if(changeType == ListEvent.UPDATE) {
                 IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
-                updateNodes.addLast(unsortedNode);
-                deleteIndices.addLast(new Integer(deleteSortedIndex));
+                IndexedTreeNode sortedNode = (IndexedTreeNode)unsortedNode.getValue();
+                int originalIndex = sortedNode.getIndex();
+                indicesPendingDeletion.addPair(new IndexNodePair(originalIndex, unsortedNode)); 
             }
         }
         
-        if(debug) System.out.println(deleteIndices);
+        if(debug) System.out.println("PENDING DELETION: " + indicesPendingDeletion);
         
+        // delete the indices of the updated nodes
+        ListEvent thirdPass = listChanges;
+        while(thirdPass.next()) {
+            
+            // get the current change info
+            int unsortedIndex = thirdPass.getIndex();
+            int changeType = thirdPass.getType();
+
+            // on insert, insert the index node
+            if(changeType == ListEvent.UPDATE) {
+                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
+                int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
+            }
+        }
         
         // fire all the update events
-        while(!updateNodes.isEmpty()) {
-            IndexedTreeNode updateNode = (IndexedTreeNode)updateNodes.removeFirst();
-            int deletedIndex = ((Integer)deleteIndices.removeFirst()).intValue();
-            int insertedIndex = insertByUnsortedNode(updateNode);
+        while(indicesPendingDeletion.hasPair()) {
+            IndexNodePair indexNodePair = indicesPendingDeletion.removePair();
+            int insertedIndex = insertByUnsortedNode(indexNodePair.node);
+            int deletedIndex = indexNodePair.index;
             // adjust the out of order insert with respect to the delete list
-            if(debug) System.out.println("HANDLE RM " + deletedIndex + ", ADD " + insertedIndex + "... " + deleteIndices); 
+            insertedIndex = indicesPendingDeletion.adjustDeleteAndInsert(deletedIndex, insertedIndex); 
+            if(debug) System.out.println("HANDLE RM " + deletedIndex + ", ADD " + insertedIndex + "... " + indicesPendingDeletion); 
             
-            for(ListIterator i = deleteIndices.listIterator(deleteIndices.size()); i.hasPrevious(); ) {
-                int currentDeletedIndex = ((Integer)i.previous()).intValue();
-                //if(currentDeletedIndex < insertedIndex ||
-                    //(currentDeletedIndex == insertedIndex && insertedIndex < deletedIndex)) {
-                if(currentDeletedIndex <= insertedIndex) {
-                    insertedIndex++;
-                } else {
-                    currentDeletedIndex++;
-                    i.set(new Integer(currentDeletedIndex));
-                }
-            }
             // fire the events
             if(deletedIndex == insertedIndex) {
                 if(debug == true) System.out.println("UPDATE! UPDATE " + insertedIndex);
@@ -433,7 +449,7 @@ public final class SortedList extends TransformedList {
      * A comparator that takes an indexed node, and compares the index
      * of that node.
      */
-    class IndexedTreeNodeRawOrderComparator implements Comparator {
+    static class IndexedTreeNodeRawOrderComparator implements Comparator {
         /**
          * Compares the alpha object to the beta object by their indicies.
          */
@@ -473,6 +489,108 @@ public final class SortedList extends TransformedList {
             int alphaIndex = alphaTreeNode.getIndex();
             int betaIndex = betaTreeNode.getIndex();
             return comparator.compare(source.get(alphaIndex), source.get(betaIndex));
+        }
+    }
+    
+    /**
+     * A class for managing a list of pending deletes. Currently this class
+     * presents deletes in sorted order.
+     */
+//    static class IndicesPendingDeletion {
+    class IndicesPendingDeletion {
+        
+        /** the underlying data storage */
+        List indexNodePairs = new ArrayList();
+        
+        /**
+         * Adds the specified index to the list of indices pending deletion.
+         */
+        public void addPair(IndexNodePair nodePair) {
+            if(debug) System.out.println("Adding RM'd node " + nodePair.index + ", " + this);
+            indexNodePairs.add(nodePair);
+
+            // move this index into sorted order with a bubble-sort
+            for(int swapIndex = indexNodePairs.size() - 2; swapIndex >= 0; swapIndex--) {
+                IndexNodePair first = (IndexNodePair)indexNodePairs.get(swapIndex);
+                IndexNodePair second = (IndexNodePair)indexNodePairs.get(swapIndex+1);
+                Object firstObject = source.get(first.node.getIndex());
+                Object secondObject = source.get(second.node.getIndex());
+                int compareResult = comparator.compare(firstObject, secondObject);
+                if(debug) System.out.println("COMPARING " + first.node.getIndex() + ":" + firstObject + " WITH " + second.node.getIndex() + ":" + secondObject + ", class " + firstObject.getClass()); 
+                
+                
+                // these values need no swap
+                if(compareResult < 0) {
+                    //return;
+                } else {
+                    indexNodePairs.set(swapIndex, second);
+                    indexNodePairs.set(swapIndex+1, first);
+                }
+            }
+        }
+        
+        /**
+         * Adjusts the indices for a delete and an insert at the specified indices. This is
+         * necessary if an event is forwarded be fore this list of delete events is forwarded.
+         *
+         * <p>This method can use some optimization.
+         */
+        public int adjustDeleteAndInsert(int deletedIndex, int insertedIndex) {
+            for(ListIterator i = indexNodePairs.listIterator(); i.hasNext(); ) {
+                IndexNodePair indexNodePair = (IndexNodePair)i.next();
+                int originalIndex = indexNodePair.index;
+                if(debug) System.out.println("ADJUSTING FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index); 
+                if(deletedIndex < indexNodePair.index) {
+                    indexNodePair.index--;
+                }
+                if(insertedIndex <= indexNodePair.index) {
+                    indexNodePair.index++;
+                } else {
+                    insertedIndex++;
+                }
+                if(debug && indexNodePair.index != originalIndex) System.out.println("ADJUSTED  FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index);
+            }
+            return insertedIndex;
+        }
+        
+        /**
+         * Gets the next index/node pair to insert.
+         */
+        public IndexNodePair removePair() {
+            return (IndexNodePair)indexNodePairs.remove(0);
+        }
+        
+        /**
+         * Tests if there is a pair to remove.
+         */
+        public boolean hasPair() {
+            return !(indexNodePairs.isEmpty());
+        }
+        
+        /**
+         * Gets this as a String for debugging.
+         */
+        public String toString() {
+            return "" + indexNodePairs;
+        }
+    }
+    
+    /**
+     * An IndexNodePair is simply a node and an index. This is useful for
+     * keeping track of pending deletes.
+     */
+    class IndexNodePair {
+    //static class IndexNodePair {
+        private int index;
+        private IndexedTreeNode node;
+        
+        public IndexNodePair(int index, IndexedTreeNode node) {
+            this.index = index;
+            this.node = node;
+        }
+        
+        public String toString() {
+            return "" + index + "(" + source.get(node.getIndex()) + ")";
         }
     }
 }

@@ -315,7 +315,6 @@ public class SortedListTest extends TestCase {
         
         // listen to changes on the sorted list
         ListEventCounter counter = new ListEventCounter();
-        //sortedList.debug = true;
         sortedList.addListEventListener(counter);
 
         // replace the data with an identical copy
@@ -326,7 +325,71 @@ public class SortedListTest extends TestCase {
         assertEquals(4, counter.getChangeCount(0));
     }
 
+    
+    /**
+     * Test if the SortedList fires update events rather than delete/insert
+     * pairs, when using a ReverseComparator.
+     *
+     * <p>The source list uses a totally different comparator than the sorted list
+     * in order to guarantee the indicies have no pattern.
+     */
+    /*public void testUpdateEventsFiredRigorous2() {
+        System.out.println("");
+        System.out.println("RIGOROUS 2");
+        System.out.println("");
+        
+        // prepare a unique list with simple data
+        Comparator uniqueComparator = new ReverseStringComparator();
+        UniqueList uniqueSource = new UniqueList(unsortedList, uniqueComparator);
+        sortedList = new SortedList(uniqueSource);
+        
+        // populate a unique source with some random elements
+        for(int i = 0; i < 100; i++) {
+            uniqueSource.add("" + random.nextInt(100));
+        }
+       
+        // populate a replacement set with some more random elements
+        SortedSet data = new TreeSet(uniqueComparator);
+        data.addAll(uniqueSource);
+        //for(int i = 0; i < 500; i++) {
+            //data.add("" + random.nextInt(200));
+        //}
+        
+        // calculate the number of changes expected
+        List intersection = new ArrayList();
+        intersection.addAll(uniqueSource);
+        intersection.retainAll(data);
+        int expectedUpdateCount = intersection.size();
+        int expectedDeleteCount = uniqueSource.size() - expectedUpdateCount;
+        int expectedInsertCount = data.size() - expectedUpdateCount;
+        int expectedChangeCount = expectedUpdateCount + expectedDeleteCount + expectedInsertCount;   
+        
+        // count the number of changes performed
+        ListEventCounter uniqueCounter = new ListEventCounter();
+        uniqueSource.addListEventListener(uniqueCounter);
+        ListEventCounter sortedCounter = new ListEventCounter();
+        sortedList.addListEventListener(sortedCounter);
+        sortedList.debug = true;
+        System.out.println("ORIGINAL SORTED LIST: " + sortedList);
 
+        // perform the change
+        uniqueSource.addListEventListener(new ConsistencyTestList(uniqueSource, "unique", true));
+        sortedList.addListEventListener(new ConsistencyTestList(sortedList, "sorted", true));
+        uniqueSource.replaceAll(data);
+        
+        System.out.println("");
+        System.out.println("/RIGOROUS 2");
+        System.out.println("");
+
+        // verify our guess on the change count is correct
+        assertEquals(1, uniqueCounter.getEventCount());
+        assertEquals(1, sortedCounter.getEventCount());
+        assertEquals(expectedChangeCount, uniqueCounter.getChangeCount(0));
+        assertEquals(expectedChangeCount, sortedCounter.getChangeCount(0));
+
+    }*/
+
+    
     /**
      * Test if the SortedList fires update events rather than delete/insert
      * pairs, when using a ReverseComparator.
@@ -342,13 +405,13 @@ public class SortedListTest extends TestCase {
         
         // populate a unique source with some random elements
         for(int i = 0; i < 500; i++) {
-            uniqueSource.add(new Integer(random.nextInt(200)));
+            uniqueSource.add("" + random.nextInt(200));
         }
         
         // populate a replacement set with some more random elements
         SortedSet data = new TreeSet(uniqueComparator);
         for(int i = 0; i < 500; i++) {
-            data.add(new Integer(random.nextInt(200)));
+            data.add("" + random.nextInt(200));
         }
         
         // calculate the number of changes expected
@@ -365,6 +428,7 @@ public class SortedListTest extends TestCase {
         uniqueSource.addListEventListener(uniqueCounter);
         ListEventCounter sortedCounter = new ListEventCounter();
         sortedList.addListEventListener(sortedCounter);
+        //sortedList.debug = true;
 
         // perform the change
         uniqueSource.addListEventListener(new ConsistencyTestList(uniqueSource, "unique", true));
@@ -392,24 +456,16 @@ public class SortedListTest extends TestCase {
     }
 
     /**
-     * A Comparator that mixes up integer comparisons somewhat by
-     * comparing them in reverse String order. This is random-enough
-     * to use as an alternate comparator for Integers, yet consistent
-     * in order.
+     * A Comparator that compares strings from end to beginning rather than
+     * normally.
      */
     class ReverseStringComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            int number1 = ((Integer)a).intValue();
-            int number2 = ((Integer)b).intValue();
-            
-            int number1Flipped = flip(number1);
-            int number2Flipped = flip(number2);
+        public ComparableComparator delegate = new ComparableComparator();
 
-            return number1Flipped - number2Flipped;
-        }
-        
-        public int flip(int i) {
-            return Integer.parseInt(flip("" + i));
+        public int compare(Object a, Object b) {
+            String aString = (String)a;
+            String bString = (String)b;
+            return delegate.compare(flip(aString), flip(bString));
         }
         
         public String flip(String original) {
