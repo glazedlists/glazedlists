@@ -4,15 +4,15 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.test;
+package ca.odell.glazedlists.test;
 
 // for being a JUnit test case
 import junit.framework.*;
 // the core Glazed Lists package
-import com.odellengineeringltd.glazedlists.*;
-import com.odellengineeringltd.glazedlists.util.*;
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.util.*;
 // the Glazed Lists' change objects
-import com.odellengineeringltd.glazedlists.event.*;
+import ca.odell.glazedlists.event.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 

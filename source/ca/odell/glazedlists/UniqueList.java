@@ -4,14 +4,14 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists;
+package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
-import com.odellengineeringltd.glazedlists.event.*;
+import ca.odell.glazedlists.event.*;
 // for event list utilities, iterators and comparators
-import com.odellengineeringltd.glazedlists.util.*;
+import ca.odell.glazedlists.util.*;
 // volatile implementation support
-import com.odellengineeringltd.glazedlists.util.impl.*;
+import ca.odell.glazedlists.util.impl.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 

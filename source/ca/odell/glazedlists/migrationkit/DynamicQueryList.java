@@ -4,11 +4,11 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.migrationkit;
+package ca.odell.glazedlists.migrationkit;
 
 // the core Glazed Lists packages
-import com.odellengineeringltd.glazedlists.*;
-import com.odellengineeringltd.glazedlists.event.*;
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 
