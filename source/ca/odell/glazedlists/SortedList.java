@@ -73,23 +73,37 @@ public final class SortedList extends TransformedList {
             getReadWriteLock().readLock().unlock();
         }
     }
-
-    
-    public boolean debug = false;
     
     /**
      * For implementing the ListEventListener interface. When the underlying list
      * changes, this notification allows the object to repaint itself or update
      * itself as necessary.
      *
-     * <p>This is implemented in two phases. First, the unsorted index tree is updated
-     * so that it maches the source list. This is necessary so that when sorted operations
-     * are performed, the comparisons are done with respect to the correct unsorted
-     * index. In the second phase, the sorted list is updated with the changes.
+     * <p>This is implemented in four phases. These phases are:
+     * <br>1. Update the unsorted tree for all event types. Update the sorted tree
+     *     for delete events by deleting nodes. Fire delete events. Queue unsorted
+     *     nodes for inserts in a list.
+     * <br>2. Update the sorted tree for update events by deleting nodes. Queue the
+     *     unsorted nodes for updates in a list.
+     * <br>3. Update the sorted tree for updates by inserting nodes. Fire insert
+     *     events. 
+     * <br>4. Process queue of unsorted nodes for inserts. Fire insert events.
+     *
+     * <p>This cycle is rather complex but necessarily so. The reason is that for
+     * the two-tree SortedList to function properly, there is a very strict order
+     * for how trees can be modified. The unsorted tree must be brought completely
+     * up-to-date before any access is made to the sorted tree. This ensures that
+     * the unsorted nodes can discover their indices properly. The sorted tree must
+     * have all deleted and updated nodes removed before any nodes are inserted.
+     * This is because a deleted node may have a changed value that violates the
+     * sorted order in the tree. An insert in this case may compare against a violating
+     * node and result in inconsistency, even if the other node is eventually
+     * deleted. Therefore the order of operations above is essentially update
+     * the unsorted tree, delete from the sorted tree and finally insert into the
+     * sorted tree. The last two insert steps are split to simplify finding updates
+     * where the index does not change.
      */
     public void listChanged(ListEvent listChanges) {
-        if(debug) System.out.println("");
-        if(debug) System.out.println("handling change event: " + listChanges);
 
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
@@ -121,17 +135,6 @@ public final class SortedList extends TransformedList {
                 // do not handle these till the next pass
             }
         }
-        
-        if(debug) {
-        System.out.print("BEFORE UPDATES: ");
-        for(int i = 0; i < sorted.size(); i++) {
-            System.out.print("S:" + i);
-            int unsortedIndex = ((IndexedTreeNode)sorted.getNode(i).getValue()).getIndex();
-            System.out.print("/U:" + unsortedIndex);
-            System.out.print("[" + source.get(unsortedIndex) + "] ");
-        }
-        System.out.print("\n");
-        }
 
         // update indices which are all deleted and then inserted
         IndicesPendingDeletion indicesPendingDeletion = new IndicesPendingDeletion();
@@ -152,8 +155,6 @@ public final class SortedList extends TransformedList {
                 indicesPendingDeletion.addPair(new IndexNodePair(originalIndex, unsortedNode)); 
             }
         }
-        
-        if(debug) System.out.println("PENDING DELETION: " + indicesPendingDeletion);
         
         // delete the indices of the updated nodes
         ListEvent thirdPass = listChanges;
@@ -177,14 +178,11 @@ public final class SortedList extends TransformedList {
             int deletedIndex = indexNodePair.index;
             // adjust the out of order insert with respect to the delete list
             insertedIndex = indicesPendingDeletion.adjustDeleteAndInsert(deletedIndex, insertedIndex); 
-            //if(debug) System.out.println("HANDLE RM " + deletedIndex + ", ADD " + insertedIndex + "... " + indicesPendingDeletion); 
             
             // fire the events
             if(deletedIndex == insertedIndex) {
-                //if(debug == true) System.out.println("UPDATE! UPDATE " + insertedIndex);
                 updates.addUpdate(insertedIndex);
             } else {
-                //if(debug == true) System.out.println("UPDATE! RM " + deletedIndex + ", ADD " + insertedIndex);
                 updates.addDelete(deletedIndex);
                 updates.addInsert(insertedIndex);
             }
@@ -199,7 +197,6 @@ public final class SortedList extends TransformedList {
         
         // commit the changes and notify listeners
         updates.commitEvent();
-        if(debug) System.out.println("");
     }
     
     /**
@@ -493,46 +490,20 @@ public final class SortedList extends TransformedList {
     }
     
     /**
-     * A class for managing a list of pending deletes. Currently this class
-     * presents deletes in sorted order.
+     * A class for managing a list of pending deletes. This class
+     * presents deletes in order sorted by the index where they will be
+     * reinserted.
      */
-//    static class IndicesPendingDeletion {
-    class IndicesPendingDeletion {
+    static class IndicesPendingDeletion {
         
         /** the underlying data storage */
-        List indexNodePairs = new ArrayList();
+        SortedSet indexNodePairs = new TreeSet();
         
         /**
          * Adds the specified index to the list of indices pending deletion.
          */
         public void addPair(IndexNodePair nodePair) {
-            //if(debug) System.out.println("Adding RM'd node " + nodePair.index + ", " + this);
             indexNodePairs.add(nodePair);
-
-            // move this index into sorted order with a bubble-sort
-            for(int swapIndex = indexNodePairs.size() - 2; swapIndex >= 0; swapIndex--) {
-                IndexNodePair first = (IndexNodePair)indexNodePairs.get(swapIndex);
-                IndexNodePair second = (IndexNodePair)indexNodePairs.get(swapIndex+1);
-                Object firstObject = source.get(first.node.getIndex());
-                Object secondObject = source.get(second.node.getIndex());
-                int compareResult = comparator.compare(firstObject, secondObject);
-                //if(debug) System.out.println("COMPARING " + first.node.getIndex() + ":" + firstObject + " WITH " + second.node.getIndex() + ":" + secondObject + ", class " + firstObject.getClass()); 
-                
-                // these values need no swap
-                if(compareResult < 0) {
-                    return;
-                } else if(compareResult == 0 && first.index < second.index) {
-                    if(debug) System.out.println("NO SWAP  EQUALS " + first + ", " + second);
-                    return;
-                } else if(compareResult == 0) {
-                    if(debug) System.out.println("SWAPPING EQUALS " + first + ", " + second);
-                    indexNodePairs.set(swapIndex, second);
-                    indexNodePairs.set(swapIndex+1, first);
-                } else {
-                    indexNodePairs.set(swapIndex, second);
-                    indexNodePairs.set(swapIndex+1, first);
-                }
-            }
         }
         
         /**
@@ -542,10 +513,9 @@ public final class SortedList extends TransformedList {
          * <p>This method can use some optimization.
          */
         public int adjustDeleteAndInsert(int deletedIndex, int insertedIndex) {
-            for(ListIterator i = indexNodePairs.listIterator(); i.hasNext(); ) {
+            for(Iterator i = indexNodePairs.iterator(); i.hasNext(); ) {
                 IndexNodePair indexNodePair = (IndexNodePair)i.next();
                 int originalIndex = indexNodePair.index;
-                //if(debug) System.out.println("ADJUSTING FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index); 
                 if(deletedIndex < indexNodePair.index) {
                     indexNodePair.index--;
                 }
@@ -554,7 +524,6 @@ public final class SortedList extends TransformedList {
                 } else {
                     insertedIndex++;
                 }
-                //if(debug && indexNodePair.index != originalIndex) System.out.println("ADJUSTED  FROM RM " + deletedIndex + ", ADD " + insertedIndex + ": INDEX = " + indexNodePair.index);
             }
             return insertedIndex;
         }
@@ -563,7 +532,9 @@ public final class SortedList extends TransformedList {
          * Gets the next index/node pair to insert.
          */
         public IndexNodePair removePair() {
-            return (IndexNodePair)indexNodePairs.remove(0);
+            IndexNodePair first = (IndexNodePair)indexNodePairs.first();
+            indexNodePairs.remove(first);
+            return first;
         }
         
         /**
@@ -585,8 +556,7 @@ public final class SortedList extends TransformedList {
      * An IndexNodePair is simply a node and an index. This is useful for
      * keeping track of pending deletes.
      */
-    class IndexNodePair {
-    //static class IndexNodePair {
+    class IndexNodePair implements Comparable {
         private int index;
         private IndexedTreeNode node;
         
@@ -597,6 +567,18 @@ public final class SortedList extends TransformedList {
         
         public String toString() {
             return "" + index + "(" + source.get(node.getIndex()) + ")";
+        }
+        /**
+         * Index node pairs are compared first by their Object's values, and then
+         * by their indices.
+         */
+        public int compareTo(Object other) {
+            IndexNodePair otherIndexNodePair = (IndexNodePair)other;
+            Object myObject = source.get(node.getIndex());
+            Object otherObject = source.get(otherIndexNodePair.node.getIndex());
+            int compareResult = comparator.compare(myObject, otherObject);
+            if(compareResult != 0) return compareResult;
+            return index - otherIndexNodePair.index;
         }
     }
 }
