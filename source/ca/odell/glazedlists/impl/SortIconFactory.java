@@ -67,7 +67,7 @@ public final class SortIconFactory {
         if(resourcePath == null) resourcePath = defaultResourcePath;
         
         // save and return the default icons
-        defaultIcons = getIcons(resourceRoot + "/" + resourcePath);
+        defaultIcons = loadIcons(resourceRoot + "/" + resourcePath);
         return defaultIcons;
     }
     
@@ -80,7 +80,7 @@ public final class SortIconFactory {
 
         // load each icon as a resource from the source .jar file
         Icon[] pathIcons = new Icon[iconFileNames.length];
-        for(int i = 0; i < icons.length; i++) {
+        for(int i = 0; i < pathIcons.length; i++) {
             URL iconLocation = jarLoader.getResource(path + "/" + iconFileNames[i]);
             if(iconLocation != null) pathIcons[i] = new ImageIcon(iconLocation);
             else pathIcons[i] = null;
