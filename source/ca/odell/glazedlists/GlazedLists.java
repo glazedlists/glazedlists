@@ -123,10 +123,11 @@ public final class GlazedLists {
     }
 
     /**
-     * Creates a {@link WritableTableFormat} that binds JavaBean properties to
-     * optionally writable table columns via Reflection.
+     * Creates a {@link TableFormat} that binds JavaBean properties to
+     * table columns via Reflection. The returned {@link TableFormat} implements
+     * {@link WritableTableFormat} and may be used for an editable table.
      */
-    public static WritableTableFormat writableTableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
+    public static TableFormat tableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
         return new BeanWritableTableFormat(propertyNames, columnLabels, editable);
     }
 
