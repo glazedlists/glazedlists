@@ -132,6 +132,11 @@ public class ThresholdMatcherSource extends AbstractValueMatcherSource {
      */
     public synchronized void setThreshold(Object threshold) {
 		Object old_threshold = getThreshold();
+        // See if there was a value change
+        if (threshold != null && old_threshold != null ) {
+            if (comparator.compare(old_threshold, threshold) == 0 ) return;
+        }
+
 		boolean need_to_fire_update = setValue(threshold);
 
 		if (need_to_fire_update) {

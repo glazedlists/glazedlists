@@ -56,6 +56,11 @@ public class EqualsMatcherSource extends AbstractValueMatcherSource {
 	 * caused by accidentally changing the state of the value.
 	 */
 	public synchronized void setMatchValue(Object match_value) {
+        Object old_value = getValue();
+        if (old_value != null && match_value != null) {
+            if (old_value.equals(match_value)) return;       // no change
+        }
+
 		boolean need_to_fire_update = setValue(match_value);
 
 		if (need_to_fire_update) {
