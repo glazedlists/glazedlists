@@ -84,20 +84,20 @@ public class DefaultTextFilterList extends AbstractFilterList {
      * @param newFilter the {@link String}s representing all of the filter values
      */
     public final void setFilterText(final String[] newFilter) {
+        // acquire the lock before updating this list
+        ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         // adjusting the filters and refiltering the source list happens "atomically"
         updates.beginEvent(true);
         try {
-            // acquire the lock before updating this list
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
 
             // delegate to updateFilter (which is overridable) to perform the work
             this.updateFilter(newFilter);
 
         } finally {
-            // release the lock
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
             // commit the changes and notify listeners
             updates.commitEvent();
+            // release the lock
+            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
     }
 
