@@ -81,6 +81,9 @@ public final class EventSelectionModel {
     /** list change updates */
     private ListEventAssembler updates = null;
     
+    /** whether the user can modify the selection */
+    public boolean enabled = true;
+    
     /**
      * Creates a new selection model that also presents a list of the selection.
      */
@@ -116,6 +119,36 @@ public final class EventSelectionModel {
      */
     public ListSelectionModel getListSelectionModel() {
         return selectionModel;
+    }
+    
+    /**
+     * Set the EventSelectionModel as editable or not. This means that the user cannot
+     * manipulate the selection by clicking. The selection can still be changed as
+     * the source list changes.
+     *
+     * <p>Note that this will also disable the selection from being modified
+     * <strong>programatically</strong>. Therefore you must use setEnabled(true) to
+     * modify the selection in code.
+     */
+    public void setEnabled(boolean enabled) {
+        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        try {
+            this.enabled = enabled;
+        } finally {
+            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+        }
+    }
+
+    /**
+     * Gets whether the EventSelectionModel is editable or not.
+     */
+    public boolean getEnabled() {
+        eventList.getReadWriteLock().readLock().lock();
+        try {
+            return enabled;
+        } finally {
+            eventList.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -472,6 +505,8 @@ public final class EventSelectionModel {
         public void setSelectionInterval(int index0, int index1) {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
+                if(!enabled) return;
+                
                 // update anchor and lead
                 anchorSelectionIndex = index0;
                 leadSelectionIndex = index1;
@@ -493,6 +528,8 @@ public final class EventSelectionModel {
         public void addSelectionInterval(int index0, int index1) {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
+                if(!enabled) return;
+
                 // update anchor and lead
                 anchorSelectionIndex = index0;
                 leadSelectionIndex = index1;
@@ -533,6 +570,8 @@ public final class EventSelectionModel {
         public void removeSelectionInterval(int index0, int index1) {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
+                if(!enabled) return;
+
                 // update anchor and lead
                 anchorSelectionIndex = index0;
                 leadSelectionIndex = index1;
@@ -617,6 +656,8 @@ public final class EventSelectionModel {
         public void setAnchorSelectionIndex(int anchorSelectionIndex) {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
+                if(!enabled) return;
+
                 // update anchor
                 this.anchorSelectionIndex = anchorSelectionIndex;
     
@@ -657,6 +698,8 @@ public final class EventSelectionModel {
         public void setLeadSelectionIndex(int leadSelectionIndex) {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
+                if(!enabled) return;
+
                 // update lead
                 int originalLeadIndex = this.leadSelectionIndex;
                 this.leadSelectionIndex = leadSelectionIndex;
@@ -690,6 +733,8 @@ public final class EventSelectionModel {
         public void clearSelection() {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
+                if(!enabled) return;
+
                 setSubRangeOfRange(false, getMinSelectionIndex(), getMaxSelectionIndex(), -1, -1);
             } finally {
                 ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
