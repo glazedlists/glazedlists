@@ -26,6 +26,25 @@ import java.util.*;
  * (i.e. First Found, Last Found, First Occurrence, etc) which would add
  * a significant and unecessary level of complexity.
  *
+ * <p><strong>Note:</strong> When values are indistinguishable to the given
+ * <code>Comparator</code> (or by using <code>Comparable</code> elements),
+ * this list does not forward mandatory change events if those values are
+ * added, removed, or updated in a way that they remain indistinguishable.
+ * For example, if you have 5 String elements that are all equal to "B",
+ * removing, or adding one does not result in a change event being forwarded.
+ * This should be taken into consideration whenever making use of the
+ * UniqueList.  It has been implemented this way because forwarding events when
+ * an underlying Object is changed in the UniqueList (with no change in
+ * uniqueness) would have non-deterministic results.
+ *
+ * <p>Though it might appear to be the case, these change events are also not
+ * supported by "non-mandatory change events".  Non-mandatory change events
+ * represent changes to the number of duplicates contained in the list.
+ * Support for this type of change event has not yet been added to UniqueList
+ * and will be unsupported by all main list types in GlazedLists.  The primary
+ * use for these events is referenced in
+ * <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=36">issue 36</a>.
+ *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
 public final class UniqueList extends MutationList implements ListChangeListener, EventList {
@@ -94,20 +113,34 @@ public final class UniqueList extends MutationList implements ListChangeListener
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
 
+        List nonUniqueInserts = new ArrayList();
+
         updates.beginAtomicChange();
 
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
+            int changeResult = -1;
 
             // Process the event
             if(changeType == ListChangeBlock.INSERT) {
-                processInsertEvent(changeIndex);
+                changeResult = processInsertEvent(changeIndex);
             } else if(changeType == ListChangeBlock.DELETE) {
                 processDeleteEvent(changeIndex);
             } else if(changeType == ListChangeBlock.UPDATE) {
-                processUpdateEvent(changeIndex);
+                changeResult = processUpdateEvent(changeIndex);
             }
+
+            if(changeResult != -1) {
+                nonUniqueInserts.add(new Integer(changeResult));
+            }
+        }
+
+        // Clean up after potentially non unique insertions
+        int uniqueInsertSize = nonUniqueInserts.size();
+        for(int i = 0; i < uniqueInsertSize; i++) {
+            int insertIndex = ((Integer)nonUniqueInserts.get(i)).intValue();
+            guaranteeUniqueness(insertIndex);
         }
 
         updates.commitAtomicChange();
@@ -118,24 +151,18 @@ public final class UniqueList extends MutationList implements ListChangeListener
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private void processInsertEvent(int changeIndex) {
+    private int processInsertEvent(int changeIndex) {
         if(valueIsDuplicate(changeIndex)) {
-            // The element is a duplicate so just add a nullity
+            // The element is a duplicate so add a nullity and forward a
+            // non-mandatory change event since the number of duplicates changed.
             duplicatesList.add(changeIndex, null);
+            int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
+            appendChange(compressedIndex, ListChangeBlock.UPDATE, false);
+            return -1;
         } else {
-            // The value is NOT a duplicate so add it to the unique view
+            // The value might not be a duplicate so add it to the unique view
             duplicatesList.add(changeIndex, Boolean.TRUE);
-            // Guarantee this is unique with respect to its follower
-            int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
-            if(compressedIndex < size() - 1 && 0 == comparator.compare(get(compressedIndex), get(compressedIndex + 1))) {
-                // Duplicate was created in the unique view, correct this
-                int duplicateIndex = duplicatesList.getIndex(compressedIndex + 1);
-                duplicatesList.set(duplicateIndex, null);
-                appendChange(compressedIndex, ListChangeBlock.UPDATE, true);
-            } else {
-                // Element has no duplicate follower
-                appendChange(compressedIndex, ListChangeBlock.INSERT, true);
-            }
+            return changeIndex;
         }
     }
 
@@ -149,11 +176,15 @@ public final class UniqueList extends MutationList implements ListChangeListener
      * @param changeIndex The index which the UPDATE event affects
      */
     private void processDeleteEvent(int changeIndex) {
+        // The element is a duplicate, the remove doesn't alter the unique view
         if(duplicatesList.get(changeIndex) == null) {
-            // The element is a duplicate, the remove doesn't alter the unique view
+            // Remove and forward a non-mandatory change event since the number
+            // of duplicates changed
+            int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
             duplicatesList.remove(changeIndex);
+            appendChange(compressedIndex, ListChangeBlock.UPDATE, false);
+        // The element is in the unique view
         } else {
-            // The element is in the unique view
             int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
             if(changeIndex < duplicatesList.size() - 1 && duplicatesList.get(changeIndex + 1) == null) {
                 // The next element is null and thus is a duplicate
@@ -161,8 +192,9 @@ public final class UniqueList extends MutationList implements ListChangeListener
                 duplicatesList.set(changeIndex + 1, Boolean.TRUE);
                 duplicatesList.remove(changeIndex);
 
-                /** HAVING THE FOLLOWING LINE UNCOMMENTED BREAKS clear()  */
-                //appendChange(compressedIndex, ListChangeBlock.UPDATE, true);
+                if(source.size() > compressedIndex) {
+                    appendChange(compressedIndex, ListChangeBlock.UPDATE, false);
+                }
             } else {
                 // The element has no duplicates
                 duplicatesList.remove(changeIndex);
@@ -176,13 +208,13 @@ public final class UniqueList extends MutationList implements ListChangeListener
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private void processUpdateEvent(int changeIndex) {
+    private int processUpdateEvent(int changeIndex) {
         if(duplicatesList.get(changeIndex) == null) {
             // Handle all cases where the change does not affect an element of the unique view
-            updateDuplicate(changeIndex);
+            return updateDuplicate(changeIndex);
         } else {
             // Handle all cases where the change does affect an element of the unique view
-            updateNonDuplicate(changeIndex);
+            return updateNonDuplicate(changeIndex);
         }
     }
 
@@ -196,23 +228,14 @@ public final class UniqueList extends MutationList implements ListChangeListener
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private void updateDuplicate(int changeIndex) {
+    private int updateDuplicate(int changeIndex) {
         if(!valueIsDuplicate(changeIndex)) {
             // The nullity at this index is no longer valid
             duplicatesList.set(changeIndex, Boolean.TRUE);
-            int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
-            // Guarantee this is unique with respect to its follower
-            if(compressedIndex < size() - 1 && 0 == comparator.compare(get(compressedIndex), get(compressedIndex + 1))) {
-                // Duplicate was created, make the first instance unique
-                int duplicateIndex = duplicatesList.getIndex(compressedIndex + 1);
-                duplicatesList.set(duplicateIndex, null);
-                appendChange(compressedIndex, ListChangeBlock.UPDATE, true);
-            } else {
-                // The value is new and unique
-                appendChange(compressedIndex, ListChangeBlock.INSERT, true);
-            }
+            return changeIndex;
         } else {
             // Otherwise, it is still a duplicate and must be NULL, no event forwarded
+            return -1;
         }
     }
 
@@ -226,7 +249,7 @@ public final class UniqueList extends MutationList implements ListChangeListener
      *
      * @param changeIndex The index which the UPDATE event affects
      */
-    private void updateNonDuplicate(int changeIndex) {
+    private int updateNonDuplicate(int changeIndex) {
         int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
         if(valueIsDuplicate(changeIndex)) {
             // The value at this index should be NULL as it is the same as previous
@@ -236,7 +259,12 @@ public final class UniqueList extends MutationList implements ListChangeListener
                 // be in the unique view.
                 duplicatesList.set(changeIndex + 1, Boolean.TRUE);
                 duplicatesList.set(changeIndex, null);
-                appendChange(compressedIndex, ListChangeBlock.UPDATE, true);
+                // Need to send non-mandatory updates for this and previous index
+                // since a duplicate was added.  valueIsDuplicate() guarantees
+                // that a previous value exists.
+                appendChange(compressedIndex, ListChangeBlock.UPDATE, false);
+                appendChange(compressedIndex - 1, ListChangeBlock.UPDATE, false);
+
             } else {
                 // The element was unique and is now a duplicate
                 duplicatesList.set(changeIndex, null);
@@ -246,36 +274,54 @@ public final class UniqueList extends MutationList implements ListChangeListener
             // this is still unique, but we must handle the follower
             if(changeIndex < duplicatesList.size() - 1) {
 
-                // the follower was a duplicate
+                // The next value was a duplicate before the UPDATE
                 if(duplicatesList.get(changeIndex + 1) == null) {
-                    // The next value was a duplicate before the UPDATE
-                    if(!valueIsDuplicate(changeIndex + 1)) {
-                        // The next value should be in the unique view
-                        duplicatesList.set(changeIndex + 1, Boolean.TRUE);
-                        appendChange(compressedIndex, ListChangeBlock.INSERT, true);
-                        appendChange(compressedIndex + 1, ListChangeBlock.UPDATE, true);
-                    } else {
-                        // The next value is the same as this value
-                        appendChange(compressedIndex, ListChangeBlock.UPDATE, true);
-                    }
-                // the follower was not a duplicate
+                    // Set the next value to be non-null, forward an
+                    // UPDATE event and return
+
+                    // This could be OPTIMIZED:
+                    // Example : D D D
+                    // - causes 2 unnecessary non-mandatory UPDATEs when
+                    // D -> D when 0 should be forwarded.
+                    duplicatesList.set(changeIndex + 1, Boolean.TRUE);
+                    appendChange(compressedIndex, ListChangeBlock.UPDATE, false);
+                    return changeIndex;
+                // The next value is in the unique view
                 } else {
-                    // The next value is in the unique view
-                    if(valueIsDuplicate(changeIndex + 1)) {
-                        // But the next value is the same, creating a duplicate
-                        duplicatesList.set(changeIndex + 1, null);
-                        appendChange(compressedIndex + 1, ListChangeBlock.UPDATE, true);
-                        appendChange(compressedIndex, ListChangeBlock.DELETE, true);
-                    } else {
-                        // The next value is different so just update this value
-                        appendChange(compressedIndex, ListChangeBlock.UPDATE, true);
-                    }
+                    // Forward a remove for the current element and return.
+
+                    // This could be OPTIMIZED:
+                    // Example : B D D
+                    // - This will cause a DELETE then an INSERT of the same
+                    // value if B -> B
+                    appendChange(compressedIndex, ListChangeBlock.DELETE, true);
+                    return changeIndex;
                 }
             // the follower does not exist
             } else {
                 // The value is at the end of the list and thus has no duplicates
                 appendChange(compressedIndex, ListChangeBlock.UPDATE, true);
             }
+        }
+        return -1;
+    }
+
+    /**
+     * Guarantee that a value is unique with respect to its follower.
+     *
+     * @param changeIndex the index to inspect for duplicates.
+     */
+    private void guaranteeUniqueness(int changeIndex) {
+        int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
+
+        // Duplicate was created in the unique view, correct this
+        if(compressedIndex < size() - 1 && 0 == comparator.compare(get(compressedIndex), get(compressedIndex + 1))) {
+            int duplicateIndex = duplicatesList.getIndex(compressedIndex + 1);
+            duplicatesList.set(duplicateIndex, null);
+            appendChange(compressedIndex, ListChangeBlock.UPDATE, false);
+        // Element has no duplicate follower
+        } else {
+            appendChange(compressedIndex, ListChangeBlock.INSERT, true);
         }
     }
 

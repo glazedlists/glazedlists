@@ -499,6 +499,49 @@ public class UniqueListTest extends TestCase {
         assertEquals(0, unique.size());
     }
 
+    class IntArrayIndexComparator implements Comparator {
+        public int index;
+        public IntArrayIndexComparator(int index) {
+            this.index = index;
+        }
+        public int compare(Object a, Object b) {
+            int[] aArray = (int[])a;
+            int[] bArray = (int[])b;
+            return aArray[index] - bArray[index];
+        }
+    }
+    class IntArrayFilterList extends AbstractFilterList {
+        public int index = 0;
+        public int threshhold = 0;
+        public IntArrayFilterList(EventList source) {
+            super(source);
+        }
+        public boolean filterMatches(Object element) {
+            int[] array = (int[])element;
+            return array[index] >= threshhold;
+        }
+        public void setFilter(int index, int threshhold) {
+            this.index = index;
+            this.threshhold = threshhold;
+            handleFilterChanged();
+        }
+    }
+
+
+    public void testUpdateDeleteCollide() {
+        source = new BasicEventList();
+        source.add(new int[] { 2, 0, 1 });
+        source.add(new int[] { 2, 0, 1 });
+        source.add(new int[] { 3, 0, 1 });
+        source.add(new int[] { 4, 1, 0 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayIndexComparator(0));
+
+        filterList.setFilter(2, 1);
+        filterList.setFilter(1, 1);
+    }
+
     /** Test response to an UPDATE event  */
 
     public void testLeftEdgeUpdateToNewObject() {
