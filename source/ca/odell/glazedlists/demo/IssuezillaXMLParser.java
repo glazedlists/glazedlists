@@ -234,7 +234,7 @@ public class IssuezillaXMLParser {
             // print the executed Java command
             if(currentField.equals("issue_id")) System.out.println("currentIssue.setId(new Integer(" + Integer.valueOf(value) + "));"); 
             else if(currentField.equals("issue_status")) System.out.println("currentIssue.setStatus(\"" + escapeToJava(value) + "\");");
-            else if(currentField.equals("priority")) System.out.println("currentIssue.setPriority(\"" + escapeToJava(value) + "\");");
+            else if(currentField.equals("priority")) System.out.println("currentIssue.setPriority(Priority." + value + ");");
             else if(currentField.equals("resolution")) System.out.println("currentIssue.setResolution(\"" + escapeToJava(value) + "\");");
             else if(currentField.equals("component")) System.out.println("currentIssue.setComponent(\"" + escapeToJava(value) + "\");");
             else if(currentField.equals("version")) System.out.println("currentIssue.setVersion(\"" + escapeToJava(value) + "\");");

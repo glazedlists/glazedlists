@@ -10,6 +10,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.applet.*;
+import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -78,14 +79,14 @@ public class IssuesBrowser extends Applet {
      * Display a frame for browsing issues.
      */
     private JPanel constructView() {
-        // create a panel with a table
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+        // create the lists
         IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
         SortedList issuesSortedList = new SortedList(issuesUserFiltered);
         TextFilterList issuesTextFiltered = new TextFilterList(issuesSortedList);
+        //ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
 
         // issues table
+        //EventTableModel issuesTableModel = new EventTableModel(priorityList, new IssueTableFormat());
         EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel(issuesTextFiltered);
@@ -109,12 +110,38 @@ public class IssuesBrowser extends Applet {
         JTable descriptionsTable = new JTable(descriptionsTableModel);
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
         JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        panel.add(usersListScrollPane, new GridBagConstraints(0, 0, 1, 2, 0.3, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-        panel.add(new JLabel("Filter: "), new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0));
-        panel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(2, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 5, 5), 0, 0));
-        panel.add(issuesTableScrollPane, new GridBagConstraints(1, 1, 2, 1, 0.7, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
-        panel.add(descriptionsTableScrollPane, new GridBagConstraints(0, 2, 3, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
+        
+        // priority slider
+        /*BoundedRangeModel priorityRangeModel = ThresholdRangeModelFactory.createLower(priorityList);
+        priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
+        JSlider prioritySlider = new JSlider(priorityRangeModel);
+        Hashtable prioritySliderLabels = new Hashtable();
+        prioritySliderLabels.put(new Integer(0), new JLabel("Low"));
+        prioritySliderLabels.put(new Integer(100), new JLabel("High"));
+        prioritySlider.setLabelTable(prioritySliderLabels);        
+        prioritySlider.setSnapToTicks(true);
+        prioritySlider.setPaintLabels(true);
+        prioritySlider.setPaintTicks(true);
+        prioritySlider.setMajorTickSpacing(25);*/
+        
+        // create the filters panel
+        JPanel filtersPanel = new JPanel();
+        filtersPanel.setLayout(new GridBagLayout());
+        filtersPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+        
+        filtersPanel.add(new JLabel("Text Filter"),          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(10, 10, 5,   10), 0, 0));
+        filtersPanel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,  10, 15,  10), 0, 0));
+        //filtersPanel.add(new JLabel("Minimum Prioriy"),      new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  10, 5,   10), 0, 0));
+        //filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,  10, 15,  10), 0, 0));
+        filtersPanel.add(new JLabel("Issue Owner"),          new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  10, 5,   10), 0, 0));
+        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets(0,  10, 10,  10), 0, 0));
+        
+        // a panel with a table
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.add(filtersPanel,                new GridBagConstraints(0, 0, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(issuesTableScrollPane,       new GridBagConstraints(1, 0, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(descriptionsTableScrollPane, new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets( 5,  5,  5,  5), 0, 0));
 
         return panel;
     }
