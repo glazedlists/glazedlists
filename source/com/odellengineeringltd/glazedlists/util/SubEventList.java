@@ -76,7 +76,8 @@ public final class SubEventList extends WritableMutationList implements ListChan
      */
     public Object get(int index) {
         synchronized(getRootList()) {
-            return source.get(index - startIndex);
+            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException();
+            return source.get(index + startIndex);
         }
     }
     
@@ -132,6 +133,7 @@ public final class SubEventList extends WritableMutationList implements ListChan
                     // do nothing
                 }
             }
+            assert(startIndex < endIndex);
             updates.commitAtomicChange();
         }
     }

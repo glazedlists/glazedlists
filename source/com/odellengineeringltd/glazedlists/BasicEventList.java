@@ -12,8 +12,8 @@ import com.odellengineeringltd.glazedlists.event.*;
 import java.util.*;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
-// for iterating over a mutation list the lazy way
-import com.odellengineeringltd.glazedlists.util.EventListIterator;
+// for iterators and sublists
+import com.odellengineeringltd.glazedlists.util.*;
 // for being serializable
 import java.io.Serializable;
 
@@ -278,7 +278,7 @@ public class BasicEventList implements EventList, Serializable {
      * fromIndex, inclusive, and toIndex, exclusive.
      */
     public List subList(int fromIndex, int toIndex) {
-        return data.subList(fromIndex, toIndex);
+        return new SubEventList(this, fromIndex, toIndex, true);
     }
     /**
      * Returns an array containing all of the elements in this list in proper

@@ -13,8 +13,8 @@ import com.odellengineeringltd.glazedlists.event.*;
 import java.util.*;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
-// for iterating over a mutation list the lazy way
-import com.odellengineeringltd.glazedlists.util.EventListIterator;
+// for iterators and sublists
+import com.odellengineeringltd.glazedlists.util.*;
 
 
 /**
@@ -227,6 +227,14 @@ public class QueryList extends AbstractList implements EventList {
      */
     public ListIterator listIterator(int index) {
         return new EventListIterator(this, index);
+    }
+
+    /**
+     * Returns a view of the portion of this list between the specified
+     * fromIndex, inclusive, and toIndex, exclusive.
+     */
+    public List subList(int fromIndex, int toIndex) {
+        return new SubEventList(this, fromIndex, toIndex, true);
     }
 
     /**

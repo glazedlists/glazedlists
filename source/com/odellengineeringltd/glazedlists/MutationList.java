@@ -12,8 +12,8 @@ import com.odellengineeringltd.glazedlists.event.*;
 import java.util.*;
 // For calling methods on the event dispacher thread
 import javax.swing.SwingUtilities;
-// for iterating over a mutation list the lazy way
-import com.odellengineeringltd.glazedlists.util.EventListIterator;
+// for iterators and sublists
+import com.odellengineeringltd.glazedlists.util.*;
 
 /**
  * A MutationList is an altered view on an EventList. This may be a sorted
@@ -122,7 +122,7 @@ public abstract class MutationList extends AbstractList implements EventList, Li
      * fromIndex, inclusive, and toIndex, exclusive.
      */
     public List subList(int fromIndex, int toIndex) {
-        throw new UnsupportedOperationException("The method is not implemented.");
+        return new SubEventList(this, fromIndex, toIndex, true);
     }
 
     /**
