@@ -16,12 +16,11 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 // for responding to user actions
 import java.awt.event.*;
+import java.awt.Point;
 // tables for displaying lists
 import javax.swing.table.AbstractTableModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 // this class uses tables for displaying message lists
 import java.util.Collection;
 import java.util.ArrayList;
@@ -34,30 +33,30 @@ import java.util.SortedSet;
 /**
  * A table that displays the contents of an event-driven list.
  *
+ * <p>The ListTable class is <strong>not thread-safe</strong>. Unless otherwise
+ * noted, all methods are only safe to be called from the event dispatch thread.
+ * To do this programmatically, use <code>SwingUtilities.invokeAndWait()</code>.
+ *
+ * @see SwingUtilities#invokeAndWait(Runnable)
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListTable extends AbstractTableModel implements ListChangeListener, ListSelectionListener, MouseListener {
+public class ListTable extends AbstractTableModel implements ListChangeListener, MouseListener {
 
     /** The Swing table for selecting a message from a list */
     private JTable table;
     private JScrollPane tableScrollPane;
-    private ListSelectionModel tableSelectionModel;
 
     /** the complete list of messages before filters */
     protected EventList source;
-        
+
     /** whom to notify of selection changes */
     private SelectionList selectionList;
-    private ArrayList selectionListeners = new ArrayList();
+    private SelectionNotifier selectionNotifier;
     
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
 
-    /** Save the selected record to eliminate unnecessary selection updates */
-    private int selectedIndex = -1;
-    /** When the list is changing and we should ignore selection events */
-    private boolean ignoreSelectionEvents = false;
-    
     /** Reusable table event for broadcasting changes */
     private MutableTableModelEvent tableModelEvent;
     
@@ -75,6 +74,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         constructWidgets();
         
         selectionList = new SelectionList(source, table.getSelectionModel());
+        selectionNotifier = new SelectionNotifier(selectionList);
         source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
     }
     
@@ -85,9 +85,6 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      */
     private void constructWidgets() {
         table = new JTable(this);
-        tableSelectionModel = table.getSelectionModel();
-        //tableSelectionModel.setSelectionMode(tableSelectionModel.SINGLE_SELECTION);
-        tableSelectionModel.addListSelectionListener(this);
         tableFormat.configureTable(table);
         tableScrollPane = new JScrollPane(table);
         table.addMouseListener(this);
@@ -162,9 +159,6 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         // when all events hae already been processed by clearing the event queue
         if(!listChanges.hasNext()) return;
 
-        // for avoiding extra selection events
-        ignoreSelectionEvents = true;
-
         // notify all changes simultaneously
         if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
             listChanges.clearEventQueue();
@@ -184,66 +178,85 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
                 fireTableChanged(tableModelEvent);
             }
         }
-
-        // fire a selection event to update the selection
-        ignoreSelectionEvents = false;
-        selectedIndex = -1;
-        valueChanged(null);
     }
 
-    /**
-     * For implementing the ListSelectionListener interface, this listens
-     * when the selection changes and notifies the SelectionListeners of the
-     * change.
-     */
-    public void valueChanged(ListSelectionEvent listSelectionEvent) {
-        // if the list is adjusting, another event is on its way, so ignore this one
-        if(ignoreSelectionEvents) return;
-        if(listSelectionEvent != null && listSelectionEvent.getValueIsAdjusting()) return;
-        // figure out which row (if any) is now selected and return it
-        int newSelectedIndex = tableSelectionModel.getMinSelectionIndex();
-        // quit while we're ahead if this is the same selection
-        if(newSelectedIndex == selectedIndex) return;
-        // save the selected record for next time
-        selectedIndex = newSelectedIndex;
-        Object selected = getSelected();
-        // update the list listeners to display the new selection
-        if(selected == null) {
-            for(int r = 0; r < selectionListeners.size(); r++) {
-                ((SelectionListener)selectionListeners.get(r)).clearSelection();
-            }
-        } else {
-            for(int r = 0; r < selectionListeners.size(); r++) {
-                ((SelectionListener)selectionListeners.get(r)).setSelection(selected);
-            }
-        }
-    }
+
     /**
      * Gets the currently selected object, or null if there is currently no
      * selection.
+     *
+     * <p>Unlike most methods in the ListTable, this method is safe to be called
+     * from threads that are not the event dispatch thread. This uses a helper
+     * class that executes on the event dispatch thread to perform the lookup if
+     * the method is called by an otherwise unsafe thread.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=12">Bug 12</a>
+     *
+     * @throws RuntimeException if the current thread is interrupted while 
+     * it is waiting for the event dispatch thread to do the lookup
      */
     public Object getSelected() {
-        if(selectedIndex == -1) return null;
-        return source.get(selectedIndex);
+        return new SelectionGetter().getSelection();
     }
+    /**
+     * The selection getter is a helper class that can fetch the selection on
+     * the event dispatch thread.
+     */
+    class SelectionGetter implements Runnable {
+        /** the selected object */
+        Object selected = null;
+        /**
+         * Fetch the currently selected object in a thread safe way.
+         *
+         * @throws RuntimeException if the current thread is interrupted while 
+         * it is waiting for the event dispatch thread to do the lookup
+         */
+        public Object getSelection() {
+            if(SwingUtilities.isEventDispatchThread()) {
+                run();
+            } else {
+                try {
+                    SwingUtilities.invokeAndWait(this);
+                } catch(InterruptedException e) {
+                    throw new RuntimeException("Unexpected interruption fetching selection", e);
+                } catch(java.lang.reflect.InvocationTargetException e) {
+                    throw new RuntimeException("Unexpected exception fetching selection", e);
+                }
+            }
+            return selected;
+        }
+        /**
+         * Lookup the currently selected object on the current thread.
+         */
+        public void run() {
+            if(selectionList.size() == 0) selected = null;
+            else selected = selectionList.get(0);
+        }
+    }
+
+    
     /**
      * For implementing the MouseListener interface. When the cell is double
      * clicked, update the listeners.
      */
-    public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) { 
-            // move clicked contact into current contact panel, and then activate episodes for that contact.
-            Object selected = getSelected();
-            if(selected == null) return;
-            for(int r = 0; r < selectionListeners.size(); r++) {
-                ((SelectionListener)selectionListeners.get(r)).setDoubleClicked(selected);
-            }
+    public void mouseClicked(MouseEvent mouseEvent) {
+        if(mouseEvent.getSource() != table) return;
+
+        // get the object which was clicked on
+        int row = table.rowAtPoint(new Point(mouseEvent.getX(), mouseEvent.getY()));
+        int col = table.columnAtPoint(new Point(mouseEvent.getX(), mouseEvent.getY()));
+        Object clicked = source.get(row);
+
+        // notify listeners on a double click
+        if(mouseEvent.getClickCount() == 2) {
+            selectionNotifier.notifyDoubleClicked(clicked);
         }
     }
-    public void mouseEntered(MouseEvent e) {}
-    public void mouseExited(MouseEvent e) {}
-    public void mousePressed(MouseEvent e) {}
-    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent mouseEvent) {}
+    public void mouseExited(MouseEvent mouseEvent) {}
+    public void mousePressed(MouseEvent mouseEvent) {}
+    public void mouseReleased(MouseEvent mouseEvent) {}
+
     /**
      * Registers the specified SelectionListener to receive updates
      * when the selection changes.
@@ -252,13 +265,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * status of the table.
      */
     public void addSelectionListener(SelectionListener selectionListener) {
-        selectionListeners.add(selectionListener);
-        // notify the new listener of the current status 
-        if(selectedIndex == -1) {
-            selectionListener.clearSelection();
-        } else {
-            selectionListener.setSelection(getSelected());
-        }
+        selectionNotifier.addSelectionListener(selectionListener);
     }
 
 
@@ -306,6 +313,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     public boolean isCellEditable(int row, int column) {
         return false;
     }
+
     public void setValueAt(Object value, int row, int column) {
         throw new UnsupportedOperationException("The basic list table is not editable, use a WritableListTable instead");
     }
