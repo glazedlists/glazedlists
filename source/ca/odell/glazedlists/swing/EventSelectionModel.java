@@ -701,7 +701,7 @@ public final class EventSelectionModel implements ListSelectionModel {
             this.anchorSelectionIndex = anchorSelectionIndex;
 
             // handle a clear
-            if(anchorSelectionIndex == -1) {
+            if(leadSelectionIndex == -1 || anchorSelectionIndex == -1) {
                 clearSelection();
                 return;
             }
@@ -744,7 +744,7 @@ public final class EventSelectionModel implements ListSelectionModel {
             this.leadSelectionIndex = leadSelectionIndex;
 
             // handle a clear
-            if(leadSelectionIndex == -1) {
+            if(leadSelectionIndex == -1 || anchorSelectionIndex == -1) {
                 clearSelection();
                 return;
             }

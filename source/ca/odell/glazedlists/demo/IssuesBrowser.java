@@ -90,7 +90,7 @@ public class IssuesBrowser extends Applet {
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel(issuesTextFiltered);
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
-        issuesJTable.setSelectionModel(issuesSelectionModel);
+        //issuesJTable.setSelectionModel(issuesSelectionModel);
         issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(10);
