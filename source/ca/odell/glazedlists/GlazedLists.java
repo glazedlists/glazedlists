@@ -11,12 +11,8 @@ import java.util.*;
 import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.beans.*;
-import ca.odell.glazedlists.impl.gui.*;
-import ca.odell.glazedlists.impl.swt.*;
 // implemented interfaces
 import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
 
 
