@@ -42,7 +42,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
 
     /**
      * Creates an {@link AbstractEventList} that sends events using the specified
-     * {@link ListEventPipeline}.
+     * {@link ListEventPublisher}.
      *
      * @param publisher the channel for event distribution. If this is <tt>null</tt>,
      *      then a new {@link ListEventPublisher} will be created.
