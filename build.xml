@@ -66,6 +66,9 @@
         <exclude name="**/**Test.class"/>
         <exclude name="**/**Test$*.class"/>
       </fileset>
+      <fileset dir=".">
+        <include name="resources/**"/>
+      </fileset>
       <manifest>
         <attribute name="Main-Class" value="com.odellengineeringltd.glazedlists.demo.ProgrammingLanguageBrowser"/>
         <attribute name="Sealed" value="true"/>

@@ -15,6 +15,10 @@ import com.odellengineeringltd.glazedlists.test.*;
 import javax.swing.*;
 import java.awt.*;
 
+// test
+import java.lang.reflect.*;
+// endtest
+
 /**
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -50,13 +54,15 @@ public class ProgrammingLanguageBrowser {
     }
     
     public void display() {
+        // start with a list of tabs for each display type
         JTabbedPane listWidgetTabs = new JTabbedPane(JTabbedPane.BOTTOM);
 
         // add a JTable
         ListTable listTable = new ListTable(customFilteredLanguages, new ProgrammingLanguageTableCell());
-        TableComparatorSelector sortSelect = new TableComparatorSelector(listTable, sortedLanguages);
-        sortSelect.addComparator(0, "by name", sortByName);
-        sortSelect.addComparator(0, "by year", sortByYear);
+        TableComparatorChooser tableSorter = new TableComparatorChooser(listTable, sortedLanguages, false);
+        tableSorter.getComparatorsForColumn(0).clear();
+        tableSorter.getComparatorsForColumn(0).add(new ProgrammingLanguageNameComparator());
+        tableSorter.getComparatorsForColumn(0).add(new ProgrammingLanguageYearComparator());
         listWidgetTabs.addTab("JTable", listTable.getTableScrollPane());
         
         // add a JList
@@ -81,6 +87,23 @@ public class ProgrammingLanguageBrowser {
         // display the window
         frame.setSize(640, 480);
         frame.show();
+    }
+    
+    class BackwardsStringComparator implements java.util.Comparator {
+        private ComparableComparator cc = new ComparableComparator();
+        public int compare(Object alpha, Object beta) {
+            ProgrammingLanguage alphaString = (ProgrammingLanguage)alpha;
+            ProgrammingLanguage betaString = (ProgrammingLanguage)beta;
+            return cc.compare(reverse(alphaString.getName()), reverse(betaString.getName()));
+        }
+        public String reverse(String a) {
+            char[] ch = a.toCharArray();
+            char[] ar = new char[ch.length];
+            for(int i = 0; i < ch.length; i++) {
+                ar[ch.length - i - 1] = ch[i];
+            }
+            return new String(ar);
+        }
     }
     
     public static void main(String[] args) {

@@ -32,6 +32,10 @@ import java.util.Comparator;
  * the order of the columns, causing the two values to be different.
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=4">Issue #4</a>
  * 
+ * @deprecated As of April 3, 2004, this class has been replaced with the far
+ *      more powerful TableComparatorChooser. This class will be remain available
+ *      for migration until April 3, 2005.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class TableComparatorSelector extends MouseAdapter {
