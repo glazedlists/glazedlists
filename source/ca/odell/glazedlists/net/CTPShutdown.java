@@ -50,7 +50,7 @@ class CTPShutdown implements CTPRunnable {
             // close a connection socket
             } else {
                 CTPConnection connection = (CTPConnection)key.attachment();
-                connection.close(new ServerShutdownException());
+                connection.close(new CTPServerShutdownException());
             }
         }
         

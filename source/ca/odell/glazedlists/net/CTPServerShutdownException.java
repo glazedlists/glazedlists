@@ -18,12 +18,12 @@ import java.util.logging.*;
 /**
  * The reason a connection is closed when the server is shutdown.
  */
-class ServerShutdownException extends Exception {
+class CTPServerShutdownException extends Exception {
 
     /**
      * Creates a new ServerShutdownException.
      */
-    public ServerShutdownException() {
+    public CTPServerShutdownException() {
         super("Server shutting down");
     }
 }

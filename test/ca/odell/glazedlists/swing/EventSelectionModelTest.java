@@ -53,19 +53,19 @@ public class EventSelectionModelTest extends TestCase {
         flushEventDispatchThread();
         
         // make a selection
-        eventSelectionModel.getListSelectionModel().addSelectionInterval(1, 4);
+        eventSelectionModel.addSelectionInterval(1, 4);
         
         // test the selection
         assertEquals(list.subList(1, 5), eventSelectionModel.getEventList());
         
         // clear the selection
-        eventSelectionModel.getListSelectionModel().clearSelection();
+        eventSelectionModel.clearSelection();
         
         // test the selection
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getEventList());
-        assertEquals(-1, eventSelectionModel.getListSelectionModel().getMinSelectionIndex());
-        assertEquals(-1, eventSelectionModel.getListSelectionModel().getMaxSelectionIndex());
-        assertEquals(true, eventSelectionModel.getListSelectionModel().isSelectionEmpty());
+        assertEquals(-1, eventSelectionModel.getMinSelectionIndex());
+        assertEquals(-1, eventSelectionModel.getMaxSelectionIndex());
+        assertEquals(true, eventSelectionModel.isSelectionEmpty());
     }
 
 
