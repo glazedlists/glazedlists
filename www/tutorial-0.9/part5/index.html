@@ -1,0 +1,153 @@
+<html>
+<head><title>Glazed Lists Tutorial Part 5 - EventSelectionModel and custom filter lists</title>
+</head>
+<body>
+<div class="app">
+
+<h3>Glazed Lists Tutorial</h3>
+<h1>Part 5 - EventSelectionModel and custom filter lists</h1>
+
+<p>In part five we are transforming the user list that we built in part four into
+a filter for the issues list. When a user is selected, only issues for that user
+shall be displayed. 
+
+<h3>EventSelectionModel</h3>
+
+<p>Just as Glazed Lists provides models for lists, combo boxes and tables, it 
+provides a model for list selection. The <code>EventSelectionModel</code> provides
+two advantages over the standard <code>DefaultListSelectionModel</code>.
+<li>It provides its own <code>EventList</code> which contains the
+widget's current selection. You can now access the selected elements like they are
+the elements of an <code>ArrayList</code> or <code>Vector</code>. 
+<li>It provides a fourth selection mode in addition to the standard modes of single, single range
+and multiple range selection. With <code>MULTIPLE_INTERVAL_SELECTION</code>, when a
+row is inserted within a selected range, the inserted row becomes selected. This can
+be annoying when unfiltering because restored elements may become selected.
+This problem is solved by <code>EventSelectionModel</code>'s default
+<code>MULTIPLE_INTERVAL_SELECTION_DEFENSIVE</code> mode, which does not add
+inserted elements to the selection. 
+
+<p>When implementing filtering we display an issue only if there are no users
+selected or if that issue's user is among those selected. This is easy by using the 
+<code>isEmpty()</code> and <code>contains()</code> methods of the selection list.
+
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>            if(<font color="#FF3333">usersSelectedList.isEmpty()</font>) return true;
+            ...
+            String user = issue.getAssignedTo();
+            <font color="#FF3333">return usersSelectedList.contains(user);</font></code></pre></td></tr></table>
+
+<h3>Custom filters using AbstractFilterList</h3>
+
+<p>Just as we filtered issues for text using <code>TextFilterList</code>, we can
+filter with arbitrary criteria by creating our own filter list. The
+<code>AbstractFilterList</code> is designed for just that. To implement a custom
+filter list, we need to do a few things:
+<li>Extend <code>AbstractFilterList</code> and call <code>handleFilterChanged()</code>
+within the constructor.
+<li>Implement the <code>filterMatches(Object)</code> method as a test whether an
+element should be included or not.
+<li>Call <code>handleFilterChanged()</code> whenever the filter criteria has
+changed in order to re-apply the filter.
+
+<p>We implemented our user filter using <code>AbstractFilterList</code>. The
+class  re-applies the filter whenver the user list selection changes. It uses
+a <code>EventSelectionModel</code> to simplify filter testing code.
+
+<p>The <code>EventSelectionModel</code> is accessed by both
+the Swing event dispatch thread and the list updating threads so we must ensure
+that access to it is thread safe. Therefore we wrap our calls to the
+selection model in a <code>try/finally</code> block where we can
+acquire a read lock. There should be further information on thread safety
+in Glazed Lists as this tutorial is expanded.
+
+<p><table cellpadding="5" cellspacing="0" width="100%" border="1" bgcolor="#EEEEEE"><tr><td><pre><code>import java.util.*;
+import java.io.*;
+import java.net.*;
+import javax.swing.*;
+import javax.swing.event.*;
+// glazed lists
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.swing.*;
+
+/**
+ * An IssuesUserFilter is a filter list that filters based on the selected
+ * users.
+ * 
+ * @author &lt;a href="mailto:jesse@odel.on.ca"&gt;Jesse Wilson&lt;/a&gt;
+ */
+public class IssuesUserFilter <font color="#FF3333">extends AbstractFilterList</font> implements ListSelectionListener {
+    
+    /** a list of users */
+    EventList usersEventList;
+    EventList usersSelectedList;
+    /** a widget for selecting users */
+    JList userSelect;
+    
+    /**
+     * Create a filter list that filters the specified source list, which
+     * must contain only Issue objects.
+     */
+    <font color="#FF3333">public IssuesUserFilter(EventList source) {</font>
+        <font color="#FF3333">super(source);</font>
+        
+        // create a unique users list from the source issues list
+        usersEventList = new UniqueList(new IssuesToUserList(source));
+
+        // create a JList that contains users
+        EventListModel usersListModel = new EventListModel(usersEventList);
+        userSelect = new JList(usersListModel);
+
+        // create an EventList containing the JList's selection
+        EventSelectionModel userSelectionModel = new EventSelectionModel(usersEventList);
+        userSelect.setSelectionModel(userSelectionModel.getListSelectionModel());
+        usersSelectedList = userSelectionModel.getEventList();
+        userSelect.addListSelectionListener(this);
+
+        <font color="#FF3333">handleFilterChanged();</font>
+    <font color="#FF3333">}</font>
+    
+    /**
+     * Get the widget for selecting users.
+     */
+    public JList getUserSelect() {
+        return userSelect;
+    }
+
+    /**
+     * When the JList selection changes, refilter.
+     */
+    public void valueChanged(ListSelectionEvent e) {
+        <font color="#FF3333">handleFilterChanged();</font>
+    }
+    
+    /**
+     * Test whether to include or not include the specified issue based
+     * on whether or not their user is selected.
+     */
+    <font color="#FF3333">public boolean filterMatches(Object o) {</font>
+        <font color="#FF3333">usersSelectedList.getReadWriteLock().readLock().lock();</font>
+        <font color="#FF3333">try {</font>
+            if(o == null) return false;
+            if(usersSelectedList.isEmpty()) return true;
+            
+            Issue issue = (Issue)o;
+            String user = issue.getAssignedTo();
+            return usersSelectedList.contains(user);
+            
+        <font color="#FF3333">} finally {</font>
+            <font color="#FF3333">usersSelectedList.getReadWriteLock().readLock().unlock();</font>
+        <font color="#FF3333">}</font>
+    <font color="#FF3333">}</font>
+}</font></code></pre></td></tr></table>
+
+<p><img src="screenshot.png" width="540" height="380" alt="Issues Browser">
+
+<h3>So What?</h3>
+<p>We have exploited some advanced Glazed Lists functionality to build a user
+filter. We used a convenience list from the selection model and previewed
+the concurrency facilities within Glazed Lists.
+
+
+</div>
+</body>
+</html>
