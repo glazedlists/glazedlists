@@ -8,6 +8,7 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;

@@ -4,12 +4,10 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swing;
+package ca.odell.glazedlists.gui;
 
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-// records fit inside of tables
-import javax.swing.JTable;
 
 /**
  * Allows the ability to specify column class information in addition to the standard

@@ -8,6 +8,7 @@ package ca.odell.glazedlists.demo;
 
 // glazed lists
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.swing.*;
 
 /**

@@ -4,13 +4,11 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swing;
+package ca.odell.glazedlists.gui;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-// records fit inside of tables
-import javax.swing.JTable;
 
 /**
  * Specifies how to edit the elements of table.

@@ -10,7 +10,8 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 // the Glazed Lists util and impl packages include default comparators
 import ca.odell.glazedlists.util.*;
-import ca.odell.glazedlists.impl.*;
+import ca.odell.glazedlists.gui.*;
+import ca.odell.glazedlists.impl.SortIconFactory;
 import ca.odell.glazedlists.impl.sort.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
@@ -77,19 +78,10 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      *      not as simple and this strategy should only be used where necessary.
      */
     public TableComparatorChooser(JTable table, SortedList sortedList, boolean multipleColumnSort) {
+        super(sortedList, ((EventTableModel)table.getModel()).getTableFormat(), multipleColumnSort);
+        
+        // save the Swing-specific state
         this.table = table;
-        this.sortedList = sortedList;
-        this.multipleColumnSort = multipleColumnSort;
-
-        // get the table model from the table
-        try {
-            eventTableModel = (EventTableModel)table.getModel();
-        } catch(ClassCastException e) {
-            throw new IllegalArgumentException("Can not apply TableComparatorChooser to a table whose table model is not an EventTableModel");
-        }
-
-        // set up the column click listeners
-        rebuildColumns();
 
         // set the table header
         table.getTableHeader().setDefaultRenderer(new SortArrowHeaderRenderer());
@@ -98,20 +90,6 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
         table.setColumnSelectionAllowed(false);
         table.getTableHeader().addMouseListener(listener);
         table.getModel().addTableModelListener(listener);
-    }
-
-    /**
-     * When the column model is changed, this resets the column clicks and
-     * comparator list for each column.
-     */
-    private void rebuildColumns() {
-        // build the column click managers
-        columnClickTrackers = new ColumnClickTracker[eventTableModel.getColumnCount()];
-        for(int i = 0; i < columnClickTrackers.length; i++) {
-            columnClickTrackers[i] = new ColumnClickTracker(eventTableModel.getTableFormat(), i);
-        }
-        primaryColumn = -1;
-        recentlyClickedColumns.clear();
     }
 
     /**
@@ -136,53 +114,8 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.
      */
-    private void redetectComparator(Comparator currentComparator) {
-        sortedListComparator = currentComparator;
-
-        // Clear the current click counts
-        for(int c = 0; c < columnClickTrackers.length; c++) {
-            columnClickTrackers[c].resetClickCount();
-        }
-        primaryColumn = -1;
-        recentlyClickedColumns.clear();
-
-        // Populate a list of Comparators
-        List comparatorsList = new ArrayList();
-        if(sortedListComparator == null) {
-            // Do Nothing
-        } else if(sortedListComparator instanceof ComparatorChain) {
-            ComparatorChain chain = (ComparatorChain)sortedListComparator;
-            comparatorsList.addAll(chain.getComparators());
-        } else {
-            comparatorsList.add(sortedListComparator);
-        }
-
-        // walk through the list of Comparators and assign click counts
-        walkThroughComparators:
-        for(Iterator i = comparatorsList.iterator(); i.hasNext(); ) {
-            // get the current comparator
-            Comparator comparator = (Comparator)i.next();
-            boolean reverse = false;
-            if(comparator instanceof ReverseComparator) {
-                reverse = true;
-                comparator = ((ReverseComparator)comparator).getSourceComparator();
-            }
-
-            // discover where to add clicks for this comparator
-            for(int c = 0; c < columnClickTrackers.length; c++) {
-                if(recentlyClickedColumns.contains(columnClickTrackers[c])) {
-                    continue;
-                }
-                int comparatorIndex = columnClickTrackers[c].getComparators().indexOf(comparator);
-                if(comparatorIndex != -1) {
-                    columnClickTrackers[c].setComparatorIndex(comparatorIndex);
-                    columnClickTrackers[c].setReverse(reverse);
-                    if(recentlyClickedColumns.isEmpty()) primaryColumn = c;
-                    recentlyClickedColumns.add(columnClickTrackers[c]);
-                    if(!multipleColumnSort) break walkThroughComparators;
-                }
-            }
-        }
+    protected void redetectComparator(Comparator currentComparator) {
+        super.redetectComparator(currentComparator);
 
         // force the table header to redraw itself
         table.getTableHeader().revalidate();
@@ -193,25 +126,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * Updates the comparator in use and applies it to the table.
      */
     protected final void rebuildComparator() {
-        // build a new comparator
-        if(!recentlyClickedColumns.isEmpty()) {
-            List comparators = new ArrayList();
-            for(Iterator i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
-                ColumnClickTracker columnClickTracker = (ColumnClickTracker)i.next();
-                Comparator comparator = columnClickTracker.getComparator();
-                comparators.add(comparator);
-            }
-            ComparatorChain comparatorChain = (ComparatorChain)ComparatorFactory.chain(comparators);
-
-            // select the new comparator
-            sortedList.getReadWriteLock().writeLock().lock();
-            try {
-                sortedListComparator = comparatorChain;
-                sortedList.setComparator(comparatorChain);
-            } finally {
-                sortedList.getReadWriteLock().writeLock().unlock();
-            }
-        }
+        super.rebuildComparator();
 
         // force the table header to redraw itself
         table.getTableHeader().revalidate();
@@ -225,19 +140,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * Gets the sorting style currently applied to the specified column.
      */
     protected final int getSortingStyle(int column) {
-        int modelColumn = table.convertColumnIndexToModel(column);
-        return columnClickTrackers[modelColumn].getSortingStyle();
-    }
-
-    /**
-     * Creates a {@link Comparator} that can compare list elements
-     * given a {@link Comparator} that can compare column values for the specified
-     * column. This returns a {@link Comparator} that extracts the table values for
-     * the specified column and then delegates the actual comparison to the specified
-     * comparator.
-     */
-    public Comparator createComparatorForElement(Comparator comparatorForColumn, int column) {
-        return new TableColumnComparator(eventTableModel.getTableFormat(), column, comparatorForColumn);
+        return super.getSortingStyle(table.convertColumnIndexToModel(column));
     }
 
     /**

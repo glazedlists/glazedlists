@@ -10,7 +10,7 @@ package ca.odell.glazedlists.impl.sort;
 import java.util.Comparator;
 import ca.odell.glazedlists.util.ComparatorFactory;
 // to work with TableFormats
-import ca.odell.glazedlists.impl.TableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
 
 /**
  * A comparator that sorts a table by the column that was clicked.

@@ -10,7 +10,7 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.*;
 // the Glazed Lists util and volatile packages for default comparators
 import ca.odell.glazedlists.util.*;
-import ca.odell.glazedlists.impl.*;
+import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.sort.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
@@ -56,32 +56,16 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      *      not as simple and this strategy should only be used where necessary.
      */
     public TableComparatorChooser(EventTableViewer eventTableViewer, SortedList sortedList, boolean multipleColumnSort) {
+        super(sortedList, eventTableViewer.getTableFormat());
+        
+        // save the SWT-specific state
         this.eventTableViewer = eventTableViewer;
         this.table = eventTableViewer.getTable();
-        this.sortedList = sortedList;
-        this.multipleColumnSort = multipleColumnSort;
-
-        // set up the column click listeners
-        rebuildColumns();
 
         // listen for events on the specified table
         for(int c = 0; c < table.getColumnCount(); c++) {
             table.getColumn(c).addSelectionListener(new ColumnListener(c));
         }
-    }
-
-    /**
-     * When the column model is changed, this resets the column clicks and
-     * comparator list for each column.
-     */
-    private void rebuildColumns() {
-        // build the column click managers
-        columnClickTrackers = new ColumnClickTracker[table.getColumnCount()];
-        for(int i = 0; i < columnClickTrackers.length; i++) {
-            columnClickTrackers[i] = new ColumnClickTracker(eventTableViewer.getTableFormat(), i);
-        }
-        primaryColumn = -1;
-        recentlyClickedColumns.clear();
     }
 
     /**
@@ -104,6 +88,9 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
         throw new IllegalArgumentException("Cannot remove nonexistant listener " + sortListener);
     }
 
+    /**
+     * Handles column clicks.
+     */
     class ColumnListener implements SelectionListener {
         private int column;
         public ColumnListener(int column) {
@@ -121,25 +108,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      * Updates the comparator in use and applies it to the table.
      */
     protected final void rebuildComparator() {
-        // build a new comparator
-        if(!recentlyClickedColumns.isEmpty()) {
-            List comparators = new ArrayList();
-            for(Iterator i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
-                ColumnClickTracker columnClickTracker = (ColumnClickTracker)i.next();
-                Comparator comparator = columnClickTracker.getComparator();
-                comparators.add(comparator);
-            }
-            ComparatorChain comparatorChain = (ComparatorChain)ComparatorFactory.chain(comparators);
-
-            // select the new comparator
-            sortedList.getReadWriteLock().writeLock().lock();
-            try {
-                sortedListComparator = comparatorChain;
-                sortedList.setComparator(comparatorChain);
-            } finally {
-                sortedList.getReadWriteLock().writeLock().unlock();
-            }
-        }
+        super.rebuildComparator();
 
         // notify interested listeners that the sorting has changed
         Event sortEvent = new Event();
@@ -148,23 +117,5 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
             Listener listener = (Listener)i.next();
             listener.handleEvent(sortEvent);
         }
-    }
-
-    /**
-     * Gets the sorting style currently applied to the specified column.
-     */
-    protected final int getSortingStyle(int column) {
-        return columnClickTrackers[column].getSortingStyle();
-    }
-
-    /**
-     * Creates a {@link Comparator} that can compare list elements
-     * given a {@link Comparator} that can compare column values for the specified
-     * column. This returns a {@link Comparator} that extracts the table values for
-     * the specified column and then delegates the actual comparison to the specified
-     * comparator.
-     */
-    public Comparator createComparatorForElement(Comparator comparatorForColumn, int column) {
-        return new TableColumnComparator(eventTableViewer.getTableFormat(), column, comparatorForColumn);
     }
 }

@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swt;
+package ca.odell.glazedlists.gui;
 
 /**
  * Specifies how a set of elements will be formatted in a List widget.

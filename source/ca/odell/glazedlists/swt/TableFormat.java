@@ -11,6 +11,6 @@ package ca.odell.glazedlists.swt;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public interface TableFormat extends ca.odell.glazedlists.impl.TableFormat {
+public interface TableFormat extends ca.odell.glazedlists.gui.TableFormat {
 
 }

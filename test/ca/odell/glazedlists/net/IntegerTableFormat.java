@@ -8,7 +8,7 @@ package ca.odell.glazedlists.net;
 
 // glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.swing.*;
+import ca.odell.glazedlists.gui.*;
 
 /**
  * The IntegerTableFormat specifies how an integer is displayed in a table.

@@ -7,6 +7,7 @@
 package ca.odell.glazedlists.swing;
 
 import java.util.*;
+import ca.odell.glazedlists.gui.WritableTableFormat;
 // Bean reflection
 import ca.odell.glazedlists.impl.BeanProperty;
 

@@ -10,6 +10,7 @@ package ca.odell.glazedlists.swt;
 import org.eclipse.swt.widgets.List;
 // glazed lists
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 // to preserve selection
 import java.util.ArrayList;
