@@ -31,7 +31,7 @@ import java.io.*;
  *
  * @author Petr Kuzel
  */
-public class FileList extends AbstractList implements List {
+public class OfflineList extends AbstractList implements List {
 
     /** Backend file. */
     private RandomAccessFile file;
@@ -43,7 +43,7 @@ public class FileList extends AbstractList implements List {
      * Creates new file based list.
      * @throws IOException if cannot create backend file
      */
-    public FileList() throws IOException {
+    public OfflineList() throws IOException {
         File tmp = File.createTempFile("NB-FileList-", null);   // NOI18N
         tmp.deleteOnExit();
         file = new RandomAccessFile(tmp, "rw");
