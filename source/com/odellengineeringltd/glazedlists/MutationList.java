@@ -75,7 +75,7 @@ public abstract class MutationList extends AbstractList implements EventList, Li
      * Registers the specified listener to receive notification of changes
      * to this list.
      */
-    public final void addListChangeListener(ListChangeListener listChangeListener) {
+    public void addListChangeListener(ListChangeListener listChangeListener) {
         updates.addListChangeListener(listChangeListener);
     }
 
