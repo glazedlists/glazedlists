@@ -178,26 +178,31 @@ public class Diff {
      * Draws a simple grid describing the specified matcher.
      */
     public static void drawGrid(Matcher matcher) {
-        System.out.print("    ");
+        System.out.print("      ");
         for(int x = 0; x < matcher.getAlphaLength(); x++) {
             System.out.print(x);
+            if(x < 10) System.out.print(" ");
+            if(x < 100) System.out.print(" ");
         }
         System.out.println("");
-        System.out.print("    ");
+        System.out.print("      ");
         for(int x = 0; x < matcher.getAlphaLength(); x++) {
             System.out.print(matcher.alphaAt(x));
+            System.out.print("  ");
         }
         System.out.println("");
         
         for(int y = 0; y < matcher.getBetaLength(); y++) {
             System.out.print(y);
+            if(y < 10) System.out.print(" ");
+            if(y < 100) System.out.print(" ");
             System.out.print(" ");
             System.out.print(matcher.betaAt(y));
             System.out.print(" ");
             for(int x = 0; x < matcher.getAlphaLength(); x++) {
                 boolean match = matcher.matchPair(x, y);
-                if(match) System.out.print("*");
-                else System.out.print(".");
+                if(match) System.out.print("_\\|");
+                else System.out.print("__|");
             }
             System.out.println("");
         }
