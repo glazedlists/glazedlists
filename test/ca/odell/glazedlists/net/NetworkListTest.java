@@ -30,7 +30,7 @@ public class NetworkListTest extends TestCase {
     private ListPeer peer;
     
     /** the port to listen on */
-    private int serverPort = 5000;
+    private static int serverPort = 5000;
     
     /**
      * Prepare for the test.
@@ -90,6 +90,54 @@ public class NetworkListTest extends TestCase {
         }
     }
     
+    /**
+     * Verifies that the client can disconnect and reconnect.
+     */
+    public void testClientDisconnect() {
+        try {
+            // prepare the source list
+            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            sourceList.add(new Integer(8));
+            sourceList.add(new Integer(6));
+            
+            // prepare the target list
+            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            
+            // verify they're equal after a subscribe
+            waitFor(1000);
+            assertTrue(targetList.isConnected());
+            assertEquals(sourceList, targetList);
+            List snapshot = new ArrayList();
+            snapshot.addAll(sourceList);
+            
+            // disconnect the client
+            targetList.disconnect();
+            waitFor(1000);
+            assertFalse(targetList.isConnected());
+            
+            // change the source list
+            sourceList.add(new Integer(7));
+            sourceList.add(new Integer(5));
+            
+            // they shouldn't be equal
+            assertEquals(snapshot, targetList);
+            
+            // bring the target list back to life
+            targetList.connect();
+            waitFor(1000);
+            assertTrue(targetList.isConnected());
+            assertEquals(sourceList, targetList);
+            
+            // clean up after myself
+            targetList.disconnect();
+            waitFor(1000);
+            
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
     /**
      * Waits for the specified duration of time. This hack method should be replaced
      * with something else that uses notification.

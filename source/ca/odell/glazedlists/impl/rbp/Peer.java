@@ -68,7 +68,7 @@ public class Peer implements CTPHandlerFactory {
         // unsubscribe from everything
         for(Iterator s = subscribed.values().iterator(); s.hasNext(); ) {
             PeerResource resource = (PeerResource)s.next();
-            resource.unsubscribe();
+            resource.status().disconnect();
         }
         subscribed.clear();
         
@@ -115,30 +115,20 @@ public class Peer implements CTPHandlerFactory {
      * Subscribe to the specified resource.
      */
     public ResourceStatus subscribe(Resource resource, String resourceName, String host, int port) {
-        PeerConnection connection = getConnection(host, port);
-        PeerResource peerResource = new PeerResource(connection, resource, resourceName);
+        PeerResource peerResource = new PeerResource(this, resource, resourceName, host, port);
         subscribed.put(resourceName, peerResource);
-        return peerResource;
+        return peerResource.status();
     }
     
     /**
      * Publish the specified resource.
      */
     public ResourceStatus publish(Resource resource, String resourceName) {
-        PeerResource peerResource = new PeerResource(resource, resourceName);
+        PeerResource peerResource = new PeerResource(this, resource, resourceName);
         published.put(resourceName, peerResource);
-        return peerResource;
+        return peerResource.status();
     }
     
-    /*
-     * Unsubscribes from the specified resource.
-     */
-    /*public void unsubscribe(String resourceName) {
-        PeerResource peerResource = (PeerResource)subscribed.remove(resourceName);
-        if(peerResource == null) throw new IllegalArgumentException("Not subscribed to " + resourceName);
-        peerResource.unsubscribe();
-    }*/
-
      /**
       * Gets the specified published resource.
       */
@@ -149,7 +139,7 @@ public class Peer implements CTPHandlerFactory {
      /**
       * Gets the specified connection, or creates it if necessary.
       */
-     private PeerConnection getConnection(String host, int port) {
+     PeerConnection getConnection(String host, int port) {
          PeerConnection peerConnection = new PeerConnection(this);
          connectionManager.connect(peerConnection, host, port);
          connections.add(peerConnection);

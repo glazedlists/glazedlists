@@ -19,114 +19,72 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class PeerResource implements ResourceListener, ResourceStatus {
+class PeerResource {
 
     /** logging */
     private static Logger logger = Logger.getLogger(PeerResource.class.toString());
     
-    /** the publisher of this resource */
-    private PeerConnection publisher = null;
+    /** the peer that owns all connections */
+    private Peer peer;
     
     /** the resource being managed */
     private Resource resource = null;
-    
-    /** subscribers interested in this resource */
-    private List subscribers = new ArrayList();
-    
     /** the name that this resource is being published as */
     private String resourceName;
     
+    /** the publisher of this resource */
+    private PeerConnection publisher = null;
+    /** subscribers interested in this resource */
+    private List subscribers = new ArrayList();
+    
     /** the session ID is a simple validation */
     private int sessionId = -1;
-    
     /** the ID of the current update */
     private int updateId = 0;
     
-    /** listeners interested in status changes */
-    private List statusListeners = new ArrayList();
+    /** the host and port of the publisher */
+    private String publisherHost = null;
+    private int publisherPort = -1;
+    
+    /** listens to changes in the resource */
+    private PrivateResourceListener resourceListener = new PrivateResourceListener();
+    
+    /** provides information about the status of this resource */
+    private PrivateResourceStatus resourceStatus = new PrivateResourceStatus();
     
     /**
-     * Create a new PeerResource to manage the specified resource.
+     * Create a new PeerResource for an outgoing resource.
      */
-    public PeerResource(Resource resource, String resourceName) {
+    public PeerResource(Peer peer, Resource resource, String resourceName) {
+        this.peer = peer;
         this.publisher = null;
         this.resource = resource;
         this.resourceName = resourceName;
         
-        // build a factory for data blocks
+        // create a random session ID as a check
         this.sessionId = new Random(System.currentTimeMillis()).nextInt();
         
         // listen for updates
-        resource.addResourceListener(this);
+        resource.addResourceListener(resourceListener);
     }
     
     /**
-     * Create a new PeerResource to manage the specified resource.
+     * Create a new PeerResource for an incoming resource.
      */
-    public PeerResource(PeerConnection publisher, Resource resource, String resourceName) {
-        this.publisher = publisher;
+    public PeerResource(Peer peer, Resource resource, String resourceName, String publisherHost, int publisherPort) {
+        this.peer = peer;
         this.resource = resource;
         this.resourceName = resourceName;
-        
-        // subscribe to this resource
-        publisher.incomingSubscriptions.put(resourceName, this);
-        PeerBlock block = PeerBlock.subscribe(resourceName);
-        publisher.writeBlock(this, block);
-        
+        this.publisherHost = publisherHost;
+        this.publisherPort = publisherPort;
+
         // listen for updates
-        resource.addResourceListener(this);
-    }
-    
-    /** {@inheritDoc} */
-    public boolean isConnected() {
-        return publisher != null;
-    }
-    /** {@inheritDoc} */
-    public void connect() {
-        throw new UnsupportedOperationException();
-    }
-    /** {@inheritDoc} */
-    public void disconnect() {
-        if(publisher != null) {
-            unsubscribe();
-        } else {
-            throw new IllegalStateException();
-        }
-    }
-    /** {@inheritDoc} */
-    public void addResourceStatusListener(ResourceStatusListener listener) {
-        statusListeners.add(listener);
-    }
-    /** {@inheritDoc} */
-    public void removeResourceStatusListener(ResourceStatusListener listener) {
-        statusListeners.remove(listener);
-    }
-    
-    /**
-     * Handles a block of incoming data.
-     */
-    public void incomingBlock(PeerConnection source, PeerBlock block) {
-        if(block.isSubscribe()) remoteSubscribe(source, block);
-        else if(block.isSubscribeConfirm()) remoteSubscribeConfirm(source, block);
-        else if(block.isUpdate()) remoteUpdate(source, block);
-        else if(block.isUnsubscribe()) remoteUnsubscribe(source, block);
-        else throw new IllegalStateException();
-    }
-    
-    /**
-     * Unsubscribes to this resource.
-     */
-    public void unsubscribe() {
-        // we can't unsubscribe until we have no subscribers
-        if(publisher == null) throw new IllegalStateException();
-        if(!subscribers.isEmpty()) throw new IllegalStateException();
+        resource.addResourceListener(resourceListener);
         
-        // unsubscribe from this resource
-        PeerBlock block = PeerBlock.unsubscribe(resourceName);
-        publisher.writeBlock(this, block);
-        publisher.incomingSubscriptions.remove(resourceName);
-        if(publisher.isIdle()) publisher.close();
+        // subscribe to the resource
+        resourceStatus.connect();
     }
+    
     
     /**
      * Gets the name of this resource.
@@ -136,28 +94,126 @@ class PeerResource implements ResourceListener, ResourceStatus {
     }
     
     /**
-     * Handles a change in a local resource contained by the specified delta.
+     * Handle the state of the specified connection changing.
      */
-    public void resourceUpdated(Resource resource, Bufferlo delta) {
-        // update the internal state
-        if(publisher == null) updateId++;
-        
-        // if nobody's listening, we're done
-        if(subscribers.isEmpty()) return;
-        
-        // forward the event to listeners
-        PeerBlock block = PeerBlock.update(resourceName, sessionId, updateId, delta);
-        
-        // send the block to interested subscribers
-        for(int s = 0; s < subscribers.size(); s++) {
-            PeerConnection subscriber = (PeerConnection)subscribers.get(s);
-            subscriber.writeBlock(this, block);
+    public void connectionClosed(PeerConnection connection, Exception reason) {
+        if(publisher == connection) {
+            publisher = null;
+            resourceStatus.setConnected(false, reason);
+            connection.incomingSubscriptions.remove(resourceName);
+        } else {
+            subscribers.remove(connection);
+            connection.outgoingPublications.remove(resourceName);
         }
     }
     
     /**
-     * Handles a change in a remote resource.
+     * Listens to changes in the resource, so they can be broadcast to subscribers.
      */
+    private class PrivateResourceListener implements ResourceListener {
+        public void resourceUpdated(Resource resource, Bufferlo delta) {
+            // update the internal state
+            if(publisher == null) updateId++;
+            
+            // if nobody's listening, we're done
+            if(subscribers.isEmpty()) return;
+            
+            // forward the event to listeners
+            PeerBlock block = PeerBlock.update(resourceName, sessionId, updateId, delta);
+            
+            // send the block to interested subscribers
+            for(int s = 0; s < subscribers.size(); s++) {
+                PeerConnection subscriber = (PeerConnection)subscribers.get(s);
+                subscriber.writeBlock(PeerResource.this, block);
+            }
+        }
+    }
+    public ResourceListener resourceListener() {
+        return resourceListener;
+    }
+
+    /**
+     * Provides information about the status of this resource.
+     */
+    private class PrivateResourceStatus implements ResourceStatus {
+        
+        /** listeners interested in status changes */
+        private List statusListeners = new ArrayList();
+        
+        /** connected if the current subscription has been confirmed */
+        private boolean connected = false;
+    
+        /** {@inheritDoc} */
+        public boolean isConnected() {
+            return connected;
+        }
+        
+        /** {@inheritDoc} */
+        public void connect() {
+            if(publisher != null) return;
+            
+            // connect to the publisher
+            publisher = peer.getConnection(publisherHost, publisherPort);
+            
+            // subscribe to this resource
+            publisher.incomingSubscriptions.put(resourceName, PeerResource.this);
+            PeerBlock block = PeerBlock.subscribe(resourceName);
+            publisher.writeBlock(PeerResource.this, block);
+        }
+        
+        /** {@inheritDoc} */
+        public void disconnect() {
+            // if we're not connected
+            if(publisher == null) return;
+                
+            // we can't unsubscribe until we have no subscribers
+            if(!subscribers.isEmpty()) throw new IllegalStateException();
+            
+            // unsubscribe from this resource
+            PeerBlock block = PeerBlock.unsubscribe(resourceName);
+            publisher.writeBlock(PeerResource.this, block);
+            publisher.incomingSubscriptions.remove(resourceName);
+            if(publisher.isIdle()) publisher.close();
+        }
+        
+        /** {@inheritDoc} */
+        public void addResourceStatusListener(ResourceStatusListener listener) {
+            statusListeners.add(listener);
+        }
+
+        /** {@inheritDoc} */
+        public void removeResourceStatusListener(ResourceStatusListener listener) {
+            statusListeners.remove(listener);
+        }
+        
+        /**
+         * Update the status of this PeerResource and notify everyone who's interested.
+         */
+        private void setConnected(boolean connected, Exception reason) {
+            this.connected = connected;
+            for(Iterator i = statusListeners.iterator(); i.hasNext(); ) {
+                ResourceStatusListener statusListener = (ResourceStatusListener)i.next();
+                if(connected) statusListener.resourceConnected(this);
+                else statusListener.resourceDisconnected(this, reason);
+            }
+        }
+    
+    }
+    public ResourceStatus status() {
+        return resourceStatus;
+    }
+    
+
+    /**
+     * Handles a block of incoming data.
+     */
+    void incomingBlock(PeerConnection source, PeerBlock block) {
+        if(block.isSubscribe()) remoteSubscribe(source, block);
+        else if(block.isSubscribeConfirm()) remoteSubscribeConfirm(source, block);
+        else if(block.isUpdate()) remoteUpdate(source, block);
+        else if(block.isUnsubscribe()) remoteUnsubscribe(source, block);
+        else throw new IllegalStateException();
+    }
     private void remoteUpdate(PeerConnection publisher, PeerBlock block) {
         // update the internal state
         if(publisher != null) updateId++;
@@ -169,10 +225,6 @@ class PeerResource implements ResourceListener, ResourceStatus {
         // handle the update
         resource.update(block.getPayload());
     }
-    
-    /**
-     * Subscribe the specified remote peer to this resource.
-     */
     private void remoteSubscribe(PeerConnection subscriber, PeerBlock block) {
         // lock peer resource //////////////////////////////
         
@@ -185,38 +237,19 @@ class PeerResource implements ResourceListener, ResourceStatus {
         subscriber.writeBlock(this, subscribeConfirm);
         // unlock peer resource //////////////////////////////
     }
-    
-    /**
-     * Confirms the subscription by the specified remote peer.
-     */
     private void remoteSubscribeConfirm(PeerConnection publisher, PeerBlock block) {
         publisher.incomingSubscriptions.put(resourceName, this);
         
         updateId = block.getUpdateId();
         sessionId = block.getSessionId();
+        resourceStatus.setConnected(true, null);
         resource.fromSnapshot(block.getPayload());
     }
-    
-    /**
-     * Unsubscribe the specified remote peer from this resource.
-     */
     private void remoteUnsubscribe(PeerConnection subscriber, PeerBlock block) {
         subscribers.remove(subscriber);
         subscriber.outgoingPublications.remove(resourceName);
     }
     
-    /**
-     * Handle the state of the specified connection changing.
-     */
-    public void connectionClosed(PeerConnection connection, Exception reason) {
-        if(publisher == connection) {
-            publisher = null;
-            connection.incomingSubscriptions.remove(resourceName);
-        } else {
-            subscribers.remove(connection);
-            connection.outgoingPublications.remove(resourceName);
-        }
-    }
 
     /**
      * Gets this resource as a String for debugging.

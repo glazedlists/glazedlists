@@ -151,18 +151,22 @@ class PeerConnection implements CTPHandler {
         return (incomingSubscriptions.isEmpty() && outgoingPublications.isEmpty());
     }
     
-    /**
+    /*
      * Tests whether this connection is closed.
      */
-    boolean isClosed() {
+    /*boolean isClosed() {
         return (state == CLOSED);
-    }
+    }*/
 
     /**
      * Close this peer connection.
      */
     public void close() {
-        if(state != READY) throw new UnsupportedOperationException();
+        if(state == CLOSED) {
+            logger.warning("Closing a closed connection");
+            return;
+        }
+
         if(connection == null) throw new UnsupportedOperationException();
         connection.close();
         peer.removeConnection(this);
@@ -177,7 +181,7 @@ class PeerConnection implements CTPHandler {
         } else if(state == READY) {
             connection.sendChunk(block.getBytes());
         } else if(state == CLOSED) {
-            throw new IllegalStateException();
+            logger.warning("Write block to closed connection: " + this);
         } else {
             throw new IllegalStateException();
         }
