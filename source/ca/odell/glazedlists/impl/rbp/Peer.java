@@ -71,8 +71,13 @@ public class Peer implements CTPHandlerFactory {
      * Starts the peer.
      */
     public void start() {
-         connectionManager = new CTPConnectionManager(this, port);
-         connectionManager.start();
+        connectionManager = new CTPConnectionManager(this, port);
+
+        try {
+            connectionManager.start();
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**

@@ -11,6 +11,7 @@ import java.util.*;
 import junit.framework.*;
 import ca.odell.glazedlists.*;
 // NIO is used for CTP
+import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.io.UnsupportedEncodingException;
@@ -35,11 +36,15 @@ public class CTPChunkTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        // increment the server port as to not bind to a previously used one
-        serverPort++;
-        handlerFactory = new StaticCTPHandlerFactory();
-        connectionManager = new CTPConnectionManager(handlerFactory, serverPort);
-        connectionManager.start();
+        try {
+            // increment the server port as to not bind to a previously used one
+            serverPort++;
+            handlerFactory = new StaticCTPHandlerFactory();
+            connectionManager = new CTPConnectionManager(handlerFactory, serverPort);
+            connectionManager.start();
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
     }
 
     /**
@@ -48,6 +53,22 @@ public class CTPChunkTest extends TestCase {
      */
     public void tearDown() {
         connectionManager.stop();
+    }
+
+    /**
+     * Verifies that an Exception is thrown if there is a bind failure.
+     */
+    public void testRepeatedBind() {
+        try {
+            // create a second connnection manager and bind on the same port
+            CTPConnectionManager connectionManager2 = new CTPConnectionManager(handlerFactory, serverPort);
+            connectionManager2.start();
+            
+            // bind worked, we're sunk
+            fail();
+        } catch(IOException e) {
+            // the bind failed as expected
+        }
     }
 
     /**

@@ -72,28 +72,23 @@ public final class CTPConnectionManager implements Runnable {
      *
      * @return true if the server successfully binds to the listen port.
      */
-    public synchronized boolean start() {
+    public synchronized boolean start() throws IOException{
         // verify we haven't already started
         if(networkThread != null) throw new IllegalStateException();
         
         // open a channel and bind
-        try {
-            ServerSocketChannel serverChannel = ServerSocketChannel.open();
-            ServerSocket serverSocket = serverChannel.socket();
-            InetSocketAddress listenAddress = new InetSocketAddress(listenPort);
-            serverSocket.bind(listenAddress);
+        ServerSocketChannel serverChannel = ServerSocketChannel.open();
+        ServerSocket serverSocket = serverChannel.socket();
+        InetSocketAddress listenAddress = new InetSocketAddress(listenPort);
+        serverSocket.bind(listenAddress);
         
-            // prepare for non-blocking, selectable IO
-            selector = Selector.open();
-            serverChannel.configureBlocking(false);
-            serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-            
-            // bind success
-            logger.info("Connection Manager ready, listening on " + listenAddress);
-        } catch(IOException e) {
-            logger.warning("Connection Manager failed to start, " + e.getMessage());
-            return false;
-        }
+        // bind success
+        logger.info("Connection Manager ready, listening on " + listenAddress);
+
+        // prepare for non-blocking, selectable IO
+        selector = Selector.open();
+        serverChannel.configureBlocking(false);
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         // start handling connections
         keepRunning = true;
