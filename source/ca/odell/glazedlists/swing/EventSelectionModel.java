@@ -201,7 +201,7 @@ public final class EventSelectionModel {
         /**
          * Returns the number of elements in this list.
          *
-         * This is the number of elements currently selected.
+         * @return the number of elements currently selected.
          */
         public int size() {
             return flagList.getCompressedList().size();
@@ -226,7 +226,7 @@ public final class EventSelectionModel {
         /**
          * Notifies this SelectionList about changes to its underlying list store.
          *
-         * This changes the flag list. Changes to the source list may cause simultaneous
+         * <p>This changes the flag list. Changes to the source list may cause simultaneous
          * changes to the corresponding selection list.
          */
         public void listChanged(ListEvent listChanges) {
@@ -493,19 +493,25 @@ public final class EventSelectionModel {
         /**
          * Change the selection to be between index0 and index1 inclusive.
          *
-         * First this calculates the smallest range where changes occur. This
+         * <p>First this calculates the smallest range where changes occur. This
          * includes the union of the selection range before and the selection
          * range specified. It then walks through the change and sets each
          * index as selected or not based on whether the index is in the 
          * new range. Finally it fires events to both the listening lists and
          * selection listeners about what changes happened.
          *
-         * If the selection does not change, this will not fire any events.
+         * <p>If the selection does not change, this will not fire any events.
          */
         public void setSelectionInterval(int index0, int index1) {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
                 if(!enabled) return;
+                
+                // handle a clear
+                if(index0 < 0 || index1 < 0) {
+                    clearSelection();
+                    return;
+                }
                 
                 // update anchor and lead
                 anchorSelectionIndex = index0;
@@ -529,6 +535,11 @@ public final class EventSelectionModel {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
                 if(!enabled) return;
+
+                // handle a no-op
+                if(index0 < 0 || index1 < 0) {
+                    return;
+                }
 
                 // update anchor and lead
                 anchorSelectionIndex = index0;
@@ -571,6 +582,11 @@ public final class EventSelectionModel {
             ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
             try {
                 if(!enabled) return;
+
+                // handle a no-op
+                if(index0 < 0 || index1 < 0) {
+                    return;
+                }
 
                 // update anchor and lead
                 anchorSelectionIndex = index0;
