@@ -36,7 +36,7 @@ public class PopularityListTest extends TestCase {
 
     /**
      * Test that the Popularity List works with simple data.
-     *//*
+     */
     public void testSimpleData() {
         EventList source = new BasicEventList();
         PopularityList popularityList = new PopularityList(source);
@@ -72,11 +72,11 @@ public class PopularityListTest extends TestCase {
         assertEquals("Melissa", popularityList.get(2));
         
         source.clear();
-    }*/
+    }
     
     /**
      * Tests that the Popularity List works by using a random sequence of operations.
-     *//*
+     */
     public void testRandom() {
         Random dice = new Random(0);
         
@@ -102,11 +102,11 @@ public class PopularityListTest extends TestCase {
             Integer updateValue = new Integer(dice.nextInt(50));
             source.set(updateIndex, updateValue);
         }
-    }*/
+    }
 
     /**
      * Tests that the PopularityList can handle multiple simultaneous events.
-     *//*
+     */
     public void testMultipleEvents() {
         EventList source = new BasicEventList();
         source.add(new int[] { 86, 1, 1, 1, 1, 0, 0 });
@@ -130,7 +130,7 @@ public class PopularityListTest extends TestCase {
         filterList.setFilter(4, 1);
         filterList.setFilter(5, 1);
         filterList.setFilter(6, 1);
-    }*/
+    }
 
     /**
      * Tests that the PopularityList can handle edge case sets.
@@ -189,6 +189,51 @@ public class PopularityListTest extends TestCase {
         source.add(2, "BMW");    // A A B
         source.add(3, "BMW");    // A A B B
         source.set(1, "BMW");    // A B B B
+    }
+
+    /**
+     * Tests that the PopularityList elements that have the same count are in sorted
+     * order.
+     */
+    public void testEqualPopularityOrdering() {
+        EventList source = new BasicEventList();
+        PopularityList popularityList = new PopularityList(source);
+        
+        // in sorted order changes
+        source.add(0, "chaos"); // c
+        source.add(1, "fiery"); // c f
+        source.add(2, "gecko"); // c f g
+        source.add(0, "banjo"); // b c f g
+        source.add(2, "dingo"); // b c d f g
+        source.add(5, "hippo"); // b c d f g h
+        source.add(0, "album"); // a b c d f g h
+        source.add(4, "eerie"); // a b c d e f g h
+        List sortedSingleCopy = new ArrayList();
+        sortedSingleCopy.addAll(source);
+        Collections.sort(sortedSingleCopy);
+        assertEquals(sortedSingleCopy, popularityList);
+
+        // in sorted order changes
+        source.add(0, "chaos"); // c a b c d e f g h
+        source.add(1, "fiery"); // c f a b c d e f g h
+        source.add(2, "gecko"); // c f g a b c d e f g h
+        source.add(0, "banjo"); // b c f g a b c d e f g h
+        source.add(2, "dingo"); // b c d f g a b c d e f g h
+        source.add(5, "hippo"); // b c d f g h a b c d e f g h
+        source.add(0, "album"); // a b c d f g h a b c d e f g h
+        source.add(4, "eerie"); // a b c d e f g h a b c d e f g h
+        assertEquals(sortedSingleCopy, popularityList);
+
+        // in sorted order changes
+        source.add("chaos"); // c a b c d e f g h c
+        source.add("fiery"); // c f a b c d e f g h c f
+        source.add("gecko"); // c f g a b c d e f g h c f g
+        source.add("banjo"); // b c f g a b c d e f g h c f g b
+        source.add("dingo"); // b c d f g a b c d e f g h c f g b d
+        source.add("hippo"); // b c d f g h a b c d e f g h c f g b d h
+        source.add("album"); // a b c d f g h a b c d e f g h c f g b d h a
+        source.add("eerie"); // a b c d e f g h a b c d e f g h c f g b d h a e
+        assertEquals(sortedSingleCopy, popularityList);
     }
 
     /**
