@@ -337,7 +337,8 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
+            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            NetworkList sourceList = peer.publish(sourceListTS, path, ByteCoderFactory.serializable());
 
             // prepare the target list
             NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
@@ -348,10 +349,10 @@ public class NetworkListTest extends TestCase {
                 System.out.println("START");
                 System.out.println("");
                 waitFor(1000);
-                sourceList.clear();
+                sourceListTS.clear();
                 targetList.connect();
                 for(int i = 0; i < 25; i++) {
-                    sourceList.add(new Integer(i));
+                    sourceListTS.add(new Integer(i));
                 }
                 // test that they're equal
                 waitFor(1000);

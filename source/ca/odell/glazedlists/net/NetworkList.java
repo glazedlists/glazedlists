@@ -247,6 +247,9 @@ public final class NetworkList extends TransformedList {
         public ReadWriteLock getReadWriteLock() {
              return NetworkList.this.getReadWriteLock();
         }
+        public String toString() {
+            return NetworkList.this.toString();
+        }
     }
         
     /**
