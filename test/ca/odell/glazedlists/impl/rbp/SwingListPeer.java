@@ -18,6 +18,7 @@ import java.awt.Insets;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
 import ca.odell.glazedlists.io.*;
+import ca.odell.glazedlists.impl.io.*;
 
 /**
  * A peer that publishes and subscribes to lists.

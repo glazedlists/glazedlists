@@ -4,14 +4,15 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.io;
+package ca.odell.glazedlists.impl.io;
 
 import java.util.*;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.impl.io.*;
 import java.nio.*;
 import java.io.*;
+// Glazed Lists' pluggable object to bytes interface
+import ca.odell.glazedlists.io.ByteCoder;
 
 /**
  * An utility interface for converting Objects to bytes for storage or network
@@ -19,7 +20,7 @@ import java.io.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListEventCoder {
+public class ListEventToBytes {
     
     /** the virtual event type */
     private static final int CLEAR = -1;
@@ -27,7 +28,7 @@ public class ListEventCoder {
     /**
      * Convert the specified ListEvent to bytes.
      */
-    public static Bufferlo listEventToBytes(ListEvent listEvent, ByteCoder byteCoder) throws IOException {
+    public static Bufferlo toBytes(ListEvent listEvent, ByteCoder byteCoder) throws IOException {
         // populate the list of parts
         List parts = new ArrayList();
         while(listEvent.next()) {
@@ -44,11 +45,11 @@ public class ListEventCoder {
     /**
      * Convert the List to a ListEvent. This is for snapshots or compressions.
      */
-    public static Bufferlo listToBytes(EventList list, ByteCoder byteCoder) throws IOException {
+    public static Bufferlo toBytes(EventList list, ByteCoder byteCoder) throws IOException {
         List parts = new ArrayList();
         
         // start with a clear
-        parts.add(new ListEventPart(-1, ListEventCoder.CLEAR, null));
+        parts.add(new ListEventPart(-1, ListEventToBytes.CLEAR, null));
         
         // add all values as adds
         for(int i = 0; i < list.size(); i++) {
@@ -63,7 +64,7 @@ public class ListEventCoder {
      * Apply the specified list event to the specified target list. The write lock
      * for this list must already be acquired if the list is shared between threads.
      */
-    public static void bytesToListEvent(Bufferlo listEvent, EventList target, ByteCoder byteCoder) throws IOException {
+    public static void toListEvent(Bufferlo listEvent, EventList target, ByteCoder byteCoder) throws IOException {
         List parts = bytesToParts(listEvent, byteCoder);
         for(Iterator i = parts.iterator(); i.hasNext(); ) {
             ListEventPart part = (ListEventPart)i.next();
@@ -166,7 +167,7 @@ public class ListEventCoder {
         private int index = -1;
         
         /** the type of change, INSERT, UPDATE, DELETE or CLEAR */
-        private int type = ListEventCoder.CLEAR;
+        private int type = ListEventToBytes.CLEAR;
         
         /** the inserted or updated value */
         private Object value = null;
@@ -217,7 +218,7 @@ public class ListEventCoder {
             return (type == ListEvent.INSERT);
         }
         public boolean isClear() {
-            return (type == ListEventCoder.CLEAR);
+            return (type == ListEventToBytes.CLEAR);
         }
         public boolean hasIndex() {
             return (isUpdate() || isInsert() || isDelete());

@@ -61,14 +61,14 @@ public class ListEventCoderTest extends TestCase {
         // change, encode, decode
         toEncode.add(new Integer(8));
         Bufferlo add8Encoding = (Bufferlo)encoder.getEncodings().remove(0);
-        ListEventCoder.bytesToListEvent(add8Encoding, toDecode, intCoder);
+        ListEventToBytes.toListEvent(add8Encoding, toDecode, intCoder);
         assertEquals(toEncode, toDecode);
         
         // multichange, encode, decode
         List addAll = Arrays.asList(new Object[] { new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
         toEncode.addAll(addAll);
         Bufferlo addAllEncoding = (Bufferlo)encoder.getEncodings().remove(0);
-        ListEventCoder.bytesToListEvent(addAllEncoding, toDecode, intCoder);
+        ListEventToBytes.toListEvent(addAllEncoding, toDecode, intCoder);
         assertEquals(toEncode, toDecode);
     }
 
@@ -88,8 +88,8 @@ public class ListEventCoderTest extends TestCase {
         // change, encode, decode
         List entireList = Arrays.asList(new Object[] { new Integer(8), new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
         toEncode.addAll(entireList);
-        Bufferlo entireListEncoding = ListEventCoder.listToBytes(toEncode, intCoder);
-        ListEventCoder.bytesToListEvent(entireListEncoding, toDecode, intCoder);
+        Bufferlo entireListEncoding = ListEventToBytes.toBytes(toEncode, intCoder);
+        ListEventToBytes.toListEvent(entireListEncoding, toDecode, intCoder);
         assertEquals(toEncode, toDecode);
     }
 }

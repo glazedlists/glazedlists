@@ -4,10 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.io;
+package ca.odell.glazedlists.impl.io;
 
 import java.util.List;
 import java.io.*;
+// Glazed Lists' pluggable object to bytes interface
+import ca.odell.glazedlists.io.ByteCoder;
 
 /**
  * An utility interface for converting Objects to bytes for storage or network

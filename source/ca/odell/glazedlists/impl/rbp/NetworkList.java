@@ -11,7 +11,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.event.*;
 // access to the volatile implementation pacakge
-import ca.odell.glazedlists.impl.io.Bufferlo;
+import ca.odell.glazedlists.impl.io.*;
 // NIO is used for BRP
 import java.util.*;
 import java.nio.*;
@@ -50,7 +50,7 @@ public class NetworkList extends TransformedList implements Resource {
         // notify resource listeners
         try {
             ListEvent listChangesCopy = new ListEvent(listChanges);
-            Bufferlo listChangesBytes = ListEventCoder.listEventToBytes(listChangesCopy, byteCoder);
+            Bufferlo listChangesBytes = ListEventToBytes.toBytes(listChangesCopy, byteCoder);
             for(int r = 0; r < resourceListeners.size(); r++) {
                 ResourceListener listener = (ResourceListener)resourceListeners.get(r);
                 listener.resourceUpdated(this, listChangesBytes.duplicate());
@@ -67,7 +67,7 @@ public class NetworkList extends TransformedList implements Resource {
     public Bufferlo toSnapshot() {
         getReadWriteLock().writeLock().lock();
         try {
-            return ListEventCoder.listToBytes(this, byteCoder);
+            return ListEventToBytes.toBytes(this, byteCoder);
         } catch(IOException e) {
             throw new IllegalStateException(e.getMessage());
         } finally {
@@ -84,7 +84,7 @@ public class NetworkList extends TransformedList implements Resource {
     private void applyCodedEvent(Bufferlo data) {
         getReadWriteLock().writeLock().lock();
         try {
-            ListEventCoder.bytesToListEvent(data, this, byteCoder);
+            ListEventToBytes.toListEvent(data, this, byteCoder);
         } catch(IOException e) {
             throw new IllegalStateException(e.getMessage());
         } finally {

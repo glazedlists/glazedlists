@@ -49,7 +49,7 @@ public class EventEncoderListener implements ListEventListener {
      */
     public void listChanged(ListEvent listChanges) {
         try {
-            Bufferlo encoding = ListEventCoder.listEventToBytes(listChanges, byteCoder);
+            Bufferlo encoding = ListEventToBytes.toBytes(listChanges, byteCoder);
             encodings.add(encoding);
         } catch(IOException e) {
             throw new IllegalStateException(e.getMessage());
