@@ -350,7 +350,7 @@ public class Issue implements TextFilterable, Comparable {
      *
      * <p>This removes the need to include an XML file and reduces parse time.
      */
-    public static List loadIssues() {
+    /*public static List loadIssues() {
         try {
             String baseUrl = "https://glazedlists.dev.java.net/issues/xml.cgi";
             return IssuezillaXMLParser.loadIssues(baseUrl, 1, 150);
@@ -361,7 +361,7 @@ public class Issue implements TextFilterable, Comparable {
         }
         
         return Collections.EMPTY_LIST;
-    }
+    }*/
 }
 
 /**

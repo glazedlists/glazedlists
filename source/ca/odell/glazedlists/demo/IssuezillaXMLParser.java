@@ -93,11 +93,10 @@ public class IssuezillaXMLParser {
      * commands to reproduce a lightweight version of this list. This is useful
      * to load the issues as code rather than XML.
      */
-    public static List parseIssuezillaXML(InputStream source) throws IOException {
+    public static void parseIssuezillaXML(EventList target, InputStream source) throws IOException {
         try {
-            IssueHandler issueReader = new IssueHandler();
+            IssueHandler issueReader = new IssueHandler(target);
             SAXParserFactory.newInstance().newSAXParser().parse(source, issueReader);
-            return issueReader.getIssues();
         } catch(SAXException e) {
             e.printStackTrace();
             throw new IOException("Parsing failed " + e.getMessage());
@@ -114,7 +113,7 @@ public class IssuezillaXMLParser {
     public static void main(String[] args) {
         try {
             InputStream streamIn = new FileInputStream(args[0]);
-            parseIssuezillaXML(streamIn);
+            parseIssuezillaXML(new BasicEventList(), streamIn);
             
         } catch(IOException e) {
             e.printStackTrace();
@@ -125,7 +124,7 @@ public class IssuezillaXMLParser {
     /**
      * Loads issues from the specified URL.
      */
-    public static List loadIssues(String baseUrl, int first, int last) throws IOException {
+    public static void loadIssues(EventList target, String baseUrl, int first, int last) throws IOException {
         // assemble the issue ID argument
         StringBuffer idArg = new StringBuffer();
         for(int i = first; i <= last; i++) {
@@ -138,21 +137,21 @@ public class IssuezillaXMLParser {
         InputStream issuesInStream = issuesUrl.openStream();
         
         // parse
-        return parseIssuezillaXML(issuesInStream);
+        parseIssuezillaXML(target, issuesInStream);
     }
 
     /**
      * The IssueHandler does the real parsing.
      */
     static class IssueHandler extends AbstractSimpleElementHandler {
-        private List issues = new ArrayList();
+        private EventList issues = null;
         private Issue currentIssue;
         private AbstractSimpleElementHandler simpleElementHandler = null;
         
-        public IssueHandler() {
+        public IssueHandler(EventList issues) {
             super(null, "issue", ISSUE_SIMPLE_FIELDS);
+            this.issues = issues;
             parent = this;
-
         }
         
         /**
@@ -207,6 +206,7 @@ public class IssuezillaXMLParser {
                 simpleElementHandler.endElement(uri, localName, qName);
             // if this is the end of an issue
             } else if(qName.equals("issue")) {
+                if(Thread.interrupted()) throw new RuntimeException(new InterruptedException());
                 issues.add(currentIssue);
                 currentIssue = null;
                 // write the necessary Java code

@@ -10,6 +10,7 @@ import java.util.*;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
+import java.awt.event.*;
 import java.applet.*;
 import java.awt.Color;
 import java.awt.GridBagLayout;
@@ -26,6 +27,9 @@ import ca.odell.glazedlists.swing.*;
  */
 public class IssuesBrowser extends Applet {
     
+    /** this doesn't belong here at all */
+    private static final Color GLAZED_LISTS_ORANGE = new Color(255, 119, 0);
+        
     /** an event list to host the issues */
     private UniqueList issuesEventList = new UniqueList(new BasicEventList());
     
@@ -40,6 +44,10 @@ public class IssuesBrowser extends Applet {
     private ImageIcon throbberActive = null;
     private ImageIcon throbberStatic = null;
     private JTextField issuesLoadingText = null;
+    
+    /** loads issues as requested */
+    private IssueLoader issueLoader = new IssueLoader();
+    private Thread issueLoaderThread = new Thread(issueLoader);
     
     /**
      * Load the issues browser as an applet.
@@ -64,7 +72,7 @@ public class IssuesBrowser extends Applet {
         }
         
         // start loading the issues
-        new Thread(new IssueLoader()).start();
+        issueLoaderThread.start();
     }
      
     /**
@@ -137,11 +145,37 @@ public class IssuesBrowser extends Applet {
         prioritySlider.setPaintTicks(true);
         prioritySlider.setMajorTickSpacing(25);*/
         
+        // projects
+        EventList projects = new BasicEventList();
+        projects.add(new JavaNetProject("glazedlists",      "Glazed Lists", 1, 150));
+        projects.add(new JavaNetProject("lg3d-core",        "Project Looking Glass Core", 1, 237));
+        projects.add(new JavaNetProject("java-net",         "Java.net Watercooler", 1, 114));
+        projects.add(new JavaNetProject("javacc",           "Java Compiler Compiler", 1, 75));
+        projects.add(new JavaNetProject("sqlexplorer",      "SQLExplorer Eclipse Database Plugin", 1, 29));
+        projects.add(new JavaNetProject("ofbiz",            "Open For Business", 1, 177));
+        projects.add(new JavaNetProject("jogl",             "JOGL Java OpenGL Bindings", 1, 131));
+        projects.add(new JavaNetProject("sip-communicator", "SIP Communicator", 1, 22));
+        projects.add(new JavaNetProject("jdic",             "JavaDesktop Integration Components", 1, 169));
+        projects.add(new JavaNetProject("jdnc",             "JavaDesktop Network Components", 1, 157));
+
+        // project select combobox
+        EventComboBoxModel projectsComboModel = new EventComboBoxModel(projects);
+        JComboBox projectsCombo = new JComboBox(projectsComboModel);
+        projectsCombo.setEditable(false);
+        projectsCombo.setBackground(GLAZED_LISTS_ORANGE);
+        projectsCombo.addItemListener(new ProjectChangeListener());
+        projectsComboModel.setSelectedItem(new JavaNetProject(null,               "Select a Java.net project...", 0, 0));
+        
         // throbber icons
+        JPanel iconBar = new JPanel();
+        iconBar.setBackground(GLAZED_LISTS_ORANGE);
+        iconBar.setLayout(new GridBagLayout());
         ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
         throbberStatic = new ImageIcon(jarLoader.getResource("resources/demo/throbber-static.gif"));
         throbberActive = new ImageIcon(jarLoader.getResource("resources/demo/throbber-active.gif"));
         throbber = new JLabel(throbberStatic);
+        iconBar.add(projectsCombo,     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(5,  5, 5,   5), 0, 0));
+        iconBar.add(throbber,          new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST,   GridBagConstraints.NONE,       new Insets(5,  5, 5,   5), 0, 0));
         
         // create the filters panel
         JPanel filtersPanel = new JPanel();
@@ -157,7 +191,7 @@ public class IssuesBrowser extends Applet {
         // a panel with a table
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
-        panel.add(throbber,                    new GridBagConstraints(0, 0, 2, 1, 1.00, 0.0, GridBagConstraints.EAST,   GridBagConstraints.NONE,       new Insets( 5,  5,  5,  5), 0, 0));
+        panel.add(iconBar,                     new GridBagConstraints(0, 0, 2, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 0,  0,  5,  0), 0, 0));
         panel.add(filtersPanel,                new GridBagConstraints(0, 1, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
         panel.add(issuesTableScrollPane,       new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
         panel.add(descriptionsTableScrollPane, new GridBagConstraints(1, 2, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets( 5,  5,  5,  5), 0, 0));
@@ -179,6 +213,17 @@ public class IssuesBrowser extends Applet {
     }
     
     /**
+     * Listens for changes to the project combo box and updates which project is
+     * being loaded.
+     */
+    class ProjectChangeListener implements ItemListener {
+        public void itemStateChanged(ItemEvent e) {
+            JavaNetProject selected = (JavaNetProject)e.getItem();
+            if(selected.isValid()) issueLoader.setProject((JavaNetProject)selected);
+        }
+    }
+    
+    /**
      * When started via a main method, this creates a standalone issues browser.
      */
     public static void main(String[] args) {
@@ -190,37 +235,115 @@ public class IssuesBrowser extends Applet {
         // load the issues and display the browser
         IssuesBrowser browser = new IssuesBrowser(false);
     }
-        
+    
     /**
-     * Load the issues from the Internet.
+     * Models a project on Java.net.
+     */
+    class JavaNetProject {
+        
+        private String projectName;
+        private String projectTitle;
+        private int first;
+        private int last;
+        
+        public JavaNetProject(String projectName, String projectTitle, int first, int last) {
+            this.projectName = projectName;
+            this.projectTitle = projectTitle;
+            this.first = first;
+            this.last = last;
+        }
+        
+        public boolean isValid() {
+            return (projectName != null);
+        }
+        
+        public String getXMLUri() {
+            return "https://" + projectName + ".dev.java.net/issues/xml.cgi";
+        }
+        
+        public int getFirst() {
+            return first;
+        }
+        
+        public int getLast() {
+            return last;
+        }
+        
+        public String toString() {
+            return projectTitle;
+        }
+    }
+    
+    
+    /**
+     * This loads issues by project as they are requested. When a new project is
+     * requested, a working project may be interrupted. This may have violent side
+     * effects such as InterruptedExceptions printed to the console by certain
+     * XML parsing libararies that aren't exactly interruption friendly.
+     *
+     * <p>Issues are streamed to the issues list as they are loaded.
      */
     class IssueLoader implements Runnable {
+        private JavaNetProject project = null; 
+        
+        public void setProject(JavaNetProject project) {
+            synchronized(this) {
+                this.project = project;
+                issueLoaderThread.interrupt();
+                notify();
+            }
+        }
+        
         public void run() {
-            // start the progress bar
-            SwingUtilities.invokeLater(new IndeterminateToggler(throbberActive, "Downloading issues..."));
-                
-            // load the issues
-            List urlIssues = null;
-            try {
-                String issuesUrl = "https://glazedlists.dev.java.net/issues/xml.cgi";
-                urlIssues = IssuezillaXMLParser.loadIssues(issuesUrl, 1, 150);
-            } catch(IOException e) {
-                e.printStackTrace();
+            // loop forever, loading projects
+            JavaNetProject currentProject = null;
+            while(true) {
+                try {
+                    // get a project to load
+                    synchronized(this) {
+                        if(project == null) wait(); 
+                        Thread.interrupted();
+                        
+                        // we should still be asleep
+                        if(project == null) continue; 
+                        
+                        // we have a project to load
+                        currentProject = project;
+                        project = null;
+                    }
+                    
+                    // start the progress bar
+                    SwingUtilities.invokeLater(new IndeterminateToggler(throbberActive, "Downloading issues..."));
+                        
+                    // load the issues
+                    EventList threadSafeIssuesEventList = new ThreadSafeList(issuesEventList);
+                    threadSafeIssuesEventList.clear();
+                    IssuezillaXMLParser.loadIssues(threadSafeIssuesEventList, currentProject.getXMLUri(), currentProject.getFirst(), currentProject.getLast());
+
+                    // stop the progress bar
+                    SwingUtilities.invokeLater(new IndeterminateToggler(throbberStatic, ""));
+
+                // handling interruptions is really gross
+                } catch(IOException e) {
+                    if(e.getCause() instanceof InterruptedException) {
+                        // do nothing, we were just interrupted as expected
+                    } else if(e.getMessage().equals("Parsing failed java.lang.InterruptedException")) {
+                        // do nothing, we were just interrupted as expected
+                    } else {
+                        e.printStackTrace();
+                    }
+                } catch(RuntimeException e) {
+                    if(e.getCause() instanceof InterruptedException) {
+                        // do nothing, we were just interrupted as expected
+                    } else if(e.getCause() instanceof IOException && e.getCause().getMessage().equals("Parsing failed Lock interrupted")) {
+                        // do nothing, we were just interrupted as expected
+                    } else {
+                        throw e;
+                    }
+                } catch(InterruptedException e) {
+                    // do nothing, we were just interrupted as expected
+                }
             }
-    
-            // apply the issues to the event list
-            SortedSet urlIssuesAsSet = new TreeSet();
-            urlIssuesAsSet.addAll(urlIssues);
-            
-            issuesEventList.getReadWriteLock().writeLock().lock();
-            try {
-                issuesEventList.replaceAll(urlIssuesAsSet);
-            } finally {
-                issuesEventList.getReadWriteLock().writeLock().unlock();
-            }
-            
-            // stop the progress bar
-            SwingUtilities.invokeLater(new IndeterminateToggler(throbberStatic, ""));
         }
         private class IndeterminateToggler implements Runnable {
             private ImageIcon throbberIcon;
@@ -233,5 +356,5 @@ public class IssuesBrowser extends Applet {
                 throbber.setIcon(throbberIcon);
             }
         }
-    }    
+    }
 }
