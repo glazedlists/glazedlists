@@ -4,10 +4,11 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.impl;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.*;
 // for access to the Collection interface
 import java.util.*;
 // for locking

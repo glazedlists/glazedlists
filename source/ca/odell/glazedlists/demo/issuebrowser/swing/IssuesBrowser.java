@@ -333,7 +333,7 @@ public class IssuesBrowser extends Applet {
 					SwingUtilities.invokeLater(new IndeterminateToggler(throbberActive, "Downloading issues..."));
 
 					// load the issues
-					EventList threadSafeIssuesEventList = new ThreadSafeList(issuesEventList);
+					EventList threadSafeIssuesEventList = GlazedLists.threadSafeList(issuesEventList);
 					threadSafeIssuesEventList.clear();
 					IssuezillaXMLParser.loadIssues(threadSafeIssuesEventList, currentProject.getXMLUri());
 

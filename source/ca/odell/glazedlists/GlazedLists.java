@@ -8,6 +8,7 @@ package ca.odell.glazedlists;
 
 import java.util.*;
 // for access to volatile classes
+import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.impl.beans.*;
@@ -197,5 +198,58 @@ public final class GlazedLists {
      */
     public static LabelFormat beanLabelFormat(String property) {
         return new BeanLabelFormat(property);
+    }
+
+    // EventLists // // // // // // // // // // // // // // // // // // // // // 
+
+    /**
+     * Wraps the source in an {@link EventList} that does not allow writing operations.
+     *
+     * <p>The returned {@link EventList} is useful for programming defensively. A
+     * {@link EventList} is useful to supply an unknown class read-only access
+     * to your {@link EventList}. 
+     *
+     * <p>The returned {@link EventList} will provides an up-to-date view of its source
+     * {@link EventList} so changes to the source {@link EventList} will still be
+     * reflected. For a static copy of any {@link EventList} it is necessary to copy
+     * the contents of that {@link EventList} into an {@link ArrayList}.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This returned EventList
+     * is thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
+     */
+    public static TransformedList readOnlyList(EventList source) {
+        return new ReadOnlyList(source);
+    }
+    
+    /**
+     * Wraps the source in an {@link EventList} that obtains a {@link ReadWriteLock}
+     * for all operations.
+     *
+     * <p>This provides some support for sharing {@link EventList}s between multiple
+     * threads.
+     *
+     * <p>Using a {@link ThreadSafeList} for concurrent access to lists can be expensive
+     * because a {@link ReadWriteLock} is aquired and released for every operation.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> Although this class
+     * provides thread safe access, it does not provide any guarantees that changes
+     * will not happen between method calls. For example, the following code is unsafe
+     * because the source {@link EventList} may change between calls to {@link #size() size()}
+     * and {@link #get(int) get()}:
+     * <pre> EventList source = ...
+     * ThreadSafeList myList = new ThreadSafeList(source);
+     * if(myList.size() > 3) {
+     *   System.out.println(myList.get(3));
+     * }</pre>
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> The objects returned
+     * by {@link #iterator() iterator()}, {@link #subList(int,int) subList()}, etc. are
+     * not thread safe.
+     *
+     * @see ca.odell.glazedlists.util.concurrent
+     */
+    public static TransformedList threadSafeList(EventList source) {
+        return new ThreadSafeList(source);
     }
 }

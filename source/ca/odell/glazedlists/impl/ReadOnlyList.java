@@ -4,11 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.impl;
 
 // standard collections
 import java.util.*;
 // the core Glazed Lists package
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 
 /**

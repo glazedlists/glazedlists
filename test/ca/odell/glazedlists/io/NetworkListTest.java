@@ -59,7 +59,7 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
             NetworkList sourceList = peer.publish(sourceListTS, path, GlazedLists.serializableByteCoder());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
             waitFor(1000);
@@ -104,7 +104,7 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
             NetworkList sourceList = peer.publish(sourceListTS, path, GlazedLists.serializableByteCoder());
             sourceListTS.add(new Integer(8));
             sourceListTS.add(new Integer(6));
@@ -159,7 +159,7 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
             NetworkList sourceList = peer.publish(sourceListTS, path, GlazedLists.serializableByteCoder());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
             sourceListTS.add(new Integer(8));
@@ -223,7 +223,7 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
             NetworkList sourceList = peer.publish(sourceListTS, path, GlazedLists.serializableByteCoder());
             sourceListTS.add(new Integer(8));
             sourceListTS.add(new Integer(6));
@@ -285,7 +285,7 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
             NetworkList sourceList = peer.publish(sourceListTS, path, GlazedLists.serializableByteCoder());
             sourceListTS.add(new Integer(8));
             sourceListTS.add(new Integer(6));
@@ -306,7 +306,7 @@ public class NetworkListTest extends TestCase {
             assertFalse(targetList.isConnected());
             
             // prepare the second source list
-            EventList sourceList2TS = new ThreadSafeList(new BasicEventList());
+            EventList sourceList2TS = GlazedLists.threadSafeList(new BasicEventList());
             NetworkList sourceList2 = peer.publish(sourceList2TS, path, GlazedLists.serializableByteCoder());
             sourceList2TS.add(new Integer(7));
             sourceList2TS.add(new Integer(5));
@@ -342,7 +342,7 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = new ThreadSafeList(new BasicEventList());
+            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
             NetworkList sourceList = peer.publish(sourceListTS, path, GlazedLists.serializableByteCoder());
 
             // prepare the target list

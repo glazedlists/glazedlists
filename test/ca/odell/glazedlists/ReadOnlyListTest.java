@@ -34,7 +34,7 @@ public class ReadOnlyListTest extends TestCase {
         readOnlyData.add("C");
         
         // our list is that data, but read only
-        readOnly = new ReadOnlyList(readOnlyData);
+        readOnly = GlazedLists.readOnlyList(readOnlyData);
     }
 
     /**
