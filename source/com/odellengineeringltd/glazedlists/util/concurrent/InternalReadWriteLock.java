@@ -8,7 +8,7 @@ package com.odellengineeringltd.glazedlists.util.concurrent;
 
 // the Glazed Lists for testing the internal lock
 import com.odellengineeringltd.glazedlists.*;
-import com.odellengineeringltd.glazedlists.util.test.*;
+import com.odellengineeringltd.glazedlists.test.*;
 // standard collections
 import java.util.*;
 
