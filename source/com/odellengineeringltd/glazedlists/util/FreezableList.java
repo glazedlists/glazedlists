@@ -49,27 +49,29 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
     /**
      * Returns the element at the specified position in this list. Most
      * mutation lists will override the get method to use a mapping.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public Object get(int index) {
-        synchronized(getRootList()) {
-            if(frozen) {
-                return frozenData.get(index);
-            } else {
-                return source.get(index);
-            }
+        if(frozen) {
+            return frozenData.get(index);
+        } else {
+            return source.get(index);
         }
     }
     
     /**
      * Returns the number of elements in this list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int size() {
-        synchronized(getRootList()) {
-            if(frozen) {
-                return frozenData.size();
-            } else {
-                return source.size();
-            }
+        if(frozen) {
+            return frozenData.size();
+        } else {
+            return source.size();
         }
     }
     
@@ -100,7 +102,8 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      * Locks the contents of the FreezableList from receiving any changes.
      */
     public void freeze() {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(frozen) throw new IllegalStateException("Cannot freeze a list that is already frozen");
             
             // we are no longer interested in update events
@@ -111,6 +114,8 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
             
             // mark this list as frozen
             frozen = true;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     
@@ -123,7 +128,8 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      * data has changed.
      */
     public void thaw() {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!frozen) throw new IllegalStateException("Cannot thaw a list that is not frozen");
             
             // mark this list as thawed
@@ -139,6 +145,8 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
 
             // being listening to update events
             source.addListChangeListener(this);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     
@@ -149,21 +157,19 @@ public class FreezableList extends WritableMutationList implements ListChangeLis
      * frozen.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        synchronized(getRootList()) {
-            if(frozen) {
-                // when a list change event arrives and this list is frozen,
-                // it is possible that the event was queued before this list
-                // was frozen. for this reason we do not throw any exceptions
-                // but instead silently ignore the event
-                
-            } else {
-                // just pass on the changes
-                updates.beginAtomicChange();
-                while(listChanges.next()) {
-                    updates.appendChange(listChanges.getIndex(), listChanges.getType());
-                }
-                updates.commitAtomicChange();
+        if(frozen) {
+            // when a list change event arrives and this list is frozen,
+            // it is possible that the event was queued before this list
+            // was frozen. for this reason we do not throw any exceptions
+            // but instead silently ignore the event
+            
+        } else {
+            // just pass on the changes
+            updates.beginAtomicChange();
+            while(listChanges.next()) {
+                updates.appendChange(listChanges.getIndex(), listChanges.getType());
             }
+            updates.commitAtomicChange();
         }
     }
 }

@@ -64,13 +64,16 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public void add(int index, Object value) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             if(index < 0 || index > size()) throw new ArrayIndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
             int sourceIndex = 0;
             if(index < size()) sourceIndex = getSourceIndex(index);
             else sourceIndex = source.size();
             source.add(sourceIndex, value);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -82,9 +85,12 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public boolean add(Object value) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             return source.add(value);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -98,13 +104,16 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public boolean addAll(int index, Collection values) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             if(index < 0 || index > size()) throw new ArrayIndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
             int sourceIndex = 0;
             if(index < size()) sourceIndex = getSourceIndex(index);
             else sourceIndex = source.size();
             return source.addAll(sourceIndex, values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -116,9 +125,12 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public boolean addAll(Collection values) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             return source.addAll(values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -132,9 +144,12 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public void clear() {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             source.clear();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -145,10 +160,13 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public Object remove(int index) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
             return source.remove(getSourceIndex(index));
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -159,9 +177,12 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public boolean remove(Object toRemove) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             return source.remove(toRemove);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -172,9 +193,12 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public boolean removeAll(Collection values) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             return source.removeAll(values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -186,9 +210,12 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public boolean retainAll(Collection values) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             return source.retainAll(values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -203,10 +230,13 @@ public abstract class WritableMutationList extends MutationList implements ListC
      *      current state.
      */
     public Object set(int index, Object value) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
             if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
             return source.set(getSourceIndex(index), value);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 }

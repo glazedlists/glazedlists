@@ -44,41 +44,49 @@ public final class SubEventList extends WritableMutationList implements ListChan
      */
     public SubEventList(EventList source, int startIndex, int endIndex, boolean automaticallyRemove) {
         super(source);
-        synchronized(getRootList()) {
+        
+        getReadWriteLock().readLock().lock();
+        try {
             // do consistency checking
             if(startIndex < 0 || endIndex < startIndex || endIndex > source.size()) {
                 throw new IllegalArgumentException("The range " + startIndex + "-" + endIndex + " is not valid over a list of size " + source.size());
             }
             
+            // save the sublist bounds
             this.startIndex = startIndex;
             this.endIndex = endIndex;
-        }
         
-        // listen directly or via a proxy that will do garbage collection
-        if(automaticallyRemove) {
-            source.addListChangeListener(new ListChangeListenerWeakReferenceProxy(source, this));
-        } else {
-            source.addListChangeListener(this);
+            // listen directly or via a proxy that will do garbage collection
+            if(automaticallyRemove) {
+                source.addListChangeListener(new ListChangeListenerWeakReferenceProxy(source, this));
+            } else {
+                source.addListChangeListener(this);
+            }
+
+        } finally {
+            getReadWriteLock().readLock().unlock();
         }
     }
     
     /**
      * Returns the number of elements in this list. 
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int size() {
-        synchronized(getRootList()) {
-            return endIndex - startIndex;
-        }
+        return endIndex - startIndex;
     }
     
     /**
      * Returns the element at the specified position in this list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public Object get(int index) {
-        synchronized(getRootList()) {
-            if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException();
-            return source.get(index + startIndex);
-        }
+        if(index < 0 || index >= size()) throw new ArrayIndexOutOfBoundsException();
+        return source.get(index + startIndex);
     }
     
     /**
@@ -102,39 +110,37 @@ public final class SubEventList extends WritableMutationList implements ListChan
      * within the bounds of the SubEventList.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        synchronized(getRootList()) {
-            updates.beginAtomicChange();
-            while(listChanges.next()) {
-                int changeIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
-                
-                // if it is a change before
-                if(changeIndex < startIndex) {
-                    if(changeType == ListChangeBlock.INSERT) {
-                        startIndex++;
-                        endIndex++;
-                    } else if(changeType == ListChangeBlock.DELETE) {
-                        startIndex--;
-                        endIndex--;
-                    }
-                // if it is a change within
-                } else if(changeIndex < endIndex) {
-                    if(changeType == ListChangeBlock.INSERT) {
-                        endIndex++;
-                        updates.appendChange(changeIndex - startIndex, ListChangeBlock.INSERT);
-                    } else if(changeType == ListChangeBlock.UPDATE) {
-                        updates.appendChange(changeIndex - startIndex, ListChangeBlock.INSERT);
-                    } else if(changeType == ListChangeBlock.DELETE) {
-                        endIndex--;
-                        updates.appendChange(changeIndex - startIndex, ListChangeBlock.DELETE);
-                    }
-                // if it is a change after
-                } else {
-                    // do nothing
+        updates.beginAtomicChange();
+        while(listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
+            
+            // if it is a change before
+            if(changeIndex < startIndex) {
+                if(changeType == ListChangeBlock.INSERT) {
+                    startIndex++;
+                    endIndex++;
+                } else if(changeType == ListChangeBlock.DELETE) {
+                    startIndex--;
+                    endIndex--;
                 }
+            // if it is a change within
+            } else if(changeIndex < endIndex) {
+                if(changeType == ListChangeBlock.INSERT) {
+                    endIndex++;
+                    updates.appendChange(changeIndex - startIndex, ListChangeBlock.INSERT);
+                } else if(changeType == ListChangeBlock.UPDATE) {
+                    updates.appendChange(changeIndex - startIndex, ListChangeBlock.INSERT);
+                } else if(changeType == ListChangeBlock.DELETE) {
+                    endIndex--;
+                    updates.appendChange(changeIndex - startIndex, ListChangeBlock.DELETE);
+                }
+            // if it is a change after
+            } else {
+                // do nothing
             }
-            assert(startIndex <= endIndex);
-            updates.commitAtomicChange();
         }
+        assert(startIndex <= endIndex);
+        updates.commitAtomicChange();
     }
 }

@@ -9,18 +9,6 @@ package com.odellengineeringltd.glazedlists.test;
 // the Glazed Lists
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
-// Java collections are used for underlying data storage
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.TreeSet;
-import java.util.SortedSet;
-// Swing toolkit stuff for displaying widgets
-import javax.swing.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
-
 
 /**
  * A very basic list that ensures that lists are kept consistent and that

@@ -131,9 +131,9 @@ public class SelectionModelEventList {
         /**
          * Returns the element at the specified position in this list.
          *
-         * This gets the object with the specified index from the source list.
+         * <p>This gets the object with the specified index from the source list.
          *
-         * Before every get, we need to validate the row because there may be an
+         * <p>Before every get, we need to validate the row because there may be an
          * update waiting in the event queue. For example, it is possible that
          * the selection has changed. Such a change may have been sent as notification,
          * but after this request in the event queue. In the case where a row is no longer
@@ -187,79 +187,76 @@ public class SelectionModelEventList {
          * changes to the corresponding selection list.
          */
         public void notifyListChanges(ListChangeEvent listChanges) {
-            synchronized(getRootList()) {
+            // prepare for notifying ListSelectionListeners
+            int minSelectionIndexBefore = selectionModel.getMinSelectionIndex();
+            int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
             
-                // prepare for notifying ListSelectionListeners
-                int minSelectionIndexBefore = selectionModel.getMinSelectionIndex();
-                int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
+            // prepare a sequence of changes
+            updates.beginAtomicChange();
+            
+            // for all changes simply update the flag list
+            while(listChanges.next()) {
+                int index = listChanges.getIndex();
+                int changeType = listChanges.getType();
                 
-                // prepare a sequence of changes
-                updates.beginAtomicChange();
+                // learn about what it was
+                boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
+                int previousSelectionIndex = -1;
+                if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
                 
-                // for all changes simply update the flag list
-                while(listChanges.next()) {
-                    int index = listChanges.getIndex();
-                    int changeType = listChanges.getType();
-                    
-                    // learn about what it was
-                    boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
-                    int previousSelectionIndex = -1;
-                    if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
-                    
-                    // when an element is deleted, blow it away
-                    if(changeType == ListChangeBlock.DELETE) {
-                        flagList.remove(index);
-        
-                        // fire a change to the selection list if a selected object is changed
-                        if(previouslySelected) {
-                            updates.appendChange(previousSelectionIndex, ListChangeBlock.DELETE);
-                        }
-                        
-                    // when an element is inserted, it is selected if its index was selected
-                    } else if(changeType == ListChangeBlock.INSERT) {
-                        
-                        // when selected, decide based on selection mode
-                        if(previouslySelected) {
-
-                            // select the inserted for single interval and multiple interval selection
-                            if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
-                            || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
-                                flagList.add(index, Boolean.TRUE);
-                                updates.appendChange(previousSelectionIndex, ListChangeBlock.INSERT);
-
-                            // do not select the inserted for single selection and defensive selection
-                            } else {
-                                flagList.add(index, null);
-                            }
+                // when an element is deleted, blow it away
+                if(changeType == ListChangeBlock.DELETE) {
+                    flagList.remove(index);
     
-                        // when not selected, just add the space
+                    // fire a change to the selection list if a selected object is changed
+                    if(previouslySelected) {
+                        updates.appendChange(previousSelectionIndex, ListChangeBlock.DELETE);
+                    }
+                    
+                // when an element is inserted, it is selected if its index was selected
+                } else if(changeType == ListChangeBlock.INSERT) {
+                    
+                    // when selected, decide based on selection mode
+                    if(previouslySelected) {
+
+                        // select the inserted for single interval and multiple interval selection
+                        if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
+                        || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
+                            flagList.add(index, Boolean.TRUE);
+                            updates.appendChange(previousSelectionIndex, ListChangeBlock.INSERT);
+
+                        // do not select the inserted for single selection and defensive selection
                         } else {
                             flagList.add(index, null);
                         }
-                        
-                    // when an element is changed, assume selection stays the same
-                    } else if(changeType == ListChangeBlock.UPDATE) {
-        
-                        // fire a change to the selection list if a selected object is changed
-                        if(previouslySelected) {
-                            updates.appendChange(previousSelectionIndex, ListChangeBlock.UPDATE);
-                        }
+
+                    // when not selected, just add the space
+                    } else {
+                        flagList.add(index, null);
+                    }
+                    
+                // when an element is changed, assume selection stays the same
+                } else if(changeType == ListChangeBlock.UPDATE) {
+    
+                    // fire a change to the selection list if a selected object is changed
+                    if(previouslySelected) {
+                        updates.appendChange(previousSelectionIndex, ListChangeBlock.UPDATE);
                     }
                 }
-        
-                // fire the changes to ListChangeListeners
-                updates.commitAtomicChange();
+            }
+    
+            // fire the changes to ListChangeListeners
+            updates.commitAtomicChange();
 
-                // fire the changes to ListSelectionListeners
-                if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
-                    int minSelectionIndexAfter = selectionModel.getMinSelectionIndex();
-                    int maxSelectionIndexAfter = selectionModel.getMaxSelectionIndex();
-                    int changeStart = minSelectionIndexBefore;
-                    int changeFinish = maxSelectionIndexBefore;
-                    if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
-                    if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
-                    selectionModel.fireSelectionChanged(changeStart, changeFinish);
-                }
+            // fire the changes to ListSelectionListeners
+            if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
+                int minSelectionIndexAfter = selectionModel.getMinSelectionIndex();
+                int maxSelectionIndexAfter = selectionModel.getMaxSelectionIndex();
+                int changeStart = minSelectionIndexBefore;
+                int changeFinish = maxSelectionIndexBefore;
+                if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
+                if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
+                selectionModel.fireSelectionChanged(changeStart, changeFinish);
             }
         }
     }

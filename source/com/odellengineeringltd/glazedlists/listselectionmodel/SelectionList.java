@@ -110,7 +110,8 @@ public class SelectionList extends MutationList implements ListSelectionListener
      * changes to the corresponding selection list.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
         
             // prepare a sequence of changes
             updates.beginAtomicChange();
@@ -159,6 +160,8 @@ public class SelectionList extends MutationList implements ListSelectionListener
     
             // fire the changes
             updates.commitAtomicChange();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     
@@ -168,7 +171,8 @@ public class SelectionList extends MutationList implements ListSelectionListener
      * must also fire an event.
      */
     public void valueChanged(ListSelectionEvent event) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             
             // prepare a sequence of changes
             updates.beginAtomicChange();
@@ -202,6 +206,8 @@ public class SelectionList extends MutationList implements ListSelectionListener
             }
             // fire the changes
             updates.commitAtomicChange();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 }

@@ -94,13 +94,16 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * call to <code>next()</code>.
      */
     public boolean hasNext() {
-        synchronized(source.getRootList()) {
+        source.getReadWriteLock().readLock().lock();
+        try {
             if(nextIndex < source.size()) {
                 next = source.get(nextIndex);
                 return true;
             } else {
                 return false;
             }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
     
@@ -108,25 +111,23 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * Returns the next element in the list.
      */
     public Object next() {
-        synchronized(source.getRootList()) {
-            // when we need to rely on our defensive saved value
-            if(nextIndex >= source.size()) {
-                if(next != null) {
-                    Object result = next;
-                    next = null;
-                    lastIndex = nextIndex;
-                    nextIndex++;
-                    return result;
-                } else {
-                    throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
-                }
-            // when next has not been removed
-            } else {
-                Object result = source.get(nextIndex);
+        // when we need to rely on our defensive saved value
+        if(nextIndex >= source.size()) {
+            if(next != null) {
+                Object result = next;
+                next = null;
                 lastIndex = nextIndex;
                 nextIndex++;
                 return result;
+            } else {
+                throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
             }
+        // when next has not been removed
+        } else {
+            Object result = source.get(nextIndex);
+            lastIndex = nextIndex;
+            nextIndex++;
+            return result;
         }
     }
     
@@ -146,13 +147,16 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * call to <code>previous()</code>.
      */
     public boolean hasPrevious() {
-        synchronized(source.getRootList()) {
+        source.getReadWriteLock().readLock().lock();
+        try {
             if(nextIndex > 0) {
                 previous = source.get(nextIndex - 1);
                 return true;
             } else {
                 return false;
             }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
     
@@ -160,25 +164,23 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * Returns the previous element in the list.
      */
     public Object previous() {
-        synchronized(source.getRootList()) {
-            // when we need to rely on our defensive saved value
-            if(nextIndex < 0) {
-                if(previous != null) {
-                    Object result = previous;
-                    previous = null;
-                    nextIndex--;
-                    lastIndex = nextIndex;
-                    return result;
-                } else {
-                    throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
-                }
-                // when previous has not been removed
-            } else {
+        // when we need to rely on our defensive saved value
+        if(nextIndex < 0) {
+            if(previous != null) {
+                Object result = previous;
+                previous = null;
                 nextIndex--;
                 lastIndex = nextIndex;
-                Object result = source.get(nextIndex);
                 return result;
+            } else {
+                throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
             }
+            // when previous has not been removed
+        } else {
+            nextIndex--;
+            lastIndex = nextIndex;
+            Object result = source.get(nextIndex);
+            return result;
         }
     }
     
@@ -193,10 +195,8 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * Inserts the specified element into the list (optional operation).
      */
     public void add(Object o) {
-        synchronized(source.getRootList()) {
-            source.add(nextIndex, o);
-            next = null;
-        }
+        source.add(nextIndex, o);
+        next = null;
     }
     
     /**
@@ -204,11 +204,9 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * or previous (optional operation).
      */
     public void remove() {
-        synchronized(source.getRootList()) {
-            if(lastIndex == -1) throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");
-            source.remove(lastIndex);
-            previous = null;
-        }
+        if(lastIndex == -1) throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");
+        source.remove(lastIndex);
+        previous = null;
     }
     
     /**
@@ -216,34 +214,30 @@ public class EventListIterator implements ListIterator, ListChangeListener {
      * specified element (optional operation).
      */
     public void set(Object o) {
-        synchronized(source.getRootList()) {
-            if(lastIndex == -1) throw new IllegalStateException("Cannot set() without a prior call to next() or previous()");
-            source.set(lastIndex, o);
-            previous = null;
-        }
+        if(lastIndex == -1) throw new IllegalStateException("Cannot set() without a prior call to next() or previous()");
+        source.set(lastIndex, o);
+        previous = null;
     }
 
     /**
      * When the list is changed, the iterator adjusts its index.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        synchronized(source.getRootList()) {
-            while(listChanges.next()) {
-                int changeIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
+        while(listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
+            
+            // if it is an insert
+            if(changeType == ListChangeBlock.INSERT) {
+                if(changeIndex <= nextIndex) nextIndex++;
                 
-                // if it is an insert
-                if(changeType == ListChangeBlock.INSERT) {
-                    if(changeIndex <= nextIndex) nextIndex++;
-                    
-                    if(lastIndex != -1 && changeIndex <= lastIndex) lastIndex++;
-                // if it is a delete
-                } else if(changeType == ListChangeBlock.DELETE) {
-                    if(changeIndex < nextIndex) nextIndex--;
-                    
-                    if(lastIndex != -1 && changeIndex < lastIndex) lastIndex--;
-                    else if(lastIndex != -1 && changeIndex == lastIndex) lastIndex = -1;
-                }
+                if(lastIndex != -1 && changeIndex <= lastIndex) lastIndex++;
+            // if it is a delete
+            } else if(changeType == ListChangeBlock.DELETE) {
+                if(changeIndex < nextIndex) nextIndex--;
+                
+                if(lastIndex != -1 && changeIndex < lastIndex) lastIndex--;
+                else if(lastIndex != -1 && changeIndex == lastIndex) lastIndex = -1;
             }
         }
     }

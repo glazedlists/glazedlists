@@ -118,7 +118,12 @@ public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
      * Gets the size of the list.
      */
     public int getSize() {
-        return source.size();
+        source.getReadWriteLock().readLock().lock();
+        try {
+            return source.size();
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -134,11 +139,16 @@ public class ListComboBoxModel implements ListChangeListener, ComboBoxModel {
      * anyway.
      */
     public Object getElementAt(int index) {
-        if(index < getSize()) {
-            return source.get(index);
-        } else {
-            //new Exception("Returning null for removed row " + row).printStackTrace();
-            return null;
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // ensure that this value still exists before retrieval
+            if(index < source.size()) {
+                return source.get(index);
+            } else {
+                return null;
+            }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 

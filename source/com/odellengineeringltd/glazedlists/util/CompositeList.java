@@ -12,6 +12,8 @@ import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
 // Java collections are used for underlying data storage
 import java.util.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import com.odellengineeringltd.glazedlists.util.concurrent.*;
 
 /**
  * A CompositeList is a list that is composed of one or more lists.
@@ -42,28 +44,11 @@ public class CompositeList extends AbstractList implements EventList {
     }
     
     /**
-     * Returns the element at the specified position in this list. Most
-     * mutation lists will override the get method to use a mapping.
-     */
-    public Object get(int index) {
-        synchronized(getRootList()) {
-            for(int i = 0; i < memberLists.size(); i++) {
-                MemberList current = (MemberList)memberLists.get(i);
-                if(index < current.size()) {
-                    return current.getSourceList().get(index);
-                } else {
-                    index = index - current.size();
-                }
-            }
-        }
-        return null;
-    }
-    
-    /**
      * Adds the specified list to the lists that compose this list.
      */
     public void addMemberList(EventList list) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // insert the actual list
             MemberList memberList = new MemberList(list);
             memberLists.add(memberList);
@@ -77,6 +62,8 @@ public class CompositeList extends AbstractList implements EventList {
                 updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.INSERT);
                 updates.commitAtomicChange();
             }
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     
@@ -84,7 +71,8 @@ public class CompositeList extends AbstractList implements EventList {
      * Removes the specified list from the lists that compose this list.
      */
     public void removeMemberList(EventList list) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // find the member list
             MemberList memberList = null;
             for(int i = 0; i < memberLists.size(); i++) {
@@ -108,21 +96,43 @@ public class CompositeList extends AbstractList implements EventList {
                 updates.appendChange(offset, offset + memberList.size() - 1, ListChangeBlock.DELETE);
                 updates.commitAtomicChange();
             }
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     
     /**
+     * Returns the element at the specified position in this list. Most
+     * mutation lists will override the get method to use a mapping.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
+     */
+    public Object get(int index) {
+        for(int i = 0; i < memberLists.size(); i++) {
+            MemberList current = (MemberList)memberLists.get(i);
+            if(index < current.size()) {
+                return current.getSourceList().get(index);
+            } else {
+                index = index - current.size();
+            }
+        }
+        return null;
+    }
+    
+    /**
      * Returns the number of elements in this list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int size() {
-        synchronized(getRootList()) {
-            int size = 0;
-            for(int i = 0; i < memberLists.size(); i++) {
-                MemberList current = (MemberList)memberLists.get(i);
-                size = size + current.size();
-            }
-            return size;
+        int size = 0;
+        for(int i = 0; i < memberLists.size(); i++) {
+            MemberList current = (MemberList)memberLists.get(i);
+            size = size + current.size();
         }
+        return size;
     }
     
     /**
@@ -164,6 +174,20 @@ public class CompositeList extends AbstractList implements EventList {
             return ((MemberList)memberLists.get(0)).getSourceList().getRootList();
         } else {
             return new BasicEventList();
+        }
+    }
+
+    /**
+     * Gets the lock object in order to access this list in a thread-safe manner.
+     * This will return a <strong>re-entrant</strong> implementation of
+     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
+     */
+    public ReadWriteLock getReadWriteLock() {
+        //return this;
+        if(memberLists.size() == 1) {
+            return ((MemberList)memberLists.get(0)).getSourceList().getReadWriteLock();
+        } else {
+            return new J2SE12ReadWriteLock();
         }
     }
 
@@ -213,7 +237,8 @@ public class CompositeList extends AbstractList implements EventList {
          * also.
          */
         public void notifyListChanges(ListChangeEvent listChanges) {
-            synchronized(getRootList()) {
+            getReadWriteLock().writeLock().lock();
+            try {
                 // get the offset for the elements of this member
                 int offset = getListOffset(this);
 
@@ -234,6 +259,8 @@ public class CompositeList extends AbstractList implements EventList {
                     assert(size >= 0);
                 }
                 updates.commitAtomicChange();
+            } finally {
+                getReadWriteLock().writeLock().unlock();
             }
         }
     }

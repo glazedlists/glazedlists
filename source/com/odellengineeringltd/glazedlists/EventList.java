@@ -10,9 +10,8 @@ package com.odellengineeringltd.glazedlists;
 import com.odellengineeringltd.glazedlists.event.*;
 // Java collections are used for underlying data storage
 import java.util.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
-
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import com.odellengineeringltd.glazedlists.util.concurrent.*;
 
 /**
  * An EventList is a list that can send events to listeners. There are two
@@ -27,10 +26,10 @@ import javax.swing.SwingUtilities;
  * The final list in this chain can then be displayed using a widget such
  * as ListTable or EventJList.
  *
- * <p>EventLists are thread-safe except where otherwise noted. When
- * implementing <code>EventList</code>, use <code>synchronized(getRootList())</code>
- * in order to guarantee thread safety. This ensures that all EventLists
- * depending on the same source list share the same lock.
+ * <p>EventLists are thread-safe except where otherwise noted. When implementing
+ * <code>EventList</code>, use the read/write lock, <code>getReadWriteLock()</code>
+ * to ensure mutual exclusion. For the simplest implementation, lists should
+ * return the <code>ReadWriteLock</code> of their source lists.
  *
  * <p>EventLists can be writable but there is no requirement for doing so.
  * When a <i>root list</i> is changed, the change event is propagated to all
@@ -68,8 +67,8 @@ public interface EventList extends List {
      * list.
      *
      * @since 2004-01-30. This has been added to support the new FreezableList.
-     *      If you need to implement this method, please review the implementation
-     *      in MutationList for an example.
+     *     If you need to implement this method, please review the implementation
+     *     in MutationList for an example.
      */
     public void removeListChangeListener(ListChangeListener listChangeListener);
 
@@ -78,6 +77,24 @@ public interface EventList extends List {
      * object, or another object. This is useful for synchronization of chained
      * lists, so that dependent lists can be synchronized on the root list to
      * prevent deadlocks.
+     *
+     * @deprecated As of 2004-05-21, this method has been replaced with
+     *      <code>getReadWriteLock()</code>.
      */
     public EventList getRootList();
+    
+    /**
+     * Gets the lock object in order to access this list in a thread-safe manner.
+     * This will return a <strong>re-entrant</strong> implementation of
+     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
+     *
+     * @since 2004-05-21 This replaces <code>getRootList()</code> which was used
+     *     for synchronizing access to lists. That technique was simple but it
+     *     suffers from the problem of preventing concurrent reads. This problem
+     *     becomes magnified when multiple lists have a common source, and such
+     *     lists perform read-intensive operations such as sorting.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=26">Bug 26</a>
+     */
+    public ReadWriteLock getReadWriteLock();
 }

@@ -151,14 +151,19 @@ public class EventJList extends AbstractListModel implements ListChangeListener,
      */
     public void mouseClicked(MouseEvent mouseEvent) {
         if(mouseEvent.getSource() != jList) return;
-
-        // get the object which was clicked on
-        int index = jList.locationToIndex(mouseEvent.getPoint());
-        Object clicked = source.get(index);
-
-        // notify listeners on a double click
-        if(mouseEvent.getClickCount() == 2) {
-            selectionNotifier.notifyDoubleClicked(clicked);
+    
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // get the object which was clicked on
+            int index = jList.locationToIndex(mouseEvent.getPoint());
+            Object clicked = source.get(index);
+    
+            // notify listeners on a double click
+            if(mouseEvent.getClickCount() == 2) {
+                selectionNotifier.notifyDoubleClicked(clicked);
+            }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
     public void mouseEntered(MouseEvent mouseEvent) { }
@@ -193,11 +198,16 @@ public class EventJList extends AbstractListModel implements ListChangeListener,
      * @see com.odellengineeringltd.glazedlists.jtable.ListTable#getValueAt(int,int) ListTable
      */
     public Object getElementAt(int index) {
-        if(index < getSize()) {
-            return source.get(index);
-        } else {
-            //new Exception("Returning null for removed index " + index).printStackTrace();
-            return null;
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // ensure that this value still exists before retrieval
+            if(index < source.size()) {
+                return source.get(index);
+            } else {
+                return null;
+            }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
     
@@ -205,6 +215,11 @@ public class EventJList extends AbstractListModel implements ListChangeListener,
      * Gets the number of objects to display in this list.
      */
     public int getSize() {
-        return source.size();
+        source.getReadWriteLock().readLock().lock();
+        try {
+            return source.size();
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
     }
 }

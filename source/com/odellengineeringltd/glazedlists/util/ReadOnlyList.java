@@ -49,14 +49,12 @@ public final class ReadOnlyList extends WritableMutationList implements ListChan
      * changes, this sends notification to listening lists.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        synchronized(getRootList()) {
-            // just pass on the changes
-            updates.beginAtomicChange();
-            while(listChanges.next()) {
-                updates.appendChange(listChanges.getIndex(), listChanges.getType());
-            }
-            updates.commitAtomicChange();
+        // just pass on the changes
+        updates.beginAtomicChange();
+        while(listChanges.next()) {
+            updates.appendChange(listChanges.getIndex(), listChanges.getType());
         }
+        updates.commitAtomicChange();
     }
 
     /**

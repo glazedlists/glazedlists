@@ -89,7 +89,7 @@ public class CachingList extends WritableMutationList implements ListChangeListe
     /**
      * Fetches a particular element.
      *
-     * This might seem redundant with the existence of <code>get(int)</code>.
+     * <p>This might seem redundant with the existence of <code>get(int)</code>.
      * However, the goals of the methods are different.  This method exists
      * to be called by <code>get(int)</code> or <code>preFetch(int)</code>.
      * This distinction allows users overriding this class a means of entry
@@ -105,52 +105,59 @@ public class CachingList extends WritableMutationList implements ListChangeListe
      *         or null if the index is not found.
      */
     protected final Object fetch(int index, boolean recordHitsOrMisses) {
-        Object value = null;
-
-        // attempt to get the element from the cache
-        IndexedTreeNode treeNode = indexTree.getNode(index);
-        Object nodeValue = treeNode.getValue();
-        if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
-            cacheHits ++;
-            Object agedTreeNodeObject = treeNode.getValue();
-            IndexedTreeNode agedTreeNode = (IndexedTreeNode)agedTreeNodeObject;
-            Object agedNodeObject = agedTreeNode.getValue();
-            AgedNode agedNode = (AgedNode)agedNodeObject;
-            value = agedNode.getValue();
-            agedTreeNode.removeFromTree();
-            treeNode.setValue(cache.addByNode(agedNode));
-        } else {
-            cacheMisses++;
-            value = source.get(index);
-            if(currentSize < maxSize) {
-                currentSize++;
-                IndexedTreeNode cachedValue = cache.addByNode(new AgedNode(treeNode, value));
-                treeNode.setValue(cachedValue);
+        getReadWriteLock().writeLock().lock();
+        try {
+            Object value = null;
+    
+            // attempt to get the element from the cache
+            IndexedTreeNode treeNode = indexTree.getNode(index);
+            Object nodeValue = treeNode.getValue();
+            if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
+                cacheHits ++;
+                Object agedTreeNodeObject = treeNode.getValue();
+                IndexedTreeNode agedTreeNode = (IndexedTreeNode)agedTreeNodeObject;
+                Object agedNodeObject = agedTreeNode.getValue();
+                AgedNode agedNode = (AgedNode)agedNodeObject;
+                value = agedNode.getValue();
+                agedTreeNode.removeFromTree();
+                treeNode.setValue(cache.addByNode(agedNode));
             } else {
-                IndexedTreeNode oldValue = cache.getNode(currentSize - 1);
-                oldValue.removeFromTree();
-                AgedNode oldNode = (AgedNode)oldValue.getValue();
-                IndexedTreeNode oldTreeNode = oldNode.getIndexNode();
-                oldTreeNode.setValue(EMPTY_INDEX_NODE);
-                IndexedTreeNode cachedValue = cache.addByNode(new AgedNode(treeNode, value));
-                treeNode.setValue(cachedValue);
+                cacheMisses++;
+                value = source.get(index);
+                if(currentSize < maxSize) {
+                    currentSize++;
+                    IndexedTreeNode cachedValue = cache.addByNode(new AgedNode(treeNode, value));
+                    treeNode.setValue(cachedValue);
+                } else {
+                    IndexedTreeNode oldValue = cache.getNode(currentSize - 1);
+                    oldValue.removeFromTree();
+                    AgedNode oldNode = (AgedNode)oldValue.getValue();
+                    IndexedTreeNode oldTreeNode = oldNode.getIndexNode();
+                    oldTreeNode.setValue(EMPTY_INDEX_NODE);
+                    IndexedTreeNode cachedValue = cache.addByNode(new AgedNode(treeNode, value));
+                    treeNode.setValue(cachedValue);
+                }
             }
+            return value;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
-        return value;
     }
 
     /**
      * Pre-fetches a set of data given the index that was directly requested.
      *
-     * Each application that wishes to take advantage of pre-fetching should
+     * <p>Each application that wishes to take advantage of pre-fetching should
      * implement this method in a way which best fits their particular use
      * cases.  As such, no default pre-fetch behaviour could really be defined,
      * and thus this method is empty by default.
      *
+     * <p>Because pre-fetching can modify the cache, child classes of CachingList
+     * should use careful consideration of locking when implementing this method.
+     *
      * @param index The index that was requested from the cache
      */
     protected void preFetch(int index) {
-
     }
 
     /**

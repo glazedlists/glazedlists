@@ -159,11 +159,14 @@ public class CaseInsensitiveFilterList extends AbstractFilterList {
      * to do filtering, then apply the filter on all elements.
      */
     private void reFilter() {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // build the regex pattern from the filter strings
             updateFilterPattern();
             // refilter the whole list
             handleFilterChanged();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 

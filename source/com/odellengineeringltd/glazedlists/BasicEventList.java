@@ -16,6 +16,8 @@ import javax.swing.SwingUtilities;
 import com.odellengineeringltd.glazedlists.util.*;
 // for being serializable
 import java.io.Serializable;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import com.odellengineeringltd.glazedlists.util.concurrent.*;
 
 /**
  * An event list that wraps a Java Collections list. This list provides an
@@ -36,6 +38,9 @@ public class BasicEventList implements EventList, Serializable {
     /** the change event and notification system */
     protected ListChangeSequence updates = new ListChangeSequence();
     
+    /** the read/write lock provides mutual exclusion to access */
+    private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
+
     /**
      * Creates a new EventArrayList that uses an ArrayList as the source list
      * implementation.
@@ -58,8 +63,8 @@ public class BasicEventList implements EventList, Serializable {
      * Inserts the specified element at the specified position in this list.
      */
     public void add(int index, Object element) {
-        // lock on this list
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // create the change event
             updates.beginAtomicChange();
             updates.appendChange(index, ListChangeBlock.INSERT);
@@ -67,6 +72,8 @@ public class BasicEventList implements EventList, Serializable {
             data.add(index, element);
             // fire the event
             updates.commitAtomicChange();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
             
@@ -74,8 +81,8 @@ public class BasicEventList implements EventList, Serializable {
      * Appends the specified element to the end of this list.
      */
     public boolean add(Object element) {
-        // lock on this list
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // create the change event
             updates.beginAtomicChange();
             updates.appendChange(size(), ListChangeBlock.INSERT);
@@ -84,6 +91,8 @@ public class BasicEventList implements EventList, Serializable {
             // fire the event
             updates.commitAtomicChange();
             return result;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     
@@ -103,8 +112,9 @@ public class BasicEventList implements EventList, Serializable {
     public boolean addAll(int index, Collection collection) {
         // don't do an add of an empty set
         if(collection.size() == 0) return true;
-        // lock on this list
-        synchronized(getRootList()) {
+
+        getReadWriteLock().writeLock().lock();
+        try {
             // create the change event
             updates.beginAtomicChange();
             updates.appendChange(index, index + collection.size() - 1, ListChangeBlock.INSERT);
@@ -113,6 +123,8 @@ public class BasicEventList implements EventList, Serializable {
             // fire the event
             updates.commitAtomicChange();
             return result;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -131,8 +143,9 @@ public class BasicEventList implements EventList, Serializable {
     public boolean addAll(int index, Object[] objects) {
         // don't do an add of an empty set
         if(objects.length == 0) return true;
-        // lock on this list
-        synchronized(getRootList()) {
+
+        getReadWriteLock().writeLock().lock();
+        try {
             // create the change event
             updates.beginAtomicChange();
             updates.appendChange(index, index + objects.length - 1, ListChangeBlock.INSERT);
@@ -146,6 +159,8 @@ public class BasicEventList implements EventList, Serializable {
             // fire the event
             updates.commitAtomicChange();
             return overallResult;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -153,8 +168,8 @@ public class BasicEventList implements EventList, Serializable {
      * Removes the element at the specified position in this list.
      */
     public Object remove(int index) {
-        // lock on this list
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // create the change event
             updates.beginAtomicChange();
             updates.appendChange(index, ListChangeBlock.DELETE);
@@ -163,6 +178,8 @@ public class BasicEventList implements EventList, Serializable {
             // fire the event
             updates.commitAtomicChange();
             return removed;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     /**
@@ -172,20 +189,25 @@ public class BasicEventList implements EventList, Serializable {
      * This uses indexOf and remove(index) to do the actual remove.
      */
     public boolean remove(Object element) {
-        int index = data.indexOf(element);
-        if(index == -1) return false;
-        remove(index);
-        return true;
+        getReadWriteLock().writeLock().lock();
+        try {
+            int index = data.indexOf(element);
+            if(index == -1) return false;
+            remove(index);
+            return true;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
     }
           
     /**
      * Removes all of the elements from this list (optional operation).
      */
     public void clear() {
-        // don't do a clear on an empty set
-        if(size() == 0) return;
-        // lock on this list
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            // don't do a clear on an empty set
+            if(size() == 0) return;
             // create the change event
             updates.beginAtomicChange();
             updates.appendChange(0, size() - 1, ListChangeBlock.DELETE);
@@ -193,6 +215,8 @@ public class BasicEventList implements EventList, Serializable {
             data.clear();
             // fire the event
             updates.commitAtomicChange();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -201,8 +225,8 @@ public class BasicEventList implements EventList, Serializable {
      * specified element.
      */
     public Object set(int index, Object element) {
-        // lock on this list
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // create the change event
             updates.beginAtomicChange();
             updates.appendChange(index, ListChangeBlock.UPDATE);
@@ -211,18 +235,27 @@ public class BasicEventList implements EventList, Serializable {
             // fire the event
             updates.commitAtomicChange();
             return previous;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
           
 
     /**
      * Returns true if this list contains the specified element.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public boolean contains(Object object) {
         return data.contains(object);
     }
+
     /**
      * Returns true if this list contains all of the elements of the specified collection.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public boolean containsAll(Collection collection) {
         return data.containsAll(collection);
@@ -230,6 +263,9 @@ public class BasicEventList implements EventList, Serializable {
     
     /**
      * Compares the specified object with this list for equality.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public boolean equals(Object object) {
         return data.equals(object);
@@ -237,12 +273,18 @@ public class BasicEventList implements EventList, Serializable {
     
     /**
      * Returns the element at the specified position in this list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public Object get(int index) {
         return data.get(index);
     }
     /**
      * Returns the hash code value for this list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int hashCode() {
         return data.hashCode();
@@ -250,47 +292,74 @@ public class BasicEventList implements EventList, Serializable {
     /**
      * Returns the index in this list of the first occurrence of the specified
      * element, or -1 if this list does not contain this element.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int indexOf(Object object) {
         return data.indexOf(object);
     }
+
     /**
      * Returns the index in this list of the last occurrence of the specified
      * element, or -1 if this list does not contain this element.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int lastIndexOf(Object object) {
         return data.lastIndexOf(object);
     }
+
     /**
      * Returns the number of elements in this list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int size() {
         return data.size();
     }
+
     /**
      * Returns true if this list contains no elements.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public boolean isEmpty() {
         return data.isEmpty();
     }
+
     /**
      * Returns a view of the portion of this list between the specified
      * fromIndex, inclusive, and toIndex, exclusive.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public List subList(int fromIndex, int toIndex) {
         return new SubEventList(this, fromIndex, toIndex, true);
     }
+
     /**
      * Returns an array containing all of the elements in this list in proper
      * sequence.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public Object[] toArray() {
         return data.toArray();
     }
+
     /**
      * Returns an array containing all of the elements in this list in proper
      * sequence; the runtime type of the returned array is that of the
      * specified array.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public Object[] toArray(Object[] array) {
         return data.toArray(array);
@@ -304,8 +373,9 @@ public class BasicEventList implements EventList, Serializable {
      * high performance.
      */
     public boolean removeAll(Collection collection) {
-        boolean changed = false;
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            boolean changed = false;
             updates.beginAtomicChange();
             for(Iterator i = collection.iterator(); i.hasNext(); ) {
                 int index = -1;
@@ -316,8 +386,10 @@ public class BasicEventList implements EventList, Serializable {
                 }
             }
             updates.commitAtomicChange();
+            return changed;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
-        return changed;
     }
 
     /**
@@ -326,8 +398,9 @@ public class BasicEventList implements EventList, Serializable {
      * in this implementation, although not particularly high performance.
      */
     public boolean retainAll(Collection collection) {
-        boolean changed = false;
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            boolean changed = false;
             updates.beginAtomicChange();
             int index = 0;
             while(index < data.size()) {
@@ -340,8 +413,10 @@ public class BasicEventList implements EventList, Serializable {
                 }
             }
             updates.commitAtomicChange();
+            return changed;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
-        return changed;
     }
 
     /**
@@ -389,18 +464,28 @@ public class BasicEventList implements EventList, Serializable {
     }
     
     /**
+     * Gets the lock object in order to access this list in a thread-safe manner.
+     * This will return a <strong>re-entrant</strong> implementation of
+     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
+     */
+    public ReadWriteLock getReadWriteLock() {
+        return readWriteLock;
+    }
+
+    /**
      * Gets this list in String form for debug or display.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public String toString() {
-        synchronized(getRootList()) {
-            StringBuffer result = new StringBuffer();
-            result.append("[");
-            for(int i = 0; i < size(); i++) {
-                if(i != 0) result.append(", ");
-                result.append(get(i));
-            }
-            result.append("]");
-            return result.toString();
+        StringBuffer result = new StringBuffer();
+        result.append("[");
+        for(int i = 0; i < size(); i++) {
+            if(i != 0) result.append(", ");
+            result.append(get(i));
         }
+        result.append("]");
+        return result.toString();
     }
 }

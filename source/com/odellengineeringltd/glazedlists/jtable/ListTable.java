@@ -179,7 +179,6 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         }
     }
 
-
     /**
      * Gets the currently selected object, or null if there is currently no
      * selection.
@@ -242,9 +241,15 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         if(mouseEvent.getSource() != table) return;
 
         // get the object which was clicked on
-        int row = table.rowAtPoint(new Point(mouseEvent.getX(), mouseEvent.getY()));
-        int col = table.columnAtPoint(new Point(mouseEvent.getX(), mouseEvent.getY()));
-        Object clicked = source.get(row);
+        Object clicked = null;
+        source.getReadWriteLock().readLock().lock();
+        try {
+            int row = table.rowAtPoint(new Point(mouseEvent.getX(), mouseEvent.getY()));
+            int col = table.columnAtPoint(new Point(mouseEvent.getX(), mouseEvent.getY()));
+            clicked = source.get(row);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
 
         // notify listeners on a double click
         if(mouseEvent.getClickCount() == 2) {
@@ -284,11 +289,17 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         return tableFormat.getFieldName(column);
     }
     public int getRowCount() {
-        return source.size();
+        source.getReadWriteLock().readLock().lock();
+        try {
+            return source.size();
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
     }
     public int getColumnCount() {
         return tableFormat.getFieldCount();
     }
+
     /**
      * Retrieves the value at the specified location from the table.
      * 
@@ -302,12 +313,16 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * anyway.
      */
     public Object getValueAt(int row, int column) {
-        // ensure that this value still exists before retrieval
-        if(row < getRowCount()) {
-            return tableFormat.getFieldValue(source.get(row), column);
-        } else {
-            //new Exception("Returning null for removed row " + row).printStackTrace();
-            return null;
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // ensure that this value still exists before retrieval
+            if(row < getRowCount()) {
+                return tableFormat.getFieldValue(source.get(row), column);
+            } else {
+                return null;
+            }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 

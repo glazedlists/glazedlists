@@ -84,6 +84,9 @@ public final class UniqueList extends MutationList implements ListChangeListener
     /**
      * Returns the number of elements in this list.
      *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
+     *
      * @return The number of elements in the list.
      */
     public int size() {
@@ -93,15 +96,16 @@ public final class UniqueList extends MutationList implements ListChangeListener
     /**
      * Returns the element at the specified position in this list.
      *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
+     *
      * @param index The index of the element to retrieve
      *
      * @return The element at the given index
      */
     public Object get(int index) {
-        synchronized(getRootList()) {
-            int sourceIndex = duplicatesList.getIndex(index);
-            return source.get(sourceIndex);
-        }
+        int sourceIndex = duplicatesList.getIndex(index);
+        return source.get(sourceIndex);
     }
 
     /**
@@ -112,7 +116,6 @@ public final class UniqueList extends MutationList implements ListChangeListener
      * @param listChanges The group of list changes to process
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-
         List nonUniqueInserts = new ArrayList();
 
         updates.beginAtomicChange();
@@ -349,7 +352,8 @@ public final class UniqueList extends MutationList implements ListChangeListener
      * source list and examining adjacent entries for equality.
      */
     private void populateDuplicatesList() {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             if(!duplicatesList.isEmpty()) throw new IllegalStateException();
 
             for(int i = 0; i < source.size(); i++) {
@@ -359,6 +363,8 @@ public final class UniqueList extends MutationList implements ListChangeListener
                     duplicatesList.add(i, null);
                 }
             }
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 

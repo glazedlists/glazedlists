@@ -14,6 +14,8 @@ import java.util.*;
 import javax.swing.SwingUtilities;
 // for iterators and sublists
 import com.odellengineeringltd.glazedlists.util.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import com.odellengineeringltd.glazedlists.util.concurrent.*;
 
 /**
  * A MutationList is an altered view on an EventList. This may be a sorted
@@ -35,12 +37,16 @@ public abstract class MutationList extends AbstractList implements EventList, Li
     
     /** the change event and notification system */
     protected ListChangeSequence updates = new ListChangeSequence();
+    
+    /** the read/write lock provides mutual exclusion to access */
+    private ReadWriteLock readWriteLock;
 
     /**
      * Creates a new Mutation list that uses the specified source list.
      */
     protected MutationList(EventList source) {
         this.source = source;
+        readWriteLock = source.getReadWriteLock();
     }
 
     /**
@@ -52,6 +58,7 @@ public abstract class MutationList extends AbstractList implements EventList, Li
      */
     protected MutationList() {
         source = this;
+        readWriteLock = new J2SE12ReadWriteLock();
     }
     
     /**
@@ -93,6 +100,15 @@ public abstract class MutationList extends AbstractList implements EventList, Li
     public EventList getRootList() {
         return source.getRootList();
     }
+    
+    /**
+     * Gets the lock object in order to access this list in a thread-safe manner.
+     * This will return a <strong>re-entrant</strong> implementation of
+     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
+     */
+    public ReadWriteLock getReadWriteLock() {
+        return readWriteLock;
+    }
 
     /**
      * Returns an iterator over the elements in this list in proper sequence.
@@ -129,15 +145,13 @@ public abstract class MutationList extends AbstractList implements EventList, Li
      * Gets this list in String form for debug or display.
      */
     public String toString() {
-        synchronized(getRootList()) {
-            StringBuffer result = new StringBuffer();
-            result.append("[");
-            for(int i = 0; i < size(); i++) {
-                if(i != 0) result.append(", ");
-                result.append(get(i));
-            }
-            result.append("]");
-            return result.toString();
+        StringBuffer result = new StringBuffer();
+        result.append("[");
+        for(int i = 0; i < size(); i++) {
+            if(i != 0) result.append(", ");
+            result.append(get(i));
         }
+        result.append("]");
+        return result.toString();
     }
 }

@@ -75,75 +75,71 @@ public abstract class AbstractFilterList extends WritableMutationList implements
      * <li>When a list item is deleted, it must be filtered if it is not visible.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        synchronized(getRootList()) {
+        // all of these changes to this list happen "atomically"
+        updates.beginAtomicChange();
+        
+        // for all changes, one index at a time
+        while(listChanges.next()) {
             
-            // all of these changes to this list happen "atomically"
-            updates.beginAtomicChange();
-            
-            // for all changes, one index at a time
-            while(listChanges.next()) {
+            // get the current change info
+            int sourceIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
+
+            // handle delete events
+            if(changeType == ListChangeBlock.DELETE) {
+                // test if this value was already not filtered out
+                boolean wasIncluded = flagList.get(sourceIndex) != null;
                 
-                // get the current change info
-                int sourceIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
+                // if this value was not filtered out, it is now so add a change
+                if(wasIncluded) {
+                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                    updates.appendChange(filteredIndex, ListChangeBlock.DELETE);
+                }
 
-                // handle delete events
-                if(changeType == ListChangeBlock.DELETE) {
-                    // test if this value was already not filtered out
-                    boolean wasIncluded = flagList.get(sourceIndex) != null;
-                    
-                    // if this value was not filtered out, it is now so add a change
-                    if(wasIncluded) {
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                        updates.appendChange(filteredIndex, ListChangeBlock.DELETE);
-                    }
+                // remove this entry from the flag list
+                flagList.remove(sourceIndex);
+                
+            // handle insert events
+            } else if(changeType == ListChangeBlock.INSERT) {
+                
+                // whether we should add this item
+                boolean include = filterMatches(source.get(sourceIndex));
+                
+                // if this value should be included, add a change and add the item
+                if(include) {
+                    flagList.add(sourceIndex, Boolean.TRUE);
+                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                    updates.appendChange(filteredIndex, ListChangeBlock.INSERT);
 
-                    // remove this entry from the flag list
-                    flagList.remove(sourceIndex);
-                    
-                // handle insert events
-                } else if(changeType == ListChangeBlock.INSERT) {
-                    
-                    // whether we should add this item
-                    boolean include = filterMatches(source.get(sourceIndex));
-                    
-                    // if this value should be included, add a change and add the item
-                    if(include) {
-                        flagList.add(sourceIndex, Boolean.TRUE);
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                        updates.appendChange(filteredIndex, ListChangeBlock.INSERT);
+                // if this value should not be included, just add the item
+                } else {
+                    flagList.add(sourceIndex, null);
+                }
 
-                    // if this value should not be included, just add the item
-                    } else {
-                        flagList.add(sourceIndex, null);
-                    }
+            // handle update events
+            } else if(changeType == ListChangeBlock.UPDATE) {
+                // test if this value was already not filtered out
+                boolean wasIncluded = flagList.get(sourceIndex) != null;
+                // whether we should add this item
+                boolean include = filterMatches(source.get(sourceIndex));
 
-                // handle update events
-                } else if(changeType == ListChangeBlock.UPDATE) {
-                    // test if this value was already not filtered out
-                    boolean wasIncluded = flagList.get(sourceIndex) != null;
-                    // whether we should add this item
-                    boolean include = filterMatches(source.get(sourceIndex));
+                // if this element is being removed as a result of the change
+                if(wasIncluded && !include) {
+                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                    flagList.set(sourceIndex, null);
+                    updates.appendChange(filteredIndex, ListChangeBlock.DELETE);
 
-                    // if this element is being removed as a result of the change
-                    if(wasIncluded && !include) {
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                        flagList.set(sourceIndex, null);
-                        updates.appendChange(filteredIndex, ListChangeBlock.DELETE);
-
-                    // if this element is being added as a result of the change
-                    } else if(!wasIncluded && include) {
-                        flagList.set(sourceIndex, Boolean.TRUE);
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                        updates.appendChange(filteredIndex, ListChangeBlock.INSERT);
-                    }
+                // if this element is being added as a result of the change
+                } else if(!wasIncluded && include) {
+                    flagList.set(sourceIndex, Boolean.TRUE);
+                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                    updates.appendChange(filteredIndex, ListChangeBlock.INSERT);
                 }
             }
-            // commit the changes and notify listeners
-            updates.commitAtomicChange();
         }
+        // commit the changes and notify listeners
+        updates.commitAtomicChange();
     }
-
 
     /**
      * When the filter changes, this goes through all of the list elements
@@ -157,7 +153,8 @@ public abstract class AbstractFilterList extends WritableMutationList implements
      *    <li>It coudl stay off because it never matches
      */
     protected void handleFilterChanged() {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
             // all of these changes to this list happen "atomically"
             updates.beginAtomicChange();
 
@@ -185,6 +182,8 @@ public abstract class AbstractFilterList extends WritableMutationList implements
 
             // commit the changes and notify listeners
             updates.commitAtomicChange();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
     
@@ -197,33 +196,22 @@ public abstract class AbstractFilterList extends WritableMutationList implements
     /**
      * Gets the specified element from the list.
      *
-     * This is copied without shame from SelectionList.
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public Object get(int index) {
-        synchronized(getRootList()) {
-            int sourceIndex = flagList.getIndex(index);
-    
-            // ensure that this value still exists before retrieval
-            if(sourceIndex < source.size()) {
-                return source.get(sourceIndex);
-            } else {
-                //new Exception("Returning null for removed selection " + row).printStackTrace();
-                return null;
-            }
-        }
+        int sourceIndex = flagList.getIndex(index);
+        return source.get(sourceIndex);
     }
 
     /**
      * Returns the number of elements in this list.
      *
-     * This is the number of elements currently selected.
-     *
-     * This is copied without shame from SelectionList.
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int size() {
-        synchronized(getRootList()) {
-            return flagList.getCompressedList().size();
-        }
+        return flagList.getCompressedList().size();
     }
 
     /**

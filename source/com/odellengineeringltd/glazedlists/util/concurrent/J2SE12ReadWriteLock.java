@@ -18,7 +18,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class J2SE12ReadWriteLock {
+public class J2SE12ReadWriteLock implements ReadWriteLock {
     
     /** delegate locking to the professionals! */
     ReentrantWriterPreferenceReadWriteLock j2se12ReadWriteLock = new ReentrantWriterPreferenceReadWriteLock();

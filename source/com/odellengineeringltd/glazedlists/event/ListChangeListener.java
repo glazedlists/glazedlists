@@ -30,7 +30,7 @@ public interface ListChangeListener {
      * When the underlying list changes, this notification allows the
      * object to repaint itself or update itself as necessary.
      *
-     * The receiving class must iterate through all of the changes in
+     * <p>The receiving class must iterate through all of the changes in
      * the list change event or else the change objects will remain
      * in memory indefinitely. The easiest way to iterate through the
      * changes is in a while loop like this:
@@ -45,6 +45,10 @@ public interface ListChangeListener {
      *    // handle change with the specified index and type
      * }
      * </code></tt></pre>
+     *
+     * <p>It is mandatory that the calling thread has obtained the write lock
+     * on the source list. This guarantees the listener can read and write the
+     * source list without obtaining any further locks.
      */
     public void notifyListChanges(ListChangeEvent listChanges);
 }

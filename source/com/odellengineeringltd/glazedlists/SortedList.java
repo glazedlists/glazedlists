@@ -74,95 +74,92 @@ public final class SortedList extends WritableMutationList implements ListChange
      * index. In the second phase, the sorted list is updated with the changes.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
-        synchronized(getRootList()) {
-            
-            // all of these changes to this list happen "atomically"
-            updates.beginAtomicChange();
-            
-            // first update the offset tree for all changes, and keep the changed nodes in a list
-            ArrayList unsortedNodes = new ArrayList();
-            ArrayList deletedIndices = new ArrayList();
-
-            // copy the list change sequence in order to iterate twice
-            ListChangeEvent clonedChanges = new ListChangeEvent(listChanges);
-            
-            // keep track of the difference between the sorted set size and its expected size
-            int sortedOffset = 0;
-            
-            // perform the updates on the indexed tree
-            while(clonedChanges.next()) {
-                
-                // get the current change info
-                int unsortedIndex = clonedChanges.getIndex();
-                int changeType = clonedChanges.getType();
-
-                // on insert, insert the index node
-                if(changeType == ListChangeBlock.INSERT) {
-                    IndexedTreeNode unsortedNode = unsorted.addByNode(unsortedIndex, this);
-                    unsortedNodes.add(unsortedNode);
-                    sortedOffset++;
-
-                // on delete, delete the index and sorted node
-                } else if(changeType == ListChangeBlock.DELETE) {
-                    IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                    unsortedNode.removeFromTree();
-                    int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
-                    updates.appendChange(deleteSortedIndex, ListChangeBlock.DELETE);
-
-                // on update, delete the sorted node
-                } else if(changeType == ListChangeBlock.UPDATE) {
-                    IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                    int deleteSortedIndex = deleteByUnsortedNode(unsortedNode) + sortedOffset;
-                    unsortedNodes.add(unsortedNode);
-                    deletedIndices.add(new Integer(deleteSortedIndex));
-                    sortedOffset++;
-                }
-            }
-            
-            // verify the index tree matches the source
-            if(unsorted.size() != source.size()) throw new IllegalStateException();
-            if(sorted.size() + sortedOffset != source.size()) throw new IllegalStateException();
-
-            // for all changes now calculate the sorted index with the updated offset data
-            Iterator unsortedNodesIterator = unsortedNodes.iterator();
-            Iterator deletedIndicesIterator = deletedIndices.iterator();
-            while(listChanges.next()) {
-                
-                // get the current change info
-                int unsortedIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
-
-                // on insert, insert into the sorted list and fire an event
-                if(changeType == ListChangeBlock.INSERT) {
-                    IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
-                    int sortedIndex = insertByUnsortedNode(unsortedNode);
-                    updates.appendChange(sortedIndex, ListChangeBlock.INSERT);
-
-                // on delete, we've already fired the event
-                } else if(changeType == ListChangeBlock.DELETE) {
-                    // do nothing
+        // all of these changes to this list happen "atomically"
+        updates.beginAtomicChange();
         
-                // on update, re-insert and fire an event
-                } else if(changeType == ListChangeBlock.UPDATE) {
-                    int deleteSortedIndex = ((Integer)deletedIndicesIterator.next()).intValue();
-                    IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
-                    int insertSortedIndex = insertByUnsortedNode(unsortedNode);
-                    
-                    if(deleteSortedIndex == insertSortedIndex) {
-                        updates.appendChange(insertSortedIndex, ListChangeBlock.UPDATE);
-                    } else {
-                        updates.appendChange(deleteSortedIndex, ListChangeBlock.DELETE);
-                        updates.appendChange(insertSortedIndex, ListChangeBlock.INSERT);
-                    }
+        // first update the offset tree for all changes, and keep the changed nodes in a list
+        ArrayList unsortedNodes = new ArrayList();
+        ArrayList deletedIndices = new ArrayList();
+
+        // copy the list change sequence in order to iterate twice
+        ListChangeEvent clonedChanges = new ListChangeEvent(listChanges);
+        
+        // keep track of the difference between the sorted set size and its expected size
+        int sortedOffset = 0;
+        
+        // perform the updates on the indexed tree
+        while(clonedChanges.next()) {
+            
+            // get the current change info
+            int unsortedIndex = clonedChanges.getIndex();
+            int changeType = clonedChanges.getType();
+
+            // on insert, insert the index node
+            if(changeType == ListChangeBlock.INSERT) {
+                IndexedTreeNode unsortedNode = unsorted.addByNode(unsortedIndex, this);
+                unsortedNodes.add(unsortedNode);
+                sortedOffset++;
+
+            // on delete, delete the index and sorted node
+            } else if(changeType == ListChangeBlock.DELETE) {
+                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
+                unsortedNode.removeFromTree();
+                int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
+                updates.appendChange(deleteSortedIndex, ListChangeBlock.DELETE);
+
+            // on update, delete the sorted node
+            } else if(changeType == ListChangeBlock.UPDATE) {
+                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
+                int deleteSortedIndex = deleteByUnsortedNode(unsortedNode) + sortedOffset;
+                unsortedNodes.add(unsortedNode);
+                deletedIndices.add(new Integer(deleteSortedIndex));
+                sortedOffset++;
+            }
+        }
+        
+        // verify the index tree matches the source
+        if(unsorted.size() != source.size()) throw new IllegalStateException();
+        if(sorted.size() + sortedOffset != source.size()) throw new IllegalStateException();
+
+        // for all changes now calculate the sorted index with the updated offset data
+        Iterator unsortedNodesIterator = unsortedNodes.iterator();
+        Iterator deletedIndicesIterator = deletedIndices.iterator();
+        while(listChanges.next()) {
+            
+            // get the current change info
+            int unsortedIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
+
+            // on insert, insert into the sorted list and fire an event
+            if(changeType == ListChangeBlock.INSERT) {
+                IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
+                int sortedIndex = insertByUnsortedNode(unsortedNode);
+                updates.appendChange(sortedIndex, ListChangeBlock.INSERT);
+
+            // on delete, we've already fired the event
+            } else if(changeType == ListChangeBlock.DELETE) {
+                // do nothing
+    
+            // on update, re-insert and fire an event
+            } else if(changeType == ListChangeBlock.UPDATE) {
+                int deleteSortedIndex = ((Integer)deletedIndicesIterator.next()).intValue();
+                IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
+                int insertSortedIndex = insertByUnsortedNode(unsortedNode);
+                
+                if(deleteSortedIndex == insertSortedIndex) {
+                    updates.appendChange(insertSortedIndex, ListChangeBlock.UPDATE);
+                } else {
+                    updates.appendChange(deleteSortedIndex, ListChangeBlock.DELETE);
+                    updates.appendChange(insertSortedIndex, ListChangeBlock.INSERT);
                 }
             }
-            
-            if(deletedIndicesIterator.hasNext()) throw new IllegalStateException();
-            if(unsortedNodesIterator.hasNext()) throw new IllegalStateException();
-            
-            // commit the changes and notify listeners
-            updates.commitAtomicChange();
         }
+        
+        if(deletedIndicesIterator.hasNext()) throw new IllegalStateException();
+        if(unsortedNodesIterator.hasNext()) throw new IllegalStateException();
+        
+        // commit the changes and notify listeners
+        updates.commitAtomicChange();
     }
     
     /**
@@ -216,7 +213,11 @@ public final class SortedList extends WritableMutationList implements ListChange
      *      leave the list in the same order as the source list.
      */
     public void setComparator(Comparator comparator) {
-        synchronized(getRootList()) {
+        getReadWriteLock().writeLock().lock();
+        try {
+
+            System.out.println("  > Sorting a list of size: " + source.size());
+            
             // save this comparator
             this.comparator = comparator;
             // create the sorted list with a simple comparator
@@ -241,6 +242,11 @@ public final class SortedList extends WritableMutationList implements ListChange
             updates.appendChange(0, size() - 1, ListChangeBlock.DELETE);
             updates.appendChange(0, size() - 1, ListChangeBlock.INSERT);
             updates.commitAtomicChange();
+            
+            System.out.println("  < Sorted  a list of size: " + source.size());
+
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -251,23 +257,25 @@ public final class SortedList extends WritableMutationList implements ListChange
      * list may change or the sorting algorithm may change. When such changes
      * occur, the element at get(i) may be shifted to a different location, but
      * still exist in the list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public Object get(int index) {
-        synchronized(getRootList()) {
-            IndexedTreeNode sortedNode = sorted.getNode(index);
-            IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
-            int unsortedIndex = unsortedNode.getIndex();
-            return source.get(unsortedIndex);
-        }
+        IndexedTreeNode sortedNode = sorted.getNode(index);
+        IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
+        int unsortedIndex = unsortedNode.getIndex();
+        return source.get(unsortedIndex);
     }
 
     /**
      * Gets the total number of elements in the list.
+     *
+     * <p>This method is not thread-safe and callers should ensure they have thread-
+     * safe access via <code>getReadWriteLock().readLock()</code>.
      */
     public int size() {
-        synchronized(getRootList()) {
-            return sorted.size();
-        }
+        return sorted.size();
     }
     
     /**
