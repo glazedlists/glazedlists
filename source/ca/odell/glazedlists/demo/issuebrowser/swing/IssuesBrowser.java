@@ -114,13 +114,11 @@ public class IssuesBrowser extends Applet {
 		TextFilterList issuesTextFiltered = new TextFilterList(issuesUserFiltered);
 		ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
 		SortedList issuesSortedList = new SortedList(priorityList);
-		//SortedList issuesSortedList = new SortedList(issuesTextFiltered);
 
 		// issues table
 	    EventTableModel issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
-		//EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, new IssueTableFormat());
 		JTable issuesJTable = new JTable(issuesTableModel);
-		issuesSelectionModel = new EventSelectionModel(issuesTextFiltered);
+		issuesSelectionModel = new EventSelectionModel(issuesSortedList);
 		issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
 		issuesJTable.setSelectionModel(issuesSelectionModel);
 		issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);

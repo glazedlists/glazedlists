@@ -58,6 +58,14 @@ public final class ListEventPublisher {
             dependentListeners.add(dependentListener);
         }
         dependentListener.getDependencies().add(dependency);
+        
+        /* debug
+        if(listener instanceof WeakReferenceProxy) return;
+        System.out.println("- - - - NEW DEPENDENCY: " + listener.getClass() + " DEPENDS ON " + dependency.getClass());
+        for(Iterator i = dependentListeners.iterator(); i.hasNext(); ) {
+            DependentListener dl = (DependentListener)i.next();
+            System.out.print(dl);
+        } */
     }
 
     /**
@@ -230,6 +238,20 @@ public final class ListEventPublisher {
         public DependentListener(ListEventListener listener) {
             this.listener = listener;
         }
+        
+        /**
+         * Get this DependentList for debugging.
+         */
+        public String toString() {
+            StringBuffer result = new StringBuffer();
+            result.append(listener.getClass().getName());
+            result.append("\n");
+            for(Iterator i = dependencies.iterator(); i.hasNext(); ) {
+                EventList dependency = (EventList)i.next();
+                result.append(" > DEPENDS ON > ").append(dependency.getClass().getName()).append("\n"); //.append(", LIST CONTENTS=" + dependency).append("\n");
+            }
+            return result.toString();
+        }
 
         /**
          * Get a {@link List} of {@link EventList}s that this listener is dependent
@@ -261,22 +283,6 @@ public final class ListEventPublisher {
             return false;
         }
 
-        /**
-         * Get this DependentList for debugging.
-         */
-        public String toString() {
-            StringBuffer result = new StringBuffer();
-            result.append(listener.getClass().getName());
-            result.append(" (");
-            for(Iterator i = dependencies.iterator(); i.hasNext(); ) {
-                EventList dependency = (EventList)i.next();
-                result.append(dependency.getClass().getName());
-                if(i.hasNext()) result.append(", ");
-            }
-            result.append(")");
-            return result.toString();
-        }
-        
         /**
          * Adds the specified {@linkListEvent} to be fired upon the completion of
          * its dependencies.
