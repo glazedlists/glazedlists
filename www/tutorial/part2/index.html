@@ -58,10 +58,10 @@ public class ProgrammingLanguageBrowser {
 
     public ProgrammingLanguageBrowser() {
         languages = new BasicEventList();
-        languages.add(new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems"));
-        languages.add(new ProgrammingLanguage("C", "1973", "The UNIX language originally developed for the PDP-11"));
+        languages.add(new ProgrammingLanguage("Java", "1995", ...));
+        languages.add(new ProgrammingLanguage("C", "1973", ...));
         ...
-        languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer"));
+        languages.add(new ProgrammingLanguage("Visual Basic", "1992", ...));
         
         <font color="#FF3333">filteredLanguages = new CaseInsensitiveFilterList(languages);</font>
     }
@@ -77,9 +77,9 @@ languages.
         ListTable listTable = new ListTable(filteredLanguages, new ProgrammingLanguageTableCell());
         JFrame frame = new JFrame("Programming Languages");
         frame.getContentPane().setLayout(new GridBagLayout());
-        frame.getContentPane().add(new JLabel("Filter"), new GridBagConstraints(...));
-        frame.getContentPane().add(<font color="#FF3333">filteredLanguages.getFilterEdit()</font>, new GridBagConstraints(...));
-        frame.getContentPane().add(listTable.getTableScrollPane(), new GridBagConstraints(...));
+        frame.getContentPane().add(new JLabel("Filter"), ...);
+        frame.getContentPane().add(<font color="#FF3333">filteredLanguages.getFilterEdit()</font>, ...);
+        frame.getContentPane().add(listTable.getTableScrollPane(), ...);
         frame.setSize(640, 480);
         frame.show();
     }

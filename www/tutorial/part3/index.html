@@ -97,10 +97,10 @@ public class ProgrammingLanguageBrowser {
 
     public ProgrammingLanguageBrowser() {
         languages = new BasicEventList();
-        languages.add(new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems", true, true));
-        languages.add(new ProgrammingLanguage("C", "1973", "The UNIX language originally developed for the PDP-11", false, false));
+        languages.add(new ProgrammingLanguage("Java", "1995", ...));
+        languages.add(new ProgrammingLanguage("C", "1973", ...));
         ...
-        languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer", false, false));
+        languages.add(new ProgrammingLanguage("Visual Basic", "1992", ...));
         
         filteredLanguages = new CaseInsensitiveFilterList(languages);
         <font color="#FF3333">customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);</font>
@@ -108,8 +108,8 @@ public class ProgrammingLanguageBrowser {
     
     public void display() {
         ...
-        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(...));
-        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(...));
+        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), ...);
+        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), ...);
         ...
     }
 </code></pre></td></tr></table>

@@ -80,8 +80,8 @@ class ProgrammingLanguageQuery implements Query {
 
         try {
             Class.forName(jdbcDriverClassname);
-            Connection connection = DriverManager.getConnection(jdbcUri, jdbcUsername, jdbcPassword);
-            PreparedStatement getAll = connection.prepareStatement("SELECT pl_name, pl_year, pl_description, pl_oop, pl_vm FROM programming_languages");
+            Connection connection = DriverManager.getConnection(...);
+            PreparedStatement getAll = connection.prepareStatement(...);
             ResultSet resultSet = getAll.executeQuery();
 
             while(resultSet.next()) {

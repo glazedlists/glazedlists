@@ -67,10 +67,10 @@ public class ProgrammingLanguageBrowser {
 
     public ProgrammingLanguageBrowser() {
         languages = new BasicEventList();
-        languages.add(new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems", true, true));
-        languages.add(new ProgrammingLanguage("C", "1973", "The UNIX language originally developed for the PDP-11", false, false));
+        languages.add(new ProgrammingLanguage("Java", "1995", ...));
+        languages.add(new ProgrammingLanguage("C", "1973", ...));
         ...
-        languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer", false, false));
+        languages.add(new ProgrammingLanguage("Visual Basic", "1992", ...));
         
         <font color="#FF3333">sortedLanguages = new SortedList(languages, sortByName);</font>
         filteredLanguages = new CaseInsensitiveFilterList(sortedLanguages);
@@ -98,11 +98,11 @@ create an instance and add <code>Comparator</code>s as necessary.
         
         JFrame frame = new JFrame("Programming Languages");
         frame.getContentPane().setLayout(new GridBagLayout());
-        frame.getContentPane().add(new JLabel("Filter"), new GridBagConstraints(...));
-        frame.getContentPane().add(filteredLanguages.getFilterEdit(), new GridBagConstraints(...));
-        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(...));
-        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(...));
-        frame.getContentPane().add(listTable.getTableScrollPane(), new GridBagConstraints(...));
+        frame.getContentPane().add(new JLabel("Filter"), ...);
+        frame.getContentPane().add(filteredLanguages.getFilterEdit(), ...);
+        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), ...);
+        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), ...);
+        frame.getContentPane().add(listTable.getTableScrollPane(), ...);
         frame.setSize(640, 480);
         frame.show();
     }</code></pre></td></tr></table>
