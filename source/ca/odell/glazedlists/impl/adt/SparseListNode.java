@@ -6,6 +6,9 @@
  */
 package ca.odell.glazedlists.impl.adt;
 
+// for iterators
+import java.util.*;
+
 /**
  * A SparseListNode models a node in an SparseList.  This class
  * does the bulk of the heavy lifting for SparseList.
@@ -612,4 +615,211 @@ public final class SparseListNode {
         // require height to be recalculated on the replacement node
         replacement.height = 0;
     }
+
+    /**
+     * For debugging purposes.
+     */
+    public String toString() {
+        return "[ " + left + " <"+emptySpace+"> " + value +" <"+height+"> "
+            + right + " ]";
+	}
+
+    /**
+     * Corrects all the cached sizes up the tree by the given offsets starting
+     * from this so an Iterator can perform a fast remove.
+     */
+    private void correctSizes(int sizeChange) {
+		if(parent != null)  {
+        	// left subtree has changed in size
+        	if(parent.left == this) totalLeftSize += sizeChange;
+
+        	// right subtree has changed in size
+        	else totalRightSize += sizeChange;
+
+        	// recurse up the tree to the root
+        	parent.correctSizes(sizeChange);
+
+        // Notify the host tree that the size has changed
+        } else host.treeSizeChanged();
+    }
+
+	/**
+	 * A specialized Iterator that will significantly outperform the default
+	 * one provided by AbstractList when acting on this ADT.
+	 */
+    final static class SparseListIterator implements Iterator {
+
+		/** the current SparseListNode being inspected */
+		private SparseListNode currentNode = null;
+
+		/** the number of times the current node has been requested */
+		private int timesRequested = -1;
+
+		/** a reference to the SparseList for removal of trailing nulls */
+		private SparseList sparseList = null;
+
+		/** the size of the actual tree within the SparseList*/
+		private int treeSize = 0;
+
+		/** the size of the list */
+		private int size = 0;
+
+		/** the current index being inspected */
+		private int index = -1;
+
+		/**
+		 * Creates a new Iterator that is optimized for SparseLists.
+		 */
+		SparseListIterator(SparseList sparseList, SparseListNode root) {
+			// move the Iterator to the start position.
+			if(root != null) {
+				this.treeSize = sparseList.treeSize();
+				currentNode = root;
+				while(currentNode.left != null) {
+					currentNode = currentNode.left;
+				}
+			}
+			this.sparseList = sparseList;
+			this.size = sparseList.size();
+		}
+
+		/**
+		 * Returns whether or not there are more values in the SparseList to
+		 * iterate over.
+		 */
+		public boolean hasNext() {
+			if(index >= treeSize - 1 && index == size - 1) {
+				return false;
+			}
+			return true;
+		}
+
+		/**
+		 * Gets the next value in this SparseList.
+		 */
+		public Object next() {
+			// iterate on this node
+			timesRequested++;
+			index++;
+
+			// handle the empty tree case
+			if(currentNode == null) {
+				// beyond the tree in the trailing nulls
+				if(index < size) {
+					return null;
+
+				// at the end of the list
+				} else {
+					throw new NoSuchElementException();
+				}
+
+			// at the edge of the current node
+			} else if(timesRequested > currentNode.emptySpace) {
+				// move to the next node
+				if(index < treeSize) {
+					findNextNode();
+					timesRequested = 0;
+
+				// act on the trailing nulls
+				} else {
+					// beyond the tree in the trailing nulls
+					if(index < size) {
+						return null;
+
+					// at the end of the list
+					} else {
+						throw new NoSuchElementException();
+					}
+				}
+			}
+
+			// next() was a null value
+			if(timesRequested < currentNode.emptySpace) {
+				return null;
+
+			// next() was the value of this node
+			} else if(timesRequested == currentNode.emptySpace) {
+				return currentNode.value;
+
+			// the iterator is out of state
+			} else {
+				throw new IllegalStateException();
+			}
+		}
+
+		/**
+		 * Removes the current value at the Iterator from the SparseList.
+		 *
+		 * @throws UnsupportedOperationException This feature is not yet implemented.
+		 *
+		 */
+		public void remove() {
+			// handle the uninitialized iterator case
+			if(timesRequested == -1) {
+				throw new IllegalStateException("Cannot remove() without a prior call to next()");
+
+			// remove from the trailing nulls
+			} else if(currentNode == null || index >= treeSize) {
+				sparseList.remove(index);
+
+			// remove a null
+			} else if(timesRequested < currentNode.emptySpace) {
+				currentNode.correctSizes(-1);
+				currentNode.emptySpace--;
+
+			// remove a value
+			} else if(timesRequested == currentNode.emptySpace) {
+				currentNode.correctSizes(-1);
+				SparseListNode nodeToRemove = currentNode;
+				findNextNode();
+				timesRequested = -1;
+				nodeToRemove.unlink();
+
+			// the iterator is out of state
+			} else {
+				throw new IllegalStateException();
+			}
+		}
+
+		/**
+		 * Finds the next node in the tree.
+		 */
+		private void findNextNode() {
+			//  go into the right subtree for the next node
+			if(currentNode.right != null) {
+				currentNode = currentNode.right;
+				while(currentNode.left != null) {
+					currentNode = currentNode.left;
+				}
+
+			// go to the parent for the next node
+			} else if(currentNode.parent.left == currentNode) {
+				currentNode = currentNode.parent;
+
+			// get out of the right subtree
+			} else if(currentNode.parent.right == currentNode) {
+				// move to the top of the current subtree
+				while(currentNode.parent.right == currentNode) {
+					currentNode = currentNode.parent;
+				}
+				// Move up one more node to leave the subtree
+				currentNode = currentNode.parent;
+
+			// the iterator is out of state
+			} else {
+				throw new IllegalStateException();
+			}
+		}
+
+		/**
+		 * Finds the previous node in the tree.
+		 */
+		private void findPreviousNode() {
+			throw new UnsupportedOperationException("Not implemented yet.");
+		}
+
+		public String toString() {
+			return "Accessing " + currentNode + " for the " + timesRequested + " time.";
+		}
+	}
 }

@@ -511,9 +511,9 @@ public class SparseListTest extends TestCase {
 
     /**
      * Test for the accidental removal of a right child when a
-     * node being unlinked has two children.  The affect node
+     * node being unlinked has two children.  The affected node
      * is the right child of the smallest node in the right subtree
-     * the node being unlinked.
+     * of the node being unlinked.
      */
     public void testDisappearingRightChildOnUnlink() {
         sparseTree.add(0, Boolean.TRUE);
@@ -655,6 +655,129 @@ public class SparseListTest extends TestCase {
         assertEquals(null, sparseTree.get(15));
     }
 
+    /**
+     * Validates that the SparseListIterator is working correctly
+     */
+    public void testIterator() {
+		for(int i = 0;i < 995;i++) {
+			boolean addInteger = random.nextBoolean();
+			int index = sparseTree.isEmpty() ? 0 : random.nextInt(sparseTree.size());
+
+			// Add a value
+			if(addInteger) {
+				sparseTree.add(index, new Integer(i));
+
+			// Add a null
+			} else {
+				sparseTree.add(index, null);
+			}
+		}
+
+		// Make sure that there is some trailing nulls
+		for(int i = 0;i < 5;i++) {
+			sparseTree.add(sparseTree.size(), null);
+		}
+
+		// Get the SparseList's provided Iterator
+		Iterator iterator = sparseTree.iterator();
+
+		// Validate that the iterator returns the same value as get for all values
+		for(int i = 0;i < sparseTree.size();i++) {
+			assertEquals(true, iterator.hasNext());
+			assertEquals(sparseTree.get(i), iterator.next());
+		}
+
+		// Validate that the iterator is done
+		assertEquals(false, iterator.hasNext());
+	}
+
+	/**
+	 * Validates the Iterator works on a SparseList that has no trailing nulls.
+	 */
+	public void testIteratorWithoutTrailingNulls() {
+		// load random values into the SparseList
+		for(int i = 0;i < 145;i++) {
+			boolean addInteger = random.nextBoolean();
+			int index = sparseTree.isEmpty() ? 0 : random.nextInt(sparseTree.size());
+
+			// Add a value
+			if(addInteger) {
+				sparseTree.add(index, new Integer(i));
+
+			// Add a null
+			} else {
+				sparseTree.add(index, null);
+			}
+		}
+
+		// pad the end of the SparseList to guarantee no trailing nulls
+		for(int i = 0;i < 5;i++) {
+			sparseTree.add(sparseTree.size(), new Integer(i));
+		}
+
+		// Get the SparseList's provided Iterator
+		Iterator iterator = sparseTree.iterator();
+
+		// Validate that the iterator returns the same value as get for all values
+		for(int i = 0;i < sparseTree.size();i++) {
+			assertEquals(true, iterator.hasNext());
+			assertEquals(sparseTree.get(i), iterator.next());
+		}
+
+		// Validate that the iterator is done
+		assertEquals(false, iterator.hasNext());
+	}
+
+	/**
+	 * Validates the Iterator works on a SparseList that has only trailing nulls.
+	 */
+	public void testIteratorOnTrailingNulls() {
+		// load only trailing nulls into the SparseList
+		for(int i = 0;i < 35;i++) {
+			sparseTree.add(i, null);
+		}
+
+		// Get the SparseList's provided Iterator
+		Iterator iterator = sparseTree.iterator();
+
+		// Validate that the iterator returns the same value as get for all values
+		for(int i = 0;i < sparseTree.size();i++) {
+			assertEquals(true, iterator.hasNext());
+			assertEquals(sparseTree.get(i), iterator.next());
+		}
+
+		// Validate that the iterator is done
+		assertEquals(false, iterator.hasNext());
+	}
+
+	/**
+	 * Validates that Iterator.remove() works on a SparseList that contains
+	 * only nulls.
+	 */
+	public void testIteratorRemoveWithEmptyTree() {
+		// load only trailing nulls into the SparseList
+		for(int i = 0;i < 10;i++) {
+			sparseTree.add(i, null);
+		}
+
+		// Get the SparseList's provided Iterator
+		Iterator iterator = sparseTree.iterator();
+
+		// Remove the first item and validate that sizes change accordingly
+		int oldSize = sparseTree.size();
+		iterator.next();
+		iterator.remove();
+		assertEquals(oldSize - 1, sparseTree.size());
+
+		// Validate that the iterator returns the same value as get for all values
+		for(int i = 0;i < sparseTree.size();i++) {
+			assertEquals(true, iterator.hasNext());
+			assertEquals(sparseTree.get(i), iterator.next());
+		}
+
+		// Validate that the iterator is done
+		assertEquals(false, iterator.hasNext());
+	}
 
     /**
      * Tests to verify that the sparse list is consistent after a long

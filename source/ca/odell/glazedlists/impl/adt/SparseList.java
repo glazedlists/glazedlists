@@ -6,6 +6,9 @@
  */
 package ca.odell.glazedlists.impl.adt;
 
+// For Lists and Iterators
+import java.util.*;
+
 /**
  * A SparseList is an ADT to complement the CompressableList and IndexedTree
  * ADTs.  IndexedTree provides accessible nodes that can recalculate their index
@@ -50,7 +53,7 @@ package ca.odell.glazedlists.impl.adt;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  *
  */
-public final class SparseList extends java.util.AbstractList {
+public final class SparseList extends AbstractList {
 
     /** the root of the tree */
     private SparseListNode root = null;
@@ -62,11 +65,18 @@ public final class SparseList extends java.util.AbstractList {
     private int treeSize = 0;
 
     /**
-     * Gets the size of this tree
+     * Gets the size of this {@link List}.
      */
     public int size() {
         return size;
     }
+
+    /**
+     * Gets the size of the tree.
+     */
+    int treeSize() {
+		return treeSize;
+	}
 
     /**
      * Inserts a value into this tree at the given index
@@ -209,4 +219,19 @@ public final class SparseList extends java.util.AbstractList {
         treeSize = root != null ? root.size() : 0;
         size += treeSize;
     }
+
+    /**
+     * Obtains an {@link Iterator} for this {@link List}.
+     */
+    public Iterator iterator() {
+		if(size == 0) return Collections.EMPTY_LIST.iterator();
+		return new SparseListNode.SparseListIterator(this, root);
+	}
+
+	/**
+	 * Prints out the structure of the tree for debug purposes.
+	 */
+	public void printDebug() {
+		System.out.println(root.toString());
+	}
 }
