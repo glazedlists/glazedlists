@@ -68,6 +68,9 @@ class PeerResource implements ResourceListener, ResourceStatus {
         PeerBlock block = peerBlockFactory.subscribe();
         publisher.addIncomingSubscription(this);
         publisher.writeBlock(this, block);
+        
+        // listen for updates
+        resource.addResourceListener(this);
     }
     
     /**

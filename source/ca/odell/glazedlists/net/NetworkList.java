@@ -37,6 +37,7 @@ public class NetworkList extends TransformedList implements Resource {
     public NetworkList(EventList source, ByteCoder byteCoder) {
         super(source);
         this.byteCoder = byteCoder;
+        source.addListEventListener(this);
     }
     
     /** {@inheritDoc} */

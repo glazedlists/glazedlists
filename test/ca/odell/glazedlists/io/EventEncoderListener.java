@@ -52,7 +52,7 @@ public class EventEncoderListener implements ListEventListener {
             Bufferlo encoding = ListEventCoder.listEventToBytes(listChanges, byteCoder);
             encodings.add(encoding);
         } catch(IOException e) {
-            fail(e.getMessage());
+            throw new IllegalStateException(e.getMessage());
         }
     }
 
