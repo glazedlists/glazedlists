@@ -241,12 +241,24 @@ public final class ListEvent extends EventObject {
      * and concatenates them.
      */
     public String toString() {
+        // prepare the event as a String
         StringBuffer result = new StringBuffer();
         result.append("Event " + atomicCount + ": ");
-        for(int b = 0; b < masterSequence.getBlockCount(atomicCount); b++) {
+        
+        // figure out which change to show
+        int atomicChangeToShow = 0;
+        if(atomicCount < masterSequence.getAtomicCount()) atomicChangeToShow = masterSequence.getAtomicCount();
+        else atomicChangeToShow = masterSequence.getAtomicCount() = 1;
+        
+        // figure out how many blocks in that change
+        int blocksToShow = masterSequence.getBlockCount(atomicChangeToShow); 
+        
+        // write out the change
+        for(int b = 0; b < blocksToShow; b++) {
             if(b != 0) result.append(", ");
-            result.append(masterSequence.getBlock(atomicCount, b));
+            result.append(masterSequence.getBlock(atomicChangeToShow, b));
         }
+
         return result.toString();
     }
 }
