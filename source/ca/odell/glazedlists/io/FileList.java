@@ -30,19 +30,19 @@ public final class FileList extends TransformedList {
 
     /** the destination file, just for user convenience */
     private File file = null;
-    
+
     /** how bytes are encoded and decoded */
     private ByteCoder byteCoder;
-    
+
     /** the underlying storage of ListEvents */
     private PersistentMap storage = null;
 
     /** the ID of the next update to write to disc */
     private int nextUpdateId = 81;
-    
+
     /** whether this list can be modified */
     private boolean writable = true;
-    
+
     /**
      * Create a {@link FileList} that stores its data in the specified file.
      */
@@ -50,7 +50,7 @@ public final class FileList extends TransformedList {
         super(new BasicEventList());
         this.file = file;
         this.byteCoder = byteCoder;
-        
+
         // store the updates in a persistent map
         storage = new PersistentMap(file);
 
@@ -61,28 +61,28 @@ public final class FileList extends TransformedList {
             Bufferlo valueBuffer = ((Chunk)storage.get(key)).getValue();
             sequentialUpdates.put(key, valueBuffer);
         }
-        
+
         // replay all the updates from the file
         for(Iterator u = sequentialUpdates.keySet().iterator(); u.hasNext(); ) {
             Integer key = (Integer)u.next();
             Bufferlo update = (Bufferlo)sequentialUpdates.get(key);
             ListEventToBytes.toListEvent(update, this, byteCoder);
         }
-        
+
         // prepare the next update id to use
         if(!sequentialUpdates.isEmpty()) {
             nextUpdateId = ((Integer)sequentialUpdates.lastKey()).intValue() + 1;
         }
-        
+
         // now that we're up-to-date, listen for further events
         source.addListEventListener(this);
     }
-    
+
     /** {@inheritDoc} */
     public boolean isWritable() {
         return writable;
     }
-    
+
     /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
         // write the change to disc
@@ -95,14 +95,14 @@ public final class FileList extends TransformedList {
         } catch(IOException e) {
             throw new IllegalStateException(e.getMessage());
         }
-        
+
         // forward the event to interested listeners
         updates.forwardEvent(listChanges);
     }
-    
+
     /**
      * Closes this FileList so that it consumes no disc resources. The list may
-     * continue to be read until it is {@link dispose() disposed}.
+     * continue to be read until it is {@link #dispose() disposed}.
      */
     public void close() {
         if(storage != null) storage.close();

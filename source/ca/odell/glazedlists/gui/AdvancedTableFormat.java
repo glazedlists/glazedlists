@@ -24,20 +24,20 @@ import java.util.Comparator;
  * @see TableFormat
  */
 public interface AdvancedTableFormat extends TableFormat {
-    
-	/**
-	 * Returns the most specific superclass for all the cell values in the column. This
-	 * is used by the table to set up a default renderer and editor for the column.
-	 *
-	 * @param column The index of the column being edited.
-	 */
-	public Class getColumnClass(int column);
-    
+
+    /**
+     * Returns the most specific superclass for all the cell values in the column. This
+     * is used by the table to set up a default renderer and editor for the column.
+     *
+     * @param column The index of the column being edited.
+     */
+    public Class getColumnClass(int column);
+
     /**
      * Returns the default {@link Comparator} to use for the specified column.
      * This {@link Comparator} may be used to determine how a table will be sorted.
      *
-     * @see ca.odell.glazedlists.util.ComparatorFactory
+     * @see ca.odell.glazedlists.GlazedLists
      *
      * @return the {@link Comparator} to use or <code>null</code> for an unsortable
      *      column.

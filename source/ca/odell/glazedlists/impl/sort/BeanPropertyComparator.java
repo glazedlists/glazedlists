@@ -28,7 +28,7 @@ public final class BeanPropertyComparator implements Comparator {
     /**
      * Create a new JavaBean property comparator that compares properties using
      * the provided {@link Comparator}.  This should be accessed from the
-     * {@link ComparatorFactory}.
+     * {@link ca.odell.glazedlists.GlazedLists GlazedLists} tool factory.
      */
     public BeanPropertyComparator(Class className, String property, Comparator propertyComparator) {
         beanProperty = new BeanProperty(className, property, true, false);

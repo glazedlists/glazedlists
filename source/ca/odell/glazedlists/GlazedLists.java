@@ -200,14 +200,14 @@ public final class GlazedLists {
         return new BeanLabelFormat(property);
     }
 
-    // EventLists // // // // // // // // // // // // // // // // // // // // // 
+    // EventLists // // // // // // // // // // // // // // // // // // // // //
 
     /**
      * Wraps the source in an {@link EventList} that does not allow writing operations.
      *
      * <p>The returned {@link EventList} is useful for programming defensively. A
      * {@link EventList} is useful to supply an unknown class read-only access
-     * to your {@link EventList}. 
+     * to your {@link EventList}.
      *
      * <p>The returned {@link EventList} will provides an up-to-date view of its source
      * {@link EventList} so changes to the source {@link EventList} will still be
@@ -221,22 +221,24 @@ public final class GlazedLists {
     public static TransformedList readOnlyList(EventList source) {
         return new ReadOnlyList(source);
     }
-    
+
     /**
-     * Wraps the source in an {@link EventList} that obtains a {@link ReadWriteLock}
-     * for all operations.
+     * Wraps the source in an {@link EventList} that obtains a
+     * {@link ca.odell.glazedlists.util.concurrent.ReadWriteLock ReadWritLock} for all
+     * operations.
      *
      * <p>This provides some support for sharing {@link EventList}s between multiple
      * threads.
      *
      * <p>Using a {@link ThreadSafeList} for concurrent access to lists can be expensive
-     * because a {@link ReadWriteLock} is aquired and released for every operation.
+     * because a {@link ca.odell.glazedlists.util.concurrent.ReadWriteLock ReadWriteLock}
+     * is aquired and released for every operation.
      *
      * <p><strong><font color="#FF0000">Warning:</font></strong> Although this class
      * provides thread safe access, it does not provide any guarantees that changes
      * will not happen between method calls. For example, the following code is unsafe
-     * because the source {@link EventList} may change between calls to {@link #size() size()}
-     * and {@link #get(int) get()}:
+     * because the source {@link EventList} may change between calls to
+     * {@link TransformedList#size() size()} and {@link TransformedList#get(int) get()}:
      * <pre> EventList source = ...
      * ThreadSafeList myList = new ThreadSafeList(source);
      * if(myList.size() > 3) {
@@ -244,8 +246,8 @@ public final class GlazedLists {
      * }</pre>
      *
      * <p><strong><font color="#FF0000">Warning:</font></strong> The objects returned
-     * by {@link #iterator() iterator()}, {@link #subList(int,int) subList()}, etc. are
-     * not thread safe.
+     * by {@link TransformedList#iterator() iterator()},
+     * {@link TransformedList#subList(int,int) subList()}, etc. are not thread safe.
      *
      * @see ca.odell.glazedlists.util.concurrent
      */
