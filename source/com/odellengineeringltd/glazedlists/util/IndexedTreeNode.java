@@ -52,7 +52,7 @@ public class IndexedTreeNode {
     /**
      * Creates a new IndexedTreeNode with the specified parent node.
      */
-    public IndexedTreeNode(IndexedTree host, IndexedTreeNode parent) {
+    IndexedTreeNode(IndexedTree host, IndexedTreeNode parent) {
         this.host = host;
         this.parent = parent;
     }
@@ -76,7 +76,7 @@ public class IndexedTreeNode {
     /**
      * Gets the object with the specified index in the tree.
      */
-    public IndexedTreeNode getNodeWithIndex(int index) {
+    IndexedTreeNode getNodeWithIndex(int index) {
         // ensure the index value is valid
         if(index >= leftSize + rightSize + rootSize) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         // recurse to the left
@@ -94,7 +94,7 @@ public class IndexedTreeNode {
     /**
      * Gets the object with the specified value in the tree.
      */
-    public IndexedTreeNode getNodeByValue(Object searchValue) {
+    IndexedTreeNode getNodeByValue(Object searchValue) {
         int sortSide = host.getComparator().compare(searchValue, value);
         
         // if it sorts on the left side, search there
@@ -114,7 +114,7 @@ public class IndexedTreeNode {
     /**
      * Retrieves the size of this subtree.
      */
-    public int size() {
+    int size() {
         return leftSize + rootSize + rightSize;
     }
     
@@ -122,34 +122,28 @@ public class IndexedTreeNode {
      * Creates an iterator starting at this node and continuing from here
      * through the tree.
      */
-    public Iterator iterator() {
+    Iterator iterator() {
         return new IndexedTreeIterator(this);
     }
     
     /**
      * Retrieves the height of this subtree.
      */
-    private int height() {
+    int height() {
         return height;
     }
-    /*private int height() {
-        if(left == null && right == null) return 1;
-        else if(right == null) return 1 + left.height();
-        else if(left == null) return 1 + right.height();
-        else return 1 + Math.max(left.height(), right.height());
-    }*/
 
     /**
      * Retrieves the subtree node with the largest value.
      */
-    public IndexedTreeNode getLargestChildNode() {
+    IndexedTreeNode getLargestChildNode() {
         if(rightSize > 0) return right.getLargestChildNode();
         else return this;
     }
     /**
      * Retrieves the subtree node with the smallest value.
      */
-    public IndexedTreeNode getSmallestChildNode() {
+    IndexedTreeNode getSmallestChildNode() {
         if(leftSize > 0) return left.getSmallestChildNode();
         else return this;
     }
@@ -192,7 +186,7 @@ public class IndexedTreeNode {
      *      use the getIndex() method on the node to discover what the sorted
      *      index of the value is.
      */
-    public IndexedTreeNode insert(Object inserted) {
+    IndexedTreeNode insert(Object inserted) {
         // if this is a newborn leaf, the value can be null as long as there are no children
         if(value == null) {
             if(leftSize > 0 || rightSize > 0) throw new IllegalStateException("insert into non-leaf node with null value");
@@ -229,7 +223,7 @@ public class IndexedTreeNode {
      *      index will shift. The getIndex() method can be used to get the
      *      current index of the node at any time.
      */
-    public IndexedTreeNode insert(int index, Object inserted) {
+    IndexedTreeNode insert(int index, Object inserted) {
         if(index > leftSize + rootSize + rightSize) throw new IndexOutOfBoundsException("cannot insert into tree of size " + (leftSize + rootSize + rightSize) + " at " + index);
         if(inserted == null) throw new NullPointerException("cannot insert a value that is null");
         // if this node has no value, insert as a leaf
@@ -368,7 +362,7 @@ public class IndexedTreeNode {
      * order and that their sizes are consistent. This throws a
      * IllegalStateException if any infraction is found.
      */
-    public void validate() {
+    void validate() {
         // first validate the children
         if(left != null) left.validate();
         if(right != null) right.validate();

@@ -125,7 +125,7 @@ public class IndexedTree {
      * Validates the entire tree by iterating over its nodes and validating
      * them one at a time.
      */
-    public void validate() {
+    void validate() {
         for(Iterator i = iterator(); i.hasNext();) {
             IndexedTreeNode node = (IndexedTreeNode)i.next();
             node.validate();
@@ -145,7 +145,7 @@ public class IndexedTree {
      * method should not be called by client classes as it is an
      * implementation artifact.
      */
-    public void setRootNode(IndexedTreeNode root) {
+    void setRootNode(IndexedTreeNode root) {
         this.root = root;
     }
     
