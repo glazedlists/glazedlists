@@ -43,8 +43,8 @@ public final class ListEvent extends EventObject {
     private int atomicCount;
     /** the number of blocks of changes seen by this view */
     private int blockCount;
-    /** the current change */
-    private ListEventBlock listChange = null;
+    /** the current change block */
+    private ListEventBlock currentBlock = null;
     /** the row index into the current change */
     private int rowIndex;
     
@@ -85,7 +85,7 @@ public final class ListEvent extends EventObject {
     public ListEvent(ListEvent original) {
         super(original.sourceList);
         this.blockCount = original.blockCount;
-        this.listChange = original.listChange;
+        this.currentBlock = original.currentBlock;
         this.rowIndex = original.rowIndex;
         this.masterSequence = original.masterSequence;
         this.sourceList = original.sourceList;
@@ -106,7 +106,7 @@ public final class ListEvent extends EventObject {
      */
     public void clearEventQueue() {
         atomicCount = masterSequence.getAtomicCount();
-        listChange = null;
+        currentBlock = null;
         blockCount = 0;
     }
     
@@ -117,11 +117,12 @@ public final class ListEvent extends EventObject {
      */
     public boolean next() {
         // if we need to get a new change block from the queue
-        if(listChange == null || rowIndex == listChange.getEndIndex()) {
+        if(currentBlock == null || rowIndex == currentBlock.getEndIndex()) {
             // if we are at the end of the current block
             return nextBlock();
         // if we can just increment the row on the current change
         } else {
+            assert(rowIndex < currentBlock.getEndIndex());
             rowIndex++;
             return true;
         }
@@ -134,7 +135,7 @@ public final class ListEvent extends EventObject {
      */
     public boolean hasNext() {
         // we are at the end of the current block
-        if(listChange == null || rowIndex == listChange.getEndIndex()) {
+        if(currentBlock == null || rowIndex == currentBlock.getEndIndex()) {
             // if there are no more atomic changes
             if(atomicCount == masterSequence.getAtomicCount()) {
                 return false;
@@ -158,7 +159,7 @@ public final class ListEvent extends EventObject {
         // if we have no blocks left in the current atomic change
         if(blockCount == masterSequence.getBlockCount(atomicCount)) {
             // clear the list change
-            listChange = null;
+            currentBlock = null;
             rowIndex = -5;
             blockCount = 0;
             // prepare for the next atomic change
@@ -170,9 +171,9 @@ public final class ListEvent extends EventObject {
             return false;
         // if we have more blocks left
         } else {
-            listChange = masterSequence.getBlock(atomicCount, blockCount);
+            currentBlock = masterSequence.getBlock(atomicCount, blockCount);
             blockCount++;
-            rowIndex = listChange.getStartIndex();
+            rowIndex = currentBlock.getStartIndex();
             return true;
         }
     }
@@ -195,7 +196,7 @@ public final class ListEvent extends EventObject {
         int[] reorderMap = masterSequence.getReorderMap(atomicCount);
         if(reorderMap == null) throw new IllegalStateException("Cannot get reorder map for a non-reordering change");
         // clear the list change
-        listChange = null;
+        currentBlock = null;
         rowIndex = -5;
         blockCount = 0;
         // prepare for the next atomic change
@@ -207,11 +208,11 @@ public final class ListEvent extends EventObject {
     }
 
     /**
-     * Gets the current row index. If the listChange type is delete, this
+     * Gets the current row index. If the block type is delete, this
      * will always return the startIndex of the current list change.
      */
     public int getIndex() {
-        if(listChange.getType() == DELETE) return listChange.getStartIndex();
+        if(currentBlock.getType() == DELETE) return currentBlock.getStartIndex();
         return rowIndex;
     }
 
@@ -219,14 +220,14 @@ public final class ListEvent extends EventObject {
      * Gets the first row of the current block of changes. Inclusive.
      */
     public int getBlockStartIndex() {
-        return listChange.getStartIndex();
+        return currentBlock.getStartIndex();
     }
 
     /**
      * Gets the last row of the current block of changes. Inclusive.
      */
     public int getBlockEndIndex() {
-        return listChange.getEndIndex();
+        return currentBlock.getEndIndex();
     }
 
     /**
@@ -234,7 +235,7 @@ public final class ListEvent extends EventObject {
      * ListEvent.INSERT, UPDATE, or DELETE.
      */
     public int getType() {
-        return listChange.getType();
+        return currentBlock.getType();
     }
 
     /**
@@ -251,7 +252,7 @@ public final class ListEvent extends EventObject {
      */
     public int getBlocksRemaining() {
         // if we're not at the end of the current block, add one for that
-        if(listChange != null && rowIndex < listChange.getEndIndex()) {
+        if(currentBlock != null && rowIndex < currentBlock.getEndIndex()) {
             return masterSequence.getBlockCount(atomicCount) - blockCount + 1;
         } else {
             return masterSequence.getBlockCount(atomicCount) - blockCount;

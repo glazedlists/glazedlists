@@ -139,7 +139,7 @@ public final class SparseListNode {
      * compressed index.
      */
     public int getIndexByCompressedIndex(int compressedIndex) {
-        assert(compressedIndex >= treeLeftSize + treeRightSize + treeRootSize);
+        assert(compressedIndex <= treeLeftSize + treeRightSize + treeRootSize);
 
         // recurse to the left
         if(compressedIndex < treeLeftSize) {

@@ -209,6 +209,8 @@ public final class ListEventAssembler {
      */
     public void reorder(int[] reorderMap) {
         if(atomicChangeBlocks.size() > 0) throw new IllegalStateException("Cannot combine reorder with other change events");
+        // can't reorder an empty list, see bug 91
+        if(reorderMap.length == 0) return;
         addChange(ListEvent.DELETE, 0, reorderMap.length - 1);
         addChange(ListEvent.INSERT, 0, reorderMap.length - 1);
         this.reorderMap = reorderMap;
