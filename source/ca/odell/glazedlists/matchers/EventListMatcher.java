@@ -4,7 +4,7 @@
  *
  * Created: Feb 18, 2005 - 12:49:37 PM
  */
-package ca.odell.glazedlists.impl.matchers;
+package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;

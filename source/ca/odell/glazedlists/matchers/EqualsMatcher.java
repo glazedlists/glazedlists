@@ -4,7 +4,7 @@
  *
  * Created: Feb 18, 2005 - 7:39:25 AM
  */
-package ca.odell.glazedlists.impl.matchers;
+package ca.odell.glazedlists.matchers;
 
 
 /**
