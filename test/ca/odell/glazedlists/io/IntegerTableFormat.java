@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.net;
+package ca.odell.glazedlists.io;
 
 // glazed lists
 import ca.odell.glazedlists.*;
