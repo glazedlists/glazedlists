@@ -704,6 +704,39 @@ public class UniqueListTest extends TestCase {
             }
         }
     }
+    
+    /**
+     * Tests a UniqueList version of a SortedList is safe when that SortedList
+     * is re-sorted.
+     */
+    public void testReSortSource() {
+        // create a unique list with a sorted source
+        source = new BasicEventList();
+        SortedList sortedList = new SortedList(source/*, new IntArrayComparator(0)*/);
+        unique = new UniqueList(sortedList);
+        
+        // populate the source
+        for(int i = 0; i < 1000; i++) {
+            source.add(new Integer(random.nextInt(1000)));
+        }
+        
+        // build a control list
+        ArrayList controlList = new ArrayList();
+        SortedSet uniqueSource = new TreeSet();
+        uniqueSource.addAll(source);
+        controlList.addAll(uniqueSource);
+        
+        // verify the unique list is correct initially
+        assertEquals(unique, controlList);
+        
+        // verify the unique list is correct when the sorted list is unsorted
+        sortedList.setComparator(null);
+        assertEquals(unique, controlList);
+        
+        // verify the unique list is correct when the sorted list is sorted
+        sortedList.setComparator(new ComparableComparator());
+        assertEquals(unique, controlList);
+    }
 
 
     /** Test response to an UPDATE event  */
