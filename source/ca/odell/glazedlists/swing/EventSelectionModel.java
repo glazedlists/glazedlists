@@ -82,7 +82,7 @@ public final class EventSelectionModel {
     private ListEventAssembler updates = null;
     
     /** whether the user can modify the selection */
-    public boolean enabled = true;
+    private boolean enabled = true;
     
     /**
      * Creates a new selection model that also presents a list of the selection.

@@ -35,7 +35,7 @@ import java.io.Serializable;
 public final class BasicEventList extends AbstractEventList {
 
     /** the underlying data list */
-    protected List data;
+    private List data;
 
     /**
      * Creates a new EventArrayList that uses an ArrayList as the source list

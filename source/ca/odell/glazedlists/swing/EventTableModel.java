@@ -38,7 +38,7 @@ import java.util.*;
 public class EventTableModel extends AbstractTableModel implements ListEventListener {
 
     /** the complete list of messages before filters */
-    protected EventList source;
+    private EventList source;
 
     /** Specifies how to render table headers and sort */
     private TableFormat tableFormat;
@@ -47,7 +47,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     private MutableTableModelEvent tableModelEvent;
     
     /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    public int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
+    private int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
     
     /**
      * Creates a new table that renders the specified list in the specified
