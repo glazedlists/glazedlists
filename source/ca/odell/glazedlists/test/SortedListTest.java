@@ -329,11 +329,15 @@ public class SortedListTest extends TestCase {
 
     /**
      * Test if the SortedList fires update events rather than delete/insert
-     * pairs.
+     * pairs, when using a ReverseComparator.
+     *
+     * <p>The source list uses a totally different comparator than the sorted list
+     * in order to guarantee the indicies have no pattern.
      */
     public void testUpdateEventsFiredRigorous() {
         // prepare a unique list with simple data
-        UniqueList uniqueSource = new UniqueList(unsortedList, new ReverseComparator());
+        Comparator uniqueComparator = new ReverseStringComparator();
+        UniqueList uniqueSource = new UniqueList(unsortedList, uniqueComparator);
         sortedList = new SortedList(uniqueSource);
         
         // populate a unique source with some random elements
@@ -342,7 +346,7 @@ public class SortedListTest extends TestCase {
         }
         
         // populate a replacement set with some more random elements
-        SortedSet data = new TreeSet(new ReverseComparator());
+        SortedSet data = new TreeSet(uniqueComparator);
         for(int i = 0; i < 500; i++) {
             data.add(new Integer(random.nextInt(200)));
         }
@@ -363,6 +367,8 @@ public class SortedListTest extends TestCase {
         sortedList.addListEventListener(sortedCounter);
 
         // perform the change
+        uniqueSource.addListEventListener(new ConsistencyTestList(uniqueSource, "unique", true));
+        sortedList.addListEventListener(new ConsistencyTestList(sortedList, "sorted", true));
         uniqueSource.replaceAll(data);
         
         // verify our guess on the change count is correct
@@ -377,13 +383,45 @@ public class SortedListTest extends TestCase {
      * Explicit comparator for Kevin's sanity!
      */
     class IntegerComparator implements Comparator {
-
         public int compare(Object a, Object b) {
             int number1 = ((Integer)a).intValue();
             int number2 = ((Integer)b).intValue();
 
             return number1 - number2;
         }
+    }
 
+    /**
+     * A Comparator that mixes up integer comparisons somewhat by
+     * comparing them in reverse String order. This is random-enough
+     * to use as an alternate comparator for Integers, yet consistent
+     * in order.
+     */
+    class ReverseStringComparator implements Comparator {
+        public int compare(Object a, Object b) {
+            int number1 = ((Integer)a).intValue();
+            int number2 = ((Integer)b).intValue();
+            
+            int number1Flipped = flip(number1);
+            int number2Flipped = flip(number2);
+
+            return number1Flipped - number2Flipped;
+        }
+        
+        public int flip(int i) {
+            return Integer.parseInt(flip("" + i));
+        }
+        
+        public String flip(String original) {
+            char[] originalAsChars = original.toCharArray();
+            int length = originalAsChars.length;
+            for(int i = 0; i < (length / 2); i++) {
+                char temp = originalAsChars[i];
+                originalAsChars[i] = originalAsChars[length - i - 1];
+                originalAsChars[length - i - 1] = temp;
+            }
+            String originalReversed = new String(originalAsChars);
+            return originalReversed;
+        }
     }
 }
