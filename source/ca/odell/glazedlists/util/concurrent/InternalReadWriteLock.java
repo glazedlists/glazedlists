@@ -23,12 +23,12 @@ import ca.odell.glazedlists.SortedList;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class InternalReadWriteLock implements ReadWriteLock {
-    
+
     /** the locks to delegate to */
     private Lock readLock;
     private Lock writeLock;
     private Lock internalLock;
-    
+
     /**
      * Creates a new InternalReadWriteLock that uses the specified locks for
      * the source and internal.
@@ -38,7 +38,7 @@ public final class InternalReadWriteLock implements ReadWriteLock {
         writeLock = new LockPair(source.writeLock(), internal.writeLock());
         internalLock = new LockPair(source.readLock(), internal.writeLock());
     }
-    
+
     /**
      * Return the lock used for reading.
      */
@@ -68,11 +68,11 @@ public final class InternalReadWriteLock implements ReadWriteLock {
  * in the order: ( first, second ), and unlocked in the order ( second, first ).
  */
 class LockPair implements Lock {
-    
+
     /** the locks to delegate to */
     private Lock first;
     private Lock second;
-    
+
     /**
      * Creates a lock pair that uses the specified locks in sequence.
      */
@@ -86,34 +86,30 @@ class LockPair implements Lock {
      */
     public void lock() {
         first.lock();
-		System.out.println("Locked: " + first + " (1) " + Thread.currentThread());
         second.lock();
-		System.out.println("Locked: " + second + " (2) " + Thread.currentThread());
     }
-    
+
     /**
      * Acquires the lock only if it is free at the time of invocation.
      */
     public boolean tryLock() {
         boolean firstSuccess = first.tryLock();
         if(!firstSuccess) return false;
-            
+
         boolean secondSuccess = second.tryLock();
         if(!secondSuccess) {
             first.unlock();
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Releases the lock.
      */
     public void unlock() {
         second.unlock();
-		System.out.println("Unlock: " + second + " (2) " + Thread.currentThread());
         first.unlock();
-		System.out.println("Unlock: " + first + " (1) " + Thread.currentThread());
     }
 }
