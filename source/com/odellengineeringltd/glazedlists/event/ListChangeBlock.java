@@ -31,20 +31,14 @@ public final class ListChangeBlock {
     /** the type of change, INSERT, UPDATE or DELETE */
     private int type;
     
-    /** a change which is not valid can be re-used to avoid new calls */
-    private boolean valid;
-    
     
     /**
      * Create a new single-entry list change of the specified index and type.
      */
     ListChangeBlock(int index, int type) {
-        this.startIndex = index;
-        this.endIndex = index;
-        this.type = type;
-        this.valid = true;
-        assert(startIndex >= 0 && endIndex >= startIndex);
+        this(index, index, type);
     }
+    
     /**
      * Create a new single-entry list change of the specified start index, end
      * index and type.
@@ -53,44 +47,33 @@ public final class ListChangeBlock {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.type = type;
-        this.valid = true;
         assert(startIndex >= 0 && endIndex >= startIndex);
     }
-    ListChangeBlock() {
-        this.valid = false;
-    }
+
+    /**
+     * Set this list change block to use the specified data.
+     */
     void setData(int index, int type) {
-        this.startIndex = index;
-        this.endIndex = index;
-        this.type = type;
-        this.valid = true;
-        assert(startIndex >= 0 && endIndex >= startIndex);
+        setData(index, index, type);
     }
+
+    /**
+     * Set this list change block to use the specified data.
+     */
     void setData(int startIndex, int endIndex, int type) {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.type = type;
-        this.valid = true;
         assert(startIndex >= 0 && endIndex >= startIndex);
     }
     
-    /**
-     * Setting a change to being valid means it is in use. Invalid
-     * means that it can be recycled via object pooling.
-     */
-    void setInvalid() {
-        this.valid = false;
-    }
-    boolean isValid() {
-        return valid;
-    }
-
     /**
      * Get the first index in the range of this change.
      */
     public int getStartIndex() {
         return startIndex;
     }
+
     /**
      * Get the last index in the range of this change.
      */
@@ -111,24 +94,22 @@ public final class ListChangeBlock {
      * then the append can proceed. If the events are not similar enough, a new
      * list change will be created.
      *
-     * The two events must occur sequentially in the change, and the append
+     * <p>The two events must occur sequentially in the change, and the append
      * must be called with an index that reflects the list after the first
      * change.
      *
-     * @return a new list change if such is created. Otherwise this returns
-     *      null. The caller should compare the result to null and add the
-     *      change if it is non-null. Otherwise the source list change has
-     *      increased in size and no new object is necessary.
+     * @return true if the append was successful or false if the user must
+     *      use a different list change block for the appended change. 
      */
-    ListChangeBlock append(int appendStartIndex, int appendEndIndex, int type) {
+    boolean append(int appendStartIndex, int appendEndIndex, int type) {
         // bail if the types are different
-        if(type != this.type) return null;
+        if(type != this.type) return false;
         // insert events: join if the ends touch
-        if(type == INSERT && (appendStartIndex > endIndex + 1 || appendStartIndex < startIndex)) return null;
+        if(type == INSERT && (appendStartIndex > endIndex + 1 || appendStartIndex < startIndex)) return false;
         // delete events: same if deleted from start index or one before start index
-        else if(type == DELETE && (appendEndIndex < startIndex - 1 || appendStartIndex > startIndex)) return null;
+        else if(type == DELETE && (appendEndIndex < startIndex - 1 || appendStartIndex > startIndex)) return false;
         // update events: same if update is one from beginning or end
-        else if(type == UPDATE && (appendEndIndex < startIndex - 1 || appendStartIndex > endIndex + 1)) return null;
+        else if(type == UPDATE && (appendEndIndex < startIndex - 1 || appendStartIndex > endIndex + 1)) return false;
         // on insert and delete, merge the current change by concatenating the lengths to the earliest start
         if(type == INSERT || type == DELETE) {
             int length = (endIndex - startIndex + 1) + (appendEndIndex - appendStartIndex + 1);
@@ -140,7 +121,7 @@ public final class ListChangeBlock {
             endIndex = Math.max(appendEndIndex, endIndex);
         }
         assert(startIndex >= 0 && endIndex >= startIndex);
-        return this;
+        return true;
     }
     
     /**
@@ -248,7 +229,6 @@ public final class ListChangeBlock {
             first.startIndex = startIndex;
             first.endIndex = endIndex;
         }
-        second.valid = false;
     }
     
     /**
@@ -272,7 +252,6 @@ public final class ListChangeBlock {
         }
     }
     
-
     /**
      * Gets this ListChangeBlock represented as a String
      */

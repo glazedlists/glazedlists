@@ -16,17 +16,17 @@ import java.util.ArrayList;
 /**
  * A ListChangeEvent models a change to a list.
  *
- * The lists may change over time, causing this sequence of changes to grow
+ * <p>The lists may change over time, causing this sequence of changes to grow
  * indefinitely. The event is accessed like an iterator, with the user calling
  * next() repeatedly to view the changes in sequence.
  *
- * The user must call next() until it returns false in order to increment the
+ * <p>The user must call next() until it returns false in order to increment the
  * iterator until its end. Otherwise the next change event notification will
  * first include unseen changes from the current change. In order to clear the
  * current location of the iterator, use the clearEventQueue() method. This will
  * clear the values of pending events.
  *
- * It is also possible to view changes in blocks, which may provide some
+ * <p>It is also possible to view changes in blocks, which may provide some
  * performance benefit. To use this, use the nextBlock() method instead of the
  * next() method.
  *
@@ -62,7 +62,7 @@ public final class ListChangeEvent {
      * iterate through <strong>all</strong> values in the original instance
      * in order to reach the freshest changes.
      *
-     * Because the master change sequence does not know about clones, it is
+     * <p>Because the master change sequence does not know about clones, it is
      * possible that the change information stored in the master list will
      * be cleaned up without notifying the clone. In order to prevent this,
      * you should always use the clone list before using the original list -
@@ -83,13 +83,13 @@ public final class ListChangeEvent {
      * listener reloads the source list rather than modifying it by
      * differences.
      *
-     * If the user is manually clearing the event queue with this method,
+     * <p>If the user is manually clearing the event queue with this method,
      * it is also necessary to call hasNext() before calling next() when
      * receiving new events. This is because it is possible that pending
      * events will be cleared before they are processed. Otherwise the
      * call to next() may fail.
      */
-    public synchronized void clearEventQueue() {
+    public void clearEventQueue() {
         atomicCount = masterSequence.getAtomicCount();
         listChange = null;
         blockCount = 0;
@@ -100,7 +100,7 @@ public final class ListChangeEvent {
      * return true if such a change exists and false when there is no
      * change to view.
      */
-    public synchronized boolean next() {
+    public boolean next() {
         // if we need to get a new change block from the queue
         if(listChange == null || rowIndex == listChange.getEndIndex()) {
             // if we are at the end of the current block
@@ -117,7 +117,7 @@ public final class ListChangeEvent {
      * change to view. The user will still need to call next() to view
      * such a change.
      */
-    public synchronized boolean hasNext() {
+    public boolean hasNext() {
         // we are at the end of the current block
         if(listChange == null || rowIndex == listChange.getEndIndex()) {
             // if there are no more atomic changes
@@ -139,7 +139,7 @@ public final class ListChangeEvent {
     /**
      * Increments the change sequence to view the next change block.
      */
-    public synchronized boolean nextBlock() {
+    public boolean nextBlock() {
         // if we have no blocks left in the current atomic change
         if(blockCount == masterSequence.getBlockCount(atomicCount)) {
             // clear the list change
@@ -198,14 +198,14 @@ public final class ListChangeEvent {
      * by the master list in order to get rid of blocks that have been seen by
      * all views.
      */
-    public synchronized int getAtomicChangeCount() {
+    public int getAtomicChangeCount() {
         return atomicCount;
     }
 
     /**
      * Gets the number of blocks currently remaining in this atomic change.
      */
-    public synchronized int getBlocksRemaining() {
+    public int getBlocksRemaining() {
         // if we're not at the end of the current block, add one for that
         if(listChange != null && rowIndex < listChange.getEndIndex()) {
             return masterSequence.getBlockCount(atomicCount) - blockCount + 1;

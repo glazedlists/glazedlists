@@ -9,8 +9,7 @@ package com.odellengineeringltd.glazedlists.event;
 // the core Glazed Lists package
 import com.odellengineeringltd.glazedlists.*;
 // for keeping a list of changes
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 // to prevent two changes at once
 import java.util.ConcurrentModificationException;
 
@@ -31,15 +30,9 @@ public final class ListChangeSequence {
     /** the list of lists of change blocks */
     private ArrayList atomicChanges = new ArrayList();
     private int oldestChange = 0;
-    /** the total count of simple changes */
-    private int changeCount = 0;
-    /** the total number of change blocks */
-    private int blockCount = 0;
     
     /** the current working copy of the atomic change */
     private ArrayList atomicChangeBlocks = null;
-    /** the atomic change's count of change blocks */
-    private int atomicChangeCount = 0;
     /** the most recent list change; this is the only change we can append to */
     private ListChangeBlock atomicLatestBlock = null;
     
@@ -64,10 +57,9 @@ public final class ListChangeSequence {
             throw new java.util.ConcurrentModificationException("Cannot change this list while another change is taking place");
         }
         atomicChangeBlocks = new ArrayList();
-        atomicChangeCount = 0;
         atomicLatestBlock = null;
         
-        // attempt to reclaim some changes for the change pool
+        // calculate the oldest change still needed
         int oldestRequiredChange = atomicChanges.size(); 
         for(int e = 0; e < listenerEvents.size(); e++) {
             ListChangeEvent listChangeEvent = (ListChangeEvent)listenerEvents.get(e);
@@ -82,7 +74,6 @@ public final class ListChangeSequence {
             changePool.addAll(recycledChanges);
             atomicChanges.set(i, null);
         }
-        // now we have reclaimed all these change objects
         oldestChange = oldestRequiredChange;
     }
         
@@ -106,9 +97,6 @@ public final class ListChangeSequence {
      * beginAtomicChange() and followed by a call to commitAtomicChange().
      */
     public void appendChange(int startIndex, int endIndex, int type) {
-        // increment the size
-        atomicChangeCount = atomicChangeCount + (endIndex - startIndex + 1);
-        
         // create a new change for the first change
         if(atomicLatestBlock == null) {
             atomicLatestBlock = createListChangeBlock(startIndex, endIndex, type);
@@ -117,12 +105,12 @@ public final class ListChangeSequence {
         }
         
         // append the change if possible
-        ListChangeBlock appended = atomicLatestBlock.append(startIndex, endIndex, type);
+        boolean appended = atomicLatestBlock.append(startIndex, endIndex, type);
         // if appended is null the changes couldn't be merged
-        if(appended == null) {
-            appended = createListChangeBlock(startIndex, endIndex, type);
-            atomicChangeBlocks.add(appended);
-            atomicLatestBlock = appended;
+        if(!appended) {
+            ListChangeBlock block = createListChangeBlock(startIndex, endIndex, type);
+            atomicChangeBlocks.add(block);
+            atomicLatestBlock = block;
         }
     }
     
@@ -137,21 +125,25 @@ public final class ListChangeSequence {
             ListChangeBlock.sortListChangeBlocks(atomicChangeBlocks);
             // add this to the complete set
             atomicChanges.add(atomicChangeBlocks);
-            changeCount = changeCount + atomicChangeCount;
-            blockCount = blockCount + atomicChangeBlocks.size();
             
             // notify listeners
-            for(int i = 0; i < listeners.size(); i++) {
-                ListChangeListener listener = (ListChangeListener)listeners.get(i);
-                ListChangeEvent event = (ListChangeEvent)listenerEvents.get(i);
-                listener.notifyListChanges(event);
+            try {
+                for(int i = 0; i < listeners.size(); i++) {
+                    ListChangeListener listener = (ListChangeListener)listeners.get(i);
+                    ListChangeEvent event = (ListChangeEvent)listenerEvents.get(i);
+                    listener.notifyListChanges(event);
+                }
+            // clear the change for the next caller
+            } finally {
+                atomicChangeBlocks = null;
+                atomicLatestBlock = null;
             }
-        }
 
         // clear the change for the next caller
-        atomicChangeBlocks = null;
-        atomicChangeCount = 0;
-        atomicLatestBlock = null;
+        } else {
+            atomicChangeBlocks = null;
+            atomicLatestBlock = null;
+        }
     }
 
 
@@ -179,13 +171,6 @@ public final class ListChangeSequence {
      */
     public int getAtomicCount() {
         return atomicChanges.size();
-    }
-
-    /**
-     * Gets the total number of simple changes seen so far.
-     */
-    public int getChangeCount() {
-        return changeCount;
     }
     
     /**
