@@ -20,6 +20,8 @@ import java.util.Collection;
 import javax.swing.SwingUtilities;
 // for iterating over a mutation list the lazy way
 import com.odellengineeringltd.glazedlists.util.EventListIterator;
+// for being serializable
+import java.io.Serializable;
 
 /**
  * An event list that wraps a Java Collections list. This list provides an
@@ -29,7 +31,7 @@ import com.odellengineeringltd.glazedlists.util.EventListIterator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class BasicEventList implements EventList {
+public class BasicEventList implements EventList, Serializable {
 
     /** the underlying data list */
     private List data;

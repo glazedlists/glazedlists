@@ -105,10 +105,12 @@ public class MutationList implements EventList, ListChangeListener {
     }
 
     /**
-     * For implementing the EventList interface. This returns the source list.
+     * For implementing the EventList interface. This returns the root of the
+     * source list, or <code>this</code> if this list has no source.
      */
     public EventList getRootList() {
-        return source;
+        if(source == this) return this;
+        return source.getRootList();
     }
 
 

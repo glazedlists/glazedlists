@@ -20,6 +20,7 @@ class ProgrammingLanguageRenderer extends StyledDocumentRenderer {
 
     public void writeObject(JTable table, Object value, 
         boolean isSelected, boolean hasFocus, int row, int column) {
+        if(value == null) return;
         
         ProgrammingLanguage language = (ProgrammingLanguage)value;
         

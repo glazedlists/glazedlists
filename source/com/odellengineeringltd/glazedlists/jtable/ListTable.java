@@ -9,12 +9,14 @@ package com.odellengineeringltd.glazedlists.jtable;
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
+// for responding to selection the Glazed Lists way
+import com.odellengineeringltd.glazedlists.listselectionmodel.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import java.awt.GridBagLayout;
 // for responding to user actions
 import java.awt.event.*;
-// this class uses tables for displaying contact lists
+// tables for displaying lists
 import javax.swing.table.AbstractTableModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -45,6 +47,7 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     protected EventList source;
         
     /** whom to notify of selection changes */
+    private SelectionList selectionList;
     private ArrayList selectionListeners = new ArrayList();
     
     /** Specifies how to render table headers and sort */
@@ -67,6 +70,8 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         tableModelEvent = new MutableTableModelEvent(this);
         this.tableFormat = tableFormat;
         constructWidgets();
+        
+        selectionList = new SelectionList(source, table.getSelectionModel());
         source.addListChangeListener(new ListChangeListenerEventThreadProxy(this));
     }
     
@@ -78,13 +83,21 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     private void constructWidgets() {
         table = new JTable(this);
         tableSelectionModel = table.getSelectionModel();
-        tableSelectionModel.setSelectionMode(tableSelectionModel.SINGLE_SELECTION);
+        //tableSelectionModel.setSelectionMode(tableSelectionModel.SINGLE_SELECTION);
         tableSelectionModel.addListSelectionListener(this);
         tableFormat.configureTable(table);
         tableScrollPane = new JScrollPane(table);
         table.addMouseListener(this);
     }
     
+    /**
+     * Gets an event list that contains the current selection in
+     * this list table. That list changes dynamically as elements
+     * are selected and deselected from the list.
+     */
+    public EventList getSelectionList() {
+        return selectionList;
+    }
     
     /**
      * Gets the components for display in a user-constructed panel. 
@@ -150,8 +163,6 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
             // first scroll to row zero
             tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
             fireTableDataChanged();
-            // clear the selection
-            selectedIndex = -1;
         // for all changes, one block at a time
         } else {
             while(listChanges.nextBlock()) {
@@ -162,29 +173,14 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
                 // create a table model event for this block
                 tableModelEvent.setValues(startIndex, endIndex, changeType);
                 fireTableChanged(tableModelEvent);
-                // update the selection
-                if(startIndex <= selectedIndex) {
-                    if(changeType == ListChangeBlock.INSERT) {
-                        selectedIndex += (endIndex - startIndex + 1);
-                    } else if(changeType == ListChangeBlock.DELETE) {
-                        if(endIndex >= selectedIndex) {
-                            selectedIndex = -1;
-                        } else {
-                            selectedIndex -= (endIndex - startIndex + 1);
-                        }
-                    }
-                }
             }
         }
         // trigger a selection event if necessary
         ignoreSelectionEvents = false;
-        // update the table selection
-        if(selectedIndex != -1) tableSelectionModel.setSelectionInterval(selectedIndex, selectedIndex);
-        else tableSelectionModel.clearSelection();
-        //System.out.println(">> NOTIFYIED LIST CHANGES " + ((System.currentTimeMillis() % 100000)/100));
-        //System.out.println("TABLE SIZE: " + table.getRowCount());
+        // fire a selection event to update the selection
+        selectedIndex = -1;
+        valueChanged(null);
     }
-
 
     /**
      * For implementing the ListSelectionListener interface, this listens

@@ -220,6 +220,7 @@ public class SparseList extends AbstractList {
          * the number of non-null elements are in the main list.
          */
         public int size() {
+            if(root == null) return 0;
             return root.treeSize();
         }
     }

@@ -251,7 +251,9 @@ class SparseListNode {
     
     /**
      * Gets the virtual index of the current node, based on a recursive
-     * path up the tree.
+     * path up the tree. This is the index of the value in this node and
+     * not necessarily the value of the first null in this node. To get
+     * that value, use <code>getIndex() - virtualRootSize</code>.
      */
     public int getIndex() {
         return getIndex(null);
@@ -261,15 +263,15 @@ class SparseListNode {
         int allRootSize = treeRootSize + virtualRootSize;
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
 
+        // if there is no child, get the index of the current node
+        if(child == null) {
+            if(parent != null) return parent.getIndex(this) + totalLeftSize + virtualRootSize;
+            return totalLeftSize + virtualRootSize;
+
         // if the child is on the left, return the index recursively
-        if(child == left) {
+        } else if(child == left) {
             if(parent != null) return parent.getIndex(this);
             return 0;
-
-        // if there is no child, get the index of the current node
-        } else if(child == null) {
-            if(parent != null) return parent.getIndex(this) + totalLeftSize;
-            return totalLeftSize;
 
         // if the child is on the right, return the index recursively
         } else if(child == right) {
@@ -398,7 +400,7 @@ class SparseListNode {
         int restoreIndex = 0;
         if(virtualRootSize > 0) {
             spaceToRestore = virtualRootSize;
-            restoreIndex = getIndex();
+            restoreIndex = getIndex() - virtualRootSize;
             virtualRootSize = 0;
             fireChildSizeChanged(true, -1 * spaceToRestore);
         }

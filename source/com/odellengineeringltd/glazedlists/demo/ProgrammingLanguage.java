@@ -7,11 +7,13 @@
 package com.odellengineeringltd.glazedlists.demo;
 
 import com.odellengineeringltd.glazedlists.*;
+// serializable for JDBC-backed lists
+import java.io.Serializable;
 
 /**
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class ProgrammingLanguage implements Filterable {
+class ProgrammingLanguage implements Filterable, Serializable {
     private String name;
     private String year;
     private String description;
