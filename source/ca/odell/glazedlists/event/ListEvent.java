@@ -235,4 +235,18 @@ public final class ListEvent extends EventObject {
     public EventList getSourceList() {
         return sourceList;
     }
+    
+    /**
+     * Gets this event as a String. This simply iterates through all blocks
+     * and concatenates them.
+     */
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append("Event " + atomicCount + ": ");
+        for(int b = 0; b < masterSequence.getBlockCount(atomicCount); b++) {
+            if(b != 0) result.append(", ");
+            result.append(masterSequence.getBlock(atomicCount, b));
+        }
+        return result.toString();
+    }
 }
