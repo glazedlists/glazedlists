@@ -149,7 +149,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
      */
     private void rebuildColumns() {
         // build the column click managers
-        columnClickTrackers = new ColumnClickTracker[table.getColumnCount()];
+        columnClickTrackers = new ColumnClickTracker[eventTableModel.getColumnCount()];
         for(int i = 0; i < columnClickTrackers.length; i++) {
             columnClickTrackers[i] = new ColumnClickTracker(i);
         }
@@ -184,7 +184,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
             columnClicked(column, clicks);
         }
     }
-    
+
     /**
      * Get the columns that the TableComparatorChooser is sorting by.
      *
@@ -199,7 +199,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         }
         return sortingColumns;
     }
-    
+
     /**
      * Gets the index comparator in use for the specified column. This comparator
      * may be retrieved using {@link #getComparatorsForColumn(int)}.
@@ -210,7 +210,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     public int getColumnComparatorIndex(int column) {
         return columnClickTrackers[column].getComparatorIndex();
     }
-    
+
     /**
      * Gets whether the comparator in use for the specified column is reverse.
      */
@@ -291,7 +291,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         table.getTableHeader().revalidate();
         table.getTableHeader().repaint();
     }
-    
+
     /**
      * Set the table to use the specified comparator.
      *
@@ -303,7 +303,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
     public void chooseComparator(int column, int comparatorIndex, boolean reverse) {
         if(column > columnClickTrackers.length) throw new IllegalArgumentException("invalid column " + column + ", must be in range 0, " + columnClickTrackers.length);
         if(comparatorIndex > getComparatorsForColumn(column).size()) throw new IllegalArgumentException("invalid comparator index " + comparatorIndex + ", must be in range 0, " + getComparatorsForColumn(column).size());
-        
+
         // clear the click counts
         for(Iterator i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
             ColumnClickTracker columnClickTracker = (ColumnClickTracker)i.next();
@@ -311,12 +311,12 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         }
         primaryColumn = -1;
         recentlyClickedColumns.clear();
-        
+
         // add clicks to the specified column
         ColumnClickTracker currentTracker = columnClickTrackers[column];
         currentTracker.setComparatorIndex(comparatorIndex);
         currentTracker.setReverse(reverse);
-        
+
         // rebuild the clicked column list
         primaryColumn = column;
         recentlyClickedColumns.add(currentTracker);
@@ -359,11 +359,11 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
                 recentlyClickedColumns.add(currentTracker);
             }
         }
-        
+
         // apply our comparator changes to the sorted list
         rebuildComparator();
     }
-    
+
     /**
      * Updates the comparator in use and applies it to the table.
      */
