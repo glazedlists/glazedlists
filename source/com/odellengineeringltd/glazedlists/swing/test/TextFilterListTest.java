@@ -10,6 +10,7 @@ package com.odellengineeringltd.glazedlists.test;
 import junit.framework.*;
 // the core Glazed Lists package
 import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.swing.*;
 // standard collections
 import java.util.*;
 
@@ -18,13 +19,13 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CaseInsensitiveFilterListTest extends TestCase {
+public class TextFilterListTest extends TestCase {
 
     /** the source list */
     private BasicEventList unfilteredList = null;
     
     /** the filtered list */
-    private CaseInsensitiveFilterList filteredList = null;
+    private TextFilterList filteredList = null;
     
     /** for randomly choosing list indicies */
     private Random random = new Random();
@@ -34,7 +35,7 @@ public class CaseInsensitiveFilterListTest extends TestCase {
      */
     public void setUp() {
         unfilteredList = new BasicEventList();
-        filteredList = new CaseInsensitiveFilterList(unfilteredList, new StringFilterator());
+        filteredList = new TextFilterList(unfilteredList, new StringFilterator());
     }
 
     /**
@@ -157,7 +158,7 @@ public class CaseInsensitiveFilterListTest extends TestCase {
     /**
      * A filterator for strings.
      */
-    class StringFilterator implements Filterator {
+    class StringFilterator implements TextFilterator {
         public String[] getFilterStrings(Object element) {
             return new String[] { (String)element };
         }

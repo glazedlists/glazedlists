@@ -20,7 +20,7 @@ public class ProgrammingLanguageBrowser extends Applet {
 
     EventList languages;
     SortedList sortedLanguages;
-    CaseInsensitiveFilterList filteredLanguages;
+    TextFilterList filteredLanguages;
     ProgrammingLanguageFilter customFilteredLanguages;
 
     ProgrammingLanguageNameComparator sortByName = new ProgrammingLanguageNameComparator();
@@ -52,7 +52,7 @@ public class ProgrammingLanguageBrowser extends Applet {
         languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer", false, false));
 
         sortedLanguages = new SortedList(languages, sortByName);
-        filteredLanguages = new CaseInsensitiveFilterList(sortedLanguages);
+        filteredLanguages = new TextFilterList(sortedLanguages);
         customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);
     }
 

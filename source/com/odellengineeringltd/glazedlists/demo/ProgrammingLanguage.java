@@ -13,7 +13,7 @@ import java.io.Serializable;
 /**
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class ProgrammingLanguage implements Filterable, Serializable {
+class ProgrammingLanguage implements TextFilterable, Serializable {
     private String name;
     private String year;
     private String description;

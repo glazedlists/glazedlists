@@ -4,14 +4,13 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists;
+package com.odellengineeringltd.glazedlists.swing;
 
-// the Glazed Lists' change objects
+// the core Glazed Lists packages
+import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
 // for automatically responding to changes in the filter field 
 import javax.swing.text.Document;
 import javax.swing.event.DocumentEvent;
@@ -19,9 +18,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 // regular expressions are used to match case insensitively
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import java.util.regex.*;
 
 
 /**
@@ -31,9 +28,9 @@ import java.util.regex.PatternSyntaxException;
  * all of the tokens are retained, while all others are (temporarily) removed
  * from the list. The list dynamically changes as its tokens are edited.
  *
- * <p>The filter list either requires that a <code>Filterator</code> be specified
+ * <p>The filter list either requires that a <code>TextFilterator</code> be specified
  * in its constructor, or that every object in the source list implements
- * the <code>filterable</code> interface. This can be compared to the sorted
+ * the <code>TextFilterable</code> interface. This can be compared to the sorted
  * collections (ie. TreeSet) and the Comparable/Comparator interfaces.
  *
  * <p>Refiltering the list can be triggered in two ways. They are when the user
@@ -47,14 +44,14 @@ import java.util.regex.PatternSyntaxException;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CaseInsensitiveFilterList extends AbstractFilterList {
+public class TextFilterList extends AbstractFilterList {
 
     /** the filters list is currently just a list of Substrings to include */
     private Matcher[] filters = new Matcher[0];
     private JTextField filterEdit = new JTextField("");
     
-    /** the filterator is used as an alternative to implementing the Filterable interface */
-    private Filterator filterator = null;
+    /** the filterator is used as an alternative to implementing the TextFilterable interface */
+    private TextFilterator filterator = null;
     
     /** the document listener responds to changes, it is null when we're not listening */
     private FilterEditListener filterEditListener = null;
@@ -66,16 +63,16 @@ public class CaseInsensitiveFilterList extends AbstractFilterList {
      * Creates a new filter list that filters elements out of the
      * specified source list.
      */
-    public CaseInsensitiveFilterList(EventList source) {
+    public TextFilterList(EventList source) {
         this(source, null);
     }
 
     /**
-     * Creates a new filter list that uses a Filterator. A Filterator is something
+     * Creates a new filter list that uses a TextFilterator. A TextFilterator is something
      * that I made up. It is basically a class that knows how to take an arbitrary
      * object and get an array of strings for that object.
      */
-    public CaseInsensitiveFilterList(EventList source, Filterator filterator) {
+    public TextFilterList(EventList source, TextFilterator filterator) {
         super(source);
         this.filterator = filterator;
 
@@ -220,7 +217,7 @@ public class CaseInsensitiveFilterList extends AbstractFilterList {
         // populate the strings for this object
         String values[] = null;
         if(filterator == null) {
-            Filterable item = (Filterable)element;
+            TextFilterable item = (TextFilterable)element;
             values = item.getFilterStrings();
         } else {
             values = filterator.getFilterStrings(element);
