@@ -61,6 +61,9 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     /** Reusable table event for broadcasting changes */
     private MutableTableModelEvent tableModelEvent;
     
+    /** whenever a list change covers greater than this many rows, redraw the whole thing */
+    public int changeSizeRepaintAllThreshhold = 25;
+    
     /**
      * Creates a new table that renders the specified list in the specified
      * format.
@@ -144,9 +147,6 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
         fireTableChanged(tableModelEvent);
     }
     
-    /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    public int changeSizeRepaintAllThreshhold = 25;
-    
     /**
      * For implementing the ListChangeListener interface. This sends changes
      * to the table which can repaint the table cells. Because this class uses
@@ -159,17 +159,19 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
      * areas that changed are notified.
      */
     public void notifyListChanges(ListChangeEvent listChanges) {
+        // when all events hae already been processed by clearing the event queue
+        if(!listChanges.hasNext()) return;
+
         // for avoiding extra selection events
         ignoreSelectionEvents = true;
-        // when all events hae already been processed by clearing the event queue
-        if(!listChanges.hasNext()) {
-            return;
+
         // notify all changes simultaneously
-        } else if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
+        if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
             listChanges.clearEventQueue();
             // first scroll to row zero
             tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
             fireTableDataChanged();
+
         // for all changes, one block at a time
         } else {
             while(listChanges.nextBlock()) {
@@ -182,9 +184,9 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
                 fireTableChanged(tableModelEvent);
             }
         }
-        // trigger a selection event if necessary
-        ignoreSelectionEvents = false;
+
         // fire a selection event to update the selection
+        ignoreSelectionEvents = false;
         selectedIndex = -1;
         valueChanged(null);
     }
