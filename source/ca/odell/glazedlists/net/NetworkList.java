@@ -24,9 +24,10 @@ import java.io.*;
  * {@link NetworkList} requires a {@link ByteCoder} to convert {@link Objects} to
  * and from bytes.
  *
- * <p>To instantiate a {@link NetworkList}, use the {@link ListPeer#subscribe(String,String,int,ByteCoder)}
- * and {@link ListPeer#publish(EventList,String,ByteCoder)} methods of a started
- * {@link ListPeer}.
+ * <p>To instantiate a {@link NetworkList}, use the
+ * {@link ListPeer#subscribe(String,String,int,ByteCoder) subscribe()}
+ * and {@link ListPeer#publish(EventList,String,ByteCoder) publish()} methods
+ * of a started {@link ListPeer}.
  *
  * <p>{@link NetworkList}s may be taken offline and brought back online with the
  * {@link #connect()} and {@link #disconnect()} methods. This allows an application
