@@ -15,21 +15,27 @@ import ca.odell.glazedlists.util.concurrent.*;
 
 
 /**
- * A filter list is a mutation-list that views a subset of the source list.
- * That subset may be the complete set, an empty set, or a select group of
- * elements from a list.
+ * An {@link EventList} that shows a subset of the elements of a source
+ * {@link EventList}. This subset is composed of all elements of the source
+ * {@link EventList} that match the filter.
  *
- * <p>The filter may be static or dynamic. In effect, the subset may change
- * in size by modifying the source set, or the filter itself. When the filter
- * has changed, the user should call the {@link #handleFilterChanged()}
- * method.
+ * <p>The filter can be static or dynamic. Changing the behaviour of the filter
+ * will change which elements of the source list are included. 
  *
- * <p>As of April 8, 2004, the array-based filter data structure has been replaced with
- * a high-performance tree-based data structure. This data structure has potentially
- * slower access for get() but with significantly better performance for updates.
+ * <p>Extending classes define the filter by implementing the method
+ * {@link #filterMatches(Object)}.
  *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
- * Lists Tutorial</a>
+ * <p>Extending classes must call {@link #handleFilterChanged()} when the filter
+ * has changed in order to update the subset of included elements. This method
+ * must also be called at the end of the extending class's constructor.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * are thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * may break the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -39,9 +45,10 @@ public abstract class AbstractFilterList extends TransformedList implements List
     private SparseList flagList = new SparseList();
 
     /**
-     * Creates a new filter list that filters elements out of the
-     * specified source list. After an extending class is done instantiation,
-     * it should <strong>always</strong> call handleFilterChanged().
+     * Creates a {@link AbstractFilterList} that includes a subset of the specified
+     * source {@link EventList}. 
+     *
+     * <p>Extending classes must call handleFilterChanged().
      */
     protected AbstractFilterList(EventList source) {
         super(source);
@@ -63,10 +70,8 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
 
     /**
-     * When the FlagList is prepared, it populates it with information from
-     * the source list and the initial selection model.
-     *
-     * <p>This is copied without shame from SelectionList.
+     * Prepares the flagList by populating it with information from the source
+     * {@link EventList}. Initially all elements are filtered out.
      */
     private void prepareFlagList() {
         for(int i = 0; i < source.size(); i++) {
@@ -74,15 +79,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
         }
     }
 
-    /**
-     * For implementing the ListEventListener interface. When the underlying list
-     * changes, this notification allows the object to repaint itself or update
-     * itself as necessary.
-     *
-     * <li>When a list item is updated, it may become visible or become filtered.
-     * <li>When a list item is inserted, it may be visible or filtered.
-     * <li>When a list item is deleted, it must be filtered if it is not visible.
-     */
+    /** {@inheritDoc} */
     public final void listChanged(ListEvent listChanges) {
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
@@ -179,15 +176,8 @@ public abstract class AbstractFilterList extends TransformedList implements List
     }
 
     /**
-     * When the filter changes, this goes through all of the list elements
-     * and retains only the ones who match the current filter.
-     *
-     * <p>This iterates through all of the source items. Each source item can
-     * have changed in varous ways:
-     *    <li>It could be added because it now matches and didn't before
-     *    <li>It could be removed because it doesn't matches and used to
-     *    <li>It could stay on because it always matches
-     *    <li>It coudl stay off because it never matches
+     * Handles changes to the behavior of the filter. This may change the contents
+     * of this {@link EventList} as elements are filtered and unfiltered.
      */
     protected final void handleFilterChanged() {
         ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
@@ -225,33 +215,26 @@ public abstract class AbstractFilterList extends TransformedList implements List
     }
 
     /**
-     * Tests if the specified item matches the current filter. The implementing
-     * class must implement only this method.
+     * Tests if the specified item from the source {@link EventList} is matched by
+     * the current filter.
+     *
+     * @return <tt>true</tt> for elements that match the filter and shall be
+     *      included in this {@link EventList} or <tt>false</tt> for elements that
+     *      shall not be included in this {@link EventList}.
      */
     public abstract boolean filterMatches(Object element);
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public final int size() {
         return flagList.getCompressedList().size();
     }
 
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     */
+    /** {@inheritDoc} */
     protected final int getSourceIndex(int mutationIndex) {
         return flagList.getIndex(mutationIndex);
     }
 
-    /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc.
-     */
+    /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
     }

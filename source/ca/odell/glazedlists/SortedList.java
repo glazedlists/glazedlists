@@ -16,17 +16,20 @@ import java.util.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 
-
 /**
- * A list that provides a sorted view on its elements.
+ * An {@link EventList} that shows its source {@link EventList} in sorted order.
  *
- * <p>The sorting algorithm may be dynamic. In effect, user may specify the
- * criteria that is used to choose a sorting order.
+ * <p>The sorting strategy is specified with a {@link Comparator}. If no
+ * {@link Comparator} is specified, all of the elements of the source {@link EventList}
+ * must implement {@link Comparable}.
  *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
- * Lists Tutorial</a>
- * @see java.util.Comparator
- * @see java.lang.Comparable
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * are thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * may break the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -41,21 +44,20 @@ public final class SortedList extends TransformedList {
     private Comparator comparator = null;
 
     /**
-     * Creates a new filter list that provides a sorted view on the source data.
-     * By not specifying a {@link Comparator} to sort by, the list elements
-     * must implement the {@link Comparable} interface.
+     * Creates a {@link SortedList} that sorts the specified {@link EventList}.
+     * Because this constructor takes no {@link Comparator} argument, all
+     * elements in the specified {@link EventList} must implement {@link Comparable}
+     * or a {@link ClassCastException} will be thrown.
      */
     public SortedList(EventList source) {
         this(source, new ComparableComparator());
     }
 
     /**
-     * Creates a new filter list that provides a sorted view on the source data.
-     *
-     * @param comparator the comparator to specify how to sort the list. You
-     *      may also specify <code>null</code>, which will leave the list in
-     *      the same order as the source list until a different {@link Comparator}
-     *      is applied via the {@link #setComparator(Comparator)} method.
+     * Creates a {@link SortedList} that sorts the specified {@link EventList}
+     * using the specified {@link Comparator} to determine sort order. If the
+     * specified {@link Comparator} is <tt>null</tt>, then this list will be
+     * unsorted.
      */
     public SortedList(EventList source, Comparator comparator) {
         super(source);
@@ -78,33 +80,32 @@ public final class SortedList extends TransformedList {
      * For implementing the ListEventListener interface. When the underlying list
      * changes, this notification allows the object to repaint itself or update
      * itself as necessary.
-     *
-     * <p>This is implemented in four phases. These phases are:
-     * <br>1. Update the unsorted tree for all event types. Update the sorted tree
-     *     for delete events by deleting nodes. Fire delete events. Queue unsorted
-     *     nodes for inserts in a list.
-     * <br>2. Update the sorted tree for update events by deleting nodes. Queue the
-     *     unsorted nodes for updates in a list.
-     * <br>3. Update the sorted tree for updates by inserting nodes. Fire insert
-     *     events.
-     * <br>4. Process queue of unsorted nodes for inserts. Fire insert events.
-     *
-     * <p>This cycle is rather complex but necessarily so. The reason is that for
-     * the two-tree SortedList to function properly, there is a very strict order
-     * for how trees can be modified. The unsorted tree must be brought completely
-     * up-to-date before any access is made to the sorted tree. This ensures that
-     * the unsorted nodes can discover their indices properly. The sorted tree must
-     * have all deleted and updated nodes removed before any nodes are inserted.
-     * This is because a deleted node may have a changed value that violates the
-     * sorted order in the tree. An insert in this case may compare against a violating
-     * node and result in inconsistency, even if the other node is eventually
-     * deleted. Therefore the order of operations above is essentially update
-     * the unsorted tree, delete from the sorted tree and finally insert into the
-     * sorted tree. The last two insert steps are split to simplify finding updates
-     * where the index does not change.
      */
     public void listChanged(ListEvent listChanges) {
+        // This is implemented in four phases. These phases are:
+        // 1. Update the unsorted tree for all event types. Update the sorted tree
+        //    for delete events by deleting nodes. Fire delete events. Queue unsorted
+        //    nodes for inserts in a list.
+        // 2. Update the sorted tree for update events by deleting nodes. Queue the
+        //    unsorted nodes for updates in a list.
+        // 3. Update the sorted tree for updates by inserting nodes. Fire insert
+        //    events.
+        // 4. Process queue of unsorted nodes for inserts. Fire insert events.
 
+        // This cycle is rather complex but necessarily so. The reason is that for
+        // the two-tree SortedList to function properly, there is a very strict order
+        // for how trees can be modified. The unsorted tree must be brought completely
+        // up-to-date before any access is made to the sorted tree. This ensures that
+        // the unsorted nodes can discover their indices properly. The sorted tree must
+        // have all deleted and updated nodes removed before any nodes are inserted.
+        // This is because a deleted node may have a changed value that violates the
+        // sorted order in the tree. An insert in this case may compare against a violating
+        // node and result in inconsistency, even if the other node is eventually
+        // deleted. Therefore the order of operations above is essentially update
+        // the unsorted tree, delete from the sorted tree and finally insert into the
+        // sorted tree. The last two insert steps are split to simplify finding updates
+        // where the index does not change.
+        
         // handle reordering events
         if(listChanges.isReordering()) {
             // the reorder map tells us what moved where
@@ -257,23 +258,28 @@ public final class SortedList extends TransformedList {
     }
 
     /**
-     * Gets the comparator used to sort this list.
+     * Gets the {@link Comparator} that is being used to sort this list.
+     *
+     * @return the {@link Comparator} in use, or <tt>null</tt> if this list is
+     *      currently unsorted. If this is an {@link EventList} of {@link Comparable}
+     *      elements in natural order, then a {@link ComparableComparator} will
+     *      be returned.
      */
     public Comparator getComparator() {
         return comparator;
     }
 
     /**
-     * Set the comparator used to sort this list. This will resort the list
-     * and will take <code>O(N * Log N)</code> time. For large lists, it may
-     * be worthwhile to create multiple SortedList views, each of which uses
-     * a different Comparator to specify the ordering.
+     * Set the {@link Comparator} in use in this {@link EventList}. This will
+     * sort the {@link EventList} into a new order.
      *
-     * @param comparator the comparator to specify how to sort the list. If
-     *      the list elements implement {@link Comparable}, you may use
-     *      a {@link ComparableComparator} instance to sort them in their
-     *      natural order. You may also specify <code>null</code>, which will
-     *      leave the list in the same order as the source list.
+     * <p>Performance Note: sorting will take <code>O(N * Log N)</code> time.
+     *
+     * @param comparator the {@link Comparator} to specify how to sort the list. If
+     *      the source {@link EventList} elements implement {@link Comparable},
+     *      you may use a {@link ComparableComparator} to sort them in their
+     *      natural order. You may also specify <code>null</code> to put this
+     *      {@link SortedList} in unsorted order.
      */
     public void setComparator(Comparator comparator) {
         ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
@@ -328,10 +334,7 @@ public final class SortedList extends TransformedList {
         }
     }
 
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     */
+    /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
         IndexedTreeNode sortedNode = sorted.getNode(mutationIndex);
         IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
@@ -339,46 +342,22 @@ public final class SortedList extends TransformedList {
         return unsortedIndex;
     }
 
-    /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc.
-     */
+    /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
     }
 
-    /**
-     * Returns true if this list contains the specified element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public boolean contains(Object object) {
         return sorted.contains(object);
-
     }
 
-    /**
-     * Returns the index in this list of the first occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int indexOf(Object object) {
         return sorted.indexOf(object);
     }
 
-    /**
-     * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
         return sorted.lastIndexOf(object);
     }
@@ -386,21 +365,21 @@ public final class SortedList extends TransformedList {
     /**
      * Returns the index in this list of the first occurrence of the specified
      * element, or the index where that element would be in the list if it were
-     * in the list.
+     * inserted.
      *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
+     * @return the index in this list of the first occurrence of the specified
+     *      element, or the index where that element would be in the list if it
+     *      were inserted. This will return a value in <tt>[0, size()]</tt>,
+     * inclusive.
      */
     public int indexOfSimulated(Object object) {
         return sorted.indexOfSimulated(object);
     }
 
     /**
-     * A comparator that takes an indexed node, and compares the index
-     * of that node.
+     * A comparator that takes an indexed node, and compares the index of that node.
      */
-    static class IndexedTreeNodeRawOrderComparator implements Comparator {
+    private static class IndexedTreeNodeRawOrderComparator implements Comparator {
         /**
          * Compares the alpha object to the beta object by their indicies.
          */
@@ -416,22 +395,23 @@ public final class SortedList extends TransformedList {
     /**
      * A comparator that takes an indexed node, and compares the value
      * of an object in a list that has the index of that node.
+     * 
+     * <p>If one of the objects passed to {@link #compare()} is not an
+     * {@link IndexedTreeNode}, it will compare the object directly to the object
+     * in the source {@link EventList} referenced by the {@link IndexedTreeNode}.
+     * This functionality is necessary to allow use of the underlying
+     * {@link Comparator} within {@link IndexedTree} to support {@link #indexOf()},
+     * {@link #lastIndexOf()}, and {@link #contains()}.
      */
-    class IndexedTreeNodeComparator implements Comparator {
+    private class IndexedTreeNodeComparator implements Comparator {
 
         /** the actual comparator used on the values found */
         private Comparator comparator;
 
         /**
-         * Creates a new IndexedTreeNodeComparator that compares the
+         * Creates an {@link IndexedTreeNodeComparator} that compares the
          * objects in the source list based on the indexes of the tree
          * nodes being compared.
-         *
-         * <p>If one of the objects passed to compare() is not a tree node,
-         * it will compare the object directly to the object in the source
-         * list referenced by the tree node.  This functionality was
-         * necessary to allow use of the underlying comparator within
-         * IndexedTree to support indexOf(), lastIndexOf, and contains().
          */
         public IndexedTreeNodeComparator(Comparator comparator) {
             this.comparator = comparator;
@@ -458,11 +438,10 @@ public final class SortedList extends TransformedList {
     }
 
     /**
-     * A class for managing a list of pending deletes. This class
-     * presents deletes in order sorted by the index where they will be
-     * reinserted.
+     * A class for managing a list of pending deletes. This class presents deletes
+     * in order sorted by the index where they will be reinserted.
      */
-    static class IndicesPendingDeletion {
+    private static class IndicesPendingDeletion {
 
         /** the underlying data storage */
         SortedSet indexNodePairs = new TreeSet();
@@ -524,7 +503,7 @@ public final class SortedList extends TransformedList {
      * An IndexNodePair is simply a node and an index. This is useful for
      * keeping track of pending deletes.
      */
-    class IndexNodePair implements Comparable {
+    private class IndexNodePair implements Comparable {
         private int index;
         private IndexedTreeNode node;
 

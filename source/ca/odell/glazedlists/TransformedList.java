@@ -27,6 +27,14 @@ import java.util.*;
  * <p>Extending classes must explicitly call {@link #addListEventListener(ListEventListener)}
  * to receive for change notification from the source {@link EventList}.
  *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * are thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * may break the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class TransformedList extends AbstractEventList implements ListEventListener {
