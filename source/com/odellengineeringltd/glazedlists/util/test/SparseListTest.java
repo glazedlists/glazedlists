@@ -81,4 +81,46 @@ public class SparseListTest extends TestCase {
         // verify the compressed lists are equal
         assertEquals(compressedControlList, sparseList.getCompressedList());
     }
+    
+    /**
+     * Verifies that the compressed index works.
+     */
+    public void testCompressedIndex() {
+        SparseList list = new SparseList();
+        list.add(null);
+        list.add(null);
+        list.add("A");
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        list.add("B");
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        
+        // verify the lead works
+        assertEquals(0, list.getCompressedIndex(1, false));
+        assertEquals(-1, list.getCompressedIndex(1, true));
+
+        // verify the found value works
+        assertEquals(0, list.getCompressedIndex(2, false));
+        assertEquals(0, list.getCompressedIndex(2, true));
+
+        // verify a middle value works
+        assertEquals(1, list.getCompressedIndex(4, false));
+        assertEquals(0, list.getCompressedIndex(4, true));
+
+        // verify a trailing value works
+        assertEquals(2, list.getCompressedIndex(8, false));
+        assertEquals(1, list.getCompressedIndex(8, true));
+
+        // verify leading nulls works
+        assertEquals(2, list.getLeadingNulls(0));
+        assertEquals(3, list.getLeadingNulls(1));
+
+        // verify trailing nulls works
+        assertEquals(3, list.getTrailingNulls(0));
+        assertEquals(4, list.getTrailingNulls(1));
+    }
 }

@@ -101,8 +101,6 @@ public class MultipleListenersTest extends TestCase {
             
             // adjust the filter
             filtered.setThreshhold(random.nextInt(100));
-            
-            System.out.println("sizes: " + root.size() + " " + sorted.size() + " " + filtered.size());
         }
     }
 

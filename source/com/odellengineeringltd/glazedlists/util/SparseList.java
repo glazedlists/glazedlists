@@ -13,11 +13,11 @@ import java.util.*;
  * A sparse list is a list that is optimized for holding several
  * values that are null.
  *
- * A sparse list can has a compressed view - this is a second list
+ * <p>A sparse list can has a compressed view - this is a second list
  * that contains no null values. It is an error to modify the compressed
  * view.
  *
- * The sparse list also has methods to get the compressed index from
+ * <p>The sparse list also has methods to get the compressed index from
  * the natural index, and the natural index from the compressed
  * index.
  *
@@ -180,13 +180,6 @@ public class SparseList extends AbstractList {
     }
     
     /**
-     * Gets the list in tree form by its contents.
-     */
-    public String toString() {
-        return listToString(this) + "/" + root;
-    }
-    
-    /**
      * Verifies that the tree has a consistent state.
      */
     void validate() {
@@ -260,116 +253,57 @@ public class SparseList extends AbstractList {
     }
     
     /**
-     * Utility method for displaying a list that has many nulls
-     * in a console-friendly fashion.
+     * Gets the compressed index of the specified index into the tree. This
+     * is the index of the node that the specified index will be stored in.
+     *
+     * @param left true for compressed-out nodes to return the index of the
+     *      not-compressed-out node on the left. Such values will range from
+     *      <code>-1</code> through <code>size()-1</code>. False for such
+     *      nodes to return the not-compressed-out node on the right. Such values
+     *      will range from <code>0</code> through <code>size()</code>.
      */
-    private static String listToString(List list) {
-        StringBuffer result = new StringBuffer();
-        for(int i = 0; i < list.size(); i++) {
-            if(i != 0) result.append(" ");
-            Object current = list.get(i);
-            if(current == null) result.append("-");
-            else result.append(current);
+    public int getCompressedIndex(int index, boolean left) {
+        if(index >= size) throw new IndexOutOfBoundsException("cannot get from a tree of size " + size + " at " + index);
+        
+        // there is no main tree
+        if(root == null) {
+            if(left) return -1;
+            else return 0;
         }
-        return result.toString();
+        
+        // if it is beyond the main tree
+        if(index >= root.size()) {
+            if(left) return root.treeSize() - 1;
+            return root.treeSize();
+        }
+        
+        // get from the main tree
+        return root.getCompressedIndex(index, left);
     }
     
-    
     /**
-     * Test method for the sublist.
+     * Gets the number of leading nulls on this index. This is the number of
+     * nulls between the value at this index and the next lowest index that has
+     * a non-null value.
+     *
+     * @param compressedIndex the compressed index into the tree
      */
-    public static void main(String[] args) {
-        if(args.length != 5) {
-            System.out.println("Usage: SparseList <% null> <operations> <cycles> <seed> <list type>");
-            System.out.println("List Type : \"ArrayList\" or \"SparseList\"");
-            return;
-        }
-        
-        // parse the parameters
-        int percentNull = Integer.parseInt(args[0]);
-        int operations = Integer.parseInt(args[1]);
-        int cycles = Integer.parseInt(args[2]);
-        int seed = Integer.parseInt(args[3]);
-        String listType = args[4];
-        List testList = null;
-        if(listType.equals("ArrayList")) {
-            testList = new ArrayList();
-        } else if(listType.equals("SparseList")) {
-            testList = new SparseList();
-        } else {
-            System.out.println("List type " + listType + " not supported");
-            return;
-        }
-        
-        // populate an array of objects with the appropriate percent of null values
-        Object[] values = new Object[100];
-        int nonNullCount = 100 - percentNull;
-        for(int i = 0; i < nonNullCount; i++) {
-            values[i] = "*" + i + "*";
-        }
-        for(int i = nonNullCount; i < 100; i++) {
-            values[i] = null;
-        }
-        
-        // populate some arrays with randoms to get us started
-        double[][][] randoms = new double[3][operations][cycles];
-        Random random = new Random(seed);
-        for(int a = 0; a < 3; a++) {
-            for(int b = 0; b < operations; b++) {
-                for(int c = 0; c < cycles; c++) {
-                    randoms[a][b][c] = random.nextDouble();
-                }
-            }
-        }
-        
-        // prepare to test this list
-        System.out.print(listType);
-        long startTime = System.currentTimeMillis();
-        
-        // run the operations once for each cycle
-        for(int c = 0; c < cycles; c++) {
-            testList.clear();
+    public int getLeadingNulls(int compressedIndex) {
+        if(root == null) throw new IndexOutOfBoundsException("cannot get from a tree of size " + size + " at " + compressedIndex);
+        SparseListNode node = root.getNodeByCompressedIndex(compressedIndex);
+        if(node == null) throw new IllegalArgumentException("Cannot get compressed index of " + compressedIndex + ", that value is compressed out");
+        return node.getNodeVirtualSize();
+    }
 
-            // run operations on each list
-            for(int i = 0; i < operations; i++) {
-                // figure out the random operation for this particular element
-                int insertLocation = (int)((double)testList.size() * randoms[0][i][c]);
-                int insertValue = (int)((double)values.length * randoms[1][i][c]);
-                int operation = (int)((double)4 * randoms[2][i][c]);
-                
-                // do the operation
-                if(operation <= 1 || testList.size() == 0) {
-                    testList.add(insertLocation, values[insertValue]);
-                } else if(operation == 2) {
-                    testList.remove(insertLocation);
-                } else if(operation == 3) {
-                    testList.set(insertLocation, values[insertValue]);
-                }
-                //((SparseList)testList).validate();
-            }
-        }
-        
-        // summarize the results of this test
-        long finishTime = System.currentTimeMillis();
-        System.out.println(" time = " + (finishTime - startTime));
-    }
-    
     /**
-     * Verifies that two lists match, throwing an exception if they
-     * do not.
+     * Gets the number of trailing nulls on this index. This is the number
+     * of nulls between the value at this index and the next highest index that has
+     * a non-null value.
      */
-    public static void verifyListsEqual(List alpha, List beta) {
-        if(alpha.size() != beta.size()) throw new IllegalStateException("Sizes do not match " + alpha.size() + " != " + beta.size());
-        
-        for(int i = 0; i < alpha.size(); i++) {
-            if(((alpha.get(i) == null) == (beta.get(i) == null)) || (alpha.get(i).equals(beta.get(i)))) {
-                // do nothing
-            } else {
-                System.out.println("\n-----");
-                System.out.println("ALPHA: " + listToString(alpha));
-                System.out.println("BETA:  " + listToString(beta));
-                throw new IllegalStateException("Mismatch at " + i + ", " + alpha.get(i) + " != " + beta.get(i));
-            }
-        }
+    public int getTrailingNulls(int compressedIndex) {
+        if(root == null && compressedIndex != 0) throw new IndexOutOfBoundsException("cannot get from a tree of size " + size + " at " + compressedIndex);
+        else if(root == null) return size;
+        else if(compressedIndex == root.treeSize() - 1) return size - root.size();
+        return getLeadingNulls(compressedIndex + 1);
     }
 }

@@ -142,6 +142,42 @@ class SparseListNode {
     }
     
     /**
+     * Gets the compressed index of the specified index into the tree. This
+     * is the index of the node that the specified index will be stored in.
+     *
+     * @param lead true for compressed-out nodes to return the index of the
+     *      not-compressed-out node on the left. False for such
+     *      nodes to return the not-compressed-out node on the right.
+     */
+    public int getCompressedIndex(int index, boolean lead) {
+        // calculate some convenience sizes
+        int allRootSize = treeRootSize + virtualRootSize;
+        int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
+
+        // recurse to the left
+        if(index < totalLeftSize) {
+            return left.getCompressedIndex(index, lead);
+
+        // this is a compressed-out node
+        } else if(index < totalLeftSize + virtualRootSize) {
+            if(lead) return treeLeftSize - 1;
+            else return treeLeftSize;
+
+        // this is a kept node
+        } else if(index == totalLeftSize + virtualRootSize) {
+            return treeLeftSize;
+            
+        // recurse on the right side
+        } else if(index < allSubtreeSize) {
+            return right.getCompressedIndex(index - (totalLeftSize + allRootSize), lead) + treeLeftSize + treeRootSize;
+
+        // when the index value is invalid
+        } else {
+            throw new IndexOutOfBoundsException("cannot get from tree of size " + allSubtreeSize + " at " + index);
+        }
+    }
+
+    /**
      * Removes the specified virtual or non-virtual node by the specified
      * virtual index.
      */
@@ -196,6 +232,14 @@ class SparseListNode {
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
         
         return allSubtreeSize;
+    }
+
+    /**
+     * Gets the number of leading nulls on this node. This is the virtual
+     * size of this node.
+     */
+    public int getNodeVirtualSize() {
+        return virtualRootSize;
     }
 
     /**
