@@ -466,6 +466,7 @@ public final class CTPConnection {
         } catch(ParseException e) {
             return close(e);
         } catch(IOException e) {
+            e.printStackTrace();
             return close(e);
         }
     }
@@ -500,7 +501,7 @@ public final class CTPConnection {
      *      unreadable and unwritable state after a close.
      */
     boolean close(Exception reason) {
-        manager.invokeAndWait(new CTPConnectionToClose(this, reason));
+        manager.invokeLater(new CTPConnectionToClose(this, reason));
         return false;
     }
     

@@ -131,11 +131,8 @@ public class ByteChannelReader {
      */
     public int bytesAvailable() throws IOException {
         // read more bytes if possible
-        while(buffer.remaining() < buffer.capacity()) {
-            int bytesRead = suck();
-            if(bytesRead == 0) break;
-        }
-        
+        suckle();
+
         // return the number of bytes available
         return buffer.remaining();
     }
@@ -178,14 +175,26 @@ public class ByteChannelReader {
         if(buffer.remaining() == buffer.capacity()) throw new IOException("Input buffer is full");
         
         // read in another chunk
-        buffer.compact();
-        int bytesRead = channel.read(buffer);
-        buffer.flip();
+        int bytesRead = suckle();
         
         // throw an exception if nothing is read, or the end of file is reached
         if(bytesRead < 0) throw new EOFException("End of stream");
         
         // return the number of bytes read
+        return bytesRead;
+    }
+    
+    /**
+     * Fills the buffer with as much content as possible. Unlike {@link #suck()},
+     * {@link #suckle()} does not mandate that more data be available.
+     *
+     * @return the number of bytes read, possibly 0 or possibly a negative value
+     *      if the end of stream is reached.
+     */
+    private int suckle() throws IOException {
+        buffer.compact();
+        int bytesRead = channel.read(buffer);
+        buffer.flip();
         return bytesRead;
     }
 }
@@ -253,7 +262,7 @@ class ByteBufferSequence implements CharSequence {
     }
 
     /**
-     * ÊReturns a string containing the characters in this sequence in the same order as this sequence.
+     * ï¿½Returns a string containing the characters in this sequence in the same order as this sequence.
      */
     public String toString() {
         StringBuffer result = new StringBuffer();

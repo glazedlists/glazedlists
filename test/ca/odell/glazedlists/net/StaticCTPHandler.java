@@ -40,12 +40,15 @@ class StaticCTPHandler implements CTPHandler {
         }
     }
     public void connectionClosed(CTPConnection source, Exception reason) {
-        if(!tasks.isEmpty()) throw new IllegalStateException();
+        if(!tasks.isEmpty()) throw new IllegalStateException("Close " + this + " with " + tasks.size() + " events pending: " + tasks);
     }
     private void sendEnqueued(CTPConnection connection) {
         while(tasks.size() > 0 && tasks.get(0) instanceof Enqueued) {
             Enqueued enqueued = (Enqueued)tasks.remove(0);
             connection.sendChunk(enqueued.getData());
+        }
+        if(tasks.isEmpty()) {
+            connection.close();
         }
     }
     public boolean isDone() {

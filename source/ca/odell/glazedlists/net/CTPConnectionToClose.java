@@ -44,7 +44,7 @@ class CTPConnectionToClose implements CTPRunnable {
      * @return true unless the server shall shutdown due to a shutdown request or
      *      an unrecoverable failure.
      */
-    public void run(Selector selector, CTPConnectionManager manager) {
+    public void run(Selector selector, CTPConnectionManager manager) {        
         // if this is already closed, we're done
         if(connection.state == CTPConnection.STATE_CLOSED_PERMANENTLY) return;
         

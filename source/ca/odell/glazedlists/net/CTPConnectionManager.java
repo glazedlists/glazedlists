@@ -178,6 +178,15 @@ public final class CTPConnectionManager implements Runnable {
     }
     
     /**
+     * Runs the specified task the next time the CTPConnectionManager thread has
+     * a chance.
+     */
+    void invokeLater(CTPRunnable runnable) {
+        pendingRunnables.add(runnable);
+        wakeUp();
+    }
+    
+    /**
      * Stops the CTPConnectionManager and closes all connections.
      */
     public synchronized void stop() {
