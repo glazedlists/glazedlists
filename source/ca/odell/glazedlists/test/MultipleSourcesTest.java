@@ -61,37 +61,93 @@ public class MultipleSourcesTest extends TestCase {
         source.add("PlayStation");
         source.add("Turbo Graphics 16");
         
-
         List filterLists = new ArrayList();
         filterLists.add(filterOne);
         filterLists.add(filterTwo);
-        MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists);
+        MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, true);
         
+        // modify the source
         source.clear();
-
+        assertEquals(2, filtersListener.getChangeCount());
         source.add("Atari 2600");
         source.add("Intellivision");
         source.add("Game Gear");
+        assertEquals(8, filtersListener.getChangeCount());
 
-        filterOne.setMatch(true);
+        // modify filter one
         filterOne.setMatch(false);
+        assertEquals(9, filtersListener.getChangeCount());
+        
+        // modify filter two
+        filterTwo.setMatch(true);
+        assertEquals(9, filtersListener.getChangeCount());
     }
     
+    /**
+     * Tests whether an EventList can depend upon multiple sources simultaneously
+     * when not all of the sources are directly registered as ListEventListeners.
+     */
+    public void testMultipleSourcesNoListener() {
+        BasicEventList source = new BasicEventList();
+        EasyFilterList filterOne = new EasyFilterList(source);
+        EasyFilterList filterTwo = new EasyFilterList(source);
+        
+        source.add("Game Cube");
+        source.add("Genesis");
+        source.add("XBox");
+        source.add("PlayStation");
+        source.add("Turbo Graphics 16");
+        
+        List filterLists = new ArrayList();
+        filterLists.add(filterOne);
+        filterLists.add(filterTwo);
+        MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, false);
+        filterOne.addListEventListener(filtersListener);
+        filterOne.getPublisher().addDependency(filterTwo, filtersListener);
+        
+        // modify the source
+        source.clear();
+        assertEquals(1, filtersListener.getChangeCount());
+        source.add("Atari 2600");
+        source.add("Intellivision");
+        source.add("Game Gear");
+        assertEquals(4, filtersListener.getChangeCount());
+
+        // modify filter one
+        filterOne.setMatch(false);
+        assertEquals(5, filtersListener.getChangeCount());
+        
+        // modify filter two
+        filterTwo.setMatch(true);
+        assertEquals(5, filtersListener.getChangeCount());
+    }
+    
+
     /**
      * Listens to multiple sources, and when one source changes, this iterates all
      * sources.
      */
     class MultipleSourcesListener implements ListEventListener {
         private List sources;
-        public MultipleSourcesListener(List sources) {
+        private int changeCount = 0;
+
+        public MultipleSourcesListener(List sources, boolean addListeners) {
             this.sources = sources;
-            for(Iterator i = sources.iterator(); i.hasNext(); ) {
-                EventList eventList = (EventList)i.next();
-                eventList.addListEventListener(this);
+            if(addListeners) {
+                for(Iterator i = sources.iterator(); i.hasNext(); ) {
+                    EventList eventList = (EventList)i.next();
+                    eventList.addListEventListener(this);
+                }
             }
         }
+
+        public int getChangeCount() {
+            return changeCount;
+        }
+
         public void listChanged(ListEvent e) {
             e.clearEventQueue();
+            changeCount++;
             for(Iterator i = sources.iterator(); i.hasNext(); ) {
                 EventList eventList = (EventList)i.next();
                 eventList.toArray();

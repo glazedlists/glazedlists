@@ -51,7 +51,7 @@ public final class ListEventPublisher {
      * automatically managed by most {@link EventList}s, so this method shall only
      * be used for {@link EventList}s that have indirect dependencies.
      */
-    public void addDependency(ListEventListener listener, EventList dependency) {
+    public void addDependency(EventList dependency, ListEventListener listener) {
         DependentListener dependentListener = getDependentListener(listener);
         if(dependentListener == null) {
             dependentListener = new DependentListener(listener);
@@ -64,7 +64,7 @@ public final class ListEventPublisher {
      * Removes the specified {@link EventList} as a dependency for the specified
      * {@link ListEventListener}.
      */
-    public void removeDependency(ListEventListener listener, EventList dependency) {
+    public void removeDependency(EventList dependency, ListEventListener listener) {
         DependentListener dependentListener = getDependentListener(listener);
         if(dependentListener == null) throw new IllegalArgumentException();
         List dependencies = dependentListener.getDependencies();

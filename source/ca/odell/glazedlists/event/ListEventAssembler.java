@@ -362,7 +362,7 @@ public final class ListEventAssembler {
     public synchronized void addListEventListener(ListEventListener listChangeListener) {
         listeners.add(listChangeListener);
         listenerEvents.add(new ListEvent(this, sourceList));
-        publisher.addDependency(listChangeListener, sourceList);
+        publisher.addDependency(sourceList, listChangeListener);
     }
     /**
      * Removes the specified listener from receiving notification when new
@@ -391,6 +391,6 @@ public final class ListEventAssembler {
         }
         
         // remove the publisher's dependency
-        publisher.removeDependency(listChangeListener, sourceList);
+        publisher.removeDependency(sourceList, listChangeListener);
     }
 }
