@@ -19,10 +19,10 @@ import java.util.logging.*;
 /**
  * Closes a connection on the NIO thread.
  */
-class CTPConnectionToClose implements Runnable {
+class CloseConnection implements Runnable {
     
     /** logging */
-    private static Logger logger = Logger.getLogger(CTPConnectionToClose.class.toString());
+    private static Logger logger = Logger.getLogger(CloseConnection.class.toString());
 
     /** the target connection */
     private CTPConnection connection;
@@ -33,7 +33,7 @@ class CTPConnectionToClose implements Runnable {
     /**
      * Creates a CTPConnectionToClose that closes the specified connection.
      */
-    public CTPConnectionToClose(CTPConnection connection, Exception reason) {
+    public CloseConnection(CTPConnection connection, Exception reason) {
         this.connection = connection;
         this.reason = reason;
     }

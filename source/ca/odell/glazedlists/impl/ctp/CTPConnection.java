@@ -439,7 +439,7 @@ public final class CTPConnection implements NIOAttachment {
      *      is safe to modify afterwards.
      */
     public void sendChunk(Bufferlo data) {
-        manager.getNIODaemon().invokeAndWait(new CTPChunkToSend(this, data));
+        manager.getNIODaemon().invokeAndWait(new SendChunk(this, data));
     }
 
     /**
@@ -539,7 +539,7 @@ public final class CTPConnection implements NIOAttachment {
      *      unreadable and unwritable state after a close.
      */
     public void close(Exception reason) {
-        manager.getNIODaemon().invokeLater(new CTPConnectionToClose(this, reason));
+        manager.getNIODaemon().invokeLater(new CloseConnection(this, reason));
         //return false;
     }
 

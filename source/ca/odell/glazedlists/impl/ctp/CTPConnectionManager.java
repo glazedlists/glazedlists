@@ -74,7 +74,7 @@ public final class CTPConnectionManager implements NIOServer {
         
         // start the server
         try {
-            nioDaemon.invokeAndWait(new CTPStartUp(this, listenPort));
+            nioDaemon.invokeAndWait(new StartServer(this, listenPort));
         } catch(RuntimeException e) {
             nioDaemon.stop();
             if(e.getCause() instanceof IOException) throw (IOException)e.getCause();
@@ -135,7 +135,7 @@ public final class CTPConnectionManager implements NIOServer {
      * Connect to the specified host.
      */
     public void connect(CTPHandler handler, String host, int port) {
-        nioDaemon.invokeLater(new CTPConnectionToEstablish(this, handler, host, port));
+        nioDaemon.invokeLater(new OpenConnection(this, handler, host, port));
     }
     public void connect(CTPHandler handler, String host) {
         connect(handler, host, DEFAULT_PORT);

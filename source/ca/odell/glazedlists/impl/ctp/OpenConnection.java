@@ -17,16 +17,16 @@ import java.io.*;
 import java.util.logging.*;
 
 /**
- * A CTPConnectionToEstablish models a desired connection. It is a temporary object used
+ * A OpenConnection models a desired connection. It is a temporary object used
  * by the connection manager to be passed between threads.
  *
- * <p>A CTPConnectionToEstablish is created for each call to the connect() method, and
+ * <p>A OpenConnection is created for each call to the connect() method, and
  * queued until it can be processed by the CTP thread.
  */
-class CTPConnectionToEstablish implements Runnable {
+class OpenConnection implements Runnable {
      
     /** logging */
-    private static Logger logger = Logger.getLogger(CTPConnectionToEstablish.class.toString());
+    private static Logger logger = Logger.getLogger(OpenConnection.class.toString());
 
     /** the place to connect to */
     private CTPConnectionManager connectionManager;
@@ -37,7 +37,7 @@ class CTPConnectionToEstablish implements Runnable {
     /**
      * Create a new CTPConnectionToEstablish.
      */
-    public CTPConnectionToEstablish(CTPConnectionManager connectionManager, CTPHandler handler, String host, int port) {
+    public OpenConnection(CTPConnectionManager connectionManager, CTPHandler handler, String host, int port) {
         this.connectionManager = connectionManager;
         this.handler = handler;
         this.host = host;

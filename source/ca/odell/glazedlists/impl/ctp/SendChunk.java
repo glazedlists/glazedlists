@@ -20,10 +20,10 @@ import java.util.logging.*;
 /**
  * Sends a chunk of data on the NIO thread.
  */
-class CTPChunkToSend implements Runnable {
+class SendChunk implements Runnable {
      
     /** logging */
-    private static Logger logger = Logger.getLogger(CTPChunkToSend.class.toString());
+    private static Logger logger = Logger.getLogger(SendChunk.class.toString());
 
     /** the destination */
     private CTPConnection connection;
@@ -32,9 +32,9 @@ class CTPChunkToSend implements Runnable {
     private Bufferlo data;
 
     /**
-     * Create a new CTPConnectionToEstablish.
+     * Create a new SendChunk.
      */
-    public CTPChunkToSend(CTPConnection connection, Bufferlo data) {
+    public SendChunk(CTPConnection connection, Bufferlo data) {
         this.connection = connection;
         this.data = data;
     }

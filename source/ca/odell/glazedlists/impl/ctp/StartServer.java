@@ -19,10 +19,10 @@ import java.util.logging.*;
 /**
  * A task that starts the CTP Connection manager.
  */
-class CTPStartUp implements Runnable {
+class StartServer implements Runnable {
     
     /** logging */
-    private static Logger logger = Logger.getLogger(CTPStartUp.class.toString());
+    private static Logger logger = Logger.getLogger(StartServer.class.toString());
 
     /** the I/O event queue daemon */
     private CTPConnectionManager connectionManager = null;
@@ -34,7 +34,7 @@ class CTPStartUp implements Runnable {
      * Create a new CTPStartUp that starts a server using the specified
      * NIODaemon.
      */
-    public CTPStartUp(CTPConnectionManager connectionManager, int listenPort) {
+    public StartServer(CTPConnectionManager connectionManager, int listenPort) {
         this.connectionManager = connectionManager;
         this.listenPort = listenPort;
     }
