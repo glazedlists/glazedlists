@@ -277,6 +277,10 @@ public final class EventSelectionModel implements ListSelectionModel {
                             selectReorderMap[currentIndex] = previousIndex;
                         }
                     }
+                    
+                    // adjust other internal state
+                    anchorSelectionIndex = -1;
+                    leadSelectionIndex = -1;
 
                     // fire the reorder
                     updates.reorder(selectReorderMap);
@@ -293,7 +297,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                         boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
                         int previousSelectionIndex = -1;
                         if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
-
+                        
                         // when an element is deleted, blow it away
                         if(changeType == ListEvent.DELETE) {
                             flagList.remove(index);
@@ -333,6 +337,10 @@ public final class EventSelectionModel implements ListSelectionModel {
                                 updates.addUpdate(previousSelectionIndex);
                             }
                         }
+
+                        // adjust other internal state
+                        anchorSelectionIndex = adjustIndex(anchorSelectionIndex, changeType, index);
+                        leadSelectionIndex = adjustIndex(leadSelectionIndex, changeType, index);
                     }
                 }
 
@@ -352,6 +360,26 @@ public final class EventSelectionModel implements ListSelectionModel {
             } finally {
                 ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
             }
+        }
+    }
+    
+    /**
+     * Adjusts the specified index to the specified change. This is used to adjust
+     * the anchor and lead selection indices when list changes occur.
+     */
+    private int adjustIndex(int indexBefore, int changeType, int changeIndex) {
+        if(indexBefore == -1) return -1;
+        if(changeType == ListEvent.DELETE) {
+            if(changeIndex < indexBefore) return indexBefore-1;
+            else if(changeIndex == indexBefore) return -1;
+            else return indexBefore;
+        } else if(changeType == ListEvent.UPDATE) {
+            return indexBefore;
+        } else if(changeType == ListEvent.INSERT) {
+            if(changeIndex <= indexBefore) return indexBefore+1;
+            else return indexBefore;
+        } else {
+            throw new IllegalStateException();
         }
     }
 
