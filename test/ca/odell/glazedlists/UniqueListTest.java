@@ -1235,6 +1235,102 @@ public class UniqueListTest extends TestCase {
     }
 
     /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testUpdateSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Datsun");      // C D
+        source.add("Ford");        // C D F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Dodge");    // C D F
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testUpdateLeftSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Datsun");      // C D
+        source.add("Ford");        // C D F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Chevy");    // C C F
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testUpdateRightSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Datsun");      // C D
+        source.add("Ford");        // C D F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Ford");    // C F F
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testLeftUpdateSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Chevy");       // C C
+        source.add("Ford");        // C C F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Chevy");    // C C F
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testLeftInsertSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Chevy");       // C C
+        source.add("Ford");        // C C F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Datsun");   // C D F
+    }
+
+    /**
+     * Tests that the UniqueList can handle sets on the edge.
+     */
+    public void testLeftMoveSet() {
+        EventList source = new BasicEventList();
+        source.add("Chevy");       // C
+        source.add("Chevy");       // C C
+        source.add("Ford");        // C C F
+
+        UniqueList uniqueList = new UniqueList(source);
+        uniqueList.addListEventListener(new ConsistencyTestList(uniqueList, "unique"));
+
+        // in sorted order changes
+        source.set(1, "Ford");   // C F F
+    }
+
+    /**
 	 * Explicit comparator for Kevin's sanity!
 	 */
 	class IntegerComparator implements Comparator {
