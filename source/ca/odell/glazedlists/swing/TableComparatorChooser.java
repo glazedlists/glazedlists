@@ -290,6 +290,37 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         table.getTableHeader().revalidate();
         table.getTableHeader().repaint();
     }
+    
+    /**
+     * Set the table to use the specified comparator.
+     *
+     * @param column the column to sort by
+     * @param comparatorIndex the comparator to use, specify <code>0</code> for the
+     *      default comparator.
+     * @param reverse whether to reverse the specified comparator.
+     */
+    public void chooseComparator(int column, int comparatorIndex, boolean reverse) {
+        if(column > columnClickTrackers.length) throw new IllegalArgumentException("invalid column " + column + ", must be in range 0, " + columnClickTrackers.length);
+        if(comparatorIndex > getComparatorsForColumn(column).size()) throw new IllegalArgumentException("invalid comparator index " + comparatorIndex + ", must be in range 0, " + getComparatorsForColumn(column).size());
+        
+        // clear the click counts
+        for(Iterator i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
+            ColumnClickTracker columnClickTracker = (ColumnClickTracker)i.next();
+            columnClickTracker.resetClickCount();
+        }
+        primaryColumn = -1;
+        recentlyClickedColumns.clear();
+        
+        // add clicks to the specified column
+        ColumnClickTracker currentTracker = columnClickTrackers[column];
+        currentTracker.setComparatorIndex(comparatorIndex);
+        currentTracker.setReverse(reverse);
+        
+        // rebuild the clicked column list
+        primaryColumn = column;
+        recentlyClickedColumns.add(currentTracker);
+        rebuildComparator();
+    }
 
     /**
      * Handle a column being clicked by sorting that column.
@@ -327,7 +358,15 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
                 recentlyClickedColumns.add(currentTracker);
             }
         }
-
+        
+        // apply our comparator changes to the sorted list
+        rebuildComparator();
+    }
+    
+    /**
+     * Updates the comparator in use and applies it to the table.
+     */
+    private void rebuildComparator() {
         // build a new comparator
         if(recentlyClickedColumns.size() > 0) {
             List comparators = new ArrayList();
