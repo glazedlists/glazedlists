@@ -10,7 +10,7 @@ import java.util.*;
 // NIO
 import java.nio.*;
 import java.nio.channels.*;
-import java.io.IOException;
+import java.io.*;
 // regular expressions
 import java.util.regex.*;
 import java.text.ParseException;
@@ -183,7 +183,7 @@ public class ByteChannelReader {
         buffer.flip();
         
         // throw an exception if nothing is read, or the end of file is reached
-        if(bytesRead < 0) throw new IOException("End of stream, no more bytes to read");
+        if(bytesRead < 0) throw new EOFException("End of stream");
         
         // return the number of bytes read
         return bytesRead;

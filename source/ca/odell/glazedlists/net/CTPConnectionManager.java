@@ -23,7 +23,7 @@ import java.util.logging.*;
  * all read and write operations on all connections. A pool of other threads are
  * used to notify the handlers of the data and status of a connection.
  */
-final class CTPConnectionManager {
+final class CTPConnectionManager implements Runnable {
     
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnectionManager.class.toString());
@@ -36,6 +36,9 @@ final class CTPConnectionManager {
     
     /** used to multiplex I/O resources */
     Selector selector = null;
+    
+    /** connections to establish */
+    private List connectionsToEstablish = new ArrayList();
     
     /**
      * Creates a connection manager that handles incoming connections using the
@@ -54,7 +57,6 @@ final class CTPConnectionManager {
         ServerSocketChannel serverChannel = ServerSocketChannel.open();
         ServerSocket serverSocket = serverChannel.socket();
         InetSocketAddress listenAddress = new InetSocketAddress(listenPort);
-        logger.fine("Binding to " + listenAddress);
         serverSocket.bind(listenAddress);
     
         // prepare for non-blocking, selectable IO
@@ -62,15 +64,39 @@ final class CTPConnectionManager {
         serverChannel.configureBlocking(false);
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
         
+        // start handling connections
+        new Thread(this, "GlazedLists net").start();
+
+        logger.fine("Connection Manager ready, listening on " + listenAddress);
+    }
+        
+    /**
+     * Continuously selects a connection which needs servicing and services it.
+     */
+    public void run() {
+        
         // continuously select a socket and action on it
         while(true) {
             // This may block for a long time. Upon returning, the
             // selected set contains keys of the ready channels
-            int n = selector.select();
+            try {
+                selector.select();
+            } catch(IOException e) {
+                logger.log(Level.WARNING, e.getMessage(), e);
+            }
+
+            // Iterate over the connections to establish
+            List toConnect = new ArrayList();
+            synchronized(this) {
+                toConnect.addAll(connectionsToEstablish);
+                connectionsToEstablish.clear();
+            }
+            for(Iterator i = toConnect.iterator(); i.hasNext(); ) {
+                PendingConnect pendingConnect = (PendingConnect)i.next();
+                pendingConnect.connect();
+            }
             
-            // nothing to do
-            if(n == 0) continue;
-            
+
             // Iterate over the selected keys
             for(Iterator i = selector.selectedKeys().iterator(); i.hasNext(); ) {
                 SelectionKey key = (SelectionKey)i.next();
@@ -121,7 +147,7 @@ final class CTPConnectionManager {
             // configure the channel for no-blocking and selection
             if(channel == null) return;
             channel.configureBlocking(false);
-            channelKey = channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+            channelKey = channel.register(selector, 0);
         } catch(IOException e) {
             // the accept failed, there's nothing to clean up
             return;
@@ -132,9 +158,6 @@ final class CTPConnectionManager {
         CTPConnection server = CTPConnection.server(channelKey, handler);
         channelKey.attach(server);
         server.handleConnect();
-
-        // document our success
-        logger.fine("Accepted connection from " + channel.socket().getRemoteSocketAddress());
     }
     
     /**
@@ -147,20 +170,47 @@ final class CTPConnectionManager {
     /**
      * Connect to the specified host.
      */
-    public CTPConnection connect(String host, CTPHandler handler) throws IOException {
-        InetSocketAddress address = new InetSocketAddress(host, listenPort);
-        SocketChannel channel = SocketChannel.open(address);
-        SelectionKey selectionKey = channel.register(selector, SelectionKey.OP_CONNECT);
-        CTPConnection client = CTPConnection.client(host, selectionKey, handler);
-        return client;
+    public void connect(String host, int port, CTPHandler handler) {
+        synchronized(this) {
+            connectionsToEstablish.add(new PendingConnect(host, port, handler));
+        }
+        selector.wakeup();
     }
+
+    /**
+     * Connect to the specified host.
+     */
+    public void connect(String host, CTPHandler handler) {
+        connect(host, listenPort, handler);
+    }
+
     
     /**
      * Listens for connections and echoes data back to them.
      */
     public static void main(String[] args) {
+        if(args.length == 0) {
+            System.out.println("Usage: CTPConnectionManager <mode>");
+            System.out.println("");
+            System.out.println(" mode: server");
+            System.out.println("       client");
+            return;
+        }
+
         try {
-            new CTPConnectionManager(new EmptyCTPConnectHandler()).start();
+            if(args[0].equals("server")) {
+                new CTPConnectionManager(new EmptyCTPConnectHandler()).start();
+                
+                
+            } else if(args[0].equals("client")) {
+                CTPConnectionManager connectionManager = new CTPConnectionManager(new EmptyCTPConnectHandler());
+                connectionManager.start();
+                connectionManager.connect("localhost", 5310, new EmptyCTPHandler());
+                
+            } else {
+                throw new IllegalArgumentException(args[0]);
+            }
+
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -209,6 +259,56 @@ final class CTPConnectionManager {
          */
         public void connectionClosed(CTPConnection source, Exception reason) {
             logger.info("connectionClosed( " + source + " , " + reason + " )");
+        }
+    }
+
+    /**
+     * A PendingConnect models a desired connection. It is a temporary object used
+     * by the connection manager to be passed between threads.
+     *
+     * <p>A PendingConnect is created for each call to the connect() method, and
+     * queued until it can be processed by the CTP thread.
+     */
+    class PendingConnect {
+        
+        private String host;
+        private int port;
+        private CTPHandler handler;
+        
+        /**
+         * Create a new PendingConnect.
+         */
+        public PendingConnect(String host, int port, CTPHandler handler) {
+            this.host = host;
+            this.port = port;
+            this.handler = handler;
+        }
+        
+        /**
+         * Establish the connection. This creates a CTPProtocol for the client and
+         * registers it with the selector.
+         */
+        public void connect() {
+            CTPConnection client = null;
+            try {
+                // prepare a channel to connect
+                InetSocketAddress address = new InetSocketAddress(host, port);
+                SocketChannel channel = SocketChannel.open();
+        
+                // configure the channel for no-blocking and selection
+                channel.configureBlocking(false);
+                SelectionKey selectionKey = channel.register(selector, SelectionKey.OP_CONNECT);
+        
+                // prepare the handler for the connection
+                client = CTPConnection.client(host, selectionKey, handler);
+                selectionKey.attach(client);
+
+                // connect (non-blocking)
+                channel.connect(address);
+
+            } catch(IOException e) {
+                handler.connectionClosed(client, e);
+            }
         }
     }
 }

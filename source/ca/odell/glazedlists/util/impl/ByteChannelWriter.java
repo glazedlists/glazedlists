@@ -22,6 +22,9 @@ import java.text.ParseException;
  */
 public class ByteChannelWriter {
 
+    /** the SelectionKey to notify which operations we are interested in */
+    private SelectionKey selectionKey;
+    
     /** the SocketChannel to write to */
     private SocketChannel channel;
     
@@ -31,8 +34,9 @@ public class ByteChannelWriter {
     /**
      * Create a writer for the specified channel.
      */
-    public ByteChannelWriter(SocketChannel channel) {
+    public ByteChannelWriter(SocketChannel channel, SelectionKey selectionKey) {
         this.channel = channel;
+        this.selectionKey = selectionKey;
         this.buffer = ByteBuffer.allocateDirect(1024);
     }
     
@@ -59,6 +63,16 @@ public class ByteChannelWriter {
     }
     
     /**
+     * Marks this writer to flush when the channel can be written.
+     */
+    public void requestFlush() {
+        // mark this needing a flush
+        if(buffer.position() > 0) {
+            selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
+        }
+    }
+    
+    /**
      * Flushes the contents of the buffer to the socket channel.
      *
      * <p>This only flushes what can be written immediately. This is limited by
@@ -67,8 +81,12 @@ public class ByteChannelWriter {
     public void flush() throws IOException {
         buffer.flip();
         while(true) {
+            // verify we can still write
+            if(!selectionKey.isValid()) throw new IOException("Key cancelled");
+            
             // if we have nothing more to write
             if(!buffer.hasRemaining()) {
+                selectionKey.interestOps(selectionKey.interestOps() % SelectionKey.OP_WRITE);
                 buffer.clear();
                 return;
             }

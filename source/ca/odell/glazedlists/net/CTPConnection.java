@@ -23,6 +23,16 @@ import java.util.logging.*;
  * of Chunked Transfer Protocol. This protocol is a subset of HTTP/1.1 with special
  * interest to chunked encoding.
  *
+ * <p>Although HTTP/1.1 is designed such that all compliant implementations can
+ * interoperate, this is not the case for CTPConnection. This specialized HTTP/1.1
+ * client is only capable of interoperating with other clients that implement the
+ * same subset of HTTP/1.1. Known limitations of this HTTP/1.1 implementation:
+ * <li>it can read and write only chunked-encoding
+ * <li>it can only read and write a single URI, "/glazedlists"
+ * <li>as a client, it sends only the headers, "Host", "Transfer-Encoding"
+ * <li>as a server, it sends only the header, "Transfer-Encoding"
+ * <li>it does not interpret received headers
+ *
  * client:
  * AWAITING_CONNECT
  *   --[connect]-->
@@ -118,8 +128,7 @@ class CTPConnection {
         this.handler = handler;
         this.socketChannel = (SocketChannel)selectionKey.channel();
         this.parser = new ByteChannelReader(socketChannel);
-        this.writer = new ByteChannelWriter(socketChannel);
-        this.host = ((InetSocketAddress)socketChannel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
+        this.writer = new ByteChannelWriter(socketChannel, selectionKey);
     }
     
     /**
@@ -127,8 +136,8 @@ class CTPConnection {
      */
     static CTPConnection client(String host, SelectionKey selectionKey, CTPHandler handler) {
         CTPConnection client = new CTPConnection(selectionKey, handler);
-        client.host = host;
         client.state = STATE_CLIENT_AWAITING_CONNECT;
+        client.host = host;
         return client;
     }
     
@@ -138,15 +147,14 @@ class CTPConnection {
     static CTPConnection server(SelectionKey selectionKey, CTPHandler handler) {
         CTPConnection server = new CTPConnection(selectionKey, handler);
         server.state = STATE_SERVER_AWAITING_CONNECT;
+        server.host = ((InetSocketAddress)server.socketChannel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
         return server;
     }
 
     /**
      * Handles the incoming bytes.
      */
-    void handleRead() {
-        logger.fine("handling read from " + this + " state " + state);
-        
+    synchronized void handleRead() {
         // read a request
         if(state == STATE_SERVER_AWAITING_REQUEST) {
             handleRequest();
@@ -168,7 +176,7 @@ class CTPConnection {
     /**
      * When we can write, flush the output stream.
      */
-    void handleWrite() throws IOException {
+    synchronized void handleWrite() {
         try {
             writer.flush();
         } catch(IOException e) {
@@ -179,15 +187,29 @@ class CTPConnection {
     /**
      * When connected, prepare the higher-level connection.
      */
-    void handleConnect() {
+    synchronized void handleConnect() {
+        // finish up the connect() process
+        try {
+            socketChannel.finishConnect();
+        } catch(IOException e) {
+            close(e);
+            return;
+        }
+            
+        // the connection is successful for a client
         if(state == STATE_CLIENT_AWAITING_CONNECT) {
+            logger.fine("Opened connection to " + this);
+            selectionKey.interestOps(SelectionKey.OP_READ);
             state = STATE_CLIENT_CONSTRUCTING_REQUEST;
             sendRequest(CTP_URI, Collections.EMPTY_MAP);
             
-            
+        // the connection is successful for a server
         } else if(state == STATE_SERVER_AWAITING_CONNECT) {
+            logger.fine("Accepted connection from " + this);
+            selectionKey.interestOps(SelectionKey.OP_READ);
             state = STATE_SERVER_AWAITING_REQUEST;
             
+        // invalid state
         } else {
             throw new IllegalStateException();
         }
@@ -213,10 +235,10 @@ class CTPConnection {
             Map responseHeaders = new TreeMap();
             responseHeaders.putAll(headers);
             responseHeaders.put("Transfer-Encoding", "chunked");
-            responseHeaders.put("Host:", host);
+            responseHeaders.put("Host", host);
             writeHeaders(responseHeaders);
             writer.write("\r\n");
-            writer.flush();
+            writer.requestFlush();
             
             // we're waiting for the response
             state = STATE_CLIENT_AWAITING_RESPONSE;
@@ -237,7 +259,6 @@ class CTPConnection {
     private void handleRequest() {
         if(state != STATE_SERVER_AWAITING_REQUEST) throw new IllegalStateException();
         
-        logger.finest("Handling request from " + this);
         try {
             // if the entire header has not loaded, load more
             if(parser.indexOf("\\r\\n\\r\\n") == -1) return;
@@ -247,7 +268,6 @@ class CTPConnection {
             String uri = parser.readUntil("( )+");
             parser.consume("HTTP\\/1\\.1 *");
             parser.consume("\\r\\n");
-            logger.finest("Reading request " + uri + " from " + this);
             
             // parse the headers
             Map headers = readHeaders();
@@ -296,7 +316,7 @@ class CTPConnection {
             responseHeaders.put("Transfer-Encoding", "chunked");
             writeHeaders(responseHeaders);
             writer.write("\r\n");
-            writer.flush();
+            writer.requestFlush();
             
             // we're ready
             state = STATE_READY;
@@ -317,7 +337,6 @@ class CTPConnection {
     private void handleResponse() {
         if(state != STATE_CLIENT_AWAITING_RESPONSE) throw new IllegalStateException();
         
-        logger.finest("Handling response from " + this);
         try {
             // if the entire header has not loaded, load more
             if(parser.indexOf("\\r\\n\\r\\n") == -1) return;
@@ -327,7 +346,6 @@ class CTPConnection {
             String codeString = parser.readUntil("( )+");
             int code = Integer.parseInt(codeString);
             String description = parser.readUntil("\\r\\n");
-            logger.finest("Reading response " + code + " from " + this);
             
             // parse the headers
             Map headers = readHeaders();
@@ -359,7 +377,7 @@ class CTPConnection {
      *      buffer needs to be valid for the duration of this method call, but
      *      may be modified afterwards.
      */
-    public void sendChunk(ByteBuffer data) {
+    synchronized public void sendChunk(ByteBuffer data) {
         if(state != STATE_READY) throw new IllegalStateException();
         
         try {
@@ -368,7 +386,7 @@ class CTPConnection {
             writer.write("\r\n");
             writer.write(data);
             writer.write("\r\n");
-            writer.flush();
+            writer.requestFlush();
             
         } catch(IOException e) {
             close(e);
@@ -390,12 +408,10 @@ class CTPConnection {
             
             // calculate the chunk size
             String chunkSizeInHex = parser.readUntil("(\\;[^\\r\\n]*)?\\r\\n", false);
-            logger.fine("Received chunk of size: \"" + chunkSizeInHex + "\"");
             int chunkSize = Integer.parseInt(chunkSizeInHex, 16);
             
             // if the full chunk has not loaded, load more
             int bytesRequired = chunkEndIndex + 2 + chunkSize + 2;
-            logger.fine("Bytes required: " + bytesRequired + ", available: " + parser.bytesAvailable());
             if(bytesRequired > parser.bytesAvailable()) {
                 return;
             }
@@ -432,7 +448,7 @@ class CTPConnection {
      * Closes the connection to the client. As specified by the HTTP/1.1 RFC,
      * this sends a single empty chunk and closes the TCP/IP connection.
      */
-    public void close() {
+    public synchronized void close() {
         close(null);
     }
     
@@ -453,7 +469,6 @@ class CTPConnection {
         
         // close is not a result of a connection error, so say goodbye
         if(reason == null || !(reason instanceof IOException)) {
-            logger.log(Level.INFO, "Closing due to " + reason, reason);
             
             // if we haven't yet responded, respond now
             if(state == STATE_SERVER_AWAITING_REQUEST) {
@@ -464,12 +479,17 @@ class CTPConnection {
             // if we've already responded, send an empty chunk
             if(state == STATE_READY) {
                 sendChunk(ByteBuffer.wrap(new byte[0]));
-
             }
         }
         
+        // try to flush what we have left
+        try {
+            writer.flush();
+        } catch(IOException e) {
+            // if this flush failed, there's nothing we can do
+        }
+
         // close the socket
-        logger.fine("Closed connection to " + this);
         handler.connectionClosed(this, reason);
         state = STATE_CLOSED_PERMANENTLY;
         try {
@@ -477,6 +497,13 @@ class CTPConnection {
             selectionKey.cancel();
         } catch(IOException e) {
             // if this close failed, there's nothing we can do
+        }
+
+        // log the close
+        if(reason != null) {
+            logger.log(Level.FINE, "Closed connection to " + this + " due to " + reason, reason);
+        } else {
+            logger.log(Level.FINE, "Closed connection to " + this);
         }
     }
     
