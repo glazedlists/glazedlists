@@ -8,24 +8,17 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
-// Java collections are used for underlying data storage
-import java.util.*;
-// Swing toolkit stuff for displaying widgets
-import javax.swing.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
-
 
 /**
  * A ReadOnlyList is a mutation list that throws an exception for
  * each method that modifies the list.
  *
  * <p>This is useful only when programming defensively. For example, if you
- * need to supply read-only access to your List to another class, using a
+ * need to supply read-only access to your {@link List} to another class, using a
  * ReadOnlyList will guarantee that such a list will not be able to
  * modify the list. The ReadOnlyList will still provide an up-to-date
  * view of the list that changes with each update to the list. For a static
- * read only list, simply copy the contents of this list into an ArrayList and
+ * read only list, simply copy the contents of this list into an {@link ArrayList} and
  * use that list.
  *
  * @see ca.odell.glazedlists.TransformedList
@@ -42,7 +35,7 @@ public final class ReadOnlyList extends TransformedList implements ListEventList
         super(source);
         source.addListEventListener(this);
     }
-    
+
     /**
      * For implementing the ListEventListener interface. When the underlying list
      * changes, this sends notification to listening lists.
