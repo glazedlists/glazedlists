@@ -15,7 +15,8 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import javax.swing.*;
 import javax.swing.table.*;
-
+// for rendering dates
+import java.text.*;
 // for rendering this component inside of a table
 import javax.swing.text.*;
 
@@ -31,6 +32,9 @@ import javax.swing.text.*;
  */
 public class DescriptionRenderer extends StyledRenderer {
 
+    /** for displaying dates */
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
+    
 	private Style whoStyle = null;
 	private Style plain = null;
 
@@ -51,6 +55,8 @@ public class DescriptionRenderer extends StyledRenderer {
 
 		// write who
 		append(doc, description.getWho(), whoStyle);
+        append(doc, " - ", whoStyle);
+        append(doc, dateFormat.format(description.getWhen()), whoStyle);
 		append(doc, "\n", whoStyle);
 
 		// write the body

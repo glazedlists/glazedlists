@@ -9,7 +9,6 @@ package ca.odell.glazedlists.swing;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 // the Glazed Lists util and impl packages include default comparators
-import ca.odell.glazedlists.util.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.SortIconFactory;
 import ca.odell.glazedlists.impl.sort.*;

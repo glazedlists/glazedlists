@@ -13,6 +13,8 @@ import java.net.URL;
 import javax.xml.parsers.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
+// parse dates
+import java.text.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.demo.issuebrowser.Description;
@@ -32,6 +34,11 @@ import ca.odell.glazedlists.swing.*;
  * @see <a href="https://glazedlists.dev.java.net/issues/issuezilla.dtd">Issuezilla DTD</a>
  */
 public class IssuezillaXMLParser {
+    
+    /** the date format is supposed to be 'yyyy-MM-dd HH:mm' but is actually 'yyyy-MM-dd HH:mm:ss' */
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    // hardcode the servers in California
+    static { dateFormat.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles")); }
 
     private static SortedSet ISSUE_SIMPLE_FIELDS = new TreeSet();
     static {
@@ -331,6 +338,18 @@ public class IssuezillaXMLParser {
             new Exception(message).printStackTrace();
         }
     }
+    
+    /**
+     * Parse the specified date.
+     */
+    private static Date parse(String date) {
+        try {
+            return dateFormat.parse(date);
+        } catch(ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 
     /**
@@ -344,7 +363,7 @@ public class IssuezillaXMLParser {
         }
         public void addFieldAndValue(String currentField, String value) {
             if(currentField.equals("who")) description.setWho(value);
-            else if(currentField.equals("issue_when")) description.setWhen(null);
+            else if(currentField.equals("issue_when")) description.setWhen(parse(value));
             else if(currentField.equals("thetext")) description.setText(value);
             else parent.addException(this + " encountered unexpected element " + currentField);
         }
@@ -363,7 +382,7 @@ public class IssuezillaXMLParser {
         public void addFieldAndValue(String currentField, String value) {
             if(currentField.equals("mimetype")) attachment.setMimeType(value);
             else if(currentField.equals("attachid")) attachment.setAttachId(value);
-            else if(currentField.equals("date")) attachment.setDate(null);
+            else if(currentField.equals("date")) attachment.setDate(parse(value));
             else if(currentField.equals("desc")) attachment.setDescription(value);
             else if(currentField.equals("ispatch")) attachment.setIsPatch(value);
             else if(currentField.equals("filename")) attachment.setFilename(value);
@@ -387,7 +406,7 @@ public class IssuezillaXMLParser {
         }
         public void addFieldAndValue(String currentField, String value) {
             if(currentField.equals("user")) activity.setUser(value);
-            else if(currentField.equals("when")) activity.setWhen(null);
+            else if(currentField.equals("when")) activity.setWhen(parse(value));
             else if(currentField.equals("field_name")) activity.setField(value);
             else if(currentField.equals("field_desc")) activity.setFieldDescription(value);
             else if(currentField.equals("oldvalue")) activity.setOldValue(value);
@@ -411,8 +430,8 @@ public class IssuezillaXMLParser {
         }
         public void addFieldAndValue(String currentField, String value) {
             if(currentField.equals("issue_id")) peerIssue.setIssueId(value);
-            else if(currentField.equals("who")) peerIssue.setWho(null);
-            else if(currentField.equals("when")) peerIssue.setWhen(null);
+            else if(currentField.equals("who")) peerIssue.setWho(value);
+            else if(currentField.equals("when")) peerIssue.setWhen(parse(value));
             else parent.addException(this + " encountered unexpected element " + currentField);
         }
     }
