@@ -119,7 +119,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
     protected boolean isWritable() {
         return true;
     }
-    
+
     /**
      * When the list is changed the change may create new duplicates or remove
      * duplicates.  The list is then altered to restore uniqeness and the events
@@ -182,7 +182,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             }
         }
 
-        
+
         // second pass, fire events
         updates.beginEvent();
         while(secondPass.next()) {
@@ -230,7 +230,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 }
             }
         }
-        
+
         updates.commitEvent();
     }
 
@@ -294,7 +294,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // This is a hook for overlaying the Bag ADT over top of the UniqueList
         }
     }
-    
+
     /**
      * Gets the count of repetitions of the value at the specified index.
      */
@@ -447,14 +447,14 @@ public final class UniqueList extends TransformedList implements ListEventListen
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Replaces the contents of this list with the contents of the specified
      * SortedSet. This walks through both lists in parallel in order to retain
      * objects that exist in both the current and the new revision.
      */
     public void replaceAll(SortedSet revision) {
-        
+
         // skip these results if the set is null
         if(revision == null) return;
 
@@ -462,9 +462,9 @@ public final class UniqueList extends TransformedList implements ListEventListen
         if(revision.comparator() == null
             ? !(comparator instanceof ComparableComparator)
             : !(revision.comparator().equals(comparator))) {
-            throw new IllegalArgumentException("SortedSet comparator " + revision.comparator() + " != " + comparator); 
+            throw new IllegalArgumentException("SortedSet comparator " + revision.comparator() + " != " + comparator);
         }
-        
+
         getReadWriteLock().writeLock().lock();
         try {
 
@@ -509,7 +509,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             while(originalIndex < size()) {
                 remove(originalIndex);
             }
-            
+
             // fire the composed event
             updates.commitEvent();
         } finally {
@@ -536,10 +536,10 @@ public final class UniqueList extends TransformedList implements ListEventListen
      */
 
     public boolean contains(Object object) {
-        return (binarySearch(object) != -1);
+        return (indexOf(object) != -1);
     }
 
-	/**
+    /**
      * Returns the index in this list of the first occurrence of the specified
      * element, or -1 if this list does not contain this element.
      *
@@ -548,7 +548,9 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * via <code>getReadWriteLock().readLock()</code>.
      */
     public int indexOf(Object object) {
-        return binarySearch(object);
+        int sourceIndex = source.indexOf(object);
+        if(sourceIndex == -1) return -1;
+        return duplicatesList.getCompressedIndex(sourceIndex, true);
     }
 
     /**
@@ -562,34 +564,6 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * via <code>getReadWriteLock().readLock()</code>.
      */
     public int lastIndexOf(Object object) {
-        return binarySearch(object);
-    }
-
-	/**
-     * Returns the index of where the value is found or -1 if that value doesn't exist.
-     */
-    private int binarySearch(Object object) {
-        int start = 0;
-        int end = size() - 1;
-
-        while(start <= end) {
-            int current = (start + end) / 2;
-            int comparisonResult = comparator.compare(object, get(current));
-
-            // The object is larger than current so focus on right half of list
-            if(comparisonResult > 0) {
-                start = current + 1;
-
-            // The object is smaller than current so focus on left half of list
-            } else if (comparisonResult < 0) {
-                end = current - 1;
-
-            // The object equals the object at current, so return
-            } else {
-                return current;
-
-            }
-        }
-        return -1;
+        return indexOf(object);
     }
 }
