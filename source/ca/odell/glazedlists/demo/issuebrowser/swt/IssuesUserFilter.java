@@ -83,53 +83,24 @@ public class IssuesUserFilter extends AbstractFilterList {
 
         /** {@inheritDoc} */
         public void listChanged(ListEvent listChanges) {
-            // maintain the state of the filters as they are affected by the changes
-            int stateMask = 0;
-            final int FILTER_RELAXED = 1;
-            final int FILTER_CONSTRAINED = 2;
-            final int FILTER_CHANGED = 3;
+            // skip reorderings
+            if(listChanges.isReordering()) return;
 
-            /**
-             * Loop through all the changes to see how the filters change
-             */
+            // Loop through all the changes to see how the filters change
+            boolean constrained = false;
+            boolean relaxed = false;
             while(listChanges.next()) {
                 int type = listChanges.getType();
-
-                // Reordering events have no effect on filters
-                if(listChanges.isReordering()) {
-                    // no-op
-
-                // Updates requires that the filter has changed
-                } else if(type == ListEvent.UPDATE) {
-                    stateMask = FILTER_CHANGED;
-
-                // Only deletes result in a filter relaxation
-                } else if(type == ListEvent.DELETE) {
-                    stateMask = stateMask | FILTER_RELAXED;
-
-                // Only inserts result in a filter constrainment
-                } else if(type == ListEvent.INSERT) {
-                    stateMask = stateMask | FILTER_CONSTRAINED;
-                }
+                if(type == ListEvent.UPDATE || type == ListEvent.DELETE) relaxed = true;
+                if(type == ListEvent.UPDATE || type == ListEvent.INSERT) constrained = true;
             }
             
-            // if this didn't actually change anything
-            if(stateMask == 0) return;
-
             // The filter now contains a different set of users
             getReadWriteLock().writeLock().lock();
             try {
-                if((stateMask & FILTER_CHANGED) != 0) {
-                    handleFilterChanged();
-    
-                // The filter now contains fewer users
-                } else if((stateMask & FILTER_RELAXED) != 0) {
-                    handleFilterRelaxed();
-    
-                // The filter now contains more users
-                } else if((stateMask & FILTER_CONSTRAINED) != 0) {
-                    handleFilterConstrained();
-                }
+                if(contrained && relaxed) handleFilterChanged();
+                else if(relaxed) handleFilterRelaxed();
+                else if(constrained) handleFilterConstrained();
             } finally {
                 getReadWriteLock().writeLock().unlock();
             }
