@@ -49,8 +49,9 @@ public class IssuesBrowser {
 
         // Various Layered List Transformations
         issuesUserFiltered = new IssuesUserFilter(issuesEventList);
-        SortedList issuesSortedList = new SortedList(issuesUserFiltered);
-        TextFilterList issuesTextFiltered = new TextFilterList(issuesSortedList);
+        TextFilterList issuesTextFiltered = new TextFilterList(issuesUserFiltered);
+        ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
+        SortedList issuesSortedList = new SortedList(priorityList);
 
         // This is the outer component for the demo
         SashForm demoForm = new SashForm(shell, SWT.HORIZONTAL);
@@ -81,7 +82,7 @@ public class IssuesBrowser {
         filterPanel.setLayoutData(filterPanelLayout);
 
         // Set the layout for the contents of that panel
-        GridLayout filterPanelContentLayout = new GridLayout(1, false);
+        GridLayout filterPanelContentLayout = new GridLayout(2, false);
         filterPanelContentLayout.marginHeight = 0;
         filterPanelContentLayout.marginWidth = 0;
         filterPanel.setLayout(filterPanelContentLayout);
@@ -89,6 +90,7 @@ public class IssuesBrowser {
         // Add the various filters
         Text filterText = createFilterText(filterPanel);
         issuesTextFiltered.setFilterEdit(filterText);
+        createPrioritySlider(filterPanel, priorityList);
         createUsersList(filterPanel);
 
         // A panel containing the two tables to display Issue data
@@ -110,7 +112,7 @@ public class IssuesBrowser {
 
         // Create the Issues Table
         Table issuesTable = createIssuesTable(issuePanel);
-        EventTableViewer issuesTableViewer = new EventTableViewer(issuesTextFiltered, issuesTable, new IssueTableFormat());
+        EventTableViewer issuesTableViewer = new EventTableViewer(issuesSortedList, issuesTable, new IssueTableFormat());
         issuesTable = formatIssuesTable(issuesTable);
         new TableComparatorChooser(issuesTableViewer, issuesSortedList, false);
 
@@ -128,22 +130,83 @@ public class IssuesBrowser {
         issueLoader.setProject((Project)Project.getProjects().get(0));
     }
 
+    private Text createFilterText(Composite parent) {
+        // Create the Label first
+        Label filterLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        filterLabel.setText("Text Filter");
+        GridData filterLabelLayout = new GridData();
+        filterLabelLayout.horizontalAlignment = GridData.BEGINNING;
+        filterLabelLayout.verticalAlignment = GridData.CENTER;
+        filterLabelLayout.horizontalSpan = 2;
+        filterLabel.setLayoutData(filterLabelLayout);
 
+        // Create the actual text box to user for filtering
+        Text filterText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+        GridData filterTextLayout = new GridData();
+        filterTextLayout.horizontalAlignment = GridData.FILL;
+        filterTextLayout.verticalAlignment = GridData.BEGINNING;
+        filterTextLayout.horizontalSpan = 2;
+        filterTextLayout.grabExcessHorizontalSpace = true;
+        filterTextLayout.grabExcessVerticalSpace = false;
+        filterText.setLayoutData(filterTextLayout);
+        return filterText;
+    }
+
+    private void createPrioritySlider(Composite parent, ThresholdList priorityList) {
+        // Create the Label first
+        Label priorityLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        priorityLabel.setText("Minimum Priority");
+        GridData priorityLabelLayout = new GridData();
+        priorityLabelLayout.horizontalAlignment = GridData.BEGINNING;
+        priorityLabelLayout.verticalAlignment = GridData.CENTER;
+        priorityLabelLayout.horizontalSpan = 2;
+        priorityLabel.setLayoutData(priorityLabelLayout);
+
+        // Create the slider widget to control priority filtering
+        Slider prioritySlider = new Slider(parent, SWT.HORIZONTAL);
+        prioritySlider.setValues(0, 0, 100, 15, 1, 25);
+        ThresholdSliderViewerFactory.createLower(priorityList, prioritySlider);
+        GridData prioritySliderLayout = new GridData();
+        prioritySliderLayout.horizontalAlignment = GridData.FILL;
+        prioritySliderLayout.verticalAlignment = GridData.BEGINNING;
+        prioritySliderLayout.horizontalSpan = 2;
+        prioritySliderLayout.grabExcessHorizontalSpace = true;
+        prioritySliderLayout.grabExcessVerticalSpace = false;
+        prioritySlider.setLayoutData(prioritySliderLayout);
+
+        // Create the lower end Label
+        Label lowPriorityLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        lowPriorityLabel.setText("Low");
+        GridData lowPriorityLabelLayout = new GridData();
+        lowPriorityLabelLayout.horizontalAlignment = GridData.BEGINNING;
+        lowPriorityLabelLayout.verticalAlignment = GridData.CENTER;
+        lowPriorityLabel.setLayoutData(lowPriorityLabelLayout);
+
+        // Create the higher end Label
+        Label highPriorityLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        highPriorityLabel.setText("High");
+        GridData highPriorityLabelLayout = new GridData();
+        highPriorityLabelLayout.horizontalAlignment = GridData.END;
+        highPriorityLabelLayout.verticalAlignment = GridData.CENTER;
+        highPriorityLabel.setLayoutData(highPriorityLabelLayout);
+    }
 
     private void createUsersList(Composite parent) {
         // Create the Label first
-        Label filterLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
-        filterLabel.setText("Issue Owner");
-        GridData filterLabelLayout = new GridData();
-        filterLabelLayout.horizontalAlignment = GridData.CENTER;
-        filterLabelLayout.verticalAlignment = GridData.BEGINNING;
-        filterLabel.setLayoutData(filterLabelLayout);
+        Label usersListLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
+        usersListLabel.setText("Issue Owner");
+        GridData usersListLabelLayout = new GridData();
+        usersListLabelLayout.horizontalAlignment = GridData.BEGINNING;
+        usersListLabelLayout.verticalAlignment = GridData.BEGINNING;
+        usersListLabelLayout.horizontalSpan = 2;
+        usersListLabel.setLayoutData(usersListLabelLayout);
 
         // Create the issue owner's list
         usersList = new List(parent, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
         GridData usersListLayout = new GridData();
         usersListLayout.horizontalAlignment = GridData.FILL;
         usersListLayout.verticalAlignment = GridData.FILL;
+        usersListLayout.horizontalSpan = 2;
         usersListLayout.grabExcessHorizontalSpace = true;
         usersListLayout.grabExcessVerticalSpace = true;
         usersList.setLayoutData(usersListLayout);
@@ -151,26 +214,6 @@ public class IssuesBrowser {
         // Add filtering based on selection of issue owners
         EventListViewer listViewer = new EventListViewer(issuesUserFiltered.getUsersList(), usersList);
         issuesUserFiltered.setSelectionList(listViewer.getSelected());
-    }
-
-    private Text createFilterText(Composite parent) {
-        // Create the Label first
-        Label filterLabel = new Label(parent, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
-        filterLabel.setText("Text Filter ");
-        GridData filterLabelLayout = new GridData();
-        filterLabelLayout.horizontalAlignment = GridData.BEGINNING;
-        filterLabelLayout.verticalAlignment = GridData.CENTER;
-        filterLabel.setLayoutData(filterLabelLayout);
-
-        // Create the actual text bow to user for filtering
-        Text filterText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        GridData filterTextLayout = new GridData();
-        filterTextLayout.horizontalAlignment = GridData.FILL;
-        filterTextLayout.verticalAlignment = GridData.BEGINNING;
-        filterTextLayout.grabExcessHorizontalSpace = true;
-        filterTextLayout.grabExcessVerticalSpace = false;
-        filterText.setLayoutData(filterTextLayout);
-        return filterText;
     }
 
     private Table createIssuesTable(Composite parent) {

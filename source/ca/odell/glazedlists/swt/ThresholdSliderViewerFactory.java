@@ -31,8 +31,8 @@ public final class ThresholdSliderViewerFactory {
      * of getSelection() and getMaximum() on the Slider.
      */
     public static SelectionListener createLower(ThresholdList thresholdList, Slider slider) {
-		return new LowerThresholdSliderViewer(thresholdList, slider);
-	}
+        return new LowerThresholdSliderViewer(thresholdList, slider);
+    }
 
     /**
      * Creates a viewer that manipulates the upper bound of the specified
@@ -41,92 +41,106 @@ public final class ThresholdSliderViewerFactory {
      * of getMinimum() and getSelection() on the Slider.
      */
     public static SelectionListener createUpper(ThresholdList thresholdList, Slider slider) {
-		return new UpperThresholdSliderViewer(thresholdList, slider);
-	}
+        return new UpperThresholdSliderViewer(thresholdList, slider);
+    }
 
-	/**
-	 * A Viewer class that binds a Slider to the lower threshold on a
-	 * ThresholdList.
-	 */
-	private static class LowerThresholdSliderViewer implements SelectionListener {
+    /**
+     * A Viewer class that binds a Slider to the lower threshold on a
+     * ThresholdList.
+     */
+    private static class LowerThresholdSliderViewer implements SelectionListener {
 
-		/** the ThresholdList that is the target for changes */
-		private ThresholdList target = null;
+        /** the ThresholdList that is the target for changes */
+        private ThresholdList target = null;
 
-		/** the Slider that manipulates the lower threshold on the target list */
-		private Slider slider = null;
+        /** the Slider that manipulates the lower threshold on the target list */
+        private Slider slider = null;
 
-		/**
-		 * Creates a SliderViewer that binds a Slider to the lower threshold
-		 * on a ThresholdList.
-		 */
-		LowerThresholdSliderViewer(ThresholdList target, Slider slider) {
-		    this.target = target;
-		    this.slider = slider;
-		    slider.addSelectionListener(this);
-		}
+        /** a cache of the maximum value which will likely not change much */
+        private int maximum = -1;
 
-		/**
-		 * Allows this Viewer to respond to changes to the Slider
-		 */
-		public void widgetSelected(SelectionEvent e) {
+        /**
+         * Creates a SliderViewer that binds a Slider to the lower threshold
+         * on a ThresholdList.
+         */
+        LowerThresholdSliderViewer(ThresholdList target, Slider slider) {
+            this.target = target;
+            this.slider = slider;
+            widgetSelected(null);
+            slider.addSelectionListener(this);
+        }
+
+        /**
+         * Allows this Viewer to respond to changes to the Slider
+         */
+        public void widgetSelected(SelectionEvent e) {
             target.getReadWriteLock().writeLock().lock();
             try {
-				target.setLowerThreshold(slider.getSelection());
-				target.setUpperThreshold(slider.getMaximum());
-			} finally {
+                target.setLowerThreshold(slider.getSelection());
+                if(maximum != slider.getMaximum()) {
+                    maximum = slider.getMaximum();
+                    target.setUpperThreshold(maximum);
+                }
+            } finally {
                 target.getReadWriteLock().writeLock().unlock();
             }
-		}
+        }
 
-		/**
-		 * No-op on a Slider
-		 */
-		public void widgetDefaultSelected(SelectionEvent e) {
-			throw new UnsupportedOperationException();
-		}
-	}
+        /**
+         * No-op on a Slider
+         */
+        public void widgetDefaultSelected(SelectionEvent e) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	/**
-	 * A Viewer class that binds a Slider to the upper threshold on a
-	 * ThresholdList.
-	 */
-	private static class UpperThresholdSliderViewer implements SelectionListener {
+    /**
+     * A Viewer class that binds a Slider to the upper threshold on a
+     * ThresholdList.
+     */
+    private static class UpperThresholdSliderViewer implements SelectionListener {
 
-		/** the ThresholdList that is the target for changes */
-		private ThresholdList target = null;
+        /** the ThresholdList that is the target for changes */
+        private ThresholdList target = null;
 
-		/** the Slider that manipulates the lower threshold on the target list */
-		private Slider slider = null;
+        /** the Slider that manipulates the lower threshold on the target list */
+        private Slider slider = null;
 
-		/**
-		 * Creates a SliderViewer that binds a Slider to the upper threshold
-		 * on a ThresholdList.
-		 */
-		UpperThresholdSliderViewer(ThresholdList target, Slider slider) {
-		    this.target = target;
-		    this.slider = slider;
-		    slider.addSelectionListener(this);
-		}
+        /** a cache of the minimum value which will likely not change much */
+        private int minimum = -1;
 
-		/**
-		 * Allows this Viewer to respond to changes to the Slider
-		 */
-		public void widgetSelected(SelectionEvent e) {
+        /**
+         * Creates a SliderViewer that binds a Slider to the upper threshold
+         * on a ThresholdList.
+         */
+        UpperThresholdSliderViewer(ThresholdList target, Slider slider) {
+            this.target = target;
+            this.slider = slider;
+            widgetSelected(null);
+            slider.addSelectionListener(this);
+        }
+
+        /**
+         * Allows this Viewer to respond to changes to the Slider
+         */
+        public void widgetSelected(SelectionEvent e) {
             target.getReadWriteLock().writeLock().lock();
             try {
-				target.setLowerThreshold(slider.getMinimum());
-				target.setUpperThreshold(slider.getSelection());
-			} finally {
+                if(minimum != slider.getMinimum()) {
+                    minimum = slider.getMinimum();
+                    target.setLowerThreshold(minimum);
+                }
+                target.setUpperThreshold(slider.getSelection());
+            } finally {
                 target.getReadWriteLock().writeLock().unlock();
             }
-		}
+        }
 
-		/**
-		 * No-op on a Slider
-		 */
-		public void widgetDefaultSelected(SelectionEvent e) {
-			throw new UnsupportedOperationException();
-		}
-	}
+        /**
+         * No-op on a Slider
+         */
+        public void widgetDefaultSelected(SelectionEvent e) {
+            throw new UnsupportedOperationException();
+        }
+    }
 }
