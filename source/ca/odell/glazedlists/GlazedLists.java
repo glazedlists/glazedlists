@@ -33,7 +33,35 @@ public final class GlazedLists {
     private GlazedLists() {
         throw new UnsupportedOperationException();
     }
+    
+    // Utility Methods // // // // // // // // // // // // // // // // // // //
 
+    /**
+     * Replace the complete contents of the target {@link EventList} with the complete
+     * contents of the source {@link EventList} while making as few list changes
+     * as possible.
+     *
+     * <p>In a multi-threaded environment, it is necessary that the caller obtain
+     * the write lock for the target list before this method is invoked. If the
+     * source list is an {@link EventList}, its read lock must also be acquired.
+     *
+     * <p>This method shall be used when it is necessary to update an EventList
+     * to a newer state while minimizing the number of change events fired. It
+     * is desirable over {@link List#clear() clear()}; {@link List#addAll(Collection) addAll()}
+     * because it will not cause selection to be lost if unnecessary. It is also
+     * useful where firing changes may be expensive, such as when they will cause
+     * writes to disk or the network.
+     *
+     * <p>This is implemented using Eugene W. Myer's paper, "An O(ND) Difference
+     * Algorithm and Its Variations", the same algorithm found in GNU diff.
+     *
+     * @param updates whether to fire update events for Objects that are equal in
+     *      both {@link List}s.
+     */
+    public static void replaceAll(EventList target, List source, boolean updates) {
+        Diff.replaceAll(target, source, updates);
+    }
+    
 
     // Comparators // // // // // // // // // // // // // // // // // // // //
 

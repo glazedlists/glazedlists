@@ -13,7 +13,11 @@ import ca.odell.glazedlists.event.*;
 
 /**
  * Implementation of Eugene W. Myer's paper, "An O(ND) Difference Algorithm and Its
- * Variations".
+ * Variations", the same algorithm found in GNU diff.
+ *
+ * <p>Note that this is a cleanroom implementation of this popular algorithm that
+ * is particularly suited for the Java programmer. The variable names are descriptive
+ * and the approach is more object-oriented than Myer's sample algorithm.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
