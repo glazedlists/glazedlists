@@ -12,6 +12,7 @@ import java.nio.*;
 import java.io.*;
 // BRP sits atop Chunk Transfer Protocol
 import ca.odell.glazedlists.impl.ctp.*;
+import ca.odell.glazedlists.net.*;
 // logging
 import java.util.logging.*;
 

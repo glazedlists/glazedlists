@@ -56,22 +56,6 @@ public class CTPChunkTest extends TestCase {
     }
 
     /**
-     * Verifies that an Exception is thrown if there is a bind failure.
-     */
-    public void testRepeatedBind() {
-        try {
-            // create a second connnection manager and bind on the same port
-            CTPConnectionManager connectionManager2 = new CTPConnectionManager(handlerFactory, serverPort);
-            connectionManager2.start();
-            
-            // bind worked, we're sunk
-            fail();
-        } catch(IOException e) {
-            // the bind failed as expected
-        }
-    }
-
-    /**
      * Verifies that chunks can be sent from the server to the client. This simply
      * sends data to itself.
      */

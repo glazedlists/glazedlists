@@ -32,6 +32,9 @@ class StaticCTPHandler implements CTPHandler {
     /** whether this connection has disconnected */
     private boolean closed = false;
     
+    /** the reason this connection was closed */
+    private Exception closeReason = null;
+    
     /** the connection being handled */
     private CTPConnection connection = null;
     
@@ -88,11 +91,13 @@ class StaticCTPHandler implements CTPHandler {
     /**
      * Notify that this connection is no longer ready for use.
      */
-    public synchronized void connectionClosed(CTPConnection source, Exception reason) {
+    public synchronized void connectionClosed(CTPConnection source, Exception closeReason) {
         if(closed) throw new IllegalStateException("Connection already closed");
         closed = true;
         connection = null;
-        if(!tasks.isEmpty()) throw new IllegalStateException("Closed prematurely! " + tasks.size() + " Pending tasks " + tasks + ", reason " + reason);
+        if(!tasks.isEmpty()) throw new IllegalStateException("Closed prematurely! " + tasks.size() + " Pending tasks " + tasks + ", reason " + closeReason);
+        this.closeReason = closeReason;
+        notifyAll();
     }
     
     /**
@@ -131,6 +136,22 @@ class StaticCTPHandler implements CTPHandler {
         }
         
         if(!tasks.isEmpty()) throw new IllegalStateException(tasks.size() + " uncompleted tasks " + tasks + ", pending data \"" + incoming + "\"");
+    }
+    
+    /**
+     * Ensures that this handler has been closed.
+     */
+    public synchronized Exception assertClosed(long timeout) {
+        if(!closed) {
+            try {
+                wait(timeout);
+            } catch(InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        if(!closed) throw new IllegalStateException("Open connection with " + tasks.size() + " uncompleted tasks");
+        return closeReason;
     }
 }
 

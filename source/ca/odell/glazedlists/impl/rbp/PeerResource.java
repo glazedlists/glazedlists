@@ -11,6 +11,7 @@ import java.util.*;
 import java.nio.*;
 import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
+import ca.odell.glazedlists.net.*;
 
 /**
  * A resource that is being published on the network.
@@ -70,11 +71,25 @@ class PeerResource implements ResourceListener, ResourceStatus {
     }
     
     /**
-     * Whether this resource is being updated from the network.
+     * Whether this resource is connected.
      */
-    public boolean isLive() {
+    public boolean isConnected() {
         return publisher != null;
     }
+    public void connect() {
+        throw new UnsupportedOperationException();
+    }
+    public void disconnect() {
+        throw new UnsupportedOperationException();
+    }
+    public void addResourceStatusListener(ResourceStatusListener listener) {
+        throw new UnsupportedOperationException();
+    }
+    public void removeResourceStatusListener(ResourceStatusListener listener) {
+        throw new UnsupportedOperationException();
+    }
+    
+    
     
     /**
      * Unsubscribes to this resource.
