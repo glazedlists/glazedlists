@@ -103,7 +103,14 @@ public class CTPClient {
             }
         }
         public void receiveChunk(CTPConnection source, ByteBuffer data) {
-            System.out.println("DATA: " + data);
+            try {
+                byte[] dataBytes = new byte[data.remaining()];
+                data.get(dataBytes);
+                String dataString = new String(dataBytes, "US-ASCII");
+                System.out.println("DATA: \"" + dataString + "\"");
+            } catch(UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     class ClientHandlerFactory implements CTPHandlerFactory {
