@@ -44,6 +44,9 @@ public class ConsistencyTestList implements ListEventListener {
      * For implementing the ListEventListener interface.     
      */
     public void listChanged(ListEvent listChanges) {
+        // keep track of the highest change index so far
+        int highestChangeIndex = 0;
+        
         // for all changes, one index at a time
         while(listChanges.next()) {
             
@@ -51,23 +54,30 @@ public class ConsistencyTestList implements ListEventListener {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
             
+            // make sure the change indicies are not descreasing
+            if(changeIndex < highestChangeIndex) {
+                new Exception(name + "/" + changeCount + " change indicies not in order, " + changeIndex + " after " + highestChangeIndex + ", event: " + listChanges).printStackTrace();
+            }
+            highestChangeIndex = changeIndex;
+                
             // verify the index is big enough
-            if(changeIndex < 0) new Exception(name + "/" + changeCount + " cannot insert at " + changeIndex).printStackTrace();
+            if(changeIndex < 0) new Exception(name + "/" + changeCount + " cannot insert at " + changeIndex + ", event: " + listChanges).printStackTrace();
 
             // verify the index is small enough, and adjust the size
             if(changeType == ListEvent.INSERT) {
-                if(changeIndex > size) new Exception(name + "/" + changeCount + " cannot insert at " + changeIndex + ", size is: " + size).printStackTrace();
+                if(changeIndex > size) new Exception(name + "/" + changeCount + " cannot insert at " + changeIndex + ", size is: " + size + ", event: " + listChanges).printStackTrace();
                 size++;
-                
             } else if(changeType == ListEvent.DELETE) {
-                if(changeIndex >= size) new Exception(name + "/" + changeCount + " cannot delete at " + changeIndex + ", size is: " + size).printStackTrace();
+                if(changeIndex >= size) new Exception(name + "/" + changeCount + " cannot delete at " + changeIndex + ", size is: " + size + ", event: " + listChanges).printStackTrace();
                 size--;
+            } else if(changeType == ListEvent.UPDATE) {
+                if(changeIndex >= size) new Exception(name + "/" + changeCount + " cannot update at " + changeIndex + ", size is: " + size + ", event: " + listChanges).printStackTrace();
             }
         }
         
         // verify the size is consistent with the source
         if(size != source.size()) {
-            new Exception(name + "/" + changeCount + " size consistency problem! Expected " + size + ", got " + source.size()).printStackTrace();
+            new Exception(name + "/" + changeCount + " size consistency problem! Expected " + size + ", got " + source.size() + ", event: " + listChanges).printStackTrace();
         }
         changeCount++;
     }
