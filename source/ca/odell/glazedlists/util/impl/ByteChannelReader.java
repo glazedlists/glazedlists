@@ -30,25 +30,21 @@ public class ByteChannelReader {
 
     /** the SocketChannel to read from */
     private SocketChannel channel;
-
+    
     /** the ByteBuffer to parse text from must always ready to be read from */
-    private ByteBuffer buffer;
-    
+    private int initialBufferSize = 256;
+    private ResizableByteBuffer buffer = new ResizableByteBuffer(initialBufferSize);
+
     /** the CharSequence for this ByteBuffer */
-    private CharSequence bytesAsCharSequence;
-    
-    /** initially the read buffer consumes a single kilobyte of memory */
-    private static final int INITIAL_BUFFER_SIZE = 1024;
+    private CharSequence bytesAsCharSequence = new ByteBufferSequence(buffer);
 
     /**
      * Create a reader for the specified channel.
      */
     public ByteChannelReader(SocketChannel channel) {
         this.channel = channel;
-        this.buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
-        bytesAsCharSequence = new ByteBufferSequence(buffer);
         // buffer is always ready to be read from
-        buffer.limit(0);
+        buffer.flip();
     }
     
     /**
@@ -58,13 +54,16 @@ public class ByteChannelReader {
     public ByteChannelReader(String text) {
         try {
             byte[] bytes = text.getBytes("US-ASCII");
-            buffer = ByteBuffer.wrap(bytes);
+            ByteBuffer word = ByteBuffer.wrap(bytes);
+            buffer.grow(word.limit());
+            buffer.clear();
+            buffer.put(word);
+            buffer.flip();
         } catch(java.io.UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
 
         channel = null;
-        bytesAsCharSequence = new ByteBufferSequence(buffer);
     }
     
     /**
@@ -103,15 +102,7 @@ public class ByteChannelReader {
      */
     public ByteBuffer readBytes(int bytes) throws IOException {
         if(!bytesAvailable(bytes)) throw new IllegalArgumentException();
-
-        // prepare the result
-        ByteBuffer result = buffer.asReadOnlyBuffer();
-        result.limit(result.position() + bytes);
-
-        // consume from the working buffer
-        buffer.position(buffer.position() + bytes);
-        
-        return result;
+        return buffer.consume(bytes);
     }
 
     /**
@@ -165,35 +156,31 @@ public class ByteChannelReader {
      *
      * @return the number of bytes read, possibly 0 or possibly a negative value
      *      if the end of stream is reached.
+     * @throws IllegalStateException if there are no bytes to read.
+     * @throws EOFException when the end of the file is reached.
      */
     public int fill() throws IOException {
         buffer.compact();
         int totalBytesRead = 0;
         while(true) {
             // make sure there's room to read
-            if(!buffer.hasRemaining()) growLocalBuffer();
+            if(!buffer.hasRemaining()) buffer.grow(buffer.capacity() * 2);
             
             // read in some bytes if possible
-            int bytesRead = channel.read(buffer);
+            int bytesRead = buffer.pull(channel);
             
             // if there's nothing to read
             if(bytesRead <= 0) {
                 buffer.flip();
                 if(totalBytesRead != 0) return totalBytesRead;
-                else throw new EOFException("End of stream");
+                else if(bytesRead < 0) throw new EOFException("End of stream");
+                else throw new IllegalStateException("No bytes to read");
                 
             // keep reading
             } else {
                 totalBytesRead += bytesRead;
             }
         }
-    }
-    
-    /**
-     * Grow the local buffer.
-     */
-    private void growLocalBuffer() throws IOException {
-        throw new IOException("Failed to grow local read buffer");
     }
 }
 
@@ -209,7 +196,7 @@ public class ByteChannelReader {
 class ByteBufferSequence implements CharSequence {
     
     /** the byte buffer viewed by this char sequence */
-    private ByteBuffer byteBuffer;
+    private ResizableByteBuffer byteBuffer;
     
     /** start offset after position */
     private int startOffset = 0;
@@ -221,14 +208,14 @@ class ByteBufferSequence implements CharSequence {
      * Creates a new ByteBufferSequence that provides characters for the
      * specified ByteBuffer.
      */
-    public ByteBufferSequence(ByteBuffer byteBuffer) {
+    public ByteBufferSequence(ResizableByteBuffer byteBuffer) {
         this(byteBuffer, 0, 0);
     }
     /**
      * Creates a new ByteBufferSequence that provides characters for the
      * specified ByteBuffer with the specified start offsets.
      */
-    private ByteBufferSequence(ByteBuffer byteBuffer, int startOffset, int endOffset) {
+    private ByteBufferSequence(ResizableByteBuffer byteBuffer, int startOffset, int endOffset) {
         if(startOffset < 0) throw new IllegalArgumentException();
         if(endOffset < 0) throw new IllegalArgumentException();
         if(byteBuffer.remaining() - startOffset - endOffset < 0) throw new IllegalArgumentException();

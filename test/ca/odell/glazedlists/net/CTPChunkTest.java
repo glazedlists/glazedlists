@@ -138,7 +138,7 @@ public class CTPChunkTest extends TestCase {
         
         CTPChunkTest test = new CTPChunkTest();
         test.setUp();
-        test.testSendLargeString();
+        test.testClientSendChunk();
         test.tearDown();
     }
 }
