@@ -92,4 +92,12 @@ public class SelectionNotifier implements ListChangeListener {
             selectionListener.setSelection(source.get(0));
         }
     }
+    
+    /**
+     * Deregisters the specified SelectionListener from receiving updates
+     * when the selection changes.
+     */
+    public void removeSelectionListener(SelectionListener selectionListener) {
+        selectionListeners.remove(selectionListener);
+    }
 }

@@ -270,7 +270,13 @@ public class ListTable extends AbstractTableModel implements ListChangeListener,
     public void addSelectionListener(SelectionListener selectionListener) {
         selectionNotifier.addSelectionListener(selectionListener);
     }
-
+    /**
+     * Desregisters the specified SelectionListener from receiving
+     * updates when the selection changes.
+     */
+    public void removeSelectionListener(SelectionListener selectionListener) {
+        selectionNotifier.removeSelectionListener(selectionListener);
+    }
 
     /**
      * Access methods for getting contact information to display. These are 
