@@ -46,16 +46,16 @@
     <tstamp prefix="javadoc">
       <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
     </tstamp>
-    <!-- document all the source with @todo tags -->
+    <!-- document all the source -->
     <javadoc
       sourcepath="source" destdir="docs/api"
       author="true" use="true" windowtitle="Glazed Lists" source="1.4">
       <packageset dir="source">
         <exclude name="**/impl/**"/>
         <exclude name="**/demo/**"/>
-        <exclude name="**/glazedtasks/**"/>
         <exclude name="**/test/**"/>
         <exclude name="**/migrationkit/**"/>
+        <exclude name="**/swt/**"/>
       </packageset>
       <doctitle><![CDATA[<h1><a href="http://glazedlists.dev.java.net">Glazed Lists</a></h1>]]></doctitle>
       <bottom><![CDATA[Generated ${javadoc.datestamp}<br><i>Copyright &#169; 2003-2004 O'Dell Engineering.</i>]]></bottom>
@@ -96,9 +96,27 @@
     <!-- Compile the java code from source/ into classes/ -->
     <javac destdir="classes" srcdir="source" debug="on" source="1.4">
       <exclude name="**/test/**"/>
+      <exclude name="**/swt/**"/>
     </javac>
   </target>
   
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     SWT: The Standard Widget Toolkit from eclipse.org
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <target name="swt" depends="init,compile"
+        description="Compile the SWT classes.">
+    <mkdir dir="classes"/>
+    <!-- Verify that JUnit is available on the classpath -->
+    <available classname="org.eclipse.swt.SWT" property="swt.present"/>
+    <fail unless="swt.present" message="To run this task, add swt.jar to your classpath. SWT is available free at http://www.eclipse.org"/>
+    <!-- Compile the java code from source/ into classes/ -->
+    <javac destdir="classes" srcdir="source" debug="on" source="1.4">
+      <include name="**/swt/**"/>
+    </javac>
+  </target>
+
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      REDISTRIBUTING THE SOURCE
