@@ -46,7 +46,7 @@ public class IssuesBrowser {
 	 * Constructs a new IssuesBrowser in the given window
 	 */
 	private IssuesBrowser(Shell shell) {
-
+        
 		// Various Layered List Transformations
 		issuesUserFiltered = new IssuesUserFilter(issuesEventList);
 		SortedList issuesSortedList = new SortedList(issuesUserFiltered);
@@ -108,6 +108,7 @@ public class IssuesBrowser {
 
 		// Start the demo
 		issueLoader.start();
+        issueLoader.setProject((Project)Project.getProjects().get(0));
 
 	}
 
