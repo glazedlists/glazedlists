@@ -34,12 +34,6 @@ public final class CompositeList extends AbstractEventList {
     private LinkedList globalChangeQueue = new LinkedList();
     /** allow a single thread to be the forwarding thread in collisions */
     private Thread forwardingThread = null;
-    
-    ///** the lists we are following events on, sorted by lock order */
-    //private SortedSet memberListsSorted = new TreeSet(new LockOrderComparator());
-    
-    /** the change event and notification system */
-    protected ListEventAssembler updates = new ListEventAssembler(this);
 
     /**
      * Creates a new CompositeList.
