@@ -94,8 +94,6 @@ public class CollectionList extends TransformedList implements ListEventListener
 
 		this.resizing_factor = resize_factor;
 
-		readWriteLock = parent_list.getReadWriteLock();
-
 		if (collection_list_model == null)
 			throw new IllegalArgumentException("Collection map cannot be null");
 
