@@ -17,7 +17,7 @@
   </target>
 
   <target name="clean"
-    description="Clean up generated files, forcing them to be rebuilt." >
+    description="Clean up generated files, forcing them to be rebuilt.">
     <!-- Delete the directories where generated files fall -->
     <delete dir="classes"/>
     <!-- Delete the documentation directories -->
@@ -62,6 +62,28 @@
   </target>
 
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     DEVELOPER JAVADOC
+     Generate the Javadoc API for internal implementation classes.
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    
+  <target name="impldocs" depends="init">
+    <mkdir dir="docs"/>
+    <tstamp prefix="javadoc">
+      <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
+    </tstamp>
+    <!-- document all the source -->
+    <javadoc
+      destdir="docs/dev" access="package" author="true" use="true" windowtitle="Glazed Lists - Internal" source="1.4">
+      <packageset dir="source"/>
+      <packageset dir="test"/>
+      <doctitle><![CDATA[<h1>Glazed Lists - Developer Docs</h1>]]></doctitle>
+      <bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
+      <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+    </javadoc>
+  </target>
+
+  
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      JAR
      Construct the .jar file for use in a library.
