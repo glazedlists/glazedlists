@@ -24,11 +24,14 @@ public class TaskContext {
     /** the task runner that is running this task */
     private TaskRunner taskRunner;
     
-    /** the current state of this task */
+    /** the user state of this task */
     private boolean busy = false;
     private double progress = 0.0;
     private boolean cancellable = false;
     private String actionCaption = "";
+    
+    /** the context state of this task */
+    private boolean taskComplete = false;
 
     /**
      * Creates a new progress bar task context that notifies the
@@ -68,6 +71,9 @@ public class TaskContext {
      * All tasks are cancellable until they are made not cancellable, so
      * for tasks that cannot be cancelled, setCancellable(false) should be
      * called in the task's setTaskContext() method.
+     *
+     * This method should only be called by the task itself and never by a
+     * viewer of the task.
      */
     public void setCancellable(boolean cancellable) {
         this.cancellable = cancellable;
@@ -112,8 +118,9 @@ public class TaskContext {
      * Implementors should strongly consider synchronizing this method as multiple
      * task runners may complete their tasks simultaneously.
      */
-    public void taskComplete() {
-        taskDone();
+    public synchronized void taskComplete() {
+        progress = 1.0;
+        taskDone("Complete");
     }
     
     /**
@@ -121,9 +128,9 @@ public class TaskContext {
      * Implementors should strongly consider synchronizing this method as multiple
      * task runners may complete their tasks simultaneously.
      */
-    public void taskInterrupted(InterruptedException e) {
+    public synchronized void taskInterrupted(InterruptedException e) {
         e.printStackTrace();
-        taskDone();
+        taskDone("Cancelled");
     }
     
     /**
@@ -131,21 +138,34 @@ public class TaskContext {
      * Implementors should strongly consider synchronizing this method as multiple
      * task runners may complete their tasks simultaneously.
      */
-    public void taskFailed(Exception e) {
+    public synchronized void taskFailed(Exception e) {
         e.printStackTrace();
-        taskDone();
+        taskDone("Failed");
     }
     
     /**
      * When a task completes this sets all the values to the appropriate
      * done values and returns resources to the task manager.
      */
-    private void taskDone() {
+    private void taskDone(String doneCaption) {
+        // update the user state of the task
         busy = false;
-        progress = 1.0;
-        actionCaption = "Done";
+        actionCaption = doneCaption;
         cancellable = false;
+        
+        // update the context state
+        taskComplete = true;
+        
+        // notify the task manager
         taskManager.taskRunnerFree(taskRunner);
         taskManager.taskUpdated(this);
+    }
+    
+    /**
+     * Cancels this task. If the task has already completed this method will
+     * silently do nothing.
+     */
+    public synchronized void cancelTask() {
+        if(cancellable && !taskComplete) taskRunner.cancelTask();
     }
 }

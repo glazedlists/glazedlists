@@ -43,8 +43,11 @@ public class TaskManager implements Runnable {
      * Directs the progress bar task manager to execute the specified
      * task on an available thread and to display the task's progress
      * in a Swing progress bar.
+     *
+     * @return the task context of the newly running task. Use this to cancel
+     *      the task if necessary.
      */
-    public synchronized void runTask(Task task) {
+    public synchronized TaskContext runTask(Task task) {
         // get a task runner to run this task
         TaskRunner taskRunner;
         if(idleTaskRunners.size() > 0) {
@@ -63,6 +66,8 @@ public class TaskManager implements Runnable {
         
         // update the displayed progress bars
         taskUpdated(context);
+        
+        return context;
     }
     
     /**

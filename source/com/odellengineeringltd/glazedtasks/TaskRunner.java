@@ -60,6 +60,16 @@ public class TaskRunner implements Runnable {
     }
     
     /**
+     * Cancels the currently executing task.
+     *
+     * This simply interrupts the task-running thread in hopes that it will
+     * recognize that it has been cancelled and clean up after itself.
+     */
+    public synchronized void cancelTask() {
+        workerThread.interrupt();
+    }
+    
+    /**
      * Executes this task. This method may be called by at most two
      * threads simultaneously. The method may be executed by the workerThread
      * that this instance owns, and by the swing thread.
@@ -73,9 +83,17 @@ public class TaskRunner implements Runnable {
      */
     public void run() {
         while(true) {
+            
+            // always test to see if the current thread has been interrupted
+            if(Thread.interrupted()) {
+                TaskContext completedContext = currentTaskContext;
+                executeState = IDLE;
+                currentTask = null;
+                currentTaskContext = null;
+                completedContext.taskInterrupted(new InterruptedException());
 
             // when in the IDLE execution state, sleep until that state changes
-            if(executeState == IDLE) {
+            } else if(executeState == IDLE) {
                 try {
                     while(true) workerThread.sleep(1000);
                 } catch(InterruptedException e) {
