@@ -27,7 +27,7 @@ import com.odellengineeringltd.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CompositeList extends AbstractList implements EventList {
+public final class CompositeList extends AbstractList implements EventList {
     
     /** the lists that we are following events on */
     public List memberLists = new ArrayList();

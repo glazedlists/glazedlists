@@ -86,7 +86,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
      * <li>When a list item is inserted, it may be visible or filtered.
      * <li>When a list item is deleted, it must be filtered if it is not visible.
      */
-    public void listChanged(ListEvent listChanges) {
+    public final void listChanged(ListEvent listChanges) {
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
         
@@ -164,7 +164,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
      *    <li>It could stay on because it always matches
      *    <li>It coudl stay off because it never matches
      */
-    protected void handleFilterChanged() {
+    protected final void handleFilterChanged() {
         ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
             // all of these changes to this list happen "atomically"
@@ -211,7 +211,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
      * <p>This method is not thread-safe and callers should ensure they have thread-
      * safe access via <code>getReadWriteLock().readLock()</code>.
      */
-    public int size() {
+    public final int size() {
         return flagList.getCompressedList().size();
     }
 
@@ -227,7 +227,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
      * Tests if this mutation shall accept calls to <code>add()</code>,
      * <code>remove()</code>, <code>set()</code> etc.
      */
-    protected final boolean isWritable() {
+    protected boolean isWritable() {
         return true;
     }
 }

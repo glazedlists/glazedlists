@@ -304,22 +304,35 @@ public class CachingList extends TransformedList implements ListEventListener {
  * a request, emulating a more expensive call such
  * as a database lookup.
  */
-class WaitEventList extends BasicEventList {
+class WaitEventList extends TransformedList {
 
     private int waitDuration = 0;
 
     public WaitEventList(int waitDuration) {
-        super();
+        super(new BasicEventList());
         this.waitDuration = waitDuration;
     }
 
     public Object get(int index) {
         try {
             Thread.sleep(waitDuration);
-            return super.get(index);
+            return source.get(index);
         } catch (Exception e) {
             throw new RuntimeException("Thread.sleep() failure.", e);
         }
+    }
+
+    /**
+     * For implementing the ListEventListener interface. When the underlying list
+     * changes, this sends notification to listening lists.
+     */
+    public void listChanged(ListEvent listChanges) {
+        // just pass on the changes
+        updates.beginEvent();
+        while(listChanges.next()) {
+            updates.addChange(listChanges.getType(), listChanges.getIndex());
+        }
+        updates.commitEvent();
     }
 }
 
@@ -339,7 +352,7 @@ class CacheTestHelper {
     private CachingList testCache = null;
 
     /** The underlying EventList */
-    private BasicEventList sourceList = null;
+    private EventList sourceList = null;
 
     /**
      * Creates a new CacheTestHelper to performance test the

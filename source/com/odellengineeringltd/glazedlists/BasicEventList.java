@@ -32,7 +32,7 @@ import java.io.Serializable;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class BasicEventList implements EventList, Serializable {
+public final class BasicEventList implements EventList, Serializable {
 
     /** the underlying data list */
     protected List data;

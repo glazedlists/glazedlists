@@ -55,26 +55,4 @@ public final class ReadOnlyList extends TransformedList implements ListEventList
         }
         updates.commitEvent();
     }
-
-    /**
-     * Gets the specified element from the list.
-     */
-    public Object get(int index) {
-        return source.get(index);
-    }
-    
-    /**
-     * Gets the total number of elements in the list.
-     */
-    public int size() {
-        return source.size();
-    }
-
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     */
-    protected int getSourceIndex(int mutationIndex) {
-        return mutationIndex;
-    }
 }

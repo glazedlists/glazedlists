@@ -28,7 +28,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class FreezableList extends TransformedList implements ListEventListener {
+public final class FreezableList extends TransformedList implements ListEventListener {
 
     /** the state of the freezable list */
     private boolean frozen = false;
