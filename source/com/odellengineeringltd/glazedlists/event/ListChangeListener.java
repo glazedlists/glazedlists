@@ -19,7 +19,7 @@ import com.odellengineeringltd.glazedlists.*;
  * directly. Instead use a ListChangeListenerEventThreadProxy, which receives
  * events on the list thread and then fires them on the Swing thread.
  *
- * @see <a href="https://glazedlists.dev.java.net/tutorial/part8/index.html#filtering">Glazed
+ * @see <a href="https://glazedlists.dev.java.net/tutorial/part8/index.html#trash">Glazed
  * Lists Tutorial Part 8 - Performance Tuning</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
