@@ -116,7 +116,7 @@
 	   COMPILE
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="compile" depends="core,swing,demo"
+	<target name="compile" depends="core,swing,demo,io"
 		description="Compile the source.">
 	</target>
 

@@ -58,4 +58,30 @@ public class EventListTest extends TestCase {
         jesseSortedList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);
     }
+
+
+    /**
+     * Validates that retainAll() works.
+     */
+    public void testRetainAll() {
+        List jesse = new ArrayList(); jesse.addAll(Arrays.asList(new Character[] { new Character('J'), new Character('E'), new Character('S'), new Character('S'), new Character('E') }));
+        List wilson = Arrays.asList(new Character[] { new Character('W'), new Character('I'), new Character('L'), new Character('S'), new Character('O'), new Character('N') });
+
+        // create the reference list
+        List jesseArrayList = new ArrayList();
+        jesseArrayList.addAll(jesse);
+        jesseArrayList.retainAll(wilson);
+        
+        // test the BasicEventList list
+        List jesseBasicEventList = new BasicEventList();
+        jesseBasicEventList.addAll(jesse);
+        jesseBasicEventList.retainAll(wilson);
+        assertEquals(jesseArrayList, jesseBasicEventList);
+        
+        // test the SortedList list
+        List jesseSortedList = new SortedList(new BasicEventList(), null);
+        jesseSortedList.addAll(jesse);
+        jesseSortedList.retainAll(wilson);
+        assertEquals(jesseArrayList, jesseSortedList);
+    }
 }
