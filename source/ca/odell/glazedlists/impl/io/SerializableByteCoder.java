@@ -22,7 +22,7 @@ public class SerializableByteCoder implements ByteCoder {
     public void encode(Object source, OutputStream target) throws IOException {
         ObjectOutputStream objectOut = new ObjectOutputStream(target);
         objectOut.writeObject(source);
-        objectOut.flush();
+        objectOut.close();
     }
     
     /** {@inheritDoc} */
