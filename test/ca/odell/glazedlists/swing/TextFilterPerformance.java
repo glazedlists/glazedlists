@@ -84,6 +84,7 @@ public class TextFilterPerformance {
         
         System.out.println("");
         System.out.println("Full Filter");
+        long fullFilterTime = 0;
         // perform the filters
         for(int i = 0; i < testFilters.size(); i++) {
             String filter = (String)testFilters.get(i);
@@ -94,6 +95,7 @@ public class TextFilterPerformance {
             filtered.setFilterText(filter.split("[ \t]"));
             finishTime = System.currentTimeMillis();
             long totalFilteringTime = (finishTime - startTime);
+            fullFilterTime += totalFilteringTime;
             
             if(filtered.size() != expectedResult) {
                 System.out.println("expected size " + expectedResult + " != actual size " + filtered.size() + " for filter " + filter);
@@ -104,9 +106,11 @@ public class TextFilterPerformance {
             }
             System.out.println(" done. Total: " + totalFilteringTime);
         }
+        System.out.println("Total: " + fullFilterTime);
 
         System.out.println("");
         System.out.println("Character-by-character Filter");
+        long characterFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {
             String filter = (String)testFilters.get(i);
@@ -124,7 +128,8 @@ public class TextFilterPerformance {
 
                 totalFilteringTime += (finishTime - startTime);
             }
-
+            characterFilterTime += totalFilteringTime;
+            
             // simulate unfiltering by the keystroke
             for (int j = 1; j <= filter.length(); j++) {
                 String subFilter = filter.substring(0, filter.length() - j);
@@ -134,8 +139,11 @@ public class TextFilterPerformance {
 
                 totalUnfilteringTime += (finishTime - startTime);
             }
+            characterFilterTime += totalUnfilteringTime;
+            
             System.out.println(" done. Filter: " + totalFilteringTime + ", Unfilter: " + totalUnfilteringTime + ", Total: " + (totalFilteringTime + totalUnfilteringTime));
         }
+        System.out.println("Total: " + characterFilterTime);
     }
     
     /**
