@@ -42,6 +42,9 @@ public class CachingList extends TransformedList implements ListEventListener {
     private int currentSize = 0;
     private int maxSize = 0;
 
+    /** The last inspected size of the source list */
+    private int lastKnownSize = 0;
+
     /**
      * Creates a new Caching list that uses the specified source list and
      * has the specified maximum cache size.
@@ -52,11 +55,17 @@ public class CachingList extends TransformedList implements ListEventListener {
     public CachingList(EventList source, int maxSize) {
         super(source);
         this.maxSize = maxSize;
-        source.addListEventListener(this);
-        cache = new IndexedTree(new AgedNodeComparator());
-        indexTree = new IndexedTree();
-        for(int i = 0; i < source.size();i++) {
-            indexTree.addByNode(i, EMPTY_INDEX_NODE);
+        getReadWriteLock().writeLock().lock();
+        try {
+            cache = new IndexedTree(new AgedNodeComparator());
+            indexTree = new IndexedTree();
+            for(int i = 0; i < source.size();i++) {
+                indexTree.addByNode(i, EMPTY_INDEX_NODE);
+            }
+            source.addListEventListener(this);
+            lastKnownSize = source.size();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -217,9 +226,13 @@ public class CachingList extends TransformedList implements ListEventListener {
             final int index = listChanges.getIndex();
             final int changeType = listChanges.getType();
 
-            // Lookup the cache entry for this index
-            IndexedTreeNode treeNode = indexTree.getNode(index);
-            Object value = treeNode.getValue();
+            // Lookup the cache entry for this index if possible
+            Object value = null;
+            IndexedTreeNode treeNode = null;
+            if(index < lastKnownSize) {
+                treeNode = indexTree.getNode(index);
+                value = treeNode.getValue();
+            }
             IndexedTreeNode cachedObject = null;
             if(EMPTY_INDEX_NODE != value && value != null) {
                 cachedObject = (IndexedTreeNode)value;
@@ -242,6 +255,7 @@ public class CachingList extends TransformedList implements ListEventListener {
             }
             updates.addChange(changeType, index);
         }
+        lastKnownSize = source.size();
         updates.commitEvent();
     }
 
@@ -321,6 +335,10 @@ class WaitEventList extends TransformedList {
             updates.addChange(listChanges.getType(), listChanges.getIndex());
         }
         updates.commitEvent();
+    }
+
+    protected boolean isWritable() {
+        return true;
     }
 }
 
