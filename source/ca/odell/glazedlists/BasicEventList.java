@@ -51,6 +51,7 @@ public final class BasicEventList extends AbstractEventList {
      * become out of sync and operations will fail.
      */
     public BasicEventList(List list) {
+        super(null);
         data = list;
         readWriteLock = new J2SE12ReadWriteLock();
     }

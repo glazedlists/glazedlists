@@ -61,4 +61,10 @@ public interface EventList extends List {
      *      access to this list.
      */
     public ReadWriteLock getReadWriteLock();
+
+    /**
+     * Get the pipeline used to distribute list events.
+     */
+    public ListEventPipeline getPipeline();
+
 }

@@ -31,11 +31,33 @@ import java.io.Serializable;
 public abstract class AbstractEventList implements EventList, Serializable {
 
     /** the change event and notification system */
-    protected ListEventAssembler updates = new ListEventAssembler(this);
+    protected ListEventAssembler updates = null;
 
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock = null;
+    
+    /** the pipeline manages the distribution of changes */
+    protected ListEventPipeline pipeline = null;
 
+
+    /**
+     * Creates an {@link AbstractEventList} that sends events using the specified
+     * {@link ListEventPipeline}.
+     *
+     * @param pipeline the channel for event distribution. If this is <tt>null</tt>,
+     *      then a new {@link ListEventPipeline} will be created.
+     */
+    protected AbstractEventList(ListEventPipeline pipeline) {
+        if(pipeline == null) pipeline = new ListEventPipeline();
+        this.pipeline = pipeline;
+        updates = new ListEventAssembler(this, pipeline);
+    }
+    
+    /** {@inheritDoc} */
+    public ListEventPipeline getPipeline() {
+        return pipeline;
+    }
+    
     /** {@inheritDoc} */
     public ReadWriteLock getReadWriteLock() {
         return readWriteLock;

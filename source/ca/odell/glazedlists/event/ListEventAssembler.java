@@ -46,13 +46,17 @@ public final class ListEventAssembler {
     /** the sequences that provide a view on this queue */
     private ArrayList listeners = new ArrayList();
     private ArrayList listenerEvents = new ArrayList();
+    
+    /** the pipeline manages the distribution of events */
+    ListEventPipeline pipeline = new ListEventPipeline();
 
     /**
      * Creates a new ListEventAssembler that tracks changes for the
      * specified list.
      */
-    public ListEventAssembler(EventList sourceList) {
+    public ListEventAssembler(EventList sourceList, ListEventPipeline pipeline) {
         this.sourceList = sourceList;
+        this.pipeline = pipeline;
     }
     
     /** the event level is the number of nested events */
@@ -264,41 +268,36 @@ public final class ListEventAssembler {
      * event exactly once, even if that event includes nested events.
      */
     private void fireEvent() {
-        // do a 'real' commit only on non-empty changes
-        if(atomicChangeBlocks.size() > 0) {
-            // sort and simplify this block
-            ListEventBlock.sortListEventBlocks(atomicChangeBlocks);
-            // add this to the complete set
-            atomicChanges.add(atomicChangeBlocks);
-            // add the reorder map to the complete set only if it is the only change
-            if(reorderMap != null && atomicChangeBlocks.size() == 2) {
-                reorderMaps.add(reorderMap);
-            } else {
-                reorderMaps.add(null);
-            }
-            
-            // notify listeners
-            try {
-                // protect against the listener set changing via a duplicate list
-                List listenersToNotify = new ArrayList();
-                List listenerEventsToNotify = new ArrayList();
-                listenersToNotify.addAll(listeners);
-                listenerEventsToNotify.addAll(listenerEvents);
-                // perform the notification on the duplicate list
-                for(int i = 0; i < listenersToNotify.size(); i++) {
-                    ListEventListener listener = (ListEventListener)listenersToNotify.get(i);
-                    ListEvent event = (ListEvent)listenerEventsToNotify.get(i);
-                    listener.listChanged(event);
-                }
-            // clear the change for the next caller
-            } finally {
-                atomicChangeBlocks = null;
-                atomicLatestBlock = null;
-                reorderMap = null;
-            }
+        // bail early on empty changes
+        if(atomicChangeBlocks.size() == 0) {
+            atomicChangeBlocks = null;
+            atomicLatestBlock = null;
+            reorderMap = null;
+            return;
+        }
 
-        // clear the change for the next caller
+        // sort and simplify this block
+        ListEventBlock.sortListEventBlocks(atomicChangeBlocks);
+        // add this to the complete set
+        atomicChanges.add(atomicChangeBlocks);
+        // add the reorder map to the complete set only if it is the only change
+        if(reorderMap != null && atomicChangeBlocks.size() == 2) {
+            reorderMaps.add(reorderMap);
         } else {
+            reorderMaps.add(null);
+        }
+        
+        // notify listeners
+        try {
+            // protect against the listener set changing via a duplicate list
+            List listenersToNotify = new ArrayList();
+            List listenerEventsToNotify = new ArrayList();
+            listenersToNotify.addAll(listeners);
+            listenerEventsToNotify.addAll(listenerEvents);
+            // perform the notification on the duplicate list
+            pipeline.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+        // clear the change for the next caller
+        } finally {
             atomicChangeBlocks = null;
             atomicLatestBlock = null;
             reorderMap = null;
@@ -363,6 +362,7 @@ public final class ListEventAssembler {
     public synchronized void addListEventListener(ListEventListener listChangeListener) {
         listeners.add(listChangeListener);
         listenerEvents.add(new ListEvent(this, sourceList));
+        pipeline.addDependency(listChangeListener, sourceList);
     }
     /**
      * Removes the specified listener from receiving notification when new

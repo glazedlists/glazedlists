@@ -46,6 +46,7 @@ public final class CompositeList extends AbstractEventList {
      * {@link EventList}s.
      */
     public CompositeList() {
+        super(null);
         readWriteLock = new CompositeReadWriteLock();
     }
     

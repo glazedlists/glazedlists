@@ -44,6 +44,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
      * @param source the {@link EventList} to transform..
      */
     protected TransformedList(EventList source) {
+        super(source.getPipeline());
         this.source = source;
         readWriteLock = source.getReadWriteLock();
     }
