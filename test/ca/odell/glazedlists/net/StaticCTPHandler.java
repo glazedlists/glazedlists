@@ -13,6 +13,10 @@ import junit.framework.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.io.UnsupportedEncodingException;
+// Glazed Lists I/O
+import ca.odell.glazedlists.util.impl.Bufferlo;
+import java.text.ParseException;
+import java.io.*;
 
 /**
  * A CTPHandler where all data is known beforehand.
@@ -58,17 +62,24 @@ class StaticCTPHandler implements CTPHandler {
     /**
      * Handle the specified incoming data.
      */
-    public synchronized void receiveChunk(CTPConnection source, List data) {
-        if(true) throw new IllegalStateException("convert list data into buffer");
-        /*if(!data.hasRemaining()) return;
-        
+    public synchronized void receiveChunk(CTPConnection source, Bufferlo data) {
         if(tasks.size() == 0) throw new IllegalStateException("Unexpected data " + data);
-        Expected expected = (Expected)tasks.get(0);
-        int remain = expected.consume(data);
-        if(remain == 0) {
-            tasks.remove(0);
-            handlePendingTasks();
-        }*/
+        
+        // read all the expected elements from the data
+        try {
+            while(data.length() > 0) {
+                Expected expected = (Expected)tasks.get(0);
+                boolean consumed = expected.tryConsume(data);
+                if(!consumed) return;
+                
+                tasks.remove(0);
+                handlePendingTasks();
+            }
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        } catch(ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**
@@ -87,9 +98,7 @@ class StaticCTPHandler implements CTPHandler {
     private void handlePendingTasks() {
         while(tasks.size() > 0 && tasks.get(0) instanceof Enqueued) {
             Enqueued enqueued = (Enqueued)tasks.remove(0);
-            List dataAsList = new ArrayList();
-            dataAsList.add(enqueued.getData());
-            connection.sendChunk(dataAsList);
+            connection.sendChunk(enqueued.getData());
         }
         if(tasks.isEmpty()) {
             notifyAll();
@@ -126,32 +135,36 @@ class StaticCTPHandler implements CTPHandler {
  * Models an expected incoming chunk.
  */
 class Expected {
-    private byte[] data;
-    private int offset = 0;
+    
+    /** the expected data */
+    private String expected = null;
+
+    /**
+     * Creates a new expectation of the specified data.
+     */
     public Expected(String charData) {
-        try {
-            this.data = charData.getBytes("US-ASCII");
-        } catch(UnsupportedEncodingException e) {
-            throw new IllegalStateException(e.getMessage());
-        }
+        this.expected = charData;
     }
+
     /**
      * Consumes the specified data, which must match the expected data. If this does
      * not match, an Exception was thrown.
      *
      * @return the number of bytes remaining to be consumed.
      */
-    public int consume(ByteBuffer lunch) {
-        for( ; offset < data.length && lunch.hasRemaining(); offset++) {
-            if(lunch.get() != data[offset]) throw new IllegalStateException();
-        }
-        return data.length - offset;
+    public boolean tryConsume(Bufferlo lunch) throws IOException, ParseException {
+        if(lunch.length() < expected.length()) return false;
+        
+        lunch.consume(expected);
+        expected = null;
+        return true;
     }
+    
     /**
-     * Get the number of bytes that this has left to consume.
+     * Whether this has been satisfied.
      */
-    public int bytesLeft() {
-        return data.length - offset;
+    private boolean done() {
+        return (expected == null);
     }
 }
 
@@ -159,15 +172,14 @@ class Expected {
  * Models an outgoing chunk.
  */
 class Enqueued {
-    private ByteBuffer data;
+    
+    private Bufferlo data = new Bufferlo();
+    
     public Enqueued(String charData) {
-        try {
-            this.data = ByteBuffer.wrap(charData.getBytes("US-ASCII"));
-        } catch(UnsupportedEncodingException e) {
-            throw new IllegalStateException(e.getMessage());
-        }
+        data.write(charData);
     }
-    public ByteBuffer getData() {
+
+    public Bufferlo getData() {
         return data;
     }
 }

@@ -100,4 +100,128 @@ public class BufferloTest extends TestCase {
         worldWriter.flush();
         assertEquals("Dancer", worldReader.readLine());
     }
+
+    /**
+     * Tests that consume() works.
+     */
+    public void testConsume() {
+        try {
+            Bufferlo parser = getBufferlo("hello world");
+            parser.consume("hell");
+            assertEquals("o world", parser.toString());
+            parser.consume("[a-z]\\s[a-z]");
+            assertEquals("orld", parser.toString());
+            parser.consume("orld");
+            assertEquals("", parser.toString());
+        } catch(ParseException e) {
+            fail(e.getMessage());
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
+    }
+    
+    /**
+     * Tests that consume() throws exceptions when the regular expression is not
+     * contained.
+     */
+    public void testConsumeBadInput() {
+        try {
+            Bufferlo parser = getBufferlo("hello world");
+            parser.consume("earth");
+            fail();
+        } catch(ParseException e) {
+            // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
+    }
+    
+
+    /**
+     * Tests that consume() throws exceptions when the regular expression does not
+     * start at the beginning of the String..
+     */
+    public void testConsumeNotAtStart() {
+        try {
+            Bufferlo parser = getBufferlo("hello world");
+            parser.consume("ello");
+            fail();
+        } catch(ParseException e) {
+            // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Tests that readUntil() works.
+     */
+    public void testReadUntil() {
+        try {
+            Bufferlo parser = getBufferlo("hello world");
+            String hello = parser.readUntil("\\s");
+            assertEquals("hello", hello);
+            assertEquals("world", parser.toString());
+            String worl = parser.readUntil("[abcde]+");
+            assertEquals("worl", worl);
+            assertEquals("", parser.toString());
+        } catch(ParseException e) {
+            fail(e.getMessage());
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Tests that readUntil() throws an exception if the specified text is not found.
+     */
+    public void testReadUntilBadInput() {
+        try {
+            Bufferlo parser = getBufferlo("hello world");
+            String result = parser.readUntil("earth");
+            fail();
+        } catch(ParseException e) {
+            // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Tests that indexOf() works.
+     */
+    public void testIndexOf() {
+        try {
+            Bufferlo parser = getBufferlo("hello world");
+            int worldIndex = parser.indexOf("w");
+            assertEquals(6, worldIndex);
+            assertEquals("hello world", parser.toString());
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Tests that indexOf() returns -1 if the specified text is not found.
+     */
+    public void testIndexOfBadInput() {
+        try {
+            Bufferlo parser = getBufferlo("hello world");
+            int tIndex = parser.indexOf("t");
+            assertEquals(-1, tIndex);
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Gets a Bufferlo with the specified contents.
+     */
+    private Bufferlo getBufferlo(String contents) throws IOException {
+        Bufferlo bufferlo = new Bufferlo();
+        Writer writer = new OutputStreamWriter(bufferlo.getOutputStream(), "US-ASCII");
+        writer.write(contents);
+        writer.flush();
+        return bufferlo;
+    }
 }

@@ -9,6 +9,10 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.io.*;
 import java.nio.*;
+// Glazed Lists I/O
+import ca.odell.glazedlists.util.impl.Bufferlo;
+import java.text.ParseException;
+import java.io.*;
 
 /**
  * A test program that acts as a client to interface with a CTP server.
@@ -50,10 +54,9 @@ public class CTPClient {
 
                 if(dataString != null) {
                     System.out.println("read a string of length " + dataString.length());
-                    ByteBuffer data = ByteBuffer.wrap(dataString.getBytes("US-ASCII"));
-                    List dataAsList = new ArrayList();
-                    dataAsList.add(data);
-                    connection.sendChunk(dataAsList);
+                    Bufferlo data = new Bufferlo();
+                    data.write(dataString);
+                    connection.sendChunk(data);
                 } else {
                     connection.close();
                 }
@@ -104,7 +107,7 @@ public class CTPClient {
                 connection = source;
             }
         }
-        public void receiveChunk(CTPConnection source, List data) {
+        public void receiveChunk(CTPConnection source, Bufferlo data) {
             if(true) throw new IllegalStateException("Convert buffer list into buffer");
             /*try {
                 byte[] dataBytes = new byte[data.remaining()];

@@ -13,7 +13,7 @@ import java.nio.channels.*;
 import java.net.*;
 import java.io.*;
 import java.text.ParseException;
-import ca.odell.glazedlists.util.impl.ByteChannelReader;
+import ca.odell.glazedlists.util.impl.Bufferlo;
 import ca.odell.glazedlists.util.impl.ByteChannelWriter;
 // logging
 import java.util.logging.*;
@@ -102,10 +102,10 @@ final class CTPConnection {
     SocketChannel socketChannel = null;
     
     /** parse the input channel */
-    ByteChannelReader parser;
+    private Bufferlo parser;
 
     /** write the output channel */
-    ByteChannelWriter writer;
+    Bufferlo writer;
 
     /** the handler to delegate data interpretation to */
     CTPHandler handler;
@@ -134,8 +134,8 @@ final class CTPConnection {
         this.handler = handler;
         this.manager = manager;
         this.socketChannel = (SocketChannel)selectionKey.channel();
-        this.parser = new ByteChannelReader(socketChannel);
-        this.writer = new ByteChannelWriter(socketChannel, selectionKey);
+        this.parser = new Bufferlo();
+        this.writer = new Bufferlo();
     }
     
     /**
@@ -164,7 +164,8 @@ final class CTPConnection {
     void handleRead() {
         // read at least a byte of data
         try {
-            int bytesIn = parser.fill();
+            int bytesIn = parser.readFromChannel(socketChannel);
+            if(bytesIn < 0) throw new EOFException("End of stream");
         } catch(IOException e) {
             close(e);
         }
@@ -195,8 +196,9 @@ final class CTPConnection {
      * When we can write, flush the output stream.
      */
     void handleWrite() {
+        // do the write
         try {
-            writer.flush();
+            writer.writeToChannel(socketChannel, selectionKey);
         } catch(IOException e) {
             close(e);
         }
@@ -256,7 +258,7 @@ final class CTPConnection {
             responseHeaders.put("Host", host);
             writeHeaders(responseHeaders);
             writer.write("\r\n");
-            writer.flush();
+            writer.writeToChannel(socketChannel, selectionKey);
             
             // we're waiting for the response
             state = STATE_CLIENT_AWAITING_RESPONSE;
@@ -337,7 +339,7 @@ final class CTPConnection {
             responseHeaders.put("Transfer-Encoding", "chunked");
             writeHeaders(responseHeaders);
             writer.write("\r\n");
-            writer.flush();
+            writer.writeToChannel(socketChannel, selectionKey);
             
             // we're ready
             logger.info("Accepted connection from " + this);
@@ -407,7 +409,7 @@ final class CTPConnection {
      *      buffer needs to be valid for the duration of this method call, but
      *      is safe to modify afterwards.
      */
-    public void sendChunk(List data) {
+    public void sendChunk(Bufferlo data) {
         manager.invokeAndWait(new CTPChunkToSend(this, data));
     }
 
@@ -438,33 +440,29 @@ final class CTPConnection {
                 
                 // if the full chunk has not loaded, load more
                 int bytesRequired = chunkEndIndex + 2 + chunkSize + 2;
-                if(!parser.bytesAvailable(bytesRequired)) {
+                if(parser.length() < bytesRequired) {
                     return false;
                 }
             
                 // load the chunk
                 parser.consume("[^\\r\\n]*\\r\\n");
-                ByteBuffer chunkBuffer = parser.readBytes(chunkSize);
+                Bufferlo chunkData = parser.consume(chunkSize);
                 parser.consume("\\r\\n");
                 
                 // handle the chunk
-                if(chunkSize != 0) {
-                    List chunkAsList = new ArrayList();
-                    chunkAsList.add(chunkBuffer);
-                    handler.receiveChunk(this, chunkAsList);
+                if(chunkData.length() > 0) {
+                    handler.receiveChunk(this, chunkData);
                     return true;
                 } else {
                     return close();
                 }
 
             } else {
-                ByteBuffer chunkBuffer = parser.readBytes();
+                Bufferlo chunkData = parser.consume(parser.length());
             
                 // handle the simulated chunk
-                if(chunkBuffer.hasRemaining()) {
-                    List chunkAsList = new ArrayList();
-                    chunkAsList.add(chunkBuffer);
-                    handler.receiveChunk(this, chunkAsList);
+                if(chunkData.length() > 0) {
+                    handler.receiveChunk(this, chunkData);
                     return true;
                 } else {
                     return false;

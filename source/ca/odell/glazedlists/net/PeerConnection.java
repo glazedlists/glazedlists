@@ -33,12 +33,10 @@ class PeerConnection implements CTPHandler {
     private boolean ready = false;
     
     /** the incoming bytes pending a full block */
-    private static final int READ_INITIAL_SIZE = 0;
-    private ResizableByteBuffer readBuffer = new ResizableByteBuffer(READ_INITIAL_SIZE);
+    private Bufferlo currentBlock = new Bufferlo();
     
     /** the outgoing bytes pending a connection */
-    private static final int WRITE_INITIAL_SIZE = 0;
-    private ResizableByteBuffer writeBuffer = new ResizableByteBuffer(WRITE_INITIAL_SIZE);
+    private Bufferlo pendingConnect = new Bufferlo();
 
     /** locally subscribed resources by resource name */
     private Map incomingSubscriptions = new TreeMap();
@@ -59,11 +57,8 @@ class PeerConnection implements CTPHandler {
     public void connectionReady(CTPConnection connection) {
         this.connection = connection;
         this.ready = true;
-        if(writeBuffer.position() > 0) {
-            writeBuffer.flip();
-            List toSend = new ArrayList();
-            toSend.add(writeBuffer.getBuffer());
-            connection.sendChunk(toSend);
+        if(pendingConnect.length() > 0) {
+            connection.sendChunk(pendingConnect);
         }
     }
 
@@ -89,12 +84,9 @@ class PeerConnection implements CTPHandler {
      *      relevant bytes start at data.position() and end at data.limit(). This
      *      buffer is only valid for the duration of this method call.
      */
-    public void receiveChunk(CTPConnection source, List data) {
+    public void receiveChunk(CTPConnection source, Bufferlo data) {
         // get all the data in the working block
-        List currentBlock = new ArrayList();
-        readBuffer.flip();
-        currentBlock.add(readBuffer.getBuffer());
-        currentBlock.addAll(data);
+        currentBlock.append(data);
         
         // handle all blocks
         PeerBlock block = null;
@@ -104,15 +96,6 @@ class PeerConnection implements CTPHandler {
             else if(block.getAction().equals(Peer.ACTION_UPDATE)) remoteUpdate(block);
             else if(block.getAction().equals(Peer.ACTION_UNSUBSCRIBE)) remoteUnsubscribe(block);
             else throw new IllegalStateException();
-        }
-
-        // save a partial block
-        readBuffer.compact();
-        int dataRemaining = 0;
-        for(int d = 0; d < data.size(); d++) dataRemaining += ((ByteBuffer)data.get(d)).remaining();
-        if(readBuffer.remaining() < dataRemaining) readBuffer.grow(readBuffer.capacity() + dataRemaining);
-        for(int d = 0; d < data.size(); d++) {
-            readBuffer.put((ByteBuffer)data.get(d));
         }
     }
     
@@ -179,18 +162,11 @@ class PeerConnection implements CTPHandler {
      */
     public void writeBlock(PeerResource resource, PeerBlock block) {
         if(!ready) {
-            for(int b = 0; b < block.getBytes().size(); b++) {
-                ByteBuffer buffer = (ByteBuffer)block.getBytes().get(b);
-                if(writeBuffer.remaining() < buffer.remaining()) writeBuffer.grow(writeBuffer.capacity() + buffer.remaining());
-                writeBuffer.put(buffer);
-            }
+            pendingConnect.append(block.getBytes());
         } else if(connection == null) {
             throw new IllegalStateException();
         } else {
-            List toSend = new ArrayList();
-            if(writeBuffer.hasRemaining()) toSend.add(writeBuffer.getBuffer());
-            toSend.addAll(block.getBytes());
-            connection.sendChunk(toSend);
+            connection.sendChunk(block.getBytes());
         }
     }
 }

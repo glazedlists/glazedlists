@@ -10,6 +10,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.*;
 
 /**
  * A binary message between peers.
@@ -51,14 +52,14 @@ class PeerBlock {
      *      result may be null indicating an incomplete PeerBlock. There may be
      *      multiple PeerBlocks available in the specified list of bytes.
      */
-    public static PeerBlock fromBytes(List bytes) {
+    public static PeerBlock fromBytes(Bufferlo bytes) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Get the bytes for this block.
      */
-    public List getBytes() {
+    public Bufferlo getBytes() {
         throw new UnsupportedOperationException();
     }
     

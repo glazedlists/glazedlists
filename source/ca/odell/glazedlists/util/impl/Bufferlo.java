@@ -16,7 +16,6 @@ import java.util.regex.*;
 import java.text.ParseException;
 // logging
 import java.util.logging.*;
-import java.text.ParseException;
 
 /**
  * A high-level class for moving data and parsing protocols.
@@ -60,10 +59,16 @@ public class Bufferlo implements CharSequence {
     /** 
      * Write the content of this Bufferlo to the specified channel.
      */
-    public int writeToChannel(WritableByteChannel target) throws IOException {
+    public int writeToChannel(WritableByteChannel target, SelectionKey selectionKey) throws IOException {
         if(true) throw new RuntimeException("Convert this to gathering writes");
+        
+        // verify we can still write
+        if(!selectionKey.isValid()) throw new IOException("Key cancelled");
+
+        // write everything we can
         int totalWritten = 0;
-        while(true) {
+        while(length() > 0) {
+
             // we need a place to read from
             ByteBuffer readFrom = getReadFromBuffer();
             
@@ -71,11 +76,19 @@ public class Bufferlo implements CharSequence {
             int bytesWritten = target.write(readFrom);
             doneReading();
             
-            // figure out what to do next
-            if(bytesWritten < 0 && totalWritten == 0) return bytesWritten;
-            else if(bytesWritten <= 0) return totalWritten;
-            else totalWritten += bytesWritten;
+            // we have leftovers 
+            if(bytesWritten <= 0) {
+                selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
+                if(totalWritten == 0) return bytesWritten;
+                else return totalWritten;
+            } else {
+                totalWritten += bytesWritten;
+            }
         }
+        
+        // nothing more to write
+        selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
+        return totalWritten;
     }
     
     /**
@@ -112,6 +125,13 @@ public class Bufferlo implements CharSequence {
         result.limit(bytes);
         skip(bytes);
         return result;
+    }
+    
+    /**
+     * Writes the specified String to this Bufferlo.
+     */
+    public void write(String data) {
+        append(stringToBytes(data));
     }
     
     /**

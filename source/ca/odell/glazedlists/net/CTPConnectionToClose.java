@@ -58,18 +58,18 @@ class CTPConnectionToClose implements CTPRunnable {
 
             // if we've already responded, send an empty chunk
             } else if(connection.state == CTPConnection.STATE_READY) {
-                connection.sendChunk(Collections.EMPTY_LIST);
+                connection.sendChunk(null);
             }
         }
         
         // try to flush what we have left
-        boolean flushSuccess = false;
+        int sentBytes = -1;
         try {
-            flushSuccess = connection.writer.flush();
+            sentBytes = connection.writer.writeToChannel(connection.socketChannel, connection.selectionKey);
         } catch(IOException e) {
             // if this flush failed, there's nothing we can do
         }
-        if(!flushSuccess) logger.warning("Close proceeding with unsent data");
+        if(sentBytes < 0) logger.warning("Close proceeding with unsent data");
 
         // close the socket
         try {

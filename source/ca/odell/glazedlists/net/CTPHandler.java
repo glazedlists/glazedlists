@@ -8,6 +8,7 @@ package ca.odell.glazedlists.net;
 
 import java.util.*;
 import java.nio.*;
+import ca.odell.glazedlists.util.impl.Bufferlo;
 
 /**
  * A callback interface for classes that implement a CTPConnection.
@@ -28,7 +29,7 @@ interface CTPHandler {
      *      relevant bytes start at data.position() and end at data.limit(). These
      *      buffers are only valid for the duration of this method call.
      */
-    public void receiveChunk(CTPConnection source, List data);
+    public void receiveChunk(CTPConnection source, Bufferlo data);
 
     /**
      * Handles the connection being closed by the remote client. This will also

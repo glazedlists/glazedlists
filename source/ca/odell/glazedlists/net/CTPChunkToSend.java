@@ -12,6 +12,7 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.net.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.Bufferlo;
 // logging
 import java.util.logging.*;
 
@@ -27,12 +28,12 @@ class CTPChunkToSend implements CTPRunnable {
     private CTPConnection connection;
 
     /** the content */
-    private List data;
+    private Bufferlo data;
 
     /**
      * Create a new CTPConnectionToEstablish.
      */
-    public CTPChunkToSend(CTPConnection connection, List data) {
+    public CTPChunkToSend(CTPConnection connection, Bufferlo data) {
         this.connection = connection;
         this.data = data;
     }
@@ -45,18 +46,15 @@ class CTPChunkToSend implements CTPRunnable {
         
         try {
             // calculate the total bytes remaining
-            int totalRemaining = 0;
-            for(int b = 0; b < data.size(); b++) {
-                totalRemaining += ((ByteBuffer)data.get(b)).remaining();
-            }
+            int totalRemaining = (data != null) ? data.length() : 0;
             
             // write the chunk
             String chunkSizeInHex = Integer.toString(totalRemaining, 16);
             connection.writer.write(chunkSizeInHex);
             connection.writer.write("\r\n");
-            connection.writer.write(data);
+            if(data != null) connection.writer.append(data);
             connection.writer.write("\r\n");
-            connection.writer.flush();
+            connection.writer.writeToChannel(connection.socketChannel, connection.selectionKey);
             
         } catch(IOException e) {
             connection.close(e);
