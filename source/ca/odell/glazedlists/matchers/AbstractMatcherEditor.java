@@ -34,7 +34,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
 	private volatile Matcher currentMatcher = Matchers.trueMatcher();
 
 	/** {@inheritDoc} */
-	public Matcher getCurrentMatcher() {
+	public Matcher getMatcher() {
 		return currentMatcher;
 	}
 

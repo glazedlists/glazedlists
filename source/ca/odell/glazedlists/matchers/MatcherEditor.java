@@ -39,5 +39,5 @@ public interface MatcherEditor {
      *
      * @return a non-null {@link Matcher}.
 	 */
-	public Matcher getCurrentMatcher();
+	public Matcher getMatcher();
 }
