@@ -36,26 +36,26 @@ public abstract class AbstractEventList implements EventList, Serializable {
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock = null;
     
-    /** the pipeline manages the distribution of changes */
-    protected ListEventPipeline pipeline = null;
+    /** the publisher manages the distribution of changes */
+    protected ListEventPublisher publisher = null;
 
 
     /**
      * Creates an {@link AbstractEventList} that sends events using the specified
      * {@link ListEventPipeline}.
      *
-     * @param pipeline the channel for event distribution. If this is <tt>null</tt>,
-     *      then a new {@link ListEventPipeline} will be created.
+     * @param publisher the channel for event distribution. If this is <tt>null</tt>,
+     *      then a new {@link ListEventPublisher} will be created.
      */
-    protected AbstractEventList(ListEventPipeline pipeline) {
-        if(pipeline == null) pipeline = new ListEventPipeline();
-        this.pipeline = pipeline;
-        updates = new ListEventAssembler(this, pipeline);
+    protected AbstractEventList(ListEventPublisher publisher) {
+        if(publisher == null) publisher = new ListEventPublisher();
+        this.publisher = publisher;
+        updates = new ListEventAssembler(this, publisher);
     }
     
     /** {@inheritDoc} */
-    public ListEventPipeline getPipeline() {
-        return pipeline;
+    public ListEventPublisher getPublisher() {
+        return publisher;
     }
     
     /** {@inheritDoc} */

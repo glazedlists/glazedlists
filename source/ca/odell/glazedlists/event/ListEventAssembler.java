@@ -48,15 +48,15 @@ public final class ListEventAssembler {
     private ArrayList listenerEvents = new ArrayList();
     
     /** the pipeline manages the distribution of events */
-    ListEventPipeline pipeline = new ListEventPipeline();
+    private ListEventPublisher publisher = null;
 
     /**
      * Creates a new ListEventAssembler that tracks changes for the
      * specified list.
      */
-    public ListEventAssembler(EventList sourceList, ListEventPipeline pipeline) {
+    public ListEventAssembler(EventList sourceList, ListEventPublisher publisher) {
         this.sourceList = sourceList;
-        this.pipeline = pipeline;
+        this.publisher = publisher;
     }
     
     /** the event level is the number of nested events */
@@ -295,7 +295,7 @@ public final class ListEventAssembler {
             listenersToNotify.addAll(listeners);
             listenerEventsToNotify.addAll(listenerEvents);
             // perform the notification on the duplicate list
-            pipeline.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+            publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
         // clear the change for the next caller
         } finally {
             atomicChangeBlocks = null;
@@ -362,7 +362,7 @@ public final class ListEventAssembler {
     public synchronized void addListEventListener(ListEventListener listChangeListener) {
         listeners.add(listChangeListener);
         listenerEvents.add(new ListEvent(this, sourceList));
-        pipeline.addDependency(listChangeListener, sourceList);
+        publisher.addDependency(listChangeListener, sourceList);
     }
     /**
      * Removes the specified listener from receiving notification when new
@@ -389,5 +389,8 @@ public final class ListEventAssembler {
         } else {
             throw new IllegalArgumentException("Cannot remove nonexistent listener " + listChangeListener);
         }
+        
+        // remove the publisher's dependency
+        publisher.removeDependency(listChangeListener, sourceList);
     }
 }

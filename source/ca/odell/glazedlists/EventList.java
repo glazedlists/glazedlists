@@ -63,8 +63,8 @@ public interface EventList extends List {
     public ReadWriteLock getReadWriteLock();
 
     /**
-     * Get the pipeline used to distribute list events.
+     * Get the publisher used to distribute {@link ListEvent}s.
      */
-    public ListEventPipeline getPipeline();
+    public ListEventPublisher getPublisher();
 
 }
