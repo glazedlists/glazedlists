@@ -1,0 +1,108 @@
+<html>
+<head><title>Glazed Lists Tutorial Part 1 - Basics</title>
+<link REL ="stylesheet" TYPE="text/css" HREF="../../stylesheet.css" TITLE="Style">
+</head>
+<body>
+
+<h3>Glazed Lists Tutorial</h3>
+<h1>Part 1 - Basics</h1>
+
+In this 3-step tutorial, we use Glazed Lists to mimic the functionality of a
+vanilla <code>AbstractTableModel</code>. Once we have that in place, we can
+begin to exploit Glazed Lists' more advanced features.
+<p>We are going to create a simple Programming Language browser, so that we
+can review our favourite programming langauges.
+
+<h3>Step 1: The Source List</h3>
+Create a <code>BasicEventList</code> and add elements to it, just like you would 
+an <code>ArrayList</code> or <code>LinkedList</code>. <code>BasicEventList</code> 
+implements the <code>List</code> interface, so you should have no problem learning 
+its API.
+<pre><code>import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.jtable.*;
+import javax.swing.*;
+
+public class ProgrammingLanguageBrowser {
+
+    <span class="highlighted">BasicEventList languages;</span>
+
+    public ProgrammingLanguageBrowser() {
+        <span class="highlighted">languages = new BasicEventList();</span>
+        <span class="highlighted">languages.add(</span>new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems")<span class="highlighted">)</span>;
+        <span class="highlighted">languages.add(</span>new ProgrammingLanguage("C", "1973", "The UNIX language originally developed for the PDP-11")<span class="highlighted">)</span>;
+        ...
+        <span class="highlighted">languages.add(</span>new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer")<span class="highlighted">)</span>;
+    }
+...</code></pre>
+
+<h3>Step 2: The Display Table</h3>
+Although Glazed Lists will take care of managing table, it is still necessary to do 
+some table set up. Glazed Lists needs to know column names and how to get a value 
+for a particular column. For this, it is necessary to implement the TableFormat 
+interface.
+<pre><code>import com.odellengineeringltd.glazedlists.jtable.*;
+import javax.swing.*;
+
+public class ProgrammingLanguageTableCell <span class="highlighted">implements TableFormat</span> {
+
+    <span class="highlighted">public int getFieldCount()</span> { 
+        return 2;
+    }
+
+    <span class="highlighted">public String getFieldName(int column)</span> { 
+        if(column == 0) return "Name";
+        else return "Year";
+    }
+    
+    <span class="highlighted">public Object getFieldValue(Object baseObject, int column)</span> {
+        ProgrammingLanguage lang = (ProgrammingLanguage)baseObject;
+        
+        if(column == 0) return lang.getName();
+        else return lang.getYear();
+    }
+    
+    <span class="highlighted">public void configureTable(JTable table)</span> {
+        // no configuration necessary, yet
+    }
+
+}</code></pre>
+Note that the <code>getFieldValue()</code> method asks you to get an Object for a 
+column cell, given an object that models an entire row. In this case, the 
+<code>ProgrammingLanguage</code> object models the entire row, and for column 1, we
+want the <code>getYear()</code> attribute of that <code>ProgrammingLanguage</code>.
+
+<h3>Step 3: A ListTable In a Frame</h3>
+Now that we have the data and display ready, it is time to display our table in a
+<code>JFrame</code>. The <code>ListTable</code> provides a <code>JTable</code> for displaying
+any <code>EventList</code>. It uses optimized table events to give you the best
+performance for dynamic data.
+<pre><code>    
+    public void display() {
+        <span class="highlighted">ListTable listTable = new ListTable(languages, new ProgrammingLanguageTableCell());</span>
+        JFrame frame = new JFrame("Programming Languages");
+        frame.getContentPane().add(<span class="highlighted">listTable.getTableScrollPane()</span>);
+        frame.setSize(640, 480);
+        frame.show();
+    }
+    
+    public static void main(String[] args) {
+        ProgrammingLanguageBrowser browser = new ProgrammingLanguageBrowser();
+        browser.display();
+    }
+</code></pre>
+<img src="screenshot.gif" width="431" height="195" alt="Programming Languages Screen Shot">
+
+
+<h3>So what?</h3>
+<p>So far we haven't taken advantage of any advanced features of Glazed Lists.
+
+<p>But with this simple framework in place, it is now straightforward to add filtering, sorting or
+querying to the table. We can begin to layer mutation lists between the
+<code>BasicEventList</code> and the <code>ListTable</code>. If necessary, we can
+replace the manually-managed <code>BasicEventList</code> with a
+<code>DynamicQueryList</code> which can periodically fetch updates from a database
+or other source. And should we decide to display the data in another form such
+as a <code>JComboBox</code>, that is now straightforward as well.
+
+</body>
+</html>

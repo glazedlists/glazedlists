@@ -1,0 +1,124 @@
+<html>
+<head><title>Glazed Lists Tutorial Part 3 - Custom Filtering</title>
+<link REL ="stylesheet" TYPE="text/css" HREF="../../stylesheet.css" TITLE="Style">
+</head>
+<body>
+
+<h3>Glazed Lists Tutorial</h3>
+<h1>Part 3 - Custom Filtering</h1>
+
+Although text filters are fantastic, they don't solve all of our problems. Glazed Lists
+makes it easy to create custom filters that work with your data. The right filter
+will make your application easier to use and prevent user errors.
+
+<p>For our tutorial, we're going to implement a pair of checkboxes for our 
+<code>ProgrammingLanguage</code>. We will allow users to optionally show only programming languages that are
+object-oriented or use a virtual machine. First, we'll need to ensure that the filter
+data exists in our source object. We'll add a few methods to <code>ProgrammingLanguage</code>
+for this.
+
+<pre><code>    public boolean isObjectOriented() {
+        return objectOriented;
+    }
+    
+    public boolean isVirtualMachine() {
+        return virtualMachine;
+    }</code></pre>
+    
+<h3>Extending AbstractFilterList</h3>
+To create our custom filter we simply extend AbstractFilterList. There is one method
+which we need to create, <code>boolean filterMatches(Object element)</code>, to test
+if a given object in the set matches the current filter. Another noteworthy method
+of <code>AbstractFilterList</code> is <code>handleFilterChanged()</code>, which
+should be called whenever the filtering critera changes. In our case, this will be
+whenever a user changes the value of a checkbox.
+<pre><code>import com.odellengineeringltd.glazedlists.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+class ProgrammingLanguageFilter <span class="highlighted">extends AbstractFilterList</span> implements ItemListener {
+
+    JCheckBox objectOrientedCheck;
+    JCheckBox virtualMachineCheck;
+    
+    public ProgrammingLanguageFilter(EventList source) {
+        <span class="highlighted">super(source);</span>
+
+        objectOrientedCheck = new JCheckBox("Object Oriented");
+        objectOrientedCheck.addItemListener(this);
+        
+        virtualMachineCheck = new JCheckBox("Virtual Machine");
+        virtualMachineCheck.addItemListener(this);
+
+        <span class="highlighted">handleFilterChanged();</span>
+    }
+    
+    <span class="highlighted">public boolean filterMatches(Object element)</span> {
+        ProgrammingLanguage language = (ProgrammingLanguage)element;
+        
+        if(objectOrientedCheck.isSelected() && !language.isObjectOriented()) return false;
+        if(virtualMachineCheck.isSelected() && !language.isVirtualMachine()) return false;
+        
+        return true;
+    }
+    
+    public void itemStateChanged(ItemEvent e) {
+        <span class="highlighted">handleFilterChanged();</span>
+    }
+
+    public JCheckBox getObjectOrientedCheckBox() {
+        return objectOrientedCheck;
+    }
+
+    public JCheckBox getVirtualMachineCheckBox() {
+        return virtualMachineCheck;
+    }
+}</pre>
+
+<p>There are a few important notes when extending <code>AbstractFilterList</code>:
+<li><code class="highlighted">super(EventList)</code> is the only way to instantiate the
+AbstractFilterList. The parameter is the source list to be filtered.
+<li><code class="highlighted">handleFilterChanged()</code> must be called at the end of the constructor.
+<li><code class="highlighted">handleFilterChanged()</code> should be called whenever the filter criteria changes.
+
+<p>Finally we must add the filter to our list chain and add the checkboxes to our Frame.
+
+<pre><code>import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.jtable.*;
+import javax.swing.*;
+import java.awt.*;
+
+public class ProgrammingLanguageBrowser {
+
+    BasicEventList languages;
+    CaseInsensitiveFilterList filteredLanguages;
+    <span class="highlighted">ProgrammingLanguageFilter customFilteredLanguages;</span>
+
+    public ProgrammingLanguageBrowser() {
+        languages = new BasicEventList();
+        languages.add(new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems", true, true));
+        languages.add(new ProgrammingLanguage("C", "1973", "The UNIX language originally developed for the PDP-11", false, false));
+        ...
+        languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer", false, false));
+        
+        filteredLanguages = new CaseInsensitiveFilterList(languages);
+        <span class="highlighted">customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);</span>
+    }
+    
+    public void display() {
+        ...
+        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(...));
+        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(...));
+        ...
+    }
+</code></pre>
+
+<img src="screenshot.gif" width="431" height="235" alt="Programming Languages Screen Shot">
+
+<p>As the user checks and unchecks the checkboxes, programming languages are displayed
+or hidden. Custom filters can be very powerful and could be used to limit items by
+date, magnitude, owner or even a regular expression.
+
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<html>
+<head><title>Glazed Lists Tutorial Part 5 - Custom Renderers</title>
+<link REL ="stylesheet" TYPE="text/css" HREF="../../stylesheet.css" TITLE="Style">
+</head>
+<body>
+
+<h3>Glazed Lists Tutorial</h3>
+<h1>Part 5 - Custom Renderers</h1>
+
+The default cell renderer for JTables is quite plain. Glazed Lists comes with a
+formatted renderer called <code>StyledDocumentRenderer</code>.
+
+<h3>Using StyledDocumentRenderer</h3>
+<p><code>StyledDocumentRenderer</code> is a wrapper for a <code>JTextPane</code>
+as a <code>TableCellRenderer</code>. It provides a few default <code>Style</code>s
+and some straightforward methods to create styled cells quickly and easily.
+<p>To create a custom renderer, extend the <code>StyledDocumentRenderer</code> and
+implement the <code>writeObject()</code> method. In this method you will receive
+the object to render. The object parameter is actually the return value of your
+<code>TableFormat</code>'s <code>getFieldValue()</code> method.
+<p>The constructor of the custom renderer should call <code>super(true)</code> to
+instantiate the <code>StyledDocumentRenderer</code>. A value of <code>false</code>
+will prevent the renderer from modifying row heights.
+<p>For our custom renderer, we're going to display the programming language name
+and year in boldface text on the first line, with our description of the language
+below. The table is going to have a single column, with all fields layed out within
+that column.
+
+<pre><code>import com.odellengineeringltd.glazedlists.jtable.*;
+import javax.swing.*;
+
+class ProgrammingLanguageRenderer <span class="highlighted">extends StyledDocumentRenderer</span> {
+
+    
+    public ProgrammingLanguageRenderer() {
+        <span class="highlighted">super(true);</span>
+    }
+
+    <span class="highlighted">public void writeObject(JTable table, Object value, 
+        boolean isSelected, boolean hasFocus, int row, int column)</span> {
+        
+        ProgrammingLanguage language = (ProgrammingLanguage)value;
+        
+        <span class="highlighted">append(</span>language.getName()<span class="highlighted">, strong)</span>;
+        <span class="highlighted">append(</span>", "<span class="highlighted">, strong)</span>;
+        <span class="highlighted">append(</span>language.getYear()<span class="highlighted">, strong)</span>;
+        <span class="highlighted">append(</span>"\n"<span class="highlighted">, plain)</span>;
+        <span class="highlighted">append(</span>language.getDescription()<span class="highlighted">, plain)</span>;
+        
+    }
+}</code></pre>
+
+<p>Note that the values of <code>strong</code> and <code>plain</code> are protected
+<code>Style</code> variables in the <code>StyledDocumentRenderer</code> class. It
+is straightforward to create custom styles if necessary. Put this code in the
+constructor to create a new <code>Style</code> called "alert".
+
+<pre><code>    Style alert = styledDocument.addStyle("alert", null);
+    StyleConstants.setFontFamily(alert, "sansserif");
+    StyleConstants.setFontSize(alert, 16);
+    StyleConstants.setForeground(alert, new Color(255, 00, 00));
+</code></pre>
+
+<h3>Fixing the TableFormat</h3>
+
+The <code>TableFormat</code> class works with our renderer to display the table
+correctly. To change our renderer we must make adjustments to make in the
+<code>TableFormat</code> as well.
+<li>Currently, our renderer expects a <code>ProgrammingLanguage</code> as an argument. We need
+to change our <code>TableFormat</code> so that it always returns a <code>ProgrammingLanguage</code>. 
+<li>With our sophisticated renderer, we have added all of our values to a single cell.
+We need to change our <code>TableFormat</code> to specify only one column. 
+<li>Finally, we must configure our <code>TableFormat</code> to configure the table to use our renderer. 
+We need to change the <code>configureTable()</code> method to have the table use our renderer.
+The <code>configureTable()</code> method is called just after the table is constructed.
+
+<pre><code>import com.odellengineeringltd.glazedlists.jtable.*;
+import javax.swing.*;
+
+public class ProgrammingLanguageTableCell implements TableFormat {
+
+    public int getFieldCount() {
+        <span class="highlighted">return 1;</span>
+    }
+
+    public String getFieldName(int column) { 
+        return "Programming Language";
+    }
+    
+    public Object getFieldValue(Object baseObject, int column) {
+        ProgrammingLanguage lang = (ProgrammingLanguage)baseObject;
+        <span class="highlighted">return lang;</span>
+    }
+    
+    public void configureTable(JTable table) {
+        <span class="highlighted">table.getColumnModel().getColumn(0).setCellRenderer(new ProgrammingLanguageRenderer());</span>
+    }
+
+}</code></pre>
+
+<h3>Fixing the Sorter</h3>
+
+Originally we set our <code>TableComparatorSelector</code> so that clicking on the
+name column sorted by name, and clicking on the year column sorted by year. As we
+have collapsed all values into a single column, we need to update the
+<code>TableComparatorSelector</code> to use just the single column.
+
+<pre><code>    public void display() {
+        ListTable listTable = new ListTable(customFilteredLanguages, new ProgrammingLanguageTableCell());
+        
+        TableComparatorSelector sortSelect = new TableComparatorSelector(listTable, sortedLanguages);
+        sortSelect.addComparator(<span class="highlighted">0</span>, <span class="highlighted">"by name"</span>, sortByName);
+        sortSelect.addComparator(<span class="highlighted">0</span>, <span class="highlighted">"by year"</span>, sortByYear);
+        
+        JFrame frame = new JFrame("Programming Languages");
+        frame.getContentPane().setLayout(new GridBagLayout());
+        frame.getContentPane().add(new JLabel("Filter"), new GridBagConstraints(...));
+        frame.getContentPane().add(filteredLanguages.getFilterEdit(), new GridBagConstraints(...));
+        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(...));
+        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(...));
+        frame.getContentPane().add(listTable.getTableScrollPane(), new GridBagConstraints(...));
+        frame.setSize(640, 480);
+        frame.show();
+    }</code></pre>
+
+<img src="screenshot.gif" width="431" height="273" alt="Programming Languages Screen Shot">
+
+</body>
+</html>

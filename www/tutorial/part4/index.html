@@ -1,0 +1,113 @@
+<html>
+<head><title>Glazed Lists Tutorial Part 4 - Sorting</title>
+<link REL ="stylesheet" TYPE="text/css" HREF="../../stylesheet.css" TITLE="Style">
+</head>
+<body>
+
+<h3>Glazed Lists Tutorial</h3>
+<h1>Part 4 - Sorting</h1>
+
+Since the dawn of time, people have used 
+<a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">TableSorter</a>
+from The Java Tutorial to sort their tables. Unfortunately, TableSorter has a few problems:
+<li>TableSorter re-sorts your entire table whenever a row is added. For a table
+containing thousands of elements, this is unacceptable.
+<li>TableSorter doesn't know how to sort <strong>your</strong> table. It does a best
+guess, sorting Strings alphabetically and dates chronologically. Suppose that your table
+contains names like "Jesse Wilson" and "Phil O'Dell". TableSorter will sort by the entire
+String rather than by surname.
+
+<p>Glazed Lists sorting was inspired by TableSorter. The header-clicking actions
+works just as expected and the layered models is very powerful.
+
+<h3>Creating Comparators</h3>
+<p>For our tutorial, we are going to enable the user to sort by the name or year
+attributes of our <code>ProgrammingLanguage</code> objects. The first step is to
+write a <code>Comparator</code> for each criteria.
+
+<pre><code>import java.util.Comparator;
+
+public class ProgrammingLanguageNameComparator <span class="highlighted">implements Comparator</span> {
+
+    <span class="highlighted">public int compare(Object a, Object b)</span> {
+        ProgrammingLanguage languageA = (ProgrammingLanguage)a;
+        ProgrammingLanguage languageB = (ProgrammingLanguage)b;
+        
+        return languageA.getName().compareToIgnoreCase(languageB.getName());
+    }
+}</code></pre>
+
+<p>We also implemented a similar <code>Comparator</code> to compare objects by year.
+You will need to create a <code>Comparator</code> for each sorting criteria. Although
+this can be tedious, it provides full control of your sort order.
+
+<h3>Layering the SortedList</h3>
+
+<p>Just as we layered a filtered list between our source data and our display table,
+we can add a <code>SortedList</code> as well. The constructor for <code>SortedList</code>
+takes the source <code>EventList</code> and a <code>Comparator</code> to do ordering.
+<p>It is also possible to construct a <code>SortedList</code> without including a
+<code>Comparator</code> argument. If you use this technique, the objects in your list
+<strong>must</strong> implement the <code>Comparable</code> interface.
+
+<pre><code>import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.jtable.*;
+import javax.swing.*;
+import java.awt.*;
+
+public class ProgrammingLanguageBrowser {
+
+    BasicEventList languages;
+    <span class="highlighted">SortedList sortedLanguages;</span>
+    CaseInsensitiveFilterList filteredLanguages;
+    ProgrammingLanguageFilter customFilteredLanguages;
+
+    <span class="highlighted">ProgrammingLanguageNameComparator sortByName = new ProgrammingLanguageNameComparator();</span>
+    <span class="highlighted">ProgrammingLanguageYearComparator sortByYear = new ProgrammingLanguageYearComparator();</span>
+
+    public ProgrammingLanguageBrowser() {
+        languages = new BasicEventList();
+        languages.add(new ProgrammingLanguage("Java", "1995", "Object-oriented virtual machine language by Sun Microsystems", true, true));
+        languages.add(new ProgrammingLanguage("C", "1973", "The UNIX language originally developed for the PDP-11", false, false));
+        ...
+        languages.add(new ProgrammingLanguage("Visual Basic", "1992", "QuickBasic with a visual UI designer", false, false));
+        
+        <span class="highlighted">sortedLanguages = new SortedList(languages, sortByName);</span>
+        filteredLanguages = new CaseInsensitiveFilterList(sortedLanguages);
+        customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);
+    }</code></pre>
+
+<p>Also note that the SortedList was the <strong>first</strong> layered view over the
+source list. This is a simple optimization - if we had done it the other way, each time
+an object became un-filtered, we would need to re-sort it into the list.
+
+<h3>Selecting Comparators</h3>
+
+<p>Currently we have sorted our list by name, but what if the user wants to sort by
+year? We need to create a bridge from the <code>ListTable</code> to the
+<code>SortedList</code> so that clicking on the table headers changes the sort
+criteria. The bridge is called <code>TableComparatorSelector</code>, and we simply
+create an instance and add <code>Comparator</code>s as necessary.
+
+<pre><code>    public void display() {
+        ListTable listTable = new ListTable(customFilteredLanguages, new ProgrammingLanguageTableCell());
+        
+        <span class="highlighted">TableComparatorSelector sortSelect = new TableComparatorSelector(listTable, sortedLanguages);</span>
+        <span class="highlighted">sortSelect.addComparator(0, "(sorted)", sortByName);</span>
+        <span class="highlighted">sortSelect.addComparator(1, "(sorted)", sortByYear);</span>
+        
+        JFrame frame = new JFrame("Programming Languages");
+        frame.getContentPane().setLayout(new GridBagLayout());
+        frame.getContentPane().add(new JLabel("Filter"), new GridBagConstraints(...));
+        frame.getContentPane().add(filteredLanguages.getFilterEdit(), new GridBagConstraints(...));
+        frame.getContentPane().add(customFilteredLanguages.getObjectOrientedCheckBox(), new GridBagConstraints(...));
+        frame.getContentPane().add(customFilteredLanguages.getVirtualMachineCheckBox(), new GridBagConstraints(...));
+        frame.getContentPane().add(listTable.getTableScrollPane(), new GridBagConstraints(...));
+        frame.setSize(640, 480);
+        frame.show();
+    }</code></pre>
+
+<img src="screenshot.gif" width="431" height="235" alt="Programming Languages Screen Shot">
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<html>
+<head><title>Glazed Lists Tutorial Part 6 - Query Lists</title>
+<link REL ="stylesheet" TYPE="text/css" HREF="../../stylesheet.css" TITLE="Style">
+</head>
+<body>
+
+<h3>Glazed Lists Tutorial</h3>
+<h1>Part 6 - Query Lists</h1>
+
+One of the most important features of Glazed Lists is that it works with dynamically
+changing data. If our data was not dynamic, problems like sorting would be trivial.
+
+<p>For many applications, the dynamic component of the data will come from using
+the <code>add()</code> and <code>remove()</code> methods of BasicEventList. This
+quickly becomes unmanageable when the source data comes from an external source. 
+It is difficult to decide what has changed, and unacceptable to clear the table
+and then re-add all elements of an updated list. To solve this problem, Glazed Lists
+uses a dynamically-sourced list.
+
+<h3>Using DynamicQueryList</h3>
+<p><code>DynamicQueryList</code> is a list that you cannot directly add elements to.
+Instead, you specify where the <code>DynamicQueryList</code> can find the elements, and it looks
+them up. You also specify an interval at which the <code>DynamicQueryList</code>
+should update itself.
+<p>The lookup is done by implementing the <code>Query</code> interface. The significant
+method is <code>doQuery()</code>, which returns a <code>SortedSet</code>. This means
+that objects using queries must implement the <code>Comparable</code> interface, and
+it makes sense why. When the <code>DynamicQueryList</code> is comparing an updated objects
+to the original list, it needs to map the old values to the new values. By performing this
+step, updated objects are updated instead of being replaced. For example, on ListTable, this
+means that the selection is preserved even if the selected object is updated. 
+<p>For our programming language example, we're going to lookup our programming
+languages from a JDBC database. The first step is to add <code>Comparable</code> to
+our <code>ProgrammingLanguage</code> class.
+
+<pre><code>import com.odellengineeringltd.glazedlists.*;
+
+class ProgrammingLanguage implements Filterable, <span class="highlighted">Comparable</span> {
+    
+    ...
+    
+    <span class="highlighted">public int compareTo(Object other)</span> {
+        ProgrammingLanguage otherLanguage = (ProgrammingLanguage)other;
+        return getName().compareToIgnoreCase(otherLanguage.getName());
+    }
+}</code></pre>
+
+<h3>Creating the Query</h3>
+
+<p>Our query class needs to fetch a <code>SortedSet</code> of
+<code>ProgrammingLanguage</code> objects. We'll be using JDBC for the example,
+but it is not limited in how you find your objects. You could use EJB, SOAP, 
+local files or whatever your heart desires to lookup objects.
+
+<pre><code>import java.sql.*;
+import java.util.*;
+import com.odellengineeringltd.glazedlists.query.*;
+
+class ProgrammingLanguageQuery implements Query {
+
+    String jdbcDriverClassname;
+    String jdbcUri;
+    String jdbcUsername;
+    String jdbcPassword;
+    
+    public ProgrammingLanguageQuery(String[] jdbcParameters) {
+        jdbcDriverClassname = jdbcParameters[0];
+        jdbcUri = jdbcParameters[1];
+        jdbcUsername = jdbcParameters[2];
+        jdbcPassword = jdbcParameters[3];
+    }
+    
+    <span class="highlighted">public String getName()</span> {
+        return "Programming Languages";
+    }
+
+    <span class="highlighted">public SortedSet doQuery() throws InterruptedException</span> {
+
+        SortedSet results = new TreeSet();
+
+        try {
+            Class.forName(jdbcDriverClassname);
+            Connection connection = DriverManager.getConnection(jdbcUri, jdbcUsername, jdbcPassword);
+            PreparedStatement getAll = connection.prepareStatement("SELECT pl_name, pl_year, pl_description, pl_oop, pl_vm FROM programming_languages");
+            ResultSet resultSet = getAll.executeQuery();
+
+            while(resultSet.next()) {
+                String name = resultSet.getString("pl_name");
+                String year = resultSet.getString("pl_year");
+                String description = resultSet.getString("pl_description");
+                boolean oop = resultSet.getString("pl_oop").equalsIgnoreCase("Y");
+                boolean vm = resultSet.getString("pl_vm").equalsIgnoreCase("Y");
+                
+                results.add(new ProgrammingLanguage(name, year, description, oop, vm));
+            }
+            connection.close();
+            
+            return results;
+
+        } catch(ClassNotFoundException e) {
+            e.printStackTrace();
+            return results;
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return results;
+        }
+        
+    }
+    
+    <span class="highlighted">public boolean matchesObject(Comparable object)</span> {
+        return (object instanceof ProgrammingLanguage);
+    }
+}</code></pre>
+
+<h3>Creating the DynamicQueryList</h3>
+
+<p>Now that we've created our query, it's time to replace our static
+<code>BasicEventList</code> with something more dynamic. We create a new
+<code>DynamicQueryList</code> with a refresh interval in <strong>milliseconds</strong>.
+We then set the list to use our new query.
+
+<pre><code>import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.jtable.*;
+import com.odellengineeringltd.glazedlists.query.*;
+import javax.swing.*;
+import java.awt.*;
+
+public class ProgrammingLanguageBrowser {
+
+    <span class="highlighted">DynamicQueryList dynamicLanguages;</span>
+    SortedList sortedLanguages;
+    CaseInsensitiveFilterList filteredLanguages;
+    ProgrammingLanguageFilter customFilteredLanguages;
+
+    ProgrammingLanguageNameComparator sortByName = new ProgrammingLanguageNameComparator();
+    ProgrammingLanguageYearComparator sortByYear = new ProgrammingLanguageYearComparator();
+
+    public ProgrammingLanguageBrowser(String[] jdbcParameters) {
+        <span class="highlighted">dynamicLanguages = new DynamicQueryList(1000*30);</span>
+        <span class="highlighted">dynamicLanguages.setQuery(</span>new ProgrammingLanguageQuery()<span class="highlighted">)</span>;
+        
+        sortedLanguages = new SortedList(dynamicLanguages, sortByName);
+        filteredLanguages = new CaseInsensitiveFilterList(sortedLanguages);
+        customFilteredLanguages = new ProgrammingLanguageFilter(filteredLanguages);
+    }
+    
+    ...</code></pre>
+
+Now all that's left is to set up a sample database. I used my PostgreSQL database. The
+exciting thing here is that I can add rows to the database, and they propogate to
+the table. If the table is sorted or filtered, new rows show up where they are
+supposed to.
+
+<p><img src="screenshot.gif" width="431" height="273" alt="Programming Languages Screen Shot">
+
+<p>There are a few important things to know about <code>DynamicQueryList</code>:
+<li>It creates a <strong>new thread</strong> for itself. If you would prefer to have a query list
+that can share a thread, use <code>PeriodicQueryList</code> instead. That class
+provides a <code>TimerTask</code> that can be added to any <code>Timer</code> thread.
+<li>You can <strong>choose a different query</strong> whenever necessary. Just use the <code>setQuery()</code>
+method. When a different query is still running and you call <code>setQuery()</code>,
+the running query will be interrupted. If you have a query that could run a long time, you
+should periodically test <code>Thread.interrupted()</code> and throw an
+<code>InterruptedException</code> if you have been interrupted. That will allow a
+replacement query to continue.
+
+</body>
+</html>
