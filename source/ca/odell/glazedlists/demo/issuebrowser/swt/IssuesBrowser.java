@@ -7,7 +7,6 @@
 package ca.odell.glazedlists.demo.issuebrowser.swt;
 
 // swt
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.*;
@@ -15,8 +14,7 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.custom.*;
 // demo
-import ca.odell.glazedlists.demo.issuebrowser.Description;
-import ca.odell.glazedlists.demo.issuebrowser.Issue;
+import ca.odell.glazedlists.demo.issuebrowser.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
@@ -31,16 +29,18 @@ import ca.odell.glazedlists.swt.*;
  */
 public class IssuesBrowser {
 
-	/**
-	 * an event list to host the issues
-	 */
-	private IssuesList issuesEventList = new IssuesList();
+	/** an event list to host the issues */
+	private UniqueList issuesEventList = new UniqueList(new BasicEventList());
 
-	/**
-	 * To get access to the unique list of users
-	 */
+	/** To get access to the unique list of users */
 	private IssuesUserFilter issuesUserFiltered = null;
 	private List usersList = null;
+    
+    /** status bar is a temporary throbber */
+    private Text statusText = null;
+
+	/** loads issues as requested */
+	private IssueLoader issueLoader = new IssueLoader(issuesEventList, new IndeterminateToggler());
 
 	/**
 	 * Constructs a new IssuesBrowser in the given window
@@ -107,7 +107,7 @@ public class IssuesBrowser {
 		demoForm.setWeights(new int[]{50, 50});
 
 		// Start the demo
-		issuesEventList.start();
+		issueLoader.start();
 
 	}
 
@@ -240,7 +240,7 @@ public class IssuesBrowser {
 	}
 
 	private void createStatusBar(Composite parent) {
-		Text statusText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
+		statusText = new Text(parent, SWT.SINGLE | SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
 		GridData statusTextLayout = new GridData();
 		statusTextLayout.horizontalAlignment = GridData.FILL;
 		statusTextLayout.verticalAlignment = GridData.END;
@@ -342,6 +342,30 @@ public class IssuesBrowser {
 		System.exit(0);
 	}
 
+
+    /**
+     * Toggles the throbber on and off.
+     */
+    private class IndeterminateToggler implements Runnable, Throbber {
+
+        /** whether the throbber will be turned on and off */
+        private boolean on = false;
+        
+        public synchronized void setOn() {
+            on = true;
+            System.out.println("THROB ON");
+        }
+        
+        public synchronized void setOff() {
+            on = false;
+            System.out.println("THROB OFF");
+        }
+
+        public synchronized void run() {
+            //if(on) throbber.setIcon(throbberActive);
+            //else throbber.setIcon(throbberStatic);
+        }
+    }
 }
 
 /**
