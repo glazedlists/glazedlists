@@ -121,6 +121,14 @@ public class EventTableViewer implements ListEventListener {
     public TableFormat getTableFormat() {
         return tableFormat;
     }
+    
+    /**
+     * Gets the table being managed by this {@link EventTableViewer}.
+     */
+    public Table getTable() {
+        return table;
+    }
+        
 
     /**
      * Sets this table to be rendered by a different table format.

@@ -422,7 +422,7 @@ public final class TableComparatorChooser extends MouseAdapter implements TableM
         table.getTableHeader().repaint();
         
         // notify interested listeners that the sorting has changed
-        sortListener.actionPerformed(new ActionEvent(this, 0, "sort"));
+        if(sortListener != null) sortListener.actionPerformed(new ActionEvent(this, 0, "sort"));
     }
 
     /**

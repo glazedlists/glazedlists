@@ -42,9 +42,15 @@ public class Demo {
         // filter list
         TextFilterList issuesFiltered = new TextFilterList(issues, filterEdit);
 
-        // all table list
-		EventTableViewer allTableViewer = new EventTableViewer(issuesFiltered, everythingTable, new IssueTableFormat());
+        // sort the list of all issues
+        SortedList allSorted = new SortedList(issuesFiltered);
 
+        // all table list
+		EventTableViewer allTableViewer = new EventTableViewer(allSorted, everythingTable, new IssueTableFormat());
+
+        // set up table sorting for column-clicking
+        new TableComparatorChooser(allTableViewer, allSorted, false);
+        
         // checked table list
 		EventTableViewer checkedTableViewer = new EventTableViewer(issuesFiltered, checkedTable, new IssueTableFormat());
 		checkedTableViewer.setCheckedOnly(true);
