@@ -19,8 +19,47 @@ import java.nio.*;
 import java.io.*;
 
 /**
- * A resource is a dynamic Object that can publish its changes as a series of deltas.
- * It is also possible to construct a resource using a shapshot.
+ * An {@link EventList} that is either published to the network or subscribed from
+ * the network. Since list elements must be transmitted over the network, each
+ * {@link NetworkList} requires a {@link ByteCoder} to convert {@link Objects} to
+ * and from bytes.
+ *
+ * <p>To instantiate a {@link NetworkList}, use the {@link ListPeer#subscribe(String,String,int,ByteCoder)}
+ * and {@link ListPeer#publish(EventList,String,ByteCoder)} methods of a started
+ * {@link ListPeer}.
+ *
+ * <p>{@link NetworkList}s may be taken offline and brought back online with the
+ * {@link #connect()} and {@link #disconnect()} methods. This allows an application
+ * to use a {@link NetworkList} in spite of an unreliable network connection.
+ *
+ * <p>As a consequence of imperfect networks, {@link NetworkList}s may sometimes go
+ * offline on their own. Some causes of this include the server program shutting
+ * down or crashing, the local network connection becoming unavailable, or a
+ * problem with the physical link, such as an unplugged cable.
+ *
+ * <p>{@link NetworkList}s use a subset of HTTP/1.1 for transport, including
+ * chunked encoding. This protocol brings its own set of advantages:
+ *    <li>HTTP is a standard well-understood protocol
+ *    <li>Clients may be served even if they are behind NAT or Firewalls
+ *    <li>The connection could be proxied by a standard HTTP proxy server, if necessary
+ *    <li>In theory, the served port could be shared with another HTTP daemon such as Tomcat
+ * 
+ * <p>And HTTP brings some disadvantages also:
+ *    <li>A persistent connection must be held, even if updates are infrequent
+ *    <li>It cannot be differentiated from web traffic for analysis
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> The protocol used by
+ * this version of {@link NetworkList} will be incompatible with future versions.
+ * Eventually the protocol will be finalized but the current protocol does not have
+ * this luxury.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class
+ * breaks the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -45,7 +84,7 @@ public final class NetworkList extends TransformedList {
     private PrivateInterfaces privateInterfaces = new PrivateInterfaces();
     
     /**
-     * Create a NetworkList that connects to the specified source.
+     * Create a {@link NetworkList} that brings the specified source online.
      */
     NetworkList(EventList source, ByteCoder byteCoder) {
         super(source);
@@ -106,16 +145,17 @@ public final class NetworkList extends TransformedList {
     }
     
     /**
-     * Forces this resource to attempt to connect. The results from the attempt
-     * will not be visible immediately.
+     * Attempts to bring this {@link NetworkList} online. When the connection attempt
+     * is successful (or when it fails), all {@link ResourceStatusListener}s will be
+     * notified.
      */
     public void connect() {
         resourceStatus.connect();
     }
     
     /**
-     * Forces this resource to attempt to disconnect. This will prevent the resource
-     * from consuming network resources.
+     * Attempts to take this {@link NetworkList} offline. When the {@link NetworkList}
+     * is fully disconnected, all {@link ResourceStatusListener}s will be notified.
      */
     public void disconnect() {
         resourceStatus.disconnect();
@@ -168,7 +208,9 @@ public final class NetworkList extends TransformedList {
         private void applyCodedEvent(Bufferlo data) {
             getReadWriteLock().writeLock().lock();
             try {
+                updates.beginEvent(true);
                 ListEventToBytes.toListEvent(data, source, byteCoder);
+                updates.commitEvent();
             } catch(IOException e) {
                 throw new IllegalStateException(e.getMessage());
             } finally {
@@ -199,7 +241,7 @@ public final class NetworkList extends TransformedList {
         
     /**
      * Registers the specified listener to receive events about the status of this
-     * resource.
+     * {@link NetworkList}.
      */
     public void addStatusListener(NetworkListStatusListener listener) {
         statusListeners.add(listener);
@@ -207,7 +249,7 @@ public final class NetworkList extends TransformedList {
     
     /**
      * Deregisters the specified listener from receiving events about the status of
-     * this resource.
+     * this {@link NetworkList}.
      */
     public void removeStatusListener(NetworkListStatusListener listener) {
         statusListeners.remove(listener);

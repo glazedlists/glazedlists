@@ -19,7 +19,20 @@ import java.nio.*;
 import java.io.*;
 
 /**
- * A {@link ListPeer} provides functions to publish and subscribe to EventLists.
+ * A {@link ListPeer} manages the network resources for publishing and subscribing
+ * to {@link NetworkList}s. 
+ *
+ * <p>A {@link ListPeer} must have its {@link #start()} method complete successfully
+ * before it can be used to {@link #publish(EventList,String,ByteCoder) publish()} and
+ * {@link #subscribe(String,String,int,ByteCoder) subscribe()} {@link EventList}s.
+ *
+ * <p>When a {@link ListPeer} is started, it listens for incoming connections on
+ * the specified port. When it is stopped, all active {@link NetworkList}s are
+ * {@link NetworkList#disconnect() disconnected}, and the port is closed.
+ *
+ * <p>To bring and individual {@link NetworkList} online or offline, use its
+ * {@link NetworkList#disconnect() disconnect()} and {@link NetworkList#connect() connect()}
+ * methods.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
