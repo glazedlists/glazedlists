@@ -87,5 +87,4 @@ public final class SortIconFactory {
             else icons[i] = null;
         }
     }
-
 }

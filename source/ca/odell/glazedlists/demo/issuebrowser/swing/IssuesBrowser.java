@@ -130,7 +130,7 @@ public class IssuesBrowser extends Applet {
 		issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
 		TableComparatorChooser tableSorter = new TableComparatorChooser(issuesJTable, issuesSortedList, true);
 		JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
+        
 		// users table
 		JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -174,8 +174,8 @@ public class IssuesBrowser extends Applet {
 		url = jarLoader.getResource("resources/demo/throbber-active.gif");
 		if (url != null) throbberActive = new ImageIcon(url);
 		throbber = new JLabel(throbberStatic);
-		iconBar.add(projectsCombo, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		iconBar.add(throbber, new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		iconBar.add(projectsCombo,                           new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		iconBar.add(throbber,                                new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
 		// create the filters panel
 		JPanel filtersPanel = new JPanel();
@@ -187,14 +187,15 @@ public class IssuesBrowser extends Applet {
 		filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,  10, 15,  10), 0, 0));
 		filtersPanel.add(new JLabel("User"),                 new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
 		filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 10, 10), 0, 0));
+        
 
 		// a panel with a table
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
-		panel.add(iconBar, new GridBagConstraints(0, 0, 2, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
-		panel.add(filtersPanel, new GridBagConstraints(0, 1, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		panel.add(issuesTableScrollPane, new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		panel.add(descriptionsTableScrollPane, new GridBagConstraints(1, 2, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		panel.add(iconBar,                                   new GridBagConstraints(0, 0, 2, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
+		panel.add(filtersPanel,                              new GridBagConstraints(0, 1, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		panel.add(issuesTableScrollPane,                     new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		panel.add(descriptionsTableScrollPane,               new GridBagConstraints(1, 2, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
 		return panel;
 	}

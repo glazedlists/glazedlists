@@ -159,6 +159,7 @@ public abstract class AbstractTableComparatorChooser {
      */
     protected void columnClicked(int column, int clicks) {
         ColumnClickTracker currentTracker = columnClickTrackers[column];
+        if(currentTracker.getComparators().isEmpty()) return;
 
         // on a double click, clear the click counts
         if(clicks == 2) {
@@ -181,14 +182,12 @@ public abstract class AbstractTableComparatorChooser {
         }
 
         // add a click to the newly clicked column if it has any comparators
-        if(!currentTracker.getComparators().isEmpty()) {
-            currentTracker.addClick();
-            if(recentlyClickedColumns.isEmpty()) {
-                recentlyClickedColumns.add(currentTracker);
-                primaryColumn = column;
-            } else if(!recentlyClickedColumns.contains(currentTracker)) {
-                recentlyClickedColumns.add(currentTracker);
-            }
+        currentTracker.addClick();
+        if(recentlyClickedColumns.isEmpty()) {
+            recentlyClickedColumns.add(currentTracker);
+            primaryColumn = column;
+        } else if(!recentlyClickedColumns.contains(currentTracker)) {
+            recentlyClickedColumns.add(currentTracker);
         }
 
         // apply our comparator changes to the sorted list
