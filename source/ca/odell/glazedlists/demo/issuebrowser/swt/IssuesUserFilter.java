@@ -93,24 +93,13 @@ public class IssuesUserFilter extends AbstractFilterList {
             boolean constrained = false;
             boolean relaxed = false;
             while(listChanges.next()) {
-                int type = listChanges.getType();
-                if(type == ListEvent.UPDATE || type == ListEvent.DELETE) relaxed = true;
-                if(type == ListEvent.UPDATE || type == ListEvent.INSERT) constrained = true;
+                // do nothing
             }
 
             // The filter now contains a different set of users
             getReadWriteLock().writeLock().lock();
             try {
-                //if(constrained && relaxed) {
-                //    System.out.println("FILTER CHANGED!");
-                    handleFilterChanged();
-                //} else if(relaxed) {
-                //    System.out.println("FILTER RELAXED!!");
-                //    handleFilterRelaxed();
-                //} else if(constrained) {
-                //    System.out.println("FILTER CONSTRAINED!");
-                //    handleFilterConstrained();
-                //}
+                handleFilterChanged();
             } finally {
                 getReadWriteLock().writeLock().unlock();
             }
