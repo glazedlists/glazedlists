@@ -507,6 +507,6 @@ public final class Barcode {
      * functionality.
      */
     public BarcodeIterator iterator() {
-        return new BarcodeNode.BarcodeIteratorImpl(this);
+        return new BarcodeIterator(this);
     }
 }
