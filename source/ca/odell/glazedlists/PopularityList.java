@@ -53,8 +53,6 @@ public final class PopularityList extends TransformedList {
     /**
      * Creates a new {@link PopularityList} that provides frequency-ranking for the
      * specified {@link EventList}.
-     * 
-     * @param uniqueComparator The {@link Comparator} used to determine equality.
      */
     public PopularityList(EventList source) {
         this(source, new UniqueList(source));
