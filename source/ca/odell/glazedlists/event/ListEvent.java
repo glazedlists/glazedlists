@@ -176,6 +176,35 @@ public final class ListEvent extends EventObject {
             return true;
         }
     }
+    
+    /**
+     * Tests if this change is a complete reordering of the list.
+     */
+    public boolean isReordering() {
+        return (masterSequence.getReorderMap(atomicCount) != null);
+    }
+    
+    /**
+     * Gets the reorder map of this list. This will also increment the change
+     * sequence to the next change.
+     *
+     * @return an array of integers where the the previous index of a value is
+     *      stored at the current index of that value.
+     */
+    public int[] getReorderMap() {
+        int[] reorderMap = masterSequence.getReorderMap(atomicCount);
+        if(reorderMap == null) throw new IllegalStateException("Cannot get reorder map for a non-reordering change");
+        // clear the list change
+        listChange = null;
+        rowIndex = -5;
+        blockCount = 0;
+        // prepare for the next atomic change
+        if(atomicCount >= masterSequence.getAtomicCount()) {
+            throw new NoSuchElementException("Cannot iterate past the total number of changes!");
+        }
+        atomicCount++;
+        return reorderMap;
+    }
 
     /**
      * Gets the current row index. If the listChange type is delete, this

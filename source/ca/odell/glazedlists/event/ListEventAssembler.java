@@ -30,12 +30,15 @@ public final class ListEventAssembler {
     
     /** the list of lists of change blocks */
     private ArrayList atomicChanges = new ArrayList();
+    private ArrayList reorderMaps = new ArrayList();
     private int oldestChange = 0;
     
     /** the current working copy of the atomic change */
     private ArrayList atomicChangeBlocks = null;
     /** the most recent list change; this is the only change we can append to */
     private ListEventBlock atomicLatestBlock = null;
+    /** the current reordering array if this change is a reorder */
+    private int[] reorderMap = null;
     
     /** the pool of list change objects */
     private ArrayList changePool = new ArrayList();
@@ -114,6 +117,7 @@ public final class ListEventAssembler {
     private void prepareEvent() {
         atomicChangeBlocks = new ArrayList();
         atomicLatestBlock = null;
+        reorderMap = null;
         
         // calculate the oldest change still needed
         int oldestRequiredChange = atomicChanges.size(); 
@@ -199,6 +203,16 @@ public final class ListEventAssembler {
     public void addUpdate(int startIndex, int endIndex) { 
         addChange(ListEvent.UPDATE, startIndex, endIndex);
     }
+    /**
+     * Sets the current event as a reordering. Reordering events cannot be
+     * combined with other events.
+     */
+    public void reorder(int[] reorderMap) {
+        if(atomicChangeBlocks.size() > 0) throw new IllegalStateException("Cannot combine reorder with other change events");
+        addChange(ListEvent.DELETE, 0, reorderMap.length - 1);
+        addChange(ListEvent.INSERT, 0, reorderMap.length - 1);
+        this.reorderMap = reorderMap;
+    }
 
     /**
      * Commits the current atomic change to this list change queue. This will
@@ -233,6 +247,12 @@ public final class ListEventAssembler {
             ListEventBlock.sortListEventBlocks(atomicChangeBlocks);
             // add this to the complete set
             atomicChanges.add(atomicChangeBlocks);
+            // add the reorder map to the complete set only if it is the only change
+            if(reorderMap != null && atomicChangeBlocks.size() == 2) {
+                reorderMaps.add(reorderMap);
+            } else {
+                reorderMaps.add(null);
+            }
             
             // notify listeners
             try {
@@ -251,12 +271,14 @@ public final class ListEventAssembler {
             } finally {
                 atomicChangeBlocks = null;
                 atomicLatestBlock = null;
+                reorderMap = null;
             }
 
         // clear the change for the next caller
         } else {
             atomicChangeBlocks = null;
             atomicLatestBlock = null;
+            reorderMap = null;
         }
     }
 
@@ -295,6 +317,14 @@ public final class ListEventAssembler {
     ListEventBlock getBlock(int atomicCount, int block) {
         List atomicChange = (List)atomicChanges.get(atomicCount);
         return (ListEventBlock)atomicChange.get(block);
+    }
+    
+    /**
+     * Gets the reorder map for the specified atomic change or null if that
+     * change is not a reordering.
+     */
+    int[] getReorderMap(int atomicCount) {
+        return (int[])reorderMaps.get(atomicCount);
     }
     
     /**

@@ -203,54 +203,75 @@ public final class EventSelectionModel {
             
             // prepare a sequence of changes
             updates.beginEvent();
-            
-            // for all changes simply update the flag list
-            while(listChanges.next()) {
-                int index = listChanges.getIndex();
-                int changeType = listChanges.getType();
+        
+            // handle reordering events
+            if(listChanges.isReordering()) {
+                int[] sourceReorderMap = listChanges.getReorderMap();
+                int[] selectReorderMap = new int[flagList.getCompressedList().size()];
                 
-                // learn about what it was
-                boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
-                int previousSelectionIndex = -1;
-                if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
+                // adjust the flaglist & construct a reorder map to propagate
+                SparseList previousFlagList = flagList;
+                flagList = new SparseList();
+                for(int i = 0; i < sourceReorderMap.length; i++) {
+                    Object flag = previousFlagList.get(sourceReorderMap[i]); 
+                    flagList.add(flag);
+                    if(flag != null) selectReorderMap[flagList.getCompressedIndex(i)] = previousFlagList.getCompressedIndex(sourceReorderMap[i]);
+                }
                 
-                // when an element is deleted, blow it away
-                if(changeType == ListEvent.DELETE) {
-                    flagList.remove(index);
+                // fire the reorder
+                updates.reorder(selectReorderMap);
+
+            // handle non-reordering events
+            } else {
+
+                // for all changes simply update the flag list
+                while(listChanges.next()) {
+                    int index = listChanges.getIndex();
+                    int changeType = listChanges.getType();
+                    
+                    // learn about what it was
+                    boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
+                    int previousSelectionIndex = -1;
+                    if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
+                    
+                    // when an element is deleted, blow it away
+                    if(changeType == ListEvent.DELETE) {
+                        flagList.remove(index);
+        
+                        // fire a change to the selection list if a selected object is changed
+                        if(previouslySelected) {
+                            updates.addDelete(previousSelectionIndex);
+                        }
+                        
+                    // when an element is inserted, it is selected if its index was selected
+                    } else if(changeType == ListEvent.INSERT) {
+                        
+                        // when selected, decide based on selection mode
+                        if(previouslySelected) {
     
-                    // fire a change to the selection list if a selected object is changed
-                    if(previouslySelected) {
-                        updates.addDelete(previousSelectionIndex);
-                    }
-                    
-                // when an element is inserted, it is selected if its index was selected
-                } else if(changeType == ListEvent.INSERT) {
-                    
-                    // when selected, decide based on selection mode
-                    if(previouslySelected) {
-
-                        // select the inserted for single interval and multiple interval selection
-                        if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
-                        || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
-                            flagList.add(index, Boolean.TRUE);
-                            updates.addInsert(previousSelectionIndex);
-
-                        // do not select the inserted for single selection and defensive selection
+                            // select the inserted for single interval and multiple interval selection
+                            if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
+                            || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
+                                flagList.add(index, Boolean.TRUE);
+                                updates.addInsert(previousSelectionIndex);
+    
+                            // do not select the inserted for single selection and defensive selection
+                            } else {
+                                flagList.add(index, null);
+                            }
+    
+                        // when not selected, just add the space
                         } else {
                             flagList.add(index, null);
                         }
-
-                    // when not selected, just add the space
-                    } else {
-                        flagList.add(index, null);
-                    }
-                    
-                // when an element is changed, assume selection stays the same
-                } else if(changeType == ListEvent.UPDATE) {
-    
-                    // fire a change to the selection list if a selected object is changed
-                    if(previouslySelected) {
-                        updates.addUpdate(previousSelectionIndex);
+                        
+                    // when an element is changed, assume selection stays the same
+                    } else if(changeType == ListEvent.UPDATE) {
+        
+                        // fire a change to the selection list if a selected object is changed
+                        if(previouslySelected) {
+                            updates.addUpdate(previousSelectionIndex);
+                        }
                     }
                 }
             }

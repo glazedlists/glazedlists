@@ -90,65 +90,87 @@ public abstract class AbstractFilterList extends TransformedList implements List
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
         
-        // for all changes, one index at a time
-        while(listChanges.next()) {
+        // handle reordering events
+        if(listChanges.isReordering()) {
+            int[] sourceReorderMap = listChanges.getReorderMap();
+            int[] filterReorderMap = new int[flagList.getCompressedList().size()];
             
-            // get the current change info
-            int sourceIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-
-            // handle delete events
-            if(changeType == ListEvent.DELETE) {
-                // test if this value was already not filtered out
-                boolean wasIncluded = flagList.get(sourceIndex) != null;
+            // adjust the flaglist & construct a reorder map to propagate
+            SparseList previousFlagList = flagList;
+            flagList = new SparseList();
+            for(int i = 0; i < sourceReorderMap.length; i++) {
+                Object flag = previousFlagList.get(sourceReorderMap[i]); 
+                flagList.add(flag);
+                if(flag != null) filterReorderMap[flagList.getCompressedIndex(i)] = previousFlagList.getCompressedIndex(sourceReorderMap[i]);
+            }
+            
+            // fire the reorder
+            updates.reorder(filterReorderMap);
+            
+        // handle non-reordering events
+        } else {
+        
+            // for all changes, one index at a time
+            while(listChanges.next()) {
                 
-                // if this value was not filtered out, it is now so add a change
-                if(wasIncluded) {
-                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.addDelete(filteredIndex);
-                }
-
-                // remove this entry from the flag list
-                flagList.remove(sourceIndex);
-                
-            // handle insert events
-            } else if(changeType == ListEvent.INSERT) {
-                
-                // whether we should add this item
-                boolean include = filterMatches(source.get(sourceIndex));
-                
-                // if this value should be included, add a change and add the item
-                if(include) {
-                    flagList.add(sourceIndex, Boolean.TRUE);
-                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.addInsert(filteredIndex);
-
-                // if this value should not be included, just add the item
-                } else {
-                    flagList.add(sourceIndex, null);
-                }
-
-            // handle update events
-            } else if(changeType == ListEvent.UPDATE) {
-                // test if this value was already not filtered out
-                boolean wasIncluded = flagList.get(sourceIndex) != null;
-                // whether we should add this item
-                boolean include = filterMatches(source.get(sourceIndex));
-
-                // if this element is being removed as a result of the change
-                if(wasIncluded && !include) {
-                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    flagList.set(sourceIndex, null);
-                    updates.addDelete(filteredIndex);
-
-                // if this element is being added as a result of the change
-                } else if(!wasIncluded && include) {
-                    flagList.set(sourceIndex, Boolean.TRUE);
-                    int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.addInsert(filteredIndex);
+                // get the current change info
+                int sourceIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+    
+                // handle delete events
+                if(changeType == ListEvent.DELETE) {
+                    // test if this value was already not filtered out
+                    boolean wasIncluded = flagList.get(sourceIndex) != null;
+                    
+                    // if this value was not filtered out, it is now so add a change
+                    if(wasIncluded) {
+                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                        updates.addDelete(filteredIndex);
+                    }
+    
+                    // remove this entry from the flag list
+                    flagList.remove(sourceIndex);
+                    
+                // handle insert events
+                } else if(changeType == ListEvent.INSERT) {
+                    
+                    // whether we should add this item
+                    boolean include = filterMatches(source.get(sourceIndex));
+                    
+                    // if this value should be included, add a change and add the item
+                    if(include) {
+                        flagList.add(sourceIndex, Boolean.TRUE);
+                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                        updates.addInsert(filteredIndex);
+    
+                    // if this value should not be included, just add the item
+                    } else {
+                        flagList.add(sourceIndex, null);
+                    }
+    
+                // handle update events
+                } else if(changeType == ListEvent.UPDATE) {
+                    // test if this value was already not filtered out
+                    boolean wasIncluded = flagList.get(sourceIndex) != null;
+                    // whether we should add this item
+                    boolean include = filterMatches(source.get(sourceIndex));
+    
+                    // if this element is being removed as a result of the change
+                    if(wasIncluded && !include) {
+                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                        flagList.set(sourceIndex, null);
+                        updates.addDelete(filteredIndex);
+    
+                    // if this element is being added as a result of the change
+                    } else if(!wasIncluded && include) {
+                        flagList.set(sourceIndex, Boolean.TRUE);
+                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                        updates.addInsert(filteredIndex);
+                    }
                 }
             }
         }
+
         // commit the changes and notify listeners
         updates.commitEvent();
     }

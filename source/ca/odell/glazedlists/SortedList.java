@@ -227,11 +227,11 @@ public final class SortedList extends TransformedList {
     public void setComparator(Comparator comparator) {
         ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
-
-            //System.out.println("  > Sorting a list of size: " + source.size());
-            
             // save this comparator
             this.comparator = comparator;
+            // keep the old trees to construct the reordering
+            IndexedTree previousSorted = sorted;
+            IndexedTree previousUnsorted = unsorted;
             // create the sorted list with a simple comparator
             Comparator treeComparator = null;
             if(comparator != null) treeComparator = new IndexedTreeNodeComparator(comparator);
@@ -240,22 +240,34 @@ public final class SortedList extends TransformedList {
             // create a list which knows the offsets of the indexes
             unsorted = new IndexedTree();
             
-            // we're done if there's no elements in the source list
-            if(source.size() == 0) return;
-            
             // add all elements in the source list, in order
             for(int i = 0; i < source.size(); i++) {
                 IndexedTreeNode unsortedNode = unsorted.addByNode(i, this);
                 insertByUnsortedNode(unsortedNode);
             }
+            
+            // if this is the first sort, we're done 
+            if(previousSorted == null && previousUnsorted == null) return;
+
+            // construct the reordering array
+            int[] reorderMap = new int[size()];
+            for(int i = 0; i < reorderMap.length; i++) {
+                // get the previous index
+                IndexedTreeNode previousSortedNode = previousSorted.getNode(i);
+                IndexedTreeNode previousUnsortedNode = (IndexedTreeNode)previousSortedNode.getValue();
+                int previousUnsortedIndex = previousUnsortedNode.getIndex();
+                // get the new index
+                IndexedTreeNode currentSortedNode = sorted.getNode(i);
+                IndexedTreeNode currentUnsortedNode = (IndexedTreeNode)currentSortedNode.getValue();
+                int currentUnsortedIndex = currentUnsortedNode.getIndex();
+                // create the reordering
+                reorderMap[currentUnsortedIndex] = previousUnsortedIndex;  
+            }
 
             // notification about the big change
             updates.beginEvent();
-            updates.addDelete(0, size() - 1);
-            updates.addInsert(0, size() - 1);
+            updates.reorder(reorderMap);
             updates.commitEvent();
-            
-            //System.out.println("  < Sorted  a list of size: " + source.size());
 
         } finally {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
