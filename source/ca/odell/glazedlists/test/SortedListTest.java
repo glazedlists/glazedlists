@@ -448,6 +448,24 @@ public class SortedListTest extends TestCase {
         source.setComparator(null);
         assertEquals(consistencyTestList, sorted);
     }
+    
+    /**
+     * Verify that the sorted list works with no compatator.
+     */
+    public void testNoComparator() {
+        List consistencyTestList = new ArrayList();
+        consistencyTestList.add("A");
+        consistencyTestList.add("C");
+        consistencyTestList.add("B");
+        
+        SortedList sorted = new SortedList(new BasicEventList(), null);
+        sorted.addAll(consistencyTestList);
+        assertEquals(consistencyTestList, sorted);
+
+        sorted.set(2, "A");
+        sorted.clear();
+        assertEquals(Collections.EMPTY_LIST, sorted);
+    }
 
     /**
      * Explicit comparator for Kevin's sanity!

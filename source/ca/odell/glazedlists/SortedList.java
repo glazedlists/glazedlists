@@ -529,10 +529,12 @@ public final class SortedList extends TransformedList {
          */
         public int compareTo(Object other) {
             IndexNodePair otherIndexNodePair = (IndexNodePair)other;
-            Object myObject = source.get(node.getIndex());
-            Object otherObject = source.get(otherIndexNodePair.node.getIndex());
-            int compareResult = comparator.compare(myObject, otherObject);
-            if(compareResult != 0) return compareResult;
+            if(comparator != null) {
+                Object myObject = source.get(node.getIndex());
+                Object otherObject = source.get(otherIndexNodePair.node.getIndex());
+                int compareResult = comparator.compare(myObject, otherObject);
+                if(compareResult != 0) return compareResult;
+            }
             return index - otherIndexNodePair.index;
         }
     }
