@@ -70,11 +70,15 @@ public final class EventSelectionModel implements ListSelectionModel {
     /** the new selection mode behaves similar to MULTIPLE_INTERVAL_SELECTION */
     public static final int MULTIPLE_INTERVAL_SELECTION_DEFENSIVE = 103;
 
-    /** the event list provides an event list view of the selection */
-    private SelectionEventList eventList;
+    /** the event lists that provide an event list view of the selection */
+    private SelectionEventList selectionList;
 
     /** the flag list contains Barcode.BLACK for selected items and Barcode.WHITE for others */
     private Barcode flagList = new Barcode();
+
+    /** to allow for selection inversion without changing the barcode */
+    private Object selected = Barcode.BLACK;
+    private Object deselected = Barcode.WHITE;
 
     /** the proxy moves events to the Swing Event Dispatch thread */
     private TransformedList swingSource;
@@ -105,19 +109,37 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     public EventSelectionModel(EventList source) {
         swingSource = GlazedListsSwing.swingThreadProxyList(source);
-        
+
         // build the initial state
-        flagList.addWhite(0, swingSource.size());
+        flagList.add(0, deselected, swingSource.size());
 
         // build a list for reading the selection
-        this.eventList = new SelectionEventList(swingSource);
+        this.selectionList = new SelectionEventList(swingSource);
     }
 
     /**
      * Gets the event list that always contains the current selection.
+     *
+     * @deprecated As of 2005/02/18, the naming of this method became
+     *             ambiguous.  Please use {@link #getSelected()}.
      */
     public EventList getEventList() {
-        return eventList;
+        return selectionList;
+    }
+
+    /**
+     * Gets an {@link EventList} that always contains the current selection.
+     */
+    public EventList getSelected() {
+        return selectionList;
+    }
+
+    /**
+     * Gets an {@link EventList} that always contains the items from the source
+     * that are NOT currently selected.
+     */
+    public EventList getDeselected() {
+        throw new UnsupportedOperationException("This feature is not yet implemented.");
     }
 
     /**
@@ -131,6 +153,38 @@ public final class EventSelectionModel implements ListSelectionModel {
     }
 
     /**
+     * Inverts the current selection.
+     */
+    public void invertSelection() {
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
+        try {
+            // Switch what will be considered selected by this model
+            if(selected == Barcode.BLACK) {
+                selected = Barcode.WHITE;
+                deselected = Barcode.BLACK;
+            } else {
+                selected = Barcode.BLACK;
+                deselected = Barcode.WHITE;
+            }
+
+            // Forward the change on the selection driven EventList
+            updates.beginEvent();
+            updates.addDelete(0, flagList.colourSize(deselected));
+            updates.addInsert(0, flagList.colourSize(selected));
+            updates.commitEvent();
+
+            // Clear the anchor and lead
+            anchorSelectionIndex = -1;
+            leadSelectionIndex = -1;
+
+            // Forward a change to registered selection listeners
+            fireSelectionChanged(0, flagList.size());
+        } finally {
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
+        }
+    }
+
+    /**
      * Set the EventSelectionModel as editable or not. This means that the user cannot
      * manipulate the selection by clicking. The selection can still be changed as
      * the source list changes.
@@ -140,11 +194,11 @@ public final class EventSelectionModel implements ListSelectionModel {
      * modify the selection in code.
      */
     public void setEnabled(boolean enabled) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             this.enabled = enabled;
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -152,11 +206,11 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Gets whether the EventSelectionModel is editable or not.
      */
     public boolean getEnabled() {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             return enabled;
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -197,7 +251,7 @@ public final class EventSelectionModel implements ListSelectionModel {
          * queued to be processed.
          */
         public Object get(int index) {
-            int sourceIndex = flagList.getIndex(index, Barcode.BLACK);
+            int sourceIndex = flagList.getIndex(index, selected);
 
             // ensure that this value still exists before retrieval
             if(sourceIndex < swingSource.size()) {
@@ -214,7 +268,7 @@ public final class EventSelectionModel implements ListSelectionModel {
          * @return the number of elements currently selected.
          */
         public int size() {
-            return flagList.blackSize();
+            return flagList.colourSize(selected);
         }
 
         /**
@@ -222,7 +276,7 @@ public final class EventSelectionModel implements ListSelectionModel {
          * index in this list.
          */
         protected int getSourceIndex(int mutationIndex) {
-            return flagList.getIndex(mutationIndex, Barcode.BLACK);
+            return flagList.getIndex(mutationIndex, selected);
         }
 
         /**
@@ -240,7 +294,7 @@ public final class EventSelectionModel implements ListSelectionModel {
          * changes to the corresponding selection list.
          */
         public void listChanged(ListEvent listChanges) {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
             try {
                 // prepare for notifying ListSelectionListeners
                 int minSelectionIndexBefore = getMinSelectionIndex();
@@ -252,18 +306,18 @@ public final class EventSelectionModel implements ListSelectionModel {
                 // handle reordering events
                 if(listChanges.isReordering()) {
                     int[] sourceReorderMap = listChanges.getReorderMap();
-                    int[] selectReorderMap = new int[flagList.blackSize()];
+                    int[] selectReorderMap = new int[flagList.colourSize(selected)];
 
                     // adjust the flaglist & construct a reorder map to propagate
                     Barcode previousFlagList = flagList;
                     flagList = new Barcode();
                     for(int c = 0; c < sourceReorderMap.length; c++) {
                         Object flag = previousFlagList.get(sourceReorderMap[c]);
-                        boolean wasSelected = (flag != Barcode.WHITE);
+                        boolean wasSelected = (flag != deselected);
                         flagList.add(c, flag, 1);
                         if(wasSelected) {
-                            int previousIndex = previousFlagList.getBlackIndex(sourceReorderMap[c]);
-                            int currentIndex = flagList.getBlackIndex(c);
+                            int previousIndex = previousFlagList.getColourIndex(sourceReorderMap[c], selected);
+                            int currentIndex = flagList.getColourIndex(c, selected);
                             selectReorderMap[currentIndex] = previousIndex;
                         }
                     }
@@ -284,7 +338,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                         int changeType = listChanges.getType();
 
                         // learn about what it was
-                        int previousSelectionIndex = flagList.getBlackIndex(index);
+                        int previousSelectionIndex = flagList.getColourIndex(index, selected);
                         boolean previouslySelected = previousSelectionIndex != -1;
 
                         // when an element is deleted, blow it away
@@ -305,17 +359,17 @@ public final class EventSelectionModel implements ListSelectionModel {
                                 // select the inserted for single interval and multiple interval selection
                                 if(selectionMode == SINGLE_INTERVAL_SELECTION
                                 || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
-                                    flagList.addBlack(index, 1);
+                                    flagList.add(index, selected, 1);
                                     updates.addInsert(previousSelectionIndex);
 
                                 // do not select the inserted for single selection and defensive selection
                                 } else {
-                                    flagList.addWhite(index, 1);
+                                    flagList.add(index, deselected, 1);
                                 }
 
                             // when not selected, just add the space
                             } else {
-                                flagList.addWhite(index, 1);
+                                flagList.add(index, deselected, 1);
                             }
 
                         // when an element is changed, assume selection stays the same
@@ -348,7 +402,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                     fireSelectionChanged(changeStart, changeFinish);
                 }
             } finally {
-                ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+                ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
             }
         }
 
@@ -385,7 +439,7 @@ public final class EventSelectionModel implements ListSelectionModel {
         StringBuffer result = new StringBuffer();
         for(int i = 0; i < flagList.size(); i++) {
             if(i != 0) result.append(" ");
-            if(flagList.get(i) == Barcode.WHITE) result.append("-");
+            if(flagList.get(i) == deselected) result.append("-");
             else result.append("+");
         }
         return result.toString();
@@ -481,7 +535,7 @@ public final class EventSelectionModel implements ListSelectionModel {
 
         // walk through the list making changes
         for(int i = minUnionIndex; i <= maxUnionIndex; i++) {
-            int selectionIndex = flagList.getBlackIndex(i);
+            int selectionIndex = flagList.getColourIndex(i, selected);
             boolean selectedBefore = (selectionIndex != -1);
             boolean inChangeRange = (i >= minChangeIndex && i <= maxChangeIndex);
             boolean selectedAfter = (inChangeRange == select);
@@ -493,12 +547,12 @@ public final class EventSelectionModel implements ListSelectionModel {
 
                 // if it is being deselected
                 if(selectedBefore) {
-                    flagList.setWhite(i, 1);
+                    flagList.set(i, deselected, 1);
                     updates.addDelete(selectionIndex);
                 // if it is being selected
                 } else {
-                    flagList.setBlack(i, 1);
-                    updates.addInsert(flagList.getBlackIndex(i));
+                    flagList.set(i, selected, 1);
+                    updates.addInsert(flagList.getColourIndex(i, selected));
                 }
             }
         }
@@ -523,7 +577,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * <p>If the selection does not change, this will not fire any events.
      */
     public void setSelectionInterval(int index0, int index1) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             if(!enabled) return;
 
@@ -544,7 +598,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                 setSubRangeOfRange(true, index0, index1, getMinSelectionIndex(), getMaxSelectionIndex());
             }
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -552,7 +606,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
      */
     public void addSelectionInterval(int index0, int index1) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             if(!enabled) return;
 
@@ -592,14 +646,14 @@ public final class EventSelectionModel implements ListSelectionModel {
                 setSubRangeOfRange(true, index0, index1, -1, -1);
             }
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
     /**
      * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
      */
     public void removeSelectionInterval(int index0, int index1) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             if(!enabled) return;
 
@@ -623,7 +677,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                 setSubRangeOfRange(false, index0, index1, -1, -1);
             }
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -631,24 +685,24 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Returns the first selected index or -1 if the selection is empty.
      */
     public int getMinSelectionIndex() {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
-            if(flagList.blackSize() == 0) return -1;
-            return flagList.getIndex(0, Barcode.BLACK);
+            if(flagList.colourSize(selected) == 0) return -1;
+            return flagList.getIndex(0, selected);
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
     /**
      * Returns the last selected index or -1 if the selection is empty.
      */
     public int getMaxSelectionIndex() {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
-            if(flagList.blackSize() == 0) return -1;
-            return flagList.getIndex(flagList.blackSize() - 1, Barcode.BLACK);
+            if(flagList.colourSize(selected) == 0) return -1;
+            return flagList.getIndex(flagList.colourSize(selected) - 1, selected);
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
     /**
@@ -660,17 +714,15 @@ public final class EventSelectionModel implements ListSelectionModel {
      * in table size.
      */
     public boolean isSelectedIndex(int index) {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
             // bail if index is too high
             if(index < 0 || index >= flagList.size()) {
                 return false;
             }
-
-            // a value is selected if it is not Barcode.WHITE in the flag list
-            return (flagList.get(index) != Barcode.WHITE);
+            return (flagList.get(index) == selected);
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -678,18 +730,18 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
     public int getAnchorSelectionIndex() {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
             return anchorSelectionIndex;
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
     /**
      * Set the anchor selection index.
      */
     public void setAnchorSelectionIndex(int anchorSelectionIndex) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             if(!enabled) return;
 
@@ -713,25 +765,25 @@ public final class EventSelectionModel implements ListSelectionModel {
                 setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, -1, -1);
             }
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
     /**
      * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
     public int getLeadSelectionIndex() {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
             return leadSelectionIndex;
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
     /**
      * Set the lead selection index.
      */
     public void setLeadSelectionIndex(int leadSelectionIndex) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             if(!enabled) return;
 
@@ -758,7 +810,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                 setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, anchorSelectionIndex, originalLeadIndex);
             }
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -766,24 +818,24 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Change the selection to the empty set.
      */
     public void clearSelection() {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             if(!enabled) return;
 
             setSubRangeOfRange(false, getMinSelectionIndex(), getMaxSelectionIndex(), -1, -1);
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
     /**
      * Returns true if no indices are selected.
      */
     public boolean isSelectionEmpty() {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
-            return (flagList.blackSize() == 0);
+            return (flagList.colourSize(selected) == 0);
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -804,7 +856,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * This property is true if upcoming changes to the value  of the model should be considered a single event.
      */
     public void setValueIsAdjusting(boolean valueIsAdjusting) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             this.valueIsAdjusting = valueIsAdjusting;
 
@@ -817,7 +869,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                 }
             }
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -825,11 +877,11 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Returns true if the value is undergoing a series of changes.
      */
     public boolean getValueIsAdjusting() {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
             return valueIsAdjusting;
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -837,7 +889,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Set the selection mode.
      */
     public void setSelectionMode(int selectionMode) {
-        ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().lock();
+        ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().lock();
         try {
             this.selectionMode = selectionMode;
 
@@ -850,7 +902,7 @@ public final class EventSelectionModel implements ListSelectionModel {
                 setSubRangeOfRange(true, getMinSelectionIndex(), getMaxSelectionIndex(), getMinSelectionIndex(), getMaxSelectionIndex());
             }
         } finally {
-            ((InternalReadWriteLock)eventList.getReadWriteLock()).internalLock().unlock();
+            ((InternalReadWriteLock)selectionList.getReadWriteLock()).internalLock().unlock();
         }
     }
 
@@ -858,11 +910,11 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Returns the current selection mode.
      */
     public int getSelectionMode() {
-        eventList.getReadWriteLock().readLock().lock();
+        selectionList.getReadWriteLock().readLock().lock();
         try {
             return selectionMode;
         } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+            selectionList.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -884,7 +936,7 @@ public final class EventSelectionModel implements ListSelectionModel {
     public void removeListSelectionListener(ListSelectionListener listener) {
         listeners.remove(listener);
     }
-    
+
     /**
      * Releases the resources consumed by this {@link EventSelectionModel} so that it
      * may eventually be garbage collected.
@@ -892,14 +944,14 @@ public final class EventSelectionModel implements ListSelectionModel {
      * <p>An {@link EventSelectionModel} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link EventSelectionModel}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link EventSelectionModel} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventSelectionModel} after it has been disposed.
      */
     public void dispose() {
-        eventList.dispose();
+        selectionList.dispose();
     }
 }
