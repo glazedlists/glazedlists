@@ -42,7 +42,7 @@ class PeerConnection implements CTPHandler {
      * CTPHandler method handles an HTTP request or response from the specified
      * connection.
      */
-    public void receiveConnect(CTPProtocol source, Integer code, String uri, Map headers) {
+    /*public void receiveConnect(CTPProtocol source, Integer code, String uri, Map headers) {
         // this is a request for a local source
         if(uri != null) {
             // throw out this connection if possible
@@ -63,8 +63,29 @@ class PeerConnection implements CTPHandler {
                 System.out.println("Response from " + source + " accepted, code: " + code);
             }
         }
-    }
+    }*/
     
+    /**
+     * Handles an HTTP response from the specified connection.
+     *
+     * @param code the HTTP  response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1.
+     *      This will be null if this is an HTTP request.
+     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
+     */
+    public void receiveResponse(CTPProtocol source, Integer code, Map headers) {
+    }
+
+    /**
+     * Handles an HTTP request from the specified connection.
+     *
+     * @param uri the address requested by the client, in the format of a file
+     *      address. See HTTP/1.1 RFC, 5.1.2. This will be null if this is an
+     *      HTTP response.
+     * @param headers a Map of HTTP response headers. See HTTP/1.1 RFC, 6.2.
+     */
+    public void receiveRequest(CTPProtocol source, String uri, Map headers) {
+    }
+
     /**
      * Handles reception of the specified chunk of data.
      */
