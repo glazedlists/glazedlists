@@ -72,13 +72,6 @@ public final class SparseList extends AbstractList {
     }
 
     /**
-     * Gets the size of the tree.
-     */
-    int treeSize() {
-		return treeSize;
-	}
-
-    /**
      * Inserts a value into this tree at the given index
      */
     public void add(int index, Object value) {
@@ -224,14 +217,14 @@ public final class SparseList extends AbstractList {
      * Obtains an {@link Iterator} for this {@link List}.
      */
     public Iterator iterator() {
-		if(size == 0) return Collections.EMPTY_LIST.iterator();
-		return new SparseListNode.SparseListIterator(this, root);
-	}
+        if(size == 0) return Collections.EMPTY_LIST.iterator();
+        return new SparseListNode.SparseListIterator(this, root);
+    }
 
-	/**
-	 * Prints out the structure of the tree for debug purposes.
-	 */
-	public void printDebug() {
-		System.out.println(root.toString());
-	}
+    /**
+     * Prints out the structure of the tree for debug purposes.
+     */
+    public void printDebug() {
+        System.out.println(root.toString());
+    }
 }

@@ -6,6 +6,9 @@
  */
 package ca.odell.glazedlists.impl.adt;
 
+// for iterators
+import java.util.*;
+
 /**
  * A BarcodeNode models a node in an Barcode.  This class
  * does the bulk of the heavy lifting for Barcode.
@@ -603,7 +606,6 @@ final class BarcodeNode {
 
                 } else {
                     correctSizes(-1, -1);
-                    //int affectedIndex = getIndex() + localizedIndex - emptySpace;
                     host.addWhite(absoluteIndex, 1);
                 }
             }
@@ -1171,6 +1173,357 @@ final class BarcodeNode {
 
         // require height to be recalculated on the replacement node
         replacement.height = 0;
+    }
+
+    /**
+     * An {@link Iterator} to iterate over the entire {@link Barcode}.
+     */
+    public static class FullBarcodeIterator implements BarcodeIterator {
+
+        /** keep a reference for removes in the trailing whitespace */
+        private Barcode barcode = null;
+
+        /** the current node being inspected */
+        private BarcodeNode currentNode = null;
+
+        /** the number of requests on the current node */
+        private int localIndex = -1;
+
+        /** the number of black elements before this node */
+        private int blackSoFar = 0;
+
+        /** the number of white elements before this node */
+        private int whiteSoFar = 0;
+
+        /** the size of the tree within the Barcode */
+        private int treeSize = 0;
+
+        /** the total size of the Barcode */
+        private int size = 0;
+
+        /**
+         * Creates a new Iterator for the given Barcode that has the specified root.
+         */
+        FullBarcodeIterator(Barcode barcode, BarcodeNode root) {
+            // move the Iterator to the start position.
+            if(root != null) {
+                this.treeSize = root.size();
+                currentNode = root;
+                while(currentNode.left != null) {
+                    currentNode = currentNode.left;
+                }
+            }
+            this.barcode = barcode;
+            this.size = barcode.size();
+        }
+
+        /**
+         * Returns whether or not there are more values in the SparseList to
+         * iterate over.
+         */
+        public boolean hasNext() {
+            if(getIndex() >= treeSize - 1 && getIndex() == size - 1) {
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * Gets the next value in this SparseList.
+         */
+        public Object next() {
+            // iterate on this node
+            localIndex++;
+            // handle the empty tree case
+            if(currentNode == null) {
+                // beyond the tree in the trailing whitespace
+                if(getIndex() < size) {
+                    return Barcode.WHITE;
+
+                // at the end of the list
+                } else {
+                    throw new NoSuchElementException();
+                }
+
+            // at the edge of the current node
+            } else if(localIndex >= currentNode.whiteSpace + currentNode.rootSize) {
+                // move to the next node
+                if(getIndex() < treeSize) {
+                    blackSoFar += currentNode.rootSize;
+                    whiteSoFar += currentNode.whiteSpace;
+                    findNextNode();
+                    localIndex = 0;
+
+                // act on the trailing whitespace
+                } else {
+                    // beyond the tree in the trailing whitespace
+                    if(getIndex() < size) {
+                        return Barcode.WHITE;
+
+                    // at the end of the list
+                    } else {
+                        throw new NoSuchElementException();
+                    }
+                }
+            }
+
+            // next() was a null value
+            if(localIndex < currentNode.whiteSpace) {
+                return Barcode.WHITE;
+
+            // next() was the value of this node
+            } else if(localIndex >= currentNode.whiteSpace) {
+                return Barcode.BLACK;
+
+            // the iterator is out of state
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+
+        /**
+         * Removes the current value at the Iterator from the SparseList.
+         *
+         * @throws UnsupportedOperationException This iterator is currently read-only.
+         *
+         */
+        public void remove() {
+            throw new UnsupportedOperationException("This iterator is read-only for now.");
+        }
+
+        /** { @inheritDoc } */
+        public int getIndex() {
+            return blackSoFar + whiteSoFar + localIndex;
+        }
+
+        /** { @inheritDoc } */
+        public int getBlackIndex() {
+            if(currentNode == null || localIndex < currentNode.whiteSpace) return -1;
+            return blackSoFar + localIndex;
+        }
+
+        /** { @inheritDoc } */
+        public int getWhiteIndex() {
+            if(currentNode == null) return localIndex;
+            else if(localIndex >= currentNode.whiteSpace && localIndex < currentNode.rootSize) return -1;
+            return whiteSoFar + localIndex;
+        }
+
+        /** { @inheritDoc } */
+        public int getColourIndex(Object colour) {
+            if(colour == Barcode.WHITE) return getWhiteIndex();
+            return getBlackIndex();
+        }
+
+        /**
+         * Finds the next node in the tree.
+         */
+        private void findNextNode() {
+            //  go into the right subtree for the next node
+            if(currentNode.right != null) {
+                currentNode = currentNode.right;
+                while(currentNode.left != null) {
+                    currentNode = currentNode.left;
+                }
+
+            // go to the parent for the next node
+            } else if(currentNode.parent.left == currentNode) {
+                currentNode = currentNode.parent;
+
+            // get out of the right subtree
+            } else if(currentNode.parent.right == currentNode) {
+                // move to the top of the current subtree
+                while(currentNode.parent.right == currentNode) {
+                    currentNode = currentNode.parent;
+                }
+                // Move up one more node to leave the subtree
+                currentNode = currentNode.parent;
+
+            // the iterator is out of state
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+    }
+
+    /**
+     * An {@link Iterator} to iterate over only one colour in a given {@link Barcode}.
+     */
+    public static class BarcodeColourIterator implements BarcodeIterator {
+
+        /** keep a reference for removes in the trailing whitespace */
+        private Barcode barcode = null;
+
+        /** the current node being inspected */
+        private BarcodeNode currentNode = null;
+
+        /** the colour to iterate over */
+        private Object colour = null;
+
+        /** the number of requests on the current node */
+        private int localIndex = -1;
+
+        /** the number of black elements before this node */
+        private int blackSoFar = 0;
+
+        /** the number of white elements before this node */
+        private int whiteSoFar = 0;
+
+        /** the size of the tree within the Barcode */
+        private int treeSize = 0;
+
+        /** the total size of the Barcode */
+        private int size = 0;
+
+        /**
+         * Creates a new Iterator for the given Barcode that has the specified root.
+         */
+        BarcodeColourIterator(Barcode barcode, BarcodeNode root, Object colour) {
+            // move the Iterator to the start position.
+            if(root != null) {
+                currentNode = root;
+                while(currentNode.left != null) {
+                    currentNode = currentNode.left;
+                }
+            }
+            this.barcode = barcode;
+            this.size = barcode.colourSize(colour);
+            this.colour = colour;
+            if(colour == Barcode.WHITE) {
+                if(root == null) {
+                    treeSize = 0;
+                } else {
+                    treeSize = root.whiteSize();
+                    whiteSoFar += currentNode.whiteSpace;
+                }
+            } else {
+                treeSize = size;
+            }
+        }
+
+        /**
+         * Returns whether or not there are more values in the SparseList to
+         * iterate over.
+         */
+        public boolean hasNext() {
+            if(getColourIndex(colour) >= treeSize - 1 && getColourIndex(colour) == size - 1) {
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * Gets the next value in this SparseList.
+         */
+        public Object next() {
+            // iterate on this node
+            localIndex++;
+            // handle the empty tree case
+            if(currentNode == null) {
+                // beyond the tree in the trailing whitespace
+                if(getColourIndex(colour) < size) {
+                    return Barcode.WHITE;
+
+                // at the end of the list
+                } else {
+                    throw new NoSuchElementException();
+                }
+
+            // at the edge of the current node
+            } else if(colour == Barcode.WHITE && localIndex == currentNode.whiteSpace) {
+                // move to the next node
+                if(getColourIndex(colour) < treeSize) {
+                    blackSoFar += currentNode.rootSize;
+                    whiteSoFar += currentNode.whiteSpace;
+                    findNextNode();
+                    localIndex = 0;
+
+                // at the edge of the tree
+                } else if(getColourIndex(colour) == treeSize) {
+                    blackSoFar += currentNode.rootSize;
+
+                // at the end of the list
+                } else if(getColourIndex(colour) == size) {
+                    throw new NoSuchElementException();
+                }
+            } else if(colour == Barcode.BLACK && localIndex == currentNode.rootSize) {
+                // move to the next node
+                if(getColourIndex(colour) < treeSize) {
+                    blackSoFar += currentNode.rootSize;
+                    findNextNode();
+                    whiteSoFar += currentNode.whiteSpace;
+                    localIndex = 0;
+
+                // there are no more elements
+                } else {
+                    throw new NoSuchElementException();
+                }
+            }
+            return colour;
+        }
+
+        /**
+         * Removes the current value at the Iterator from the SparseList.
+         *
+         * @throws UnsupportedOperationException This iterator is currently read-only.
+         *
+         */
+        public void remove() {
+            throw new UnsupportedOperationException("This iterator is read-only for now.");
+        }
+
+        /** { @inheritDoc } */
+        public int getIndex() {
+            return blackSoFar + whiteSoFar + localIndex;
+        }
+
+        /** { @inheritDoc } */
+        public int getBlackIndex() {
+            if(colour == Barcode.WHITE) return -1;
+            return blackSoFar + localIndex;
+        }
+
+        /** { @inheritDoc } */
+        public int getWhiteIndex() {
+            if(colour == Barcode.BLACK) return -1;
+            return whiteSoFar + localIndex;
+        }
+
+        /** { @inheritDoc } */
+        public int getColourIndex(Object colour) {
+            if(colour == Barcode.WHITE) return getWhiteIndex();
+            return getBlackIndex();
+        }
+
+        /**
+         * Finds the next node in the tree.
+         */
+        private void findNextNode() {
+            //  go into the right subtree for the next node
+            if(currentNode.right != null) {
+                currentNode = currentNode.right;
+                while(currentNode.left != null) {
+                    currentNode = currentNode.left;
+                }
+
+            // go to the parent for the next node
+            } else if(currentNode.parent.left == currentNode) {
+                currentNode = currentNode.parent;
+
+            // get out of the right subtree
+            } else if(currentNode.parent.right == currentNode) {
+                // move to the top of the current subtree
+                while(currentNode.parent.right == currentNode) {
+                    currentNode = currentNode.parent;
+                }
+                // Move up one more node to leave the subtree
+                currentNode = currentNode.parent;
+
+            // the iterator is out of state
+            } else {
+                throw new IllegalStateException();
+            }
+        }
     }
 
     public String toString() {

@@ -196,6 +196,139 @@ public class BarcodeTest extends TestCase {
     }
 
     /**
+     * Tests that a black-centric iterator works correctly
+     */
+    public void testBlackIterator() {
+        barcode.addBlack(0, 10);
+        barcode.addWhite(10, 3);
+        barcode.addWhite(7, 1);
+        barcode.addWhite(5, 5);
+        barcode.addWhite(3, 7);
+        barcode.addWhite(1, 3);
+
+        BarcodeIterator iterator = barcode.iterator(Barcode.BLACK);
+        for(int i = 0; i < barcode.blackSize(); i++) {
+            assertEquals(true, iterator.hasNext());
+            assertEquals(Barcode.BLACK, iterator.next());
+            assertEquals(i, iterator.getBlackIndex());
+            assertEquals(-1, iterator.getWhiteIndex());
+            assertEquals(barcode.getIndex(i, Barcode.BLACK), iterator.getIndex());
+        }
+        assertEquals(false, iterator.hasNext());
+    }
+
+    /**
+     * Tests that a white-centric iterator works correctly
+     */
+    public void testWhiteIterator() {
+        barcode.addBlack(0, 10);
+        barcode.addWhite(10, 3);
+        barcode.addWhite(7, 1);
+        barcode.addWhite(5, 5);
+        barcode.addWhite(3, 7);
+        barcode.addWhite(1, 3);
+
+        BarcodeIterator iterator = barcode.iterator(Barcode.WHITE);
+        for(int i = 0; i < barcode.whiteSize(); i++) {
+            assertEquals(true, iterator.hasNext());
+            assertEquals(Barcode.WHITE, iterator.next());
+            assertEquals(i, iterator.getWhiteIndex());
+            assertEquals(-1, iterator.getBlackIndex());
+            assertEquals(barcode.getIndex(i, Barcode.WHITE), iterator.getIndex());
+        }
+        assertEquals(false, iterator.hasNext());
+    }
+
+    /**
+     * Tests all of the iterators on an empty barcode
+     */
+    public void testEmptyBarcodeIterators() {
+        BarcodeIterator whiteIterator = barcode.iterator(Barcode.WHITE);
+        assertEquals(false, whiteIterator.hasNext());
+        assertEquals(-1, whiteIterator.getIndex());
+        assertEquals(-1, whiteIterator.getBlackIndex());
+        assertEquals(-1, whiteIterator.getWhiteIndex());
+
+        BarcodeIterator blackIterator = barcode.iterator(Barcode.BLACK);
+        assertEquals(false, blackIterator.hasNext());
+        assertEquals(-1, blackIterator.getIndex());
+        assertEquals(-1, blackIterator.getBlackIndex());
+        assertEquals(-1, blackIterator.getWhiteIndex());
+
+        BarcodeIterator iterator = barcode.iterator();
+        assertEquals(false, iterator.hasNext());
+        assertEquals(-1, iterator.getIndex());
+        assertEquals(-1, iterator.getBlackIndex());
+        assertEquals(-1, iterator.getWhiteIndex());
+    }
+
+    /**
+     * Tests all of the iterators on a completely WHITE barcode
+     */
+    public void testCompletelyWhiteBarcodeIterators() {
+        barcode.addWhite(0, 10);
+
+        BarcodeIterator whiteIterator = barcode.iterator(Barcode.WHITE);
+        for(int i = 0; i < 10; i++) {
+            assertEquals(true, whiteIterator.hasNext());
+            assertEquals(Barcode.WHITE, whiteIterator.next());
+            assertEquals(i, whiteIterator.getIndex());
+            assertEquals(-1, whiteIterator.getBlackIndex());
+            assertEquals(i, whiteIterator.getWhiteIndex());
+        }
+        assertEquals(false, whiteIterator.hasNext());
+
+        BarcodeIterator blackIterator = barcode.iterator(Barcode.BLACK);
+        assertEquals(false, blackIterator.hasNext());
+        assertEquals(-1, blackIterator.getIndex());
+        assertEquals(-1, blackIterator.getBlackIndex());
+        assertEquals(-1, blackIterator.getWhiteIndex());
+
+        BarcodeIterator iterator = barcode.iterator();
+        for(int i = 0; i < 10; i++) {
+            assertEquals(true, iterator.hasNext());
+            assertEquals(Barcode.WHITE, iterator.next());
+            assertEquals(i, iterator.getIndex());
+            assertEquals(-1, iterator.getBlackIndex());
+            assertEquals(i, iterator.getWhiteIndex());
+        }
+        assertEquals(false, iterator.hasNext());
+    }
+
+    /**
+     * Tests all of the iterators on a completely BLACK barcode
+     */
+    public void testCompletelyBlackBarcodeIterators() {
+        barcode.addBlack(0, 10);
+
+        BarcodeIterator blackIterator = barcode.iterator(Barcode.BLACK);
+        for(int i = 0; i < 10; i++) {
+            assertEquals(true, blackIterator.hasNext());
+            assertEquals(Barcode.BLACK, blackIterator.next());
+            assertEquals(i, blackIterator.getIndex());
+            assertEquals(-1, blackIterator.getWhiteIndex());
+            assertEquals(i, blackIterator.getBlackIndex());
+        }
+        assertEquals(false, blackIterator.hasNext());
+
+        BarcodeIterator whiteIterator = barcode.iterator(Barcode.WHITE);
+        assertEquals(false, whiteIterator.hasNext());
+        assertEquals(-1, whiteIterator.getIndex());
+        assertEquals(-1, whiteIterator.getBlackIndex());
+        assertEquals(-1, whiteIterator.getWhiteIndex());
+
+        BarcodeIterator iterator = barcode.iterator();
+        for(int i = 0; i < 10; i++) {
+            assertEquals(true, iterator.hasNext());
+            assertEquals(Barcode.BLACK, iterator.next());
+            assertEquals(i, iterator.getIndex());
+            assertEquals(-1, iterator.getWhiteIndex());
+            assertEquals(i, iterator.getBlackIndex());
+        }
+        assertEquals(false, iterator.hasNext());
+    }
+
+    /**
      * Tests to verify that the sparse list is consistent after a long
      * series of list operations.
      */
@@ -258,7 +391,7 @@ public class BarcodeTest extends TestCase {
                     System.out.println("Validation failure on step " + i);
                     fail(e.getMessage());
                 }
-                assertEquals(controlList, barcode);
+                validate(controlList, barcode);
             }
             if(msgCondition) System.out.println("List validation successful.");
 
@@ -266,7 +399,16 @@ public class BarcodeTest extends TestCase {
         }
 
         // verify the lists are equal
-        assertEquals(controlList, barcode);
+        validate(controlList, barcode);
+    }
+
+    private void validate(List list, Barcode barcode) {
+        Iterator barcodeIterator = barcode.iterator();
+        for(Iterator listIterator = list.iterator(); listIterator.hasNext(); ) {
+            assertEquals(true, barcodeIterator.hasNext());
+            assertEquals(listIterator.next(), barcodeIterator.next());
+        }
+        assertEquals(false, barcodeIterator.hasNext());
     }
 
     /**

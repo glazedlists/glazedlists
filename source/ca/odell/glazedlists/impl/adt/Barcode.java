@@ -48,7 +48,7 @@ import java.util.*;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  *
  */
-public final class Barcode extends AbstractList {
+public final class Barcode {
 
     /** barcode colour constants */
     public static final Object WHITE = Boolean.FALSE;
@@ -130,7 +130,7 @@ public final class Barcode extends AbstractList {
     public void addWhite(int index, int length) {
         assert(length >= 0);
         if(length == 0) return;
-        
+
         // Adding to the trailing whitespace
         if(root == null || index >= treeSize) {
             whiteSpace += length;
@@ -149,7 +149,7 @@ public final class Barcode extends AbstractList {
     public void addBlack(int index, int length) {
         assert(length >= 0);
         if(length == 0) return;
-        
+
         // Make a new root
         if(root == null) {
             root = new BarcodeNode(this, null, length, index);
@@ -189,7 +189,7 @@ public final class Barcode extends AbstractList {
      */
     public void set(int index, Object colour, int length) {
         assert(length >= 1);
-        
+
         // The set affects the trailing whitespace
         int trailingChange = index > treeSize - 1 ? length : index + length - treeSize;
         if(trailingChange > 0) {
@@ -227,7 +227,7 @@ public final class Barcode extends AbstractList {
      */
     public void remove(int index, int length) {
         assert(length >= 1);
-        
+
         // The remove affects the trailing whitespace
         int trailingChange = index > treeSize ? length : index + length - treeSize;
         if(trailingChange > 0) {
@@ -481,5 +481,21 @@ public final class Barcode extends AbstractList {
             if(result == -1 && whiteSpace >= size) result = treeSize;
             return result;
         }
+    }
+
+    /**
+     * Provides an {@link Iterator} that iterates over the entire
+     * {@link Barcode}.
+     */
+    public BarcodeIterator iterator() {
+        return new BarcodeNode.FullBarcodeIterator(this, root);
+    }
+
+    /**
+     * Provides an {@link Iterator} that only iterates over the portions of
+     * the {@link Barcode} which match the specified value of colour.
+     */
+    public BarcodeIterator iterator(Object colour) {
+        return new BarcodeNode.BarcodeColourIterator(this, root, colour);
     }
 }
