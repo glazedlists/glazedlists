@@ -74,7 +74,7 @@ public class BarcodeIterator implements Iterator {
     public boolean hasNextWhite() {
         if(barcode.size() != barcode.treeSize()) return hasNext();
         else if(currentNode == null) return false;
-        else if(localIndex < currentNode.whiteSpace - 1) return true;
+        else if(localIndex < currentNode.whiteSpace - 1 || whiteSoFar + currentNode.whiteSpace < barcode.whiteSize()) return true;
         else return false;
     }
 
