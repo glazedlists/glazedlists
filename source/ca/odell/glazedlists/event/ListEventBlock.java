@@ -201,7 +201,7 @@ final class ListEventBlock {
             return true;
         }
         
-        // can't be an insert
+        // can't be an contradiction
         return false;
     }
     
@@ -250,8 +250,11 @@ final class ListEventBlock {
             first.endIndex = first.startIndex + firstLength - 1;
             contradictingPair.add(1, first);
 
-        } else {
-            throw new UnsupportedOperationException();
+        // update then update is the span of both
+        } else if(first.type == ListEvent.UPDATE && second.type == ListEvent.UPDATE) {
+            first.startIndex = Math.min(first.startIndex, second.startIndex);
+            first.endIndex = Math.max(first.endIndex, second.endIndex);
+            contradictingPair.remove(1);
         }
     }
     

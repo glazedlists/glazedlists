@@ -192,6 +192,58 @@ public class NestedEventsTest extends TestCase {
     }
     
     /**
+     * Validates that simple contradicting events can be nested.
+     */
+    public void testUpdatedUpdates() {
+        boolean contradictionsAllowed = true;
+        nestingList.beginEvent(false);
+        source.addAll(Arrays.asList(new String[] { "A", "B", "C", "D", "E", "F", "G" }));
+        nestingList.commitEvent();
+        
+        // test nested events: add 3 elements at 2 and delete 3 elements at 1
+        nestingList.beginEvent(contradictionsAllowed);
+        source.set(2, "c");
+        source.set(3, "d");
+        source.set(4, "e");
+        source.add("H");
+        source.set(3, "d");
+        source.set(4, "e");
+        source.set(5, "f");
+        nestingList.commitEvent();
+        
+        // net change is: replacing C, D, E, F with c, d, e, f
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "B", "c", "d", "e", "f", "G", "H" }));
+        assertEquals(2, counter.getEventCount());
+        assertEquals(5, counter.getChangeCount(1));
+    }
+    
+    /**
+     * Validates that simple contradicting events can be nested.
+     */
+    public void testFullyUpdatedUpdates() {
+        boolean contradictionsAllowed = true;
+        nestingList.beginEvent(false);
+        source.addAll(Arrays.asList(new String[] { "A", "B", "C", "D", "E", "F", "G" }));
+        nestingList.commitEvent();
+        
+        // test nested events: add 3 elements at 2 and delete 3 elements at 1
+        nestingList.beginEvent(contradictionsAllowed);
+        source.set(2, "c");
+        source.set(3, "d");
+        source.set(4, "e");
+        source.add("H");
+        source.set(2, "c");
+        source.set(3, "d");
+        source.set(4, "e");
+        nestingList.commitEvent();
+        
+        // net change is: replacing C, D, E with c, d, e and add H
+        assertEquals(nestingList, Arrays.asList(new String[] { "A", "B", "c", "d", "e", "F", "G", "H" }));
+        assertEquals(2, counter.getEventCount());
+        assertEquals(4, counter.getChangeCount(1));
+    }
+    
+    /**
      * Validates that simple contradicting events throw an exception if not allowed.
      */
     public void testSimpleContradictingEventsFail() {
