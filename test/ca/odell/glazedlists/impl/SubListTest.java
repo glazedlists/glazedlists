@@ -70,7 +70,8 @@ public class SubListTest extends TestCase {
         }
 
         // get the sublist
-        List subListBefore = eventList.subList(25, 75);
+        EventList subListBefore = (EventList)eventList.subList(25, 75);
+        subListBefore.addListEventListener(new ConsistencyTestList(subListBefore, "sublist")); 
 
         // change the source list to be 0,1,2,3,...49,50,51,..99,100,101...149
         for(int i = 0; i < 50; i++) {
@@ -78,7 +79,7 @@ public class SubListTest extends TestCase {
         }
 
         // ensure the sublist took the change
-        List subListAfter = eventList.subList(25, 125);
+        EventList subListAfter = (EventList)eventList.subList(25, 125);
         assertEquals(subListBefore, subListAfter);
 
         // change the lists again, deleting all odd numbered entries
@@ -88,8 +89,19 @@ public class SubListTest extends TestCase {
         }
 
         // ensure the sublists took the change
-        subListAfter = eventList.subList(13, 63);
+        subListAfter = (EventList)eventList.subList(13, 63);
         assertEquals(subListBefore, subListAfter);
+        
+        // make some set calls
+        eventList.set(15, "Fifteen");
+        eventList.set(18, "Eighteen");
+        eventList.set(21, "Twenty-One");
+        eventList.set(24, "Twenty-Four");
+        assertEquals("Fifteen", subListAfter.get(2));
+        assertEquals("Eighteen", subListAfter.get(5));
+        subListBefore.set(17, "Twenty-Seven");
+        assertEquals("Twenty-Seven", eventList.get(27));
+        assertEquals(subListAfter, subListBefore);
     }
 
     /**
