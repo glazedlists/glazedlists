@@ -110,7 +110,7 @@
     <mkdir dir="classes"/>
     <!-- Verify that JUnit is available on the classpath -->
     <available classname="org.eclipse.swt.SWT" property="swt.present"/>
-    <fail unless="swt.present" message="To run this task, add swt.jar to your classpath. SWT is available free at http://www.eclipse.org"/>
+    <fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>
     <!-- Compile the java code from source/ into classes/ -->
     <javac destdir="classes" srcdir="source" debug="on" source="1.4">
       <include name="**/swt/**"/>
