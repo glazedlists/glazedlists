@@ -49,7 +49,7 @@ public class ThresholdListTest extends TestCase {
         source = null;
         random = null;
     }
-    
+
     /**
      * Verifies that ThresholdList fires the right events.
      */
@@ -57,12 +57,12 @@ public class ThresholdListTest extends TestCase {
         // populate our sample list
         source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
             new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
-            
+
         // make some dealbreaking changes
         thresholdList.setLowerThreshold(27);
         thresholdList.setLowerThreshold(18);
     }
-    
+
     /**
      * Verifies that ThresholdList fires the right events.
      */
@@ -70,12 +70,50 @@ public class ThresholdListTest extends TestCase {
         // populate our sample list
         source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
             new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
-            
+
         // make some dealbreaking changes
         thresholdList.setUpperThreshold(77);
         thresholdList.setUpperThreshold(102);
     }
-    
+
+    /**
+     * Verifies that ThresholdList fires the right events.
+     */
+    public void testEventFiringFromOneEntryToFullViaLower() {
+        thresholdList.setUpperThreshold(100);
+        thresholdList.setLowerThreshold(100);
+
+        // populate our sample list
+        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
+            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+
+        assertEquals(1, thresholdList.size());
+
+        // make a dealbreaking change
+        thresholdList.setLowerThreshold(25);
+        assertEquals(6, thresholdList.size());
+
+    }
+
+    /**
+     * Verifies that ThresholdList fires the right events.
+     */
+    public void testEventFiringFromOneEntryToFullViaUpper() {
+        thresholdList.setUpperThreshold(25);
+        thresholdList.setLowerThreshold(25);
+
+        // populate our sample list
+        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
+            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+
+        assertEquals(1, thresholdList.size());
+
+        // make a dealbreaking change
+        thresholdList.setUpperThreshold(100);
+        assertEquals(6, thresholdList.size());
+
+    }
+
     /**
      * A simple test to validate that ThresholdList is
      * behaving as expected on a list with no missing elements.
@@ -940,18 +978,18 @@ public class ThresholdListTest extends TestCase {
      * works as expected.
      */
     public void testJavaBeanConstructor() {
-		thresholdList.dispose();
-		thresholdList = null;
-		thresholdList = new ThresholdList(source, "value");
+        thresholdList.dispose();
+        thresholdList = null;
+        thresholdList = new ThresholdList(source, "value");
 
-		for(int i = 0;i < 1000;i++) {
-			source.add(new SimpleJavaBeanObject(i));
-		}
+        for(int i = 0;i < 1000;i++) {
+            source.add(new SimpleJavaBeanObject(i));
+        }
 
-		thresholdList.setLowerThreshold(500);
+        thresholdList.setLowerThreshold(500);
 
-		assertEquals(500, thresholdList.size());
-	}
+        assertEquals(500, thresholdList.size());
+    }
 
     /**
      * A helper method to compare two lists for equality
@@ -970,16 +1008,16 @@ public class ThresholdListTest extends TestCase {
      */
     public class SimpleJavaBeanObject {
 
-		private int value = 0;
+        private int value = 0;
 
-		public SimpleJavaBeanObject(int value) {
-			this.value = value;
-		}
+        public SimpleJavaBeanObject(int value) {
+            this.value = value;
+        }
 
-		public int getValue() {
-			return value;
-		}
-	}
+        public int getValue() {
+            return value;
+        }
+    }
 
     private class IntegerEvaluator implements ThresholdEvaluator {
         /**

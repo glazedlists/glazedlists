@@ -45,10 +45,10 @@ import java.util.*;
 public final class ThresholdList extends TransformedList {
 
     /** the index in the list which corresponds to the lower bound for this list */
-    private int lowerThresholdIndex = -1;
+    private int lowerThresholdIndex = 0;
 
     /** the index in the list which corresponds to the upper bound for this list */
-    private int upperThresholdIndex = -1;
+    private int upperThresholdIndex = 0;
 
     /** the lower bound to use to define list containment */
     private int lowerThreshold = 0;
@@ -214,6 +214,7 @@ public final class ThresholdList extends TransformedList {
         }
 
         updates.commitEvent();
+
     }
 
     /**
@@ -234,7 +235,7 @@ public final class ThresholdList extends TransformedList {
         // Threshold change is irrelevant
         if(sourceSize == 0) {
             lowerThreshold = threshold;
-            lowerThresholdIndex = -1;
+            lowerThresholdIndex = 0;
             return;
 
         // Threshold is unchanged
