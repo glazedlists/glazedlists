@@ -4,14 +4,10 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.util;
+package com.odellengineeringltd.glazedlists.util.impl;
 
 // for specifying a sorting order
-import java.util.Comparator;
-// for iterating the nodes
-import java.util.Iterator;
-import java.util.Collections;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * A tree node that can be accessed either in sorted order or by
@@ -26,7 +22,7 @@ import java.util.NoSuchElementException;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class IndexedTreeNode {
+public final class IndexedTreeNode {
     
     /** the parent node, used to delete from leaf up */
     private IndexedTreeNode parent;

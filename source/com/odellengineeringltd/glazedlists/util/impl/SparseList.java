@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.util;
+package com.odellengineeringltd.glazedlists.util.impl;
 
 // for implementing Java Collections List
 import java.util.*;
@@ -23,7 +23,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SparseList extends AbstractList {
+public final class SparseList extends AbstractList {
     
     /** the root node of the tree, this may be replaced by a delete */
     private SparseListNode root = null;

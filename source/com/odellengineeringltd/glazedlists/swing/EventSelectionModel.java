@@ -10,6 +10,8 @@ package com.odellengineeringltd.glazedlists.swing;
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
 import com.odellengineeringltd.glazedlists.util.*;
+// volatile implementation support
+import com.odellengineeringltd.glazedlists.util.impl.*;
 // for listening to list selection events
 import javax.swing.*;
 import javax.swing.event.*;

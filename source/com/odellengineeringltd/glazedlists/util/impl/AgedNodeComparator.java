@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.util;
+package com.odellengineeringltd.glazedlists.util.impl;
 
 // to implement the Comparator interface
 import java.util.Comparator;
@@ -14,7 +14,7 @@ import java.util.Comparator;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-final class AgedNodeComparator implements Comparator {
+public final class AgedNodeComparator implements Comparator {
 
     public final int compare(Object o1, Object o2) {
         AgedNode node1 = (AgedNode)o1;

@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.util;
+package com.odellengineeringltd.glazedlists.util.impl;
 
 // for use in creating the underlying containers
 import java.util.*;
@@ -15,7 +15,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-final class AgedNode {
+public final class AgedNode {
 
     /** The corresponding node in the index tree */
     private IndexedTreeNode indexNode = null;

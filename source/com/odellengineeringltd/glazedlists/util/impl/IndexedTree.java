@@ -4,13 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.util;
+package com.odellengineeringltd.glazedlists.util.impl;
 
 // for specifying a sorting order
-import java.util.Comparator;
-// for iterating the nodes
-import java.util.Iterator;
-import java.util.Collections;
+import java.util.*;
+// for event list utilities, iterators and comparators
+import com.odellengineeringltd.glazedlists.util.*;
 
 /**
  * Models a tree which keeps its elements either in sorted order
@@ -27,7 +26,7 @@ import java.util.Collections;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class IndexedTree {
+public final class IndexedTree {
     
     /** a decision maker for ordering elements */
     private Comparator comparator;

@@ -8,6 +8,8 @@ package com.odellengineeringltd.glazedlists;
 
 // the Glazed Lists' change objects
 import com.odellengineeringltd.glazedlists.event.*;
+// volatile implementation support
+import com.odellengineeringltd.glazedlists.util.impl.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 // For calling methods on the event dispacher thread

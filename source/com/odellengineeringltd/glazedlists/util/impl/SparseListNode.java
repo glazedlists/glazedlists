@@ -4,14 +4,10 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.util;
+package com.odellengineeringltd.glazedlists.util.impl;
 
 // for specifying a sorting order
-import java.util.Comparator;
-// for iterating the nodes
-import java.util.Iterator;
-import java.util.Collections;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * This node is a helper class that does all the real work for
@@ -59,7 +55,7 @@ import java.util.NoSuchElementException;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class SparseListNode {
+public final class SparseListNode {
     
     /** the parent node, used to delete from leaf up */
     private SparseListNode parent;

@@ -9,6 +9,8 @@ package com.odellengineeringltd.glazedlists.query;
 // the core Glazed Lists packages
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.event.*;
+// volatile implementation support
+import com.odellengineeringltd.glazedlists.util.impl.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5

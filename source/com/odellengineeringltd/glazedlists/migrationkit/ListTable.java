@@ -23,7 +23,7 @@ import javax.swing.table.*;
 import java.util.*;
 
 /**
- * An adaptor for the <code>ListTable</code> class found in Glazed Lists v. 0.8 and
+ * An adaptor for the <code>ListTable</code> class found in Glazed Lists v.0.8 and
  * prior that uses the <code>EventTableModel</code> for implementation.
  *
  * <p>The ListTable class is <strong>not thread-safe</strong>. Unless otherwise

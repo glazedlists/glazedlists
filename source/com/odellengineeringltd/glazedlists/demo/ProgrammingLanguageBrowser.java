@@ -9,7 +9,6 @@ package com.odellengineeringltd.glazedlists.demo;
 import com.odellengineeringltd.glazedlists.*;
 import com.odellengineeringltd.glazedlists.swing.*;
 import com.odellengineeringltd.glazedlists.migrationkit.*;
-import com.odellengineeringltd.glazedlists.util.*;
 import java.applet.*;
 import javax.swing.*;
 import java.awt.*;

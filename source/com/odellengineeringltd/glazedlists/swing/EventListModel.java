@@ -113,7 +113,7 @@ public class EventListModel implements ListEventListener, ListModel {
      * Event queue will very shortly be repainting (or removing) the row
      * anyway.
      *
-     * @see com.odellengineeringltd.glazedlists.jtable.ListTable#getValueAt(int,int) ListTable
+     * @see com.odellengineeringltd.glazedlists.swing.EventTableModel#getValueAt(int,int) ListTable
      */
     public Object getElementAt(int index) {
         source.getReadWriteLock().readLock().lock();
