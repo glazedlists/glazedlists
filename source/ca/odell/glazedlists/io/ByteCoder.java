@@ -11,7 +11,8 @@ import java.io.*;
 
 /**
  * An utility interface for converting Objects to bytes for storage or network
- * transport.
+ * transport. For some common general-purpose {@link ByteCoder}s, use
+ * {@link ByteCoderFactory}.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

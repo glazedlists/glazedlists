@@ -51,8 +51,8 @@ import java.io.*;
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> The protocol used by
  * this version of {@link NetworkList} will be incompatible with future versions.
- * Eventually the protocol will be finalized but the current protocol does not have
- * this luxury.
+ * Eventually the protocol will be finalized but the current protocol is a work
+ * in progress.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
