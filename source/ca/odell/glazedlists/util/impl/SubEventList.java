@@ -29,7 +29,7 @@ public final class SubEventList extends TransformedList implements ListEventList
     private int endIndex;
     
     /**
-     * Creates a new SubEventList that covers the specified range of indicies
+     * Creates a new SubEventList that covers the specified range of indices
      * in the source list.
      *
      * @param startIndex the start index of the source list, inclusive
