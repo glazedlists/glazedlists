@@ -73,7 +73,7 @@ garbage collected. If a <code>ListChangeListener</code> never iterates or clears
 change events, change ojbects will be allocated but never garbage collected so the
 application will have a memory leak.
 
-<a name="rowheight"></a><h3>Use a fixed row height</h3>
+<a name="rowheight"></a><h3>Use a Fixed Row Height</h3>
 <p>By using custom renderers such as <code>StyledDocumentRenderer</code> with variable
 row heights, the <code>JTable</code> does a lot of work to keep track of the height for
 each row. When Glazed Lists has a sequence of change events it can take a noticeable
@@ -88,8 +88,8 @@ from individually adjusting each row's height and will avoid that performance pr
 <p>If you absolutely must use variable row heights, be sure to call
 <code>ListTable.setRepaintAllThreshhold(100)</code> which can group your change blocks
 to work around the <code>JTable</code>'s slow row height handling. Note that although
-behaviour is much faster, it causes the <strong>selection and scrolling to be lost<strong>
-when many changes occur simultaneously such as when your list is filtered.
+behaviour is much faster, it causes the <strong>selection and scrolling to be lost</strong>
+when many changes occur simultaneously - such as when your list is filtered.
 
 <br><br><p><table cellpadding="0" cellspacing="0" width="100%" border="0"><tr>
 <th align="left" width="30%"><a href="../part7/index.html">&lt;&lt; Part 7 - JComboBox</a></th> 
