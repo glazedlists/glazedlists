@@ -97,7 +97,10 @@ public class Bufferlo {
      */
     public Bufferlo duplicate() {
         Bufferlo result = new Bufferlo();
-        result.append(this);
+        for(int i = 0; i < buffers.size(); i++) {
+            ByteBuffer buffer = (ByteBuffer)buffers.get(i);
+            result.buffers.add(removeTrailingSpace(buffer));
+        }
         return result;
     }
     
@@ -115,12 +118,25 @@ public class Bufferlo {
      * Writes the specified data to this bufferlo. This shortens the last ByteBuffer
      * in the added set so that it will not be written to. This allows a read-only
      * buffer to be added without it ever being modified.
+     * 
+     * This will consume the specified Bufferlo.
      */
-    public void append(Bufferlo data) {
-        for(Iterator b = buffers.iterator(); b.hasNext(); ) {
-            ByteBuffer buffer = (ByteBuffer)b.next();
-            buffers.add(removeTrailingSpace(buffer));
-        }
+    public Bufferlo append(Bufferlo data) {
+        buffers.addAll(data.buffers);
+        data.buffers.clear();
+        return this;
+    }
+    
+    /**
+     * Appends a the specified data. The data will be consumed so it should be
+     * a duplicate if it is to be reused.
+     */
+    public Bufferlo append(ByteBuffer data) {
+        ByteBuffer myCopy = data.splice();
+        myCopy.position(myCopy.limit());
+        buffers.add(myCopy);
+        data.position(data.limit());
+        return this;
     }
     
     /**
@@ -162,6 +178,13 @@ public class Bufferlo {
                 break;
             }
         }
+    }
+    
+    /**
+     * Write this Bufferlo as a String for debugging.
+     */
+    public String toString() {
+        return buffers.toString();
     }
 
     /**
@@ -270,7 +293,7 @@ public class Bufferlo {
      * Gets a new buffer by creating it or removing it from the pool.
      */
     private ByteBuffer getNewBuffer() {
-        int BUFFER_SIZE = 8124; 
+        int BUFFER_SIZE = 8 * 1024; 
         return ByteBuffer.allocateDirect(BUFFER_SIZE);
     }
 }
