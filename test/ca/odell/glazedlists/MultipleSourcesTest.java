@@ -143,7 +143,6 @@ public class MultipleSourcesTest extends TestCase {
         }
 
         public void listChanged(ListEvent e) {
-            e.clearEventQueue();
             changeCount++;
             for(Iterator i = sources.iterator(); i.hasNext(); ) {
                 EventList eventList = (EventList)i.next();

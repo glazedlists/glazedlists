@@ -80,6 +80,7 @@ public abstract class ThreadProxyEventList extends TransformedList {
     public final void listChanged(ListEvent listChanges) {
         // ensure we have a Swing proxy for the update event
         this.listChanges = listChanges;
+        listChanges.mark();
 
         // forward the event on the appropriate thread
         schedule(updateRunner);
@@ -136,12 +137,13 @@ public abstract class ThreadProxyEventList extends TransformedList {
                     }
                     forwardedEvents = true;
                 }
+                listChanges.clearMark();
                 updates.commitEvent();
             } finally {
                 getReadWriteLock().writeLock().unlock();
             }
         }
-    
+
         /**
          * Update local state as a consequence of the change event.
          */

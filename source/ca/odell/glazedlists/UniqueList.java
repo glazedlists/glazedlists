@@ -142,10 +142,6 @@ public final class UniqueList extends TransformedList {
         // forwarded with a resultant DELETE or UPDATE event, depending on whether
         // the deleted value was unique.
 
-        // divide the change event for two passes
-        ListEvent firstPass = new ListEvent(listChanges);
-        ListEvent secondPass = listChanges;
-
         // a Barcode to track values that could be unique but it can't be
         // determined until a later pass through the change events.
         Barcode tempUniqueList = new Barcode();
@@ -153,9 +149,10 @@ public final class UniqueList extends TransformedList {
 
         // first pass, update unique list
         LinkedList removedValues = new LinkedList();
-        while(firstPass.next()) {
-            int changeIndex = firstPass.getIndex();
-            int changeType = firstPass.getType();
+        listChanges.mark();
+        while(listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
             if(changeType == ListEvent.INSERT) {
                 duplicatesList.addBlack(changeIndex, 1);
@@ -188,9 +185,11 @@ public final class UniqueList extends TransformedList {
 
         // second pass, fire events
         updates.beginEvent();
-        while(secondPass.next()) {
-            int changeIndex = secondPass.getIndex();
-            int changeType = secondPass.getType();
+        listChanges.reset();
+        listChanges.clearMark();
+        while(listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
             // inserts can result in UPDATE or INSERT events
             if(changeType == ListEvent.INSERT) {

@@ -138,12 +138,12 @@ public final class SortedList extends TransformedList {
         LinkedList insertNodes = new LinkedList();
 
         // perform the inserts and deletes on the indexed tree
-        ListEvent firstPass = new ListEvent(listChanges);
-        while(firstPass.next()) {
+        listChanges.mark();
+        while(listChanges.next()) {
 
             // get the current change info
-            int unsortedIndex = firstPass.getIndex();
-            int changeType = firstPass.getType();
+            int unsortedIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
             // on insert, insert the index node
             if(changeType == ListEvent.INSERT) {
@@ -166,12 +166,12 @@ public final class SortedList extends TransformedList {
         IndicesPendingDeletion indicesPendingDeletion = new IndicesPendingDeletion();
 
         // record the original indices of the nodes for update
-        ListEvent secondPass = new ListEvent(listChanges);
-        while(secondPass.next()) {
+        listChanges.reset();
+        while(listChanges.next()) {
 
             // get the current change info
-            int unsortedIndex = secondPass.getIndex();
-            int changeType = secondPass.getType();
+            int unsortedIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
             // on insert, insert the index node
             if(changeType == ListEvent.UPDATE) {
@@ -183,12 +183,13 @@ public final class SortedList extends TransformedList {
         }
 
         // delete the indices of the updated nodes
-        ListEvent thirdPass = listChanges;
-        while(thirdPass.next()) {
+        listChanges.reset();
+        listChanges.clearMark();
+        while(listChanges.next()) {
 
             // get the current change info
-            int unsortedIndex = thirdPass.getIndex();
-            int changeType = thirdPass.getType();
+            int unsortedIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
             // on insert, insert the index node
             if(changeType == ListEvent.UPDATE) {

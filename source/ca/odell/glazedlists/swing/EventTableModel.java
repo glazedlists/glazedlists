@@ -42,9 +42,6 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     /** Reusable table event for broadcasting changes */
     private MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
 
-    /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    private int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
-
     /**
      * Creates a new table that renders the specified list in the specified
      * format.
@@ -116,27 +113,15 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public void listChanged(ListEvent listChanges) {
         swingSource.getReadWriteLock().readLock().lock();
         try {
-            // when all events hae already been processed by clearing the event queue
-            if(!listChanges.hasNext()) return;
-
-            // notify all changes simultaneously
-            if(listChanges.getBlocksRemaining() >= changeSizeRepaintAllThreshhold) {
-                listChanges.clearEventQueue();
-                // first scroll to row zero
-                //tableScrollPane.getViewport().setViewPosition(table.getCellRect(0, 0, true).getLocation());
-                fireTableDataChanged();
-
             // for all changes, one block at a time
-            } else {
-                while(listChanges.nextBlock()) {
-                    // get the current change info
-                    int startIndex = listChanges.getBlockStartIndex();
-                    int endIndex = listChanges.getBlockEndIndex();
-                    int changeType = listChanges.getType();
-                    // create a table model event for this block
-                    tableModelEvent.setValues(startIndex, endIndex, changeType);
-                    fireTableChanged(tableModelEvent);
-                }
+            while(listChanges.nextBlock()) {
+                // get the current change info
+                int startIndex = listChanges.getBlockStartIndex();
+                int endIndex = listChanges.getBlockEndIndex();
+                int changeType = listChanges.getType();
+                // create a table model event for this block
+                tableModelEvent.setValues(startIndex, endIndex, changeType);
+                fireTableChanged(tableModelEvent);
             }
         } finally {
             swingSource.getReadWriteLock().readLock().unlock();
@@ -256,36 +241,6 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
         } else {
             throw new UnsupportedOperationException("Unexpected set() on read-only table");
         }
-    }
-
-    /**
-     * Gets the minimum number of changes that will be combined into one uniform
-     * change and cause selection and scrolling to be lost.
-     */
-    public int getRepaintAllThreshhold() {
-        return changeSizeRepaintAllThreshhold;
-    }
-    /**
-     * Sets the threshhold of the number of change blocks that will be handled
-     * individually before the ListTable collapses such changes into one and simply
-     * repaints the entire table. This is a work around to the JTable's poor
-     * performance when handling large sets of small changes. <strong>This
-     * work-around is only necessary when the JTable has variable row height</strong>.
-     * When the JTable has a fixed row height, there is no performance problem and
-     * this work around is unnecessary.
-     *
-     * <p>Two problems occur when using this work around. It will cause the table's
-     * selection to be destroyed and it will cause the table's scrolling to be lost.
-     *
-     * <p>By default, this work around is disabled and users must enable it by calling
-     * <code>setRepaintAllThreshhold()</code> to enable it. In practice, tests have shown
-     * that 100 is a decent value for the repaintAllThreshhold of tables that have variable
-     * height rows.
-     *
-     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=30">Bug 30</a>
-     */
-    public void setRepaintAllThreshhold(int repaintAllThreshhold) {
-        this.changeSizeRepaintAllThreshhold = repaintAllThreshhold;
     }
     
     /**

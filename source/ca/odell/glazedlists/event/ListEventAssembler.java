@@ -131,10 +131,9 @@ public final class ListEventAssembler {
         int oldestRequiredChange = atomicChanges.size(); 
         for(int e = 0; e < listenerEvents.size(); e++) {
             ListEvent listChangeEvent = (ListEvent)listenerEvents.get(e);
-            int eventOldestChange = listChangeEvent.getAtomicChangeCount();
-            if(eventOldestChange < oldestRequiredChange) {
-                oldestRequiredChange = eventOldestChange;
-            }
+            int mark = listChangeEvent.getMark();
+            if(mark == -1) continue;
+            else if(mark < oldestRequiredChange) oldestRequiredChange = mark;
         }
         // recycle every change that is no longer used
         for(int i = oldestChange; i < oldestRequiredChange; i++) {

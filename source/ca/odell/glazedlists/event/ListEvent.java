@@ -51,6 +51,9 @@ public final class ListEvent extends EventObject {
     /** the master sequence that this is a view of */
     private ListEventAssembler masterSequence;
     
+    /** the marked atomic count, for later revew */
+    private int atomicCountMark = -1;
+    
     /**
      * Create a new list change sequence that uses the source master list
      * for the source of changes.
@@ -90,8 +93,47 @@ public final class ListEvent extends EventObject {
         this.atomicCount = original.atomicCount;
     }
     
-    
     /**
+     * Mark the current location in the sequence of list events so that it may be
+     * returned to later. Note that this will cause the components of this
+     * {@link ListEvent} to persist in memory until {@link clearMark()} is called.
+     * Therefore be sure to call {@link clearMark()} whenever you call
+     * {@link mark()}.
+     */
+    public void mark() {
+        atomicCountMark = atomicCount;
+    }
+    /**
+     * Removes the mark so that the components of this {@link ListEvent} may be
+     * garbage collected.
+     */
+    public void clearMark() {
+        atomicCountMark = -1;
+    }
+    /**
+     * Resets this event's position to the previously-marked position. This should
+     * be used for {@link TransformedList}s that require multiple-passes of the 
+     * {@link ListEvent} in order to process it. Note that this method does not
+     * clear the mark.
+     */
+    public void reset() {
+        if(atomicCountMark == -1) throw new IllegalStateException();
+        
+        atomicCount = atomicCountMark;
+        currentBlock = null;
+        blockCount = 0;
+    }
+
+    /**
+     * Gets the count of the number of blocks seen by this view. This is used
+     * by the master list in order to get rid of blocks that have been seen by
+     * all views.
+     */
+    int getMark() {
+        return atomicCountMark;
+    }
+    
+    /*
      * Clears the queue of all unprocessed changes. This is used when a
      * listener reloads the source list rather than modifying it by
      * differences.
@@ -102,11 +144,11 @@ public final class ListEvent extends EventObject {
      * events will be cleared before they are processed. Otherwise the
      * call to next() may fail.
      */
-    public void clearEventQueue() {
+    /*public void clearEventQueue() {
         atomicCount = masterSequence.getAtomicCount();
         currentBlock = null;
         blockCount = 0;
-    }
+    }*/
     
     /**
      * Increments the change sequence to view the next change. This will
@@ -234,15 +276,6 @@ public final class ListEvent extends EventObject {
      */
     public int getType() {
         return currentBlock.getType();
-    }
-
-    /**
-     * Gets the count of the number of blocks seen by this view. This is used
-     * by the master list in order to get rid of blocks that have been seen by
-     * all views.
-     */
-    public int getAtomicChangeCount() {
-        return atomicCount;
     }
 
     /**
