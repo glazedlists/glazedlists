@@ -14,10 +14,14 @@ import java.util.*;
 import ca.odell.glazedlists.util.concurrent.*;
 
 /**
- * An {@link EventList} composed of multiple source {@link EventList}s.
+ * An {@link EventList} composed of multiple source {@link EventList}s. This list
+ * shows the contents of its source lists.
  *
- * @deprecated As of 2004/02/26, this has been replaced by CollectionList with a
- *     {@link GlazedLists#listCollectionListModel()}.
+ * <p>Note that all contained {@link EventList}s must use the same {@link ReadWriteLock}
+ * if this {@link EventList} is to be used my multiple threads concurrently. To
+ * construct an {@link EventList} that shares the {@link ReadWriteLock} with this
+ * {@link CompositeList}, use {@link #createMemberList()} or
+ * {@link BasicEventList#BasicEventList(ReadWriteLock) new BasicEventList(CompositeList.getReadWriteLock())}
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -40,7 +44,7 @@ public class CompositeList extends CollectionList {
      * will be used by multiple threads.
      *
      * <p>Note that the created {@link EventList} must be explicitly added as a member
-     * to this {@link CompositeList} using {@link addMemberList(EventList)}.
+     * to this {@link CompositeList} using {@link #addMemberList(EventList)}.
      */
     public EventList createMemberList() {
         return new BasicEventList(getReadWriteLock());
