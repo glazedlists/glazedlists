@@ -12,7 +12,12 @@ import ca.odell.glazedlists.*;
 import java.util.*;
 
 /**
- * Manager for distributing {@link ListEvent}s.
+ * Manager for distributing {@link ListEvent}s to {@link ListEventListener}s.
+ * Because {@link ListEvent}s must be forwarded in a safe order, the
+ * {@link ListEventPublisher} manages dependencies between {@link ListEventListener}s
+ * and {@link EventList}s. Therefore any {@link ListEventListener} that fires
+ * {@link ListEvent}s from within the {@link ListEventListener#listChanged(ListEvent) listChanged()}
+ * method shall share the {@link ListEventPublisher} with its source {@link EventList}.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -41,9 +46,12 @@ public final class ListEventPublisher {
     }
     
     /**
-     * Adds the specified dependency to the specified EventList.
+     * Requires that the specified {@link EventList} be updated before the
+     * specified {@link ListEventListener} which depends on it. Dependencies are
+     * automatically managed by most {@link EventList}s, so this method shall only
+     * be used for {@link EventList}s that have indirect dependencies.
      */
-    void addDependency(ListEventListener listener, EventList dependency) {
+    public void addDependency(ListEventListener listener, EventList dependency) {
         DependentListener dependentListener = getDependentListener(listener);
         if(dependentListener == null) {
             dependentListener = new DependentListener(listener);
@@ -51,10 +59,12 @@ public final class ListEventPublisher {
         }
         dependentListener.getDependencies().add(dependency);
     }
+
     /**
-     * Removes the specified dependency for the specified EventList.
+     * Removes the specified {@link EventList} as a dependency for the specified
+     * {@link ListEventListener}.
      */
-    void removeDependency(ListEventListener listener, EventList dependency) {
+    public void removeDependency(ListEventListener listener, EventList dependency) {
         DependentListener dependentListener = getDependentListener(listener);
         if(dependentListener == null) throw new IllegalArgumentException();
         List dependencies = dependentListener.getDependencies();
@@ -66,7 +76,6 @@ public final class ListEventPublisher {
         }
         if(dependencies.isEmpty()) dependentListeners.remove(dependentListener);
     }
-    
     
     /**
      * Gets the dependent list for the specified @{ListEventListener}.
@@ -117,6 +126,8 @@ public final class ListEventPublisher {
             // if our listener is managed, fulfill its dependencies first
             if(dependenciesSatisfied(listener)) {
                 listener.listChanged(event);
+                //if(no events come through) lists dependent on this do not need
+                    // events from this to be satisfied
                 if(listener instanceof EventList) {
                     satisfiedEventLists.add((EventList)listener);
                 }
@@ -158,21 +169,28 @@ public final class ListEventPublisher {
     }
     
     /**
-     * Returns true if the specified {@link ListEventListener}'s dependencies have
-     * been satisfied.
+     * Returns true if the specified {@link ListEventListener}'s required dependencies
+     * have been satisfied.
+     *
+     * <p>A dependency has been satisfied if it has been notified of the current event,
+     * either directly or indirectly.
+     *
+     * <p>A dependency is required if it is dependent on the event's cause, either
+     * directly or indirectly.
+     *
+     * <p>This method is currently broken. If an {@link EventList} fails to forward
+     * any events, it may cause a source {@link EventList} to be unsatisfied.
      */
     public boolean dependenciesSatisfied(ListEventListener listener) {
         return dependenciesSatisfied(getDependentListener(listener));
     }
     public boolean dependenciesSatisfied(DependentListener dependentListener) {
-        // if it is unmanaged, it is always satisfied
-        if(dependentListener == null) throw new IllegalStateException();
-
-        // ensure all dependencies have been satisfied
         List dependenciesToSatisfy = dependentListener.getDependencies();
         for(int d = 0; d < dependenciesToSatisfy.size(); d++) {
             EventList dependency = (EventList)dependenciesToSatisfy.get(d);
+            
             if(listContains(satisfiedEventLists, dependency)) continue;
+            
             DependentListener dependencyListener = getDependentListener(dependency);
             if(dependencyListener == null) continue;
             if(dependencyListener.dependsOn(eventCause)) return false;
