@@ -18,7 +18,7 @@ import java.util.*;
 public final class AgedNode {
 
     /** The corresponding node in the index tree */
-    private IndexedTreeNode indexNode = null;
+    private SparseListNode indexNode = null;
     /** The timestamp corresponding to the last access of this node */
     private long timestamp = 0;
     /** The value to this node */
@@ -27,10 +27,10 @@ public final class AgedNode {
     /**
      * Creates a new AgedNode object to store in the age sorted tree
      *
-     * @param indexNode The related node in the index tree
+     * @param indexNode The related node in the indexing tree
      * @param value The value to assign to this node
      */
-    public AgedNode(IndexedTreeNode indexNode, Object value) {
+    public AgedNode(SparseListNode indexNode, Object value) {
         this.indexNode = indexNode;
         this.value =  value;
         timestamp = System.currentTimeMillis();
@@ -53,7 +53,7 @@ public final class AgedNode {
      *
      * @return The index node
      */
-    public IndexedTreeNode getIndexNode() {
+    public SparseListNode getIndexNode() {
         return indexNode;
     }
 

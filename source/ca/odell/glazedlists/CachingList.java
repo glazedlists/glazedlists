@@ -16,8 +16,8 @@ import java.util.Random;
 /**
  * An {@link EventList} that caches elements from its source {@link EventList}.
  *
- * It is useful in cases when the {@link #get(int) get()} method of an
- * {@link EventList} is expensive. It can be used when there are too many
+ * It is useful in cases when the {@link #get(int)} method of an
+ * {@link EventList} is expensive. It can also be used when there are too many
  * elements to keep in memory simultaneously. For caching to be effective, object
  * access must be clustered.
  *
@@ -31,17 +31,16 @@ import java.util.Random;
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
- * 
+ *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
 public class CachingList extends TransformedList implements ListEventListener {
 
-    /** The value signifying that an index node is currently unset  */
-    public static final Integer EMPTY_INDEX_NODE = new Integer(-1);
-
-    /** The cache is implemented using a tree-based cache and an index tree */
+    /** The cache is implemented using a tree-based cache */
     private IndexedTree cache;
-    private IndexedTree indexTree;
+
+    /** The model of the source list for scalability with minimal memory footprint */
+    private SparseList indexTree;
 
     /** The count of cache hits and cache misses for testing cache success */
     private int cacheHits;
@@ -59,17 +58,15 @@ public class CachingList extends TransformedList implements ListEventListener {
      * {@link EventList}.
      *
      * @param source The source list to use to get values from
-     * @param maxSize The maxiumum size of the cache
+     * @param maxSize The maximum size of the cache
      */
     public CachingList(EventList source, int maxSize) {
         super(source);
         this.maxSize = maxSize;
 
         cache = new IndexedTree(new AgedNodeComparator());
-        indexTree = new IndexedTree();
-        for(int i = 0; i < source.size();i++) {
-            indexTree.addByNode(i, EMPTY_INDEX_NODE);
-        }
+        indexTree = new SparseList();
+        indexTree.addNulls(0, source.size());
         source.addListEventListener(this);
         lastKnownSize = source.size();
     }
@@ -105,34 +102,40 @@ public class CachingList extends TransformedList implements ListEventListener {
      *         or null if the index is not found.
      */
     protected final Object fetch(int index, boolean recordHitsOrMisses) {
-        Object value = null;
 
         // attempt to get the element from the cache
-        IndexedTreeNode indexNode = indexTree.getNode(index);
-        Object nodeValue = indexNode.getValue();
-        if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
-            if(recordHitsOrMisses) cacheHits ++;
-            IndexedTreeNode cacheNode = (IndexedTreeNode)indexNode.getValue();
+        Object value = null;
+        IndexedTreeNode cacheNode = (IndexedTreeNode)indexTree.get(index);
+
+        // The value is cached, return cached value
+        if(cacheNode != null) {
+            if(recordHitsOrMisses) cacheHits ++;;
             AgedNode agedNode = (AgedNode)cacheNode.getValue();
             value = agedNode.getValue();
             cacheNode.removeFromTree();
+            SparseListNode indexNode = agedNode.getIndexNode();
             indexNode.setValue(cache.addByNode(agedNode));
+
+        // The value is not cached, lookup from source and cache
         } else {
             if(recordHitsOrMisses) cacheMisses++;
-            value = source.get(index);
-            if(currentSize < maxSize) {
-                currentSize++;
-                IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
-                indexNode.setValue(cacheNode);
-            } else {
+            // Make room in the cache if it is full
+            if(currentSize >= maxSize) {
                 IndexedTreeNode oldestInCache = cache.getNode(0);
                 oldestInCache.removeFromTree();
                 AgedNode oldAgedNode = (AgedNode)oldestInCache.getValue();
-                IndexedTreeNode oldIndexNode = oldAgedNode.getIndexNode();
-                oldIndexNode.setValue(EMPTY_INDEX_NODE);
-                IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
-                indexNode.setValue(cacheNode);
+                SparseListNode oldIndexNode = oldAgedNode.getIndexNode();
+                indexTree.set(oldIndexNode.getIndex(), null);
+                currentSize--;
             }
+
+            // Cache the value
+            value = source.get(index);
+            indexTree.set(index, Boolean.TRUE);
+            SparseListNode indexNode = indexTree.getNode(index);
+            AgedNode agedNode = new AgedNode(indexNode, value);
+            indexNode.setValue(cache.addByNode(agedNode));
+            currentSize++;
         }
         return value;
     }
@@ -191,37 +194,32 @@ public class CachingList extends TransformedList implements ListEventListener {
 
     /** {@inheritDoc} */
     public final void listChanged(ListEvent listChanges) {
-        // An INSERT causes the indexes of cached values to be offset.
-        // A DELETE causes an entry to be removed and/or the index values to be offset
-        // An UPDATE causes an existing entry to be removed
 
         updates.beginEvent();
         while(listChanges.next()) {
             // get the current change info
-            final int index = listChanges.getIndex();
-            final int changeType = listChanges.getType();
+            int index = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
             // Lookup the cache entry for this index if possible
-            Object nodeValue = null;
-            IndexedTreeNode indexNode = null;
-            if(index < lastKnownSize) {
-                indexNode = indexTree.getNode(index);
-                nodeValue = indexNode.getValue();
-            }
             IndexedTreeNode cacheNode = null;
-            if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
-                cacheNode = (IndexedTreeNode)nodeValue;
+            if(index < lastKnownSize) {
+                cacheNode = (IndexedTreeNode)indexTree.get(index);
             }
 
-            // Perform specific actions for each type of change
+            // An INSERT causes the indexes of cached values to be offset.
             if(changeType == ListEvent.INSERT) {
-                indexTree.addByNode(index, EMPTY_INDEX_NODE);
+                indexTree.add(index, null);
+
+            // A DELETE causes an entry to be removed and/or the index values to be offset.
             } else if(changeType == ListEvent.DELETE) {
                 if(cacheNode != null) {
                     cacheNode.removeFromTree();
                     currentSize--;
                 }
-                indexNode.removeFromTree();
+                indexTree.remove(index);
+
+            // An UPDATE causes an existing entry to be removed
             } else if(changeType == ListEvent.UPDATE) {
                 if(cacheNode != null) {
                     cacheNode.removeFromTree();
@@ -370,11 +368,17 @@ class CacheTestHelper {
     }
 
     /**
-     * Convienience method to allow the running of all of the
+     * Convenience method to allow the running of all of the
      * tests defined in this helper class via a single method call
      */
     protected void runTests() {
         System.out.println("Beginning Performance Tests...");
+
+        // Set up the source list
+        sourceList = new WaitEventList(requestWaitTime);
+        for(int i = 0; i < sourceListSize; i++) {
+            sourceList.add(new Integer(i));
+        }
         long startTime = System.currentTimeMillis();
         testRetrievalFromCache();
 
@@ -485,11 +489,6 @@ class CacheTestHelper {
      * Prepare for a test.
      */
     private void setUp() {
-        // Set up the source list
-        sourceList = new WaitEventList(requestWaitTime);
-        for(int i = 0; i < sourceListSize; i++) {
-            sourceList.add(new Integer(i));
-        }
         // Set up and preload the cache with the first items, up to cacheSize
         testCache = new CachingList(sourceList, cacheSize);
         for(int i = 0; i < cacheSize; i++) {
@@ -502,7 +501,6 @@ class CacheTestHelper {
      */
     private void tearDown() {
         testCache = null;
-        sourceList = null;
     }
 
     /**
