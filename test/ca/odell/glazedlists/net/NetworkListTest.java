@@ -177,7 +177,7 @@ public class NetworkListTest extends TestCase {
             snapshot.addAll(sourceList);
             
             // disconnect the server
-            targetList.disconnect(); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
+            //targetList.disconnect(); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
             sourceList.disconnect();
             waitFor(1000);
             assertFalse(sourceListener.isConnected());
@@ -295,7 +295,7 @@ public class NetworkListTest extends TestCase {
             snapshot.addAll(sourceList);
             
             // disconnect the first list
-            targetList.disconnect(); waitFor(1000); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
+            //targetList.disconnect(); waitFor(1000); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
             sourceList.disconnect();
             waitFor(1000);
             assertFalse(targetList.isConnected());
@@ -311,7 +311,7 @@ public class NetworkListTest extends TestCase {
             assertEquals(sourceList2, targetList);
             
             // disconnect the second list
-            targetList.disconnect(); waitFor(1000); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
+            //targetList.disconnect(); waitFor(1000); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
             sourceList2.disconnect();
             waitFor(1000);
             assertFalse(targetList.isConnected());

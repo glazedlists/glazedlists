@@ -26,7 +26,7 @@ public class Peer implements CTPHandlerFactory {
     private static Logger logger = Logger.getLogger(Peer.class.toString());
 
     /** the resources being subscribed to */ 
-    private Map subscribed = new TreeMap();
+    Map subscribed = new TreeMap();
     
     /** the resources being published */
     Map published = new TreeMap();
@@ -117,7 +117,6 @@ public class Peer implements CTPHandlerFactory {
      */
     public ResourceStatus subscribe(Resource resource, String resourceName, String host, int port) {
         PeerResource peerResource = new PeerResource(this, resource, resourceName, host, port);
-        subscribed.put(resourceName, peerResource);
         return peerResource.status();
     }
     
@@ -144,5 +143,12 @@ public class Peer implements CTPHandlerFactory {
          connectionManager.connect(peerConnection, host, port);
          connections.add(peerConnection);
          return peerConnection;
+     }
+     
+     /**
+      * Runs the specified task on the network thread.
+      */
+     void invokeLater(Runnable runnable) {
+         connectionManager.invokeLater(runnable);
      }
 }

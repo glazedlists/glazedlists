@@ -194,6 +194,9 @@ public final class CTPConnectionManager implements Runnable {
      * Runs the specified task the next time the CTPConnectionManager thread has
      * a chance.
      */
+    public void invokeLater(Runnable runnable) {
+        invokeLater(new CTPSimpleRunnable(runnable));
+    }
     void invokeLater(CTPRunnable runnable) {
         synchronized(this) {
             // if the server has not yet been started

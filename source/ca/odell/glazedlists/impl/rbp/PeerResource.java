@@ -64,9 +64,6 @@ class PeerResource {
         // create a random session ID as a check
         this.sessionId = new Random(System.currentTimeMillis()).nextInt();
         
-        // listen for updates
-        resource.addResourceListener(resourceListener);
-        
         // subscribe to the resource
         resourceStatus.connect();
     }
@@ -80,9 +77,6 @@ class PeerResource {
         this.resourceName = resourceName;
         this.publisherHost = publisherHost;
         this.publisherPort = publisherPort;
-
-        // listen for updates
-        resource.addResourceListener(resourceListener);
         
         // subscribe to the resource
         resourceStatus.connect();
@@ -115,26 +109,35 @@ class PeerResource {
      */
     private class PrivateResourceListener implements ResourceListener {
         public void resourceUpdated(Resource resource, Bufferlo delta) {
-            // update the internal state
-            if(publisher == null) updateId++;
-            
-            // if nobody's listening, we're done
-            if(subscribers.isEmpty()) return;
-            
-            // forward the event to listeners
-            PeerBlock block = PeerBlock.update(resourceName, sessionId, updateId, delta);
-            
-            // send the block to interested subscribers
-            for(int s = 0; s < subscribers.size(); s++) {
-                PeerConnection subscriber = (PeerConnection)subscribers.get(s);
-                subscriber.writeBlock(PeerResource.this, block);
+            peer.invokeLater(new UpdatedRunnable(delta));
+        }
+        private class UpdatedRunnable implements Runnable {
+            private Bufferlo delta = null;
+            public UpdatedRunnable(Bufferlo delta) {
+                this.delta = delta;
+            }
+            public void run() {
+                // update the internal state
+                if(publisher == null) updateId++;
+                
+                // if nobody's listening, we're done
+                if(subscribers.isEmpty()) return;
+                
+                // forward the event to listeners
+                PeerBlock block = PeerBlock.update(resourceName, sessionId, updateId, delta);
+                
+                // send the block to interested subscribers
+                for(int s = 0; s < subscribers.size(); s++) {
+                    PeerConnection subscriber = (PeerConnection)subscribers.get(s);
+                    subscriber.writeBlock(PeerResource.this, block);
+                }
             }
         }
     }
     public ResourceListener resourceListener() {
         return resourceListener;
     }
-
+    
     /**
      * Provides information about the status of this resource.
      */
@@ -147,66 +150,85 @@ class PeerResource {
         private boolean connected = false;
     
         /** {@inheritDoc} */
-        public boolean isConnected() {
+        public synchronized boolean isConnected() {
             return connected;
         }
         
         /** {@inheritDoc} */
         public void connect() {
-            // if this is remote, subscribe to this resource
-            if(publisherHost != null) {
-                publisher = peer.getConnection(publisherHost, publisherPort);
-            
-                publisher.incomingSubscriptions.put(resourceName, PeerResource.this);
-                PeerBlock block = PeerBlock.subscribe(resourceName);
-                publisher.writeBlock(PeerResource.this, block);
-
-            // if this is local, we're immediately connected
-            } else {
-                resourceStatus.setConnected(true, null);
-                if(peer.published.get(resourceName) != null) throw new IllegalStateException();
-                peer.published.put(resourceName, PeerResource.this);
+            peer.invokeLater(new ConnectRunnable());
+        }
+        private class ConnectRunnable implements Runnable {
+            public void run() {
+                // listen for updates
+                resource.addResourceListener(resourceListener);
+                
+                // if this is remote, subscribe to this resource
+                if(publisherHost != null) {
+                    publisher = peer.getConnection(publisherHost, publisherPort);
+                
+                    peer.subscribed.put(resourceName, PeerResource.this);
+                    publisher.incomingSubscriptions.put(resourceName, PeerResource.this);
+                    PeerBlock block = PeerBlock.subscribe(resourceName);
+                    publisher.writeBlock(PeerResource.this, block);
+        
+                // if this is local, we're immediately connected
+                } else {
+                    resourceStatus.setConnected(true, null);
+                    if(peer.published.get(resourceName) != null) throw new IllegalStateException();
+                    peer.published.put(resourceName, PeerResource.this);
+                }
             }
         }
-        
+    
         /** {@inheritDoc} */
         public void disconnect() {
-            // we're immediately disconnected
-            resourceStatus.setConnected(false, null);
-            
-            // if this is remote
-            if(publisherHost != null) {
-                // clean up the publisher
-                if(publisher != null) {
-                    publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
-                    publisher.incomingSubscriptions.remove(resourceName);
-                    if(publisher.isIdle()) publisher.close();
-                    publisher = null;
-                }
-
-            // if this is local
-            } else {
-                if(peer.published.get(resourceName) == null) throw new IllegalStateException();
-                peer.published.remove(resourceName);
+            peer.invokeLater(new DisconnectRunnable());
+        }
+        private class DisconnectRunnable implements Runnable {
+            public void run() {
+                // we're immediately disconnected
+                resourceStatus.setConnected(false, null);
                 
-                // unpublish the subscribers
-                for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
-                    PeerConnection subscriber = (PeerConnection)s.next();
-                    subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceName));
-                    subscriber.outgoingPublications.remove(resourceName);
-                    if(subscriber.isIdle()) subscriber.close();
-                    s.remove();
+                // listen for updates
+                resource.removeResourceListener(resourceListener);
+                
+                // if this is remote
+                if(publisherHost != null) {
+                    peer.subscribed.remove(resourceName);
+                    
+                    // clean up the publisher
+                    if(publisher != null) {
+                        publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
+                        publisher.incomingSubscriptions.remove(resourceName);
+                        if(publisher.isIdle()) publisher.close();
+                        publisher = null;
+                    }
+    
+                // if this is local
+                } else {
+                    if(peer.published.get(resourceName) == null) throw new IllegalStateException();
+                    peer.published.remove(resourceName);
+                    
+                    // unpublish the subscribers
+                    for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
+                        PeerConnection subscriber = (PeerConnection)s.next();
+                        subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceName));
+                        subscriber.outgoingPublications.remove(resourceName);
+                        if(subscriber.isIdle()) subscriber.close();
+                        s.remove();
+                    }
                 }
             }
         }
         
         /** {@inheritDoc} */
-        public void addResourceStatusListener(ResourceStatusListener listener) {
+        public synchronized void addResourceStatusListener(ResourceStatusListener listener) {
             statusListeners.add(listener);
         }
 
         /** {@inheritDoc} */
-        public void removeResourceStatusListener(ResourceStatusListener listener) {
+        public synchronized void removeResourceStatusListener(ResourceStatusListener listener) {
             statusListeners.remove(listener);
         }
         
@@ -214,14 +236,17 @@ class PeerResource {
          * Update the status of this PeerResource and notify everyone who's interested.
          */
         private void setConnected(boolean connected, Exception reason) {
-            this.connected = connected;
-            for(Iterator i = statusListeners.iterator(); i.hasNext(); ) {
+            List listenersToNotify = new ArrayList();
+            synchronized(PrivateResourceStatus.this) {
+                this.connected = connected;
+                listenersToNotify.addAll(statusListeners);
+            }
+            for(Iterator i = listenersToNotify.iterator(); i.hasNext(); ) {
                 ResourceStatusListener statusListener = (ResourceStatusListener)i.next();
                 if(connected) statusListener.resourceConnected(this);
                 else statusListener.resourceDisconnected(this, reason);
             }
         }
-    
     }
     public ResourceStatus status() {
         return resourceStatus;
