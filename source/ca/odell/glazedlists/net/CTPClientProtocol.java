@@ -6,8 +6,12 @@
  */
 package ca.odell.glazedlists.net;
 
-// for maps of headers
+// NIO is used for CTP
 import java.util.*;
+import java.nio.*;
+import java.nio.channels.*;
+import java.net.*;
+import java.io.*;
 
 /**
  * The CTPClientProtocol is a clientside implementation of Chunked Transfer
@@ -16,11 +20,17 @@ import java.util.*;
  */
 final class CTPClientProtocol extends CTPProtocol {
 
+    /** a buffer to read into and out of */
+    private ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
+
     /**
-     * Creates a server that connects to the specified address.
+     * Creates a new CTPServerProtocol.
+     *
+     * @param host the target connection.
+     * @param selectionKey the connection managed by this higher-level protocol.
      */
-    public CTPClientProtocol(String host) throws CTPException {
-        
+    CTPClientProtocol(String host, SelectionKey selectionKey, CTPHandler handler) {
+        super(selectionKey, handler);
     }
 
     /**
@@ -31,6 +41,34 @@ final class CTPClientProtocol extends CTPProtocol {
      *      be null to indicate no headers.
      */
     public void sendRequest(String uri, Map headers) throws CTPException {
+    }
+
+    /**
+     * Handles the incoming bytes.
+     */
+    void handleRead() throws IOException {
+        SocketChannel socketChannel = (SocketChannel)selectionKey.channel();
+        buffer.clear();
+        
+        // read until we have exhausted the channel
+        int count = 0;
+        while((count = socketChannel.read(buffer)) > 0) {
+            // make buffer readable
+            buffer.flip();
+            
+            // send the data, it might not go all at once
+            while(buffer.hasRemaining()) {
+                socketChannel.write(buffer);
+            }
+            
+            // empty buffer
+            buffer.clear();
+        }
+        
+        // handle EOF, close channel. This invalidates the key
+        if(count < 0) {
+            socketChannel.close();
+        }
     }
 }
 
