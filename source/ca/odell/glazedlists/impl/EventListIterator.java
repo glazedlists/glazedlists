@@ -16,11 +16,7 @@ import java.util.*;
  * The EventListIterator is an iterator that allows the user to iterate
  * on a list <i>that may be changed while it is iterated</i>. This is
  * possible because the iterator is a listener for change events to the
- * source list. It also defensively stores a reference to {@link #next()}
- * and {@link #previous()} so that if the user calls {@link #hasNext()},
- * the immediately following call to {@link #next()} will not fail,
- * regardless of whether the next element is removed from the source list
- * in the interim. This property also holds for {@link #hasPrevious()}.
+ * source list.
  *
  * <p>This iterator simply keeps an index of where it is and what it last
  * saw. It knows nothing about the underlying storage performance of the List
@@ -34,10 +30,8 @@ public class EventListIterator implements ListIterator, ListEventListener {
     /** the list being iterated */
     private EventList source;
 
-    /** the index of and reference to the next element to view */
+    /** the index of the next element to view */
     private int nextIndex;
-    private Object next = null;
-    private Object previous = null;
 
     /** the most recently accessed element */
     private int lastIndex = -1;
@@ -94,41 +88,25 @@ public class EventListIterator implements ListIterator, ListEventListener {
     /**
      * Returns true if this list iterator has more elements when traversing the
      * list in the forward direction.
-     *
-     * <p>This implementation saves a reference to <i>next</i> to be defensive in
-     * case the <i>next</i> value is removed between a call to this method and a
-     * call to {@link #next()}.
      */
     public boolean hasNext() {
-        if(nextIndex < source.size()) {
-            next = source.get(nextIndex);
-            return true;
-        } else {
-            return false;
-        }
+        if(nextIndex < source.size()) return true;
+        return false;
     }
 
     /**
      * Returns the next element in the list.
      */
     public Object next() {
-        // when we need to rely on our defensive saved value
-        if(nextIndex >= source.size()) {
-            if(next != null) {
-                Object result = next;
-                next = null;
-                lastIndex = nextIndex;
-                nextIndex++;
-                return result;
-            } else {
-                throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
-            }
+        // next shouldn't have been called.
+        if(nextIndex == source.size()) {
+ 	       throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
+
         // when next has not been removed
         } else {
-            Object result = source.get(nextIndex);
             lastIndex = nextIndex;
             nextIndex++;
-            return result;
+            return source.get(lastIndex);
         }
     }
 
@@ -142,41 +120,25 @@ public class EventListIterator implements ListIterator, ListEventListener {
     /**
      * Returns true if this list iterator has more elements when traversing the
      * list in the reverse direction.
-     *
-     * <p>This implementation saves a reference to <i>previous</i> to be defensive in
-     * case the <i>previous</i> value is removed between a call to this method and a
-     * call to {@link #previous()}.
      */
     public boolean hasPrevious() {
-        if(nextIndex > 0) {
-            previous = source.get(nextIndex - 1);
-            return true;
-        } else {
-            return false;
-        }
+        if(nextIndex > 0) return true;
+        return false;
     }
 
     /**
      * Returns the previous element in the list.
      */
     public Object previous() {
-        // when we need to rely on our defensive saved value
-        if(nextIndex <= 0) {
-            if(previous != null) {
-                Object result = previous;
-                previous = null;
-                nextIndex--;
-                lastIndex = nextIndex;
-                return result;
-            } else {
-                throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
-            }
-            // when previous has not been removed
+        // previous shouldn't have been called
+        if(nextIndex == 0) {
+	        throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
+
+        // when previous has not been removed
         } else {
             nextIndex--;
             lastIndex = nextIndex;
-            Object result = source.get(nextIndex);
-            return result;
+            return source.get(nextIndex);
         }
     }
 
@@ -192,7 +154,6 @@ public class EventListIterator implements ListIterator, ListEventListener {
      */
     public void add(Object o) {
         source.add(nextIndex, o);
-        next = null;
     }
 
     /**
@@ -202,7 +163,6 @@ public class EventListIterator implements ListIterator, ListEventListener {
     public void remove() {
         if(lastIndex == -1) throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");
         source.remove(lastIndex);
-        previous = null;
     }
 
     /**
@@ -212,7 +172,6 @@ public class EventListIterator implements ListIterator, ListEventListener {
     public void set(Object o) {
         if(lastIndex == -1) throw new IllegalStateException("Cannot set() without a prior call to next() or previous()");
         source.set(lastIndex, o);
-        previous = null;
     }
 
     /**
