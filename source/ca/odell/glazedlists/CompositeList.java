@@ -57,8 +57,10 @@ public final class CompositeList extends AbstractEventList {
      * Adds the specified list to the lists that compose this list.
      */
     public void addMemberList(EventList list) {
-        //getReadWriteLock().writeLock().lock();
-        //try {
+        // lock all member lists and the new list
+        list.getReadWriteLock().readLock().lock();
+        getReadWriteLock().writeLock().lock();
+        try {
             // insert the actual list
             MemberList memberList = new MemberList(list);
             memberLists.add(memberList);
@@ -72,17 +74,19 @@ public final class CompositeList extends AbstractEventList {
                 updates.addInsert(offset, offset + memberList.size() - 1);
                 updates.commitEvent();
             }
-        //} finally {
-            //getReadWriteLock().writeLock().unlock();
-        //}
+        } finally {
+            // release all member lists which now include the new list
+            getReadWriteLock().writeLock().unlock();
+        }
     }
     
     /**
      * Removes the specified list from the lists that compose this list.
      */
     public void removeMemberList(EventList list) {
-        //getReadWriteLock().writeLock().lock();
-        //try {
+        // lock all member lists
+        getReadWriteLock().writeLock().lock();
+        try {
             // find the member list
             MemberList memberList = null;
             for(int i = 0; i < memberLists.size(); i++) {
@@ -109,9 +113,11 @@ public final class CompositeList extends AbstractEventList {
                 updates.addDelete(offset, offset + memberList.size() - 1);
                 updates.commitEvent();
             }
-        //} finally {
-            //getReadWriteLock().writeLock().unlock();
-        //}
+        } finally {
+            // release all member lists and the removed list
+            list.getReadWriteLock().readLock().unlock();
+            getReadWriteLock().writeLock().unlock();
+        }
     }
     
     /**
