@@ -35,6 +35,9 @@ class StaticCTPHandler implements CTPHandler {
     /** the connection being handled */
     private CTPConnection connection = null;
     
+    /** the incoming data */
+    private Bufferlo incoming = new Bufferlo();
+    
     /**
      * Add expected incoming data.
      */
@@ -63,13 +66,13 @@ class StaticCTPHandler implements CTPHandler {
      * Handle the specified incoming data.
      */
     public synchronized void receiveChunk(CTPConnection source, Bufferlo data) {
-        if(tasks.size() == 0) throw new IllegalStateException("Unexpected data " + data);
+        incoming.append(data);
         
         // read all the expected elements from the data
         try {
-            while(data.length() > 0) {
+            while(incoming.length() > 0) {
                 Expected expected = (Expected)tasks.get(0);
-                boolean consumed = expected.tryConsume(data);
+                boolean consumed = expected.tryConsume(incoming);
                 if(!consumed) return;
                 
                 tasks.remove(0);
@@ -127,7 +130,7 @@ class StaticCTPHandler implements CTPHandler {
             }
         }
         
-        if(!tasks.isEmpty()) throw new IllegalStateException(tasks.size() + " uncompleted tasks " + tasks);
+        if(!tasks.isEmpty()) throw new IllegalStateException(tasks.size() + " uncompleted tasks " + tasks + ", pending data \"" + incoming + "\"");
     }
 }
 
@@ -166,6 +169,14 @@ class Expected {
     private boolean done() {
         return (expected == null);
     }
+    
+    /** 
+     * Print the expected string.
+     */
+    public String toString() {
+        if(expected.length() > 30) return "Expected \"" + expected.length() + ":" + expected.substring(0, 30) + "\"";
+        else return "Expected \"" + expected + "\"";
+    }
 }
 
 /**
@@ -181,6 +192,11 @@ class Enqueued {
 
     public Bufferlo getData() {
         return data;
+    }
+    
+    public String toString() {
+        if(data.length() > 30) return "Enqueued \"" + data.length() + ":" + data.toString().substring(0, 30) + "\"";
+        else return "Enqueued \"" + data + "\"";
     }
 }
 

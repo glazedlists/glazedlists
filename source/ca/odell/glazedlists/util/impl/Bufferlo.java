@@ -81,7 +81,7 @@ public class Bufferlo implements CharSequence {
         for(ListIterator b = buffers.listIterator(); b.hasNext(); ) {
             ByteBuffer buffer = (ByteBuffer)b.next();
 
-            if(buffer.hasRemaining()) {
+            if(!buffer.hasRemaining()) {
                 b.remove();
             } else if(buffer.position() > 0) {
                 int bytesLeftToRead = buffer.remaining();
@@ -379,6 +379,10 @@ public class Bufferlo implements CharSequence {
             result.append(charAt(c));
         }
         return result.toString();
+    }
+    
+    public String toDebugString() {
+        return "BUFFERLO {" + buffers + "}";
     }
     
 

@@ -108,15 +108,8 @@ public class CTPClient {
             }
         }
         public void receiveChunk(CTPConnection source, Bufferlo data) {
-            if(true) throw new IllegalStateException("Convert buffer list into buffer");
-            /*try {
-                byte[] dataBytes = new byte[data.remaining()];
-                data.get(dataBytes);
-                String dataString = new String(dataBytes, "US-ASCII");
-                System.out.println("DATA: \"" + dataString + "\"");
-            } catch(UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }*/
+            System.out.println(data.toDebugString());
+            System.out.println("DATA: \"" + data.toString() + "\"");
         }
     }
     class ClientHandlerFactory implements CTPHandlerFactory {
