@@ -95,7 +95,7 @@ public class BarcodeTest extends TestCase {
         barcode.addWhite(81, 9);
         barcode.addWhite(91, 9);
 
-        assertEquals(10, barcode.getBlackList().size());
+        assertEquals(10, barcode.blackSize());
 
         for(int i = 0; i < 10; i++) {
             assertEquals(i, barcode.getBlackIndex(10*i));

@@ -54,12 +54,8 @@ public final class Barcode extends AbstractList {
     public static final Object WHITE = Boolean.FALSE;
     public static final Object BLACK = Boolean.TRUE;
 
-    /** the root of the tree */
+    /** the root of the underlying tree */
     private BarcodeNode root = null;
-
-    /** views of this list that contain only one colour */
-    private BlackList blackList = new BlackList();
-    private WhiteList whiteList = new WhiteList();
 
     /** the size of the trailing whitespace */
     private int whiteSpace = 0;
@@ -68,7 +64,7 @@ public final class Barcode extends AbstractList {
     private int treeSize = 0;
 
     /**
-     * Prints internal debug information for this list
+     * Prints internal debug information for this barcode
      */
     public void printDebug() {
         System.out.println("\nTotal Size: " + size());
@@ -78,17 +74,46 @@ public final class Barcode extends AbstractList {
     }
 
     /**
-     * Validates this list's internal structure
+     * Validates the barcode's internal structure
      */
     public void validate() {
         if(root != null) root.validate();
     }
 
     /**
-     * Gets the size of this list
+     * Gets the size of this barcode
      */
     public int size() {
         return treeSize + whiteSpace;
+    }
+
+    /**
+     * Whether or not this barcode is empty
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    /**
+     * Gets the size of the white portion of this barcode
+     */
+    public int whiteSize() {
+        return root == null ? whiteSpace : root.whiteSize() + whiteSpace;
+    }
+
+    /**
+     * Gets the size of the black portion of this barcode
+     */
+    public int blackSize() {
+        return root == null ? 0 : root.blackSize();
+    }
+
+    /**
+     * Gets the size of the given colour portion of this barcode
+     */
+    public int colourSize(Object colour) {
+        if(colour == WHITE) return whiteSize();
+        else return blackSize();
     }
 
     /**
@@ -189,14 +214,6 @@ public final class Barcode extends AbstractList {
     }
 
     /**
-     * TO BE REMOVED
-     */
-    public Object remove(int index) {
-        remove(index, 1);
-        return WHITE;
-    }
-
-    /**
      * Removes the values from the given index to index + length
      */
     public void remove(int index, int length) {
@@ -248,96 +265,29 @@ public final class Barcode extends AbstractList {
     }
 
     /**
-     * Gets the colour-based view of this list.
-     */
-    public List getColourList(Object colour) {
-        if(colour == WHITE) return whiteList;
-        else return blackList;
-    }
-
-    /**
-     * Gets the white-only view of this list.
-     */
-    public List getWhiteList() {
-        return whiteList;
-    }
-
-    /**
-     * Gets the black-only view of this list.
-     */
-    public List getBlackList() {
-        return blackList;
-    }
-
-    /**
-     * A WhiteList is a read-only view of the list where all of the BLACK elements
-     * are not included.
-     */
-    class WhiteList extends AbstractList {
-
-        /**
-         * Gets the value at the specified index.
-         */
-        public Object get(int index) {
-            if(root == null || index > root.whiteSize() - 1) throw new IndexOutOfBoundsException("cannot get from list of size "+ root.whiteSize()+" at " + index);
-            return WHITE;
-        }
-
-        /**
-         * Gets the real index of the element with the specified whiteIndex.
-         */
-        public int getIndex(int whiteIndex) {
-            if(root == null && whiteSpace == 0) throw new IndexOutOfBoundsException("cannot get from a list of size 0 at " + whiteIndex);
-            else if(root == null) return whiteIndex;
-            else return root.getIndexByWhiteIndex(whiteIndex);
-        }
-
-        /**
-         * Gets the size of the white list.
-         */
-        public int size() {
-            if(root == null) return whiteSpace;
-            return root.whiteSize() + whiteSpace;
-        }
-    }
-
-    /**
-     * A BlackList is a read-only view of the list where all of the WHITE elements
-     * are not included.
-     */
-    class BlackList extends AbstractList {
-
-        /**
-         * Gets the value at the specified index.
-         */
-        public Object get(int index) {
-            if(root == null || index > root.blackSize() - 1) throw new IndexOutOfBoundsException("cannot get from list of size "+ root.blackSize()+" at " + index);
-            return BLACK;
-        }
-
-        /**
-         * Gets the real index of the element with the specified blackIndex.
-         */
-        public int getIndex(int blackIndex) {
-            if(root == null) throw new IndexOutOfBoundsException("cannot get from a list of size 0 at " + blackIndex);
-            return root.getIndexByBlackIndex(blackIndex);
-        }
-
-        /**
-         * Gets the size of the black list.
-         */
-        public int size() {
-            if(root == null) return 0;
-            return root.blackSize();
-        }
-    }
-
-    /**
      * Gets the real index of an element given the black index or white index.
      */
     public int getIndex(int colourIndex, Object colour) {
-        if(colour == WHITE) return whiteList.getIndex(colourIndex);
-        else return blackList.getIndex(colourIndex);
+        // Get the real index of a WHITE element
+        if(colour == WHITE) {
+            // There are no black elements
+            if(root == null) {
+                return colourIndex;
+
+            // Retrieving from the trailing whitespace with a tree
+            } else if(colourIndex >= root.whiteSize()) {
+                return colourIndex - root.whiteSize() + treeSize;
+
+            // The index maps to an element in the tree
+            } else {
+                return root.getIndexByWhiteIndex(colourIndex);
+            }
+
+        // Get the real index of a BLACK element
+        } else {
+            return root.getIndexByBlackIndex(colourIndex);
+
+        }
     }
 
     /**

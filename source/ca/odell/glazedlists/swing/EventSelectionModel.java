@@ -48,9 +48,9 @@ import java.util.*;
 public final class EventSelectionModel implements ListSelectionModel {
     // Internally this maintains a flag list to keep track of which elements
     // are selected and not and where they are in the source list. It uses
-    // a sparse list that corresponds directly to the source list. The sparse
-    // list contains null for all unselected elements and Boolean.TRUE for
-    // elements which are selected. This is used to map indexes between the
+    // a barcode that corresponds directly to the source list. The barcode
+    // contains white elements for all unselected elements and black elements
+    // for elements which are selected. This is used to map indexes between the
     // selection subset and the full source list.
     //
     // The SelectionModelEventList responds to two classes of changes from a
@@ -74,8 +74,8 @@ public final class EventSelectionModel implements ListSelectionModel {
     /** the event list provides an event list view of the selection */
     private SelectionEventList eventList;
 
-    /** the flag list contains Boolean.TRUE for selected items and null for others */
-    private CompressableList flagList = new CompressableList();
+    /** the flag list contains Barcode.BLACK for selected items and Barcode.WHITE for others */
+    private Barcode flagList = new Barcode();
 
     /** the source event list knows the table dimensions */
     private EventList source;
@@ -108,20 +108,10 @@ public final class EventSelectionModel implements ListSelectionModel {
         this.source = source;
 
         // build the initial state
-        prepareFlagList();
+        flagList.addWhite(0, source.size());
 
         // build a list for reading the selection
         this.eventList = new SelectionEventList(source);
-    }
-
-    /**
-     * When the FlagList is prepared, it populates it with information from
-     * the source list and the initial selection model.
-     */
-    private void prepareFlagList() {
-        for(int i = 0; i < source.size(); i++) {
-            flagList.add(null);
-        }
     }
 
     /**
@@ -207,7 +197,7 @@ public final class EventSelectionModel implements ListSelectionModel {
          * queued to be processed.
          */
         public Object get(int index) {
-            int sourceIndex = flagList.getIndex(index);
+            int sourceIndex = flagList.getIndex(index, Barcode.BLACK);
 
             // ensure that this value still exists before retrieval
             if(sourceIndex < source.size()) {
@@ -224,7 +214,7 @@ public final class EventSelectionModel implements ListSelectionModel {
          * @return the number of elements currently selected.
          */
         public int size() {
-            return flagList.getCompressedList().size();
+            return flagList.blackSize();
         }
 
         /**
@@ -232,7 +222,7 @@ public final class EventSelectionModel implements ListSelectionModel {
          * index in this list.
          */
         protected int getSourceIndex(int mutationIndex) {
-            return flagList.getIndex(mutationIndex);
+            return flagList.getIndex(mutationIndex, Barcode.BLACK);
         }
 
         /**
@@ -262,22 +252,22 @@ public final class EventSelectionModel implements ListSelectionModel {
                 // handle reordering events
                 if(listChanges.isReordering()) {
                     int[] sourceReorderMap = listChanges.getReorderMap();
-                    int[] selectReorderMap = new int[flagList.getCompressedList().size()];
+                    int[] selectReorderMap = new int[flagList.blackSize()];
 
                     // adjust the flaglist & construct a reorder map to propagate
-                    CompressableList previousFlagList = flagList;
-                    flagList = new CompressableList();
+                    Barcode previousFlagList = flagList;
+                    flagList = new Barcode();
                     for(int c = 0; c < sourceReorderMap.length; c++) {
                         Object flag = previousFlagList.get(sourceReorderMap[c]);
-                        boolean wasSelected = (flag != null);
-                        flagList.add(c, flag);
+                        boolean wasSelected = (flag != Barcode.WHITE);
+                        flagList.add(c, flag, 1);
                         if(wasSelected) {
-                            int previousIndex = previousFlagList.getCompressedIndex(sourceReorderMap[c]);
-                            int currentIndex = flagList.getCompressedIndex(c);
+                            int previousIndex = previousFlagList.getBlackIndex(sourceReorderMap[c]);
+                            int currentIndex = flagList.getBlackIndex(c);
                             selectReorderMap[currentIndex] = previousIndex;
                         }
                     }
-                    
+
                     // adjust other internal state
                     anchorSelectionIndex = -1;
                     leadSelectionIndex = -1;
@@ -294,13 +284,12 @@ public final class EventSelectionModel implements ListSelectionModel {
                         int changeType = listChanges.getType();
 
                         // learn about what it was
-                        boolean previouslySelected = (flagList.size() > index) && (flagList.get(index) != null);
-                        int previousSelectionIndex = -1;
-                        if(previouslySelected) previousSelectionIndex = flagList.getCompressedIndex(index);
-                        
+                        int previousSelectionIndex = flagList.getBlackIndex(index);
+                        boolean previouslySelected = previousSelectionIndex != -1;
+
                         // when an element is deleted, blow it away
                         if(changeType == ListEvent.DELETE) {
-                            flagList.remove(index);
+                            flagList.remove(index, 1);
 
                             // fire a change to the selection list if a selected object is changed
                             if(previouslySelected) {
@@ -316,17 +305,17 @@ public final class EventSelectionModel implements ListSelectionModel {
                                 // select the inserted for single interval and multiple interval selection
                                 if(selectionMode == SINGLE_INTERVAL_SELECTION
                                 || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
-                                    flagList.add(index, Boolean.TRUE);
+                                    flagList.addBlack(index, 1);
                                     updates.addInsert(previousSelectionIndex);
 
                                 // do not select the inserted for single selection and defensive selection
                                 } else {
-                                    flagList.add(index, null);
+                                    flagList.addWhite(index, 1);
                                 }
 
                             // when not selected, just add the space
                             } else {
-                                flagList.add(index, null);
+                                flagList.addWhite(index, 1);
                             }
 
                         // when an element is changed, assume selection stays the same
@@ -363,7 +352,7 @@ public final class EventSelectionModel implements ListSelectionModel {
             }
         }
     }
-    
+
     /**
      * Adjusts the specified index to the specified change. This is used to adjust
      * the anchor and lead selection indices when list changes occur.
@@ -391,7 +380,7 @@ public final class EventSelectionModel implements ListSelectionModel {
         StringBuffer result = new StringBuffer();
         for(int i = 0; i < flagList.size(); i++) {
             if(i != 0) result.append(" ");
-            if(flagList.get(i) == null) result.append("-");
+            if(flagList.get(i) == Barcode.WHITE) result.append("-");
             else result.append("+");
         }
         return result.toString();
@@ -487,7 +476,8 @@ public final class EventSelectionModel implements ListSelectionModel {
 
         // walk through the list making changes
         for(int i = minUnionIndex; i <= maxUnionIndex; i++) {
-            boolean selectedBefore = (flagList.get(i) != null);
+            int selectionIndex = flagList.getBlackIndex(i);
+            boolean selectedBefore = (selectionIndex != -1);
             boolean inChangeRange = (i >= minChangeIndex && i <= maxChangeIndex);
             boolean selectedAfter = (inChangeRange == select);
             // when there's a change
@@ -498,14 +488,12 @@ public final class EventSelectionModel implements ListSelectionModel {
 
                 // if it is being deselected
                 if(selectedBefore) {
-                    int selectionIndex = flagList.getCompressedIndex(i);
-                    flagList.set(i, null);
+                    flagList.setWhite(i, 1);
                     updates.addDelete(selectionIndex);
                 // if it is being selected
                 } else {
-                    flagList.set(i, Boolean.TRUE);
-                    int selectionIndex = flagList.getCompressedIndex(i);
-                    updates.addInsert(selectionIndex);
+                    flagList.setBlack(i, 1);
+                    updates.addInsert(flagList.getBlackIndex(i));
                 }
             }
         }
@@ -640,8 +628,8 @@ public final class EventSelectionModel implements ListSelectionModel {
     public int getMinSelectionIndex() {
         eventList.getReadWriteLock().readLock().lock();
         try {
-            if(flagList.getCompressedList().size() == 0) return -1;
-            return flagList.getIndex(0);
+            if(flagList.blackSize() == 0) return -1;
+            return flagList.getIndex(0, Barcode.BLACK);
         } finally {
             eventList.getReadWriteLock().readLock().unlock();
         }
@@ -652,8 +640,8 @@ public final class EventSelectionModel implements ListSelectionModel {
     public int getMaxSelectionIndex() {
         eventList.getReadWriteLock().readLock().lock();
         try {
-            if(flagList.getCompressedList().size() == 0) return -1;
-            return flagList.getIndex(flagList.getCompressedList().size() - 1);
+            if(flagList.blackSize() == 0) return -1;
+            return flagList.getIndex(flagList.blackSize() - 1, Barcode.BLACK);
         } finally {
             eventList.getReadWriteLock().readLock().unlock();
         }
@@ -675,8 +663,8 @@ public final class EventSelectionModel implements ListSelectionModel {
                 return false;
             }
 
-            // a value is selected if it is not null in the flag list
-            return (flagList.get(index) != null);
+            // a value is selected if it is not Barcode.WHITE in the flag list
+            return (flagList.get(index) != Barcode.WHITE);
         } finally {
             eventList.getReadWriteLock().readLock().unlock();
         }
@@ -789,7 +777,7 @@ public final class EventSelectionModel implements ListSelectionModel {
     public boolean isSelectionEmpty() {
         eventList.getReadWriteLock().readLock().lock();
         try {
-            return (flagList.getCompressedList().size() == 0);
+            return (flagList.blackSize() == 0);
         } finally {
             eventList.getReadWriteLock().readLock().unlock();
         }

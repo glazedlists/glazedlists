@@ -42,8 +42,8 @@ import ca.odell.glazedlists.util.concurrent.*;
  */
 public abstract class AbstractFilterList extends TransformedList implements ListEventListener {
 
-    /** the flag list contains Boolean.TRUE for items that match the current filter and null or others */
-    private BooleanList flagList = new BooleanList();
+    /** the flag list contains Barcode.BLACK for items that match the current filter and Barcode.WHITE for others */
+    private Barcode flagList = new Barcode();
 
     /**
      * Creates a {@link AbstractFilterList} that includes a subset of the specified
@@ -58,21 +58,9 @@ public abstract class AbstractFilterList extends TransformedList implements List
         readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
 
         // build a list of what is filtered and what's not
-        prepareFlagList();
+        flagList.addBlack(0, source.size());
         // listen for changes to the source list
         source.addListEventListener(this);
-    }
-
-
-    /**
-     * Prepares the flagList by populating it with information from the source
-     * {@link EventList}. Initially no elements are filtered out since the list
-     * begins with no filter value.
-     */
-    private void prepareFlagList() {
-        for(int i = 0; i < source.size(); i++) {
-            flagList.add(Boolean.TRUE);
-        }
     }
 
     /** {@inheritDoc} */
@@ -83,15 +71,15 @@ public abstract class AbstractFilterList extends TransformedList implements List
         // handle reordering events
         if(listChanges.isReordering()) {
             int[] sourceReorderMap = listChanges.getReorderMap();
-            int[] filterReorderMap = new int[flagList.getCompressedList().size()];
+            int[] filterReorderMap = new int[flagList.blackSize()];
 
             // adjust the flaglist & construct a reorder map to propagate
-            BooleanList previousFlagList = flagList;
-            flagList = new BooleanList();
+            Barcode previousFlagList = flagList;
+            flagList = new Barcode();
             for(int i = 0; i < sourceReorderMap.length; i++) {
                 Object flag = previousFlagList.get(sourceReorderMap[i]);
-                flagList.add(flag);
-                if(flag != null) filterReorderMap[flagList.getCompressedIndex(i)] = previousFlagList.getCompressedIndex(sourceReorderMap[i]);
+                flagList.add(i, flag, 1);
+                if(flag != Barcode.WHITE) filterReorderMap[flagList.getBlackIndex(i)] = previousFlagList.getBlackIndex(sourceReorderMap[i]);
             }
 
             // fire the reorder
@@ -109,17 +97,16 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
                 // handle delete events
                 if(changeType == ListEvent.DELETE) {
-                    // test if this value was already not filtered out
-                    boolean wasIncluded = flagList.get(sourceIndex) != null;
+                    // determine if this value was already filtered out or not
+                    int filteredIndex = flagList.getBlackIndex(sourceIndex);
 
                     // if this value was not filtered out, it is now so add a change
-                    if(wasIncluded) {
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                    if(filteredIndex != -1) {
                         updates.addDelete(filteredIndex);
                     }
 
                     // remove this entry from the flag list
-                    flagList.remove(sourceIndex);
+                    flagList.remove(sourceIndex, 1);
 
                 // handle insert events
                 } else if(changeType == ListEvent.INSERT) {
@@ -129,37 +116,38 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
                     // if this value should be included, add a change and add the item
                     if(include) {
-                        flagList.add(sourceIndex, Boolean.TRUE);
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
+                        flagList.addBlack(sourceIndex, 1);
+                        int filteredIndex = flagList.getBlackIndex(sourceIndex);
                         updates.addInsert(filteredIndex);
 
                     // if this value should not be included, just add the item
                     } else {
-                        flagList.add(sourceIndex, null);
+                        flagList.addWhite(sourceIndex, 1);
                     }
 
                 // handle update events
                 } else if(changeType == ListEvent.UPDATE) {
-                    // test if this value was already not filtered out
-                    boolean wasIncluded = flagList.get(sourceIndex) != null;
+
+
+
+                    // determine if this value was already filtered out or not
+                    int filteredIndex = flagList.getBlackIndex(sourceIndex);
+                    boolean wasIncluded = filteredIndex != -1;
                     // whether we should add this item
                     boolean include = filterMatches(source.get(sourceIndex));
 
                     // if this element is being removed as a result of the change
                     if(wasIncluded && !include) {
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                        flagList.set(sourceIndex, null);
+                        flagList.setWhite(sourceIndex, 1);
                         updates.addDelete(filteredIndex);
 
                     // if this element is being added as a result of the change
                     } else if(!wasIncluded && include) {
-                        flagList.set(sourceIndex, Boolean.TRUE);
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                        updates.addInsert(filteredIndex);
+                        flagList.setBlack(sourceIndex, 1);
+                        updates.addInsert(flagList.getBlackIndex(sourceIndex));
 
                     // this element is still here
                     } else if(wasIncluded && include) {
-                        int filteredIndex = flagList.getCompressedIndex(sourceIndex);
                         updates.addUpdate(filteredIndex);
 
                     }
@@ -182,12 +170,10 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
         // ensure all flags are set in the flagList indicating all
         // source list elements are matched with no filter
-        for (int i = 0; i < source.size(); i++) {
-            if (flagList.get(i) == null) {
-                flagList.set(i, Boolean.TRUE);
-                int filteredIndex = flagList.getCompressedIndex(i);
-                updates.addInsert(filteredIndex);
-            }
+        while(flagList.whiteSize() > 0) {
+            int sourceIndex = flagList.getIndex(0, Barcode.WHITE);
+            flagList.setBlack(sourceIndex, 1);
+            updates.addInsert(flagList.getBlackIndex(sourceIndex));
         }
 
         // commit the changes and notify listeners
@@ -207,13 +193,14 @@ public abstract class AbstractFilterList extends TransformedList implements List
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
 
-        // for all source items, see what the change is
-        for(int i = 0; i < source.size(); i++) {
-            // if this source item is now matched as a result of the relaxed filter
-            if(flagList.get(i) == null && filterMatches(source.get(i))) {
-                flagList.set(i, Boolean.TRUE);
-                int filteredIndex = flagList.getCompressedIndex(i);
-                updates.addInsert(filteredIndex);
+        // for all filtered items, see what the change is
+        for (int i = 0; i < flagList.whiteSize(); ) {
+            int sourceIndex = flagList.getIndex(i, Barcode.WHITE);
+            if(filterMatches(source.get(sourceIndex))) {
+                flagList.setBlack(sourceIndex, 1);
+                updates.addInsert(flagList.getBlackIndex(sourceIndex));
+            } else {
+                i++;
             }
         }
 
@@ -234,13 +221,14 @@ public abstract class AbstractFilterList extends TransformedList implements List
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
 
-        // for all source items, see what the change is
-        for(int i = 0; i < source.size(); i++) {
-            // if this source item is no longer matched as a result of the constrained filter
-            if (flagList.get(i) != null && !filterMatches(source.get(i))) {
-                int filteredIndex = flagList.getCompressedIndex(i);
-                flagList.set(i, null);
-                updates.addDelete(filteredIndex);
+        // for all unfiltered items, see what the change is
+        for (int i = 0; i < flagList.blackSize(); ) {
+            int sourceIndex = flagList.getIndex(i, Barcode.BLACK);
+            if(!filterMatches(source.get(sourceIndex))) {
+                flagList.setWhite(sourceIndex, 1);
+                updates.addDelete(i);
+            } else {
+                i++;
             }
         }
 
@@ -263,22 +251,21 @@ public abstract class AbstractFilterList extends TransformedList implements List
         // for all source items, see what the change is
         for(int i = 0; i < source.size(); i++) {
 
-            // test if this value was already not filtered out
-            boolean wasIncluded = flagList.get(i) != null;
+            // determine if this value was already filtered out or not
+            int filteredIndex = flagList.getBlackIndex(i);
+            boolean wasIncluded = filteredIndex != -1;
             // whether we should add this item
             boolean include = filterMatches(source.get(i));
 
             // if this element is being removed as a result of the change
             if(wasIncluded && !include) {
-                int filteredIndex = flagList.getCompressedIndex(i);
-                flagList.set(i, null);
+                flagList.setWhite(i, 1);
                 updates.addDelete(filteredIndex);
 
             // if this element is being added as a result of the change
             } else if(!wasIncluded && include) {
-                flagList.set(i, Boolean.TRUE);
-                int filteredIndex = flagList.getCompressedIndex(i);
-                updates.addInsert(filteredIndex);
+                flagList.setBlack(i, 1);
+                updates.addInsert(flagList.getBlackIndex(i));
             }
         }
 
@@ -349,12 +336,12 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
     /** {@inheritDoc} */
     public final int size() {
-        return flagList.getCompressedList().size();
+        return flagList.blackSize();
     }
 
     /** {@inheritDoc} */
     protected final int getSourceIndex(int mutationIndex) {
-        return flagList.getIndex(mutationIndex);
+        return flagList.getIndex(mutationIndex, Barcode.BLACK);
     }
 
     /** {@inheritDoc} */

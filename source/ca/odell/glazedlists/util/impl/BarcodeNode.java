@@ -327,7 +327,7 @@ final class BarcodeNode {
         if(localIndex < 0) return left.getIndexByWhiteIndex(whiteIndex);
 
         // Recurse to the Right
-        else if(localIndex >= rootSize) {
+        else if(localIndex >= whiteSpace) {
             return right.getIndexByWhiteIndex(localIndex - whiteSpace)
                 + treeLeftSize + whiteSpace + rootSize;
 
