@@ -16,13 +16,14 @@ import java.util.regex.*;
 // class to test
 import ca.odell.glazedlists.util.impl.*;
 import java.text.ParseException;
+import java.io.IOException;
 
 /**
- * This test verifies that the ByteBufferParser works.
+ * This test verifies that the ByteChannelReader works.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ByteBufferParserTest extends TestCase {
+public class ByteChannelReaderTest extends TestCase {
     
     /**
      * Prepare for the test.
@@ -37,25 +38,11 @@ public class ByteBufferParserTest extends TestCase {
     }
     
     /**
-     * Gets a parser for the specified string.
-     */
-    private ByteBufferParser parserFor(String string) {
-        try {
-            byte[] bytes = string.getBytes("US-ASCII");
-            ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-            ByteBufferParser parser = new ByteBufferParser(byteBuffer);
-            return parser;
-        } catch(java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * Tests that consume() works.
      */
     public void testConsume() {
         try {
-            ByteBufferParser parser = parserFor("hello world");
+            ByteChannelReader parser = new ByteChannelReader("hello world");
             parser.consume("hell");
             assertEquals("o world", parser.toString());
             parser.consume("[a-z]\\s[a-z]");
@@ -63,6 +50,8 @@ public class ByteBufferParserTest extends TestCase {
             parser.consume("orld");
             assertEquals("", parser.toString());
         } catch(ParseException e) {
+            fail(e.getMessage());
+        } catch(IOException e) {
             fail(e.getMessage());
         }
     }
@@ -73,11 +62,13 @@ public class ByteBufferParserTest extends TestCase {
      */
     public void testConsumeBadInput() {
         try {
-            ByteBufferParser parser = parserFor("hello world");
+            ByteChannelReader parser = new ByteChannelReader("hello world");
             parser.consume("earth");
             fail();
         } catch(ParseException e) {
             // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
         }
     }
 
@@ -87,11 +78,13 @@ public class ByteBufferParserTest extends TestCase {
      */
     public void testConsumeNotAtStart() {
         try {
-            ByteBufferParser parser = parserFor("hello world");
+            ByteChannelReader parser = new ByteChannelReader("hello world");
             parser.consume("ello");
             fail();
         } catch(ParseException e) {
             // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
         }
     }
 
@@ -100,7 +93,7 @@ public class ByteBufferParserTest extends TestCase {
      */
     public void testReadUntil() {
         try {
-            ByteBufferParser parser = parserFor("hello world");
+            ByteChannelReader parser = new ByteChannelReader("hello world");
             String hello = parser.readUntil("\\s");
             assertEquals("hello", hello);
             assertEquals("world", parser.toString());
@@ -108,6 +101,8 @@ public class ByteBufferParserTest extends TestCase {
             assertEquals("worl", worl);
             assertEquals("", parser.toString());
         } catch(ParseException e) {
+            fail(e.getMessage());
+        } catch(IOException e) {
             fail(e.getMessage());
         }
     }
@@ -117,11 +112,13 @@ public class ByteBufferParserTest extends TestCase {
      */
     public void testReadUntilBadInput() {
         try {
-            ByteBufferParser parser = parserFor("hello world");
+            ByteChannelReader parser = new ByteChannelReader("hello world");
             String result = parser.readUntil("earth");
             fail();
         } catch(ParseException e) {
             // exception is desired output
+        } catch(IOException e) {
+            fail(e.getMessage());
         }
     }
 
@@ -129,19 +126,27 @@ public class ByteBufferParserTest extends TestCase {
      * Tests that indexOf() works.
      */
     public void testIndexOf() {
-        ByteBufferParser parser = parserFor("hello world");
-        int worldIndex = parser.indexOf("w");
-        assertEquals(6, worldIndex);
-        assertEquals("hello world", parser.toString());
+        try {
+            ByteChannelReader parser = new ByteChannelReader("hello world");
+            int worldIndex = parser.indexOf("w");
+            assertEquals(6, worldIndex);
+            assertEquals("hello world", parser.toString());
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
     }
 
     /**
      * Tests that indexOf() returns -1 if the specified text is not found.
      */
     public void testIndexOfBadInput() {
-        ByteBufferParser parser = parserFor("hello world");
-        int tIndex = parser.indexOf("t");
-        assertEquals(-1, tIndex);
-        assertEquals("hello world", parser.toString());
+        try {
+            ByteChannelReader parser = new ByteChannelReader("hello world");
+            int tIndex = parser.indexOf("t");
+            assertEquals(-1, tIndex);
+            assertEquals("hello world", parser.toString());
+        } catch(IOException e) {
+            fail(e.getMessage());
+        }
     }
 }

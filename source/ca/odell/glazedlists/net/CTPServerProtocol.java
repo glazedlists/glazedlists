@@ -12,10 +12,10 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.net.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.ByteChannelReader;
+import ca.odell.glazedlists.util.impl.ByteChannelWriter;
 // logging
 import java.util.logging.*;
-// parsing
-import ca.odell.glazedlists.util.impl.ByteBufferParser;
 import java.text.ParseException;
 
 /**
@@ -27,11 +27,6 @@ final class CTPServerProtocol extends CTPProtocol {
 
     /** logging */
     private static Logger logger = Logger.getLogger(CTPServerProtocol.class.toString());
-
-    /** a buffer to write out of */
-    private ByteBuffer outBuffer = ByteBuffer.allocateDirect(1024);
-    /** a buffer to read in to */
-    private ByteBuffer inBuffer = ByteBuffer.allocateDirect(1024);
 
     /**
      * Creates a new CTPServerProtocol.
@@ -60,37 +55,34 @@ final class CTPServerProtocol extends CTPProtocol {
         
         try {
             // write the status line
-            outBuffer.put(HTTP_VERSION.getBytes());
+            writer.write("HTTP/1.1");
             if(code == CTPHandler.OK) {
-                outBuffer.put(new Integer(CTPHandler.OK).toString().getBytes());
-                outBuffer.put(HTTP_SPACE);
-                outBuffer.put(HTTP_REASON_PHRASE_OK);
+                writer.write(new Integer(CTPHandler.OK).toString());
+                writer.write(" ");
+                writer.write("OK");
             } else if(code == CTPHandler.NOT_FOUND) {
-                outBuffer.put(new Integer(CTPHandler.NOT_FOUND).toString().getBytes());
-                outBuffer.put(HTTP_SPACE);
-                outBuffer.put(HTTP_REASON_PHRASE_NOT_FOUND);
+                writer.write(new Integer(CTPHandler.NOT_FOUND).toString());
+                writer.write(" ");
+                writer.write("Not Found");
             } else {
                 throw new IllegalArgumentException("Unsupported code: " + code);
             }
-            outBuffer.put(HTTP_CRLF);
+            writer.write("\r\n");
     
             // write all the headers
             for(Iterator i = headers.entrySet().iterator(); i.hasNext(); ) {
                 Map.Entry mapEntry = (Map.Entry)i.next();
-                outBuffer.put(mapEntry.getKey().toString().getBytes());
-                outBuffer.put(HTTP_HEADER_SEPARATOR);
-                outBuffer.put(mapEntry.getValue().toString().getBytes());
-                outBuffer.put(HTTP_CRLF);
+                writer.write(mapEntry.getKey().toString());
+                writer.write(": ");
+                writer.write(mapEntry.getValue().toString());
+                writer.write("\r\n");
             }
-            outBuffer.put(HTTP_CRLF);
+            writer.write("\r\n");
+            writer.flush();
             
-            // fire off the response
-            while(outBuffer.hasRemaining()) {
-                socketChannel.write(outBuffer);
-            }
-            
-            // empty the buffer
-            outBuffer.clear();
+            // we're done
+            state = STATE_READY;
+
         } catch(IOException e) {
             throw new CTPException(e);
         }
@@ -100,60 +92,58 @@ final class CTPServerProtocol extends CTPProtocol {
      * Handles incoming bytes.
      */
     void handleRead() throws IOException {
-        // fill our buffer with incoming data
-        int count = 0;
-        ByteBufferParser parser = new ByteBufferParser(inBuffer);
-        while((count = socketChannel.read(inBuffer)) > 0) {
-
-            // read a request
-            if(state == STATE_AWAITING_REQUEST) {
-                String uri = null;
-                Map headers = new TreeMap();
-                
-                // parse the request
-                try {
-                    
-                    // if the entire header has not loaded, load more
-                    logger.finest("Current buffer " + inBuffer);
-                    inBuffer.flip();
-                    if(parser.indexOf("\\r?\\n\\r?\\n") == -1) {
-                        logger.finest("Insufficient data thus far " + parser);
-                        inBuffer.compact();
-                        continue;
-                    }
-                    
-                    // parse the status line
-                    parser.consume("POST( )+");
-                    uri = parser.readUntil("( )+");
-                    parser.consume("HTTP\\/1\\.1 *");
-                    parser.consume("\\r?\\n");
-                    logger.finest("Reading request " + uri + " from " + this);
-                    
-                    // parse the headers
-                    while(true) {
-                        if(parser.indexOf("\\r?\\n") == 0) break;
-                        String key = parser.readUntil("\\:( )*");
-                        String value = parser.readUntil("\\r?\\n");
-                        headers.put(key, value);
-                        logger.finest("Read header " + key + ": " + value + " from " + this);
-                    }
-                    
-                } catch(ParseException e) {
-                    // handle this better
-                    e.printStackTrace();
-                }
-                
-                // handle the request
-                state = STATE_CONSTRUCTING_RESPONSE;
-                handler.receiveRequest(this, uri, headers);
-            } else {
-                throw new IllegalStateException();
+        // read a request
+        if(state == STATE_AWAITING_REQUEST) {
+            handleRequest();
+            
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+    
+    /**
+     * Handle a request by parsing the contents of the input buffer. If the input
+     * buffer does not contain a complete request, this will return. If it does
+     * contain a request:
+     *   <li>the request will be processed
+     *   <li>the buffer will be advanced, and
+     *   <li>the state will be updated
+     */
+    private void handleRequest() {
+        String uri = null;
+        Map headers = new TreeMap();
+        
+        try {
+            // if the entire header has not loaded, load more
+            if(parser.indexOf("\\r?\\n\\r?\\n") == -1) {
+                logger.finest("Insufficient data thus far " + parser);
+                return;
             }
+            
+            // parse the status line
+            parser.consume("POST( )+");
+            uri = parser.readUntil("( )+");
+            parser.consume("HTTP\\/1\\.1 *");
+            parser.consume("\\r?\\n");
+            logger.finest("Reading request " + uri + " from " + this);
+            
+            // parse the headers
+            while(true) {
+                if(parser.indexOf("\\r?\\n") == 0) break;
+                String key = parser.readUntil("\\:( )*");
+                String value = parser.readUntil("\\r?\\n");
+                headers.put(key, value);
+                logger.finest("Read header " + key + ": " + value + " from " + this);
+            }
+            
+        } catch(ParseException e) {
+            close(e);
+        } catch(IOException e) {
+            close(e);
         }
         
-        // handle EOF, close channel. This invalidates the key
-        if(count < 0) {
-            handleClose(null);
-        }
+        // handle the request
+        state = STATE_CONSTRUCTING_RESPONSE;
+        handler.receiveRequest(this, uri, headers);
     }
 }

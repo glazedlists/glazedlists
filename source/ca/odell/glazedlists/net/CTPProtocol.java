@@ -12,6 +12,8 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.net.*;
 import java.io.*;
+import ca.odell.glazedlists.util.impl.ByteChannelReader;
+import ca.odell.glazedlists.util.impl.ByteChannelWriter;
 // logging
 import java.util.logging.*;
 
@@ -47,8 +49,9 @@ import java.util.logging.*;
  * received shutdown:
  * READY
  *   --[received close chunk]-->
- *     --[cleanup]-->
- *       CLOSED_PERMANENTLY
+ *     RECEIVED_CLOSE
+ *       --[cleanup]-->
+ *         CLOSED_PERMANENTLY
  *
  * IO error:
  * READY
@@ -80,7 +83,8 @@ abstract class CTPProtocol {
     protected static final int STATE_CONSTRUCTING_RESPONSE = 3;
     protected static final int STATE_AWAITING_RESPONSE = 4;
     protected static final int STATE_READY = 5;
-    protected static final int STATE_CLOSED_PERMANENTLY = 6;
+    protected static final int STATE_RECEIVED_CLOSE = 6;
+    protected static final int STATE_CLOSED_PERMANENTLY = 7;
     
     /** the current state of this protocol */
     protected int state = STATE_AWAITING_CONNECT;
@@ -91,6 +95,12 @@ abstract class CTPProtocol {
     /** the channel where communication occurs */
     protected SocketChannel socketChannel = null;
     
+    /** parse the input channel */
+    protected ByteChannelReader parser;
+
+    /** write the output channel */
+    protected ByteChannelWriter writer;
+
     /** the handler to delegate data interpretation to */
     protected CTPHandler handler;
 
@@ -105,6 +115,8 @@ abstract class CTPProtocol {
         this.selectionKey = selectionKey;
         this.handler = handler;
         this.socketChannel = (SocketChannel)selectionKey.channel();
+        this.parser = new ByteChannelReader(socketChannel);
+        this.writer = new ByteChannelWriter(socketChannel);
     }
 
     /**
@@ -122,6 +134,53 @@ abstract class CTPProtocol {
      * this sends a single empty chunk and closes the TCP/IP connection.
      */
     public void close() {
+        close(null);
+    }
+    
+    /**
+     * Close the connection to the client. 
+     *
+     * <p>The closing behaviour is dictated by the current state of the connection
+     * and the reason for closing.
+     * <li>If the reason is an IOException, the socket is closed immediately
+     * <li>Otherwise a "goodbye" message is sent to notify the other party of the close
+     * <li>If the state is READY, the goodbye is a single 0-byte chunk
+     * <li>If the state is AWAITING_REQUEST, the goodbye is a request error
+     * <li>If the state is RECEIVED_CLOSE, no goodbye message is sent
+     */
+    protected void close(Exception reason) {
+        try {
+            // close is not a result of a connection error, so say goodbye
+            if(reason == null || !(reason instanceof IOException)) {
+            
+                // if we haven't yet responded, respond now
+                if(state == STATE_AWAITING_REQUEST) {
+                    state = STATE_CONSTRUCTING_RESPONSE;
+                    Map errorResponse = new TreeMap();
+                    errorResponse.put("Content-Length", "0");
+                    ((CTPServerProtocol)this).sendResponse(CTPHandler.ERROR, errorResponse);
+                } else {
+                    throw new IllegalStateException();
+                }
+            // when a connection error occurs, bail without a good-bye message
+            } else if(reason instanceof IOException) {
+                throw new UnsupportedOperationException();
+                
+            }
+        } catch(CTPException e) {
+            // the clean close failed, continue anyway
+        }
+        
+        
+        // close the socket
+        try {
+            logger.fine("Closed connection to " + this);
+            socketChannel.close();
+            state = STATE_CLOSED_PERMANENTLY;
+            handler.connectionClosed(this, reason);
+        } catch(IOException e) {
+            // if this close failed, there's nothing we can do
+        }
     }
 
     /**
@@ -137,15 +196,5 @@ abstract class CTPProtocol {
      */
     public String toString() {
         return socketChannel.socket().getRemoteSocketAddress().toString();
-    }
-    
-    /**
-     * Handles the connection being closed.
-     */
-    protected void handleClose(Exception reason) throws IOException {
-        state = STATE_CLOSED_PERMANENTLY;
-        logger.fine("Closed connection to " + this);
-        socketChannel.close();
-        handler.connectionClosed(this, reason);
     }
 }

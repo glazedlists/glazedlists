@@ -20,6 +20,7 @@ interface CTPHandler {
     /** standard HTTP response headers, see HTTP/1.1 RFC, 6.1.1 */
     public static final int OK = 200;
     public static final int NOT_FOUND = 404;
+    public static final int ERROR = 500;
 
     /**
      * Handles an HTTP response from the specified connection.
