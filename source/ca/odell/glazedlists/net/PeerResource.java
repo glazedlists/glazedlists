@@ -17,7 +17,7 @@ import ca.odell.glazedlists.util.impl.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class PeerResource implements ResourceListener {
+class PeerResource implements ResourceListener, ResourceStatus {
     
     /** the publisher of this resource */
     private PeerConnection publisher = null;
@@ -68,6 +68,27 @@ class PeerResource implements ResourceListener {
         PeerBlock block = peerBlockFactory.subscribe();
         publisher.addIncomingSubscription(this);
         publisher.writeBlock(this, block);
+    }
+    
+    /**
+     * Whether this resource is being updated from the network.
+     */
+    public boolean isLive() {
+        return publisher != null;
+    }
+    
+    /**
+     * Unsubscribes to this resource.
+     */
+    public void unsubscribe() {
+        // we can't unsubscribe until we have no subscribers
+        if(publisher == null) throw new IllegalStateException();
+        if(!subscribers.isEmpty()) throw new IllegalStateException();
+        
+        // unsubscribe from this resource
+        PeerBlock block = peerBlockFactory.unsubscribe();
+        publisher.writeBlock(this, block);
+        publisher.removeIncomingSubscription(this);
     }
     
     /**
@@ -138,5 +159,38 @@ class PeerResource implements ResourceListener {
      */
     public void remoteUnsubscribe(PeerConnection subscriber, PeerBlock block) {
         subscribers.remove(subscriber);
+    }
+    
+    /**
+     * Notifies this resource that the connection to its publisher has been
+     * closed.
+     */
+    public void publisherConnectionClosed(PeerConnection connection) {
+        if(publisher != connection) throw new IllegalStateException();
+        publisher = null;
+    }
+    
+    /**
+     * Notifies this resource that the connection to a subscriber has been closed.
+     */
+    public void subscriberConnectionClosed(PeerConnection connection) {
+        boolean removed = subscribers.remove(connection);
+        if(!removed) throw new IllegalStateException();
+    }
+
+    /**
+     * Gets this resource as a String for debugging.
+     */
+    public void print() {
+        System.out.print(resourceName);
+        System.out.print(" from: ");
+        System.out.print(publisher);
+        System.out.print(" to: ");
+        for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
+            PeerConnection subscriber = (PeerConnection)s.next();
+            System.out.print(subscriber.toString());
+            if(s.hasNext()) System.out.print(", ");
+        }
+        System.out.println("");
     }
 }

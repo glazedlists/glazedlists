@@ -45,6 +45,13 @@ public class PeerConnectionTest extends TestCase {
     }
 
     /**
+     * Verifies that peers can be started and stopped.
+     */
+    public void testStartStop() {
+        // everything is done in setUp and tearDown
+    }
+
+    /**
      * Verifies that Resources can be published and subscribed to.
      */
     public void testPeerConnection() {
@@ -82,7 +89,7 @@ public class PeerConnectionTest extends TestCase {
      * Waits for the specified duration of time. This hack method should be replaced
      * with something else that uses notification.
      */
-    private void waitFor(long time) {
+    private static void waitFor(long time) {
         try {
             Object lock = new Object();
             synchronized(lock) {
@@ -94,9 +101,37 @@ public class PeerConnectionTest extends TestCase {
     }
     
     public static void main(String[] args) {
-        PeerConnectionTest test = new PeerConnectionTest();
-        test.setUp();
-        test.testPeerConnection();
-        test.tearDown();
+        System.out.println("------------------------------------------------");
+        System.out.println("START");
+        int serverPort = 5000;
+        Peer peer = new Peer(serverPort);
+        peer.start();
+        peer.print();
+
+        System.out.println("------------------------------------------------");
+        System.out.println("PUBLISH");
+        StringResource stringResource = new StringResource();
+        String resourceName = "glazedlists://localhost:" + serverPort + "/stringResource";
+        stringResource.setValue("Hello World");
+        peer.publish(stringResource, resourceName);
+        peer.print();
+
+        System.out.println("------------------------------------------------");
+        System.out.println("SUBSCRIBE");
+        StringResource clone = new StringResource();
+        peer.subscribe(clone, resourceName, "localhost", serverPort);
+        waitFor(1000);
+        peer.print();
+
+        System.out.println("------------------------------------------------");
+        System.out.println("UNSUBSCRIBE");
+        peer.unsubscribe(resourceName);
+        waitFor(1000);
+        peer.print();
+
+        System.out.println("------------------------------------------------");
+        System.out.println("TEARED DOWN CONNECTION");
+        peer.stop();
+        peer.print();
     }
 }

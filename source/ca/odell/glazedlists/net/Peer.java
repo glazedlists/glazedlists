@@ -10,6 +10,8 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 import java.nio.*;
 import java.io.*;
+// logging
+import java.util.logging.*;
 
 /**
  * A peer manages publishing and subscribing to resources.
@@ -18,6 +20,9 @@ import java.io.*;
  */
 public class Peer implements CTPHandlerFactory {
     
+    /** logging */
+    private static Logger logger = Logger.getLogger(Peer.class.toString());
+
     /** constants used in the protocol */
     static final String RESOURCE_NAME = "Resource-Name";
     static final String DELTA = "Delta";
@@ -72,16 +77,60 @@ public class Peer implements CTPHandlerFactory {
      * Stops the peer.
      */
     public void stop() {
-        throw new UnsupportedOperationException();
+        // unsubscribe from everything
+        for(Iterator s = subscribed.values().iterator(); s.hasNext(); ) {
+            PeerResource resource = (PeerResource)s.next();
+            resource.unsubscribe();
+        }
+        subscribed.clear();
+        
+        // unpublish everything
+        logger.warning("Closing with published entries");
+        
+        // close all connections
+        List connectionsToClose = new ArrayList();
+        connectionsToClose.addAll(connections);
+        for(Iterator c = connectionsToClose.iterator(); c.hasNext(); ) {
+            PeerConnection connection = (PeerConnection)c.next();
+            connection.close();
+        }
+        
+        // stop the connection manager
+        connectionManager.stop();
+    }
+    
+    /**
+     * Prints the current state of this peer.
+     */
+    void print() {
+        System.out.println("Subscribed Resources:");
+        for(Iterator s = subscribed.values().iterator(); s.hasNext(); ) {
+            PeerResource resource = (PeerResource)s.next();
+            resource.print();
+        }
+        System.out.println("");
+        System.out.println("Published Resources:");
+        for(Iterator s = published.values().iterator(); s.hasNext(); ) {
+            PeerResource resource = (PeerResource)s.next();
+            resource.print();
+        }
+        System.out.println("");
+        System.out.println("Connections:");
+        for(Iterator s = connections.iterator(); s.hasNext(); ) {
+            PeerConnection connection = (PeerConnection)s.next();
+            connection.print();
+        }
+        System.out.println("");
     }
     
     /**
      * Subscribe to the specified resource.
      */
-    public void subscribe(Resource resource, String resourceName, String host, int port) {
+    public ResourceStatus subscribe(Resource resource, String resourceName, String host, int port) {
         PeerConnection connection = getConnection(host, port);
         PeerResource peerResource = new PeerResource(connection, resource, resourceName);
         subscribed.put(resourceName, peerResource);
+        return peerResource;
     }
     
     /**
@@ -90,6 +139,15 @@ public class Peer implements CTPHandlerFactory {
     public void publish(Resource resource, String resourceName) {
         PeerResource peerResource = new PeerResource(resource, resourceName);
         published.put(resourceName, peerResource);
+    }
+    
+    /**
+     * Unsubscribes from the specified resource.
+     */
+    public void unsubscribe(String resourceName) {
+        PeerResource peerResource = (PeerResource)subscribed.remove(resourceName);
+        if(peerResource == null) throw new IllegalArgumentException("Not subscribed to " + resourceName);
+        peerResource.unsubscribe();
     }
 
     /**
@@ -125,5 +183,12 @@ public class Peer implements CTPHandlerFactory {
          connectionManager.connect(peerConnection, host, port);
          connections.add(peerConnection);
          return peerConnection;
+     }
+     
+     /**
+      * Removes the specified connection.
+      */
+     void removeConnection(PeerConnection peerConnection) {
+         connections.remove(peerConnection);
      }
 }

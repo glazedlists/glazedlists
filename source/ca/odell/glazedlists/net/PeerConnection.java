@@ -30,8 +30,17 @@ class PeerConnection implements CTPHandler {
     /** the lower level connection to this peer */
     private CTPConnection connection = null;
     
+    /** the state of this connection */
+    private static final int AWAITING_CONNECT = 0;
+    private static final int READY = 1;
+    private static final int CLOSED = 2;
+    private int state = AWAITING_CONNECT;
+    
     /** whether this connection is ready yet */
     private boolean ready = false;
+    
+    /** whether this connection has been closed */
+    private boolean closed = false;
     
     /** the incoming bytes pending a full block */
     private Bufferlo currentBlock = new Bufferlo();
@@ -57,7 +66,7 @@ class PeerConnection implements CTPHandler {
      */
     public void connectionReady(CTPConnection connection) {
         this.connection = connection;
-        this.ready = true;
+        this.state = READY;
         if(pendingConnect.length() > 0) {
             connection.sendChunk(pendingConnect);
         }
@@ -73,7 +82,23 @@ class PeerConnection implements CTPHandler {
      */
     public void connectionClosed(CTPConnection source, Exception reason) {
         this.connection = null;
-        throw new UnsupportedOperationException("we have to clean up resources");
+        this.state = CLOSED;
+        peer.removeConnection(this);
+
+        // clean up the incoming subscriptions
+        for(Iterator r = incomingSubscriptions.values().iterator(); r.hasNext(); ) {
+            PeerResource resource = (PeerResource)r.next();
+            resource.publisherConnectionClosed(this);
+        }
+        incomingSubscriptions.clear();
+        
+        // clean up the outgoing publications
+        for(Iterator r = outgoingPublications.values().iterator(); r.hasNext(); ) {
+            PeerResource resource = (PeerResource)r.next();
+            resource.subscriberConnectionClosed(this);
+            r.remove();
+        }
+        outgoingPublications.clear();
     }
 
     /**
@@ -171,15 +196,73 @@ class PeerConnection implements CTPHandler {
     }
     
     /**
+     * Remove the subscription to the specified resource.
+     */
+    public void removeIncomingSubscription(PeerResource resource) {
+        Object removed = incomingSubscriptions.remove(resource.getResourceName());
+        if(removed != resource) throw new IllegalStateException();
+        if(incomingSubscriptions.isEmpty() && outgoingPublications.isEmpty()) {
+            close();
+        }
+    }
+    
+    /**
+     * Close this peer connection.
+     */
+    public void close() {
+        if(state != READY) throw new IllegalStateException();
+        if(!incomingSubscriptions.isEmpty()) throw new IllegalStateException();
+        if(!outgoingPublications.isEmpty()) throw new IllegalStateException();
+        if(connection == null) throw new IllegalStateException();
+        connection.close();
+        peer.removeConnection(this);
+    }
+    
+    /**
      * Writes the specified block to this peer.
      */
     public void writeBlock(PeerResource resource, PeerBlock block) {
-        if(!ready) {
+        if(state == AWAITING_CONNECT) {
             pendingConnect.append(block.getBytes());
-        } else if(connection == null) {
+        } else if(state == READY) {
+            connection.sendChunk(block.getBytes());
+        } else if(state == CLOSED) {
             throw new IllegalStateException();
         } else {
-            connection.sendChunk(block.getBytes());
+            throw new IllegalStateException();
         }
+    }
+    
+    /**
+     * Gets this connection as a String.
+     */
+    public String toString() {
+        if(state == AWAITING_CONNECT) return "pending";
+        else if(state == READY) return connection.toString();
+        else if(state == CLOSED) return "closed";
+        else throw new IllegalStateException();
+    }
+    
+    /**
+     * Prints the current state of this connection.
+     */
+    void print() {
+        StringBuffer result = new StringBuffer();
+        System.out.print(this);
+        System.out.print(": ");
+        System.out.print("Incoming {");
+        for(Iterator s = incomingSubscriptions.keySet().iterator(); s.hasNext(); ) {
+            String resourceName = (String)s.next();
+            System.out.print(resourceName);
+            if(s.hasNext()) System.out.print(", ");
+        }
+        System.out.print("}, ");
+        System.out.print("Outgoing {");
+        for(Iterator s = outgoingPublications.keySet().iterator(); s.hasNext(); ) {
+            String resourceName = (String)s.next();
+            System.out.print(resourceName);
+            if(s.hasNext()) System.out.print(", ");
+        }
+        System.out.println("}");
     }
 }
