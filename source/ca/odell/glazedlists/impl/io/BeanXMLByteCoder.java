@@ -7,31 +7,30 @@
 package ca.odell.glazedlists.impl.io;
 
 import java.util.List;
+import java.beans.*;
 import java.io.*;
 // Glazed Lists' pluggable object to bytes interface
 import ca.odell.glazedlists.io.ByteCoder;
 
 /**
- * A {@link ByteCoder} that uses {@link Serializable}.
+ * A {@link ByteCoder} that uses the {@link java.beans.XMLEncoder XMLEncoder} and
+ * {@link java.beans.XMLDecoder XMLDecoder} classes from java.beans. Encoded Objects
+ * must be JavaBeans.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SerializableByteCoder implements ByteCoder {
+public class BeanXMLByteCoder implements ByteCoder {
 
     /** {@inheritDoc} */
     public void encode(Object source, OutputStream target) throws IOException {
-        ObjectOutputStream objectOut = new ObjectOutputStream(target);
-        objectOut.writeObject(source);
-        objectOut.flush();
+        XMLEncoder xmlOut = new XMLEncoder(target);
+        xmlOut.writeObject(source);
+        xmlOut.close();
     }
     
     /** {@inheritDoc} */
     public Object decode(InputStream source) throws IOException {
-        try {
-            ObjectInputStream objectIn = new ObjectInputStream(source);
-            return objectIn.readObject();
-        } catch(ClassNotFoundException e) {
-            throw new IllegalStateException(e.getMessage());
-        }
+        XMLDecoder xmlIn = new XMLDecoder(source);
+        return xmlIn.readObject();
     }
 }

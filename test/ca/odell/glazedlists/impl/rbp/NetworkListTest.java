@@ -10,6 +10,7 @@ import java.util.*;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.io.*;
+import ca.odell.glazedlists.impl.io.*;
 // for being a JUnit test case
 import junit.framework.*;
 // NIO is used for CTP
