@@ -45,7 +45,7 @@ public class TextFilterListTest extends TestCase {
         unfilteredList = null;
         filteredList = null;
     }
-
+    
     /**
      * Test to verify that the filter is working correctly when values 
      * are being added to a list.

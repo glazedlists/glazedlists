@@ -6,6 +6,7 @@
  */
 package ca.odell.glazedlists;
 
+import java.util.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
 
