@@ -214,7 +214,7 @@ public class IssuesBrowser extends Applet {
             if(selected == descriptionIssue) return;
             descriptionIssue = selected;
             descriptions.clear();
-            descriptions.addAll(descriptionIssue.getDescriptions());
+            if(descriptionIssue != null) descriptions.addAll(descriptionIssue.getDescriptions());
         }
     }
 
