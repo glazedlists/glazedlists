@@ -11,6 +11,8 @@ import ca.odell.glazedlists.Matcher;
 import ca.odell.glazedlists.MatcherSource;
 import ca.odell.glazedlists.event.MatcherSourceListener;
 
+import java.util.Arrays;
+
 /**
  * @author reden
  */
@@ -87,5 +89,9 @@ public class AndMatcherSource extends AbstractValueMatcherSource
 
 			return true;
 		}
+
+        public String toString() {
+            return "[AndMatcher matchers:" + Arrays.asList(matchers) + "]";
+        }
 	}
 }
