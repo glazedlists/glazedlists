@@ -57,6 +57,40 @@ Glazed Lists because they have been replaced or they are beyond the scope of Gla
 
 <p><table border="1" cellspacing="0" cellpadding="4">
 <tr><th>Version 0.8</th><th>Version 0.9</th></tr>
+
+<tr><td valign="top"><code>com.odellengineeringltd.glazedlists</code></td>
+<td valign="top"><code>ca.odell.glazedlists</code></td></tr>
+
+<tr><td valign="top"><code>ListTable</code></td>
+<td valign="top"><code>EventTableModel</code></td></tr>
+
+<tr><td valign="top"><code>EventJList</code></td>
+<td valign="top"><code>EventListModel</code></td></tr>
+
+<tr><td valign="top"><code>Filterable</code></td>
+<td valign="top"><code>TextFilterable</code></td></tr>
+
+<tr><td valign="top"><code>Filterator</code></td>
+<td valign="top"><code>TextFilterator</code></td></tr>
+
+<tr><td valign="top"><code>CaseInsensitiveFilterList</code></td>
+<td valign="top"><code>TextFilterList</code></td></tr>
+
+<tr><td valign="top"><code>TableFormat.getFieldCount()</code></td>
+<td valign="top"><code>TableFormat.getColumnCount()</code></td></tr>
+
+<tr><td valign="top"><code>TableFormat.getFieldName()</code></td>
+<td valign="top"><code>TableFormat.getColumnName()</code></td></tr>
+
+<tr><td valign="top"><code>TableFormat.getFieldValue()</code></td>
+<td valign="top"><code>TableFormat.getColumnValue()</code></td></tr>
+
+<tr><td valign="top"><code>WritableTableFormat.isFieldEditable()</code></td>
+<td valign="top"><code>WritableTableFormat.isColumnEditable()</code></td></tr>
+
+<tr><td valign="top"><code>WritableTableFormat.setFieldValue()</code></td>
+<td valign="top"><code>WritableTableFormat.setColumnValue()</code></td></tr>
+
 <tr><td valign="top"><code>synchronized(getRootList()) {<br>&nbsp;&nbsp;&nbsp;&nbsp;// thread-safe code here<br>}</code></td>
 <td valign="top"><code>getReadWriteLock().writeLock().lock();<br>try {<br>&nbsp;&nbsp;&nbsp;&nbsp;// thread-safe code here<br>} finally {<br>&nbsp;&nbsp;&nbsp;&nbsp;getReadWriteLock().writeLock().unlock();<br>}</code></td></tr>
 
@@ -93,32 +127,11 @@ Glazed Lists because they have been replaced or they are beyond the scope of Gla
 <tr><td valign="top"><code>ListChangeListenerWeakReferenceProxy</code></td>
 <td valign="top"><code>WeakReferenceProxy</code></td></tr>
 
-<tr><td valign="top"><code>TableFormat.getFieldCount()</code></td>
-<td valign="top"><code>TableFormat.getColumnCount()</code></td></tr>
-
-<tr><td valign="top"><code>TableFormat.getFieldName()</code></td>
-<td valign="top"><code>TableFormat.getColumnName()</code></td></tr>
-
-<tr><td valign="top"><code>TableFormat.getFieldValue()</code></td>
-<td valign="top"><code>TableFormat.getColumnValue()</code></td></tr>
-
-<tr><td valign="top"><code>WritableTableFormat.isFieldEditable()</code></td>
-<td valign="top"><code>WritableTableFormat.isColumnEditable()</code></td></tr>
-
-<tr><td valign="top"><code>WritableTableFormat.setFieldValue()</code></td>
-<td valign="top"><code>WritableTableFormat.setColumnValue()</code></td></tr>
-
-<tr><td valign="top"><code>Filterable</code></td>
-<td valign="top"><code>TextFilterable</code></td></tr>
-
-<tr><td valign="top"><code>Filterator</code></td>
-<td valign="top"><code>TextFilterator</code></td></tr>
-
-<tr><td valign="top"><code>CaseInsensitiveFilterList</code></td>
-<td valign="top"><code>TextFilterList</code></td></tr>
-
 <tr><td valign="top"><code>CharacteristicList</code></td>
 <td valign="top"><code>TransformationList</code></td></tr>
+
+<tr><td valign="top"><code>QueryList</code></td>
+<td valign="top"><code>UniqueList.replaceAll()</code></td></tr>
 </table>
 
 

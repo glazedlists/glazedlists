@@ -55,6 +55,7 @@
         <exclude name="**/demo/**"/>
         <exclude name="**/glazedtasks/**"/>
         <exclude name="**/test/**"/>
+        <exclude name="**/migrationkit/**"/>
       </packageset>
       <doctitle><![CDATA[<h1><a href="http://glazedlists.dev.java.net">Glazed Lists</a></h1>]]></doctitle>
       <bottom><![CDATA[Generated ${javadoc.datestamp}<br><i>Copyright &#169; 2003-2004 O'Dell Engineering.</i>]]></bottom>
