@@ -112,6 +112,8 @@ public class EventListIterator implements ListIterator {
     public void remove() {
         if(lastIndex == -1) throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");
         target.remove(lastIndex);
+        // shift next over to the left if necessary
+        if(lastIndex <= nextIndex) nextIndex--;
         lastIndex = -1;
     }
     
