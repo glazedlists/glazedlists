@@ -543,7 +543,7 @@ class TableColumnComparator implements Comparator {
             return comparableComparator.compare(alphaField, betaField);
         // throw a 'nicer' exception if the class does not implement Comparable
         } catch(ClassCastException e) {
-            IllegalStateException illegalStateException = new IllegalStateException("TableComparatorChooser can not sort objects \"" + alpha + "\", \"" + beta + "\" that do not implement Comparable");
+            IllegalStateException illegalStateException = new IllegalStateException("TableComparatorChooser can not sort objects \"" + alphaField + "\", \"" + betaField + "\" that do not implement Comparable");
             illegalStateException.initCause(e);
             throw illegalStateException;
         }
