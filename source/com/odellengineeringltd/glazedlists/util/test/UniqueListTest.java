@@ -4,12 +4,13 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package com.odellengineeringltd.glazedlists.util;
+package com.odellengineeringltd.glazedlists.util.test;
 
 // for being a JUnit test case
 import junit.framework.*;
 // the core Glazed Lists package
 import com.odellengineeringltd.glazedlists.*;
+import com.odellengineeringltd.glazedlists.util.*;
 // the Glazed Lists' change objects
 import com.odellengineeringltd.glazedlists.event.*;
 // Java collections are used for underlying data storage
@@ -499,35 +500,6 @@ public class UniqueListTest extends TestCase {
         assertEquals(0, unique.size());
     }
 
-    class IntArrayIndexComparator implements Comparator {
-        public int index;
-        public IntArrayIndexComparator(int index) {
-            this.index = index;
-        }
-        public int compare(Object a, Object b) {
-            int[] aArray = (int[])a;
-            int[] bArray = (int[])b;
-            return aArray[index] - bArray[index];
-        }
-    }
-    class IntArrayFilterList extends AbstractFilterList {
-        public int index = 0;
-        public int threshhold = 0;
-        public IntArrayFilterList(EventList source) {
-            super(source);
-        }
-        public boolean filterMatches(Object element) {
-            int[] array = (int[])element;
-            return array[index] >= threshhold;
-        }
-        public void setFilter(int index, int threshhold) {
-            this.index = index;
-            this.threshhold = threshhold;
-            handleFilterChanged();
-        }
-    }
-
-
     public void testUpdateDeleteCollide() {
         source = new BasicEventList();
         source.add(new int[] { 2, 0, 1 });
@@ -536,11 +508,225 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 4, 1, 0 });
 
         IntArrayFilterList filterList = new IntArrayFilterList(source);
-        unique = new UniqueList(filterList, new IntArrayIndexComparator(0));
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
 
         filterList.setFilter(2, 1);
         filterList.setFilter(1, 1);
     }
+
+    /**
+     * Tests the change from A, B, B, D to A, C, C, D
+     */
+    public void testMultipleDeleteWithMultipleInsert() {
+        source = new BasicEventList();
+        source.add(new int[] { 1, 1, 1 });
+        source.add(new int[] { 2, 1, 0 });
+        source.add(new int[] { 2, 1, 0 });
+        source.add(new int[] { 3, 0, 1 });
+        source.add(new int[] { 3, 0, 1 });
+        source.add(new int[] { 4, 1, 1 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
+
+        filterList.setFilter(1, 1);
+        filterList.setFilter(2, 1);
+        
+        assertEquals(3, unique.size());
+        assertEquals(1, ((int[])unique.get(0))[0]);
+        assertEquals(3, ((int[])unique.get(1))[0]);
+        assertEquals(4, ((int[])unique.get(2))[0]);
+    }
+
+    /**
+     * Tests the change from A, B, D to A, C, D
+     */
+    public void testDeleteWithInsert() {
+        source = new BasicEventList();
+        source.add(new int[] { 1, 1, 1 });
+        source.add(new int[] { 2, 1, 0 });
+        source.add(new int[] { 3, 0, 1 });
+        source.add(new int[] { 4, 1, 1 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
+
+        filterList.setFilter(1, 1);
+        filterList.setFilter(2, 1);
+        
+        assertEquals(3, unique.size());
+        assertEquals(1, ((int[])unique.get(0))[0]);
+        assertEquals(3, ((int[])unique.get(1))[0]);
+        assertEquals(4, ((int[])unique.get(2))[0]);
+    }
+
+    /**
+     * Tests the change from A, B, C to C, D, E
+     */
+    public void testSingleValueKept() {
+        source = new BasicEventList();
+        source.add(new int[] { 1, 1, 0 });
+        source.add(new int[] { 2, 1, 0 });
+        source.add(new int[] { 3, 1, 1 });
+        source.add(new int[] { 4, 0, 1 });
+        source.add(new int[] { 5, 0, 1 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
+
+        filterList.setFilter(1, 1);
+        filterList.setFilter(2, 1);
+        
+        assertEquals(3, unique.size());
+        assertEquals(3, ((int[])unique.get(0))[0]);
+        assertEquals(4, ((int[])unique.get(1))[0]);
+        assertEquals(5, ((int[])unique.get(2))[0]);
+    }
+
+
+    /**
+     * Tests the change from A, A, B, B, C, C to C, C, D, D, E, E
+     */
+    public void testMultipleValuesKept() {
+        source = new BasicEventList();
+        source.add(new int[] { 1, 1, 0 });
+        source.add(new int[] { 1, 1, 0 });
+        source.add(new int[] { 2, 1, 0 });
+        source.add(new int[] { 2, 1, 0 });
+        source.add(new int[] { 3, 1, 1 });
+        source.add(new int[] { 3, 1, 1 });
+        source.add(new int[] { 4, 0, 1 });
+        source.add(new int[] { 4, 0, 1 });
+        source.add(new int[] { 5, 0, 1 });
+        source.add(new int[] { 5, 0, 1 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
+
+        filterList.setFilter(1, 1);
+        filterList.setFilter(2, 1);
+        
+        assertEquals(3, unique.size());
+        assertEquals(3, ((int[])unique.get(0))[0]);
+        assertEquals(4, ((int[])unique.get(1))[0]);
+        assertEquals(5, ((int[])unique.get(2))[0]);
+    }
+    
+    
+    /**
+     * Tests the change from A, A, B, B, C, C, D, D, E, E to B, B, E, E
+     */
+    public void testSubset() {
+        source = new BasicEventList();
+        source.add(new int[] { 1, 1, 0 });
+        source.add(new int[] { 1, 1, 0 });
+        source.add(new int[] { 2, 1, 1 });
+        source.add(new int[] { 2, 1, 1 });
+        source.add(new int[] { 3, 1, 0 });
+        source.add(new int[] { 3, 1, 0 });
+        source.add(new int[] { 4, 1, 1 });
+        source.add(new int[] { 4, 1, 1 });
+        source.add(new int[] { 5, 1, 0 });
+        source.add(new int[] { 5, 1, 0 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
+
+        filterList.setFilter(1, 1);
+        filterList.setFilter(2, 1);
+        
+        assertEquals(2, unique.size());
+        assertEquals(2, ((int[])unique.get(0))[0]);
+        assertEquals(4, ((int[])unique.get(1))[0]);
+    }
+
+    /**
+     * Tests the change from A, A, B, B, C to empty to A, B, B, C, C
+     */
+    public void testMultipleChanges() {
+        source = new BasicEventList();
+        source.add(new int[] { 1, 1, 0, 0 });
+        source.add(new int[] { 1, 1, 0, 1 });
+        source.add(new int[] { 2, 1, 0, 1 });
+        source.add(new int[] { 2, 1, 0, 1 });
+        source.add(new int[] { 3, 1, 0, 1 });
+        source.add(new int[] { 3, 0, 0, 1 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
+
+        filterList.setFilter(1, 1);
+        filterList.setFilter(2, 1);
+        filterList.setFilter(3, 1);
+        
+        assertEquals(3, unique.size());
+        assertEquals(1, ((int[])unique.get(0))[0]);
+        assertEquals(2, ((int[])unique.get(1))[0]);
+        assertEquals(3, ((int[])unique.get(2))[0]);
+    }
+    
+    /** the dice for the random tests */
+    private Random random = new Random();
+
+    /**
+     * Tests a large set of random events.
+     */
+    public void testLargeRandomSet() {
+        source = new BasicEventList();
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        SortedList sorted = new SortedList(filterList, new IntArrayComparator(0));
+        
+        // populate a list with 1000 random arrays between 0 and 1000
+        for(int i = 0; i < 20; i++) {
+            int value = random.nextInt(10);
+            int[] array = new int[] { value, random.nextInt(2), random.nextInt(2), random.nextInt(2) };
+            source.add(array);
+        }
+        
+        // try ten different filters
+        for(int i = 0; i < 100; i++) {
+            // apply the filter
+            int filterColumn = random.nextInt(3);
+            filterList.setFilter(filterColumn + 1, 1);
+            
+            // construct the control list
+            SortedSet controlSet = new TreeSet(new IntArrayComparator(0));
+            controlSet.addAll(filterList);
+            ArrayList controlList = new ArrayList();
+            controlList.addAll(controlSet);
+            Collections.sort(controlList, new IntArrayComparator(0));
+            
+            // verify that the control and unique list are the same
+            System.out.println("u: " + unique.size() + ", c: " + controlList.size());
+            if(unique.size() != controlList.size()) System.out.print("UNIQUE: ");
+            for(int j = 0; unique.size() != controlList.size() && j < unique.size(); j++) {
+                System.out.print(((int[])unique.get(j))[0] + ", ");
+            }
+            if(unique.size() != controlList.size()) System.out.println("");
+            if(unique.size() != controlList.size()) System.out.print("CONTROL: ");
+            for(int j = 0; unique.size() != controlList.size() && j < controlList.size(); j++) {
+                System.out.print(((int[])controlList.get(j))[0] + ", ");
+            }
+            if(unique.size() != controlList.size()) System.out.println("");
+            if(unique.size() != controlList.size()) System.out.print("FILTER: ");
+            for(int j = 0; unique.size() != controlList.size() && j < filterList.size(); j++) {
+                System.out.print(((int[])filterList.get(j))[0] + ", ");
+            }
+            if(unique.size() != controlList.size()) System.out.println("");
+            if(unique.size() != controlList.size()) System.out.print("SORTED: ");
+            for(int j = 0; unique.size() != controlList.size() && j < sorted.size(); j++) {
+                System.out.print(((int[])sorted.get(j))[0] + ", ");
+            }
+            if(unique.size() != controlList.size()) System.out.println("");
+            
+            assertEquals(unique.size(), controlList.size());
+            for(int j = 0; j < unique.size(); j++) {
+                assertEquals(((int[])unique.get(j))[0], ((int[])controlList.get(j))[0]);
+            }
+        }
+    }
+
 
     /** Test response to an UPDATE event  */
 
