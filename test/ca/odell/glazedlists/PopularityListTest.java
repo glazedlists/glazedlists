@@ -234,6 +234,22 @@ public class PopularityListTest extends TestCase {
         source.add("album"); // a b c d f g h a b c d e f g h c f g b d h a
         source.add("eerie"); // a b c d e f g h a b c d e f g h c f g b d h a e
         assertEquals(sortedSingleCopy, popularityList);
+        
+        // now break into two classes 2 x { A C E F } and 4 x { B D G H }
+        source.set(0, "gecko"); // g b c d e f g h a b c d e f g h c f g b d h a e
+        source.set(2, "hippo"); // g b h d e f g h a b c d e f g h c f g b d h a e
+        source.set(4, "dingo"); // g b h d d f g h a b c d e f g h c f g b d h a e
+        source.set(5, "banjo"); // g b h d d b g h a b c d e f g h c f g b d h a e
+        List expectedTwoClasses = new ArrayList();
+        expectedTwoClasses.add("banjo");
+        expectedTwoClasses.add("dingo");
+        expectedTwoClasses.add("gecko");
+        expectedTwoClasses.add("hippo");
+        expectedTwoClasses.add("album");
+        expectedTwoClasses.add("chaos");
+        expectedTwoClasses.add("eerie");
+        expectedTwoClasses.add("fiery");
+        assertEquals(expectedTwoClasses, popularityList);
     }
 
     /**
