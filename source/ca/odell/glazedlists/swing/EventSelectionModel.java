@@ -166,7 +166,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * responsible for listening to changes in the JTable's size and modifying
      * the internal list model to match.
      */
-    class SelectionEventList extends TransformedList implements ListEventListener {
+    class SelectionEventList extends TransformedList {
 
         /**
          * Creates a new SelectionEventList that listens to changes from the

@@ -41,7 +41,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThreadSafeList extends TransformedList implements ListEventListener {
+public final class ThreadSafeList extends TransformedList {
 
     /**
      * Creates a {@link ThreadSafeList} that provides thread safe access to all
@@ -78,11 +78,6 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
             getReadWriteLock().readLock().unlock();
         }
     }
-
-    /** {@inheritDoc} */
-    /*protected int getSourceIndex(int mutationIndex) {
-        return mutationIndex;
-    }*/
 
     /** {@inheritDoc} */
     protected boolean isWritable() {

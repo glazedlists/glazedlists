@@ -30,7 +30,7 @@ import ca.odell.glazedlists.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SubEventList extends TransformedList implements ListEventListener {
+public final class SubEventList extends TransformedList {
 
     /** the start index of this list, inclusive */
     private int startIndex;

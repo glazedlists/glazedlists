@@ -32,7 +32,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class FreezableList extends TransformedList implements ListEventListener {
+public final class FreezableList extends TransformedList {
 
     /** the state of the freezable list */
     private boolean frozen = false;

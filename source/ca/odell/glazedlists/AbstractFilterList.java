@@ -40,7 +40,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class AbstractFilterList extends TransformedList implements ListEventListener {
+public abstract class AbstractFilterList extends TransformedList {
 
     /** the flag list contains Barcode.BLACK for items that match the current filter and Barcode.WHITE for others */
     private Barcode flagList = new Barcode();

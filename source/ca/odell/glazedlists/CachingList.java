@@ -36,7 +36,7 @@ import java.util.Random;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class CachingList extends TransformedList implements ListEventListener {
+public class CachingList extends TransformedList {
 
     /** The cache is implemented using a tree-based cache */
     private IndexedTree cache;

@@ -31,7 +31,7 @@ import ca.odell.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ReadOnlyList extends TransformedList implements ListEventListener {
+public final class ReadOnlyList extends TransformedList {
 
     /**
      * Creates a {@link ReadOnlyList} to provide a view of an {@link EventList}

@@ -42,7 +42,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThresholdList extends TransformedList implements ListEventListener {
+public final class ThresholdList extends TransformedList {
 
     /** the index in the list which corresponds to the lower bound for this list */
     private int lowerThresholdIndex = -1;

@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class UniqueList extends TransformedList implements ListEventListener {
+public final class UniqueList extends TransformedList {
 
     /** the comparator used to determine equality */
     private Comparator comparator;
