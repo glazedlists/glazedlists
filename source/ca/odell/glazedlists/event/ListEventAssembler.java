@@ -59,14 +59,25 @@ public final class ListEventAssembler {
     private boolean allowNestedEvents = true;
     
     /**
-     * Starts a new atomic change to this list change queue.
+     * Starts a new atomic change to this list change queue. 
+     *
+     * <p>This simple change event does not support change events nested within.
+     * To allow other methods to nest change events within a change event, use
+     * beginEvent(true).
      */
     public void beginEvent() {
         beginEvent(false);
     }
         
     /**
-     * Starts a new atomic change to this list change queue.
+     * Starts a new atomic change to this list change queue. This signature
+     * allows you to specify allowing nested changes. This simply means that
+     * you can call other methods that contain a beginEvent(), commitEvent()
+     * block and their changes will be recorded but not fired. This allows
+     * the creation of list modification methods to call simpler list modification
+     * methods while still firing a single ListEvent to listeners.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=52">Bug 52</a>
      *
      * @param allowNestedEvents false to throw an exception
      *      if another call to beginEvent() is made before
@@ -192,6 +203,10 @@ public final class ListEventAssembler {
     /**
      * Commits the current atomic change to this list change queue. This will
      * notify all listeners about the change.
+     *
+     * <p>If the current event is nested within a greater event, this will simply
+     * change the nesting level so that further changes are applied directly to the
+     * parent change.
      */
     public synchronized void commitEvent() {
         // complain if we have no event to commit
