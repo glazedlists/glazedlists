@@ -88,6 +88,26 @@ public class TableCheckFilterList extends AbstractFilterList implements Selectio
     }
     
     /**
+     * Gets a static snapshot of the checked Objects in this list.
+     */
+    public List getAllChecked() {
+        getReadWriteLock().readLock().lock();
+        try {
+            List result = new ArrayList();
+            for(int i = 0; i < size(); i++) {
+                Checkable checkable = (Checkable)source.get(getSourceIndex(i));
+                if(checkable.isChecked()) {
+                    result.add(get(i));
+                }
+            }
+            return result;
+            
+        } finally {
+            getReadWriteLock().readLock().unlock();
+        }
+    }
+    
+    /**
      * Set whether this filter list displays all elements, or only checked elements.
      */
     public void setCheckedOnly(boolean checkedOnly) {
