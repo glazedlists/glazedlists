@@ -269,7 +269,7 @@ public final class ThresholdList extends TransformedList {
 
         // The threshold is lower
         if(newListIndex < lowerThresholdIndex) {
-            updates.addInsert(0, Math.max(lowerThresholdIndex, 0) - newListIndex - 1);
+            updates.addInsert(0, lowerThresholdIndex - Math.max(newListIndex, 0) - 1);
 
         // The threshold is higher
         } else if(newListIndex > lowerThresholdIndex) {
