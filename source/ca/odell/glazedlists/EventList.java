@@ -14,54 +14,31 @@ import ca.odell.glazedlists.util.concurrent.*;
 import java.util.*;
 
 /**
- * An EventList is a list that can send events to listeners. There are two
- * main types of EventLists:
- * <li><strong><i>Root lists:</i></strong> EventLists that provide data
- * <li><strong><i>Transformed lists:</i></strong> EventLists that transform the
- * data from a different EventList
+ * An observable list. {@link ListEventListener}s can register to be notified
+ * when this list changes.
  *
- * <p>Usually EventLists are deployed with a chain of transformed lists that
- * view a root list. For example, a BasicEventList may be sorted via a
- * SortedList and then filtered with one or more AbstractFilterLists.
- * The final list in this chain can then be displayed using a widget such
- * as ListTable or EventJList.
+ * <p>{@link EventList}s may be writable or read-only. Consult the Javadoc for
+ * your {@link EventList} if you are unsure.
  *
- * <p>EventLists are not thread-safe. If you are sharing an EventList with another
- * thread, you can make access thread-safe by using a <code>ThreadSafeList</code>:<br>
- * <code><pre>EventList myList = ...
- * ThreadSafeList myThreadSafeList = new ThreadSafeList(myList);
- * // access myThreadSafeList here</code></pre>
- *
- * <p>Alternatively, you can manually acquire the read lock before access and
- * release it afterwards:<br>
- * <code><pre>myList.getReadWriteLock().readLock().lock();
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * are thread ready but not thread safe. If you are sharing an {@link EventList}
+ * between multiple threads, you can add thread safety by using the built-in
+ * locks:
+ * <pre> EventList myList = ...
+ * myList.getReadWriteLock().writeLock().lock();
  * try {
- *     // access myList here
+ *    // you can access myList here
+ *    if(myList.size() > 3) {
+ *       System.out.println(myList.get(3));
+ *    }
  * } finally {
- *     myList.getReadWriteLock().readLock().unlock();
- * }</pre></code>
+ *    myList.getReadWriteLock().writeLock().unlock();
+ * }</pre>
  *
- * <p>EventLists can be writable but there is no requirement for doing so.
- * When a <i>root list</i> is changed, the change event is propagated to all
- * ListEventListeners that are interested in the change. The set of
- * ListEventListeners will include any <i>transformed lists</i> providing a
- * transformed view of the root list.
- *
- * <p>When a <i>transformed list</i> is modified via <code>set()</code>,
- * <code>add()</code>, <code>remove()</code>, etc. the modification is
- * propagated to the root list which can then make the change or throw an
- * Exception. If the change is made it will be propagated back to the
- * transformed list.
- *
- * <p><strong><font color="#FF0000">Warning:</font></strong> changes to
- * <i>transformed lists</i> may break the contract normally required by all
- * implementations of {@link java.util.List}. This is because the
- * change made may be transformed itself. For example, calling the method
- * <code>add()</code> allows the user to specify at what index the value
- * is inserted. But a {@link SortedList} will <strong>ignore</strong>
- * this index and insert the value in sorted order. Similarly, a value
- * added to a {@link AbstractFilterList} may appear not to be added
- * at all. This is because the filter may have filtered-out the added value.
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * may break the contract required by {@link java.util.List}. For example, when
+ * you {@link #add(int,Object)} on a {@link SortedList}, it will ignore the specified
+ * index so that the element will be inserted in sorted order.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -73,27 +50,15 @@ public interface EventList extends List {
     public void addListEventListener(ListEventListener listChangeListener);
 
     /**
-     * Removes the specified listener from receiving change updates for this
-     * list.
-     *
-     * @since 2004-01-30. This has been added to support the new FreezableList.
-     *     If you need to implement this method, please review the implementation
-     *     in TransformedList for an example.
+     * Removes the specified listener from receiving change updates for this list.
      */
     public void removeListEventListener(ListEventListener listChangeListener);
 
     /**
-     * Gets the lock object in order to access this list in a thread-safe manner.
-     * This will return a <strong>re-entrant</strong> implementation of
-     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
+     * Gets the lock required to share this list between multiple threads.
      *
-     * @since 2004-05-21 This replaces <code>getRootList()</code> which was used
-     *     for synchronizing access to lists. That technique was simple but it
-     *     suffers from the problem of preventing concurrent reads. This problem
-     *     becomes magnified when multiple lists have a common source, and such
-     *     lists perform read-intensive operations such as sorting.
-     *
-     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=26">Bug 26</a>
+     * @return a re-entrant {@link ReadWriteLock} that guarantees thread safe
+     *      access to this list.
      */
     public ReadWriteLock getReadWriteLock();
 }

@@ -14,10 +14,14 @@ import ca.odell.glazedlists.util.concurrent.*;
 import java.util.*;
 
 /**
- * An event list that wraps a Java Collections list. This list provides an
- * event notifying interface to a plain Java list. This may be useful to wrap
- * filtering or sorting on to an existing list, or to simply receive events
- * when a list changes.
+ * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
+ * or {@link LinkedList}.
+ *
+ * <p>This {@link List} supports all write operations.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * are thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
  * Lists Tutorial</a>
@@ -30,27 +34,28 @@ public final class BasicEventList extends AbstractEventList {
     private List data;
 
     /**
-     * Creates a new EventArrayList that uses an ArrayList as the source list
-     * implementation.
+     * Creates a {@link BasicEventList} that uses a {@link ArrayList} as the
+     * underlying list implementation.
      */
     public BasicEventList() {
         this(new ArrayList());
     }
 
     /**
-     * Creates a new EventArrayList that uses the specified list as the source
-     * list. All editing to the specified source list <strong>must</strong> be
-     * done through the BasicEventList interface. Otherwise the two lists will
-     * become out of sync and the BasicEventList will fail.
+     * Creates a {@link BasicEventList} that uses the specified {@link List} as
+     * the underlying implementation.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> all editing to
+     * the specified {@link List} <strong>must</strong> be done through via this
+     * {@link BasicEventList} interface. Otherwise this {@link BasicEventList} will
+     * become out of sync and operations will fail.
      */
     public BasicEventList(List list) {
         data = list;
         readWriteLock = new J2SE12ReadWriteLock();
     }
 
-    /**
-     * Inserts the specified element at the specified position in this list.
-     */
+    /** {@inheritDoc} */
     public void add(int index, Object element) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -66,9 +71,7 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
 
-    /**
-     * Appends the specified element to the end of this list.
-     */
+    /** {@inheritDoc} */
     public boolean add(Object element) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -85,19 +88,12 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
 
-    /**
-     * Appends all of the elements in the specified Collection to the end of
-     * this list, in the order that they are returned by the specified
-     * Collection's Iterator.
-     */
+    /** {@inheritDoc} */
     public boolean addAll(Collection collection) {
         return addAll(size(), collection);
     }
 
-    /**
-     * Inserts all of the elements in the specified Collection into this
-     * list, starting at the specified position.
-     */
+    /** {@inheritDoc} */
     public boolean addAll(int index, Collection collection) {
         // don't do an add of an empty set
         if(collection.size() == 0) return false;
@@ -118,16 +114,47 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /**
-     * Appends all of the elements in the specified array to the end of
-     * this list.
+     * Appends all of the elements in the specified array to the end of this list.
+     *
+     * @param objects list of elements that are to be added to this list.
+     * @return <tt>true</tt> if this list changed as a result of the call.
+     * 
+     * @throws UnsupportedOperationException if the <tt>addAll</tt> method is
+     *         not supported by this list.
+     * @throws ClassCastException if the class of an element in the specified
+     * 	       array prevents it from being added to this list.
+     * @throws NullPointerException if the specified array contains one
+     *         or more null elements and this list does not support null
+     *         elements, or if the specified array is <tt>null</tt>.
+     * @throws IllegalArgumentException if some aspect of an element in the
+     *         specified array prevents it from being added to this
+     *         list.
+     * @see #add(Object)
      */
     public boolean addAll(Object[] objects) {
         return addAll(size(), objects);
     }
 
     /**
-     * Inserts all of the elements in the specified array into this
-     * list, starting at the specified position.
+     * Inserts all of the elements in the specified collection into this
+     * list at the specified position. Shifts the element currently at that
+     * position (if any) and any subsequent elements to the right (increases
+     * their indices).
+     *
+     * @param objects list of elements that are to be added to this list.
+     * @return <tt>true</tt> if this list changed as a result of the call.
+     * 
+     * @throws UnsupportedOperationException if the <tt>addAll</tt> method is
+     *         not supported by this list.
+     * @throws ClassCastException if the class of an element in the specified
+     * 	       array prevents it from being added to this list.
+     * @throws NullPointerException if the specified array contains one
+     *         or more null elements and this list does not support null
+     *         elements, or if the specified array is <tt>null</tt>.
+     * @throws IllegalArgumentException if some aspect of an element in the
+     *         specified array prevents it from being added to this
+     *         list.
+     * @see #add(Object)
      */
     public boolean addAll(int index, Object[] objects) {
         // don't do an add of an empty set
@@ -153,9 +180,7 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
 
-    /**
-     * Removes the element at the specified position in this list.
-     */
+    /** {@inheritDoc} */
     public Object remove(int index) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -171,12 +196,8 @@ public final class BasicEventList extends AbstractEventList {
             getReadWriteLock().writeLock().unlock();
         }
     }
-    /**
-     * Removes a single instance of the specified element from this
-     * collection, if it is present (optional operation).
-     *
-     * This uses indexOf and remove(index) to do the actual remove.
-     */
+
+    /** {@inheritDoc} */
     public boolean remove(Object element) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -189,9 +210,7 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
 
-    /**
-     * Removes all of the elements from this list (optional operation).
-     */
+    /** {@inheritDoc} */
     public void clear() {
         getReadWriteLock().writeLock().lock();
         try {
@@ -209,10 +228,7 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
 
-    /**
-     * Replaces the element at the specified position in this list with the
-     * specified element.
-     */
+    /** {@inheritDoc} */
     public Object set(int index, Object element) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -229,32 +245,17 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
 
-    /**
-     * Returns the element at the specified position in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public Object get(int index) {
         return data.get(index);
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int size() {
         return data.size();
     }
 
-    /**
-     * Removes from this collection all of its elements that are contained
-     * in the specified collection (optional operation). This method has been
-     * is available in this implementation, although the not particularly
-     * high performance.
-     */
+    /** {@inheritDoc} */
     public boolean removeAll(Collection collection) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -275,11 +276,7 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
 
-    /**
-     * Retains only the elements in this collection that are contained in
-     * the specified collection (optional operation). This method is available
-     * in this implementation, although not particularly high performance.
-     */
+    /** {@inheritDoc} */
     public boolean retainAll(Collection collection) {
         getReadWriteLock().writeLock().lock();
         try {

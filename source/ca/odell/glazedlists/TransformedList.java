@@ -14,36 +14,30 @@ import ca.odell.glazedlists.util.concurrent.*;
 import java.util.*;
 
 /**
- * An TransformedList is a good place to get started in implementing
- * an EventList that provides a transformed view of a source EventList.
+ * A convenience class for {@link EventList}s that decorate other {@link EventList}s.
+ * Extending classes transform their source {@link EventList} by modifying the
+ * order, visibility and value of its elements.
  *
- * <p>Because it is a decorator, the user should carefully implement the method
- * {@link #getSourceIndex(int)} which is used to translate between the indicies
- * of this decorator and the indicies of the source list that it decorates.
+ * <p>Extending classes may implement the method {@link #getSourceIndex(int)} to
+ * translate between indices of this and indices of the source.
  *
- * <p>TransformedLists can be made mutable via the API by overriding the
- * method {@link #isWritable()}.
+ * <p>Extending classes may implement the method {@link #isWritable()} to make the
+ * source writable via this API.
  *
- * <p>Although this class implements the {@link ListEventListener} interface,
- * users must explicitly call {@link #addListEventListener(ListEventListener)} to
- * register themselves as listeners to the source list.
- *
- * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=18">Bug 18</a>
+ * <p>Extending classes must explicitly call {@link #addListEventListener(ListEventListener)}
+ * to receive for change notification from the source {@link EventList}.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public abstract class TransformedList extends AbstractEventList implements ListEventListener {
 
-    /** the underlying list */
+    /** the event list to transform */
     protected EventList source;
 
     /**
-     * Creates an TransformedList that provides a transformed view of the
-     * specified source list.
+     * Creates a {@link TransformedList} to transform the specified {@link EventList}.
      *
-     * @param source the list to use as the source of this event list. If source
-     *      implements EventList, the read write lock of that list will be used
-     *      as the read write lock for this list.
+     * @param source the {@link EventList} to transform..
      */
     protected TransformedList(EventList source) {
         this.source = source;
@@ -51,44 +45,34 @@ public abstract class TransformedList extends AbstractEventList implements ListE
     }
 
     /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list. This is the index such that the following works:
+     * Gets the index in the source {@link EventList} that corresponds to the
+     * specified index. More formally, returns the index such that
      * <br><code>this.get(i) == source.get(getSourceIndex(i))</code> for all
-     * values.
+     * legal values of <code>i</code>.
      */
     protected int getSourceIndex(int mutationIndex) {
         return mutationIndex;
     }
 
     /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc. This method is called
-     * before every modification to verify that the modification is allowed
-     * in the current state of this mutation.
+     * Gets whether the source {@link EventList} is writable via this API.
+     * 
+     * <p>Extending classes must override this method in order to make themselves
+     * {@link TransformedList} writable.
      */
     protected boolean isWritable() {
         return false;
     }
 
     /**
-     * For implementing the ListEventListener interface. Extending classes should
-     * adjust in response to this change and forward notifications about that
-     * adjustment to downstream listeners.
+     * Respond to a change in the source {@link EventList} by updating the internal
+     * state of this {@link TransformedList}. If the state of this {@link TransformedList}
+     * changes as a consequence, all interested {@link ListEventListener}s will
+     * be notified in turn.
      */
     public abstract void listChanged(ListEvent listChanges);
 
-    /**
-     * Adds the specified element into this list. The added value may not
-     * be visible in this mutated view.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public boolean add(Object value) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -99,19 +83,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Adds the specified element into the source list. The added value may
-     * not be visible in this mutated view. It may not be added at the specified
-     * index as a consequence of reordering by this view or a parent view.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public void add(int index, Object value) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -126,20 +98,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Adds all of the elements of the specified collection to this list. Some
-     * values may not be visible in this mutated view. It may not be added at
-     * the specified index as a consequence of reordering by this view or a
-     * parent view.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public boolean addAll(int index, Collection values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -154,18 +113,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Add all elements of the specified collection to this list. Some values
-     * may not be visible in this mutated view.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public boolean addAll(Collection values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -176,27 +124,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-
-    /**
-     * Removes <strong>all</strong> elements from the source list, even
-     * those that are not displayed from this view. In order to remove only the
-     * elements displayed by this view, iterate through this list to remove its
-     * elements one at a time.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * <p><strong>Warning:</strong> Because this method is implemented
-     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
-     * events will be propogated. Therefore this method has been carefully
-     * implemented to keep this list in a consistent state for each such modifying
-     * operation.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public void clear() {
         getReadWriteLock().writeLock().lock();
         try {
@@ -212,29 +140,13 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Returns the element at the specified position in this list.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public Object get(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot get at " + index + " on list of size " + size());
         return source.get(getSourceIndex(index));
     }
 
-    /**
-     * Removes the element at the specified index from the source list.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public Object remove(int index) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -246,17 +158,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Removes the specified element from the source list.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public boolean remove(Object toRemove) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -270,23 +172,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Removes the specified elements from the source list.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * <p><strong>Warning:</strong> Because this method is implemented
-     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
-     * events will be propogated. Therefore this method has been carefully
-     * implemented to keep this list in a consistent state for each such modifying
-     * operation.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public boolean removeAll(Collection values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -305,24 +191,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Retains only the values from the source list that are in the
-     * specified collection.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * <p><strong>Warning:</strong> Because this method is implemented
-     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
-     * events will be propogated. Therefore this method has been carefully
-     * implemented to keep this list in a consistent state for each such modifying
-     * operation.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public boolean retainAll(Collection values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -345,21 +214,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Replaces the object at the specified index in the source list with
-     * the specified value. Note that the replacement value may not be
-     * visible in this mutated view. The replaced value may not be at
-     * the specified index as a consequence of reordering by this view or
-     * the parent view.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
-     */
+    /** {@inheritDoc} */
     public Object set(int index, Object value) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -371,29 +226,24 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         }
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int size() {
         return source.size();
     }
 
     /**
-     * Release the resources consumed by this TransformedList so that it may be garbage
-     * collected. It is an error to call any method on a TransformedList after it
-     * has been disposed.
+     * Releases the resources consumed by this {@link TransformedList} so that it
+     * may eventually be garbage collected.
      *
-     * <p>A TransformedList will be garbage collected without a call to dispose(), but
-     * not before its source list may be garbage collected. By calling dispose(), you
-     * allow the TransformedList to be garbage collected before its source list.
-     * This is useful for situations where a TransformedList is short-lived with a
-     * source EventList that is long-lived.
-     *
-     * <p>This method simply removes this list as a listener to its source.
+     * <p>A {@link TransformedList} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link TransformedList}
+     * to be garbage collected before its source {@link EventList}. This is 
+     * necessary for situations where a {@link TransformedList} is short-lived but
+     * its source {@link EventList} is long-lived.
+     * 
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link TransformedList} after it has been disposed.
      */
     public void dispose() {
         source.removeListEventListener(this);

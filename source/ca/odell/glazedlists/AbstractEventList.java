@@ -18,20 +18,21 @@ import java.util.*;
 import java.io.Serializable;
 
 /**
- * A convenience class that provides much of the details to implementing an
- * EventList.
+ * A convenience class that implements common functionality for all {@link EventList}s.
  *
- * <p>Implementors of custom event lists should consider this class if the custom
- * list has no single source list. If the custom list has a single source list,
- * the TransformationList is more appropriate.
+ * <p>If you are creating a custom {@link EventList}, consider extending the more
+ * feature-rich {@link TransformedList}.
  *
- * <p>The AbstractEventList has no implementations of get() and size(). All
- * read methods depend upon these methods so for a read-only list, the user
- * needs to implement these methods only. The AbstractEventList throws
- * an IllegalStateException when one of remove(), set() or add() is called.
- * The other modification methods depend upon these methods. To make a list
- * writable, the user needs to implement these methods only. Such methods
- * should provide their own locking by acquiring and releasing the write lock.
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * are thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
+ * may break the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
+ *
+ * <p>Documentation Note: Javadoc tags have been copied from the {@link List} API
+ * because the <code>javadoc</code> tool does not inherit external descriptions.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -43,85 +44,149 @@ public abstract class AbstractEventList implements EventList, Serializable {
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock = null;
 
-    /**
-     * Gets the lock object in order to access this list in a thread-safe manner.
-     * This will return a <strong>re-entrant</strong> implementation of
-     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
-     */
+    /** {@inheritDoc} */
     public ReadWriteLock getReadWriteLock() {
         return readWriteLock;
     }
 
-    /**
-     * Registers the specified listener to receive notification of changes
-     * to this list.
-     */
+    /** {@inheritDoc} */
     public void addListEventListener(ListEventListener listChangeListener) {
         updates.addListEventListener(listChangeListener);
     }
 
-    /**
-     * Removes the specified listener from receiving change updates for this list.
-     */
+    /** {@inheritDoc} */
     public void removeListEventListener(ListEventListener listChangeListener) {
         updates.removeListEventListener(listChangeListener);
     }
 
     /**
-     * Returns the element at the specified position in this list.
-     */
-    public abstract Object get(int index);
-
-    /**
-     * Returns the number of elements in this list.
+     * Returns the number of elements in this list.  If this list contains
+     * more than <tt>Integer.MAX_VALUE</tt> elements, returns
+     * <tt>Integer.MAX_VALUE</tt>.
      *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
+     * @return the number of elements in this list.
      */
     public abstract int size();
 
+
     /**
-     * Inserts the specified element at the specified position in this list.
+     * Returns <tt>true</tt> if this list contains no elements.
      *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
+     * @return <tt>true</tt> if this list contains no elements.
      */
-    public void add(int index, Object value) {
-        throw new IllegalStateException("this list does not support add()");
+    public boolean isEmpty() {
+        return (size() == 0);
     }
 
     /**
-     * Removes the element at the specified index from the source list.
+     * Returns <tt>true</tt> if this list contains the specified element.
+     * More formally, returns <tt>true</tt> if and only if this list contains
+     * at least one element <tt>e</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>.
      *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
+     * @param object element whose presence in this list is to be tested.
+     * @return <tt>true</tt> if this list contains the specified element.
+     * @throws ClassCastException if the type of the specified element
+     * 	       is incompatible with this list (optional).
+     * @throws NullPointerException if the specified element is null and this
+     *         list does not support null elements (optional).
      */
-    public Object remove(int index) {
-        throw new IllegalStateException("this list does not support remove()");
+    public boolean contains(Object object) {
+        // for through this, looking for the lucky object
+        for(Iterator i = iterator(); i.hasNext(); ) {
+            Object a = i.next();
+            if(a == null && object == null) return true;
+            else if(a.equals(object)) return true;
+        }
+        // not found
+        return false;
     }
 
     /**
-     * Replaces the object at the specified index in the source list with
-     * the specified value. Note that the replacement value may not be
-     * visible in this mutated view. The replaced value may not be at
-     * the specified index as a consequence of reordering by this view or
-     * the parent view.
+     * Returns an iterator over the elements in this list in proper sequence.
      *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
+     * @return an iterator over the elements in this list in proper sequence.
      */
-    public Object set(int index, Object value) {
-        throw new IllegalStateException("this list does not support set()");
+    public Iterator iterator() {
+        return new EventListIterator(this);
     }
 
     /**
-     * Appends the specified element to the end of this list.
+     * Returns an array containing all of the elements in this list in proper
+     * sequence.  Obeys the general contract of the
+     * <tt>Collection.toArray</tt> method.
      *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
+     * @return an array containing all of the elements in this list in proper
+     *	       sequence.
+     * @see Arrays#asList(Object[])
+     */
+    public Object[] toArray() {
+        // copy values into the array
+        Object[] array = new Object[size()];
+        int index = 0;
+        for(Iterator i = iterator(); i.hasNext(); ) {
+            array[index] = i.next();
+            index++;
+        }
+        return array;
+    }
+
+    /**
+     * Returns an array containing all of the elements in this list in proper
+     * sequence; the runtime type of the returned array is that of the
+     * specified array.  Obeys the general contract of the
+     * <tt>Collection.toArray(Object[])</tt> method.
+     *
+     * @param array the array into which the elements of this list are to
+     *		be stored, if it is big enough; otherwise, a new array of the
+     * 		same runtime type is allocated for this purpose.
+     * @return  an array containing the elements of this list.
+     * 
+     * @throws ArrayStoreException if the runtime type of the specified array
+     * 		  is not a supertype of the runtime type of every element in
+     * 		  this list.
+     * @throws NullPointerException if the specified array is <tt>null</tt>.
+     */
+    public Object[] toArray(Object[] array) {
+        // create an array of the same type as the array passed
+        if (array.length < size()) {
+            array = (Object[])java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size());
+        } else if(array.length > size()) {
+            array[size()] = null;
+        }
+
+        // copy values into the array
+        int index = 0;
+        for(Iterator i = iterator(); i.hasNext(); ) {
+            array[index] = i.next();
+            index++;
+        }
+        return array;
+    }
+
+    /**
+     * Appends the specified element to the end of this list (optional
+     * operation).
+     *
+     * <p>Lists that support this operation may place limitations on what
+     * elements may be added to this list.  In particular, some
+     * lists will refuse to add null elements, and others will impose
+     * restrictions on the type of elements that may be added.  List
+     * classes should clearly specify in their documentation any restrictions
+     * on what elements may be added.
+     *
+     * @param value element to be appended to this list.
+     * @return <tt>true</tt> (as per the general contract of the
+     *            <tt>Collection.add</tt> method).
+     * 
+     * @throws UnsupportedOperationException if the <tt>add</tt> method is not
+     * 		  supported by this list.
+     * @throws ClassCastException if the class of the specified element
+     * 		  prevents it from being added to this list.
+     * @throws NullPointerException if the specified element is null and this
+     *           list does not support null elements.
+     * @throws IllegalArgumentException if some aspect of this element
+     *            prevents it from being added to this list.
      */
     public boolean add(Object value) {
         getReadWriteLock().writeLock().lock();
@@ -134,13 +199,121 @@ public abstract class AbstractEventList implements EventList, Serializable {
     }
 
     /**
-     * Inserts all of the elements in the specified Collection into this
-     * list, starting at the specified position.
+     * Removes the first occurrence in this list of the specified element 
+     * (optional operation).  If this list does not contain the element, it is
+     * unchanged.  More formally, removes the element with the lowest index i
+     * such that <tt>(o==null ? get(i)==null : o.equals(get(i)))</tt> (if
+     * such an element exists).
      *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
+     * @param toRemove element to be removed from this list, if present.
+     * @return <tt>true</tt> if this list contained the specified element.
+     * @throws ClassCastException if the type of the specified element
+     * 	          is incompatible with this list (optional).
+     * @throws NullPointerException if the specified element is null and this
+     *            list does not support null elements (optional).
+     * @throws UnsupportedOperationException if the <tt>remove</tt> method is
+     *		  not supported by this list.
+     */
+    public boolean remove(Object toRemove) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            int index = indexOf(toRemove);
+            if(index == -1) return false;
+            remove(index);
+            return true;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+    
+    /**
+     * Returns <tt>true</tt> if this list contains all of the elements of the
+     * specified collection.
+     *
+     * @param  values collection to be checked for containment in this list.
+     * @return <tt>true</tt> if this list contains all of the elements of the
+     * 	       specified collection.
+     * @throws ClassCastException if the types of one or more elements
+     *         in the specified collection are incompatible with this
+     *         list (optional).
+     * @throws NullPointerException if the specified collection contains one
+     *         or more null elements and this list does not support null
+     *         elements (optional).
+     * @throws NullPointerException if the specified collection is
+     *         <tt>null</tt>.
+     * @see #contains(Object)
+     */
+    public boolean containsAll(Collection values) {
+        // look for something that is missing
+        for(Iterator i = values.iterator(); i.hasNext(); ) {
+            Object a = i.next();
+            if(!contains(a)) return false;
+        }
+        // contained everything we looked for
+        return true;
+    }
+
+    /**
+     * Appends all of the elements in the specified collection to the end of
+     * this list, in the order that they are returned by the specified
+     * collection's iterator (optional operation).  The behavior of this
+     * operation is unspecified if the specified collection is modified while
+     * the operation is in progress.  (Note that this will occur if the
+     * specified collection is this list, and it's nonempty.)
+     *
+     * @param values collection whose elements are to be added to this list.
+     * @return <tt>true</tt> if this list changed as a result of the call.
+     * 
+     * @throws UnsupportedOperationException if the <tt>addAll</tt> method is
+     *         not supported by this list.
+     * @throws ClassCastException if the class of an element in the specified
+     * 	       collection prevents it from being added to this list.
+     * @throws NullPointerException if the specified collection contains one
+     *         or more null elements and this list does not support null
+     *         elements, or if the specified collection is <tt>null</tt>.
+     * @throws IllegalArgumentException if some aspect of an element in the
+     *         specified collection prevents it from being added to this
+     *         list.
+     * @see #add(Object)
+     */
+    public boolean addAll(Collection values) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return addAll(size(), values);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /**
+     * Inserts all of the elements in the specified collection into this
+     * list at the specified position (optional operation).  Shifts the
+     * element currently at that position (if any) and any subsequent
+     * elements to the right (increases their indices).  The new elements
+     * will appear in this list in the order that they are returned by the
+     * specified collection's iterator.  The behavior of this operation is
+     * unspecified if the specified collection is modified while the
+     * operation is in progress.  (Note that this will occur if the specified
+     * collection is this list, and it's nonempty.)
+     *
+     * @param index index at which to insert first element from the specified
+     *	            collection.
+     * @param values elements to be inserted into this list.
+     * @return <tt>true</tt> if this list changed as a result of the call.
+     * 
+     * @throws UnsupportedOperationException if the <tt>addAll</tt> method is
+     *		  not supported by this list.
+     * @throws ClassCastException if the class of one of elements of the
+     * 		  specified collection prevents it from being added to this
+     * 		  list.
+     * @throws NullPointerException if the specified collection contains one
+     *           or more null elements and this list does not support null
+     *           elements, or if the specified collection is <tt>null</tt>.
+     * @throws IllegalArgumentException if some aspect of one of elements of
+     *		  the specified collection prevents it from being added to
+     *		  this list.
+     * @throws IndexOutOfBoundsException if the index is out of range (index
+     *		  &lt; 0 || index &gt; size()).
      */
     public boolean addAll(int index, Collection values) {
         // don't do an add of an empty set
@@ -161,42 +334,87 @@ public abstract class AbstractEventList implements EventList, Serializable {
     }
 
     /**
-     * Add all elements of the specified collection to this list. Some values
-     * may not be visible in this mutated view.
+     * Removes from this list all the elements that are contained in the
+     * specified collection (optional operation).
      *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * @throws IllegalStateException if this mutation cannot be modified in its
-     *      current state.
+     * @param values collection that defines which elements will be removed from
+     *          this list.
+     * @return <tt>true</tt> if this list changed as a result of the call.
+     * 
+     * @throws UnsupportedOperationException if the <tt>removeAll</tt> method
+     * 		  is not supported by this list.
+     * @throws ClassCastException if the types of one or more elements
+     *            in this list are incompatible with the specified
+     *            collection (optional).
+     * @throws NullPointerException if this list contains one or more
+     *            null elements and the specified collection does not support
+     *            null elements (optional).
+     * @throws NullPointerException if the specified collection is
+     *            <tt>null</tt>.
+     * @see #remove(Object)
+     * @see #contains(Object)
      */
-    public boolean addAll(Collection values) {
+    public boolean removeAll(Collection values) {
         getReadWriteLock().writeLock().lock();
         try {
-            return addAll(size(), values);
+            boolean overallChanged = false;
+            for(Iterator i = values.iterator(); i.hasNext(); ) {
+                boolean removeChanged = remove(i.next());
+                if(removeChanged) overallChanged = true;
+            }
+            return overallChanged;
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+
+    /**
+     * Retains only the elements in this list that are contained in the
+     * specified collection (optional operation).  In other words, removes
+     * from this list all the elements that are not contained in the specified
+     * collection.
+     *
+     * @param values collection that defines which elements this set will retain.
+     * 
+     * @return <tt>true</tt> if this list changed as a result of the call.
+     * 
+     * @throws UnsupportedOperationException if the <tt>retainAll</tt> method
+     * 		  is not supported by this list.
+     * @throws ClassCastException if the types of one or more elements
+     *            in this list are incompatible with the specified
+     *            collection (optional).
+     * @throws NullPointerException if this list contains one or more
+     *            null elements and the specified collection does not support
+     *            null elements (optional).
+     * @throws NullPointerException if the specified collection is
+     *         <tt>null</tt>.
+     * @see #remove(Object)
+     * @see #contains(Object)
+     */
+    public boolean retainAll(Collection values) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            boolean changed = false;
+            for(ListIterator i = listIterator(); i.hasNext(); ) {
+                if(!values.contains(i.next())) {
+                    i.remove();
+                    changed = true;
+                }
+            }
+            return changed;
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
     }
 
     /**
-     * Removes <strong>all</strong> elements from the source list, even
-     * those that are not displayed from this view. In order to remove only the
-     * elements displayed by this view, iterate through this list to remove its
-     * elements one at a time.
+     * Removes all of the elements from this list (optional operation).  This
+     * list will be empty after this call returns (unless it throws an
+     * exception).
      *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * <p><strong>Warning:</strong> Because this method is implemented
-     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
-     * events will be propogated. Therefore this method has been carefully
-     * implemented to keep this list in a consistent state for each such modifying
-     * operation.
+     * @throws UnsupportedOperationException if the <tt>clear</tt> method is
+     * 		  not supported by this list.
      */
     public void clear() {
         getReadWriteLock().writeLock().lock();
@@ -211,46 +429,18 @@ public abstract class AbstractEventList implements EventList, Serializable {
     }
 
     /**
-     * Returns true if this list contains the specified element.
+     * Compares the specified object with this list for equality.  Returns
+     * <tt>true</tt> if and only if the specified object is also a list, both
+     * lists have the same size, and all corresponding pairs of elements in
+     * the two lists are <i>equal</i>.  (Two elements <tt>e1</tt> and
+     * <tt>e2</tt> are <i>equal</i> if <tt>(e1==null ? e2==null :
+     * e1.equals(e2))</tt>.)  In other words, two lists are defined to be
+     * equal if they contain the same elements in the same order.  This
+     * definition ensures that the equals method works properly across
+     * different implementations of the <tt>List</tt> interface.
      *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean contains(Object object) {
-        // for through this, looking for the lucky object
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(a == null && object == null) return true;
-            else if(a.equals(object)) return true;
-        }
-        // not found
-        return false;
-    }
-
-    /**
-     * Returns true if this list contains all of the elements of the specified collection.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean containsAll(Collection collection) {
-        // look for something that is missing
-        for(Iterator i = collection.iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(!contains(a)) return false;
-        }
-        // contained everything we looked for
-        return true;
-    }
-
-    /**
-     * Compares the specified object with this list for equality.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
+     * @param object the object to be compared for equality with this list.
+     * @return <tt>true</tt> if the specified object is equal to this list.
      */
     public boolean equals(Object object) {
         if(object == this) return true;
@@ -282,14 +472,27 @@ public abstract class AbstractEventList implements EventList, Serializable {
     }
 
     /**
-     * Returns the hash code value for this list.
+     * Returns the hash code value for this list.  The hash code of a list
+     * is defined to be the result of the following calculation:
+     * <pre>
+     *  hashCode = 1;
+     *  Iterator i = list.iterator();
+     *  while (i.hasNext()) {
+     *      Object obj = i.next();
+     *      hashCode = 31*hashCode + (obj==null ? 0 : obj.hashCode());
+     *  }
+     * </pre>
+     * This ensures that <tt>list1.equals(list2)</tt> implies that
+     * <tt>list1.hashCode()==list2.hashCode()</tt> for any two lists,
+     * <tt>list1</tt> and <tt>list2</tt>, as required by the general
+     * contract of <tt>Object.hashCode</tt>.
      *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
+     * @return the hash code value for this list.
+     * @see Object#hashCode()
+     * @see Object#equals(Object)
+     * @see #equals(Object)
      */
     public int hashCode() {
-        // stolen SHAMELESSLY from the JDK for guaranteed compatibility
         int hashCode = 1;
         for(Iterator i = iterator(); i.hasNext(); ) {
             Object a = i.next();
@@ -299,12 +502,95 @@ public abstract class AbstractEventList implements EventList, Serializable {
     }
 
     /**
+     * Returns the element at the specified position in this list.
+     *
+     * @param index index of element to return.
+     * @return the element at the specified position in this list.
+     * 
+     * @throws IndexOutOfBoundsException if the index is out of range (index
+     * 		  &lt; 0 || index &gt;= size()).
+     */
+    public abstract Object get(int index);
+
+    /**
+     * Replaces the element at the specified position in this list with the
+     * specified element (optional operation).
+     *
+     * @param index index of element to replace.
+     * @param value element to be stored at the specified position.
+     * @return the element previously at the specified position.
+     * 
+     * @throws UnsupportedOperationException if the <tt>set</tt> method is not
+     *		  supported by this list.
+     * @throws    ClassCastException if the class of the specified element
+     * 		  prevents it from being added to this list.
+     * @throws    NullPointerException if the specified element is null and
+     *            this list does not support null elements.
+     * @throws    IllegalArgumentException if some aspect of the specified
+     *		  element prevents it from being added to this list.
+     * @throws    IndexOutOfBoundsException if the index is out of range
+     *		  (index &lt; 0 || index &gt;= size()).
+     */
+    public Object set(int index, Object value) {
+        throw new IllegalStateException("this list does not support set()");
+    }
+
+    /**
+     * Inserts the specified element at the specified position in this list
+     * (optional operation).  Shifts the element currently at that position
+     * (if any) and any subsequent elements to the right (adds one to their
+     * indices).
+     *
+     * @param index index at which the specified element is to be inserted.
+     * @param value element to be inserted.
+     * 
+     * @throws UnsupportedOperationException if the <tt>add</tt> method is not
+     *		  supported by this list.
+     * @throws    ClassCastException if the class of the specified element
+     * 		  prevents it from being added to this list.
+     * @throws    NullPointerException if the specified element is null and
+     *            this list does not support null elements.
+     * @throws    IllegalArgumentException if some aspect of the specified
+     *		  element prevents it from being added to this list.
+     * @throws    IndexOutOfBoundsException if the index is out of range
+     *		  (index &lt; 0 || index &gt; size()).
+     */
+    public void add(int index, Object value) {
+        throw new IllegalStateException("this list does not support add()");
+    }
+
+    /**
+     * Removes the element at the specified position in this list (optional
+     * operation).  Shifts any subsequent elements to the left (subtracts one
+     * from their indices).  Returns the element that was removed from the
+     * list.
+     *
+     * @param index the index of the element to removed.
+     * @return the element previously at the specified position.
+     * 
+     * @throws UnsupportedOperationException if the <tt>remove</tt> method is
+     *		  not supported by this list.
+     * @throws IndexOutOfBoundsException if the index is out of range (index
+     *            &lt; 0 || index &gt;= size()).
+     */
+    public Object remove(int index) {
+        throw new IllegalStateException("this list does not support remove()");
+    }
+
+    /**
      * Returns the index in this list of the first occurrence of the specified
      * element, or -1 if this list does not contain this element.
+     * More formally, returns the lowest index <tt>i</tt> such that
+     * <tt>(o==null ? get(i)==null : o.equals(get(i)))</tt>,
+     * or -1 if there is no such index.
      *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
+     * @param object element to search for.
+     * @return the index in this list of the first occurrence of the specified
+     * 	       element, or -1 if this list does not contain this element.
+     * @throws ClassCastException if the type of the specified element
+     * 	       is incompatible with this list (optional).
+     * @throws NullPointerException if the specified element is null and this
+     *         list does not support null elements (optional).
      */
     public int indexOf(Object object) {
         // for through this, looking for the lucky object
@@ -320,197 +606,19 @@ public abstract class AbstractEventList implements EventList, Serializable {
     }
 
     /**
-     * Returns true if this list contains no elements.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public boolean isEmpty() {
-        return (size() == 0);
-    }
-
-    /**
-     * Returns an iterator over the elements in this list in proper sequence.
-     */
-    public Iterator iterator() {
-        return new EventListIterator(this);
-    }
-
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence).
-     */
-    public ListIterator listIterator() {
-        return new EventListIterator(this);
-    }
-
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence), starting at the specified position in this list.
-     */
-    public ListIterator listIterator(int index) {
-        return new EventListIterator(this, index);
-    }
-
-    /**
-     * Removes the specified element from the source list.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     */
-    public boolean remove(Object toRemove) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            int index = indexOf(toRemove);
-            if(index == -1) return false;
-            remove(index);
-            return true;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Removes the specified elements from the source list.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * <p><strong>Warning:</strong> Because this method is implemented
-     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
-     * events will be propogated. Therefore this method has been carefully
-     * implemented to keep this list in a consistent state for each such modifying
-     * operation.
-     */
-    public boolean removeAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            boolean overallChanged = false;
-            for(Iterator i = values.iterator(); i.hasNext(); ) {
-                boolean removeChanged = remove(i.next());
-                if(removeChanged) overallChanged = true;
-            }
-            return overallChanged;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Retains only the values from the source list that are in the
-     * specified collection.
-     *
-     * <p>Like all modifying methods, this method manages its own thread
-     * safety via the <code>getReadWriteLock().writeLock()</code>. To perform
-     * several changes atomically, obtain the write lock before the first change
-     * and release it after the last change.
-     *
-     * <p><strong>Warning:</strong> Because this method is implemented
-     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
-     * events will be propogated. Therefore this method has been carefully
-     * implemented to keep this list in a consistent state for each such modifying
-     * operation.
-     */
-    public boolean retainAll(Collection values) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            boolean changed = false;
-            for(ListIterator i = listIterator(); i.hasNext(); ) {
-                if(!values.contains(i.next())) {
-                    i.remove();
-                    changed = true;
-                }
-            }
-            return changed;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Returns a view of the portion of this list between the specified
-     * fromIndex, inclusive, and toIndex, exclusive.
-     */
-    public List subList(int fromIndex, int toIndex) {
-        return new SubEventList(this, fromIndex, toIndex, true);
-    }
-
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object[] toArray() {
-        // copy values into the array
-        Object[] array = new Object[size()];
-        int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            array[index] = i.next();
-            index++;
-        }
-        return array;
-    }
-
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence; the runtime type of the returned array is that of the
-     * specified array.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object[] toArray(Object[] array) {
-        // create an array of the same type as the array passed
-        if (array.length < size()) {
-            array = (Object[])java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size());
-        } else if(array.length > size()) {
-            array[size()] = null;
-        }
-
-        // copy values into the array
-        int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            array[index] = i.next();
-            index++;
-        }
-        return array;
-    }
-
-    /**
-     * Gets this list in String form for debug or display.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-    public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append("[");
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            result.append(i.next());
-            if(i.hasNext()) result.append(", ");
-        }
-        result.append("]");
-        return result.toString();
-    }
-
-
-    /**
      * Returns the index in this list of the last occurrence of the specified
      * element, or -1 if this list does not contain this element.
+     * More formally, returns the highest index <tt>i</tt> such that
+     * <tt>(o==null ? get(i)==null : o.equals(get(i)))</tt>,
+     * or -1 if there is no such index.
      *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
+     * @param object element to search for.
+     * @return the index in this list of the last occurrence of the specified
+     * 	       element, or -1 if this list does not contain this element.
+     * @throws ClassCastException if the type of the specified element
+     * 	       is incompatible with this list (optional).
+     * @throws NullPointerException if the specified element is null and this
+     *         list does not support null elements (optional).
      */
     public int lastIndexOf(Object object) {
         // for through this, looking for the lucky object
@@ -523,5 +631,101 @@ public abstract class AbstractEventList implements EventList, Serializable {
         }
         // not found
         return -1;
+    }
+
+    /**
+     * Returns a list iterator of the elements in this list (in proper
+     * sequence).
+     *
+     * @return a list iterator of the elements in this list (in proper
+     * 	       sequence).
+     */
+    public ListIterator listIterator() {
+        return new EventListIterator(this);
+    }
+
+    /**
+     * Returns a list iterator of the elements in this list (in proper
+     * sequence), starting at the specified position in this list.  The
+     * specified index indicates the first element that would be returned by
+     * an initial call to the <tt>next</tt> method.  An initial call to
+     * the <tt>previous</tt> method would return the element with the
+     * specified index minus one.
+     *
+     * @param index index of first element to be returned from the
+     *		    list iterator (by a call to the <tt>next</tt> method).
+     * @return a list iterator of the elements in this list (in proper
+     * 	       sequence), starting at the specified position in this list.
+     * @throws IndexOutOfBoundsException if the index is out of range (index
+     *         &lt; 0 || index &gt; size()).
+     */
+    public ListIterator listIterator(int index) {
+        return new EventListIterator(this, index);
+    }
+
+    /**
+     * Returns a view of the portion of this list between the specified
+     * <tt>fromIndex</tt>, inclusive, and <tt>toIndex</tt>, exclusive.  (If
+     * <tt>fromIndex</tt> and <tt>toIndex</tt> are equal, the returned list is
+     * empty.)  The returned list is backed by this list, so non-structural
+     * changes in the returned list are reflected in this list, and vice-versa.
+     * The returned list supports all of the optional list operations supported
+     * by this list.
+     *
+     * <p>This method eliminates the need for explicit range operations (of
+     * the sort that commonly exist for arrays).   Any operation that expects
+     * a list can be used as a range operation by passing a subList view
+     * instead of a whole list.  For example, the following idiom
+     * removes a range of elements from a list:
+     * <pre>
+     *	    list.subList(from, to).clear();
+     * </pre>
+     * Similar idioms may be constructed for <tt>indexOf</tt> and
+     * <tt>lastIndexOf</tt>, and all of the algorithms in the
+     * <tt>Collections</tt> class can be applied to a subList.
+     *
+     * <p>The semantics of the list returned by this method become undefined if
+     * the backing list (i.e., this list) is <i>structurally modified</i> in
+     * any way other than via the returned list.  (Structural modifications are
+     * those that change the size of this list, or otherwise perturb it in such
+     * a fashion that iterations in progress may yield incorrect results.)
+     *
+     * @param fromIndex low endpoint (inclusive) of the subList.
+     * @param toIndex high endpoint (exclusive) of the subList.
+     * @return a view of the specified range within this list.
+     * 
+     * @throws IndexOutOfBoundsException for an illegal endpoint index value
+     *     (fromIndex &lt; 0 || toIndex &gt; size || fromIndex &gt; toIndex).
+     */
+    public List subList(int fromIndex, int toIndex) {
+        return new SubEventList(this, fromIndex, toIndex, true);
+    }
+
+    /**
+     * Returns a string representation of this collection.  The string
+     * representation consists of a list of the collection's elements in the
+     * order they are returned by its iterator, enclosed in square brackets
+     * (<tt>"[]"</tt>).  Adjacent elements are separated by the characters
+     * <tt>", "</tt> (comma and space).  Elements are converted to strings as
+     * by <tt>String.valueOf(Object)</tt>.
+     *
+     * <p>This implementation creates an empty string buffer, appends a left
+     * square bracket, and iterates over the collection appending the string
+     * representation of each element in turn.  After appending each element
+     * except the last, the string <tt>", "</tt> is appended.  Finally a right
+     * bracket is appended.  A string is obtained from the string buffer, and
+     * returned.
+     * 
+     * @return a string representation of this collection.
+     */
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append("[");
+        for(Iterator i = iterator(); i.hasNext(); ) {
+            result.append(String.valueOf(i.next()));
+            if(i.hasNext()) result.append(", ");
+        }
+        result.append("]");
+        return result.toString();
     }
 }
