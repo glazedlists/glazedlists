@@ -114,6 +114,47 @@ public class CaseInsensitiveFilterListTest extends TestCase {
     }
 
     /**
+     * Test to verify that the filter correctly handles modification.
+     * 
+     * This performs a sequence of operations. Each operation is performed on
+     * either the filtered list or the unfiltered list. The list where the
+     * operation is performed is selected at random.
+     */
+    public void testFilterWritable() {
+        // apply a filter
+        String filter = "5";
+        filteredList.getFilterEdit().setText(filter);
+        
+        // apply various operations to a list of strings
+        for(int i = 0; i < 4000; i++) {
+            List list;
+            if(random.nextBoolean()) list = filteredList;
+            else list = unfilteredList;
+            int operation = random.nextInt(4);
+            int value = random.nextInt(10);
+            int index = list.isEmpty() ? 0 : random.nextInt(list.size());
+            
+            if(operation <= 1 || list.isEmpty()) {
+                list.add(index, "" + value);
+            } else if(operation == 2) {
+                list.remove(index);
+            } else if(operation == 3) {
+                list.set(index, "" + value);
+            }
+        }
+        
+        // build a control list of the desired results
+        ArrayList controlList = new ArrayList();
+        for(Iterator i = unfilteredList.iterator(); i.hasNext(); ) {
+            String element = (String)i.next();
+            if(element.indexOf(filter) != -1) controlList.add(element);
+        }
+        
+        // verify the lists are equal
+        assertEquals(controlList, filteredList);
+    }
+    
+    /**
      * A filterator for strings.
      */
     class StringFilterator implements Filterator {

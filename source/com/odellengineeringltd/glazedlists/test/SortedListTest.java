@@ -51,7 +51,7 @@ public class SortedListTest extends TestCase {
      */
     public void testSortBeforeAndAfter() {
         // populate a list with strings
-        for(int i = 1000; i < 2000; i++) {
+        for(int i = 0; i < 4000; i++) {
             unsortedList.add(new Integer(random.nextInt()));
         }
         
@@ -71,22 +71,55 @@ public class SortedListTest extends TestCase {
     }
 
     /**
-     * Test to verify that the sorted list is working correctly when the
+     * Test to verify that the SortedList is working correctly when the
      * list is changing by adds, removes and deletes.
      */
     public void testSortDynamic() {
         // apply various operations to the list of Integers
         for(int i = 0; i < 4000; i++) {
             int operation = random.nextInt(4);
-            int value = random.nextInt(10);
             int index = unsortedList.isEmpty() ? 0 : random.nextInt(unsortedList.size());
             
             if(operation <= 1 || unsortedList.isEmpty()) {
-                unsortedList.add(index, new Integer(value));
+                unsortedList.add(index, new Integer(random.nextInt()));
             } else if(operation == 2) {
                 unsortedList.remove(index);
             } else if(operation == 3) {
-                unsortedList.set(index, new Integer(value));
+                unsortedList.set(index, new Integer(random.nextInt()));
+            }
+        }
+        
+        // build a control list of the desired results
+        ArrayList controlList = new ArrayList();
+        controlList.addAll(unsortedList);
+        Collections.sort(controlList);
+        
+        // verify the lists are equal
+        assertEquals(controlList, sortedList);
+    }
+    
+    /**
+     * Tests to verify that the SortedList correctly handles modification.
+     *
+     * This performs a sequence of operations. Each operation is performed on
+     * either the sorted list or the unsorted list. The list where the operation
+     * is performed is selected at random.
+     */
+    public void testSortedListWritable() {
+        // apply various operations to the either list
+        for(int i = 0; i < 4000; i++) {
+            List list;
+            if(random.nextBoolean()) list = sortedList;
+            else list = unsortedList;
+            int operation = random.nextInt(4);
+            int index = list.isEmpty() ? 0 : random.nextInt(list.size());
+            
+            if(operation <= 1 || list.isEmpty()) {
+                list.add(index, new Integer(random.nextInt()));
+            } else if(operation == 2) {
+                list.remove(index);
+            } else if(operation == 3) {
+                list.set(index, new Integer(random.nextInt()));
             }
         }
         

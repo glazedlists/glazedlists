@@ -59,7 +59,7 @@ public class BoundedMap implements Map {
     
     /**
      * Returns true if this map contains a mapping for the specified key.
-     * More formally, returnstrue if and only if this map contains at a
+     * More formally, returns true if and only if this map contains at a
      * mapping for a key k such that (key==null ? k==null : key.equals(k)).
      * (There can be at most one such mapping.)
      */
@@ -102,7 +102,7 @@ public class BoundedMap implements Map {
      * add or addAll operations.
      */
     public Set entrySet() {
-        throw new RuntimeException("The entrySet() method is not supported by BoundedMap!");
+        throw new UnsupportedOperationException("The entrySet() method is not supported by BoundedMap!");
     }
     
     /**
@@ -114,7 +114,7 @@ public class BoundedMap implements Map {
      * implementations of the Map interface.
      */
     public boolean equals(Object other) {
-        throw new RuntimeException("The equals() method is not supported by BoundedMap!");
+        throw new UnsupportedOperationException("The equals() method is not supported by BoundedMap!");
     }
     
     /**
@@ -145,7 +145,7 @@ public class BoundedMap implements Map {
      * by the general contract of Object.hashCode.
      */
     public int hashCode() {
-        throw new RuntimeException("The hashCode() method is not supported by BoundedMap!");
+        throw new UnsupportedOperationException("The hashCode() method is not supported by BoundedMap!");
     }
     
     /**
@@ -165,7 +165,7 @@ public class BoundedMap implements Map {
      * and clear operations. It does not support the add or addAll operations.
      */
     public Set keySet() {
-        throw new RuntimeException("The keySet() method is not supported by BoundedMap!");
+        throw new UnsupportedOperationException("The keySet() method is not supported by BoundedMap!");
     }
     
     
@@ -205,7 +205,7 @@ public class BoundedMap implements Map {
      * the operation is in progress.
      */
     public void putAll(Map source) {
-        throw new RuntimeException("The putAll() method is not supported by BoundedMap!");
+        throw new UnsupportedOperationException("The putAll() method is not supported by BoundedMap!");
     }
     
     /**
@@ -256,7 +256,7 @@ public class BoundedMap implements Map {
      * operations. It does not support the add or addAll operations.
      */
     public Collection values() {
-        throw new RuntimeException("The values() method is not supported by BoundedMap!");
+        throw new UnsupportedOperationException("The values() method is not supported by BoundedMap!");
     }
     
     /**
