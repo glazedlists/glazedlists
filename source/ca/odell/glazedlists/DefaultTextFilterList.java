@@ -179,7 +179,6 @@ public class DefaultTextFilterList extends AbstractFilterList {
                 // a *required* filter
                 for(int j = 0; j < minimalFilter.length; j++) {
                     if(minimalFilter[j] && i != j && filterStrings[j].indexOf(filterStrings[i]) != -1) {
-                        System.out.println("removing " + filterStrings[i]);
                         minimalFilter[i] = false;
                         validFilters--;
                         break;
