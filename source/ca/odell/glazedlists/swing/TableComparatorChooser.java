@@ -413,7 +413,7 @@ public class TableComparatorChooser {
      * events the table comparator chooser responds to by overriding this method.
      */
     protected boolean isSortingMouseEvent(MouseEvent e) {
-        return (e.getButton() != MouseEvent.BUTTON1);
+        return (e.getButton() == MouseEvent.BUTTON1);
     }
     
     /**

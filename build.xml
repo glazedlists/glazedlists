@@ -51,6 +51,7 @@
       destdir="docs/api" author="true" use="true" windowtitle="Glazed Lists" source="1.4">
       <packageset dir="source">
         <exclude name="**/impl/**"/>
+        <exclude name="**/net/**"/>
         <exclude name="**/demo/**"/>
         <exclude name="**/swt/**"/>
       </packageset>
