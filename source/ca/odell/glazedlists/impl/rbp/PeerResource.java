@@ -164,6 +164,8 @@ class PeerResource {
             // if this is local, we're immediately connected
             } else {
                 resourceStatus.setConnected(true, null);
+                if(peer.published.get(resourceName) != null) throw new IllegalStateException();
+                peer.published.put(resourceName, PeerResource.this);
             }
         }
         
@@ -172,21 +174,29 @@ class PeerResource {
             // we're immediately disconnected
             resourceStatus.setConnected(false, null);
             
-            // unpublish the subscribers
-            for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
-                PeerConnection subscriber = (PeerConnection)s.next();
-                subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceName));
-                subscriber.outgoingPublications.remove(resourceName);
-                if(subscriber.isIdle()) subscriber.close();
-                s.remove();
-            }
-            
-            // clean up the publisher
-            if(publisher != null) {
-                publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
-                publisher.incomingSubscriptions.remove(resourceName);
-                if(publisher.isIdle()) publisher.close();
-                publisher = null;
+            // if this is remote
+            if(publisherHost != null) {
+                // clean up the publisher
+                if(publisher != null) {
+                    publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceName));
+                    publisher.incomingSubscriptions.remove(resourceName);
+                    if(publisher.isIdle()) publisher.close();
+                    publisher = null;
+                }
+
+            // if this is local
+            } else {
+                if(peer.published.get(resourceName) == null) throw new IllegalStateException();
+                peer.published.remove(resourceName);
+                
+                // unpublish the subscribers
+                for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
+                    PeerConnection subscriber = (PeerConnection)s.next();
+                    subscriber.writeBlock(PeerResource.this, PeerBlock.unpublish(resourceName));
+                    subscriber.outgoingPublications.remove(resourceName);
+                    if(subscriber.isIdle()) subscriber.close();
+                    s.remove();
+                }
             }
         }
         

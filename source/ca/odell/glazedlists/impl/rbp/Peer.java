@@ -29,7 +29,7 @@ public class Peer implements CTPHandlerFactory {
     private Map subscribed = new TreeMap();
     
     /** the resources being published */
-    private Map published = new TreeMap();
+    Map published = new TreeMap();
      
     /** the active connections to peers */
     List connections = new ArrayList();
@@ -126,7 +126,6 @@ public class Peer implements CTPHandlerFactory {
      */
     public ResourceStatus publish(Resource resource, String resourceName) {
         PeerResource peerResource = new PeerResource(this, resource, resourceName);
-        published.put(resourceName, peerResource);
         return peerResource.status();
     }
     

@@ -129,12 +129,76 @@ public class NetworkListTest extends TestCase {
             sourceList.add(new Integer(7));
             sourceList.add(new Integer(5));
             
-            // they shouldn't be equal
+            // they client should be out of date
+            waitFor(1000);
             assertEquals(snapshot, targetList);
             
             // bring the target list back to life
             targetList.connect();
             waitFor(1000);
+            assertTrue(targetListener.isConnected());
+            assertTrue(targetList.isConnected());
+            assertEquals(sourceList, targetList);
+            
+            // clean up after myself
+            targetList.disconnect();
+            waitFor(1000);
+            
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Verifies that the server can disconnect and reconnect.
+     */
+    public void testServerDisconnect() {
+        try {
+            // prepare the source list
+            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
+            sourceList.add(new Integer(8));
+            sourceList.add(new Integer(6));
+            
+            // prepare the target list
+            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            SimpleNetworkListStatusListener targetListener = new SimpleNetworkListStatusListener(targetList);
+            
+            // verify they're equal after a subscribe
+            waitFor(1000);
+            assertTrue(sourceListener.isConnected());
+            assertTrue(sourceList.isConnected());
+            assertTrue(targetListener.isConnected());
+            assertTrue(targetList.isConnected());
+            assertEquals(sourceList, targetList);
+            List snapshot = new ArrayList();
+            snapshot.addAll(sourceList);
+            
+            // disconnect the server
+            targetList.disconnect(); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
+            sourceList.disconnect();
+            waitFor(1000);
+            assertFalse(sourceListener.isConnected());
+            assertFalse(sourceList.isConnected());
+            assertFalse(targetListener.isConnected());
+            assertFalse(targetList.isConnected());
+            
+            // change the source list
+            sourceList.add(new Integer(7));
+            sourceList.add(new Integer(5));
+            
+            // they client should be out of date
+            waitFor(1000);
+            assertEquals(snapshot, targetList);
+            
+            // bring the source and target list back to life
+            sourceList.connect();
+            targetList.connect();
+            waitFor(1000);
+            assertTrue(sourceListener.isConnected());
+            assertTrue(sourceList.isConnected());
             assertTrue(targetListener.isConnected());
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
@@ -210,6 +274,62 @@ public class NetworkListTest extends TestCase {
     }
     
 
+    /**
+     * Verifies that the server can unpublish a value.
+     */
+    public void testServerUnpublish() {
+        try {
+            // prepare the source list
+            String resourceName = "glazedlists://localhost:" + serverPort + "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            sourceList.add(new Integer(8));
+            sourceList.add(new Integer(6));
+            
+            // prepare the target list
+            NetworkList targetList = peer.subscribe(resourceName, "localhost", serverPort, ByteCoderFactory.serializable());
+            
+            // verify they're equal after a subscribe
+            waitFor(1000);
+            assertEquals(sourceList, targetList);
+            List snapshot = new ArrayList();
+            snapshot.addAll(sourceList);
+            
+            // disconnect the first list
+            targetList.disconnect(); waitFor(1000); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
+            sourceList.disconnect();
+            waitFor(1000);
+            assertFalse(targetList.isConnected());
+            
+            // prepare the second source list
+            NetworkList sourceList2 = peer.publish(new BasicEventList(), resourceName, ByteCoderFactory.serializable());
+            sourceList2.add(new Integer(7));
+            sourceList2.add(new Integer(5));
+            
+            // verify they're equal after a new connect
+            targetList.connect();
+            waitFor(1000);
+            assertEquals(sourceList2, targetList);
+            
+            // disconnect the second list
+            targetList.disconnect(); waitFor(1000); System.out.println("WARNING: TARGET DISCONNECT FIRST FOR CONCURRENCY PROBLEM");
+            sourceList2.disconnect();
+            waitFor(1000);
+            assertFalse(targetList.isConnected());
+            
+            // verify they're equal after a new connect
+            sourceList.connect();
+            targetList.connect();
+            waitFor(1000);
+            assertEquals(sourceList, targetList);
+            
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    
+    
     /**
      * Waits for the specified duration of time. This hack method should be replaced
      * with something else that uses notification.
