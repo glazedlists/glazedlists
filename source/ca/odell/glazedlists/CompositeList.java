@@ -303,6 +303,7 @@ public final class CompositeList extends AbstractEventList {
 
         /** the composite read lock */
         private Lock compositeReadLock = new CompositeReadLock();
+        private Lock compositeWriteLock = new CompositeWriteLock();
         /** the forward lock is composed of one mutex and the read lock */
         private EventForwardLock eventForwardLock = new EventForwardLock(compositeReadLock);
         
@@ -317,8 +318,7 @@ public final class CompositeList extends AbstractEventList {
          * Return the lock used for writing.
          */
         public Lock writeLock() {
-            new IllegalArgumentException("list is not writable").printStackTrace();
-            return null;
+            return compositeWriteLock;
         }
         
         /**
@@ -374,6 +374,22 @@ public final class CompositeList extends AbstractEventList {
         public void unlock() {
             readLock.unlock();
             forwardLock.unlock();
+        }
+    }
+    
+    /**
+     * The CompositeWriteLock throws exceptions whenever a method is called
+     * because CompositeLists are not writable.
+     */
+    class CompositeWriteLock implements Lock {
+        public void lock() {
+            throw new IllegalStateException("list is not writable");
+        }
+        public boolean tryLock() {
+            throw new IllegalStateException("list is not writable");
+        }
+        public void unlock() {
+            throw new IllegalStateException("list is not writable");
         }
     }
     
