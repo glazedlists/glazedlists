@@ -9,6 +9,7 @@ package ca.odell.glazedlists.net;
 import java.util.*;
 // for being a JUnit test case
 import junit.framework.*;
+import ca.odell.glazedlists.*;
 // NIO is used for CTP
 import java.nio.*;
 import java.nio.channels.*;
@@ -103,8 +104,8 @@ public class CTPChunkTest extends TestCase {
      */
     public void testSendLargeString() {
         try {
-            String clientSendData = randomString(100000);
-            String serverSendData = randomString(200000);
+            String clientSendData = RandomDataFactory.nextString(100000);
+            String serverSendData = RandomDataFactory.nextString(200000);
             
             StaticCTPHandler client = new StaticCTPHandler();
             client.addEnqueued(clientSendData);
@@ -136,11 +137,11 @@ public class CTPChunkTest extends TestCase {
             StaticCTPHandler server = new StaticCTPHandler();
 
             for(int i = 0; i < 100; i++) {
-                String clientSendData = randomString(2000);
+                String clientSendData = RandomDataFactory.nextString(2000);
                 client.addEnqueued(clientSendData);
                 server.addExpected(clientSendData);
                 
-                String serverSendData = randomString(3000);
+                String serverSendData = RandomDataFactory.nextString(3000);
                 client.addExpected(serverSendData);
                 server.addEnqueued(serverSendData);
             }
@@ -157,24 +158,6 @@ public class CTPChunkTest extends TestCase {
         }
     }
     
-    /**
-     * Constructs a random string of the specified length.
-     */
-    public static String randomString(int length) {
-        StringBuffer result = new StringBuffer();
-        for(int i = 0; i < length; i++) {
-            result.append(randomCharacter());
-        }
-        return result.toString();
-    }
-    /**
-     * Gets a random character.
-     */
-    public static char randomCharacter() {
-        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        Random dice = new Random();
-        return alphabet.charAt(dice.nextInt(alphabet.length()));
-    }
     
     public static void main(String[] args) {
         CTPChunkTest test = new CTPChunkTest();
