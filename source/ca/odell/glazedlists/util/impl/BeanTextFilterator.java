@@ -4,12 +4,12 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swing;
+package ca.odell.glazedlists.util.impl;
 
+// To work with Lists
 import java.util.*;
+// To implement the interface
 import ca.odell.glazedlists.TextFilterator;
-// for using beans' reflection on property names
-import ca.odell.glazedlists.util.impl.BeanProperty;
 
 /**
  * TextFilterator implementation that uses reflection to be used for any
@@ -17,31 +17,31 @@ import ca.odell.glazedlists.util.impl.BeanProperty;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class BeanTextFilterator implements TextFilterator {
+public class BeanTextFilterator implements TextFilterator {
 
     /** Java Beans property names */
     private String[] propertyNames;
-    
+
     /** methods for extracting field values */
     private BeanProperty[] beanProperties = null;
-    
+
     /**
      * Create a BeanTextFilterator that uses the specified property names.
      */
     public BeanTextFilterator(String[] propertyNames) {
         this.propertyNames = propertyNames;
     }
-    
+
     /**
      * Gets the specified object as a list of Strings. These Strings should contain
      * all object information so that it can be compared to the filter set.
      */
     public void getFilterStrings(List baseList, Object element) {
         if(element == null) return;
-        
+
         // load the property descriptors on first request
         if(beanProperties == null) loadPropertyDescriptors(element);
-        
+
         // get the filter strings
         for(int p = 0; p < beanProperties.length; p++) {
             Object propertyValue = beanProperties[p].get(element);

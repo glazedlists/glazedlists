@@ -10,9 +10,11 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
+// access to the volatile implementation pacakge
+import ca.odell.glazedlists.util.impl.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-// for automatically responding to changes in the filter field 
+// for automatically responding to changes in the filter field
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.ActionListener;
@@ -42,7 +44,7 @@ import java.util.Arrays;
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
- * 
+ *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
  * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
@@ -53,13 +55,13 @@ public class TextFilterList extends DefaultTextFilterList {
 
     /** the field where the filter strings are edited */
     private JTextField filterEdit = null;
-    
+
     /** the document listener responds to changes, it is null when we're not listening */
     private FilterEditListener filterEditListener = null;
-    
+
     /** the action listener performs a refilter when fired */
     private FilterActionListener filterActionListener = new FilterActionListener();
-    
+
     /**
      * Creates a {@link TextFilterList} that filters the specified {@link EventList}
      * of elements that implement the {@link TextFilterable} interface.
@@ -76,7 +78,7 @@ public class TextFilterList extends DefaultTextFilterList {
     public TextFilterList(EventList source, TextFilterator filterator) {
         this(source, filterator, new JTextField(""));
     }
-    
+
     /**
      * Creates a {@link TextFilterList} that filters the specified {@link EventList}
      * of elements using the JavaBeans property names specified to get the
@@ -113,7 +115,7 @@ public class TextFilterList extends DefaultTextFilterList {
     public TextFilterList(EventList source, String[] propertyNames, JTextField filterEdit) {
         this(source, new BeanTextFilterator(propertyNames), filterEdit);
     }
-    
+
     /**
      * Creates a {@link TextFilterList} that filters the specified {@link EventList}
      * of elements using the specified {@link TextFilterator} to get the
@@ -127,14 +129,14 @@ public class TextFilterList extends DefaultTextFilterList {
         // listen to filter events
         this.setFilterEdit(filterEdit);
     }
-    
+
     /**
      * Gets the {@link JTextField} used to edit the filter search {@link String}.
      */
     public JTextField getFilterEdit() {
         return filterEdit;
     }
-    
+
     /**
      * Sets the {@link JTextField} used to edit the filter search {@link String}.
      */
@@ -147,16 +149,16 @@ public class TextFilterList extends DefaultTextFilterList {
             live = (filterEditListener != null);
             setLive(false);
         }
-        
+
         // start listening for filter events from the new filter edit
         this.filterEdit = filterEdit;
         filterEdit.addActionListener(filterActionListener);
         setLive(live);
-        
+
         // filter with the new filter edit
         reFilter();
     }
-    
+
     /**
      * Directs this filter to respond to changes to the {@link JTextField} as they are
      * made. This uses a {@link DocumentListener} and every time the
@@ -179,7 +181,7 @@ public class TextFilterList extends DefaultTextFilterList {
             }
         }
     }
-    
+
     /**
      * Gets an {@link ActionListener} that refilters the list when it is fired. This
      * listener can be used to filter when the user presses a button.
@@ -187,7 +189,7 @@ public class TextFilterList extends DefaultTextFilterList {
     public ActionListener getFilterActionListener() {
         return filterActionListener;
     }
-    
+
     /**
      * Implement the {@link DocumentListener} interface for text filter updates. When
      * The user edits the filter {@link JTextField}, this updates the filter to reflect
@@ -204,7 +206,7 @@ public class TextFilterList extends DefaultTextFilterList {
             reFilter();
         }
     }
-    
+
     /**
      * Implement the {@link ActionListener} interface for text filter updates. When
      * the user clicks a button (supplied by external code), this
@@ -215,7 +217,7 @@ public class TextFilterList extends DefaultTextFilterList {
             reFilter();
         }
     }
-    
+
     /**
      * When the filter changes, first update the filter values used
      * to do filtering, then apply the filter on all list elements.
