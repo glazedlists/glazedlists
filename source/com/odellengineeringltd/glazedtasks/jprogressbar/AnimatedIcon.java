@@ -70,6 +70,7 @@ public class AnimatedIcon implements TaskListener, MouseListener {
         boolean busy = false;
         for(Iterator i = taskManager.getTaskContexts().iterator(); i.hasNext(); ) {
             TaskContext taskContext = (TaskContext)i.next();
+            if(taskContext.isTaskFinished()) continue;
             if(taskContext.isBusy() || taskContext.getProgress() < 1.0) busy = true;
         }
         if(busy) iconHost.setIcon(busyIcon);
