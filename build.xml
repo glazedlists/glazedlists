@@ -73,8 +73,7 @@
         description="Creates glazedlists.jar file containing all UI libraries.">
     <jar destfile="glazedlists.jar" update="true">
       <fileset dir="classes">
-        <exclude name="**/**Test.class"/>
-        <exclude name="**/**Test$*.class"/>
+        <exclude name="**/test/**"/>
       </fileset>
       <fileset dir=".">
         <include name="resources/**"/>
@@ -96,7 +95,7 @@
     <mkdir dir="classes"/>
     <!-- Compile the java code from source/ into classes/ -->
     <javac destdir="classes" srcdir="source" debug="on" source="1.4">
-      <exclude name="**/**Test.java"/>
+      <exclude name="**/test/**"/>
     </javac>
   </target>
   
@@ -129,7 +128,7 @@
     <!-- Compile the test classes from source/ into classes/ -->
     <javac destdir="classes" srcdir="source" debug="on" source="1.4">
       <classpath path="${ant.home}/lib/junit.jar"/>
-      <include name="**/**Test.java"/>
+      <include name="**/test/**"/>
     </javac>
     <!-- Execute JUnit tests -->
     <junit printsummary="true" showoutput="false" fork="true"
