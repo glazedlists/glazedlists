@@ -252,24 +252,15 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
          */
         public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
         boolean isSelected, boolean hasFocus, int row, int column) {
-            // render the header name, aligned to the left
-            JLabel rendered = (JLabel)delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            rendered.setHorizontalAlignment(rendered.LEADING);
-            rendered.setHorizontalTextPosition(rendered.LEADING);
-
-            // inject an icon, aligned to the left
             if(iconInjection) {
+                DefaultTableCellRenderer jLabelRenderer = (DefaultTableCellRenderer)delegateRenderer;
                 Icon iconToUse = icons[getSortingStyle(column)];
-                rendered.setIcon(iconToUse);
-                rendered.setIconTextGap(4);
-                int columnWidth = table.getColumnModel().getColumn(column).getWidth();
-                int labelWidth = rendered.getPreferredSize().width;
-                int preferredGap = columnWidth - labelWidth + 2; // +4 for existing gap, -2 for padding
-                if(preferredGap > 4) rendered.setIconTextGap(preferredGap);
+                jLabelRenderer.setIcon(iconToUse);
+                jLabelRenderer.setHorizontalTextPosition(jLabelRenderer.LEADING);
+                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            } else {
+                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             }
-            
-            // return the finished result
-            return rendered;
         }
     }
 }
