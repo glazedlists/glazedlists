@@ -38,7 +38,7 @@ public final class ReadOnlyList extends TransformedList implements ListEventList
      * Creates a new ReadOnlyList that is a read only view of the
      * specified list.
      */
-    protected ReadOnlyList(EventList source) {
+    public ReadOnlyList(EventList source) {
         super(source);
         source.addListEventListener(this);
     }

@@ -38,7 +38,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
      * Creates a new ThreadSafeList that is a thread-safe view of the
      * specified list.
      */
-    protected ThreadSafeList(EventList source) {
+    public ThreadSafeList(EventList source) {
         super(source);
         source.addListEventListener(this);
     }
