@@ -95,13 +95,6 @@ public final class ListEventPublisher {
         }
         return false;
     }
-    private boolean listContainsAll(List eventLists, List goal) {
-        for(int i = 0; i < goal.size(); i++) {
-            if(!listContains(eventLists, goal.get(i))) return false;
-        }
-        return true;
-    }
-    
 
     /**
      * Fires the specified events to the specified listeners.
@@ -114,21 +107,7 @@ public final class ListEventPublisher {
         changesInProgress++;
         
         // populate the list of satisfied EventLists
-        List satisfiedRecursively = new ArrayList();
-        satisfiedRecursively.clear();
-        satisfiedRecursively.add(source);
-        while(!satisfiedRecursively.isEmpty()) {
-            // add this event list
-            EventList eventList = (EventList)satisfiedRecursively.remove(satisfiedRecursively.size() - 1);
-            if(listContains(satisfiedEventLists, eventList)) continue;
-            satisfiedEventLists.add(eventList);
-            // continue the search for this event list's dependencies
-            DependentListener dependentListener = getDependentListener(eventList);
-            if(dependentListener != null) {
-                satisfiedRecursively.addAll(dependentListener.getDependencies());
-            }
-        }
-        assert(satisfiedEventLists.contains(source));
+        if(!listContains(satisfiedEventLists, source)) satisfiedEventLists.add(source);
 
         // notify all listeners
         for(int i = 0; i < listeners.size(); i++) {
@@ -145,7 +124,7 @@ public final class ListEventPublisher {
             } else {
                 //System.out.println("Saving pending event");
                 DependentListener dependentListener = getDependentListener(listener);
-                dependentListener.addPendingEvent(listener, event);
+                dependentListener.addPendingEvent(event);
                 unsatisfiedListeners.add(dependentListener);
             }
         }
@@ -186,9 +165,8 @@ public final class ListEventPublisher {
         return dependenciesSatisfied(getDependentListener(listener));
     }
     public boolean dependenciesSatisfied(DependentListener dependentListener) {
-        
         // if it is unmanaged, it is always satisfied
-        if(dependentListener == null) return true;
+        if(dependentListener == null) throw new IllegalStateException();
 
         // ensure all dependencies have been satisfied
         List dependenciesToSatisfy = dependentListener.getDependencies();
@@ -214,8 +192,6 @@ public final class ListEventPublisher {
         /** the EventLists that this listener is dependent upon */
         private List dependencies = new ArrayList();
         
-        /** the listeners awaiting notification */
-        private List pendingListeners = new ArrayList();
         /** the events to fire the awaiting listeners */
         private List pendingEvents = new ArrayList();
         
@@ -227,10 +203,17 @@ public final class ListEventPublisher {
             this.listener = listener;
         }
 
+        /**
+         * Get a {@link List} of {@link EventList}s that this listener is dependent
+         * upon.
+         */
         public List getDependencies() {
             return dependencies;
         }
 
+        /**
+         * Get the listener that this tracks dependencies for.
+         */
         public ListEventListener getListener() {
             return listener;
         }
@@ -250,6 +233,9 @@ public final class ListEventPublisher {
             return false;
         }
 
+        /**
+         * Get this DependentList for debugging.
+         */
         public String toString() {
             StringBuffer result = new StringBuffer();
             result.append(listener.getClass().getName());
@@ -262,20 +248,23 @@ public final class ListEventPublisher {
             result.append(")");
             return result.toString();
         }
-
-        public void addPendingEvent(ListEventListener pendingListener, ListEvent pendingEvent) {
-            if(pendingListener != listener) throw new IllegalStateException();
-            pendingListeners.add(pendingListener);
+        
+        /**
+         * Adds the specified {@linkListEvent} to be fired upon the completion of
+         * its dependencies.
+         */
+        public void addPendingEvent(ListEvent pendingEvent) {
             pendingEvents.add(pendingEvent);
         }
 
+        /**
+         * Fires all pending events.
+         */
         public void firePendingEvents() {
-            for(int i = 0; i < pendingListeners.size(); i++) {
-                ListEventListener listener = (ListEventListener)pendingListeners.get(i);
+            for(int i = 0; i < pendingEvents.size(); i++) {
                 ListEvent event = (ListEvent)pendingEvents.get(i);
                 listener.listChanged(event);
             }
-            pendingListeners.clear();
             pendingEvents.clear();
         }
     }
