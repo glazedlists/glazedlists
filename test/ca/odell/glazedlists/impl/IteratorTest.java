@@ -19,10 +19,10 @@ import java.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class IteratorTest extends TestCase {
-    
+
     /** for randomly choosing list indicies */
     private Random random = new Random();
-    
+
     /**
      * Prepare for the test.
      */
@@ -45,13 +45,13 @@ public class IteratorTest extends TestCase {
         for(int i = 0; i < 26; i++) {
             originalList.add(new Integer(i));
         }
-        
+
         // iterate through that list forwards and add the results to a new list
         List forwardsControlList = new ArrayList();
         for(Iterator i = originalList.iterator(); i.hasNext(); ) {
             forwardsControlList.add(i.next());
         }
-        
+
         // verify the lists are equal
         assertEquals(forwardsControlList, originalList);
 
@@ -61,7 +61,7 @@ public class IteratorTest extends TestCase {
             backwardsControlList.add(i.previous());
         }
         Collections.reverse(backwardsControlList);
-        
+
         // verify the lists are equal
         assertEquals(backwardsControlList, originalList);
     }
@@ -79,7 +79,7 @@ public class IteratorTest extends TestCase {
             deleteFromList.add(value);
             originalList.add(value);
         }
-        
+
         List iteratedElements = new ArrayList();
         Iterator iterator = deleteFromList.iterator();
 
@@ -95,7 +95,7 @@ public class IteratorTest extends TestCase {
         for(int a = 0; a < 50; a++) {
             iteratedElements.add(iterator.next());
         }
-        
+
         // verify the lists are equal and that we're out of elements
         assertEquals(originalList, iteratedElements);
         assertFalse(iterator.hasNext());
@@ -117,19 +117,19 @@ public class IteratorTest extends TestCase {
             iterateBackwardList.add(value);
             originalList.add(value);
         }
-        
+
         // walk through the forward lists, removing all values greater than 50
         for(ListIterator i = iterateForwardList.listIterator(); i.hasNext(); ) {
             Integer current = (Integer)i.next();
             if(current.intValue() > 50) i.remove();
         }
-        
+
         // walk through the backward list, removing all values greater than 50
         for(ListIterator i = iterateBackwardList.listIterator(iterateBackwardList.size()); i.hasPrevious(); ) {
             Integer current = (Integer)i.previous();
             if(current.intValue() > 50) i.remove();
         }
-        
+
         // verify the lists are equal and that we're out of elements
         for(int i = 0; i < originalList.size(); ) {
             Integer current = (Integer)originalList.get(i);
@@ -139,7 +139,35 @@ public class IteratorTest extends TestCase {
         assertEquals(originalList, iterateForwardList);
         assertEquals(originalList, iterateBackwardList);
     }
-    
+
+    /**
+     * Tests the edge condition of the previous method
+     */
+    public void testPreviousEdgeCondition() {
+        // create a list of values
+        BasicEventList iterationList = new BasicEventList();
+        for(int i = 0; i < 20; i++) {
+            Integer value = new Integer(random.nextInt(100));
+            iterationList.add(value);
+        }
+
+        ListIterator i = iterationList.listIterator();
+
+        // Test before next is called
+        assertEquals(false, i.hasPrevious());
+        try {
+            i.previous();
+            fail("A call to previous() was allowed before next() was called");
+        } catch(Exception e) {
+            assertEquals(NoSuchElementException.class, e.getClass());
+
+        }
+
+        // Test when the iterator is at the first element
+        i.next();
+        assertEquals(true, i.hasPrevious());
+    }
+
     /**
      * This manually executed test runs forever creating iterators and
      * sublists of a source list, and modifying that list.
@@ -149,7 +177,7 @@ public class IteratorTest extends TestCase {
         long memoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);
         int repetitions = 0;
         Random random = new Random();
-        
+
         while(true) {
             // perform a random operation on this list
             int operation = random.nextInt(3);
@@ -161,12 +189,12 @@ public class IteratorTest extends TestCase {
             } else if(operation == 3) {
                 list.set(index, new Integer(random.nextInt()));
             }
-            
+
             // create an iterator for this list
             Iterator iterator = list.iterator();
             // create a SubList for this list
             List subList = list.subList(0, list.size()/2);
-            
+
             // test and output memory usage
             long newMemoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);
             if(newMemoryUsage > memoryUsage) {
@@ -175,7 +203,7 @@ public class IteratorTest extends TestCase {
             } else if(repetitions % 10000 == 0) {
                 System.out.println(repetitions + ": " + newMemoryUsage + "k");
             }
-            
+
             repetitions++;
         }
     }

@@ -30,18 +30,18 @@ import java.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class EventListIterator implements ListIterator, ListEventListener {
-    
+
     /** the list being iterated */
     private EventList source;
-    
+
     /** the index of and reference to the next element to view */
     private int nextIndex;
     private Object next = null;
     private Object previous = null;
-    
+
     /** the most recently accessed element */
     private int lastIndex = -1;
-    
+
     /**
      * Create a new event list iterator that iterates over the specified
      * source list.
@@ -61,7 +61,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
     public EventListIterator(EventList source, int nextIndex) {
         this(source, nextIndex, true);
     }
-    
+
     /**
      * Creates a new iterator that starts at the specified index.
      *
@@ -107,7 +107,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
             return false;
         }
     }
-    
+
     /**
      * Returns the next element in the list.
      */
@@ -131,14 +131,14 @@ public class EventListIterator implements ListIterator, ListEventListener {
             return result;
         }
     }
-    
+
     /**
      * Returns the index of the element that would be returned by a subsequent call to next.
      */
     public int nextIndex() {
         return nextIndex;
     }
-    
+
     /**
      * Returns true if this list iterator has more elements when traversing the
      * list in the reverse direction.
@@ -155,13 +155,13 @@ public class EventListIterator implements ListIterator, ListEventListener {
             return false;
         }
     }
-    
+
     /**
      * Returns the previous element in the list.
      */
     public Object previous() {
         // when we need to rely on our defensive saved value
-        if(nextIndex < 0) {
+        if(nextIndex <= 0) {
             if(previous != null) {
                 Object result = previous;
                 previous = null;
@@ -179,14 +179,14 @@ public class EventListIterator implements ListIterator, ListEventListener {
             return result;
         }
     }
-    
+
     /**
      * Returns the index of the element that would be returned by a subsequent call to previous.
      */
     public int previousIndex() {
         return nextIndex - 1;
     }
-    
+
     /**
      * Inserts the specified element into the list (optional operation).
      */
@@ -194,7 +194,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
         source.add(nextIndex, o);
         next = null;
     }
-    
+
     /**
      * Removes from the list the last element that was returned by next
      * or previous (optional operation).
@@ -204,7 +204,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
         source.remove(lastIndex);
         previous = null;
     }
-    
+
     /**
      * Replaces the last element returned by next or previous with the
      * specified element (optional operation).
@@ -222,16 +222,16 @@ public class EventListIterator implements ListIterator, ListEventListener {
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
-            
+
             // if it is an insert
             if(changeType == ListEvent.INSERT) {
                 if(changeIndex <= nextIndex) nextIndex++;
-                
+
                 if(lastIndex != -1 && changeIndex <= lastIndex) lastIndex++;
             // if it is a delete
             } else if(changeType == ListEvent.DELETE) {
                 if(changeIndex < nextIndex) nextIndex--;
-                
+
                 if(lastIndex != -1 && changeIndex < lastIndex) lastIndex--;
                 else if(lastIndex != -1 && changeIndex == lastIndex) lastIndex = -1;
             }
