@@ -46,7 +46,7 @@ public final class SubEventList extends WritableMutationList implements ListChan
         super(source);
         synchronized(getRootList()) {
             // do consistency checking
-            if(startIndex < 0 || endIndex <= startIndex || endIndex > source.size()) {
+            if(startIndex < 0 || endIndex < startIndex || endIndex > source.size()) {
                 throw new IllegalArgumentException("The range " + startIndex + "-" + endIndex + " is not valid over a list of size " + source.size());
             }
             
@@ -133,7 +133,7 @@ public final class SubEventList extends WritableMutationList implements ListChan
                     // do nothing
                 }
             }
-            assert(startIndex < endIndex);
+            assert(startIndex <= endIndex);
             updates.commitAtomicChange();
         }
     }

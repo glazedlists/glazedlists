@@ -140,4 +140,42 @@ public class IteratorTest extends TestCase {
         assertEquals(originalList, iterateForwardList);
         assertEquals(originalList, iterateBackwardList);
     }
+    
+    /**
+     * This manually executed test runs forever creating iterators and
+     * sublists of a source list, and modifying that list.
+     */
+    public static void main(String[] args) {
+        List list = new BasicEventList();
+        long memoryUsage = Runtime.getRuntime().maxMemory();
+        int repetitions = 0;
+        Random random = new Random();
+        
+        while(true) {
+            // perform a random operation on this list
+            int operation = random.nextInt(3);
+            int index = list.isEmpty() ? 0 : random.nextInt(list.size());
+            if(operation <= 1 || list.isEmpty()) {
+                list.add(index, new Integer(random.nextInt()));
+            } else if(operation == 2) {
+                list.remove(index);
+            } else if(operation == 3) {
+                list.set(index, new Integer(random.nextInt()));
+            }
+            
+            // create an iterator for this list
+            Iterator iterator = list.iterator();
+            // create a SubList for this list
+            List subList = list.subList(0, list.size()/2);
+            
+            // test and output memory usage
+            long newMemoryUsage = Runtime.getRuntime().maxMemory();
+            if(newMemoryUsage > memoryUsage) {
+                memoryUsage = newMemoryUsage;
+                System.out.println(repetitions + ": " + memoryUsage);
+            }
+            
+            repetitions++;
+        }
+    }
 }
