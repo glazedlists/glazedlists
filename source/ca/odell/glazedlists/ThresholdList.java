@@ -27,6 +27,10 @@ import java.util.*;
  * out all songs that aren't at least at a bitrate of 192 kbps and at most
  * a bitrate of 320 kbps to eliminate low quality MP3s and bloated WAV files.
  *
+ * <p><strong>Note:</strong> For performance reasons, the transformation
+ * performed by <code>ThresholdList</code> sorts the contents of the source
+ * list using the provided <code>ThresholdEvaluator</code>.
+ *
  * <p><strong>Warning:</strong> this is a technology preview and is
  * subject to API changes.
  *
@@ -34,10 +38,10 @@ import java.util.*;
  */
 public final class ThresholdList extends TransformedList implements ListEventListener {
 
-    /** the index in the sorted list which corresponds to the lower bound for this list */
+    /** the index in the list which corresponds to the lower bound for this list */
     private int lowerThresholdIndex = -1;
 
-    /** the index in the sorted list which corresponds to the upper bound for this list */
+    /** the index in the list which corresponds to the upper bound for this list */
     private int upperThresholdIndex = -1;
 
     /** the lower bound to use to define list containment */
@@ -46,14 +50,11 @@ public final class ThresholdList extends TransformedList implements ListEventLis
     /** the upper bound to use to define list containment */
     private int upperThreshold = 0;
 
-    /** a local cache of the size of the sorted list to improve performance */
+    /** a local cache of the size of the source list to improve performance */
     private int sourceSize = 0;
 
     /** the evaluator to use to compare Objects against the threshold */
     private ThresholdEvaluator evaluator = null;
-
-    /** the explicitly sorted sorted list */
-    private SortedList sorted = null;
 
     /** TODO: a flag to put this list in debug mode */
     public boolean debug = false;
@@ -64,10 +65,9 @@ public final class ThresholdList extends TransformedList implements ListEventLis
      */
     public ThresholdList(EventList source, ThresholdEvaluator evaluator) {
         super(new SortedList(source, new ThresholdComparator(evaluator)));
-        this.sorted = (SortedList)super.source;
-        this.sorted.addListEventListener(this);
+        this.source.addListEventListener(this);
         this.evaluator = evaluator;
-        sourceSize = sorted.size();
+        sourceSize = source.size();
 
         // Include all possible elements by default
         setUpperThreshold(Integer.MAX_VALUE);
@@ -80,8 +80,8 @@ public final class ThresholdList extends TransformedList implements ListEventLis
      */
     public void listChanged(ListEvent listChanges) {
 
-        // recache the sorted size
-        sourceSize = sorted.size();
+        // recache the source size
+        sourceSize = source.size();
 
         // Make all of the changes happen atomically
         updates.beginEvent();
@@ -93,7 +93,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
             int value = Integer.MIN_VALUE;
 
             if(type != ListEvent.DELETE && sourceSize > 0) {
-                value = evaluator.evaluate(sorted.get(sortedIndex));
+                value = evaluator.evaluate(source.get(sortedIndex));
             }
 
             // The index is below the lower threshold and is not an edge case
@@ -227,9 +227,9 @@ public final class ThresholdList extends TransformedList implements ListEventLis
 
             // Threshold is changed
             } else {
-                newListIndex = sorted.indexOfSimulated(new Integer(threshold));
+                newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold));
                 // return -1 if the value is before the list
-                if(newListIndex == 0) newListIndex = sorted.indexOf(new Integer(threshold));
+                if(newListIndex == 0) newListIndex = source.indexOf(new Integer(threshold));
             }
 
             // update the threshold
@@ -298,7 +298,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
 
             // Threshold is changed
             } else {
-                newListIndex = sorted.indexOfSimulated(new Integer(threshold+1)) - 1;
+                newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold+1)) - 1;
             }
 
             // update the threshold
@@ -362,9 +362,9 @@ public final class ThresholdList extends TransformedList implements ListEventLis
     }
 
     /**
-     * Gets the index into the sorted list for the object with the specified
+     * Gets the index into the source list for the object with the specified
      * index in this list. This is the index such that the following works:
-     * <br><code>this.get(i) == sorted.get(getSourceIndex(i))</code> for all
+     * <br><code>this.get(i) == source.get(getSourceIndex(i))</code> for all
      * values.
      */
     protected int getSourceIndex(int transformationIndex) {
@@ -384,7 +384,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
             return false;
         }
-        return sorted.contains(object);
+        return source.contains(object);
     }
 
     /**
@@ -401,7 +401,7 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
             return -1;
         }
-        return sorted.indexOf(object);
+        return source.indexOf(object);
     }
 
     /**
@@ -418,7 +418,20 @@ public final class ThresholdList extends TransformedList implements ListEventLis
         if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
             return -1;
         }
-        return sorted.lastIndexOf(object);
+        return source.lastIndexOf(object);
+    }
+
+    /**
+     * Release the resources consumed by this TransformedList so that it may be garbage
+     * collected. It is an error to call any method on a TransformedList after it
+     * has been disposed.
+     *
+     * <p>This implementation of ThresholdList extends dispose() in order to first
+     * dispose the SortedList on which this implementation depends.
+     */
+    public void dispose() {
+        ((TransformedList)source).dispose();
+        super.dispose();
     }
 
     /**
