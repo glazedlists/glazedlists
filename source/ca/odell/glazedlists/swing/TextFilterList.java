@@ -50,6 +50,7 @@ import java.awt.event.ActionEvent;
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
