@@ -199,6 +199,7 @@ public final class SortedList extends TransformedList {
         // fire all the update events
         for(Iterator i = indicesPendingDeletion.iterator(); i.hasNext(); ) {
             IndexNodePair indexNodePair = (IndexNodePair)i.next();
+            i.remove();
             
             int insertedIndex = insertByUnsortedNode(indexNodePair.node);
             int deletedIndex = indexNodePair.index;
@@ -488,30 +489,10 @@ public final class SortedList extends TransformedList {
         }
 
         /**
-         * The Iterator for IndicesPendingDeletion automatically removes elements
-         * as they are requested.
-         */
-        class IndicesPendingDeletionIterator implements Iterator {
-            private Iterator delegate = indexNodePairs.iterator();
-            public boolean hasNext() {
-                return delegate.hasNext();
-            }
-            public Object next() {
-                Object result = delegate.next();
-                delegate.remove();
-                return result;
-            }
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        }
-            
-        /**
-         * Gets the Iterator for this set of indices. When an element is accessed
-         * it is immediately removed which is the necessary behaviour.
+         * Gets the Iterator for this set of indices.
          */
         public Iterator iterator() {
-            return new IndicesPendingDeletionIterator();
+            return indexNodePairs.iterator();
         }
 
         /**
