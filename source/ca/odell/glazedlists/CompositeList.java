@@ -323,7 +323,8 @@ public final class CompositeList extends AbstractEventList {
          * Return the lock used for writing.
          */
         public Lock writeLock() {
-            throw new IllegalArgumentException("list is not writable");
+            new IllegalArgumentException("list is not writable").printStackTrace();
+            return null;
         }
         
         /**

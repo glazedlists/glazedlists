@@ -9,6 +9,8 @@ package ca.odell.glazedlists.swing;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.util.concurrent.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // for automatically responding to changes in the filter field 
@@ -156,14 +158,14 @@ public class TextFilterList extends AbstractFilterList {
      * to do filtering, then apply the filter on all elements.
      */
     private void reFilter() {
-        getReadWriteLock().writeLock().lock();
+        ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
             // build the regex pattern from the filter strings
             updateFilterPattern();
             // refilter the whole list
             handleFilterChanged();
         } finally {
-            getReadWriteLock().writeLock().unlock();
+            ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
     }
 
