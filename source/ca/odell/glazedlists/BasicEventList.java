@@ -6,20 +6,12 @@
  */
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
+// the core Glazed Lists packages
 import ca.odell.glazedlists.event.*;
-// for iterators and sublists
-import ca.odell.glazedlists.util.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
-// volatile implementation support
-import ca.odell.glazedlists.util.impl.*;
 // Java collections are used for underlying data storage
 import java.util.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
-// for being serializable
-import java.io.Serializable;
 
 /**
  * An event list that wraps a Java Collections list. This list provides an
@@ -44,7 +36,7 @@ public final class BasicEventList extends AbstractEventList {
     public BasicEventList() {
         this(new ArrayList());
     }
-    
+
     /**
      * Creates a new EventArrayList that uses the specified list as the source
      * list. All editing to the specified source list <strong>must</strong> be
@@ -73,7 +65,7 @@ public final class BasicEventList extends AbstractEventList {
             getReadWriteLock().writeLock().unlock();
         }
     }
-            
+
     /**
      * Appends the specified element to the end of this list.
      */
@@ -92,16 +84,16 @@ public final class BasicEventList extends AbstractEventList {
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /**
      * Appends all of the elements in the specified Collection to the end of
-     * this list, in the order that they are returned by the specified 
+     * this list, in the order that they are returned by the specified
      * Collection's Iterator.
      */
     public boolean addAll(Collection collection) {
         return addAll(size(), collection);
     }
-          
+
     /**
      * Inserts all of the elements in the specified Collection into this
      * list, starting at the specified position.
@@ -180,7 +172,7 @@ public final class BasicEventList extends AbstractEventList {
         }
     }
     /**
-     * Removes a single instance of the specified element from this 
+     * Removes a single instance of the specified element from this
      * collection, if it is present (optional operation).
      *
      * This uses indexOf and remove(index) to do the actual remove.
@@ -196,7 +188,7 @@ public final class BasicEventList extends AbstractEventList {
             getReadWriteLock().writeLock().unlock();
         }
     }
-          
+
     /**
      * Removes all of the elements from this list (optional operation).
      */
@@ -218,7 +210,7 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /**
-     * Replaces the element at the specified position in this list with the 
+     * Replaces the element at the specified position in this list with the
      * specified element.
      */
     public Object set(int index, Object element) {
@@ -236,7 +228,7 @@ public final class BasicEventList extends AbstractEventList {
             getReadWriteLock().writeLock().unlock();
         }
     }
-          
+
     /**
      * Returns the element at the specified position in this list.
      *
@@ -284,7 +276,7 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /**
-     * Retains only the elements in this collection that are contained in 
+     * Retains only the elements in this collection that are contained in
      * the specified collection (optional operation). This method is available
      * in this implementation, although not particularly high performance.
      */

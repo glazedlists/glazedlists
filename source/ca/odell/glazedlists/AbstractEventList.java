@@ -8,16 +8,12 @@ package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
-// for iterators and sublists
-import ca.odell.glazedlists.util.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 // volatile implementation support
 import ca.odell.glazedlists.util.impl.*;
-// Java collections are used for underlying data storage
+// concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.util.concurrent.*;
+// for iterators
 import java.util.*;
-// For calling methods on the event dispacher thread
-import javax.swing.SwingUtilities;
 // for being serializable
 import java.io.Serializable;
 

@@ -8,9 +8,7 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
-// for event list utilities, iterators and comparators
-import ca.odell.glazedlists.util.*;
-// Java collections are used for underlying data storage
+// for access to the Collection interface
 import java.util.*;
 
 /**
@@ -43,7 +41,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         super(source);
         source.addListEventListener(this);
     }
-    
+
     /**
      * For implementing the ListEventListener interface. When the underlying list
      * changes, this sends notification to listening lists.
@@ -64,7 +62,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
             getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * Gets the total number of elements in the list.
      */
@@ -74,7 +72,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
             return source.size();
         } finally {
             getReadWriteLock().readLock().unlock();
-        }       
+        }
     }
 
     /**
@@ -84,7 +82,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
     protected int getSourceIndex(int mutationIndex) {
         return mutationIndex;
     }
-    
+
     /**
      * Tests if this mutation shall accept calls to <code>add()</code>,
      * <code>remove()</code>, <code>set()</code> etc.
@@ -116,7 +114,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
             getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * Compares the specified object with this list for equality.
      */

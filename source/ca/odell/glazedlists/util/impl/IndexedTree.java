@@ -6,9 +6,9 @@
  */
 package ca.odell.glazedlists.util.impl;
 
-// for specifying a sorting order
+// for comparators and iterators
 import java.util.*;
-// for event list utilities, iterators and comparators
+// for access to the ComparableComparator
 import ca.odell.glazedlists.util.*;
 
 /**

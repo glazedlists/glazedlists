@@ -6,16 +6,13 @@
  */
 package ca.odell.glazedlists.util.impl;
 
-// for specifying a sorting order
-import java.util.*;
-
 /**
  * This node is a helper class that does all the real work for
  * SparseList.
- * 
+ *
  * It is a tree node that can be accessed either by its real index
  * or by a fake index! The fake index includes is the number of
- * virtual nodes between a node and its parent node. 
+ * virtual nodes between a node and its parent node.
  *
  * For example, suppose we have a list:
  *    3  0  6  4  7  1  8  9  5  2
@@ -39,50 +36,50 @@ import java.util.*;
  *
  * Another example: There are virtual nodes "6" and "4" between nodes (0)
  * and (7). The virtual index of (7) is 4 because its left subtrees virtual
- * size is 2 plus the virtual nodes between it and its left subtree of 2. 
+ * size is 2 plus the virtual nodes between it and its left subtree of 2.
  *
  * Each node contains a virtual left subtree, this is a count of the nodes
  * with a value less than the node but still greater than all of the nodes
  * left-side ancestors. The virtual index of a node is this virutal size
  * plus the left size plus the size of left-side ancestors.
- * 
+ *
  * This tree-node uses AVL-Trees to ensure that access is always
  * logarithmic in terms of the size of the tree. AVL Trees use
  * rotations (single and double) when the height of a pair of
  * subtrees do not match in order to guarantee a bound on the
  * difference in their height. This bound can be shown to provide
- * an overall bound on the access time on the tree. 
+ * an overall bound on the access time on the tree.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class SparseListNode {
-    
+
     /** the parent node, used to delete from leaf up */
     private SparseListNode parent;
-    
+
     /** the sublist that this node is a member of */
     private SparseList host;
-    
+
     /** the left and right child nodes */
     private SparseListNode left = null;
     private SparseListNode right = null;
-    
+
     /** the size of the left and right subtrees */
     private int treeLeftSize = 0;
     private int treeRightSize = 0;
     private int treeRootSize = 0;
-    
+
     /** the size of the virtual left subtree and right subtrees */
     private int totalRightSize = 0;
     private int totalLeftSize = 0;
     private int virtualRootSize = 0;
-    
+
     /** the height of this subtree */
     private int height = 0;
-    
+
     /** the value at this node */
     private Object value = null;
-    
+
     /**
      * Creates a new SparseListNode with the specified parent node.
      */
@@ -90,7 +87,7 @@ public final class SparseListNode {
         this.host = host;
         this.parent = parent;
     }
-    
+
     /**
      * Gets the object with the specified index in the tree.
      */
@@ -136,7 +133,7 @@ public final class SparseListNode {
             throw new IndexOutOfBoundsException("cannot get from tree of size " + allSubtreeSize + " at " + index);
         }
     }
-    
+
     /**
      * Gets the object with the specified index in the tree, given the specified
      * compressed index.
@@ -155,7 +152,7 @@ public final class SparseListNode {
             return right.getIndexByCompressedIndex(compressedIndex - (treeLeftSize + treeRootSize)) + totalLeftSize + treeRootSize + virtualRootSize;
         }
     }
-    
+
     /**
      * Gets the compressed index of the specified index into the tree. This
      * is the index of the node that the specified index will be stored in.
@@ -181,7 +178,7 @@ public final class SparseListNode {
         // this is a kept node
         } else if(index == totalLeftSize + virtualRootSize) {
             return treeLeftSize;
-            
+
         // recurse on the right side
         } else if(index < allSubtreeSize) {
             return right.getCompressedIndex(index - (totalLeftSize + allRootSize), lead) + treeLeftSize + treeRootSize;
@@ -217,27 +214,27 @@ public final class SparseListNode {
         // remove the real part of this node
         } else if(index < totalLeftSize + allRootSize) {
             removeFromTree();
-            
+
         // remove on the right side
         } else {
             right.remove(index - (totalLeftSize + allRootSize));
         }
     }
-    
+
     /**
      * Gets the value of this node.
      */
     public Object getValue() {
         return value;
     }
-    
+
     /**
      * Retrieves the number of nodes in this subtree.
      */
     public int treeSize() {
         return treeLeftSize + treeRootSize + treeRightSize;
     }
-    
+
     /**
      * Gets the total size of this subtree.
      */
@@ -245,7 +242,7 @@ public final class SparseListNode {
         // calculate some convenience sizes
         int allRootSize = treeRootSize + virtualRootSize;
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
-        
+
         return allSubtreeSize;
     }
 
@@ -271,7 +268,7 @@ public final class SparseListNode {
         if(treeLeftSize > 0) return left.getSmallestChildNode();
         else return this;
     }
-    
+
     /**
      * Gets the index of the current node, based on a recursive
      * path up the tree.
@@ -300,7 +297,7 @@ public final class SparseListNode {
             throw new IllegalArgumentException(this + " cannot get the index of a subtree that does not exist on this node!");
         }
     }
-    
+
     /**
      * Gets the virtual index of the current node, based on a recursive
      * path up the tree. This is the index of the value in this node and
@@ -343,7 +340,7 @@ public final class SparseListNode {
         // calculate some convenience sizes
         int allRootSize = treeRootSize + virtualRootSize;
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
-        
+
         // if we're actually inserting space, do that
         if(value == null) {
             insertSpace(index, 1);
@@ -394,7 +391,7 @@ public final class SparseListNode {
             throw new IndexOutOfBoundsException("cannot insert into a tree of virtual size " + allSubtreeSize + " at " + index);
         }
     }
-    
+
     /**
      * Inserts space into the sparse list at the specified index with
      * the specified length.
@@ -403,7 +400,7 @@ public final class SparseListNode {
         // calculate some convenience sizes
         int allRootSize = treeRootSize + virtualRootSize;
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
-        
+
         // if we can insert on the left, insert there
         if(length < 0) {
             throw new IndexOutOfBoundsException("cannot insert space of length " + length);
@@ -411,7 +408,7 @@ public final class SparseListNode {
         // do nothing to insert no space
         } else if(length == 0) {
             // do nothing
-            
+
         // if the index is on the left side, insert there
         } else if(index < totalLeftSize) {
             if(left == null) left = new SparseListNode(host, this);
@@ -446,7 +443,7 @@ public final class SparseListNode {
     private void removeFromTree() {
         // if this node has no mass, we have a problem!
         if(treeRootSize == 0) throw new IllegalStateException("cannot delete a node of size 0");
-        
+
         // temporarily remove the leading nulls if they exist
         int spaceToRestore = 0;
         int restoreIndex = 0;
@@ -456,7 +453,7 @@ public final class SparseListNode {
             virtualRootSize = 0;
             fireChildSizeChanged(true, -1 * spaceToRestore);
         }
-        
+
         // if this is a leaf, we can delete it outright
         if(treeLeftSize == 0 && treeRightSize == 0) {
             // update the parent
@@ -509,7 +506,7 @@ public final class SparseListNode {
             middle.fireChildSizeChanged(true, -1 * middleVirtualRootSize);
             virtualRootSize = virtualRootSize + middleVirtualRootSize;
             fireChildSizeChanged(true, middleVirtualRootSize);
-            
+
             // unlink the middle node from the tree
             middle.removeFromTree();
             if(middle.treeLeftSize > 0 || middle.treeRightSize > 0) throw new IllegalStateException("cannot have a new middle with leaves");
@@ -554,7 +551,7 @@ public final class SparseListNode {
             host.insertNulls(restoreIndex, spaceToRestore);
         }
     }
-    
+
     /**
      * Sends notification to the parent node that nodes have been
      * removed. If there is no such parent node then only the host
@@ -565,14 +562,14 @@ public final class SparseListNode {
      */
     private void fireChildSizeChanged(boolean virtual, int difference) {
         if(difference == 0) return;
-        
+
         // fire notification at the next level up the tree
         if(parent != null) parent.childSizeChanged(this, virtual, difference);
         else host.childSizeChanged(difference);
         // fore notification of height changes
         if(!virtual) recalculateHeight();
     }
-    
+
     /**
      * Notifies that a node has been removed from the specified subtree.
      * This simply decrements the count on that subtree.
@@ -597,7 +594,7 @@ public final class SparseListNode {
         } else {
             throw new IllegalArgumentException(this + " cannot remove a subtree that does not exist on this node!");
         }
-        
+
         // fire notification at the next level up the tree
         if(parent != null) parent.childSizeChanged(this, virtual, difference);
         else host.childSizeChanged(difference);
@@ -609,11 +606,11 @@ public final class SparseListNode {
         if(original == left) left = replacement;
         else if(original == right) right = replacement;
         else throw new IllegalArgumentException(this + " cannot replace a non-existant child");
-        
+
         // the height may change as a consequence
         recalculateHeight();
     }
-    
+
     /**
      * Recalculates the cached height of this node after a child node has been
      * removed or added.
@@ -621,7 +618,7 @@ public final class SparseListNode {
     private void recalculateHeight() {
         // save the old height to test for a difference
         int oldHeight = height;
-        
+
         // calculate the new height
         if(left == null && right == null) height = 1;
         else if(right == null) height = 1 + left.height();
@@ -637,7 +634,7 @@ public final class SparseListNode {
     private int height() {
         return height;
     }
-    
+
     /**
      * A primitive way to validate that nodes have a consistent state. Called
      * on a subtree this validates the root of that subtree and then all child
@@ -649,10 +646,10 @@ public final class SparseListNode {
         // calculate some convenience sizes
         int allRootSize = treeRootSize + virtualRootSize;
         int allSubtreeSize = totalLeftSize + allRootSize + totalRightSize;
-        
+
         if(left != null) left.validate();
         if(right != null) right.validate();
-        
+
         if(value == null) {
             throw new IllegalStateException("Node value is null");
         }
@@ -687,7 +684,7 @@ public final class SparseListNode {
             throw new IllegalStateException(value + " Cached leftSize " + totalLeftSize + " != reported left.size() " + (left!=null?left.size():0));
         }
     }
-    
+
     /**
      * Checks the heights of the left and right child nodes, and does rotations
      * if necessary. This only does rotations at the current node. It is necessary
@@ -745,7 +742,7 @@ public final class SparseListNode {
         treeLeftSize = replacement.treeRightSize;
         totalLeftSize = replacement.totalRightSize;
         if(replacement.right != null) replacement.right.parent = this;
-        // set the replacement's parent to my parent and mine to the replacement 
+        // set the replacement's parent to my parent and mine to the replacement
         if(parent != null) {
             parent.replaceChildNode(this, replacement);
         } else {
@@ -776,7 +773,7 @@ public final class SparseListNode {
         treeRightSize = replacement.treeLeftSize;
         totalRightSize = replacement.totalLeftSize;
         if(replacement.left != null) replacement.left.parent = this;
-        // set the replacement's parent to my parent and mine to the replacement 
+        // set the replacement's parent to my parent and mine to the replacement
         if(parent != null) {
             parent.replaceChildNode(this, replacement);
         } else {
@@ -792,7 +789,7 @@ public final class SparseListNode {
         recalculateHeight();
     }
 
-    
+
     /**
      * Prints the tree by its contents.
      */
@@ -808,7 +805,7 @@ public final class SparseListNode {
             return "(. " + valueString + " " + right.toString() + ")";
         } else if(treeRootSize == 0) {
             return ".";
-        } else { 
+        } else {
             return valueString;
         }
     }

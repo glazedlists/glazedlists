@@ -6,12 +6,12 @@
  */
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
+// the core Glazed Lists packages
 import ca.odell.glazedlists.event.*;
-// Java collections are used for underlying data storage
-import java.util.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
+// To extend the List interface from Java Collections
+import java.util.*;
 
 /**
  * An EventList is a list that can send events to listeners. There are two
@@ -31,7 +31,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * <code><pre>EventList myList = ...
  * ThreadSafeList myThreadSafeList = new ThreadSafeList(myList);
  * // access myThreadSafeList here</code></pre>
- * 
+ *
  * <p>Alternatively, you can manually acquire the read lock before access and
  * release it afterwards:<br>
  * <code><pre>myList.getReadWriteLock().readLock().lock();

@@ -8,19 +8,16 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.*;
 // volatile implementation support
 import ca.odell.glazedlists.util.impl.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
-// Java collections are used for underlying data storage
-import java.util.*;
 
 
 /**
  * A filter list is a mutation-list that views a subset of the source list.
  * That subset may be the complete set, an empty set, or a select group of
- * elements from a list. 
+ * elements from a list.
  *
  * <p>The filter may be static or dynamic. In effect, the subset may change
  * in size by modifying the source set, or the filter itself. When the filter
@@ -40,7 +37,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
     /** the flag list contains Boolean.TRUE for selected items and null or others */
     private SparseList flagList = new SparseList();
-    
+
     /**
      * Creates a new filter list that filters elements out of the
      * specified source list. After an extending class is done instantiation,
@@ -48,10 +45,10 @@ public abstract class AbstractFilterList extends TransformedList implements List
      */
     protected AbstractFilterList(EventList source) {
         super(source);
-        
+
         // use an Internal Lock to avoid locking the source list during a sort
         readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
-        
+
         // load the initial data
         getReadWriteLock().readLock().lock();
         try {
@@ -63,8 +60,8 @@ public abstract class AbstractFilterList extends TransformedList implements List
             getReadWriteLock().readLock().unlock();
         }
     }
-    
-    
+
+
     /**
      * When the FlagList is prepared, it populates it with information from
      * the source list and the initial selection model.
@@ -89,78 +86,78 @@ public abstract class AbstractFilterList extends TransformedList implements List
     public final void listChanged(ListEvent listChanges) {
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
-        
+
         // handle reordering events
         if(listChanges.isReordering()) {
             int[] sourceReorderMap = listChanges.getReorderMap();
             int[] filterReorderMap = new int[flagList.getCompressedList().size()];
-            
+
             // adjust the flaglist & construct a reorder map to propagate
             SparseList previousFlagList = flagList;
             flagList = new SparseList();
             for(int i = 0; i < sourceReorderMap.length; i++) {
-                Object flag = previousFlagList.get(sourceReorderMap[i]); 
+                Object flag = previousFlagList.get(sourceReorderMap[i]);
                 flagList.add(flag);
                 if(flag != null) filterReorderMap[flagList.getCompressedIndex(i)] = previousFlagList.getCompressedIndex(sourceReorderMap[i]);
             }
-            
+
             // fire the reorder
             updates.reorder(filterReorderMap);
-            
+
         // handle non-reordering events
         } else {
-        
+
             // for all changes, one index at a time
             while(listChanges.next()) {
-                
+
                 // get the current change info
                 int sourceIndex = listChanges.getIndex();
                 int changeType = listChanges.getType();
-    
+
                 // handle delete events
                 if(changeType == ListEvent.DELETE) {
                     // test if this value was already not filtered out
                     boolean wasIncluded = flagList.get(sourceIndex) != null;
-                    
+
                     // if this value was not filtered out, it is now so add a change
                     if(wasIncluded) {
                         int filteredIndex = flagList.getCompressedIndex(sourceIndex);
                         updates.addDelete(filteredIndex);
                     }
-    
+
                     // remove this entry from the flag list
                     flagList.remove(sourceIndex);
-                    
+
                 // handle insert events
                 } else if(changeType == ListEvent.INSERT) {
-                    
+
                     // whether we should add this item
                     boolean include = filterMatches(source.get(sourceIndex));
-                    
+
                     // if this value should be included, add a change and add the item
                     if(include) {
                         flagList.add(sourceIndex, Boolean.TRUE);
                         int filteredIndex = flagList.getCompressedIndex(sourceIndex);
                         updates.addInsert(filteredIndex);
-    
+
                     // if this value should not be included, just add the item
                     } else {
                         flagList.add(sourceIndex, null);
                     }
-    
+
                 // handle update events
                 } else if(changeType == ListEvent.UPDATE) {
                     // test if this value was already not filtered out
                     boolean wasIncluded = flagList.get(sourceIndex) != null;
                     // whether we should add this item
                     boolean include = filterMatches(source.get(sourceIndex));
-    
+
                     // if this element is being removed as a result of the change
                     if(wasIncluded && !include) {
                         int filteredIndex = flagList.getCompressedIndex(sourceIndex);
                         flagList.set(sourceIndex, null);
                         updates.addDelete(filteredIndex);
-    
+
                     // if this element is being added as a result of the change
                     } else if(!wasIncluded && include) {
                         flagList.set(sourceIndex, Boolean.TRUE);
@@ -200,7 +197,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
 
             // for all source items, see what the change is
             for(int i = 0; i < source.size(); i++) {
-                
+
                 // test if this value was already not filtered out
                 boolean wasIncluded = flagList.get(i) != null;
                 // whether we should add this item
@@ -226,7 +223,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }
     }
-    
+
     /**
      * Tests if the specified item matches the current filter. The implementing
      * class must implement only this method.
@@ -250,7 +247,7 @@ public abstract class AbstractFilterList extends TransformedList implements List
     protected final int getSourceIndex(int mutationIndex) {
         return flagList.getIndex(mutationIndex);
     }
-    
+
     /**
      * Tests if this mutation shall accept calls to <code>add()</code>,
      * <code>remove()</code>, <code>set()</code> etc.
