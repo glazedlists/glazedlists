@@ -329,7 +329,41 @@ public class NetworkListTest extends TestCase {
         }
     }
 
-    
+
+    /**
+     * Verifies that nothing breaks when a client subscribes during a flurry of updates.
+     */
+    public void testFrequentUpdates() {
+        try {
+            // prepare the source list
+            String path = "/integers";
+            NetworkList sourceList = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
+
+            // prepare the target list
+            NetworkList targetList = peer.subscribe("localhost", serverPort, path, ByteCoderFactory.serializable());
+            targetList.disconnect();
+            
+            // retry a handful of times
+            for(int j = 0; j < 5; j++) {
+                waitFor(1000);
+                sourceList.clear();
+                targetList.connect();
+                for(int i = 0; i < 100; i++) {
+                    sourceList.add(new Integer(i));
+                }
+                // test that they're equal
+                System.out.println(" < WAITING ");
+                waitFor(1000);
+                System.out.println("            < DONE WAITING ");
+                assertEquals(sourceList, targetList);
+                targetList.disconnect();
+            }
+            
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
     
     /**
      * Waits for the specified duration of time. This hack method should be replaced
