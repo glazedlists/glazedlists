@@ -88,7 +88,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
      */
     public void listChanged(ListEvent listChanges) {
         // all of these changes to this list happen "atomically"
-        updates.beginAtomicChange();
+        updates.beginEvent();
         
         // for all changes, one index at a time
         while(listChanges.next()) {
@@ -105,7 +105,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 // if this value was not filtered out, it is now so add a change
                 if(wasIncluded) {
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.appendChange(filteredIndex, ListEvent.DELETE);
+                    updates.addDelete(filteredIndex);
                 }
 
                 // remove this entry from the flag list
@@ -121,7 +121,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 if(include) {
                     flagList.add(sourceIndex, Boolean.TRUE);
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.appendChange(filteredIndex, ListEvent.INSERT);
+                    updates.addInsert(filteredIndex);
 
                 // if this value should not be included, just add the item
                 } else {
@@ -139,18 +139,18 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 if(wasIncluded && !include) {
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
                     flagList.set(sourceIndex, null);
-                    updates.appendChange(filteredIndex, ListEvent.DELETE);
+                    updates.addDelete(filteredIndex);
 
                 // if this element is being added as a result of the change
                 } else if(!wasIncluded && include) {
                     flagList.set(sourceIndex, Boolean.TRUE);
                     int filteredIndex = flagList.getCompressedIndex(sourceIndex);
-                    updates.appendChange(filteredIndex, ListEvent.INSERT);
+                    updates.addInsert(filteredIndex);
                 }
             }
         }
         // commit the changes and notify listeners
-        updates.commitAtomicChange();
+        updates.commitEvent();
     }
 
     /**
@@ -168,7 +168,7 @@ public abstract class AbstractFilterList extends WritableMutationList implements
         ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
         try {
             // all of these changes to this list happen "atomically"
-            updates.beginAtomicChange();
+            updates.beginEvent();
 
             // for all source items, see what the change is
             for(int i = 0; i < source.size(); i++) {
@@ -182,18 +182,18 @@ public abstract class AbstractFilterList extends WritableMutationList implements
                 if(wasIncluded && !include) {
                     int filteredIndex = flagList.getCompressedIndex(i);
                     flagList.set(i, null);
-                    updates.appendChange(filteredIndex, ListEvent.DELETE);
+                    updates.addDelete(filteredIndex);
 
                 // if this element is being added as a result of the change
                 } else if(!wasIncluded && include) {
                     flagList.set(i, Boolean.TRUE);
                     int filteredIndex = flagList.getCompressedIndex(i);
-                    updates.appendChange(filteredIndex, ListEvent.INSERT);
+                    updates.addInsert(filteredIndex);
                 }
             }
 
             // commit the changes and notify listeners
-            updates.commitAtomicChange();
+            updates.commitEvent();
         } finally {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
         }

@@ -118,7 +118,7 @@ public final class UniqueList extends MutationList implements ListEventListener,
     public void listChanged(ListEvent listChanges) {
         List nonUniqueInserts = new ArrayList();
 
-        updates.beginAtomicChange();
+        updates.beginEvent();
 
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
@@ -146,7 +146,7 @@ public final class UniqueList extends MutationList implements ListEventListener,
             guaranteeUniqueness(insertIndex);
         }
 
-        updates.commitAtomicChange();
+        updates.commitEvent();
     }
 
     /**
@@ -160,7 +160,7 @@ public final class UniqueList extends MutationList implements ListEventListener,
             // non-mandatory change event since the number of duplicates changed.
             duplicatesList.add(changeIndex, null);
             int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
-            appendChange(compressedIndex, ListEvent.UPDATE, false);
+            addChange(ListEvent.UPDATE, compressedIndex, false);
             return -1;
         } else {
             // The value might not be a duplicate so add it to the unique view
@@ -181,7 +181,7 @@ public final class UniqueList extends MutationList implements ListEventListener,
             // of duplicates changed
             int compressedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
             duplicatesList.remove(changeIndex);
-            appendChange(compressedIndex, ListEvent.UPDATE, false);
+            addChange(ListEvent.UPDATE, compressedIndex, false);
         // The element is in the unique view
         } else {
             int compressedIndex = duplicatesList.getCompressedIndex(changeIndex);
@@ -192,12 +192,12 @@ public final class UniqueList extends MutationList implements ListEventListener,
                 duplicatesList.remove(changeIndex);
 
                 if(source.size() > compressedIndex) {
-                    appendChange(compressedIndex, ListEvent.UPDATE, false);
+                    addChange(ListEvent.UPDATE, compressedIndex, false);
                 }
             } else {
                 // The element has no duplicates
                 duplicatesList.remove(changeIndex);
-                appendChange(compressedIndex, ListEvent.DELETE, true);
+                addChange(ListEvent.DELETE, compressedIndex, true);
             }
         }
     }
@@ -261,13 +261,13 @@ public final class UniqueList extends MutationList implements ListEventListener,
                 // Need to send non-mandatory updates for this and previous index
                 // since a duplicate was added.  valueIsDuplicate() guarantees
                 // that a previous value exists.
-                appendChange(compressedIndex, ListEvent.UPDATE, false);
-                appendChange(compressedIndex - 1, ListEvent.UPDATE, false);
+                addChange(ListEvent.UPDATE, compressedIndex, false);
+                addChange(ListEvent.UPDATE, compressedIndex - 1, false);
 
             } else {
                 // The element was unique and is now a duplicate
                 duplicatesList.set(changeIndex, null);
-                appendChange(compressedIndex, ListEvent.DELETE, true);
+                addChange(ListEvent.DELETE, compressedIndex, true);
             }
         } else {
             // this is still unique, but we must handle the follower
@@ -283,7 +283,7 @@ public final class UniqueList extends MutationList implements ListEventListener,
                     // - causes 2 unnecessary non-mandatory UPDATEs when
                     // D -> D when 0 should be forwarded.
                     duplicatesList.set(changeIndex + 1, Boolean.TRUE);
-                    appendChange(compressedIndex, ListEvent.UPDATE, false);
+                    addChange(ListEvent.UPDATE, compressedIndex, false);
                     return changeIndex;
                 // The next value is in the unique view
                 } else {
@@ -293,13 +293,13 @@ public final class UniqueList extends MutationList implements ListEventListener,
                     // Example : B D D
                     // - This will cause a DELETE then an INSERT of the same
                     // value if B -> B
-                    appendChange(compressedIndex, ListEvent.DELETE, true);
+                    addChange(ListEvent.DELETE, compressedIndex, true);
                     return changeIndex;
                 }
             // the follower does not exist
             } else {
                 // The value is at the end of the list and thus has no duplicates
-                appendChange(compressedIndex, ListEvent.UPDATE, true);
+                addChange(ListEvent.UPDATE, compressedIndex, true);
             }
         }
         return -1;
@@ -317,10 +317,10 @@ public final class UniqueList extends MutationList implements ListEventListener,
         if(compressedIndex < size() - 1 && 0 == comparator.compare(get(compressedIndex), get(compressedIndex + 1))) {
             int duplicateIndex = duplicatesList.getIndex(compressedIndex + 1);
             duplicatesList.set(duplicateIndex, null);
-            appendChange(compressedIndex, ListEvent.UPDATE, false);
+            addChange(ListEvent.UPDATE, compressedIndex, false);
         // Element has no duplicate follower
         } else {
-            appendChange(compressedIndex, ListEvent.INSERT, true);
+            addChange(ListEvent.INSERT, compressedIndex, true);
         }
     }
 
@@ -334,9 +334,9 @@ public final class UniqueList extends MutationList implements ListEventListener,
      * @param type The type of this change
      * @param mandatory Whether or not to propagate this change to all listeners
      */
-    private void appendChange(int index, int type, boolean mandatory) {
+    private void addChange(int type, int index, boolean mandatory) {
         if(mandatory) {
-            updates.appendChange(index, type);
+            updates.addChange(type, index);
         } else {
             // Does nothing currently
             // This is a hook for overlaying the Bag ADT over top of the UniqueList

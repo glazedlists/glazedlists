@@ -48,11 +48,11 @@ public final class ThreadSafeList extends WritableMutationList implements ListEv
      */
     public void listChanged(ListEvent listChanges) {
         // just pass on the changes
-        updates.beginAtomicChange();
+        updates.beginEvent();
         while(listChanges.next()) {
-            updates.appendChange(listChanges.getIndex(), listChanges.getType());
+            updates.addChange(listChanges.getType(), listChanges.getIndex());
         }
-        updates.commitAtomicChange();
+        updates.commitEvent();
     }
 
     /**

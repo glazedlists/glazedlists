@@ -74,7 +74,13 @@ consistent with J2SE, and fewer public classes.
 </code></td></tr>
 
 <tr><td valign="top"><code>ListChangeSequence()</code></td>
-<td valign="top"><code>ListEventFactory(EventList sourceList)</code></td></tr>
+<td valign="top"><code>ListEventAssember(EventList sourceList)</code></td></tr>
+
+<tr><td valign="top"><code>ListChangeSequence.appendChange(int index, int type)</code></td>
+<td valign="top"><code>ListEventAssembler.addChange(int type, int index)</code></td></tr>
+
+<tr><td valign="top"><code>ListChangeSequence.appendChange(int index, int startIndex, int endIndex)</code></td>
+<td valign="top"><code>ListEventAssembler.addChange(int type, int startIndex, int endIndex)</code></td></tr>
 
 <tr><td valign="top"><code>ListChangeListenerEventThreadProxy</code></td>
 <td valign="top"><code>EventThreadProxy</code></td></tr>

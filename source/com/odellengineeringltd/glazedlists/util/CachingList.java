@@ -223,7 +223,7 @@ public class CachingList extends WritableMutationList implements ListEventListen
      * @param listChanges The list of changes to apply to this list
      */
     public final void listChanged(ListEvent listChanges) {
-        updates.beginAtomicChange();
+        updates.beginEvent();
         while(listChanges.next()) {
             // get the current change info
             final int index = listChanges.getIndex();
@@ -252,9 +252,9 @@ public class CachingList extends WritableMutationList implements ListEventListen
                     currentSize--;
                 }
             }
-            updates.appendChange(index, changeType);
+            updates.addChange(changeType, index);
         }
-        updates.commitAtomicChange();
+        updates.commitEvent();
     }
 
     /**

@@ -60,7 +60,7 @@ public final class ListEventAssembler {
      * place. Otherwise there is a conflicting change and a
      * ConcurrentModificationException is thrown.
      */
-    public synchronized void beginAtomicChange() {
+    public synchronized void beginEvent() {
         if(atomicChangeBlocks != null) {
             throw new ConcurrentModificationException("Cannot change this list while another change is taking place");
         }
@@ -86,25 +86,13 @@ public final class ListEventAssembler {
     }
         
     /**
-     * Adds the specified change to the set of list changes. The change
-     * will be merged with the most recent change if possible, otherwise a
-     * new change will be created and added.
-     *
-     * <p>One or more calls to this method must be prefixed by a call to
-     * beginAtomicChange() and followed by a call to commitAtomicChange().
-     */
-    public void appendChange(int index, int type) {
-        appendChange(index, index, type);
-    }
-
-    /**
      * Adds a block of changes to the set of list changes. The change block
      * allows a range of changes to be grouped together for efficiency.
      *
      * <p>One or more calls to this method must be prefixed by a call to
-     * beginAtomicChange() and followed by a call to commitAtomicChange().
+     * beginEvent() and followed by a call to commitEvent().
      */
-    public void appendChange(int startIndex, int endIndex, int type) {
+    public void addChange(int type, int startIndex, int endIndex) {
         // create a new change for the first change
         if(atomicLatestBlock == null) {
             atomicLatestBlock = createListEventBlock(startIndex, endIndex, type);
@@ -121,12 +109,54 @@ public final class ListEventAssembler {
             atomicLatestBlock = block;
         }
     }
-    
+    /**
+     * Convenience method for appending a single change of the specified type.
+     */
+    public void addChange(int type, int index) {
+        addChange(type, index, index);
+    }
+    /**
+     * Convenience method for appending a single insert.
+     */
+    public void addInsert(int index) {
+        addChange(ListEvent.INSERT, index);
+    }
+    /**
+     * Convenience method for appending a single delete.
+     */
+    public void addDelete(int index) {
+        addChange(ListEvent.DELETE, index);
+    }
+    /**
+     * Convenience method for appending a single update.
+     */
+    public void addUpdate(int index) {
+        addChange(ListEvent.UPDATE, index);
+    }
+    /**
+     * Convenience method for appending a range of inserts.
+     */
+    public void addInsert(int startIndex, int endIndex) {
+        addChange(ListEvent.INSERT, startIndex, endIndex);
+    }
+    /**
+     * Convenience method for appending a range of deletes.
+     */
+    public void addDelete(int startIndex, int endIndex) {
+        addChange(ListEvent.DELETE, startIndex, endIndex);
+    }
+    /**
+     * Convenience method for appending a range of updates.
+     */
+    public void addUpdate(int startIndex, int endIndex) { 
+        addChange(ListEvent.UPDATE, startIndex, endIndex);
+    }
+
     /**
      * Commits the current atomic change to this list change queue. This will
      * notify all listeners about the change.
      */
-    public synchronized void commitAtomicChange() {
+    public synchronized void commitEvent() {
         // do a 'real' commit only on non-empty changes
         if(atomicChangeBlocks.size() > 0) {
             // sort and simplify this block

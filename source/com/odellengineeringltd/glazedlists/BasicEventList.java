@@ -66,12 +66,12 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             // create the change event
-            updates.beginAtomicChange();
-            updates.appendChange(index, ListEvent.INSERT);
+            updates.beginEvent();
+            updates.addInsert(index);
             // do the actual add
             data.add(index, element);
             // fire the event
-            updates.commitAtomicChange();
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -84,12 +84,12 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             // create the change event
-            updates.beginAtomicChange();
-            updates.appendChange(size(), ListEvent.INSERT);
+            updates.beginEvent();
+            updates.addInsert(size());
             // do the actual add
             boolean result = data.add(element);
             // fire the event
-            updates.commitAtomicChange();
+            updates.commitEvent();
             return result;
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -116,12 +116,12 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             // create the change event
-            updates.beginAtomicChange();
-            updates.appendChange(index, index + collection.size() - 1, ListEvent.INSERT);
+            updates.beginEvent();
+            updates.addInsert(index, index + collection.size() - 1);
             // do the actual add
             boolean result = data.addAll(index, collection);
             // fire the event
-            updates.commitAtomicChange();
+            updates.commitEvent();
             return result;
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -147,8 +147,8 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             // create the change event
-            updates.beginAtomicChange();
-            updates.appendChange(index, index + objects.length - 1, ListEvent.INSERT);
+            updates.beginEvent();
+            updates.addInsert(index, index + objects.length - 1);
             // do the actual add
             boolean overallResult = true;
             boolean elementResult = true;
@@ -157,7 +157,7 @@ public class BasicEventList implements EventList, Serializable {
                 overallResult = (overallResult && elementResult);
             }
             // fire the event
-            updates.commitAtomicChange();
+            updates.commitEvent();
             return overallResult;
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -171,12 +171,12 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             // create the change event
-            updates.beginAtomicChange();
-            updates.appendChange(index, ListEvent.DELETE);
+            updates.beginEvent();
+            updates.addDelete(index);
             // do the actual remove
             Object removed = data.remove(index);
             // fire the event
-            updates.commitAtomicChange();
+            updates.commitEvent();
             return removed;
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -209,12 +209,12 @@ public class BasicEventList implements EventList, Serializable {
             // don't do a clear on an empty set
             if(size() == 0) return;
             // create the change event
-            updates.beginAtomicChange();
-            updates.appendChange(0, size() - 1, ListEvent.DELETE);
+            updates.beginEvent();
+            updates.addDelete(0, size() - 1);
             // do the actual clear
             data.clear();
             // fire the event
-            updates.commitAtomicChange();
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -228,12 +228,12 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             // create the change event
-            updates.beginAtomicChange();
-            updates.appendChange(index, ListEvent.UPDATE);
+            updates.beginEvent();
+            updates.addUpdate(index);
             // do the actual set
             Object previous = data.set(index, element);
             // fire the event
-            updates.commitAtomicChange();
+            updates.commitEvent();
             return previous;
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -376,16 +376,16 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             boolean changed = false;
-            updates.beginAtomicChange();
+            updates.beginEvent();
             for(Iterator i = collection.iterator(); i.hasNext(); ) {
                 int index = -1;
                 while((index = data.indexOf(i.next())) != -1) {
-                    updates.appendChange(index, ListEvent.DELETE);
+                    updates.addDelete(index);
                     data.remove(index);
                     changed = true;
                 }
             }
-            updates.commitAtomicChange();
+            updates.commitEvent();
             return changed;
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -401,18 +401,18 @@ public class BasicEventList implements EventList, Serializable {
         getReadWriteLock().writeLock().lock();
         try {
             boolean changed = false;
-            updates.beginAtomicChange();
+            updates.beginEvent();
             int index = 0;
             while(index < data.size()) {
                 if(collection.contains(data.get(index))) {
                     index++;
                 } else {
-                    updates.appendChange(index, ListEvent.DELETE);
+                    updates.addDelete(index);
                     data.remove(index);
                     changed = true;
                 }
             }
-            updates.commitAtomicChange();
+            updates.commitEvent();
             return changed;
         } finally {
             getReadWriteLock().writeLock().unlock();

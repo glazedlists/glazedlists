@@ -68,7 +68,7 @@ public class QueryList extends AbstractList implements EventList {
             boolean queryMatches = false;
             if(query != null) queryMatches = query.matchesObject(updated);
             int listIndex = values.indexOf(updated);
-            updates.beginAtomicChange();
+            updates.beginEvent();
             // when it matches the query and its not in the list, add it!
             if(queryMatches && listIndex == -1) {
                 // find the best place to insert this item into the list
@@ -78,12 +78,12 @@ public class QueryList extends AbstractList implements EventList {
                     if(updated.compareTo(listElement) > 0) continue;
                     else break;
                 }
-                updates.appendChange(insertLocation, ListEvent.INSERT);
+                updates.addInsert(insertLocation);
                 before.add(updated);
                 values.add(insertLocation, updated);
             // when it matches and it is in the list, update it!
             } else if(queryMatches && listIndex != -1) {
-                updates.appendChange(listIndex, ListEvent.UPDATE);
+                updates.addUpdate(listIndex);
                 Object old = values.get(listIndex);
                 values.set(listIndex, updated);
                 // update the before copy by removing and re-adding it
@@ -91,11 +91,11 @@ public class QueryList extends AbstractList implements EventList {
                 before.add(updated);
             // when it doesn't match and it is in the list, remove it!
             } else if(!queryMatches && listIndex != -1) {
-                updates.appendChange(listIndex, ListEvent.DELETE);
+                updates.addDelete(listIndex);
                 values.remove(listIndex);
                 before.remove(updated);
             }
-            updates.commitAtomicChange();
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -111,7 +111,7 @@ public class QueryList extends AbstractList implements EventList {
         // skip these results if the set is null
         if(after == null) return;
         // keep a running list of what's been added and what's been deleted
-        updates.beginAtomicChange();
+        updates.beginEvent();
         // use a temporary values list
         ArrayList updatedValues = new ArrayList();
         // iterate through the all values simultaneously, looking for differences
@@ -128,7 +128,7 @@ public class QueryList extends AbstractList implements EventList {
             // when the before list holds items smaller than the after list item,
             // the before list items are out-of-date and must be deleted 
             while(currentBefore != null && currentAfter.compareTo(currentBefore) > 0) {
-                updates.appendChange(updatedValues.size(), ListEvent.DELETE);
+                updates.addDelete(updatedValues.size());
                 if(beforeIterator.hasNext()) {
                     currentBefore = (Comparable)beforeIterator.next();
                 } else { 
@@ -147,14 +147,14 @@ public class QueryList extends AbstractList implements EventList {
             // when the before list holds no more items or an item that is larger than
             // the current after list item, insert the after list item
             } else {
-                updates.appendChange(updatedValues.size(), ListEvent.INSERT);
+                updates.addInsert(updatedValues.size());
                 updatedValues.add(currentAfter);
             }
         }
         // when the before list holds items larger than the largest after list item,
         // the before list items are out-of-date and must be deleted 
         while(currentBefore != null) {
-            updates.appendChange(updatedValues.size(), ListEvent.DELETE);
+            updates.addDelete(updatedValues.size());
             if(beforeIterator.hasNext()) {
                 currentBefore = (Comparable)beforeIterator.next();
             } else {
@@ -167,7 +167,7 @@ public class QueryList extends AbstractList implements EventList {
             values = updatedValues;
             before = after;
             // fire all the changes to change listeners
-            updates.commitAtomicChange();
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }

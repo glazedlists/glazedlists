@@ -114,7 +114,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
         try {
         
             // prepare a sequence of changes
-            updates.beginAtomicChange();
+            updates.beginEvent();
             
             // for all changes simply update the flag list
             while(listChanges.next()) {
@@ -132,7 +132,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListEvent.DELETE);
+                        updates.addDelete(previousSelectionIndex);
                     }
                     
                 // when an element is inserted, it is selected if its index was selected
@@ -141,7 +141,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
                     // when selected, add the flag and fire a selection event
                     if(previouslySelected) {
                         flagList.add(index, Boolean.TRUE);
-                        updates.appendChange(previousSelectionIndex, ListEvent.INSERT);
+                        updates.addInsert(previousSelectionIndex);
 
                     // when not selected, just add the space
                     } else {
@@ -153,13 +153,13 @@ public class SelectionList extends MutationList implements ListSelectionListener
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListEvent.UPDATE);
+                        updates.addUpdate(previousSelectionIndex);
                     }
                 }
             }
     
             // fire the changes
-            updates.commitAtomicChange();
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -175,7 +175,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
         try {
             
             // prepare a sequence of changes
-            updates.beginAtomicChange();
+            updates.beginEvent();
             
             // for each element in the change range, update the selection
             for(int i = event.getFirstIndex(); i <= event.getLastIndex() && i < flagList.size(); i++) {
@@ -191,7 +191,7 @@ public class SelectionList extends MutationList implements ListSelectionListener
                     // it is no longer selected so remove it from the selection list
                     int previousSelectionIndex = flagList.getCompressedIndex(i);
                     flagList.set(i, null);
-                    updates.appendChange(previousSelectionIndex, ListEvent.DELETE);
+                    updates.addDelete(previousSelectionIndex);
                     
                 // if the value was not selected before this event
                 } else {
@@ -201,11 +201,11 @@ public class SelectionList extends MutationList implements ListSelectionListener
                     // it is newly selected so add it to the selection list
                     flagList.set(i, Boolean.TRUE);
                     int currentSelectionIndex = flagList.getCompressedIndex(i);
-                    updates.appendChange(currentSelectionIndex, ListEvent.INSERT);
+                    updates.addInsert(currentSelectionIndex);
                 }
             }
             // fire the changes
-            updates.commitAtomicChange();
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }

@@ -110,7 +110,7 @@ public final class SubEventList extends WritableMutationList implements ListEven
      * within the bounds of the SubEventList.
      */
     public void listChanged(ListEvent listChanges) {
-        updates.beginAtomicChange();
+        updates.beginEvent();
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
@@ -128,12 +128,12 @@ public final class SubEventList extends WritableMutationList implements ListEven
             } else if(changeIndex < endIndex) {
                 if(changeType == ListEvent.INSERT) {
                     endIndex++;
-                    updates.appendChange(changeIndex - startIndex, ListEvent.INSERT);
+                    updates.addInsert(changeIndex - startIndex);
                 } else if(changeType == ListEvent.UPDATE) {
-                    updates.appendChange(changeIndex - startIndex, ListEvent.INSERT);
+                    updates.addInsert(changeIndex - startIndex);
                 } else if(changeType == ListEvent.DELETE) {
                     endIndex--;
-                    updates.appendChange(changeIndex - startIndex, ListEvent.DELETE);
+                    updates.addDelete(changeIndex - startIndex);
                 }
             // if it is a change after
             } else {
@@ -141,6 +141,6 @@ public final class SubEventList extends WritableMutationList implements ListEven
             }
         }
         assert(startIndex <= endIndex);
-        updates.commitAtomicChange();
+        updates.commitEvent();
     }
 }

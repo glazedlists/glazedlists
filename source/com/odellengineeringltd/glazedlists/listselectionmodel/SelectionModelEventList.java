@@ -192,7 +192,7 @@ public class SelectionModelEventList {
             int maxSelectionIndexBefore = selectionModel.getMaxSelectionIndex();
             
             // prepare a sequence of changes
-            updates.beginAtomicChange();
+            updates.beginEvent();
             
             // for all changes simply update the flag list
             while(listChanges.next()) {
@@ -210,7 +210,7 @@ public class SelectionModelEventList {
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListEvent.DELETE);
+                        updates.addDelete(previousSelectionIndex);
                     }
                     
                 // when an element is inserted, it is selected if its index was selected
@@ -223,7 +223,7 @@ public class SelectionModelEventList {
                         if(selectionModel.selectionMode == selectionModel.SINGLE_INTERVAL_SELECTION
                         || selectionModel.selectionMode == selectionModel.MULTIPLE_INTERVAL_SELECTION) {
                             flagList.add(index, Boolean.TRUE);
-                            updates.appendChange(previousSelectionIndex, ListEvent.INSERT);
+                            updates.addInsert(previousSelectionIndex);
 
                         // do not select the inserted for single selection and defensive selection
                         } else {
@@ -240,13 +240,13 @@ public class SelectionModelEventList {
     
                     // fire a change to the selection list if a selected object is changed
                     if(previouslySelected) {
-                        updates.appendChange(previousSelectionIndex, ListEvent.UPDATE);
+                        updates.addUpdate(previousSelectionIndex);
                     }
                 }
             }
     
             // fire the changes to ListEventListeners
-            updates.commitAtomicChange();
+            updates.commitEvent();
 
             // fire the changes to ListSelectionListeners
             if(minSelectionIndexBefore != 0 && maxSelectionIndexBefore != 0) {
@@ -382,7 +382,7 @@ public class SelectionModelEventList {
             int maxChangedIndex = minUnionIndex - 1;
             
             // prepare a sequence of changes
-            updates.beginAtomicChange();
+            updates.beginEvent();
 
             // walk through the list making changes
             for(int i = minUnionIndex; i <= maxUnionIndex; i++) {
@@ -399,18 +399,18 @@ public class SelectionModelEventList {
                     if(selectedBefore) {
                         int selectionIndex = flagList.getCompressedIndex(i);
                         flagList.set(i, null);
-                        updates.appendChange(selectionIndex, ListEvent.DELETE);
+                        updates.addDelete(selectionIndex);
                     // if it is being selected
                     } else {
                         flagList.set(i, Boolean.TRUE);
                         int selectionIndex = flagList.getCompressedIndex(i);
-                        updates.appendChange(selectionIndex, ListEvent.INSERT);
+                        updates.addInsert(selectionIndex);
                     }
                 }
             }
             
             // notify event lists first
-            updates.commitAtomicChange();
+            updates.commitEvent();
             
             // notify list selection listeners second
             if(minChangedIndex <= maxChangedIndex) fireSelectionChanged(minChangedIndex, maxChangedIndex);

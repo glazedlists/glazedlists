@@ -58,9 +58,9 @@ public class CompositeList extends AbstractList implements EventList {
 
             // pass on a change for the insert of all this list's elements
             if(memberList.size() > 0) {
-                updates.beginAtomicChange();
-                updates.appendChange(offset, offset + memberList.size() - 1, ListEvent.INSERT);
-                updates.commitAtomicChange();
+                updates.beginEvent();
+                updates.addInsert(offset, offset + memberList.size() - 1);
+                updates.commitEvent();
             }
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -92,9 +92,9 @@ public class CompositeList extends AbstractList implements EventList {
         
             // pass on a change for the remove of all this list's elements
             if(memberList.size() > 0) {
-                updates.beginAtomicChange();
-                updates.appendChange(offset, offset + memberList.size() - 1, ListEvent.DELETE);
-                updates.commitAtomicChange();
+                updates.beginEvent();
+                updates.addDelete(offset, offset + memberList.size() - 1);
+                updates.commitEvent();
             }
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -243,12 +243,12 @@ public class CompositeList extends AbstractList implements EventList {
                 int offset = getListOffset(this);
 
                 // pass on the changes
-                updates.beginAtomicChange();
+                updates.beginEvent();
                 while(listChanges.next()) {
                     // propagate the change
                     int index = listChanges.getIndex();
                     int type = listChanges.getType();
-                    updates.appendChange(offset + index, type);
+                    updates.addChange(type, offset + index);
                     
                     // update the size
                     if(type == ListEvent.DELETE) {
@@ -258,7 +258,7 @@ public class CompositeList extends AbstractList implements EventList {
                     }
                     assert(size >= 0);
                 }
-                updates.commitAtomicChange();
+                updates.commitEvent();
             } finally {
                 getReadWriteLock().writeLock().unlock();
             }

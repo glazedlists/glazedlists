@@ -138,10 +138,10 @@ public class FreezableList extends WritableMutationList implements ListEventList
             frozenData.clear();
             
             // fire events to listeners of the thaw
-            updates.beginAtomicChange();
-            if(frozenDataSize > 0) updates.appendChange(0, frozenDataSize - 1, ListEvent.DELETE);
-            if(source.size() > 0) updates.appendChange(0, source.size() - 1, ListEvent.INSERT);
-            updates.commitAtomicChange();
+            updates.beginEvent();
+            if(frozenDataSize > 0) updates.addDelete(0, frozenDataSize - 1);
+            if(source.size() > 0) updates.addInsert(0, source.size() - 1);
+            updates.commitEvent();
 
             // being listening to update events
             source.addListEventListener(this);
@@ -165,11 +165,11 @@ public class FreezableList extends WritableMutationList implements ListEventList
             
         } else {
             // just pass on the changes
-            updates.beginAtomicChange();
+            updates.beginEvent();
             while(listChanges.next()) {
-                updates.appendChange(listChanges.getIndex(), listChanges.getType());
+                updates.addChange(listChanges.getType(), listChanges.getIndex());
             }
-            updates.commitAtomicChange();
+            updates.commitEvent();
         }
     }
 }

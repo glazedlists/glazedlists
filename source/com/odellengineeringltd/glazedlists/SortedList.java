@@ -87,7 +87,7 @@ public final class SortedList extends WritableMutationList implements ListEventL
      */
     public void listChanged(ListEvent listChanges) {
         // all of these changes to this list happen "atomically"
-        updates.beginAtomicChange();
+        updates.beginEvent();
         
         // first update the offset tree for all changes, and keep the changed nodes in a list
         ArrayList unsortedNodes = new ArrayList();
@@ -117,7 +117,7 @@ public final class SortedList extends WritableMutationList implements ListEventL
                 IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
                 unsortedNode.removeFromTree();
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
-                updates.appendChange(deleteSortedIndex, ListEvent.DELETE);
+                updates.addDelete(deleteSortedIndex);
 
             // on update, delete the sorted node
             } else if(changeType == ListEvent.UPDATE) {
@@ -146,7 +146,7 @@ public final class SortedList extends WritableMutationList implements ListEventL
             if(changeType == ListEvent.INSERT) {
                 IndexedTreeNode unsortedNode = (IndexedTreeNode)unsortedNodesIterator.next();
                 int sortedIndex = insertByUnsortedNode(unsortedNode);
-                updates.appendChange(sortedIndex, ListEvent.INSERT);
+                updates.addInsert(sortedIndex);
 
             // on delete, we've already fired the event
             } else if(changeType == ListEvent.DELETE) {
@@ -159,10 +159,10 @@ public final class SortedList extends WritableMutationList implements ListEventL
                 int insertSortedIndex = insertByUnsortedNode(unsortedNode);
                 
                 if(deleteSortedIndex == insertSortedIndex) {
-                    updates.appendChange(insertSortedIndex, ListEvent.UPDATE);
+                    updates.addUpdate(insertSortedIndex);
                 } else {
-                    updates.appendChange(deleteSortedIndex, ListEvent.DELETE);
-                    updates.appendChange(insertSortedIndex, ListEvent.INSERT);
+                    updates.addDelete(deleteSortedIndex);
+                    updates.addInsert(insertSortedIndex);
                 }
             }
         }
@@ -171,7 +171,7 @@ public final class SortedList extends WritableMutationList implements ListEventL
         if(unsortedNodesIterator.hasNext()) throw new IllegalStateException();
         
         // commit the changes and notify listeners
-        updates.commitAtomicChange();
+        updates.commitEvent();
     }
     
     /**
@@ -250,10 +250,10 @@ public final class SortedList extends WritableMutationList implements ListEventL
             }
 
             // notification about the big change
-            updates.beginAtomicChange();
-            updates.appendChange(0, size() - 1, ListEvent.DELETE);
-            updates.appendChange(0, size() - 1, ListEvent.INSERT);
-            updates.commitAtomicChange();
+            updates.beginEvent();
+            updates.addDelete(0, size() - 1);
+            updates.addInsert(0, size() - 1);
+            updates.commitEvent();
             
             //System.out.println("  < Sorted  a list of size: " + source.size());
 
