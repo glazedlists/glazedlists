@@ -7,6 +7,7 @@
 package ca.odell.glazedlists;
 
 import java.util.*;
+import java.io.*;
 
 /**
  * Utility class for analyzing the performance of the UniqueList.
@@ -18,28 +19,65 @@ public class UniqueListPerformance {
     /**
      * Execute a performance test that is specified on the command line.
      */
-    public static void main(String[] args) {
-        if(args.length != 0) {
+    public static void main(String[] args) throws Exception {
+        if(args.length != 2) {
+            System.out.println();
+            System.out.println("Usage: UniqueListPerformance <testfile> <numOfFilters>");
+            System.out.println();
+            System.out.println("<testfile> is a file containing the Mozilla Bug db");
+            System.out.println("<numOfFilters> is the number of times to filter the source list.");
+            System.out.println();
             return;
         }
 
-        System.out.println("Generating Test Data...");
+        // Start reading the test data file
+        System.out.println();
+        System.out.println("Reading data from testfile...");
         BasicEventList source = new BasicEventList();
         Random random = new Random(137);
-        for(int i = 0;i < 10000;i++) {
-            source.add(new SimpleBusinessObject(random.nextInt(500), random.nextInt(500), random.nextInt(500), random.nextInt(500), random.nextInt(500)));
+        BufferedReader in = new BufferedReader(new FileReader(args[0]));
+        String line = "";
+
+        // trim the first few lines of the file to remove filter related items
+        while(!(line = in.readLine()).equals("")) {
+            // no-op to ignore the file header which is for text filtering
         }
-        AllOrOneValueFilter firstFilter =  new AllOrOneValueFilter(source, GlazedLists.beanPropertyComparator(SimpleBusinessObject.class, "a"));
-        UniqueList secondFilter = new UniqueList(firstFilter,  GlazedLists.beanPropertyComparator(SimpleBusinessObject.class, "b"));
-        UniqueList thirdFilter =  new UniqueList(secondFilter, GlazedLists.beanPropertyComparator(SimpleBusinessObject.class, "c"));
-        UniqueList fourthFilter = new UniqueList(thirdFilter,  GlazedLists.beanPropertyComparator(SimpleBusinessObject.class, "d"));
-        UniqueList fifthFilter =  new UniqueList(fourthFilter, GlazedLists.beanPropertyComparator(SimpleBusinessObject.class, "e"));
+
+        // Read the actual data.
+        String[] entryValues = new String[8];
+        int counter = 0;
+        while((line = in.readLine()) != null) {
+            if(line.equals("")) {
+                source.add(new MozillaEntry(entryValues[0], entryValues[1],
+                    entryValues[2], entryValues[3], entryValues[4],
+                    entryValues[5], entryValues[6], entryValues[7]));
+                counter = 0;
+
+            } else {
+                entryValues[counter] = line;
+                counter++;
+            }
+        }
+
+        // we're done reading
+        System.out.println("Done.  " + source.size() + " issue entries loaded.\n");
+        in.close();
+
+        // Now set up the transformations
+        System.out.println("Setting up list transformations...");
+        AllOrOneValueFilter firstFilter =  new AllOrOneValueFilter(source, GlazedLists.beanPropertyComparator(MozillaEntry.class, "user"));
+        UniqueList secondFilter = new UniqueList(firstFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
+        UniqueList thirdFilter =  new UniqueList(secondFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
+        UniqueList fourthFilter = new UniqueList(thirdFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
+        UniqueList fifthFilter =  new UniqueList(fourthFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
+        UniqueList sixthFilter =  new UniqueList(fifthFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
         System.out.println("Done.\n");
 
         System.out.println("Starting performance test...");
+        int filterIterations = Integer.parseInt(args[1]);
         long startTime = System.currentTimeMillis();
-        for(int i = 0;i < 1000;i++) {
-            firstFilter.setUnfilteredIndex(random.nextInt(500) - 1);
+        for(int i = 0;i < filterIterations;i++) {
+            firstFilter.setUnfilteredIndex(random.nextInt(source.size()) - 1);
         }
         long endTime = System.currentTimeMillis();
         long testTime = endTime - startTime;
@@ -92,47 +130,64 @@ public class UniqueListPerformance {
     }
 
     /**
-     * A simple business object to use for testing.
+     * An entry in the Mozilla bug db
      */
-    public static class SimpleBusinessObject {
-
+    public static class MozillaEntry {
         /** some JavaBean properties */
-        private int a;
-        private int b;
-        private int c;
-        private int d;
-        private int e;
+        private String id;
+        private String user;
+        private String priority;
+        private String os;
+        private String email;
+        private String result;
+        private String status;
+        private String desc;
 
         /**
-         * Creates a new SimpleBusinessObject to use for performance testing
+         * Models an entry in the Mozilla bug db.
          */
-        SimpleBusinessObject(int a, int b, int c, int d, int e) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-            this.d = d;
-            this.e = e;
+        MozillaEntry(String id, String user, String priority, String os, String email, String result, String status, String desc) {
+            this.id = id;
+            this.user = user;
+            this.priority = priority;
+            this.os = os;
+            this.email = email;
+            this.result = result;
+            this.status = status;
+            this.desc = desc;
         }
 
         /** getters for the JavaBean properties */
-        public int getA() {
-            return a;
+        public String getId() {
+            return id;
         }
 
-        public int getB() {
-            return b;
+        public String getUser() {
+            return user;
         }
 
-        public int getC() {
-            return c;
+        public String getPriority() {
+            return priority;
         }
 
-        public int getD() {
-            return d;
+        public String getOs() {
+            return os;
         }
 
-        public int getE() {
-            return e;
+        public String getEmail() {
+            return email;
+        }
+
+        public String getResult() {
+            return result;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public String getDesc() {
+            return desc;
         }
     }
 }
