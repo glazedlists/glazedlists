@@ -18,12 +18,6 @@ import java.util.*;
  * indefinitely. The event is accessed like an iterator, with the user calling
  * next() repeatedly to view the changes in sequence.
  *
- * <p>The user must call next() until it returns false in order to increment the
- * iterator until its end. Otherwise the next change event notification will
- * first include unseen changes from the current change. In order to clear the
- * current location of the iterator, use the clearEventQueue() method. This will
- * clear the values of pending events.
- *
  * <p>It is also possible to view changes in blocks, which may provide some
  * performance benefit. To use this, use the nextBlock() method instead of the
  * next() method.
@@ -37,8 +31,6 @@ public final class ListEvent extends EventObject {
     public static final int UPDATE = 1;
     public static final int INSERT = 2;
 
-    /** the number of atomic changes seen by this view */
-    private int atomicCount;
     /** the number of blocks of changes seen by this view */
     private int blockCount;
     /** the current change block */
@@ -50,9 +42,6 @@ public final class ListEvent extends EventObject {
     private EventList sourceList;
     /** the master sequence that this is a view of */
     private ListEventAssembler masterSequence;
-    
-    /** the marked atomic count, for later revew */
-    private int atomicCountMark = -1;
     
     /**
      * Create a new list change sequence that uses the source master list
@@ -66,7 +55,6 @@ public final class ListEvent extends EventObject {
         this.sourceList = sourceList;
         
         // start this event where the sequence is currently
-        atomicCount = masterSequence.getAtomicCount();
         blockCount = 0;
     }
     
@@ -90,77 +78,29 @@ public final class ListEvent extends EventObject {
         this.rowIndex = original.rowIndex;
         this.masterSequence = original.masterSequence;
         this.sourceList = original.sourceList;
-        this.atomicCount = original.atomicCount;
     }
     
     /**
-     * Mark the current location in the sequence of list events so that it may be
-     * returned to later. Note that this will cause the components of this
-     * {@link ListEvent} to persist in memory until {@link #clearMark()} is called.
-     * Therefore be sure to call {@link #clearMark()} whenever you call
-     * {@link #mark()}.
-     */
-    public void mark() {
-        atomicCountMark = atomicCount;
-    }
-    /**
-     * Removes the mark so that the components of this {@link ListEvent} may be
-     * garbage collected.
-     */
-    public void clearMark() {
-        atomicCountMark = -1;
-    }
-    /**
      * Resets this event's position to the previously-marked position. This should
      * be used for {@link TransformedList}s that require multiple-passes of the 
-     * {@link ListEvent} in order to process it. Note that this method does not
-     * clear the mark.
+     * {@link ListEvent} in order to process it.
      */
     public void reset() {
-        if(atomicCountMark == -1) throw new IllegalStateException();
-        
-        atomicCount = atomicCountMark;
         currentBlock = null;
         blockCount = 0;
     }
 
-    /**
-     * Gets the count of the number of blocks seen by this view. This is used
-     * by the master list in order to get rid of blocks that have been seen by
-     * all views.
-     */
-    int getMark() {
-        return atomicCountMark;
-    }
-    
-    /*
-     * Clears the queue of all unprocessed changes. This is used when a
-     * listener reloads the source list rather than modifying it by
-     * differences.
-     *
-     * <p>If the user is manually clearing the event queue with this method,
-     * it is also necessary to call hasNext() before calling next() when
-     * receiving new events. This is because it is possible that pending
-     * events will be cleared before they are processed. Otherwise the
-     * call to next() may fail.
-     */
-    /*public void clearEventQueue() {
-        atomicCount = masterSequence.getAtomicCount();
-        currentBlock = null;
-        blockCount = 0;
-    }*/
-    
     /**
      * Increments the change sequence to view the next change. This will
      * return true if such a change exists and false when there is no
      * change to view.
      */
     public boolean next() {
-        // if we need to get a new change block from the queue
+        // we need to get a new change block from the queue
         if(currentBlock == null || rowIndex == currentBlock.getEndIndex()) {
-            // if we are at the end of the current block
             return nextBlock();
-        // if we can just increment the row on the current change
+            
+        // we can just increment the row on the current change
         } else {
             assert(rowIndex < currentBlock.getEndIndex());
             rowIndex++;
@@ -176,16 +116,8 @@ public final class ListEvent extends EventObject {
     public boolean hasNext() {
         // we are at the end of the current block
         if(currentBlock == null || rowIndex == currentBlock.getEndIndex()) {
-            // if there are no more atomic changes
-            if(atomicCount == masterSequence.getAtomicCount()) {
-                return false;
-            // there are no more blocks in this atomic change
-            } else if(blockCount == getBlocks().size()) {
-                return false;
-            // there are more blocks in this atomic change
-            } else {
-                return true;
-            }
+            return blockCount < getBlocks().size();
+
         // there is another change in the current block
         } else {
             return true;
@@ -196,20 +128,14 @@ public final class ListEvent extends EventObject {
      * Increments the change sequence to view the next change block.
      */
     public boolean nextBlock() {
-        // if we have no blocks left in the current atomic change
+        // we have no blocks left
         if(blockCount == getBlocks().size()) {
-            // clear the list change
             currentBlock = null;
             rowIndex = -5;
             blockCount = 0;
-            // prepare for the next atomic change
-            if(atomicCount >= masterSequence.getAtomicCount()) {
-                throw new NoSuchElementException("Cannot iterate past the total number of changes!");
-            }
-            atomicCount++;
-            // notify that this change is over
             return false;
-        // if we have more blocks left
+
+        // we have more blocks left
         } else {
             currentBlock = (ListEventBlock)getBlocks().get(blockCount);
             blockCount++;
@@ -222,7 +148,7 @@ public final class ListEvent extends EventObject {
      * Tests if this change is a complete reordering of the list.
      */
     public boolean isReordering() {
-        return (masterSequence.getReorderMap(atomicCount) != null);
+        return (masterSequence.getReorderMap() != null);
     }
     
     /**
@@ -233,17 +159,12 @@ public final class ListEvent extends EventObject {
      *      stored at the current index of that value.
      */
     public int[] getReorderMap() {
-        int[] reorderMap = masterSequence.getReorderMap(atomicCount);
+        int[] reorderMap = masterSequence.getReorderMap();
         if(reorderMap == null) throw new IllegalStateException("Cannot get reorder map for a non-reordering change");
         // clear the list change
-        currentBlock = null;
-        rowIndex = -5;
-        blockCount = 0;
-        // prepare for the next atomic change
-        if(atomicCount >= masterSequence.getAtomicCount()) {
-            throw new NoSuchElementException("Cannot iterate past the total number of changes!");
-        }
-        atomicCount++;
+        //currentBlock = null;
+        //rowIndex = -5;
+        //blockCount = 0;
         return reorderMap;
     }
 
@@ -282,22 +203,9 @@ public final class ListEvent extends EventObject {
      * Get the List of ListEventBlocks for this change.
      */
     List getBlocks() {
-        return masterSequence.getBlocks(atomicCount);
+        return masterSequence.getBlocks();
     }
     
-    /**
-     * Incrememts this {@link ListEvent} to the next atomic change in sequence,
-     * which may not yet be ready.
-     *
-     * <p>This method is called by the {@link ListEventAssembler} from its
-     * {@link ListEventAssembler#forwardEvent(ListEvent)} method. After a
-     * {@link ListEvent} has been forwarded, it must be incremented to the next
-     * change.
-     */
-    void nextAtomicChange() {
-        atomicCount++;
-    }
-
     /**
      * Gets the number of blocks currently remaining in this atomic change.
      */
@@ -322,18 +230,6 @@ public final class ListEvent extends EventObject {
      * and concatenates them.
      */
     public String toString() {
-        // prepare the event as a String
-        StringBuffer result = new StringBuffer();
-        result.append("Event " + atomicCount + ": ");
-        
-        // figure out which change to show
-        int atomicChangeToShow = 0;
-        if(atomicCount < masterSequence.getAtomicCount()) atomicChangeToShow = atomicCount;
-        else atomicChangeToShow = masterSequence.getAtomicCount() - 1;
-        
-        // append the blocks
-        result.append(masterSequence.getBlocks(atomicChangeToShow));
-
-        return result.toString();
+        return "ListEvent: " + masterSequence.getBlocks();
     }
 }

@@ -58,8 +58,8 @@ public abstract class ThreadProxyEventList extends TransformedList {
     /** propagates events on the Swing thread */
     private UpdateRunner updateRunner = new UpdateRunner();
     
-    /** the pending events, possibly empty, one, or multiple */
-    private ListEvent listChanges = null;
+    /** whether the dispatch thread has been scheduled */
+    private boolean scheduled = false;
         
     /**
      */
@@ -78,12 +78,15 @@ public abstract class ThreadProxyEventList extends TransformedList {
 
     /** {@inheritDoc} */
     public final void listChanged(ListEvent listChanges) {
-        // ensure we have a Swing proxy for the update event
-        this.listChanges = listChanges;
-        listChanges.mark();
-
-        // forward the event on the appropriate thread
-        schedule(updateRunner);
+        // commit the event on the appropriate thread
+        if(!scheduled) {
+            updates.beginEvent(true);
+            schedule(updateRunner);
+            scheduled = true;
+        }
+        
+        // add the changes for this event to our queue
+        updates.forwardEvent(listChanges);
     }
     
     /**
@@ -125,20 +128,8 @@ public abstract class ThreadProxyEventList extends TransformedList {
         public void run() {
             getReadWriteLock().writeLock().lock();
             try {
-                updates.beginEvent(true);
-                boolean forwardedEvents = false;
-                while(listChanges.hasNext()) {
-                    if(listChanges.isReordering() && !forwardedEvents) {
-                        updates.reorder(listChanges.getReorderMap());
-                    } else {
-                        while(listChanges.next()) {
-                            updates.addChange(listChanges.getType(), listChanges.getIndex());
-                        }
-                    }
-                    forwardedEvents = true;
-                }
-                listChanges.clearMark();
                 updates.commitEvent();
+                scheduled = false;
             } finally {
                 getReadWriteLock().writeLock().unlock();
             }
@@ -148,29 +139,16 @@ public abstract class ThreadProxyEventList extends TransformedList {
          * Update local state as a consequence of the change event.
          */
         public void listChanged(ListEvent listChanges) {
-            // handle reordering events
-            if(listChanges.isReordering()) {
-                List newLocalCache = new ArrayList();
-                int[] sourceReorderMap = listChanges.getReorderMap();
-                for(int i = 0; i < sourceReorderMap.length; i++) {
-                    newLocalCache.add(i, localCache.get(sourceReorderMap[i]));
-                }
-                localCache.clear();
-                localCache.addAll(newLocalCache);
-    
-            // handle everything else
-            } else {
-                while(listChanges.next()) {
-                    int sourceIndex = listChanges.getIndex();
-                    int changeType = listChanges.getType();
-    
-                    if(changeType == ListEvent.DELETE) {
-                        localCache.remove(sourceIndex);
-                    } else if(changeType == ListEvent.INSERT) {
-                        localCache.add(sourceIndex, source.get(sourceIndex));
-                    } else if(changeType == ListEvent.UPDATE) {
-                        localCache.set(sourceIndex, source.get(sourceIndex));
-                    }
+            while(listChanges.next()) {
+                int sourceIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+
+                if(changeType == ListEvent.DELETE) {
+                    localCache.remove(sourceIndex);
+                } else if(changeType == ListEvent.INSERT) {
+                    localCache.add(sourceIndex, source.get(sourceIndex));
+                } else if(changeType == ListEvent.UPDATE) {
+                    localCache.set(sourceIndex, source.get(sourceIndex));
                 }
             }
         }

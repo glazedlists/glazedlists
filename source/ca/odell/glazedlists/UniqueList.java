@@ -149,7 +149,6 @@ public final class UniqueList extends TransformedList {
 
         // first pass, update unique list
         LinkedList removedValues = new LinkedList();
-        listChanges.mark();
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
@@ -186,7 +185,6 @@ public final class UniqueList extends TransformedList {
         // second pass, fire events
         updates.beginEvent();
         listChanges.reset();
-        listChanges.clearMark();
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();

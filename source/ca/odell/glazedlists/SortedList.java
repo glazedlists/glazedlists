@@ -138,7 +138,6 @@ public final class SortedList extends TransformedList {
         LinkedList insertNodes = new LinkedList();
 
         // perform the inserts and deletes on the indexed tree
-        listChanges.mark();
         while(listChanges.next()) {
 
             // get the current change info
@@ -184,7 +183,6 @@ public final class SortedList extends TransformedList {
 
         // delete the indices of the updated nodes
         listChanges.reset();
-        listChanges.clearMark();
         while(listChanges.next()) {
 
             // get the current change info

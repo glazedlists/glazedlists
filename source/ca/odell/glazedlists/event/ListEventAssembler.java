@@ -28,12 +28,6 @@ public final class ListEventAssembler {
     /** the list that this tracks changes for */
     private EventList sourceList;
     
-    /** the list of lists of change blocks */
-    private List atomicChanges = new ArrayList();
-    private List reorderMaps = new ArrayList();
-    private int atomicListOffset = 0;
-    private int oldestChange = 0;
-    
     /** the current working copy of the atomic change */
     private List atomicChangeBlocks = null;
     /** the most recent list change; this is the only change we can append to */
@@ -50,16 +44,13 @@ public final class ListEventAssembler {
     
     /** the event level is the number of nested events */
     private int eventLevel = 0;
-    
     /** whether to allow nested events */
     private boolean allowNestedEvents = true;
-    
     /** whether to allow contradicting events */
     private boolean allowContradictingEvents = false;
 
     /**
-     * Creates a new ListEventAssembler that tracks changes for the
-     * specified list.
+     * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList sourceList, ListEventPublisher publisher) {
         this.sourceList = sourceList;
@@ -124,32 +115,6 @@ public final class ListEventAssembler {
         atomicChangeBlocks = new ArrayList();
         atomicLatestBlock = null;
         reorderMap = null;
-        
-        cleanUpHandledChanges();
-    }
-    
-    /**
-     * Remove old changes which are no longer needed. Since the ListEventAssembler
-     * may potentially stores several changes simultaneously, it is necessary to
-     * periodically clean up the ones that have been handled.
-     */
-    private void cleanUpHandledChanges() {
-        // calculate the oldest change still needed
-        int oldestRequiredChange = atomicChanges.size() + atomicListOffset; 
-        for(int e = 0; e < listenerEvents.size(); e++) {
-            ListEvent listChangeEvent = (ListEvent)listenerEvents.get(e);
-            int mark = listChangeEvent.getMark();
-            if(mark == -1) continue;
-            else if(mark < oldestRequiredChange) oldestRequiredChange = mark;
-        }
-        
-        // recycle every change that is no longer used
-        for(int i = oldestChange; i < oldestRequiredChange; i++) {
-            atomicChanges.remove(0);
-            reorderMaps.remove(0);
-            atomicListOffset++;
-        }
-        oldestChange = oldestRequiredChange;
     }
         
     /**
@@ -238,8 +203,6 @@ public final class ListEventAssembler {
         if(eventLevel == 0) {
             atomicChangeBlocks = listChanges.getBlocks();
             reorderMap = listChanges.isReordering() ? listChanges.getReorderMap() : null;
-            listChanges.nextAtomicChange();
-            cleanUpHandledChanges();
             fireEvent();
             
         // if we're nested, we have to copy this event's parts to our queue
@@ -279,27 +242,10 @@ public final class ListEventAssembler {
      * event exactly once, even if that event includes nested events.
      */
     private void fireEvent() {
-        // bail on empty changes
-        if(atomicChangeBlocks.size() == 0) {
-            atomicChangeBlocks = null;
-            atomicLatestBlock = null;
-            reorderMap = null;
-            allowContradictingEvents = false;
-            return;
-        }
-
-        // add this to the complete set
-        atomicChanges.add(atomicChangeBlocks);
-
-        // add the reorder map to the complete set only if it is the only change
-        if(reorderMap != null && atomicChangeBlocks.size() == 2) {
-            reorderMaps.add(reorderMap);
-        } else {
-            reorderMaps.add(null);
-        }
-        
-        // notify listeners
         try {
+            // bail on empty changes
+            if(atomicChangeBlocks.size() == 0) return;
+
             // protect against the listener set changing via a duplicate list
             List listenersToNotify = new ArrayList();
             List listenerEventsToNotify = new ArrayList();
@@ -307,6 +253,7 @@ public final class ListEventAssembler {
             listenerEventsToNotify.addAll(listenerEvents);
             // perform the notification on the duplicate list
             publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+            
         // clear the change for the next caller
         } finally {
             atomicChangeBlocks = null;
@@ -317,28 +264,21 @@ public final class ListEventAssembler {
     }
 
     /**
-     * Gets the total number of atomic changes so far.
-     */
-    int getAtomicCount() {
-        return atomicChanges.size() + atomicListOffset;
-    }
-    
-    /**
      * Gets the list of blocks for the specified atomic change.
      *
      * @return a List containing the sequence of {@link ListEventBlock}s modelling
      *      the specified change. It is an error to modify this list or its contents.
      */
-    List getBlocks(int atomicCount) {
-        return (List)atomicChanges.get(atomicCount - atomicListOffset);
+    List getBlocks() {
+        return atomicChangeBlocks;
     }
     
     /**
      * Gets the reorder map for the specified atomic change or null if that
      * change is not a reordering.
      */
-    int[] getReorderMap(int atomicCount) {
-        return (int[])reorderMaps.get(atomicCount - atomicListOffset);
+    int[] getReorderMap() {
+        return reorderMap;
     }
     
     /**
