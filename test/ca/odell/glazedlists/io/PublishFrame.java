@@ -20,7 +20,6 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
 import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.impl.io.*;
-import ca.odell.glazedlists.util.ByteCoderFactory;
 
 /**
  * A frame that shows a published list.
@@ -51,7 +50,7 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
         this.peer = peer;
         
         // publish
-        data = peer.publish(new BasicEventList(), path, ByteCoderFactory.serializable());
+        data = peer.publish(new BasicEventList(), path, GlazedLists.serializableByteCoder());
         
         // build user interface
         constructStandalone();

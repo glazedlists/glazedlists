@@ -9,8 +9,6 @@ package ca.odell.glazedlists;
 import java.util.*;
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.util.*;
 
 /**
  * A CompositeListTest tests the functionality of the CompositeList.

@@ -10,7 +10,6 @@ package ca.odell.glazedlists.impl.adt;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.util.*;
 // standard collections
 import java.util.*;
 
@@ -76,7 +75,7 @@ public class IndexedTreeTest extends TestCase {
      * entries that have the same value.
      */
     public void testEqualValues() {
-        IndexedTree indexedTree = new IndexedTree(ComparatorFactory.comparable());
+        IndexedTree indexedTree = new IndexedTree(GlazedLists.comparableComparator());
 
         int ACount = 0;
         int BCount = 0;

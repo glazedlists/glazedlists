@@ -9,7 +9,7 @@ package ca.odell.glazedlists.io;
 // for being a JUnit test case
 import junit.framework.*;
 // the core Glazed Lists package
-import ca.odell.glazedlists.util.*;
+import ca.odell.glazedlists.*;
 // standard collections
 import java.util.*;
 // for testing files
@@ -50,7 +50,7 @@ public class FileListTest extends TestCase {
         int expectedLast = 0;
         int current = 0;
         for(int i = 0; i < 16; i++) {
-            FileList fibonacci = new FileList(fibonacciFile, ByteCoderFactory.serializable());
+            FileList fibonacci = new FileList(fibonacciFile, GlazedLists.serializableByteCoder());
             
             // base case
             if(fibonacci.size() < 2) {

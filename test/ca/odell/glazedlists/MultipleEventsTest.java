@@ -8,8 +8,6 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.util.*;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
 // Java collections are used for underlying data storage

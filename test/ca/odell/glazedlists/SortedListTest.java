@@ -8,8 +8,6 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.util.*;
 // standard collections
 import java.util.*;
 
@@ -315,9 +313,9 @@ public class SortedListTest extends TestCase {
      */
     public void testUpdateEventsFired() {
         // prepare a unique list with simple data
-        UniqueList uniqueSource = new UniqueList(unsortedList, ComparatorFactory.reverse());
+        UniqueList uniqueSource = new UniqueList(unsortedList, GlazedLists.reverseComparator());
         sortedList = new SortedList(uniqueSource);
-        SortedSet data = new TreeSet(ComparatorFactory.reverse());
+        SortedSet data = new TreeSet(GlazedLists.reverseComparator());
         data.add("A");
         data.add("B");
         data.add("C");
@@ -433,7 +431,7 @@ public class SortedListTest extends TestCase {
         source.add("AA");
 
         // create a sorted view of that list
-        SortedList sorted = new SortedList(source, ComparatorFactory.reverse());
+        SortedList sorted = new SortedList(source, GlazedLists.reverseComparator());
 
         // create a consistency test
         List consistencyTestList = new ArrayList();
@@ -516,7 +514,7 @@ public class SortedListTest extends TestCase {
      * normally.
      */
     class ReverseStringComparator implements Comparator {
-        public Comparator delegate = ComparatorFactory.comparable();
+        public Comparator delegate = GlazedLists.comparableComparator();
 
         public int compare(Object a, Object b) {
             String aString = (String)a;

@@ -8,8 +8,6 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.util.*;
 // the volatile Glazed Lists pacakge
 import ca.odell.glazedlists.impl.sort.*;
 // standard collections
@@ -55,7 +53,7 @@ public class MultipleListenersTest extends TestCase {
         }
 
         // create sorted and filtered derivatives
-        Comparator comparator = ComparatorFactory.comparable();
+        Comparator comparator = GlazedLists.comparableComparator();
         SortedList sorted = new SortedList(root, comparator);
         IntegerSizeFilterList filtered = new IntegerSizeFilterList(root, 50);
 
@@ -94,9 +92,9 @@ public class MultipleListenersTest extends TestCase {
 
             // adjust the sorter
             if(comparator instanceof ReverseComparator) {
-                comparator = ComparatorFactory.comparable();
+                comparator = GlazedLists.comparableComparator();
             } else {
-                comparator = ComparatorFactory.reverse(comparator);
+                comparator = GlazedLists.reverseComparator(comparator);
             }
             sorted.setComparator(comparator);
 

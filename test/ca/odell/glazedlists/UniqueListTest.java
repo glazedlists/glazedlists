@@ -8,8 +8,6 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.util.*;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
 // Java collections are used for underlying data storage
@@ -30,7 +28,7 @@ public class UniqueListTest extends TestCase {
      */
     public void setUp() {
         source = new BasicEventList();
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
     }
 
     /**
@@ -97,7 +95,7 @@ public class UniqueListTest extends TestCase {
     public void testSimpleNonEmptySource() {
         unique = null;
         source.add("A");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         assertEquals(1, unique.size());
         assertEquals("A", (String)unique.get(0));
     }
@@ -107,7 +105,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         assertEquals(3, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("B", (String)unique.get(1));
@@ -119,7 +117,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("A");
         source.add("B");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         assertEquals(3, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("B", (String)unique.get(1));
@@ -131,7 +129,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         assertEquals(1, unique.size());
         assertEquals("A", (String)unique.get(0));
     }
@@ -144,7 +142,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         assertEquals(2, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("C", (String)unique.get(1));
@@ -155,7 +153,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         source.add("D");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -169,7 +167,7 @@ public class UniqueListTest extends TestCase {
         source.add("B");
         source.add("C");
         source.add("D");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         source.add("A");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -183,7 +181,7 @@ public class UniqueListTest extends TestCase {
         source.add("D");
         source.add("A");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         source.add("B");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -197,7 +195,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         source.add("C");
         source.add("C");
         source.add("C");
@@ -214,7 +212,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         source.add("D");
         source.add("D");
         source.add("D");
@@ -273,7 +271,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         LinkedList duplicates = new LinkedList();
         duplicates.add("A");
         duplicates.add("B");
@@ -294,7 +292,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         source.addAll(duplicates);
@@ -312,7 +310,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         duplicates.add("B");
@@ -335,7 +333,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, ComparatorFactory.comparable());
+        unique = new UniqueList(source, GlazedLists.comparableComparator());
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         duplicates.add("B");
@@ -733,7 +731,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(unique, controlList);
 
         // verify the unique list is correct when the sorted list is sorted
-        sortedList.setComparator(ComparatorFactory.reverse());
+        sortedList.setComparator(GlazedLists.reverseComparator());
         assertEquals(unique, controlList);
     }
 
@@ -1112,7 +1110,7 @@ public class UniqueListTest extends TestCase {
      */
     public void testReverseComparator() {
         // prepare a unique list with data in reverse order
-        UniqueList uniqueSource = new UniqueList(new BasicEventList(), ComparatorFactory.reverse());
+        UniqueList uniqueSource = new UniqueList(new BasicEventList(), GlazedLists.reverseComparator());
         uniqueSource.add("E");
         uniqueSource.add("D");
         uniqueSource.add("C");
@@ -1122,7 +1120,7 @@ public class UniqueListTest extends TestCase {
         uniqueSource.addListEventListener(counter);
 
         // modify the unique list
-        SortedSet data = new TreeSet(ComparatorFactory.reverse());
+        SortedSet data = new TreeSet(GlazedLists.reverseComparator());
         data.add("A");
         data.add("B");
         data.add("C");

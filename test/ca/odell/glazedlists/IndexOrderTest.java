@@ -10,7 +10,6 @@ package ca.odell.glazedlists;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.util.*;
 // standard collections
 import java.util.*;
 

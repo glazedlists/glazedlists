@@ -10,7 +10,6 @@ package ca.odell.glazedlists.impl;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.util.*;
 // standard collections
 import java.util.*;
 
@@ -117,10 +116,10 @@ public class SubListTest extends TestCase {
         expectedRiders.add("Roughriders");
         assertEquals(expectedRiders, riders);
 
-        sortedList.setComparator(ComparatorFactory.comparable());
+        sortedList.setComparator(GlazedLists.comparableComparator());
         assertEquals(expectedRiders, riders);
 
-        sortedList.setComparator(ComparatorFactory.reverse());
+        sortedList.setComparator(GlazedLists.reverseComparator());
         assertEquals(expectedRiders, riders);
 
         eventList.remove("Stampeders");
@@ -128,7 +127,7 @@ public class SubListTest extends TestCase {
         eventList.remove("Renegades");
         assertEquals(expectedRiders, riders);
 
-        sortedList.setComparator(ComparatorFactory.comparable());
+        sortedList.setComparator(GlazedLists.comparableComparator());
         assertEquals(expectedRiders, riders);
 
         eventList.remove("Eskimos");
