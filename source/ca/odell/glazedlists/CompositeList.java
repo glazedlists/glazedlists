@@ -46,12 +46,12 @@ public final class CompositeList extends AbstractEventList {
      * adjust in response to this change and forward notifications about that
      * adjustment to downstream listeners.
      *
-     * Because the CompositeList uses inner classes, this method throws an
+     * <p>Because the CompositeList uses inner classes, this method throws an
      * IllegalStateException.
      */
-    public void listChanged(ListEvent listChanges) {
-        throw new IllegalStateException();
-    }
+    //public void listChanged(ListEvent listChanges) {
+    //    throw new IllegalStateException();
+    //}
 
     /**
      * Adds the specified list to the lists that compose this list.
@@ -164,7 +164,7 @@ public final class CompositeList extends AbstractEventList {
             if(current == memberList) return listOffset;
             else listOffset = listOffset + current.size();
         }
-        throw new RuntimeException("Unable to find offset of member list " + memberList);
+        throw new IllegalStateException("Unable to find offset of member list " + memberList);
     }
 
     /**

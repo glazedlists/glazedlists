@@ -92,8 +92,14 @@ public class CachingList extends TransformedList implements ListEventListener {
      *         or null if the index is not found.
      */
     public final Object get(int index) {
-        preFetch(index);
-        return fetch(index, true);
+        getReadWriteLock().writeLock().lock();
+        try {
+            if(index >= size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
+            preFetch(index);
+            return fetch(index, true);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -115,41 +121,36 @@ public class CachingList extends TransformedList implements ListEventListener {
      *         or null if the index is not found.
      */
     protected final Object fetch(int index, boolean recordHitsOrMisses) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            Object value = null;
+        Object value = null;
 
-            // attempt to get the element from the cache
-            IndexedTreeNode indexNode = indexTree.getNode(index);
-            Object nodeValue = indexNode.getValue();
-            if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
-                if(recordHitsOrMisses) cacheHits ++;
-                IndexedTreeNode cacheNode = (IndexedTreeNode)indexNode.getValue();
-                AgedNode agedNode = (AgedNode)cacheNode.getValue();
-                value = agedNode.getValue();
-                cacheNode.removeFromTree();
-                indexNode.setValue(cache.addByNode(agedNode));
+        // attempt to get the element from the cache
+        IndexedTreeNode indexNode = indexTree.getNode(index);
+        Object nodeValue = indexNode.getValue();
+        if(EMPTY_INDEX_NODE != nodeValue && nodeValue != null) {
+            if(recordHitsOrMisses) cacheHits ++;
+            IndexedTreeNode cacheNode = (IndexedTreeNode)indexNode.getValue();
+            AgedNode agedNode = (AgedNode)cacheNode.getValue();
+            value = agedNode.getValue();
+            cacheNode.removeFromTree();
+            indexNode.setValue(cache.addByNode(agedNode));
+        } else {
+            if(recordHitsOrMisses) cacheMisses++;
+            value = source.get(index);
+            if(currentSize < maxSize) {
+                currentSize++;
+                IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
+                indexNode.setValue(cacheNode);
             } else {
-                if(recordHitsOrMisses) cacheMisses++;
-                value = source.get(index);
-                if(currentSize < maxSize) {
-                    currentSize++;
-                    IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
-                    indexNode.setValue(cacheNode);
-                } else {
-                    IndexedTreeNode oldestInCache = cache.getNode(0);
-                    oldestInCache.removeFromTree();
-                    AgedNode oldAgedNode = (AgedNode)oldestInCache.getValue();
-                    IndexedTreeNode oldIndexNode = oldAgedNode.getIndexNode();
-                    oldIndexNode.setValue(EMPTY_INDEX_NODE);
-                    IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
-                    indexNode.setValue(cacheNode);
-                }
+                IndexedTreeNode oldestInCache = cache.getNode(0);
+                oldestInCache.removeFromTree();
+                AgedNode oldAgedNode = (AgedNode)oldestInCache.getValue();
+                IndexedTreeNode oldIndexNode = oldAgedNode.getIndexNode();
+                oldIndexNode.setValue(EMPTY_INDEX_NODE);
+                IndexedTreeNode cacheNode = cache.addByNode(new AgedNode(indexNode, value));
+                indexNode.setValue(cacheNode);
             }
-            return value;
-        } finally {
-            getReadWriteLock().writeLock().unlock();
         }
+        return value;
     }
 
     /**

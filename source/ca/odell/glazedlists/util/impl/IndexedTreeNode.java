@@ -169,7 +169,7 @@ public final class IndexedTreeNode {
             return leftSize + rootSize;
         }
         // if no child is found, we have a problem
-        throw new IllegalArgumentException(this + " cannot get the index of a subtree that does not exist on this node!");
+        throw new IndexOutOfBoundsException(this + " cannot get the index of a subtree that does not exist on this node!");
     }
 
 

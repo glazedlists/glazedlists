@@ -280,19 +280,16 @@ public class CachingListTest extends TestCase {
      * a result of CachingList overriding get() from TransformedList.
      */
     public void testBoundsErrorBehaviour() {
-         // request beyond bounds with an empty source
-         boolean exceptionThrown = false;
-         try {
-             cache.get(26);
-         } catch(IndexOutOfBoundsException e) {
-             exceptionThrown = true;
-         } catch(Exception e) {
-             exceptionThrown = true;
-             fail("Exception is of inconsistent type " + e.getClass());
-         } finally {
-             if(exceptionThrown == false) {
-                 fail("No exception was thrown when an invalid index was requested on an empty source.");
-             }
+        // request beyond bounds with an empty source
+        boolean exceptionThrown = false;
+        try {
+            cache.get(26);
+        } catch(IndexOutOfBoundsException e) {
+            exceptionThrown = true;
+        }
+
+        if(exceptionThrown == false) {
+            fail("No exception was thrown when an invalid index was requested on an empty source.");
         }
 
         // Load the source with data
@@ -306,13 +303,10 @@ public class CachingListTest extends TestCase {
             cache.get(26);
         } catch(IndexOutOfBoundsException e) {
             exceptionThrown = true;
-        } catch(Exception e) {
-            exceptionThrown = true;
-            fail("Exception is of inconsistent type " + e.getClass());
-        } finally {
-            if(exceptionThrown == false) {
-                fail("No exception was thrown when an invalid index was requested on an empty cache.");
-            }
+        }
+
+        if(exceptionThrown == false) {
+            fail("No exception was thrown when an invalid index was requested on an empty cache.");
         }
 
         // Lookup some values to paritally fill the cache
@@ -327,13 +321,10 @@ public class CachingListTest extends TestCase {
             cache.get(26);
         } catch(IndexOutOfBoundsException e) {
             exceptionThrown = true;
-        } catch(Exception e) {
-            exceptionThrown = true;
-            fail("Exception is of inconsistent type " + e.getClass());
-        } finally {
-            if(exceptionThrown == false) {
-                fail("No exception was thrown when an invalid index was requested on a partially full cache.");
-            }
+        }
+
+        if(exceptionThrown == false) {
+            fail("No exception was thrown when an invalid index was requested on a partially full cache.");
         }
 
         // Lookup enough values to fill the cache
@@ -348,13 +339,10 @@ public class CachingListTest extends TestCase {
             cache.get(26);
         } catch(IndexOutOfBoundsException e) {
             exceptionThrown = true;
-        } catch(Exception e) {
-            exceptionThrown = true;
-            fail("Exception is of inconsistent type " + e.getClass());
-        } finally {
-            if(exceptionThrown == false) {
-                fail("No exception was thrown when an invalid index was requested on a full cache.");
-            }
+        }
+
+        if(exceptionThrown == false) {
+            fail("No exception was thrown when an invalid index was requested on a full cache.");
         }
     }
 }

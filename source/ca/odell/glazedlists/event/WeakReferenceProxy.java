@@ -52,7 +52,7 @@ public final class WeakReferenceProxy implements ListEventListener {
      * listener.
      */
     public WeakReferenceProxy(EventList source, ListEventListener proxyTarget) {
-        if(source == null || proxyTarget == null) throw new IllegalArgumentException();
+        if(source == null || proxyTarget == null) throw new NullPointerException();
         
         this.source = source;
         proxyTargetReference = new WeakReference(proxyTarget);

@@ -417,12 +417,12 @@ public final class EventSelectionModel {
             // verify that the first range is legitimate
             if(changeIndex0 >= flagList.size() || changeIndex1 >= flagList.size()
             || ((changeIndex0 == -1 || changeIndex1 == -1) && changeIndex0 != changeIndex1)) {
-                throw new ArrayIndexOutOfBoundsException("Invalid range for selection: " + changeIndex0 + "-" + changeIndex1 + ", list size is " + flagList.size());
+                throw new IndexOutOfBoundsException("Invalid range for selection: " + changeIndex0 + "-" + changeIndex1 + ", list size is " + flagList.size());
             }
             // verify that the second range is legitimate
             if(invertIndex0 >= flagList.size() || invertIndex1 >= flagList.size()
             || ((invertIndex0 == -1 || invertIndex1 == -1) && invertIndex0 != invertIndex1)) {
-                throw new ArrayIndexOutOfBoundsException("Invalid range for invert selection: " + invertIndex0 + "-" + invertIndex1 + ", list size is " + flagList.size());
+                throw new IndexOutOfBoundsException("Invalid range for invert selection: " + invertIndex0 + "-" + invertIndex1 + ", list size is " + flagList.size());
             }
             
             // when the first range is empty
