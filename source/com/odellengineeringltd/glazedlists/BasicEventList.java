@@ -35,7 +35,7 @@ import java.io.Serializable;
 public class BasicEventList implements EventList, Serializable {
 
     /** the underlying data list */
-    private List data;
+    protected List data;
 
     /** the change event and notification system */
     protected ListEventAssembler updates = new ListEventAssembler(this);

@@ -28,11 +28,11 @@ import javax.swing.SwingUtilities;
  * read only list, simply copy the contents of this list into an ArrayList and
  * use that list.
  *
- * @see com.odellengineeringltd.glazedlists.WritableMutationList
+ * @see com.odellengineeringltd.glazedlists.TransformedList
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ReadOnlyList extends WritableMutationList implements ListEventListener, EventList {
+public final class ReadOnlyList extends TransformedList implements ListEventListener {
 
     /**
      * Creates a new ReadOnlyList that is a read only view of the
@@ -76,13 +76,5 @@ public final class ReadOnlyList extends WritableMutationList implements ListEven
      */
     protected int getSourceIndex(int mutationIndex) {
         return mutationIndex;
-    }
-    
-    /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc.
-     */
-    protected boolean isWritable() {
-        return false;
     }
 }

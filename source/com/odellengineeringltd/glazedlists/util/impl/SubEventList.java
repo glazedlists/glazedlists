@@ -21,7 +21,7 @@ import com.odellengineeringltd.glazedlists.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SubEventList extends WritableMutationList implements ListEventListener, EventList {
+public final class SubEventList extends TransformedList implements ListEventListener {
 
     /** the start index of this list, inclusive */
     private int startIndex;

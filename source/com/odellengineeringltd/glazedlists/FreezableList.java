@@ -28,7 +28,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class FreezableList extends WritableMutationList implements ListEventListener, EventList {
+public class FreezableList extends TransformedList implements ListEventListener {
 
     /** the state of the freezable list */
     private boolean frozen = false;
@@ -105,7 +105,7 @@ public class FreezableList extends WritableMutationList implements ListEventList
             if(frozen) throw new IllegalStateException("Cannot freeze a list that is already frozen");
             
             // we are no longer interested in update events
-            source.removeListEventListener(this);
+            ((EventList)source).removeListEventListener(this);
             
             // copy the source array into the frozen list
             frozenData.addAll(source);
@@ -142,7 +142,7 @@ public class FreezableList extends WritableMutationList implements ListEventList
             updates.commitEvent();
 
             // being listening to update events
-            source.addListEventListener(this);
+            ((EventList)source).addListEventListener(this);
         } finally {
             getReadWriteLock().writeLock().unlock();
         }

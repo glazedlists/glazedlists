@@ -68,7 +68,7 @@ public interface EventList extends List {
      *
      * @since 2004-01-30. This has been added to support the new FreezableList.
      *     If you need to implement this method, please review the implementation
-     *     in MutationList for an example.
+     *     in TransformedList for an example.
      */
     public void removeListEventListener(ListEventListener listChangeListener);
 

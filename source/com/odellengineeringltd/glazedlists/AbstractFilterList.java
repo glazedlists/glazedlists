@@ -36,7 +36,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class AbstractFilterList extends WritableMutationList implements ListEventListener, EventList {
+public abstract class AbstractFilterList extends TransformedList implements ListEventListener {
 
     /** the flag list contains Boolean.TRUE for selected items and null or others */
     private SparseList flagList = new SparseList();
@@ -204,17 +204,6 @@ public abstract class AbstractFilterList extends WritableMutationList implements
      * class must implement only this method.
      */
     public abstract boolean filterMatches(Object element);
-
-    /**
-     * Gets the specified element from the list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object get(int index) {
-        int sourceIndex = flagList.getIndex(index);
-        return source.get(sourceIndex);
-    }
 
     /**
      * Returns the number of elements in this list.

@@ -28,10 +28,7 @@ import com.odellengineeringltd.glazedlists.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class QueryList extends AbstractList implements EventList {
-
-    /** the arraylist that holds this querylist's data */
-    private ArrayList values = new ArrayList();
+public class QueryList extends BasicEventList {
 
     /** the treeset mirrors the values, but it is sorted */
     private SortedSet before = new TreeSet();
@@ -39,18 +36,13 @@ public class QueryList extends AbstractList implements EventList {
     /** the query containing this list's elements */
     protected Query query = null;
 
-    /** the change event and notification system */
-    protected ListEventAssembler updates = new ListEventAssembler(this);
-
-    /** the read/write lock provides mutual exclusion to access */
-    private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
-
     /**
      * Creates a new QueryList. This list cannot be manipulated directly. The only
      * way to change the values is to change the results from the query, either by
      * changing the query or by changing its results.
      */
     public QueryList() {
+        super(new ArrayList());
     }
     
     /**
@@ -69,33 +61,33 @@ public class QueryList extends AbstractList implements EventList {
         try {
             boolean queryMatches = false;
             if(query != null) queryMatches = query.matchesObject(updated);
-            int listIndex = values.indexOf(updated);
+            int listIndex = data.indexOf(updated);
             updates.beginEvent();
             // when it matches the query and its not in the list, add it!
             if(queryMatches && listIndex == -1) {
                 // find the best place to insert this item into the list
                 int insertLocation = 0;
-                for(; insertLocation < values.size(); insertLocation++) {
-                    Comparable listElement = (Comparable)values.get(insertLocation);
+                for(; insertLocation < data.size(); insertLocation++) {
+                    Comparable listElement = (Comparable)data.get(insertLocation);
                     if(updated.compareTo(listElement) > 0) continue;
                     else break;
                 }
                 updates.addInsert(insertLocation);
                 before.add(updated);
-                values.add(insertLocation, updated);
+                data.add(insertLocation, updated);
             // when it matches and it is in the list, update it!
             } else if(queryMatches && listIndex != -1) {
                 updates.addUpdate(listIndex);
-                Object old = values.get(listIndex);
-                values.set(listIndex, updated);
+                Object old = data.get(listIndex);
+                data.set(listIndex, updated);
                 // update the before copy by removing and re-adding it
                 before.remove(old);
                 before.add(updated);
             // when it doesn't match and it is in the list, remove it!
             } else if(!queryMatches && listIndex != -1) {
                 updates.addDelete(listIndex);
-                values.remove(listIndex);
-                before.remove(updated);
+                data.remove(listIndex);
+                data.remove(updated);
             }
             updates.commitEvent();
         } finally {
@@ -166,7 +158,7 @@ public class QueryList extends AbstractList implements EventList {
         // now that the change has occurred, store the updates
         getReadWriteLock().writeLock().lock();
         try {
-            values = updatedValues;
+            data = updatedValues;
             before = after;
             // fire all the changes to change listeners
             updates.commitEvent();
@@ -176,127 +168,9 @@ public class QueryList extends AbstractList implements EventList {
     }
     
     /**
-     * Gets the specified element from the list.
-     */
-    public Object get(int index) {
-        getReadWriteLock().readLock().lock();
-        try {
-            return values.get(index);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets the total number of elements in the list.
-     */
-    public int size() {
-        getReadWriteLock().readLock().lock();
-        try {
-            return values.size();
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-    
-    /**
      * Gets the current query from the query list.
      */
     public Query getQuery() {
         return query;
-    }
-
-    /**
-     * Registers the specified listener to receive notification of changes
-     * to this list.
-     */
-    public final void addListEventListener(ListEventListener listChangeListener) {
-        updates.addListEventListener(listChangeListener);
-    }
-
-    /**
-     * Removes the specified listener from receiving change updates for this list.
-     */
-    public void removeListEventListener(ListEventListener listChangeListener) {
-        updates.removeListEventListener(listChangeListener);
-    }
-
-    /**
-     * Gets the lock object in order to access this list in a thread-safe manner.
-     * This will return a <strong>re-entrant</strong> implementation of
-     * ReadWriteLock which can be used to guarantee mutual exclusion on access.
-     */
-    public ReadWriteLock getReadWriteLock() {
-        return readWriteLock;
-    }
-
-    /**
-     * Returns an iterator over the elements in this list in proper sequence.
-     */
-    public Iterator iterator() {
-        getReadWriteLock().readLock().lock();
-        try {
-            return new EventListIterator(this);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence).
-     */
-    public ListIterator listIterator() {
-        getReadWriteLock().readLock().lock();
-        try {
-            return new EventListIterator(this);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Returns a list iterator of the elements in this list (in proper
-     * sequence), starting at the specified position in this list.
-     */
-    public ListIterator listIterator(int index) {
-        getReadWriteLock().readLock().lock();
-        try {
-            return new EventListIterator(this, index);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Returns a view of the portion of this list between the specified
-     * fromIndex, inclusive, and toIndex, exclusive.
-     */
-    public List subList(int fromIndex, int toIndex) {
-        getReadWriteLock().readLock().lock();
-        try {
-            return new SubEventList(this, fromIndex, toIndex, true);
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets this list in String form for debug or display.
-     */
-    public String toString() {
-        getReadWriteLock().readLock().lock();
-        try {
-            StringBuffer result = new StringBuffer();
-            result.append("[");
-            for(int i = 0; i < size(); i++) {
-                if(i != 0) result.append(", ");
-                result.append(get(i));
-            }
-            result.append("]");
-            return result.toString();
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
     }
 }

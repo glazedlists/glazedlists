@@ -10,7 +10,7 @@ package com.odellengineeringltd.glazedlists;
 import com.odellengineeringltd.glazedlists.event.*;
 
 /**
- * A CharacteristicList is a simple MutationList views a particular
+ * A CharacteristicList is a simple EventList views a particular
  * characteristic of its source list.
  *
  * <p>For example, suppose I have a list of email addresses:
@@ -39,7 +39,7 @@ import com.odellengineeringltd.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class CharacteristicList extends MutationList implements ListEventListener, EventList {
+public abstract class CharacteristicList extends TransformedList implements ListEventListener {
 
     /**
      * Creates a new CharacteristicList.

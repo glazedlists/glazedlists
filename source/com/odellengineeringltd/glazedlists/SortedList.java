@@ -30,7 +30,7 @@ import com.odellengineeringltd.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SortedList extends WritableMutationList implements ListEventListener, EventList {
+public final class SortedList extends TransformedList {
 
     /** a map from the unsorted index to the sorted index */
     private IndexedTree unsorted = null;
@@ -262,34 +262,6 @@ public final class SortedList extends WritableMutationList implements ListEventL
         }
     }
 
-
-    /**
-     * Gets the specified element from the list. Note that calls to get(i) will
-     * not always return the same object. This is because the underlying source
-     * list may change or the sorting algorithm may change. When such changes
-     * occur, the element at get(i) may be shifted to a different location, but
-     * still exist in the list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public Object get(int index) {
-        IndexedTreeNode sortedNode = sorted.getNode(index);
-        IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
-        int unsortedIndex = unsortedNode.getIndex();
-        return source.get(unsortedIndex);
-    }
-
-    /**
-     * Gets the total number of elements in the list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
-    public int size() {
-        return sorted.size();
-    }
-    
     /**
      * Gets the index into the source list for the object with the specified
      * index in this list.

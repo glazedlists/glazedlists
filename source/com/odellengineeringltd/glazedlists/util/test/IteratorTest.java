@@ -184,7 +184,7 @@ public class IteratorTest extends TestCase {
     /**
      * Tests that the iterator works despite changes to the set of listeners.
      */
-    public void testIterateMutationLists() {
+    public void testIterateLists() {
         BasicEventList list = new BasicEventList();
         for(int i = 0; i < 10000; i++) {
             Iterator iterator = list.iterator();

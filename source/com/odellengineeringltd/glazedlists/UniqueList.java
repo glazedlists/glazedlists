@@ -49,7 +49,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class UniqueList extends MutationList implements ListEventListener, EventList {
+public final class UniqueList extends TransformedList implements ListEventListener {
 
     /** the comparator used to determine equality */
     private Comparator comparator;

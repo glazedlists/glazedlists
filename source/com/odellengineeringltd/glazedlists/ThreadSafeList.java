@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThreadSafeList extends WritableMutationList implements ListEventListener, EventList {
+public final class ThreadSafeList extends TransformedList implements ListEventListener {
 
     /**
      * Creates a new ThreadSafeList that is a thread-safe view of the

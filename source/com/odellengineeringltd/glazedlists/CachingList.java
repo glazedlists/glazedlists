@@ -25,7 +25,7 @@ import java.util.Random;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class CachingList extends WritableMutationList implements ListEventListener, EventList {
+public class CachingList extends TransformedList implements ListEventListener {
 
     /** The value signifying that an index node is currently unset  */
     public static final Integer EMPTY_INDEX_NODE = new Integer(-1);

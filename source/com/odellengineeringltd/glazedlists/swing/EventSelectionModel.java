@@ -118,7 +118,7 @@ public class EventSelectionModel {
      * responsible for listening to changes in the JTable's size and modifying
      * the internal list model to match.
      */
-    class SelectionEventList extends WritableMutationList implements ListEventListener, EventList {
+    class SelectionEventList extends TransformedList implements ListEventListener {
         
         /**
          * Creates a new SelectionEventList that listens to changes from the
