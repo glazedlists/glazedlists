@@ -12,19 +12,23 @@ import ca.odell.glazedlists.event.*;
 import java.util.ArrayList;
 
 /**
- * A FreezableList is a list that can be <i>frozen</i> to prevent it from being
- * modified while it is being accessed. The list can later resume receiving
- * updates and to complete the methaphor this is called being <i>thawed</i>.
+ * An {@link EventList} that shows the current contents of its source {@link EventList}.
+ * 
+ * <p>When this {@link EventList} is <i>frozen</i>, changes to its source {@link EventList}
+ * will not be reflected. Instead, the {@link FreezableList} will continue to show
+ * the state of its source {@link EventList} at the time it was frozen. 
  *
- * <p>When a FreezableList is frozen, it copies the elements of the source list
- * into an internal array. It notifies its source list that it is no longer
- * interested in receiving updates. At this point the list is temporarily 
- * immutable.
+ * <p>When this {@link EventList} is <i>thawed</i>, changes to its source
+ * {@link EventList} will be reflected.
  *
- * <p>When the FreezableList is thawed it discards its copied array and resumes
- * receiving updates from the source list.
+ * <p><strong><font color="#FF0000">Warning:</font></strong> When a
+ * {@link FreezableList} is <i>frozen</i>, it is not writable via its API. Calls to
+ * {@link #set(int,Object) set()}, {@link #add(Object) add()}, etc. will throw a
+ * {@link RuntimeException}.
  *
- * <p>The FreezableList is only writable when it is not frozen.
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -37,20 +41,15 @@ public final class FreezableList extends TransformedList implements ListEventLis
     private ArrayList frozenData = new ArrayList();
     
     /**
-     * Creates a new FreezableList that can freeze the specified source list.
+     * Creates a {@link FreezableList} that can freeze the view of the specified
+     * source {@link EventList}.
      */
     public FreezableList(EventList source) {
         super(source);
         source.addListEventListener(this);
     }
     
-    /**
-     * Returns the element at the specified position in this list. Most
-     * mutation lists will override the get method to use a mapping.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public Object get(int index) {
         if(frozen) {
             return frozenData.get(index);
@@ -59,12 +58,7 @@ public final class FreezableList extends TransformedList implements ListEventLis
         }
     }
     
-    /**
-     * Returns the number of elements in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int size() {
         if(frozen) {
             return frozenData.size();
@@ -73,31 +67,32 @@ public final class FreezableList extends TransformedList implements ListEventLis
         }
     }
     
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     */
-    protected int getSourceIndex(int mutationIndex) {
+    /** {@inheritDoc} */
+    /*protected int getSourceIndex(int mutationIndex) {
         return mutationIndex;
-    }
+    }*/
     
-    /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc.
-     */
+    /** {@inheritDoc} */
     protected boolean isWritable() {
         return !frozen;
     }
     
     /**
-     * Gets whether this list is blocked from receiving changes.
+     * Gets whether this {@link EventList} is showing a previous state of the source
+     * {@link EventList}.
+     *
+     * @return <tt>true</tt> if this list is showing a previous state of the source
+     *      {@link EventList} or <tt>false</tt> if this is showing the current state
+     *      of the source {@link EventList}.
      */
     public boolean isFrozen() {
         return frozen;
     }
     
     /**
-     * Locks the contents of the FreezableList from receiving any changes.
+     * Locks this {@link FreezableList} on the current state of the source
+     * {@link EventList}. While frozen, changes to the source {@link EventList}
+     * will not be reflected by this list.
      */
     public void freeze() {
         getReadWriteLock().writeLock().lock();
@@ -118,12 +113,9 @@ public final class FreezableList extends TransformedList implements ListEventLis
     }
     
     /**
-     * Sets the FreezableList to be synchronized with the source list. This
-     * will allow the FreezableList to resume receiving updates from its
-     * source.
-     *
-     * When thawed the FreezableList will notify listening lists that the
-     * data has changed.
+     * Unlocks this {@link FreezableList} to show the same contents of the source
+     * {@link EventList}. When thawed, changes to the source {@link EventList}
+     * will be reflected by this list.
      */
     public void thaw() {
         getReadWriteLock().writeLock().lock();
@@ -148,12 +140,7 @@ public final class FreezableList extends TransformedList implements ListEventLis
         }
     }
     
-    /**
-     * When the list is changed the change propogates only if the list is
-     * not currently frozen. Otherwise the change is ignored under the
-     * assumption that the change event was sent before this list became
-     * frozen.
-     */
+    /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
         if(frozen) {
             // when a list change event arrives and this list is frozen,

@@ -12,40 +12,23 @@ import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.util.*;
 // volatile implementation support
 import ca.odell.glazedlists.util.impl.*;
+import ca.odell.glazedlists.util.concurrent.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 
 /**
- * A UniqueList is a list that guarantees the uniqueness of its elements.
+ * An {@link EventList} that shows the unique elements from its source
+ * {@link EventList}.
  *
- * <p>The goal of the UniqueList is to provide a simple and fast implementation
- * of a unique list view for a given list.
+ * <p>This {@link EventList} supports all write operations.
  *
- * <p>As such, this list is explicitly sorted via the provided Comparator or by
- * requiring all elements in the list to implement {@link Comparable}. This
- * allows the provision of uniquness without the need for exhaustive searches.
- * Also, this avoids having to define heuristics for unique entry ordering
- * (i.e. First Found, Last Found, First Occurrence, etc) which would add
- * a significant and unecessary level of complexity.
- *
- * <p><strong>Note:</strong> When values are indistinguishable to the given
- * {@link Comparator} (or by using {@link Comparable} elements),
- * this list does not forward mandatory change events if those values are
- * added, removed, or updated in a way that they remain indistinguishable.
- * For example, if you have 5 String elements that are all equal to "B",
- * removing, or adding one does not result in a change event being forwarded.
- * This should be taken into consideration whenever making use of the
- * UniqueList.  It has been implemented this way because forwarding events when
- * an underlying Object is changed in the UniqueList (with no change in
- * uniqueness) would have non-deterministic results.
- *
- * <p>Though it might appear to be the case, these change events are also not
- * supported by "non-mandatory change events".  Non-mandatory change events
- * represent changes to the number of duplicates contained in the list.
- * Support for this type of change event has not yet been added to UniqueList
- * and will be unsupported by all main list types in GlazedLists.  The primary
- * use for these events is referenced in
- * <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=36">issue 36</a>.
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ * 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class
+ * breaks the contract required by {@link java.util.List}. See {@link EventList}
+ * for an example.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
@@ -68,13 +51,30 @@ public final class UniqueList extends TransformedList implements ListEventListen
     private static final Object TEMP_UNIQUE = Boolean.FALSE;
 
     /**
-     * Creates a new UniqueList that determines uniqueness using the specified
-     * comparator.
+     * Creates a {@link UniqueList} that determines uniqueness using the specified
+     * {@link Comparator}.
      *
-     * @param source The EventList to use to populate the UniqueList
-     * @param comparator The comparator to use for sorting
+     * @param source The {@link EventList} containing duplicates to remove.
+     * @param comparator The {@link Comparator} used to determine equality.
      */
     public UniqueList(EventList source, Comparator comparator) {
+        // <p>As such, this list is explicitly sorted via the provided Comparator or by
+        // requiring all elements in the list to implement {@link Comparable}. This
+        // allows the provision of uniquness without the need for exhaustive searches.
+        // Also, this avoids having to define heuristics for unique entry ordering
+        // (i.e. First Found, Last Found, First Occurrence, etc) which would add
+        // a significant and unecessary level of complexity.
+        //
+        // <p><strong>Note:</strong> When values are indistinguishable to the given
+        // {@link Comparator} (or by using {@link Comparable} elements),
+        // this list does not forward mandatory change events if those values are
+        // added, removed, or updated in a way that they remain indistinguishable.
+        // For example, if you have 5 String elements that are all equal to "B",
+        // removing, or adding one does not result in a change event being forwarded.
+        // This should be taken into consideration whenever making use of the
+        // UniqueList.  It has been implemented this way because forwarding events when
+        // an underlying Object is changed in the UniqueList (with no change in
+        // uniqueness) would have non-deterministic results.
         super(new SortedList(source, comparator));
         SortedList sortedSource = (SortedList)super.source;
         this.comparator = comparator;
@@ -84,67 +84,50 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Creates a new UniqueList that determines uniqueness by relying on
-     * all elements in the list implementing <code>Comparable</code>.
-     *
-     * @param source The EventList to use to populate the UniqueList
+     * Creates a {@link UniqueList} that determines uniqueness via the
+     * {@link Comparable} interface. All elements of the source {@link EventList}
+     * must impelement {@link Comparable}.
      */
     public UniqueList(EventList source) {
         this(source, new ComparableComparator());
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     *
-     * @return The number of elements in the list.
-     */
+    /** {@inheritDoc} */
     public int size() {
         return duplicatesList.getCompressedList().size();
     }
 
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     */
+    /** {@inheritDoc} */
     protected int getSourceIndex(int index) {
         return duplicatesList.getIndex(index);
     }
 
-    /**
-     * The UniqueList is writable.
-     */
+    /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
     }
 
-    /**
-     * When the list is changed the change may create new duplicates or remove
-     * duplicates.  The list is then altered to restore uniqeness and the events
-     * describing the alteration of the unique view are forwarded on.
-     *
-     * <p>The approach to handling list changes in UniqueList uses two passes
-     * through the list of change events. In the first pass, the duplicates list
-     * is updated to reflect the changes yet no events are fired. All inserted
-     * values receive a value of TEMP_UNIQUE in the duplicates list. Deleted
-     * and updated original duplicates list entries are stored in a temporary
-     * array. Updated values' duplicates list entries are set to UNIQUE. In
-     * pass 2, the change events are reviewed again. Inserted elements are tested
-     * to see if the inserted value equals any elements in the source list that
-     * existed prior to this change. If they are equal, the insert is not new
-     * and an UPDATE is fired, otherwise the INSERT is fired. In either case, the
-     * TEMP_UNIQUE is replaced with a UNIQUE in the duplicates list. For update events
-     * the value is tested for equality with adjacent values, and the result may
-     * be a forwarded DELETE, INSERT or UPDATE. Finally DELETED events may be
-     * forwarded with a resultant DELETE or UPDATE event, depending on whether
-     * the deleted value was unique.
-     *
-     *
-     * @param listChanges The group of list changes to process
-     */
+    /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
+        // When the list is changed the change may create new duplicates or remove
+        // duplicates.  The list is then altered to restore uniqeness and the events
+        // describing the alteration of the unique view are forwarded on.
+        //
+        // <p>The approach to handling list changes in UniqueList uses two passes
+        // through the list of change events. In the first pass, the duplicates list
+        // is updated to reflect the changes yet no events are fired. All inserted
+        // values receive a value of TEMP_UNIQUE in the duplicates list. Deleted
+        // and updated original duplicates list entries are stored in a temporary
+        // array. Updated values' duplicates list entries are set to UNIQUE. In
+        // pass 2, the change events are reviewed again. Inserted elements are tested
+        // to see if the inserted value equals any elements in the source list that
+        // existed prior to this change. If they are equal, the insert is not new
+        // and an UPDATE is fired, otherwise the INSERT is fired. In either case, the
+        // TEMP_UNIQUE is replaced with a UNIQUE in the duplicates list. For update events
+        // the value is tested for equality with adjacent values, and the result may
+        // be a forwarded DELETE, INSERT or UPDATE. Finally DELETED events may be
+        // forwarded with a resultant DELETE or UPDATE event, depending on whether
+        // the deleted value was unique.
 
         // divide the change event for two passes
         ListEvent firstPass = new ListEvent(listChanges);
@@ -296,7 +279,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Gets the count of repetitions of the value at the specified index.
+     * Gets the number of duplicates of the value found at the specified index.
      */
     public int getCount(int index) {
         // if this is before the end, its everything up to the first different element
@@ -309,7 +292,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Gets the count of repetitions of the specified value.
+     * Gets the number of duplicates of the specified value.
      */
     public int getCount(Object value) {
         int index = indexOf(value);
@@ -318,13 +301,12 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Gets a list of the repetitions of the value at the specified index.
+     * Gets a {@link List} of the duplicates of the value at the specified index.
      *
-     * <p><strong>Warning:</strong> the returned list provides a view of the returned
-     * data that is only valid until the next list change occurs. Therefore users of
-     * this method should call it and do all of their access to it while continuously
-     * holding this list's read lock. Holding the read lock will guarantee that
-     * the result will not change while it is being read.
+     * <p><strong>Warning:</strong> the returned {@link List} is only valid until
+     * the next list change occurs. If this {@link UniqueList} is shared between
+     * multiple threads, it is necessary to have aquired the {@link ReadWriteLock}
+     * while accessing the returned {@link List}.
      */
     public List getAll(int index) {
         // if this is before the end, its everything up to the first different element
@@ -337,13 +319,12 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Gets a list of the repetitions of the specified value.
+     * Gets a {@link List} of the duplicates of the specified value.
      *
-     * <p><strong>Warning:</strong> the returned list provides a view of the returned
-     * data that is only valid until the next list change occurs. Therefore users of
-     * this method should call it and do all of their access to it while continuously
-     * holding this list's read lock. Holding the read lock will guarantee that
-     * the result will not change while it is being read.
+     * <p><strong>Warning:</strong> the returned {@link List} is only valid until
+     * the next list change occurs. If this {@link UniqueList} is shared between
+     * multiple threads, it is necessary to have aquired the {@link ReadWriteLock}
+     * while accessing the returned {@link List}.
      */
     public List getAll(Object value) {
         int index = indexOf(value);
@@ -387,12 +368,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
         return (0 == comparator.compare(source.get(index0), source.get(index1)));
     }
 
-    /**
-     * Removes the element at the specified index from the source list.
-     *
-     * <p>This has been modified for UniqueList in order to remove all of
-     * the duplicate elements from the source list.
-     */
+    /** {@inheritDoc} */
     public Object remove(int index) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -416,12 +392,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
         }
     }
 
-    /**
-     * Removes the specified element from the source list.
-     *
-     * <p>This has been modified for UniqueList in order to remove all of
-     * the duplicate elements from the source list.
-     */
+    /** {@inheritDoc} */
     public boolean remove(Object toRemove) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -437,19 +408,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
         }
     }
 
-    /**
-     * Replaces the object at the specified index in the source list with
-     * the specified value.
-     *
-     * <p>This removes all duplicates of the replaced value, then sets the
-     * replacement value on the source list.
-     *
-     * <p><strong>Warning:</strong> Because the set() method is implemented
-     * using <i>multiple</i> modifying calls to the source list, <i>multiple</i>
-     * events will be propogated. Therefore this method has been carefully
-     * implemented to keep this list in a consistent state for each such modifying
-     * operation.
-     */
+    /** {@inheritDoc} */
     public Object set(int index, Object value) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -483,9 +442,10 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
     /**
-     * Replaces the contents of this list with the contents of the specified
-     * SortedSet. This walks through both lists in parallel in order to retain
-     * objects that exist in both the current and the new revision.
+     * Replaces the contents of this {@link UniqueList} with the contents of the
+     * specified {@link SortedSet}. If this {@link UniqueList} uses a {@link Comparator}
+     * to determine equality of elements, the specified {@link SortedList} must use
+     * an equal {@link Comparator}.
      */
     public void replaceAll(SortedSet revision) {
 
@@ -561,54 +521,24 @@ public final class UniqueList extends TransformedList implements ListEventListen
     }
 
 
-    /**
-     * Returns true if this list contains the specified element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
-
+    /** {@inheritDoc} */
     public boolean contains(Object object) {
         return (indexOf(object) != -1);
     }
 
-    /**
-     * Returns the index in this list of the first occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int indexOf(Object object) {
         int sourceIndex = source.indexOf(object);
         if(sourceIndex == -1) return -1;
         return duplicatesList.getCompressedIndex(sourceIndex, true);
     }
 
-    /**
-     * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.  Since
-     * uniqueness is guaranteed for this list, the value returned by this
-     * method will always be indentical to calling <code>indexOf()</code>.
-     *
-     * <p>Like all read-only methods, this method <strong>does not</strong> manage
-     * its own thread safety. Callers can obtain thread safe access to this method
-     * via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
         return indexOf(object);
     }
 
-    /**
-     * Release the resources consumed by this TransformedList so that it may be garbage
-     * collected. It is an error to call any method on a TransformedList after it
-     * has been disposed.
-     *
-     * <p>This implementation of UniqueList extends dispose() in order to first
-     * dispose the SortedList on which this implementation depends.
-     */
+    /** {@inheritDoc} */
     public void dispose() {
         ((TransformedList)source).dispose();
         super.dispose();

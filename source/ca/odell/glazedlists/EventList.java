@@ -14,8 +14,8 @@ import ca.odell.glazedlists.util.concurrent.*;
 import java.util.*;
 
 /**
- * An observable list. {@link ListEventListener}s can register to be notified
- * when this list changes.
+ * An observable {@link List}. {@link ListEventListener}s can register to be
+ * notified when this list changes.
  *
  * <p>{@link EventList}s may be writable or read-only. Consult the Javadoc for
  * your {@link EventList} if you are unsure.
@@ -27,7 +27,7 @@ import java.util.*;
  * <pre> EventList myList = ...
  * myList.getReadWriteLock().writeLock().lock();
  * try {
- *    // you can access myList here
+ *    // access myList here
  *    if(myList.size() > 3) {
  *       System.out.println(myList.get(3));
  *    }

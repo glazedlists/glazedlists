@@ -14,15 +14,22 @@ import java.util.*;
 import ca.odell.glazedlists.util.concurrent.*;
 
 /**
- * A CompositeList is a list that is composed of one or more lists.
+ * An {@link EventList} composed of multiple source {@link EventList}s.
  *
- * <p><strong><font color="#FF0000">Warning:</font></strong> the CompositeList's
- * concurrency lock recursively acquires the lock for all source lists. This can
- * lead to deadlocks in situations where multiple CompositeLists share the same
- * source lists. To avoid risk of deadlock, no source list (or its parent lists)
- * should be a member to more than one CompositeList. 
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is not
+ * writable via its API. Calls to {@link #set(int,Object) set()},
+ * {@link #add(Object) add()}, etc. will throw a {@link RuntimeException}. To
+ * modify this {@link EventList}, modify its source {@link EventList}s directly.
  *
- * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=25">Bug 25</a>
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This
+ * {@link EventList}'s {@link ReadWriteLock} recursively acquires the locks
+ * for all source {@link EventList}s. This can cause deadlock if multiple
+ * {@link CompositeList}s share the same source {@link EventList}s. Therefore
+ * {@link CompositeList}s must not share source {@link EventList}s.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -35,26 +42,15 @@ public final class CompositeList extends AbstractEventList {
     private LinkedList globalChangeQueue = new LinkedList();
 
     /**
-     * Creates a new CompositeList.
+     * Creates a {@link CompositeList} that is initially composed of zero source
+     * {@link EventList}s.
      */
     public CompositeList() {
         readWriteLock = new CompositeReadWriteLock();
     }
     
     /**
-     * For implementing the ListEventListener interface. Extending classes should
-     * adjust in response to this change and forward notifications about that
-     * adjustment to downstream listeners.
-     *
-     * <p>Because the CompositeList uses inner classes, this method throws an
-     * IllegalStateException.
-     */
-    //public void listChanged(ListEvent listChanges) {
-    //    throw new IllegalStateException();
-    //}
-
-    /**
-     * Adds the specified list to the lists that compose this list.
+     * Adds the specified {@link EventList} as a source to this {@link CompositeList}.
      */
     public void addMemberList(EventList list) {
         // lock all member lists and the new list
@@ -81,7 +77,8 @@ public final class CompositeList extends AbstractEventList {
     }
     
     /**
-     * Removes the specified list from the lists that compose this list.
+     * Removes the specified {@link EventList} as a source {@link EventList}
+     * to this {@link CompositeList}.
      */
     public void removeMemberList(EventList list) {
         // lock all member lists
@@ -120,13 +117,7 @@ public final class CompositeList extends AbstractEventList {
         }
     }
     
-    /**
-     * Returns the element at the specified position in this list. Most
-     * mutation lists will override the get method to use a mapping.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public Object get(int index) {
         for(int i = 0; i < memberLists.size(); i++) {
             MemberList current = (MemberList)memberLists.get(i);
@@ -139,12 +130,7 @@ public final class CompositeList extends AbstractEventList {
         return null;
     }
     
-    /**
-     * Returns the number of elements in this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int size() {
         int size = 0;
         for(int i = 0; i < memberLists.size(); i++) {
@@ -154,9 +140,7 @@ public final class CompositeList extends AbstractEventList {
         return size;
     }
     
-    /**
-     * Gets the offset of the specified member list.
-     */
+    /** {@inheritDoc} */
     private int getListOffset(MemberList memberList) {
         int listOffset = 0;
         for(int i = 0; i < memberLists.size(); i++) {
@@ -171,7 +155,7 @@ public final class CompositeList extends AbstractEventList {
      * The member list listener listens to a single list for changes and
      * forwards the changes from that list to all listeners for composed list.
      */
-    class MemberList implements ListEventListener {
+    private class MemberList implements ListEventListener {
         
         /** the source list for this member */
         private EventList sourceList;
@@ -274,7 +258,7 @@ public final class CompositeList extends AbstractEventList {
      * The CompositeReadWriteLock uses a single CompositeLock for both
      * reading and writing.
      */
-    class CompositeReadWriteLock implements ReadWriteLock {
+    private class CompositeReadWriteLock implements ReadWriteLock {
         
         /** the reading and writing lock */
         Lock lock = new CompositeLock();
@@ -302,7 +286,7 @@ public final class CompositeList extends AbstractEventList {
      * source list by allowing the thread holding the composite lock to do
      * the forwarding.
      */
-    class CompositeLock implements Lock {
+    private class CompositeLock implements Lock {
     
         /** use a delegate lock to guarantee mutual exclusion */
         private Lock raceLock = new J2SE12ReadWriteLock().writeLock();

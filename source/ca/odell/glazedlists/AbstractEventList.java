@@ -23,14 +23,6 @@ import java.io.Serializable;
  * <p>If you are creating a custom {@link EventList}, consider extending the more
  * feature-rich {@link TransformedList}.
  *
- * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
- * are thread ready but not thread safe. See {@link EventList} for an example
- * of thread safe code.
- * 
- * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
- * may break the contract required by {@link java.util.List}. See {@link EventList}
- * for an example.
- *
  * <p>Documentation Note: Javadoc tags have been copied from the {@link List} API
  * because the <code>javadoc</code> tool does not inherit external descriptions.
  *

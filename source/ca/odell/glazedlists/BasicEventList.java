@@ -17,7 +17,7 @@ import java.util.*;
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
  * or {@link LinkedList}.
  *
- * <p>This {@link List} supports all write operations.
+ * <p>This {@link EventList} supports all write operations.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
  * are thread ready but not thread safe. See {@link EventList} for an example

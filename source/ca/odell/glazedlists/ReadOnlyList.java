@@ -12,16 +12,20 @@ import java.util.*;
 import ca.odell.glazedlists.event.*;
 
 /**
- * A ReadOnlyList is a mutation list that throws an exception for
- * each method that modifies the list.
+ * An {@link EventList} that does not allow writing operations.
  *
- * <p>This is useful only when programming defensively. For example, if you
- * need to supply read-only access to your {@link List} to another class, using a
- * ReadOnlyList will guarantee that such a list will not be able to
- * modify the list. The ReadOnlyList will still provide an up-to-date
- * view of the list that changes with each update to the list. For a static
- * read only list, simply copy the contents of this list into an {@link ArrayList} and
- * use that list.
+ * <p>The {@link ReadOnlyList} is useful for programming defensively. A
+ * {@link ReadOnlyList} is useful to supply an unknown class read-only access
+ * to your {@link EventList}. 
+ *
+ * <p>The {@link ReadOnlyList} will provides an up-to-date view of its source
+ * {@link EventList} so changes to the source {@link EventList} will still be
+ * reflected. For a static copy of any {@link EventList} it is necessary to copy
+ * the contents of that {@link EventList} into an {@link ArrayList}.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
  *
  * @see ca.odell.glazedlists.TransformedList
  *
@@ -30,18 +34,15 @@ import ca.odell.glazedlists.event.*;
 public final class ReadOnlyList extends TransformedList implements ListEventListener {
 
     /**
-     * Creates a new ReadOnlyList that is a read only view of the
-     * specified list.
+     * Creates a {@link ReadOnlyList} to provide a view of an {@link EventList}
+     * that does not allow write operations.
      */
     public ReadOnlyList(EventList source) {
         super(source);
         source.addListEventListener(this);
     }
 
-    /**
-     * For implementing the ListEventListener interface. When the underlying list
-     * changes, this sends notification to listening lists.
-     */
+    /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);

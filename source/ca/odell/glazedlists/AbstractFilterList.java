@@ -29,12 +29,14 @@ import ca.odell.glazedlists.util.concurrent.*;
  * has changed in order to update the subset of included elements. This method
  * must also be called at the end of the extending class's constructor.
  *
- * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
- * are thread ready but not thread safe. See {@link EventList} for an example
+ * <p>This {@link EventList} supports all write operations.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
  * 
- * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
- * may break the contract required by {@link java.util.List}. See {@link EventList}
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class
+ * breaks the contract required by {@link java.util.List}. See {@link EventList}
  * for an example.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

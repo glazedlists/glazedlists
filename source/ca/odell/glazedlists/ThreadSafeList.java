@@ -10,22 +10,28 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.*;
 // for access to the Collection interface
 import java.util.*;
+// for locking
+import ca.odell.glazedlists.util.concurrent.*;
 
 /**
- * A ThreadSafeList is a mutation list that guarantees that access
- * to the source list is thread-safe.
+ * An {@link EventList} that obtains a {@link ReadWriteLock} for all operations.
  *
- * <p>Synchronizing method calls using
- * {@link ca.odell.glazedlists.util.concurrent.ReadWriteLock}s for
- * each method is expensive and adds needless complexity to a user's code.
- * As such, we provide this thread-safe Decorator to alleviate the need to
- * focus on underlying details so that users can focus on building their
- * business logic.
+ * <p>This provides some support for sharing {@link EventList}s between multiple
+ * threads.
  *
- *<p>As a note, using this class blindly could result in a loss of performance
- * as a lock is aquired and released with each method call.  We provide this
- * class for convienience, however. If performance is a concern, feel free to implement
- * a similar class to better suit your needs.
+ * <p>Using a {@link ThreadSafeList} for concurrent access to lists can be expensive
+ * because a {@link ReadWriteLock} is aquired and released for every operation.
+ *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> Although this class
+ * provides thread safe access, it does not provide any guarantees that changes
+ * will not happen between method calls. For example, the following code is unsafe
+ * because the source {@link EventList} may change between calls to {@link #size() size()}
+ * and {@link #get(int) get()}:
+ * <pre> EventList source = ...
+ * ThreadSafeList myList = new ThreadSafeList(source);
+ * if(myList.size() > 3) {
+ *   System.out.println(myList.get(3));
+ * }</pre>
  *
  * @see ca.odell.glazedlists.util.concurrent
  *
@@ -34,26 +40,21 @@ import java.util.*;
 public final class ThreadSafeList extends TransformedList implements ListEventListener {
 
     /**
-     * Creates a new ThreadSafeList that is a thread-safe view of the
-     * specified list.
+     * Creates a {@link ThreadSafeList} that provides thread safe access to all
+     * methods in the source {@link EventList}.
      */
     public ThreadSafeList(EventList source) {
         super(source);
         source.addListEventListener(this);
     }
 
-    /**
-     * For implementing the ListEventListener interface. When the underlying list
-     * changes, this sends notification to listening lists.
-     */
+    /** {@inheritDoc} */
     public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
     }
 
-    /**
-     * Gets the specified element from the list.
-     */
+    /** {@inheritDoc} */
     public Object get(int index) {
         getReadWriteLock().readLock().lock();
         try {
@@ -63,9 +64,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Gets the total number of elements in the list.
-     */
+    /** {@inheritDoc} */
     public int size() {
         getReadWriteLock().readLock().lock();
         try {
@@ -75,25 +74,17 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Gets the index into the source list for the object with the specified
-     * index in this list.
-     */
-    protected int getSourceIndex(int mutationIndex) {
+    /** {@inheritDoc} */
+    /*protected int getSourceIndex(int mutationIndex) {
         return mutationIndex;
-    }
+    }*/
 
-    /**
-     * Tests if this mutation shall accept calls to <code>add()</code>,
-     * <code>remove()</code>, <code>set()</code> etc.
-     */
+    /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
     }
 
-    /**
-     * Returns true if this list contains the specified element.
-     */
+    /** {@inheritDoc} */
     public boolean contains(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -103,9 +94,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Returns true if this list contains all of the elements of the specified collection.
-     */
+    /** {@inheritDoc} */
     public boolean containsAll(Collection collection) {
         getReadWriteLock().readLock().lock();
         try {
@@ -115,9 +104,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Compares the specified object with this list for equality.
-     */
+    /** {@inheritDoc} */
     public boolean equals(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -127,12 +114,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Returns the hash code value for this list.
-     *
-     * <p>This method is not thread-safe and callers should ensure they have thread-
-     * safe access via <code>getReadWriteLock().readLock()</code>.
-     */
+    /** {@inheritDoc} */
     public int hashCode() {
         getReadWriteLock().readLock().lock();
         try {
@@ -142,10 +124,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Returns the index in this list of the first occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     */
+    /** {@inheritDoc} */
     public int indexOf(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -155,10 +134,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     */
+    /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -168,9 +144,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Returns true if this list contains no elements.
-     */
+    /** {@inheritDoc} */
     public boolean isEmpty() {
         getReadWriteLock().readLock().lock();
         try {
@@ -180,10 +154,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence.
-     */
+    /** {@inheritDoc} */
     public Object[] toArray() {
         getReadWriteLock().readLock().lock();
         try {
@@ -193,11 +164,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Returns an array containing all of the elements in this list in proper
-     * sequence; the runtime type of the returned array is that of the
-     * specified array.
-     */
+    /** {@inheritDoc} */
     public Object[] toArray(Object[] array) {
         getReadWriteLock().readLock().lock();
         try {
@@ -207,9 +174,7 @@ public final class ThreadSafeList extends TransformedList implements ListEventLi
         }
     }
 
-    /**
-     * Gets this list in String form for debug or display.
-     */
+    /** {@inheritDoc} */
     public String toString() {
         getReadWriteLock().readLock().lock();
         try {
