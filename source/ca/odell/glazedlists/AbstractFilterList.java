@@ -173,11 +173,10 @@ public abstract class AbstractFilterList extends TransformedList {
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
 
-        // ensure all flags are set in the flagList indicating all
-        // source list elements are matched with no filter
-        for(int i = 0; i < flagList.whiteSize(); i++) {
-            int sourceIndex = flagList.getIndex(i, Barcode.WHITE);
-            updates.addInsert(sourceIndex);
+        // for all filtered items, add them
+        for(BarcodeIterator i = flagList.iterator();i.hasNextWhite(); ) {
+            i.nextWhite();
+            updates.addInsert(i.getIndex());
         }
         flagList.clear();
         flagList.addBlack(0, source.size());
@@ -200,13 +199,10 @@ public abstract class AbstractFilterList extends TransformedList {
         updates.beginEvent();
 
         // for all filtered items, see what the change is
-        for(int i = 0; i < flagList.whiteSize(); ) {
-            int sourceIndex = flagList.getIndex(i, Barcode.WHITE);
-            if(filterMatches(source.get(sourceIndex))) {
-                flagList.setBlack(sourceIndex, 1);
-                updates.addInsert(flagList.getBlackIndex(sourceIndex));
-            } else {
-                i++;
+        for(BarcodeIterator i = flagList.iterator();i.hasNextWhite(); ) {
+            i.nextWhite();
+            if(filterMatches(source.get(i.getIndex()))) {
+                updates.addInsert(i.setBlack());
             }
         }
 
@@ -228,13 +224,10 @@ public abstract class AbstractFilterList extends TransformedList {
         updates.beginEvent();
 
         // for all unfiltered items, see what the change is
-        for(int i = 0; i < flagList.blackSize(); ) {
-            int sourceIndex = flagList.getIndex(i, Barcode.BLACK);
-            if(!filterMatches(source.get(sourceIndex))) {
-                flagList.setWhite(sourceIndex, 1);
-                updates.addDelete(i);
-            } else {
-                i++;
+        for(BarcodeIterator i = flagList.iterator();i.hasNextBlack(); ) {
+            i.nextBlack();
+            if(!filterMatches(source.get(i.getIndex()))) {
+                updates.addDelete(i.setWhite());
             }
         }
 
@@ -255,23 +248,23 @@ public abstract class AbstractFilterList extends TransformedList {
         updates.beginEvent();
 
         // for all source items, see what the change is
-        for(int i = 0; i < source.size(); i++) {
+        for(BarcodeIterator i = flagList.iterator();i.hasNext(); ) {
+            i.next();
 
             // determine if this value was already filtered out or not
-            int filteredIndex = flagList.getBlackIndex(i);
+            int filteredIndex = i.getBlackIndex();
             boolean wasIncluded = filteredIndex != -1;
             // whether we should add this item
-            boolean include = filterMatches(source.get(i));
+            boolean include = filterMatches(source.get(i.getIndex()));
 
-            // if this element is being removed as a result of the change
+            // this element is being removed as a result of the change
             if(wasIncluded && !include) {
-                flagList.setWhite(i, 1);
+                i.setWhite();
                 updates.addDelete(filteredIndex);
 
-            // if this element is being added as a result of the change
+            // this element is being added as a result of the change
             } else if(!wasIncluded && include) {
-                flagList.setBlack(i, 1);
-                updates.addInsert(flagList.getBlackIndex(i));
+                updates.addInsert(i.setBlack());
             }
         }
 

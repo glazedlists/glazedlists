@@ -19,6 +19,48 @@ import java.util.*;
 public interface BarcodeIterator extends Iterator {
 
     /**
+     * Returns true if there are more BLACK elements in the {@link Barcode} to
+     * move the {@link Iterator} to.
+     */
+    public boolean hasNextBlack();
+
+    /**
+     * Returns true if there are more WHITE elements in the {@link Barcode} to
+     * move the {@link Iterator} to.
+     */
+    public boolean hasNextWhite();
+
+    /**
+     * Returns true if there are more elements in the {@link Barcode} to
+     * move the {@link Iterator} to that match the provided colour.
+     */
+    public boolean hasNextColour(Object colour);
+
+    /**
+     * Moves this {@link Iterator} to the next element in the {@link Barcode}
+     * that is BLACK.
+     *
+     * @throws NoSuchElementException if hasNextBlack() returns false.
+     */
+    public Object nextBlack();
+
+    /**
+     * Moves this {@link Iterator} to the next element in the {@link Barcode}
+     * that is WHITE.
+     *
+     * @throws NoSuchElementException if hasNextWhite() returns false.
+     */
+    public Object nextWhite();
+
+    /**
+     * Moves this {@link Iterator} to the next element in the {@link Barcode}
+     * that matches the provided colour.
+     *
+     * @throws NoSuchElementException if hasNextColour(colour) returns false.
+     */
+    public Object nextColour(Object colour);
+
+    /**
      * Gets the index of the last element visited.
      */
     public int getIndex();
@@ -41,4 +83,22 @@ public interface BarcodeIterator extends Iterator {
      * returns -1.
      */
     public int getColourIndex(Object colour);
+
+    /**
+     * Sets the most recently viewed element to WHITE and returns the white-centric
+     * index of the element after the set is complete.
+     */
+    public int setWhite();
+
+    /**
+     * Sets the most recently viewed element to BLACK and returns the white-centric
+     * index of the element after the set is complete.
+     */
+    public int setBlack();
+
+    /**
+     * Sets the most recently viewed element to the value of colour and returns
+     * the colour specific index of the element after the set is complete.
+     */
+    public int set(Object colour);
 }

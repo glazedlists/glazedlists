@@ -258,6 +258,15 @@ public final class Barcode {
     }
 
     /**
+     * Gets the root for this Barcode.  This method is exposed for
+     * Iterators on Barcode whose set() operations may create a
+     * root node on a Barcode where none existed.
+     */
+    BarcodeNode getRootNode() {
+        return root;
+    }
+
+    /**
      * Sets the root for this list.  This method is exposed for the
      * BarcodeNode in the event that the list's root is involved in
      * an AVL rotation.
@@ -265,6 +274,15 @@ public final class Barcode {
     void setRootNode(BarcodeNode root) {
         this.root = root;
         if(root == null) treeSize = 0;
+    }
+
+    /**
+     * Gets the size of the underlying tree structure for this Barcode.  This
+     * method is exposed for Iterators on Barcode who would otherwise have to
+     * maintain the state of treeSize themselves.
+     */
+    int treeSize() {
+        return treeSize;
     }
 
     /**
@@ -484,18 +502,11 @@ public final class Barcode {
     }
 
     /**
-     * Provides an {@link Iterator} that iterates over the entire
-     * {@link Barcode}.
+     * Provides a specialized {@link Iterator} that iterates over a
+     * {@link Barcode} to provide high performance access to {@link Barcode}
+     * functionality.
      */
     public BarcodeIterator iterator() {
-        return new BarcodeNode.FullBarcodeIterator(this, root);
-    }
-
-    /**
-     * Provides an {@link Iterator} that only iterates over the portions of
-     * the {@link Barcode} which match the specified value of colour.
-     */
-    public BarcodeIterator iterator(Object colour) {
-        return new BarcodeNode.BarcodeColourIterator(this, root, colour);
+        return new BarcodeNode.BarcodeIteratorImpl(this);
     }
 }

@@ -196,7 +196,30 @@ public class BarcodeTest extends TestCase {
     }
 
     /**
-     * Tests that a black-centric iterator works correctly
+     * Tests that the BarcodeIterator works correctly
+     */
+    public void testBarcodeIterator() {
+        barcode.addBlack(0, 10);
+        barcode.addWhite(10, 3);
+        barcode.addWhite(7, 1);
+        barcode.addWhite(5, 5);
+        barcode.addWhite(3, 7);
+        barcode.addWhite(1, 3);
+
+        BarcodeIterator iterator = barcode.iterator();
+        for(int i = 0; i < barcode.size(); i++) {
+            assertEquals(true, iterator.hasNext());
+            assertEquals(barcode.get(i), iterator.next());
+            assertEquals(barcode.getBlackIndex(i), iterator.getBlackIndex());
+            assertEquals(barcode.getWhiteIndex(i), iterator.getWhiteIndex());
+            assertEquals(i, iterator.getIndex());
+        }
+        assertEquals(false, iterator.hasNext());
+    }
+
+    /**
+     * Tests that a BarcodeIterator works correctly by only BLACK iteration
+     * methods.
      */
     public void testBlackIterator() {
         barcode.addBlack(0, 10);
@@ -206,19 +229,20 @@ public class BarcodeTest extends TestCase {
         barcode.addWhite(3, 7);
         barcode.addWhite(1, 3);
 
-        BarcodeIterator iterator = barcode.iterator(Barcode.BLACK);
+        BarcodeIterator iterator = barcode.iterator();
         for(int i = 0; i < barcode.blackSize(); i++) {
-            assertEquals(true, iterator.hasNext());
-            assertEquals(Barcode.BLACK, iterator.next());
+            assertEquals(true, iterator.hasNextBlack());
+            assertEquals(Barcode.BLACK, iterator.nextBlack());
             assertEquals(i, iterator.getBlackIndex());
             assertEquals(-1, iterator.getWhiteIndex());
             assertEquals(barcode.getIndex(i, Barcode.BLACK), iterator.getIndex());
         }
-        assertEquals(false, iterator.hasNext());
+        assertEquals(false, iterator.hasNextBlack());
     }
 
     /**
-     * Tests that a white-centric iterator works correctly
+     * Tests that a BarcodeIterator works correctly by only WHITE iteration
+     * methods
      */
     public void testWhiteIterator() {
         barcode.addBlack(0, 10);
@@ -228,35 +252,25 @@ public class BarcodeTest extends TestCase {
         barcode.addWhite(3, 7);
         barcode.addWhite(1, 3);
 
-        BarcodeIterator iterator = barcode.iterator(Barcode.WHITE);
+        BarcodeIterator iterator = barcode.iterator();
         for(int i = 0; i < barcode.whiteSize(); i++) {
-            assertEquals(true, iterator.hasNext());
-            assertEquals(Barcode.WHITE, iterator.next());
+            assertEquals(true, iterator.hasNextWhite());
+            assertEquals(Barcode.WHITE, iterator.nextWhite());
             assertEquals(i, iterator.getWhiteIndex());
             assertEquals(-1, iterator.getBlackIndex());
             assertEquals(barcode.getIndex(i, Barcode.WHITE), iterator.getIndex());
         }
-        assertEquals(false, iterator.hasNext());
+        assertEquals(false, iterator.hasNextWhite());
     }
 
     /**
      * Tests all of the iterators on an empty barcode
      */
     public void testEmptyBarcodeIterators() {
-        BarcodeIterator whiteIterator = barcode.iterator(Barcode.WHITE);
-        assertEquals(false, whiteIterator.hasNext());
-        assertEquals(-1, whiteIterator.getIndex());
-        assertEquals(-1, whiteIterator.getBlackIndex());
-        assertEquals(-1, whiteIterator.getWhiteIndex());
-
-        BarcodeIterator blackIterator = barcode.iterator(Barcode.BLACK);
-        assertEquals(false, blackIterator.hasNext());
-        assertEquals(-1, blackIterator.getIndex());
-        assertEquals(-1, blackIterator.getBlackIndex());
-        assertEquals(-1, blackIterator.getWhiteIndex());
-
         BarcodeIterator iterator = barcode.iterator();
         assertEquals(false, iterator.hasNext());
+        assertEquals(false, iterator.hasNextWhite());
+        assertEquals(false, iterator.hasNextBlack());
         assertEquals(-1, iterator.getIndex());
         assertEquals(-1, iterator.getBlackIndex());
         assertEquals(-1, iterator.getWhiteIndex());
@@ -268,18 +282,18 @@ public class BarcodeTest extends TestCase {
     public void testCompletelyWhiteBarcodeIterators() {
         barcode.addWhite(0, 10);
 
-        BarcodeIterator whiteIterator = barcode.iterator(Barcode.WHITE);
+        BarcodeIterator whiteIterator = barcode.iterator();
         for(int i = 0; i < 10; i++) {
-            assertEquals(true, whiteIterator.hasNext());
-            assertEquals(Barcode.WHITE, whiteIterator.next());
+            assertEquals(true, whiteIterator.hasNextWhite());
+            assertEquals(Barcode.WHITE, whiteIterator.nextWhite());
             assertEquals(i, whiteIterator.getIndex());
             assertEquals(-1, whiteIterator.getBlackIndex());
             assertEquals(i, whiteIterator.getWhiteIndex());
         }
-        assertEquals(false, whiteIterator.hasNext());
+        assertEquals(false, whiteIterator.hasNextWhite());
 
-        BarcodeIterator blackIterator = barcode.iterator(Barcode.BLACK);
-        assertEquals(false, blackIterator.hasNext());
+        BarcodeIterator blackIterator = barcode.iterator();
+        assertEquals(false, blackIterator.hasNextBlack());
         assertEquals(-1, blackIterator.getIndex());
         assertEquals(-1, blackIterator.getBlackIndex());
         assertEquals(-1, blackIterator.getWhiteIndex());
@@ -301,18 +315,18 @@ public class BarcodeTest extends TestCase {
     public void testCompletelyBlackBarcodeIterators() {
         barcode.addBlack(0, 10);
 
-        BarcodeIterator blackIterator = barcode.iterator(Barcode.BLACK);
+        BarcodeIterator blackIterator = barcode.iterator();
         for(int i = 0; i < 10; i++) {
-            assertEquals(true, blackIterator.hasNext());
-            assertEquals(Barcode.BLACK, blackIterator.next());
+            assertEquals(true, blackIterator.hasNextBlack());
+            assertEquals(Barcode.BLACK, blackIterator.nextBlack());
             assertEquals(i, blackIterator.getIndex());
             assertEquals(-1, blackIterator.getWhiteIndex());
             assertEquals(i, blackIterator.getBlackIndex());
         }
-        assertEquals(false, blackIterator.hasNext());
+        assertEquals(false, blackIterator.hasNextBlack());
 
-        BarcodeIterator whiteIterator = barcode.iterator(Barcode.WHITE);
-        assertEquals(false, whiteIterator.hasNext());
+        BarcodeIterator whiteIterator = barcode.iterator();
+        assertEquals(false, whiteIterator.hasNextWhite());
         assertEquals(-1, whiteIterator.getIndex());
         assertEquals(-1, whiteIterator.getBlackIndex());
         assertEquals(-1, whiteIterator.getWhiteIndex());
@@ -326,6 +340,183 @@ public class BarcodeTest extends TestCase {
             assertEquals(i, iterator.getBlackIndex());
         }
         assertEquals(false, iterator.hasNext());
+    }
+
+    /**
+     * Tests that all write ops fail appropriately on an empty Barcode
+     */
+    public void testEmptyBarcodeFailures() {
+        BarcodeIterator fullIterator = barcode.iterator();
+        try {
+            fullIterator.remove();
+            fail("Iterator failed to throw an exception for a write operation on an empty Barcode.");
+        } catch(NoSuchElementException e) {
+            // Test success
+        }
+
+        try {
+            fullIterator.setBlack();
+            fail("Iterator failed to throw an exception for a write operation on an empty Barcode.");
+        } catch(NoSuchElementException e) {
+            // Test success
+        }
+
+        try {
+            fullIterator.setWhite();
+            fail("Iterator failed to throw an exception for a write operation on an empty Barcode.");
+        } catch(NoSuchElementException e) {
+            // Test success
+        }
+    }
+
+    /**
+     * Tests that setting a BLACK value on a completely WHITE Barcode
+     * behaves correctly.
+     */
+    public void testSetBlackOnCompletelyWhiteBarcodeFullIterator() {
+        barcode.addWhite(0, 10);
+        BarcodeIterator fullIterator = barcode.iterator();
+        for(int i = 0; i < 5; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.WHITE, fullIterator.next());
+        }
+        assertEquals(0, fullIterator.setBlack());
+        for(int i = 0; i < 5; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.WHITE, fullIterator.next());
+        }
+        assertEquals(false, fullIterator.hasNext());
+        assertEquals(1, barcode.blackSize());
+        assertEquals(4, barcode.getIndex(0, Barcode.BLACK));
+    }
+
+    /**
+     * Tests that setting a WHITE value on a completely BLACK Barcode
+     * behaves correctly.
+     */
+    public void testSetBlackOnCompletelyBlackBarcodeFullIterator() {
+        barcode.addBlack(0, 10);
+        BarcodeIterator fullIterator = barcode.iterator();
+        for(int i = 0; i < 5; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.BLACK, fullIterator.next());
+        }
+        assertEquals(0, fullIterator.setWhite());
+        for(int i = 0; i < 5; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.BLACK, fullIterator.next());
+        }
+        assertEquals(false, fullIterator.hasNext());
+        assertEquals(1, barcode.whiteSize());
+        assertEquals(4, barcode.getIndex(0, Barcode.WHITE));
+    }
+
+    /**
+     * Tests that setting a single WHITE value on a completely BLACK Barcode
+     * at the very end of the Barcode behaves correctly.
+     */
+    public void testSetWhiteAtEndOnCompletelyBlackBarcodeFullIterator() {
+        barcode.addBlack(0, 10);
+        BarcodeIterator fullIterator = barcode.iterator();
+        for(int i = 0; i < 10; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.BLACK, fullIterator.next());
+        }
+        assertEquals(0, fullIterator.setWhite());
+        assertEquals(false, fullIterator.hasNext());
+        assertEquals(1, barcode.whiteSize());
+        assertEquals(9, barcode.getIndex(0, Barcode.WHITE));
+    }
+
+    /**
+     * Tests that setting a single BLACK value to WHITE on an otherwise
+     * completely WHITE Barcode.
+     */
+    public void testSetOnlyBlackToWhiteFullIterator() {
+        barcode.addWhite(0, 9);
+        barcode.addBlack(4, 1);
+        BarcodeIterator fullIterator = barcode.iterator();
+        for(int i = 0; i < 4; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.WHITE, fullIterator.next());
+        }
+        assertEquals(Barcode.BLACK, fullIterator.next());
+        assertEquals(4, fullIterator.setWhite());
+        for(int i = 0; i < 5; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.WHITE, fullIterator.next());
+        }
+        assertEquals(false, fullIterator.hasNext());
+        assertEquals(0, barcode.blackSize());
+    }
+
+    /**
+     * Tests that setting the last BLACK element in a Barcode
+     * containing several BLACK elements to WHITE works.
+     */
+    public void testSetLastBlackToWhiteFullIterator() {
+        barcode.addWhite(0, 10);
+        barcode.addBlack(1, 2);
+        barcode.addBlack(5, 5);
+        barcode.addBlack(12, 3);
+        BarcodeIterator fullIterator = barcode.iterator();
+        for(int i = 0; i < 14; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            fullIterator.next();
+        }
+
+        assertEquals(Barcode.BLACK, fullIterator.next());
+        assertEquals(5, fullIterator.setWhite());
+
+        for(int i = 0; i < 5; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.WHITE, fullIterator.next());
+        }
+        assertEquals(false, fullIterator.hasNext());
+        assertEquals(11, barcode.whiteSize());
+        assertEquals(14, barcode.getIndex(5, Barcode.WHITE));
+    }
+
+    /**
+     * Tests that setting the first WHITE element in the trailing
+     * white space on the Barcode to BLACK works as expected.
+     */
+    public void testSettingLeadOfTrailingWhiteSpaceToBlackFullIterator() {
+        barcode.addWhite(0, 5);
+        barcode.addBlack(5, 4);
+        barcode.addWhite(9, 6);
+        BarcodeIterator fullIterator = barcode.iterator();
+        for(int i = 0; i < 9; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            fullIterator.next();
+        }
+        fullIterator.next();
+        assertEquals(4, fullIterator.setBlack());
+        for(int i = 0; i < 5; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.WHITE, fullIterator.next());
+        }
+        assertEquals(false, fullIterator.hasNext());
+        assertEquals(5, barcode.blackSize());
+        assertEquals(9, barcode.getIndex(4, Barcode.BLACK));
+    }
+
+    /**
+     * Tests that setting the first WHITE element in an entirely
+     * WHITE Barcode to BLACK works as expected.
+     */
+    public void testSetBlackOnFirstCompletelyWhiteFullIterator() {
+        barcode.addWhite(0, 10);
+        BarcodeIterator fullIterator = barcode.iterator();
+        fullIterator.next();
+        assertEquals(0, fullIterator.setBlack());
+        for(int i = 0; i < 9; i++) {
+            assertEquals(true, fullIterator.hasNext());
+            assertEquals(Barcode.WHITE, fullIterator.next());
+        }
+        assertEquals(false, fullIterator.hasNext());
+        assertEquals(1, barcode.blackSize());
+        assertEquals(0, barcode.getIndex(0, Barcode.BLACK));
     }
 
     /**
