@@ -64,6 +64,9 @@ public class DynamicQueryList extends TransformedList implements Runnable {
         queryThread = new Thread(this);
         queryThread.setName("Query");
         queryThread.start();
+        
+        // listen for changes to the source list
+        uniqueSource.addListEventListener(this);
     }
     
     /**
