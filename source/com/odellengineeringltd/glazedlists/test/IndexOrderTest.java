@@ -116,12 +116,12 @@ public class IndexOrderTest extends TestCase {
             }
             
             // print the two lists
-            System.out.println("MODIFICATION #: " + a);
+            /*System.out.println("MODIFICATION #: " + a);
             for(int i = 0; i < controlList.size(); i++) {
                 int[] filter = (int[])filteredOnce.get(i);
                 int[] control = (int[])controlList.get(i);
                 System.out.println(filter[0] + " " + control[0] + "   " + filter[1] + " " + control[1]);
-            }
+            }*/
             
             // verify the replica matches
             assertEquals(controlList, filteredOnce);
@@ -219,8 +219,6 @@ public class IndexOrderTest extends TestCase {
             
             if(!increasingOrder) {
                 fail("List changes not in increasing order: " + changeDescription);
-            } else {
-                System.out.println("Success: " + changeDescription);
             }
         }
     }
