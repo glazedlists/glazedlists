@@ -64,7 +64,13 @@ public class EventTableViewer implements ListEventListener {
 
         // prepare the table's initial rows
         populateTable();
-        source.addListEventListener(this);
+        
+        // listen for events, using the user interface thread
+        if(source == checkFilter) {
+            source.addListEventListener(this);
+        } else {
+            source.addListEventListener(new UserInterfaceThreadProxy(this, table.getDisplay()));
+        }
     }
     
     /**

@@ -219,8 +219,8 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
      */
     public void addListEventListener(ListEventListener listChangeListener) {
         if(listChangeListener instanceof EventTableViewer) {
-            super.addListEventListener(listChangeListener);
-            super.addListEventListener(new TableChecker());
+            super.addListEventListener(new UserInterfaceThreadProxy(listChangeListener, table.getDisplay()));
+            super.addListEventListener(new UserInterfaceThreadProxy(new TableChecker(), table.getDisplay()));
         } else {
             super.addListEventListener(listChangeListener);
         }
