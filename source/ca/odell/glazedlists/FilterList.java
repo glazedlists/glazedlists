@@ -6,7 +6,7 @@
  */
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.MatcherListener;
+import ca.odell.glazedlists.event.MatcherSourceListener;
 
 
 /**
@@ -31,7 +31,7 @@ import ca.odell.glazedlists.event.MatcherListener;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class FilterList extends AbstractFilterList implements MatcherListener {
+public class FilterList extends AbstractFilterList implements MatcherSourceListener {
     private volatile Matcher matcher;
 
 
@@ -51,15 +51,15 @@ public class FilterList extends AbstractFilterList implements MatcherListener {
      * Update the matcher used by the list.
      */
     public synchronized void setMatcher(Matcher matcher) {
-        Matcher old_matcher = this.matcher;
-        if (old_matcher != null) old_matcher.removeMatcherListener(this);
-
-        this.matcher = matcher;
-        if (matcher != null) {
-            matcher.addMatcherListener(this);
-            handleFilterChanged();
-        } else
-            handleFilterCleared();
+//        Matcher old_matcher = this.matcher;
+//        if (old_matcher != null) old_matcher.removeMatcherListener(this);
+//
+//        this.matcher = matcher;
+//        if (matcher != null) {
+//            matcher.addMatcherListener(this);
+//            handleFilterChanged();
+//        } else
+//            handleFilterCleared();
     }
 
     /**
@@ -82,28 +82,30 @@ public class FilterList extends AbstractFilterList implements MatcherListener {
     /**
      * {@inheritDoc}
      */
-    public final void cleared(Matcher source) {
+    public final void cleared(MatcherSource source) {
         handleFilterCleared();
     }
 
     /**
      * {@inheritDoc}
      */
-    public final void changed(Matcher source) {
+    public final void changed(Matcher matcher, MatcherSource source) {
         handleFilterChanged();
     }
 
     /**
      * {@inheritDoc}
      */
-    public final void constrained(Matcher source) {
+    public final void constrained(Matcher matcher, MatcherSource source) {
         handleFilterConstrained();
     }
 
     /**
      * {@inheritDoc}
      */
-    public final void relaxed(Matcher source) {
+    public final void relaxed(Matcher matcher, MatcherSource source) {
         handleFilterRelaxed();
     }
+
+
 }
