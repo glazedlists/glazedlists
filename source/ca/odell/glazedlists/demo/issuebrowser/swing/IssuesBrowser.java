@@ -42,6 +42,7 @@ public class IssuesBrowser extends Applet {
     private EventSelectionModel issuesSelectionModel;
 
     /** an event list to host the descriptions */
+    private Issue descriptionIssue = null;
     private EventList descriptions = new BasicEventList();
 
     /** monitor loading the issues */
@@ -205,11 +206,15 @@ public class IssuesBrowser extends Applet {
      */
     class IssuesSelectionListener implements ListSelectionListener {
         public void valueChanged(ListSelectionEvent e) {
+            // get the newly selected issue
+            Issue selected = null;
+            if(issuesSelectionModel.getSelected().size() > 0) selected = (Issue)issuesSelectionModel.getSelected().get(0);
+            
+            // update the description issue
+            if(selected == descriptionIssue) return;
+            descriptionIssue = selected;
             descriptions.clear();
-            if(issuesSelectionModel.getSelected().size() > 0) {
-                Issue selectedIssue = (Issue) issuesSelectionModel.getSelected().get(0);
-                descriptions.addAll(selectedIssue.getDescriptions());
-            }
+            descriptions.addAll(descriptionIssue.getDescriptions());
         }
     }
 
@@ -220,7 +225,7 @@ public class IssuesBrowser extends Applet {
     class ProjectChangeListener implements ItemListener {
         public void itemStateChanged(ItemEvent e) {
             Project selected = (Project) e.getItem();
-            if (selected.isValid()) issueLoader.setProject((Project) selected);
+            if(selected.isValid()) issueLoader.setProject((Project) selected);
         }
     }
 
