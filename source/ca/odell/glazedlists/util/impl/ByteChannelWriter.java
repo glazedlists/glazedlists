@@ -28,11 +28,9 @@ public class ByteChannelWriter {
     /** the SocketChannel to write to */
     private SocketChannel channel;
     
-    /** the ByteBuffer to parse text from */
-    private ByteBuffer buffer;
-    
-    /** initially the write buffer consumes a single kilobyte of memory */
-    private static final int INITIAL_BUFFER_SIZE = 1024;
+    /** the ResizableByteBuffer to write to */
+    private int initialBufferSize = 256;
+    private ResizableByteBuffer buffer = new ResizableByteBuffer(initialBufferSize);
     
     /**
      * Create a writer for the specified channel.
@@ -40,7 +38,6 @@ public class ByteChannelWriter {
     public ByteChannelWriter(SocketChannel channel, SelectionKey selectionKey) {
         this.channel = channel;
         this.selectionKey = selectionKey;
-        this.buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
     }
     
     /**
@@ -79,7 +76,7 @@ public class ByteChannelWriter {
         
         // resize the local buffer as necessary
         if(buffer.remaining() < source.remaining()) {
-            growLocalBuffer(source.remaining());
+            buffer.grow(buffer.capacity() + source.remaining());
         }
         
         // write the rest to local buffers
@@ -119,9 +116,9 @@ public class ByteChannelWriter {
             }
 
             // write some bytes
-            int written = channel.write(buffer);
+            int written = buffer.push(channel);
 
-            // if we cannot write anything more at the current time
+            // the channel is full so we cannot write anything more
             if(written == 0) {
                 buffer.compact();
                 return false;

@@ -42,7 +42,6 @@ public class CTPChunkTest extends TestCase {
      * Clean up after the test.
      */
     public void tearDown() {
-        connectionManager.stop();
     }
 
     /**
@@ -50,20 +49,24 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testServerSendChunk() {
-        StaticCTPHandler client = new StaticCTPHandler();
-        client.addExpected("HELLO WORLD");
-        
-        StaticCTPHandler server = new StaticCTPHandler();
-        server.addEnqueued("HELLO WORLD");
-        
-        handlerFactory.addHandler(server);
-        connectionManager.connect("localhost", client);
-        
-        client.waitForCompletion((long)1000);
-        server.waitForCompletion((long)1000);
-        
-        assertTrue("Server did not complete", server.isDone());
-        assertTrue("Client did not complete", client.isDone());
+        try {
+            StaticCTPHandler client = new StaticCTPHandler();
+            client.addExpected("HELLO WORLD");
+            
+            StaticCTPHandler server = new StaticCTPHandler();
+            server.addEnqueued("HELLO WORLD");
+            
+            handlerFactory.addHandler(server);
+            connectionManager.connect("localhost", client);
+            
+            client.waitForCompletion((long)1000);
+            server.waitForCompletion((long)1000);
+            
+            assertTrue("Server did not complete", server.isDone());
+            assertTrue("Client did not complete", client.isDone());
+        } finally {
+            connectionManager.stop();
+        }
     }
 
 
@@ -72,20 +75,24 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testClientSendChunk() {
-        StaticCTPHandler client = new StaticCTPHandler();
-        client.addEnqueued("WORLD O HELL");
-        
-        StaticCTPHandler server = new StaticCTPHandler();
-        server.addExpected("WORLD O HELL");
-        
-        handlerFactory.addHandler(server);
-        connectionManager.connect("localhost", client);
-        
-        client.waitForCompletion((long)1000);
-        server.waitForCompletion((long)1000);
-        
-        assertTrue("Server did not complete", server.isDone());
-        assertTrue("Client did not complete", client.isDone());
+        try {
+            StaticCTPHandler client = new StaticCTPHandler();
+            client.addEnqueued("WORLD O HELL");
+            
+            StaticCTPHandler server = new StaticCTPHandler();
+            server.addExpected("WORLD O HELL");
+            
+            handlerFactory.addHandler(server);
+            connectionManager.connect("localhost", client);
+            
+            client.waitForCompletion((long)1000);
+            server.waitForCompletion((long)1000);
+            
+            assertTrue("Server did not complete", server.isDone());
+            assertTrue("Client did not complete", client.isDone());
+        } finally {
+            connectionManager.stop();
+        }
     }
 
 
@@ -94,25 +101,29 @@ public class CTPChunkTest extends TestCase {
      * sends data to itself.
      */
     public void testSendLargeString() {
-        String clientSendData = randomString(2000);
-        String serverSendData = randomString(3000);
-        
-        StaticCTPHandler client = new StaticCTPHandler();
-        client.addEnqueued(clientSendData);
-        client.addExpected(serverSendData);
-        
-        StaticCTPHandler server = new StaticCTPHandler();
-        server.addExpected(clientSendData);
-        server.addEnqueued(serverSendData);
-        
-        handlerFactory.addHandler(server);
-        connectionManager.connect("localhost", client);
-        
-        client.waitForCompletion((long)1000);
-        server.waitForCompletion((long)1000);
-        
-        assertTrue("Server did not complete", server.isDone());
-        assertTrue("Client did not complete", client.isDone());
+        try {
+            String clientSendData = randomString(2000);
+            String serverSendData = randomString(3000);
+            
+            StaticCTPHandler client = new StaticCTPHandler();
+            client.addEnqueued(clientSendData);
+            client.addExpected(serverSendData);
+            
+            StaticCTPHandler server = new StaticCTPHandler();
+            server.addExpected(clientSendData);
+            server.addEnqueued(serverSendData);
+            
+            handlerFactory.addHandler(server);
+            connectionManager.connect("localhost", client);
+            
+            client.waitForCompletion((long)1000);
+            server.waitForCompletion((long)1000);
+            
+            assertTrue("Server did not complete", server.isDone());
+            assertTrue("Client did not complete", client.isDone());
+        } finally {
+            connectionManager.stop();
+        }
     }
     
     /**

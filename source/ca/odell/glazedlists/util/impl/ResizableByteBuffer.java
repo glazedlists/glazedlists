@@ -61,6 +61,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
      *   }
      */
     public ResizableByteBuffer compact() {
+        assert(consistentState());
         // rearrange the buffer orders
         while(true) {
             ByteBuffer firstBuffer = (ByteBuffer)byteBuffers.get(0);
@@ -88,6 +89,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
         limit = capacity;
         mark = -1;
 
+        assert(consistentState());
         return this;
     }
     
@@ -120,6 +122,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
      * Welds all the buffers together.
      */
     private void weld() {
+        assert(consistentState());
         ByteBuffer newBuffer = ByteBuffer.allocateDirect(capacity);
         for(int b = 0; b < byteBuffers.size(); b++) {
             ByteBuffer currentBuffer = (ByteBuffer)byteBuffers.get(b);
@@ -128,6 +131,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
         }
         byteBuffers.clear();
         byteBuffers.add(newBuffer);
+        assert(consistentState());
     }
     
     /**
@@ -138,6 +142,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
      * is to weld the buffers of this together and return a section of that.
      */
     public ByteBuffer consume(int bytesToRead) {
+        assert(consistentState());
         ByteBuffer currentBuffer = getBufferAt(position);
 
         // weld all our buffers together if necessary
@@ -150,6 +155,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
         currentBuffer.limit(currentBuffer.position() + bytesToRead);
         ByteBuffer result = currentBuffer.slice();
         position += bytesToRead;
+        assert(consistentState());
         return result;
     }
     
@@ -175,6 +181,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
      * buffer and it is potentially much more efficient.
      */
     public void put(ByteBuffer source) {
+        assert(consistentState());
         if(source.remaining() > remaining()) throw new BufferOverflowException();
 
         while(source.hasRemaining()) {
@@ -192,6 +199,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
                 source.position(source.position() + bytesToWrite);
             }
         }
+        assert(consistentState());
     }
     
     /**
@@ -224,17 +232,61 @@ public class ResizableByteBuffer extends AbstractBuffer {
      * complete.
      */
     public int pull(ReadableByteChannel source) throws IOException {
-        int totalBytesRead = 0;
-        while(true) {
-            if(!hasRemaining()) return totalBytesRead;
+        assert(consistentState());
+        int positionBefore = position;
+        while(hasRemaining()) {
             ByteBuffer currentBuffer = getBufferAt(position);
             int bytesRead = source.read(currentBuffer);
-            if(bytesRead < 0 && totalBytesRead == 0) return bytesRead;
+            if(bytesRead < 0 && positionBefore == position) return bytesRead;
             else if(bytesRead <= 0) break;
-            else if(bytesRead > 0) totalBytesRead += bytesRead;
+            else if(bytesRead > 0) {
+                position += bytesRead;
+            }
         }
-        position += totalBytesRead;
-        return totalBytesRead;
+        assert(consistentState());
+        return (position - positionBefore);
+    }
+    
+    /**
+     * Writes a sequence of bytes to the specified channel from this buffer.
+     *
+     * An attempt is made to write up to r bytes to the channel, 
+     * where r is the number of bytes remaining in the buffer, that is, 
+     * dst.remaining(), at the moment this method is invoked.
+     *
+     * Suppose that a byte sequence of length n is written, where  0 <= n <= r. 
+     * This byte sequence will be transferred from the buffer starting at index 
+     * p, where p is the buffer's position at the moment this 
+     * method is invoked; the index of the last byte written will be  p + n - 1. 
+     * Upon return the buffer's position will be equal to
+     * p + n; its limit will not have changed.
+     *
+     * Unless otherwise specified, a write operation will return only after 
+     * writing all of the r requested bytes. Some types of channels, 
+     * depending upon their state, may write only some of the bytes or possibly 
+     * none at all. A socket channel in non-blocking mode, for example, cannot 
+     * write any more bytes than are free in the socket's output buffer.
+     *
+     * This method may be invoked at any time. If another thread has 
+     * already initiated a write operation upon this channel, however, then an 
+     * invocation of this method will block until the first operation is 
+     * complete.
+     */
+    public int push(WritableByteChannel target) throws IOException {
+        assert(consistentState());
+        int positionBefore = position;
+        while(hasRemaining()) {
+            ByteBuffer currentBuffer = getBufferAt(position);
+            if(currentBuffer.remaining() > remaining()) currentBuffer.limit(currentBuffer.position() + remaining());
+            int bytesWritten = target.write(currentBuffer);
+            if(bytesWritten < 0 && positionBefore == position) return bytesWritten;
+            else if(bytesWritten <= 0) break;
+            else if(bytesWritten > 0) {
+                position += bytesWritten;
+            }
+        }
+        assert(consistentState());
+        return (position - positionBefore);
     }
     
     /**
@@ -260,6 +312,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
      * limit to the new minimum size.
      */
     public void grow(int minSize) {
+        assert(consistentState());
         if(capacity >= minSize) return;
 
         // calculate the size to grow as a nice round number
@@ -270,6 +323,7 @@ public class ResizableByteBuffer extends AbstractBuffer {
         byteBuffers.add(newBuffer);
         capacity += newBuffer.capacity();
         limit = minSize;
+        assert(consistentState());
     }
     
     /**

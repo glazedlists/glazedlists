@@ -175,4 +175,11 @@ public class AbstractBuffer {
         mark = -1;
         return this;
     }
+    
+    /**
+     * Returns true if this buffer is in a consistent state.
+     */
+    protected boolean consistentState() {
+        return((mark == -1 || 0 <= mark) && mark <= position && position <= limit && limit <= capacity);
+    }
 }
