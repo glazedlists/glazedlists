@@ -33,11 +33,12 @@ public class EventListViewer implements ListEventListener, Selectable {
 
     /** the EventList to respond to */
     private EventList source = null;
+
     /** the proxy moves events to the User Interface thread */
     private UserInterfaceThreadProxy uiThreadProxy = null;
 
     /** the formatter for list elements */
-    private ListFormat listFormat = null;
+    private LabelFormat LabelFormat = null;
 
     /** For selection management */
     private SelectionList selectionList = null;
@@ -48,17 +49,17 @@ public class EventListViewer implements ListEventListener, Selectable {
      * toString() on the contents of the source list.
      */
     public EventListViewer(EventList source, List list) {
-        this(source, list, new DefaultListFormat());
+        this(source, list, GlazedLists.toStringLabelFormat());
     }
 
     /**
      * Creates a new List that displays and responds to changes in source.
-     * List elements are formatted using the provided {@link ListFormat}.
+     * List elements are formatted using the provided {@link LabelFormat}.
      */
-    public EventListViewer(EventList source, List list, ListFormat listFormat) {
+    public EventListViewer(EventList source, List list, LabelFormat LabelFormat) {
         this.source = source;
         this.list = list;
-        this.listFormat = listFormat;
+        this.LabelFormat = LabelFormat;
 
         // Enable the selection lists
         selectionList = new SelectionList(source, this);
@@ -83,8 +84,8 @@ public class EventListViewer implements ListEventListener, Selectable {
     /**
      * Gets the List Format.
      */
-    public ListFormat getListFormat() {
-        return listFormat;
+    public LabelFormat getLabelFormat() {
+        return LabelFormat;
     }
 
     /**
@@ -114,14 +115,14 @@ public class EventListViewer implements ListEventListener, Selectable {
      * Adds the value at the specified row.
      */
     private void addRow(int row, Object value) {
-        list.add(listFormat.getDisplayValue(value), row);
+        list.add(LabelFormat.getText(value), row);
     }
 
     /**
      * Updates the value at the specified row.
      */
     private void updateRow(int row, Object value) {
-        list.setItem(row, listFormat.getDisplayValue(value));
+        list.setItem(row, LabelFormat.getText(value));
     }
 
     /**
@@ -213,20 +214,6 @@ public class EventListViewer implements ListEventListener, Selectable {
     /** {@inheritDoc} */
     public boolean isSelected(int index) {
         return list.isSelected(index);
-    }
-
-    /**
-     * Provides simple list formatting where each element will be displayed
-     * as the result of calling toString() on the source Object.
-     */
-    private static final class DefaultListFormat implements ListFormat {
-
-        /**
-         * Gets the toString() value for a particular element.
-         */
-        public String getDisplayValue(Object element) {
-            return element.toString();
-        }
     }
 
     /**

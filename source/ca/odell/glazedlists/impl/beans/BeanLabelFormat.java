@@ -6,33 +6,38 @@
  */
 package ca.odell.glazedlists.impl.beans;
 
-// to implement the ThresholdEvaluator interface
-import ca.odell.glazedlists.ThresholdEvaluator;
+// to implement the LabelFormat interface
+import ca.odell.glazedlists.gui.LabelFormat;
 
 /**
- * A ThresholdEvaluator that is powered by JavaBeans and Reflection.
+ * A LabelFormat that uses Reflection on JavaBeans to provide a label
+ * for an Object.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class BeanThresholdEvaluator implements ThresholdEvaluator {
+public final class BeanLabelFormat implements LabelFormat {
 
+    /** The name of the JavaBean property to use */
     private String propertyName = null;
 
+    /** The easy way to work with JavaBean-like object properties */
     private BeanProperty beanProperty = null;
 
-    public BeanThresholdEvaluator(String propertyName) {
+    /**
+     * Creates a new LabelFormat that uses the value of a JavaBean property
+     * as the label for an Object.
+     */
+    public BeanLabelFormat(String propertyName) {
         this.propertyName = propertyName;
     }
 
     /**
-     * Returns an integer value for an Object to be used to
-     * compare that object against a threshold.  This value is
-     * not relative to any other object unlike a <code>Comparator</code>.
+     * Gets a label for the given Object from the JavaBean property.
      */
-    public int evaluate(Object object) {
+    public String getText(Object object) {
         if(beanProperty == null) loadPropertyDescriptors(object);
         Object property = beanProperty.get(object);
-        return ((Integer)property).intValue();
+        return property.toString();
     }
 
     /**

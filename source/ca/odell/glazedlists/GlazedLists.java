@@ -11,14 +11,15 @@ import java.util.*;
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.impl.beans.*;
+import ca.odell.glazedlists.impl.gui.*;
 // implemented interfaces
 import ca.odell.glazedlists.io.ByteCoder;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.gui.LabelFormat;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.ThresholdEvaluator;
 import java.util.Comparator;
-
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -34,9 +35,9 @@ public final class GlazedLists {
         throw new UnsupportedOperationException();
     }
 
-    
-    // Comparators // // // // // // // // // // // // // // // // // // // // 
-    
+
+    // Comparators // // // // // // // // // // // // // // // // // // // //
+
     /** Provide Singleton access for all Comparators with no internal state */
     private static Comparator booleanComparator = null;
     private static Comparator comparableComparator = null;
@@ -109,49 +110,49 @@ public final class GlazedLists {
         return new ReverseComparator(forward);
     }
 
-    // TableFormats // // // // // // // // // // // // // // // // // // // // 
+    // TableFormats // // // // // // // // // // // // // // // // // // // //
 
     /**
      * Creates a {@link TableFormat} that binds JavaBean properties to
      * table columns via Reflection.
      */
     public static TableFormat tableFormat(String[] propertyNames, String[] columnLabels) {
-		return new BeanTableFormat(propertyNames, columnLabels);
-	}
+        return new BeanTableFormat(propertyNames, columnLabels);
+    }
 
     /**
      * Creates a {@link WritableTableFormat} that binds JavaBean properties to
      * optionally writable table columns via Reflection.
      */
     public static WritableTableFormat writableTableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
-		return new BeanWritableTableFormat(propertyNames, columnLabels, editable);
-	}
+        return new BeanWritableTableFormat(propertyNames, columnLabels, editable);
+    }
 
-    
-    // TextFilterators // // // // // // // // // // // // // // // // // // // 
-    
-	/**
-	 * Creates a {@link TextFilterator} that searches the given JavaBean
-	 * properties.
-	 */
-	public static TextFilterator textFilterator(String[] propertyNames) {
-		return new BeanTextFilterator(propertyNames);
-	}
 
-    
-    // ThresholdEvaluators // // // // // // // // // // // // // // // // // // 
-    
+    // TextFilterators // // // // // // // // // // // // // // // // // // //
+
+    /**
+     * Creates a {@link TextFilterator} that searches the given JavaBean
+     * properties.
+     */
+    public static TextFilterator textFilterator(String[] propertyNames) {
+        return new BeanTextFilterator(propertyNames);
+    }
+
+
+    // ThresholdEvaluators // // // // // // // // // // // // // // // // // //
+
     /**
      * Creates a {@link ThresholdEvaluator} that uses Reflection to utilize an
      * integer JavaBean property as the threshold evaluation.
      */
     public static ThresholdEvaluator thresholdEvaluator(String propertyName) {
-		return new BeanThresholdEvaluator(propertyName);
-	}
+        return new BeanThresholdEvaluator(propertyName);
+    }
 
 
-    // ByteCoders // // // // // // // // // // // // // // // // // // // // // 
-    
+    // ByteCoders // // // // // // // // // // // // // // // // // // // // //
+
     /** Provide Singleton access for all ByteCoders with no internal state */
     private static ByteCoder serializableByteCoder = new SerializableByteCoder();
     private static ByteCoder beanXMLByteCoder = new BeanXMLByteCoder();
@@ -161,7 +162,7 @@ public final class GlazedLists {
      * Objects using an {@link java.io.ObjectOutputStream}.
      */
     public static ByteCoder serializableByteCoder() {
-        if(serializableByteCoder == null) serializableByteCoder = new SerializableByteCoder(); 
+        if(serializableByteCoder == null) serializableByteCoder = new SerializableByteCoder();
         return serializableByteCoder;
     }
 
@@ -171,7 +172,30 @@ public final class GlazedLists {
      * Objects must be JavaBeans.
      */
     public static ByteCoder beanXMLByteCoder() {
-        if(beanXMLByteCoder == null) beanXMLByteCoder = new BeanXMLByteCoder(); 
+        if(beanXMLByteCoder == null) beanXMLByteCoder = new BeanXMLByteCoder();
         return beanXMLByteCoder;
+    }
+
+    // LabelFormats // // // // // // // // // // // // // // // // // // // // //
+
+    /** Provide Singleton access for all LabelFormats with no internal state */
+    private static LabelFormat toStringLabelFormat = null;
+
+    /**
+     * Creates a {@link LabelFormat} that returns labels for Objects by simply
+     * returning the result of their toString() method.
+     */
+    public static LabelFormat toStringLabelFormat() {
+        if(toStringLabelFormat == null) toStringLabelFormat = new ToStringLabelFormat();
+        return toStringLabelFormat;
+    }
+
+    /**
+     * Creates a {@link LabelFormat} that returns labels for Objects via
+     * Relection.  The label returned will be the String value of specified
+     * JavaBean property.
+     */
+    public static LabelFormat beanLabelFormat(String property) {
+        return new BeanLabelFormat(property);
     }
 }

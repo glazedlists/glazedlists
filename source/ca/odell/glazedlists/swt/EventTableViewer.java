@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.events.SelectionListener;
-// standard collections as support
+// standard collections support
 import java.util.*;
 
 /**
@@ -42,6 +42,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
 
     /** the complete list of messages before filters */
     protected EventList source;
+
     /** the proxy moves events to the User Interface thread */
     private UserInterfaceThreadProxy uiThreadProxy = null;
 
