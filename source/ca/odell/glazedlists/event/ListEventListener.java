@@ -49,8 +49,10 @@ public interface ListEventListener extends EventListener {
      * </code></pre></tt>
      *
      * <p>It is mandatory that the calling thread has obtained the write lock
-     * on the source list. This guarantees the listener can read and write the
-     * source list without obtaining any further locks.
+     * on the source list. This is because the calling thread will have written
+     * to the source list to cause this event. This condition guarantees that
+     * no writes can occur while the listener is handling this event.
+     * It is an error to write to the source list while processing an event.
      */
     public void listChanged(ListEvent listChanges);
 }
