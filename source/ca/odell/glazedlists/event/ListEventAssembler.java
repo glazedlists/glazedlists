@@ -52,18 +52,55 @@ public final class ListEventAssembler {
         this.sourceList = sourceList;
     }
     
+    /** the event level is the number of nested events */
+    private int eventLevel = 0;
+    
+    /** whether to allow nested events */
+    private boolean allowNestedEvents = true;
+    
     /**
      * Starts a new atomic change to this list change queue.
+     */
+    public void beginEvent() {
+        beginEvent(false);
+    }
+        
+    /**
+     * Starts a new atomic change to this list change queue.
+     *
+     * @param allowNestedEvents false to throw an exception
+     *      if another call to beginEvent() is made before
+     *      the next call to commitEvent(). Nested events allow
+     *      multiple method's events to be composed into a single
+     *      event.
+     */
+    public synchronized void beginEvent(boolean allowNestedEvents) {
+        // complain if we cannot nest any further
+        if(!this.allowNestedEvents) {
+            throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress");
+        }
+        this.allowNestedEvents = allowNestedEvents;
+        
+        // prepare for a new event if we haven't already
+        if(eventLevel == 0) {
+            prepareEvent();
+        }
+        
+        // track how deeply nested we are
+        eventLevel++;
+    }
+        
+    /**
+     * Prepares to receive event parts. This needs to be called for
+     * each fired event exactly once, even if that event includes some
+     * nested events.
      *
      * <p>To prevent two simultaneous atomic changes, the atomicChangeBlocks
      * arraylist is used as a flag. If it is null, there is no change taking
      * place. Otherwise there is a conflicting change and a
      * ConcurrentModificationException is thrown.
      */
-    public synchronized void beginEvent() {
-        if(atomicChangeBlocks != null) {
-            throw new ConcurrentModificationException("Cannot change this list while another change is taking place");
-        }
+    private void prepareEvent() {
         atomicChangeBlocks = new ArrayList();
         atomicLatestBlock = null;
         
@@ -157,6 +194,24 @@ public final class ListEventAssembler {
      * notify all listeners about the change.
      */
     public synchronized void commitEvent() {
+        // complain if we have no event to commit
+        if(eventLevel == 0) throw new IllegalStateException("Cannot commit without an event in progress");
+        
+        // we are one event less nested
+        eventLevel--;
+        allowNestedEvents = true;
+        
+        // fire the event if we are no longer nested
+        if(eventLevel == 0) {
+            fireEvent();
+        }
+    }
+    
+    /**
+     * Fires the current event. This needs to be called for each fired
+     * event exactly once, even if that event includes nested events.
+     */
+    private void fireEvent() {
         // do a 'real' commit only on non-empty changes
         if(atomicChangeBlocks.size() > 0) {
             // sort and simplify this block

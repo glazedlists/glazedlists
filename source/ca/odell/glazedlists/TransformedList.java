@@ -207,10 +207,12 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-            for(ListIterator i = listIterator(); i.hasNext(); ) {
-                i.next();
-                i.remove();
+            // nest changes and let the other methods compose the event
+            updates.beginEvent(true);
+            while(!isEmpty()) {
+                remove(0);
             }
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
@@ -295,11 +297,14 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+            // nest changes and let the other methods compose the event  
+            updates.beginEvent(true);
             boolean overallChanged = false;
             for(Iterator i = values.iterator(); i.hasNext(); ) {
                 boolean removeChanged = remove(i.next());
                 if(removeChanged) overallChanged = true;
             }
+            updates.commitEvent();
             return overallChanged;
         } finally {
             getReadWriteLock().writeLock().unlock();
@@ -328,13 +333,18 @@ public abstract class TransformedList extends AbstractEventList implements ListE
         getReadWriteLock().writeLock().lock();
         try {
             if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+            // nest changes and let the other methods compose the event  
+            updates.beginEvent(true);
             boolean changed = false;
-            for(ListIterator i = listIterator(); i.hasNext(); ) {
-                if(!values.contains(i.next())) {
-                    i.remove();
+            for(int i = 0; i < size(); ) {
+                if(!values.contains(get(i))) {
+                    remove(i);
                     changed = true;
+                } else {
+                    i++;
                 }
             }
+            updates.commitEvent();
             return changed;
         } finally {
             getReadWriteLock().writeLock().unlock();

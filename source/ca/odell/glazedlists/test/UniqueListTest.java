@@ -721,9 +721,9 @@ public class UniqueListTest extends TestCase {
         }
         
         // build a control list
-        ArrayList controlList = new ArrayList();
         SortedSet uniqueSource = new TreeSet();
         uniqueSource.addAll(source);
+        ArrayList controlList = new ArrayList();
         controlList.addAll(uniqueSource);
         
         // verify the unique list is correct initially
@@ -901,7 +901,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that replaceAll() works in the simplest of cases.
      */
-    public void testSetAll() {
+    public void testReplaceAll() {
         unique.add("B");
         unique.add("D");
         unique.add("E");
@@ -924,7 +924,10 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that replaceAll() works in a more sophisticated case.
      */
-    public void testSetAllRigorous() {
+    public void testReplaceAllRigorous() {
+        // verify that the size is always consistent
+        unique.addListEventListener(new ConsistencyTestList(unique, "Unique"));
+        
         for(int i = 0; i < 100; i++) {
             unique.add(new Integer(random.nextInt(100)));
         }
@@ -934,8 +937,17 @@ public class UniqueListTest extends TestCase {
             replacementSet.add(new Integer(random.nextInt(100)));
         }
         
+        // listen to changes on the unique list
+        ListEventCounter counter = new ListEventCounter();
+        unique.addListEventListener(counter);
+
+        // replace the values with the replacement set
         unique.replaceAll(replacementSet);
 
+        // verify that only one event has occured
+        assertEquals(1, counter.getEventCount());
+
+        // verify that the change applies to the replacement set
         ArrayList controlList = new ArrayList();
         controlList.addAll(replacementSet);
         assertEquals(controlList, unique);

@@ -38,7 +38,6 @@ public class ConsistencyTestList implements ListEventListener {
         this.source = source;
         this.name = name;
         size = source.size();
-        source.addListEventListener(new EventThreadProxy(this));
     }
     
     /**
@@ -58,8 +57,6 @@ public class ConsistencyTestList implements ListEventListener {
         }
         if(size != source.size()) {
             new Exception(name + "/" + changeCount + " size consistency problem! Expected " + size + ", got " + source.size()).printStackTrace();
-        } else {
-            System.out.println(name + "/" + changeCount + " size " + size);
         }
         changeCount++;
     }

@@ -463,10 +463,11 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // save the replaced value
             Object replaced = get(index);
             
-            // remove the existing value
+            // remove the existing value and add the new value
+            updates.beginEvent(true);
             remove(index);
-            // now add the new value
             add(index, value);
+            updates.commitEvent();
             
             return replaced;
         } finally {
@@ -485,54 +486,61 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // skip these results if the set is null
             if(revision == null) return;
 
-            // iterate through the all values simultaneously, looking for differences
-            ListIterator originalIterator = listIterator();
-            Iterator revisionIterator = revision.iterator();
+            // nest changes and let the other methods compose the event
+            updates.beginEvent(true);
 
             // set up the current objects to examine
-            Comparable revisionElement = null;
-            Comparable originalElement = nextOrNull(originalIterator);
+            int originalIndex = 0;
+            Comparable originalElement = getOrNull(this, originalIndex);
 
             // for all elements in the revised set
-            while((revisionElement = nextOrNull(revisionIterator)) != null) {
+            for(Iterator revisionIterator = revision.iterator(); revisionIterator.hasNext(); ) {
+                Comparable revisionElement = (Comparable)revisionIterator.next();
 
                 // when the before list holds items smaller than the after list item,
                 // the before list items are out-of-date and must be deleted 
                 while(originalElement != null && revisionElement.compareTo(originalElement) > 0) {
-                    originalIterator.remove();
-                    originalElement = nextOrNull(originalIterator);
+                    remove(originalIndex);
+                    // replace the original element
+                    originalElement = getOrNull(this, originalIndex);
                 }
 
                 // when the before list holds an item identical to the after list item,
                 // the item has not changed
                 if(originalElement != null && revisionElement.compareTo(originalElement) == 0) {
-                    originalIterator.set(revisionElement);
-                    originalElement = nextOrNull(originalIterator);
+                    set(originalIndex, revisionElement);
+                    // replace the original element
+                    originalIndex++;
+                    originalElement = getOrNull(this, originalIndex);
 
                 // when the before list holds no more items or an item that is larger than
                 // the current after list item, insert the after list item
                 } else {
-                    originalIterator.add(revisionElement);
+                    add(originalIndex, revisionElement);
+                    // adjust the index of the original element
+                    originalIndex++;
                 }
             }
 
             // when the before list holds items larger than the largest after list item,
             // the before list items are out-of-date and must be deleted 
-            while(originalElement != null) {
-                originalIterator.remove();
-                originalElement = nextOrNull(originalIterator);
+            while(originalIndex < size()) {
+                remove(originalIndex);
             }
+
+            // fire the composed event
+            updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
     }
     
     /**
-     * Utility method fetches the next Comparable from the iterator if there 
-     * is another element in the Iterator.
+     * Gets the element at the specified index of the specified list
+     * or null if the list is too small.
      */
-    private Comparable nextOrNull(Iterator i) {
-        if(i.hasNext()) return (Comparable)i.next();
-        else return null;
+    private Comparable getOrNull(List source, int index) {
+        if(index < source.size()) return (Comparable)source.get(index);
+        else return null; 
     }
 }

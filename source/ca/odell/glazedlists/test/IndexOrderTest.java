@@ -52,11 +52,6 @@ public class IndexOrderTest extends TestCase {
         SortedList sortedOnce = new SortedList(filteredOnce, new IntegerArrayComparator(0));
         SortedList sortedTwice = new SortedList(sortedOnce, new IntegerArrayComparator(1));
         
-        //unsorted.addListEventListener(new IncreasingChangeIndexListener());
-        //sortedOnce.addListEventListener(new IncreasingChangeIndexListener());
-        //sortedTwice.addListEventListener(new IncreasingChangeIndexListener());
-        //filteredOnce.addListEventListener(new IncreasingChangeIndexListener());
-        
         // add a block of new elements one hundred times
         for(int a = 0; a < 100; a++) {
 
@@ -114,14 +109,6 @@ public class IndexOrderTest extends TestCase {
                 if(filteredOnce.filterMatches(i.next())) continue;
                 i.remove();
             }
-            
-            // print the two lists
-            /*System.out.println("MODIFICATION #: " + a);
-            for(int i = 0; i < controlList.size(); i++) {
-                int[] filter = (int[])filteredOnce.get(i);
-                int[] control = (int[])controlList.get(i);
-                System.out.println(filter[0] + " " + control[0] + "   " + filter[1] + " " + control[1]);
-            }*/
             
             // verify the replica matches
             assertEquals(controlList, filteredOnce);
