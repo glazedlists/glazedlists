@@ -12,6 +12,8 @@ import junit.framework.*;
 import com.odellengineeringltd.glazedlists.*;
 // standard collections
 import java.util.*;
+// the integer array classes are useful for testing
+import com.odellengineeringltd.glazedlists.util.test.*;
 
 /**
  * This test verifies that the SortedList works.
@@ -27,7 +29,7 @@ public class SortedListTest extends TestCase {
     private SortedList sortedList = null;
     
     /** for randomly choosing list indicies */
-    private Random random = new Random();
+    private Random random = new Random(2);
     
     /**
      * Prepare for the test.
@@ -130,5 +132,57 @@ public class SortedListTest extends TestCase {
         
         // verify the lists are equal
         assertEquals(controlList, sortedList);
+    }
+
+
+    /**
+     * Tests that sorting works on a large set of filter changes.
+     */
+    public void testAgressiveFiltering() {
+        BasicEventList source = new BasicEventList();
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        SortedList sorted = new SortedList(filterList, new IntArrayComparator(0));
+        
+        // populate a list with 1000 random arrays between 0 and 1000
+        for(int i = 0; i < 20; i++) {
+            int value = random.nextInt(10);
+            int[] array = new int[] { value, random.nextInt(2), random.nextInt(2), random.nextInt(2) };
+            source.add(array);
+        }
+        
+        // try ten different filters
+        for(int i = 0; i < 100; i++) {
+            // apply the filter
+            int filterColumn = random.nextInt(3);
+            filterList.setFilter(filterColumn + 1, 1);
+            
+            // construct the control list
+            ArrayList controlList = new ArrayList();
+            controlList.addAll(filterList);
+            Collections.sort(controlList, new IntArrayComparator(0));
+            
+            // verify that the control and sorted list are the same
+            System.out.println("s: " + sorted.size() + ", c: " + controlList.size());
+            System.out.print("CONTROL: ");
+            for(int j = 0; j < controlList.size(); j++) {
+                System.out.print(((int[])controlList.get(j))[0] + ", ");
+            }
+            System.out.println("");
+            System.out.print("FILTER: ");
+            for(int j = 0; j < filterList.size(); j++) {
+                System.out.print(((int[])filterList.get(j))[0] + ", ");
+            }
+            System.out.println("");
+            System.out.print("SORTED: ");
+            for(int j = 0; j < sorted.size(); j++) {
+                System.out.print(((int[])sorted.get(j))[0] + ", ");
+            }
+            System.out.println("");
+            
+            assertEquals(sorted.size(), controlList.size());
+            for(int j = 0; j < sorted.size(); j++) {
+                assertEquals(((int[])sorted.get(j))[0], ((int[])controlList.get(j))[0]);
+            }
+        }
     }
 }
