@@ -76,8 +76,7 @@ public class CollectionListTest extends TestCase {
 	 * Make sure all the data is there in the order we expect.
 	 */
 	public void testBasicData() {
-		checkBasicListData(collection_list,
-			new String[]{DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES});
+		assertEquivalent(new String[]{ DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collection_list);
 	}
 
 	/**
@@ -187,40 +186,34 @@ public class CollectionListTest extends TestCase {
 	public void testModification() {
 		// Remove an item  (tests Delete)
 		parent_list.remove(DEV_ROB);
-		checkBasicListData(collection_list,
-			new String[]{DEV_JESSE, DEV_KEVIN, DEV_JAMES});
+		assertEquivalent(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collection_list);
 
 		// Put it on the end (test Insert)
 		parent_list.add(DEV_ROB);
-		checkBasicListData(collection_list,
-			new String[]{DEV_JESSE, DEV_KEVIN, DEV_JAMES, DEV_ROB});
+		assertEquivalent(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES, DEV_ROB }, collection_list);
 
 		// Replace it with something else (tests Update)
 		parent_list.set(parent_list.size() - 1, "Nede Bor");
-		checkBasicListData(collection_list,
-			new String[]{DEV_JESSE, DEV_KEVIN, DEV_JAMES, "Nede Bor"});
+		assertEquivalent(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES, "Nede Bor" }, collection_list);
 
 		// Remove that (tests Delete)
 		parent_list.remove(parent_list.size() - 1);
-		checkBasicListData(collection_list,
-			new String[]{DEV_JESSE, DEV_KEVIN, DEV_JAMES});
+		assertEquivalent(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collection_list);
 
 		// Add an empty item in the middle  (tests empty parents)
 		parent_list.add(1, "");
-		checkBasicListData(collection_list,
-			new String[]{DEV_JESSE, "", DEV_KEVIN, DEV_JAMES});
+		assertEquivalent(new String[]{ DEV_JESSE, "", DEV_KEVIN, DEV_JAMES }, collection_list);
 
 		// Clear the parent (tests a bunch of Deletes and size 0)
 		parent_list.clear();
-		checkBasicListData(collection_list, new String[]{});
+		assertEquivalent(new String[]{ }, collection_list);
 
 		// Put it all back to normal (tests a bunch on Inserts)
 		parent_list.add(DEV_ROB);
 		parent_list.add(DEV_JESSE);
 		parent_list.add(DEV_KEVIN);
 		parent_list.add(DEV_JAMES);
-		checkBasicListData(collection_list,
-			new String[]{DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES});
+		assertEquivalent(new String[]{ DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collection_list);
 	}
 
 
@@ -228,55 +221,34 @@ public class CollectionListTest extends TestCase {
 	 * Check the basic data on a CollectionList to make sure it's showing the characters
 	 * from the given Strings.
 	 */
-	private void checkBasicListData(CollectionList collection_list, String[] data) {
-		// Make sure the size is the total of the lengths of the strings
-		int expected_length = 0;
-		for (int i = 0; i < data.length; i++) {
-			expected_length += data[ i ].length();
-		}
-		assertEquals(expected_length, collection_list.size());
-
-		// Now make sure everything in the list is a Character
-		Iterator it = collection_list.iterator();
-		while (it.hasNext()) {
-			Object obj = it.next();
-
-			assertTrue(obj instanceof Character);
-		}
-
-		// Now make sure the characters are in the right place
-		char[] expected_chars = new char[ expected_length ];
-		int index = 0;
-		for (int i = 0; i < data.length; i++) {
-			String str = data[ i ];
-			System.arraycopy(str.toCharArray(), 0, expected_chars, index,
-				str.length());
-			index += str.length();
-		}
-
-		it = collection_list.iterator();
-		for (int i = 0; it.hasNext(); i++) {
-			Character c = (Character) it.next();
-
-			assertEquals(expected_chars[ i ], c.charValue());
-		}
-	}
-
+	private void assertEquivalent(String[] data, CollectionList collection_list) {
+        assertEquals(stringsToList(data), collection_list);
+    }
 
 	/**
 	 * Model that breaks a String into a list of characters.
 	 */
 	private class StringDecomposerModel implements CollectionListModel {
 		public List getChildren(Object parent) {
-			String str = (String) parent;
-
-			char[] chars = str.toCharArray();
-
-			List list = new ArrayList(chars.length);
-			for (int i = 0; i < chars.length; i++) {
-				list.add(new Character(chars[ i ]));
-			}
-			return list;
-		}
+			return stringToList((String)parent);
+        }
 	}
+
+    /**
+     * Convert the characters of the specified String to a list.
+     */
+    private static List stringToList(String chars) {
+        List result = new ArrayList(chars.length());
+        for (int i = 0; i < chars.length(); i++) {
+            result.add(new Character(chars.charAt(i)));
+        }
+        return result;
+    }
+    private static List stringsToList(String[] data) {
+        List result = new ArrayList();
+        for(int s = 0; s < data.length; s++) {
+            result.addAll(stringToList(data[s]));
+        }
+        return result;
+    }
 }

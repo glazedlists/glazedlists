@@ -6,10 +6,11 @@
  */
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.impl.adt.Barcode;
-import java.util.List;
+import java.util.*;
+// the core Glazed Lists package
+import ca.odell.glazedlists.event.*;
+// volatile implementation support
+import ca.odell.glazedlists.impl.adt.*;
 
 
 /**
@@ -37,117 +38,124 @@ import java.util.List;
 public class CollectionList extends TransformedList implements ListEventListener {
     
     /** used to extract children */
-	private final CollectionListModel collectionListModel;
+    private final CollectionListModel collectionListModel;
 
-	/**
-	 * Barcode containing the node mappings. There is a black node for each parent
-	 * followed by a white node for each of its children.
-	 */
-	private final Barcode barcode = new Barcode();
+    /**
+     * Barcode containing the node mappings. There is a black node for each parent
+     * followed by a white node for each of its children.
+     */
+    private final Barcode barcode = new Barcode();
+    
+    /** the Lists and EventLists that this is composed of */
+    private final IndexedTree childLists = new IndexedTree();
+    
+    /**
+     * Create a {@link CollectionList} that's contents will be the children of the
+     * elements in the specified source {@link EventList}.
+     */
+    public CollectionList(EventList source, CollectionListModel collectionListModel) {
+        super(source);
+        if(collectionListModel == null) throw new IllegalArgumentException("Collection map cannot be null");
 
-	public CollectionList(EventList source, CollectionListModel collectionListModel) {
-		super(source);
-		if(collectionListModel == null) throw new IllegalArgumentException("Collection map cannot be null");
+        this.collectionListModel = collectionListModel;
 
-		this.collectionListModel = collectionListModel;
+        // Sync the current size and indexes
+        for(int i = 0; i < source.size(); i++) {
+            List children = collectionListModel.getChildren(source.get(i));
 
-		// Sync the current size and indexes
-		for(int i = 0; i < source.size(); i++) {
-			barcode.addBlack(barcode.size(), 1);
+            // prepare the children to the barcode
+            childLists.addByNode(i, children);
+            barcode.addBlack(barcode.size(), 1);
+            if(!children.isEmpty()) barcode.addWhite(barcode.size(), children.size());
+        }
 
-			// Get the number of children this node has and make sure it's positive
-			List children = collectionListModel.getChildren(source.get(i));
-			if(!children.isEmpty()) barcode.addWhite(barcode.size(), children.size());
-		}
+        // Listen for events
+        source.addListEventListener(this);
+    }
 
-		// Listen for events
-		source.addListEventListener(this);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public int size() {
+        // Size of the child nodes only
+        return barcode.whiteSize();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public int size() {
-		// Size of the child nodes only
-		return barcode.whiteSize();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public Object get(int index) {
+        if(index < 0) throw new IndexOutOfBoundsException("Invalid index: " + index);
+        if(index >= size()) throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Object get(int index) {
-		if(index < 0) throw new IndexOutOfBoundsException("Invalid index: " + index);
-		if(index >= size()) throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
-
-		// get the parent
-		int parentIndex = barcode.getBlackBeforeWhite(index);
-        Object parent = source.get(parentIndex);
-		List children = collectionListModel.getChildren(parent);
+        // get the parent
+        int parentIndex = barcode.getBlackBeforeWhite(index);
+        List children = (List)childLists.getNode(parentIndex).getValue();
 
         // get the child
-		int childIndexInParent = barcode.getWhiteSequenceIndex(index);
-		return children.get(childIndexInParent);
-	}
+        int childIndexInParent = barcode.getWhiteSequenceIndex(index);
+        return children.get(childIndexInParent);
+    }
 
-	/**
-	 * Return the index of the first child in the CollectionList for the given parent
-	 * index. This can be very useful for things like selecting the children in a
-	 * CollectionList when the parent is selected in another list.
-	 *
-	 * @see #childEndingIndex
-	 */
-	public int childStartingIndex(int parentIndex) {
-		if(parentIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
-		if(parentIndex >= source.size()) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
+    /**
+     * Return the index of the first child in the CollectionList for the given parent
+     * index. This can be very useful for things like selecting the children in a
+     * CollectionList when the parent is selected in another list.
+     *
+     * @see #childEndingIndex
+     */
+    public int childStartingIndex(int parentIndex) {
+        if(parentIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
+        if(parentIndex >= source.size()) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
 
-		// Get the index of the next node
-		// Find the index of the black node with that index
-		int parentFullIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
+        // Get the index of the next node
+        // Find the index of the black node with that index
+        int parentFullIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
         int childFullIndex = parentFullIndex + 1;
         
-		// If this node has no children, the next node index will be past the size or black
+        // If this node has no children, the next node index will be past the size or black
         if(childFullIndex >= barcode.size()) return -1;
-		if(barcode.get(childFullIndex) != Barcode.WHITE) return -1;
+        if(barcode.get(childFullIndex) != Barcode.WHITE) return -1;
 
         // return the child index
         int childIndex = childFullIndex - (parentIndex+1);
         assert(barcode.getWhiteIndex(childFullIndex) == childIndex);
         return childIndex;
-	}
+    }
 
-	/**
-	 * Return the index of the last child in the CollectionList for the given parent
-	 * index. This can be very useful for things like selecting the children in a
-	 * CollectionList when the parent is selected in another list.
-	 *
-	 * @see #childStartingIndex
-	 */
-	public int childEndingIndex(int parentIndex) {
-		if(parentIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
-		if(parentIndex >= source.size()) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
+    /**
+     * Return the index of the last child in the CollectionList for the given parent
+     * index. This can be very useful for things like selecting the children in a
+     * CollectionList when the parent is selected in another list.
+     *
+     * @see #childStartingIndex
+     */
+    public int childEndingIndex(int parentIndex) {
+        if(parentIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
+        if(parentIndex >= source.size()) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
 
-		// Get the index of the next node
-		// Find the index of the black node with that index
+        // Get the index of the next node
+        // Find the index of the black node with that index
         int nextParentFullIndex = (parentIndex == barcode.blackSize() - 1) ? barcode.size() : barcode.getIndex(parentIndex + 1, Barcode.BLACK);
         int lastWhiteBeforeNextParent = nextParentFullIndex - 1;
 
-		// If this node has no children, the next node index will be past the size or black
+        // If this node has no children, the next node index will be past the size or black
         if(barcode.get(lastWhiteBeforeNextParent) == Barcode.BLACK) return -1;
 
         // return the child index
         int childIndex = lastWhiteBeforeNextParent - (parentIndex+1);
         assert(barcode.getWhiteIndex(lastWhiteBeforeNextParent) == childIndex);
         return childIndex;
-	}
+    }
 
-	/**
-	 * Handle changes in the parent list. We'll need to update our node list sizes.
-	 */
-	public void listChanged(ListEvent listChanges) {
-		// Need to process the changes so that our size caches are up to date.
-		updates.beginEvent();
-		while(listChanges.next()) {
-			int index = listChanges.getIndex();
+    /**
+     * Handle changes in the parent list. We'll need to update our node list sizes.
+     */
+    public void listChanged(ListEvent listChanges) {
+        // Need to process the changes so that our size caches are up to date.
+        updates.beginEvent();
+        while(listChanges.next()) {
+            int index = listChanges.getIndex();
             int type = listChanges.getType();
 
             // Insert means we'll need to insert a new node in the array
@@ -161,64 +169,66 @@ public class CollectionList extends TransformedList implements ListEventListener
             } else if(type == ListEvent.UPDATE) {
                 handleDelete(index);
                 handleInsert(index);
-			}
-		}
-		updates.commitEvent();
-	}
+            }
+        }
+        updates.commitEvent();
+    }
 
 
-	/**
-	 * Helper for {@link #listChanged(ListEvent)} when inserting.
-	 */
-	private void handleInsert(int index) {
-		// Find the index of the black node with that index
-		int absoluteIndex;
-		if(index == barcode.blackSize()) {
-			absoluteIndex = barcode.size();
-		} else {
-			absoluteIndex = barcode.getIndex(index, Barcode.BLACK);
-		}
+    /**
+     * Helper for {@link #listChanged(ListEvent)} when inserting.
+     */
+    private void handleInsert(int parentIndex) {
+        // Find the index of the black node with that index
+        int absoluteIndex;
+        if(parentIndex == barcode.blackSize()) {
+            absoluteIndex = barcode.size();
+        } else {
+            absoluteIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
+        }
 
-		// Find the size of the new node and add it to the total
-		List children = collectionListModel.getChildren(source.get(index));
-		int childrenSize = children.size();
+        // Find the size of the new node and add it to the total
+        Object parent = source.get(parentIndex);
+        List children = collectionListModel.getChildren(parent);
 
-		// Add the parent node
-		barcode.addBlack(absoluteIndex, 1);
+        // Add the parent node
+        childLists.addByNode(parentIndex, children);
+        barcode.addBlack(absoluteIndex, 1);
         
         // Add the children and fire the event
-		if(childrenSize > 0) {
-            barcode.addWhite(absoluteIndex + 1, childrenSize);
-            int childIndex = absoluteIndex - index;
-            updates.addInsert(childIndex, childIndex + childrenSize - 1);
+        if(!children.isEmpty()) {
+            barcode.addWhite(absoluteIndex + 1, children.size());
+            int childIndex = absoluteIndex - parentIndex;
+            updates.addInsert(childIndex, childIndex + children.size() - 1);
         }
-	}
+    }
     
-	/**
-	 * Helper for {@link #listChanged(ListEvent)} when deleting.
-	 */
-	private void handleDelete(int index) {
-		// Find the index of the black node with that index
-		int absoluteIndex = barcode.getIndex(index, Barcode.BLACK);
+    /**
+     * Helper for {@link #listChanged(ListEvent)} when deleting.
+     */
+    private void handleDelete(int parentIndex) {
+        // Find the index of the black node with that index
+        int absoluteIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
 
-		// Find the index of the NEXT black node (so we know what to delete)
-		int nextNodeIndex;
-        if(index + 1 < barcode.blackSize()) {
-            nextNodeIndex = barcode.getIndex(index + 1, Barcode.BLACK);
+        // Find the index of the NEXT black node (so we know what to delete)
+        int nextNodeIndex;
+        if(parentIndex + 1 < barcode.blackSize()) {
+            nextNodeIndex = barcode.getIndex(parentIndex + 1, Barcode.BLACK);
         // If there are no more black nodes, simulate it with the full barcode size
         } else {
             nextNodeIndex = barcode.size();
         }
         
-		// Remove the nodes
-		int removeRange = nextNodeIndex - absoluteIndex;
+        // Remove the nodes
+        int removeRange = nextNodeIndex - absoluteIndex;
         barcode.remove(absoluteIndex, removeRange);
+        childLists.removeByIndex(parentIndex);
         
         // fire the event
-        int childIndex = absoluteIndex - index;
+        int childIndex = absoluteIndex - parentIndex;
         int childrenToDelete = removeRange - 2; // 1 for parent and 1 for inclusive ranges
         if(childrenToDelete > 0) {
             updates.addDelete(childIndex, childIndex + childrenToDelete);
         }
-	}
+    }
 }
