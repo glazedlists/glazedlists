@@ -73,7 +73,7 @@ public class EqualsMatcherSource extends AbstractMatcherSource {
 
 	/**
 	 * Update the match value. The object used may not change its behavior while used by the
-	 * matcher. That is, equals() must always return the same value for a given object.
+	 * matchersource. That is, equals() must always return the same value for a given object.
 	 * Immutable objects are highly recommended to avoid unintended, unpredicatble behavior
 	 * caused by accidentally changing the state of the value.
 	 */

@@ -17,7 +17,7 @@ import java.util.List;
 
 
 /**
- * Test {@link EqualsMatcher}.
+ * Test {@link EqualsMatcherSource}.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
@@ -31,13 +31,13 @@ public class EqualsMatcherTest extends TestCase {
     EventList parent_list;
     FilterList filter_list;
 
-    EqualsMatcher matcher;
+    EqualsMatcherSource matcher;
 
 
     protected void setUp() throws Exception {
         parent_list = new BasicEventList(new LinkedList(INITIAL_LIST));
 
-        matcher = new EqualsMatcher();
+        matcher = new EqualsMatcherSource();
         filter_list = new FilterList(parent_list, matcher);
     }
 
@@ -50,13 +50,13 @@ public class EqualsMatcherTest extends TestCase {
 
 
     public void testMatchOnNull() {
-        matcher.setMatchOnNoThreshold(true);
+        matcher.setMatchOnNoValue(true);
         assertEquals(parent_list.size(), filter_list.size());
         for (int i = 0; i < parent_list.size(); i++) {
             assertEquals(parent_list.get(i), filter_list.get(i));
         }
 
-        matcher.setMatchOnNoThreshold(false);
+        matcher.setMatchOnNoValue(false);
         assertTrue(filter_list.isEmpty());
     }
 

@@ -17,7 +17,7 @@ import java.util.List;
 
 
 /**
- * Test {@link EventListMatcher}.
+ * Test {@link EventListMatcherSource}.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
@@ -40,7 +40,7 @@ public class EventListMatcherTest extends TestCase {
     FilterList filter_list;
 
     EventList match_set;
-    EventListMatcher matcher;
+    EventListMatcherSource matchersource;
 
 
     protected void setUp() throws Exception {
@@ -48,8 +48,8 @@ public class EventListMatcherTest extends TestCase {
 
         match_set = new BasicEventList();
 
-        matcher = new EventListMatcher(match_set);
-        filter_list = new FilterList(parent_list, matcher);
+        matchersource = new EventListMatcherSource(match_set);
+        filter_list = new FilterList(parent_list, matchersource);
     }
 
     protected void tearDown() throws Exception {
@@ -62,7 +62,7 @@ public class EventListMatcherTest extends TestCase {
 
     public void testMatching() {
         // Match when in list
-        matcher.setMatchInList(true);
+        matchersource.setMatchInList(true);
         assertTrue(filter_list.isEmpty());
 
         match_set.add(new Integer(0));
@@ -73,7 +73,7 @@ public class EventListMatcherTest extends TestCase {
         assertTrue(filter_list.isEmpty());
 
         // Match when not in list
-        matcher.setMatchInList(false);
+        matchersource.setMatchInList(false);
         assertEquals(parent_list.size(), filter_list.size());
 
         match_set.add(new Integer(0));
@@ -81,14 +81,14 @@ public class EventListMatcherTest extends TestCase {
         assertEquals(new Integer(1), filter_list.get(0));
 
         match_set.clear();
-        matcher.setMatchInList(true);
+        matchersource.setMatchInList(true);
     }
 
 
     public void testWrites() {
         // Add when not initially shown via filter
         match_set.add(new Integer(0));
-        matcher.setMatchInList(true);
+        matchersource.setMatchInList(true);
 
         filter_list.add(new Integer(11));
 

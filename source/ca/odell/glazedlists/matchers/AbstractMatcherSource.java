@@ -33,7 +33,7 @@ public abstract class AbstractMatcherSource implements MatcherSource {
 
 
 	/**
-	 * The current matcher in effect.
+	 * The current matchersource in effect.
 	 */
 	private volatile Matcher current_matcher;
 
@@ -54,7 +54,7 @@ public abstract class AbstractMatcherSource implements MatcherSource {
 	}
 
 	/**
-	 * Used by extending classes to set the matcher that is currently in use.
+	 * Used by extending classes to set the matchersource that is currently in use.
 	 */
 	public void setCurrentMatcher(Matcher matcher) {
 		if (matcher == null) throw new IllegalArgumentException("Matcher cannot be null");
