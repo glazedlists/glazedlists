@@ -10,6 +10,8 @@ package ca.odell.glazedlists;
  * Defines the contract for a {@link ThresholdEvaluator} to be used to provide
  * an absolute value for a given {@link Object} in a {@link ThresholdList}.
  *
+ * @see GlazedLists#thresholdEvaluator(String)
+ *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
 public interface ThresholdEvaluator {

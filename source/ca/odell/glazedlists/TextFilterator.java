@@ -14,6 +14,7 @@ import java.util.List;
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
  * Lists Tutorial</a>
+ * @see GlazedLists#textFilterator(String[])
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

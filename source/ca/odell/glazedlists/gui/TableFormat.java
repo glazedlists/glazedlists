@@ -9,6 +9,8 @@ package ca.odell.glazedlists.gui;
 /**
  * Specifies how a set of records are rendered in a table.
  *
+ * @see ca.odell.glazedlists.GlazedLists#tableFormat(Class,String[],String[])
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public interface TableFormat {

@@ -14,8 +14,10 @@ import java.util.List;
  * (e.g., the songs on the record). Serves basically the same purpose as
  * {@link javax.swing.tree.TreeModel} does to a JTree in Swing.
  *
- * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see CollectionList
+ * @see GlazedLists#listCollectionListModel()
+ *
+ * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
 public interface CollectionListModel {
     

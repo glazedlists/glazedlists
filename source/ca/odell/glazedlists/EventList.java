@@ -41,6 +41,10 @@ import java.util.*;
  * you {@link #add(int,Object) add()} on a {@link SortedList}, it will ignore the specified
  * index so that the element will be inserted in sorted order.
  *
+ * @see GlazedLists#eventList(Collection)
+ * @see GlazedLists#readOnlyList(EventList)
+ * @see GlazedLists#threadSafeList(EventList)
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public interface EventList extends List {
