@@ -108,9 +108,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
     public boolean contains(Object object) {
         // for through this, looking for the lucky object
         for(Iterator i = iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(a == null && object == null) return true;
-            else if(a.equals(object)) return true;
+            if(GlazedListsImpl.equal(object, i.next())) return true;
         }
         // not found
         return false;
@@ -434,16 +432,7 @@ public abstract class AbstractEventList implements EventList, Serializable {
         ListIterator iterA = listIterator();
         ListIterator iterB = otherList.listIterator();
         while(iterA.hasNext() && iterB.hasNext()) {
-            // get the ith object from each list to compare
-            Object a = iterA.next();
-            Object b = iterB.next();
-
-            // handle the both null case
-            if(a == b) continue;
-            // if one is null and the other is not, die
-            if(a == null || b == null) return false;
-            // if they are not equal die
-            if(!a.equals(b)) return false;
+            if(!GlazedListsImpl.equal(iterA.next(), iterB.next())) return false;
         }
 
         // if we haven't failed yet, they match
@@ -575,10 +564,8 @@ public abstract class AbstractEventList implements EventList, Serializable {
         // for through this, looking for the lucky object
         int index = 0;
         for(Iterator i = iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(a == null && object == null) return index;
-            else if(a.equals(object)) return index;
-            index++;
+            if(GlazedListsImpl.equal(object, i.next())) return index;
+            else index++;
         }
         // not found
         return -1;
@@ -603,10 +590,8 @@ public abstract class AbstractEventList implements EventList, Serializable {
         // for through this, looking for the lucky object
         int index = size() - 1;
         for(ListIterator i = listIterator(size()); i.hasPrevious(); ) {
-            Object a = i.previous();
-            if(a == null && object == null) return index;
-            else if(a.equals(object)) return index;
-            index--;
+            if(GlazedListsImpl.equal(object, i.previous())) return index;
+            else index--;
         }
         // not found
         return -1;
