@@ -119,7 +119,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
     protected boolean isWritable() {
         return true;
     }
-
+    
     /**
      * When the list is changed the change may create new duplicates or remove
      * duplicates.  The list is then altered to restore uniqeness and the events
@@ -159,15 +159,16 @@ public final class UniqueList extends TransformedList implements ListEventListen
             if(changeType == ListEvent.INSERT) {
                 duplicatesList.add(changeIndex, TEMP_UNIQUE);
             } else if(changeType == ListEvent.UPDATE) {
-                Object replaced = duplicatesList.set(changeIndex, UNIQUE);
+                Object replaced = duplicatesList.get(changeIndex);
                 // if the deleted value has a duplicate, remove the dup instead
                 if(replaced == UNIQUE) {
                     if(changeIndex+1 < duplicatesList.size() && duplicatesList.get(changeIndex+1) == DUPLICATE) {
+                        duplicatesList.set(changeIndex, TEMP_UNIQUE);
                         duplicatesList.set(changeIndex+1, UNIQUE);
                         replaced = null;
                     }
                 }
-                removedValues.addLast(replaced);
+                //removedValues.addLast(replaced);
             } else if(changeType == ListEvent.DELETE) {
                 Object deleted = duplicatesList.remove(changeIndex);
                 // if the deleted value has a duplicate, remove the dup instead
@@ -181,6 +182,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             }
         }
 
+        
         // second pass, fire events
         updates.beginEvent();
         while(secondPass.next()) {
@@ -198,8 +200,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
                 }
             // updates can result in INSERT, UPDATE or DELETE events
             } else if(changeType == ListEvent.UPDATE) {
+                boolean wasUnique = (duplicatesList.get(changeIndex) == UNIQUE);
                 boolean hasNeighbour = handleOldNeighbour(changeIndex);
-                boolean wasUnique = (removedValues.removeFirst() == UNIQUE);
                 if(hasNeighbour) {
                     if(wasUnique) {
                         addEvent(ListEvent.DELETE, duplicatesList.getCompressedIndex(changeIndex, true), true);
@@ -216,7 +218,7 @@ public final class UniqueList extends TransformedList implements ListEventListen
             // deletes can result in UPDATE or DELETE events
             } else if(changeType == ListEvent.DELETE) {
                 boolean wasUnique = (removedValues.removeFirst() == UNIQUE);
-                // calculate the compressed index where  the delete occured
+                // calculate the compressed index where the delete occured
                 int deletedIndex = -1;
                 if(changeIndex < duplicatesList.size()) deletedIndex = duplicatesList.getCompressedIndex(changeIndex, true);
                 else deletedIndex = duplicatesList.getCompressedList().size();
@@ -227,8 +229,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
                     addEvent(ListEvent.UPDATE, deletedIndex, false);
                 }
             }
-
         }
+        
         updates.commitEvent();
     }
 
@@ -647,11 +649,11 @@ public final class UniqueList extends TransformedList implements ListEventListen
 
             // set up the current objects to examine
             int originalIndex = 0;
-            Comparable originalElement = getOrNull(this, originalIndex);
+            Object originalElement = getOrNull(this, originalIndex);
 
             // for all elements in the revised set
             for(Iterator revisionIterator = revision.iterator(); revisionIterator.hasNext(); ) {
-                Comparable revisionElement = (Comparable)revisionIterator.next();
+                Object revisionElement = revisionIterator.next();
 
                 // when the before list holds items smaller than the after list item,
                 // the before list items are out-of-date and must be deleted
@@ -695,8 +697,8 @@ public final class UniqueList extends TransformedList implements ListEventListen
      * Gets the element at the specified index of the specified list
      * or null if the list is too small.
      */
-    private Comparable getOrNull(List source, int index) {
-        if(index < source.size()) return (Comparable)source.get(index);
+    private Object getOrNull(List source, int index) {
+        if(index < source.size()) return source.get(index);
         else return null;
     }
 

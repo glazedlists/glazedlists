@@ -14,6 +14,7 @@ import javax.swing.event.*;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
 
+import ca.odell.glazedlists.test.*;
 /**
  * An IssuesUserFilter is a filter list that filters based on the selected
  * users.
@@ -36,7 +37,12 @@ public class IssuesUserFilter extends AbstractFilterList implements ListSelectio
         super(source);
         
         // create a unique users list from the source issues list
+        source.addListEventListener(new ConsistencyTestList(source, "source"));
+        SortedList sortedSource = new SortedList(source);
+        sortedSource.addListEventListener(new ConsistencyTestList(sortedSource, "sortedSource"));
         usersEventList = new UniqueList(new IssuesToUserList(source));
+        ((UniqueList)usersEventList).debug = true;
+        usersEventList.addListEventListener(new ConsistencyTestList(usersEventList, "users-unique"));
 
         // create a JList that contains users
         EventListModel usersListModel = new EventListModel(usersEventList);

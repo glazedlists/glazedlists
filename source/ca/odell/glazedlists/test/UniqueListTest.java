@@ -1138,6 +1138,33 @@ public class UniqueListTest extends TestCase {
         assertEquals(1, counter.getEventCount());
         assertEquals(5, counter.getChangeCount(0));
     }
+    
+    /**
+     * Test that replacing the entire contents of the source list works on the
+     * unique list.
+     */
+    public void testSourceUpdateAll() {
+        IntArrayComparator compareAtZero = new IntArrayComparator(0);
+        IntArrayComparator compareAtOne = new IntArrayComparator(1);
+
+        UniqueList uniqueListZero = new UniqueList(new BasicEventList(), compareAtZero);
+        uniqueListZero.addListEventListener(new ConsistencyTestList(uniqueListZero, "uniquezero"));
+
+        UniqueList uniqueListOne = new UniqueList(uniqueListZero, compareAtOne);
+        uniqueListOne.addListEventListener(new ConsistencyTestList(uniqueListOne, "uniqueone"));
+        
+        SortedSet data = new TreeSet(compareAtZero);
+        data.add(new int[] { 0, 0 });
+        data.add(new int[] { 1, 0 });
+        uniqueListZero.replaceAll(data);
+
+        assertEquals(2, uniqueListZero.size());
+        assertEquals(1, uniqueListOne.size());
+
+        uniqueListZero.replaceAll(data);
+        assertEquals(2, uniqueListZero.size());
+        assertEquals(1, uniqueListOne.size());
+    }
 
     /**
 	 * Explicit comparator for Kevin's sanity!
