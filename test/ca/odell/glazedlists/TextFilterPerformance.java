@@ -4,7 +4,7 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.swing;
+package ca.odell.glazedlists;
 
 import java.util.*;
 import java.io.*;
