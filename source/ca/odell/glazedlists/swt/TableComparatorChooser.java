@@ -17,6 +17,7 @@ import ca.odell.glazedlists.util.concurrent.*;
 import java.util.*;
 // SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.events.*;
@@ -41,6 +42,9 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
     /** listeners to sort change events */
     private List sortListeners = new ArrayList();
 
+    /** listeners for column headers */
+    private ColumnListener columnListener = new ColumnListener();
+
     /**
      * Creates a new TableComparatorChooser that responds to clicks
      * on the specified table and uses them to sort the specified list.
@@ -60,7 +64,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
 
         // listen for events on the specified table
         for(int c = 0; c < table.getColumnCount(); c++) {
-            table.getColumn(c).addSelectionListener(new ColumnListener(c));
+            table.getColumn(c).addSelectionListener(columnListener);
         }
     }
 
@@ -88,13 +92,11 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      * Handles column clicks.
      */
     class ColumnListener implements SelectionListener {
-        private int column;
-        public ColumnListener(int column) {
-            this.column = column;
-        }
         public void widgetSelected(SelectionEvent e) {
-            //System.out.println(e.x + ", " + e.width);
-            columnClicked(column, 1);
+			TableColumn column = (TableColumn)e.widget;
+			Table table = column.getParent();
+			int columnIndex = table.indexOf(column);
+            columnClicked(columnIndex, 1);
         }
         public void widgetDefaultSelected(SelectionEvent e) {
             // Do Nothing
@@ -123,10 +125,10 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      * <p>A {@link TableComparatorChooser} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link TableComparatorChooser}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link TableComparatorChooser} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link TableComparatorChooser} after it has been disposed.
      */
