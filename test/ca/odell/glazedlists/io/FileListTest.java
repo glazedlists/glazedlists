@@ -43,22 +43,38 @@ public class FileListTest extends TestCase {
      * written.
      */
     public void testCreate() throws IOException {
-        File listFile = File.createTempFile("fibonacci", "j81");
-        listFile.deleteOnExit();
+        File fibonacciFile = File.createTempFile("fibonacci", "j81");
+        fibonacciFile.deleteOnExit();
         
-        for(int i = 0; i < 50; i++) {
-            FileList fibonacci = new FileList(listFile, ByteCoderFactory.serializable());
-            System.out.println(fibonacci);
+        int expectedSecondLast = 0;
+        int expectedLast = 0;
+        int current = 0;
+        for(int i = 0; i < 16; i++) {
+            FileList fibonacci = new FileList(fibonacciFile, ByteCoderFactory.serializable());
             
+            // base case
             if(fibonacci.size() < 2) {
-                fibonacci.add(new Integer(1));
+                current = 1;
+
+            // recursive case
             } else {
+                // read the last and second last
                 Integer secondLast = (Integer)fibonacci.get(fibonacci.size() - 2);
+                assertEquals(expectedSecondLast, secondLast.intValue());
                 Integer last = (Integer)fibonacci.get(fibonacci.size() - 1);
-                fibonacci.add(new Integer(secondLast.intValue() + last.intValue()));
+                assertEquals(expectedLast, last.intValue());
+                
+                // prepare the new value
+                current = secondLast.intValue() + last.intValue();
             }
             
+            // save the new value to the file
+            fibonacci.add(new Integer(current));
             fibonacci.close();
+            
+            // prepare for the next round
+            expectedSecondLast = expectedLast;
+            expectedLast = current;
         }
     }
 }

@@ -27,7 +27,7 @@ public class OfflineListTest extends TestCase {
         List gold = new ArrayList();
         List file = null;
         try {
-            file = new FileList();
+            file = new OfflineList();
         } catch (IOException e) {
             // let test fail
         }
