@@ -6,9 +6,11 @@
  */
 package ca.odell.glazedlists.demo;
 
+import java.util.Comparator;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
+import ca.odell.glazedlists.util.*;
 import ca.odell.glazedlists.swing.*;
 
 /**
@@ -50,6 +52,10 @@ public class IssueTableFormat implements AdvancedTableFormat {
 				return String.class;
 		}
 	}
+    
+    public Comparator getColumnComparator(int column) {
+        return ComparatorFactory.comparable();
+    }
 
     public Object getColumnValue(Object baseObject, int column) {
         if(baseObject == null) return null;

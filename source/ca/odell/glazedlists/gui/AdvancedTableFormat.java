@@ -7,8 +7,6 @@
 package ca.odell.glazedlists.gui;
 
 import java.util.Comparator;
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
 
 /**
  * Allows the ability to specify column class information in addition to the standard

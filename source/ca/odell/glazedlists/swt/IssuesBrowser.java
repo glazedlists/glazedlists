@@ -17,6 +17,7 @@ import org.eclipse.swt.custom.*;
 import ca.odell.glazedlists.demo.*;
 // glazed lists
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.*;
 
 /**
  * This is the SWT version of the demo application designed to look good on a
@@ -339,7 +340,7 @@ public class IssuesBrowser {
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-class IssueTableFormat implements CheckableTableFormat {
+class IssueTableFormat implements TableFormat, CheckableTableFormat {
 
     public int getColumnCount() {
         return 6;

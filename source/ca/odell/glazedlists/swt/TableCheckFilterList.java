@@ -8,6 +8,7 @@ package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 // SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.SWT;

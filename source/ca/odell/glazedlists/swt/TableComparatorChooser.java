@@ -56,7 +56,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      *      not as simple and this strategy should only be used where necessary.
      */
     public TableComparatorChooser(EventTableViewer eventTableViewer, SortedList sortedList, boolean multipleColumnSort) {
-        super(sortedList, eventTableViewer.getTableFormat());
+        super(sortedList, eventTableViewer.getTableFormat(), multipleColumnSort);
         
         // save the SWT-specific state
         this.eventTableViewer = eventTableViewer;
