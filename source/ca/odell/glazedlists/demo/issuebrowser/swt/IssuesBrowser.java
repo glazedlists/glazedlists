@@ -279,7 +279,7 @@ public class IssuesBrowser {
 
         // Create the Label first
         Label usersListLabel = new Label(usersListPanel, SWT.HORIZONTAL | SWT.SHADOW_NONE | SWT.CENTER);
-        usersListLabel.setText("Issue Owner");
+        usersListLabel.setText("User");
 
         // Change the font
         FontData[] fontData = usersListLabel.getFont().getFontData();
