@@ -18,11 +18,12 @@ import java.util.List;
  * @see CollectionList
  */
 public interface CollectionListModel {
+    
 	/**
 	 * Return a list of the child nodes for a parent node.
 	 *
 	 * @param parent The parent node.
-	 * @return				A List containing the child nodes.
+	 * @return A List containing the child nodes.
 	 */
 	public List getChildren(Object parent);
 }

@@ -132,7 +132,7 @@ public final class SortedList extends TransformedList {
         // first update the offset tree for all changes, and keep the changed nodes in a list
         LinkedList insertNodes = new LinkedList();
 
-        // perform the updates on the indexed tree
+        // perform the inserts and deletes on the indexed tree
         ListEvent firstPass = new ListEvent(listChanges);
         while(firstPass.next()) {
 

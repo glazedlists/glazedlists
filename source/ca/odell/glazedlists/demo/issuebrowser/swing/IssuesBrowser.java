@@ -21,7 +21,8 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.demo.issuebrowser.*;
 import ca.odell.glazedlists.demo.Launcher;
 import ca.odell.glazedlists.swing.*;
-
+// for setting up the bounded range model
+import java.util.Hashtable;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -122,13 +123,19 @@ public class IssuesBrowser extends Applet {
 	private JPanel constructView() {
 		// create the lists
 		IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
-		SortedList issuesSortedList = new SortedList(issuesUserFiltered);
-		TextFilterList issuesTextFiltered = new TextFilterList(issuesSortedList);
+		TextFilterList issuesTextFiltered = new TextFilterList(issuesUserFiltered);
 		//ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
+		//SortedList issuesSortedList = new SortedList(priorityList);
+		SortedList issuesSortedList = new SortedList(issuesTextFiltered);
+
+        //issuesUserFiltered.addListEventListener(new ConsistencyTestList(issuesUserFiltered, "user filtered", false));
+        //issuesTextFiltered.addListEventListener(new ConsistencyTestList(issuesTextFiltered, "text filtered", false));
+        //priorityList.addListEventListener(new ConsistencyTestList(priorityList, "priority", false));
+        //issuesSortedList.addListEventListener(new ConsistencyTestList(issuesSortedList, "sorted", true));
 
 		// issues table
-		//EventTableModel issuesTableModel = new EventTableModel(priorityList, new IssueTableFormat());
-		EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, new IssueTableFormat());
+	    EventTableModel issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
+		//EventTableModel issuesTableModel = new EventTableModel(issuesTextFiltered, new IssueTableFormat());
 		JTable issuesJTable = new JTable(issuesTableModel);
 		issuesSelectionModel = new EventSelectionModel(issuesTextFiltered);
 		issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());

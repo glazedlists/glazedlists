@@ -64,7 +64,7 @@ public class ConsistencyTestList implements ListEventListener {
      */
     public void listChanged(ListEvent listChanges) {
         // print the changes if necessary
-        if(verbose) System.out.println(name + ": " + listChanges);
+        if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size());
         
         // record the changed indices
         List changedIndices = new ArrayList();

@@ -128,6 +128,9 @@ public final class Barcode extends AbstractList {
      * Inserts a sequence of white into the list
      */
     public void addWhite(int index, int length) {
+        assert(length >= 0);
+        if(length == 0) return;
+        
         // Adding to the trailing whitespace
         if(root == null || index >= treeSize) {
             whiteSpace += length;
@@ -144,6 +147,9 @@ public final class Barcode extends AbstractList {
      * Inserts a sequence of black into the list
      */
     public void addBlack(int index, int length) {
+        assert(length >= 0);
+        if(length == 0) return;
+        
         // Make a new root
         if(root == null) {
             root = new BarcodeNode(this, null, length, index);
@@ -182,6 +188,8 @@ public final class Barcode extends AbstractList {
      * <code>Barcode.BLACK</code>.
      */
     public void set(int index, Object colour, int length) {
+        assert(length >= 1);
+        
         // The set affects the trailing whitespace
         int trailingChange = index > treeSize - 1 ? length : index + length - treeSize;
         if(trailingChange > 0) {
@@ -218,6 +226,8 @@ public final class Barcode extends AbstractList {
      * Removes the values from the given index to index + length
      */
     public void remove(int index, int length) {
+        assert(length >= 1);
+        
         // The remove affects the trailing whitespace
         int trailingChange = index > treeSize ? length : index + length - treeSize;
         if(trailingChange > 0) {

@@ -7,10 +7,7 @@
 package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 
 /**
@@ -23,6 +20,7 @@ public class CollectionListTest extends TestCase {
 	private static final String DEV_JESSE = "Jesse Wilson";
 	private static final String DEV_KEVIN = "Kevin Maltby";
 	private static final String DEV_JAMES = "James Lemieux";
+	private static final String DEV_EMPTY = "";
 
 	private CollectionList collection_list;
 	private BasicEventList parent_list;
@@ -33,12 +31,13 @@ public class CollectionListTest extends TestCase {
 	 */
 	public void setUp() {
 		parent_list = new BasicEventList();
+		collection_list = new CollectionList(parent_list, new StringDecomposerModel());
+        collection_list.addListEventListener(new ConsistencyTestList(collection_list, "collection list", false));
 		parent_list.add(DEV_ROB);
 		parent_list.add(DEV_JESSE);
 		parent_list.add(DEV_KEVIN);
 		parent_list.add(DEV_JAMES);
 
-		collection_list = new CollectionList(parent_list, new StringDecomposerModel());
 	}
 
 	/**
@@ -50,6 +49,27 @@ public class CollectionListTest extends TestCase {
 		parent_list.clear();
 		parent_list = null;
 	}
+    
+    /**
+     * Make sure the correct events are being fired.
+     */
+    public void testFireEvents() {
+		parent_list.add(DEV_ROB);
+		parent_list.add(DEV_JESSE);
+		parent_list.add(DEV_KEVIN);
+		parent_list.add(DEV_JAMES);
+        parent_list.remove(2);
+        parent_list.remove(2);
+        parent_list.add(DEV_EMPTY);
+        parent_list.remove(2);
+        parent_list.add(0, DEV_EMPTY);
+        parent_list.remove(0);
+        
+        assertEquals(parent_list.get(0), DEV_ROB);
+        assertEquals(parent_list.get(1), DEV_JESSE);
+        assertEquals(collection_list.get(0), new Character('R'));
+        assertEquals(collection_list.get(8), new Character('J'));
+    }
 
 
 	/**
@@ -83,12 +103,30 @@ public class CollectionListTest extends TestCase {
 		//                                 ^
 		assertEquals(DEV_ROB.length() + DEV_JESSE.length() + DEV_KEVIN.length(),
 			collection_list.childStartingIndex(3));	// James
-
+            
 		// Too low
-		assertEquals(-1, collection_list.childStartingIndex(-1));
+        try {
+		    collection_list.childStartingIndex(-1);
+            fail("Expected IndexOutOfBoundsException");
+        } catch(IndexOutOfBoundsException e) {
+            // expected
+        }
 
 		// Too high
-		assertEquals(-1, collection_list.childStartingIndex(4));
+        try {
+            collection_list.childStartingIndex(4);
+            fail("Expected IndexOutOfBoundsException");
+        } catch(IndexOutOfBoundsException e) {
+            // expected
+        }
+        
+        // extra cases for empty strings
+        parent_list.add(1, DEV_EMPTY);
+		assertEquals(-1, collection_list.childStartingIndex(1)); // EMPTY
+
+        // extra cases for empty strings
+        parent_list.add(5, DEV_EMPTY);
+		assertEquals(-1, collection_list.childStartingIndex(5)); // EMPTY
 	}
 
 	/**
@@ -118,10 +156,28 @@ public class CollectionListTest extends TestCase {
 			DEV_JAMES.length() - 1, collection_list.childEndingIndex(3));	// James
 
 		// Too low
-		assertEquals(-1, collection_list.childEndingIndex(-1));
+        try {
+            assertEquals(-1, collection_list.childEndingIndex(-1));
+            fail("Expected IndexOutOfBoundsException");
+        } catch(IndexOutOfBoundsException e) {
+            // expected
+        }
 
 		// Too high
-		assertEquals(-1, collection_list.childEndingIndex(4));
+        try {
+            assertEquals(-1, collection_list.childEndingIndex(4));
+            fail("Expected IndexOutOfBoundsException");
+        } catch(IndexOutOfBoundsException e) {
+            // expected
+        }
+        
+        // extra cases for empty strings
+        parent_list.add(1, DEV_EMPTY);
+		assertEquals(-1, collection_list.childEndingIndex(1)); // EMPTY
+        
+        // extra cases for empty strings
+        parent_list.add(5, DEV_EMPTY);
+		assertEquals(-1, collection_list.childEndingIndex(5)); // EMPTY
 	}
 
 
