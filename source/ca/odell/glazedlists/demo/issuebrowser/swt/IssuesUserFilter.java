@@ -37,7 +37,7 @@ public class IssuesUserFilter extends AbstractFilterList {
         super(source);
 
         // create a unique users list from the source issues list
-		usersEventList = new UniqueList(new CollectionList(source, new IssueUserator()));
+        usersEventList = new UniqueList(new CollectionList(source, new IssueUserator()));
     }
 
     /**
@@ -57,7 +57,7 @@ public class IssuesUserFilter extends AbstractFilterList {
         if (usersSelectedList.isEmpty()) return true;
 
         Issue issue = (Issue)o;
-        
+
         // see if the two lists have just one intersection
         List users = issue.getAllUsers();
         for(Iterator u = users.iterator(); u.hasNext(); ) {
@@ -97,13 +97,20 @@ public class IssuesUserFilter extends AbstractFilterList {
                 if(type == ListEvent.UPDATE || type == ListEvent.DELETE) relaxed = true;
                 if(type == ListEvent.UPDATE || type == ListEvent.INSERT) constrained = true;
             }
-            
+
             // The filter now contains a different set of users
             getReadWriteLock().writeLock().lock();
             try {
-                if(constrained && relaxed) handleFilterChanged();
-                else if(relaxed) handleFilterRelaxed();
-                else if(constrained) handleFilterConstrained();
+                //if(constrained && relaxed) {
+                //    System.out.println("FILTER CHANGED!");
+                    handleFilterChanged();
+                //} else if(relaxed) {
+                //    System.out.println("FILTER RELAXED!!");
+                //    handleFilterRelaxed();
+                //} else if(constrained) {
+                //    System.out.println("FILTER CONSTRAINED!");
+                //    handleFilterConstrained();
+                //}
             } finally {
                 getReadWriteLock().writeLock().unlock();
             }
