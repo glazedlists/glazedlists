@@ -1,7 +1,18 @@
+/**
+ * Glazed Lists
+ * http://glazedlists.dev.java.net/
+ *
+ * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
+ */
+package com.odellengineeringltd.glazedlists.demo;
+
 import com.odellengineeringltd.glazedlists.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+/**
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ */
 class ProgrammingLanguageFilter extends AbstractFilterList implements ItemListener {
 
     JCheckBox objectOrientedCheck;

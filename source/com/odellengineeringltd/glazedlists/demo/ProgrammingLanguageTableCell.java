@@ -1,6 +1,17 @@
+/**
+ * Glazed Lists
+ * http://glazedlists.dev.java.net/
+ *
+ * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
+ */
+package com.odellengineeringltd.glazedlists.demo;
+
 import com.odellengineeringltd.glazedlists.jtable.*;
 import javax.swing.*;
 
+/**
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ */
 public class ProgrammingLanguageTableCell implements TableFormat {
 
     public int getFieldCount() {
