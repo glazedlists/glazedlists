@@ -103,6 +103,74 @@ public class PopularityListTest extends TestCase {
             source.set(updateIndex, updateValue);
         }
     }
+
+    /**
+     * Tests that the PopularityList can handle multiple simultaneous events.
+     */
+    public void testMultipleEvents() {
+        EventList source = new BasicEventList();
+        source.add(new int[] { 86, 1, 1, 1, 1, 0, 0 });
+        source.add(new int[] { 86, 1, 0, 1, 1, 1, 0 });
+        source.add(new int[] { 86, 1, 0, 0, 0, 0, 0 });
+        source.add(new int[] { 75, 1, 1, 1, 1, 0, 1 });
+        source.add(new int[] { 75, 1, 0, 0, 0, 0, 1 });
+        source.add(new int[] { 75, 1, 0, 0, 0, 0, 1 });
+        source.add(new int[] { 30, 1, 1, 1, 1, 0, 1 });
+        source.add(new int[] { 98, 1, 1, 1, 1, 0, 1 });
+        source.add(new int[] { 98, 1, 0, 0, 1, 1, 1 });
+
+        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        SortedList sortedList = new SortedList(source, new IntArrayComparator(0));
+        PopularityList popularityList = new PopularityList(filterList, new IntArrayComparator(0));
+        new PopularityListValidator(popularityList, sortedList);
+
+        filterList.setFilter(1, 1);
+        filterList.setFilter(2, 1);
+        filterList.setFilter(3, 1);
+        filterList.setFilter(4, 1);
+        filterList.setFilter(5, 1);
+        filterList.setFilter(6, 1);
+    }
+
+    /**
+     * Tests that the PopularityList can handle edge case sets.
+     */
+    public void testEdgeSets() {
+        EventList source = new BasicEventList();
+        source.add("Audi");
+        source.add("Audi");
+        source.add("Audi");
+        source.add("BMW");
+        source.add("Chevy");
+        source.add("Chevy");
+        source.add("Chevy");
+        source.add("Datsun");
+
+        SortedList sortedList = new SortedList(source);
+        PopularityList popularityList = new PopularityList(source);
+        new PopularityListValidator(popularityList, sortedList);
+
+        // in sorted order changes
+        source.set(2, "BMW");    // A A B B C C C D
+        source.set(1, "BMW");    // A B B B C C C D
+        source.set(0, "BMW");    // B B B B C C C D
+        source.set(6, "Datsun"); // B B B B C C D D
+        source.set(5, "Datsun"); // B B B B C D D D
+        source.set(4, "Datsun"); // B B B B D D D D
+        source.set(3, "Datsun"); // B B B D D D D D
+        source.set(2, "Datsun"); // B B D D D D D D
+        source.set(1, "Datsun"); // B D D D D D D D
+        source.set(0, "Datsun"); // D D D D D D D D
+        source.set(7, "Ford");   // D D D D D D D F
+        source.set(6, "Ford");   // D D D D D D F F
+        source.set(0, "Audi");   // A D D D D D F F
+        source.set(1, "BMW");    // A B D D D D F F
+        source.set(2, "BMW");    // A B B D D D F F
+        source.set(3, "BMW");    // A B B B D D F F
+        source.set(4, "BMW");    // A B B B B D F F
+        source.set(5, "Chevy");  // A B B B B C F F
+        source.set(4, "Chevy");  // A B B B C C F F
+    }
     
     /**
      * Validates that the state of the PopularityList is correct. Because this class
