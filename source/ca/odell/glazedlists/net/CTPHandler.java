@@ -12,7 +12,7 @@ import java.nio.*;
 /**
  * A callback interface for classes that implement a CTPConnection.
  */
-public interface CTPHandler {
+interface CTPHandler {
     
     /**
      * Handles the connection being ready for chunks to be sent.
@@ -24,11 +24,11 @@ public interface CTPHandler {
      * to be cleanly concatenated with the previous and following chunks without
      * problem by the reader.
      *
-     * @param data A non-empty ByteBuffer containing the bytes for this chunk. The
-     *      relevant bytes start at data.position() and end at data.limit(). This
-     *      buffer is only valid for the duration of this method call.
+     * @param data A list of ByteBuffers containing the bytes for this chunk. The
+     *      relevant bytes start at data.position() and end at data.limit(). These
+     *      buffers are only valid for the duration of this method call.
      */
-    public void receiveChunk(CTPConnection source, ByteBuffer data);
+    public void receiveChunk(CTPConnection source, List data);
 
     /**
      * Handles the connection being closed by the remote client. This will also

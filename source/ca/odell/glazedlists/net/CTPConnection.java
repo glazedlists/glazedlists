@@ -35,7 +35,7 @@ import java.util.logging.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class CTPConnection {
+final class CTPConnection {
     // client:
     // AWAITING_CONNECT
     //   --[connect]-->
@@ -402,12 +402,12 @@ public final class CTPConnection {
      * be cleanly concatenated with the previous and following chunks without
      * problem by the reader.
      *
-     * @param data A non-empty ByteBuffer containing the bytes for this chunk. The
+     * @param data A non-empty list of non-empty ByteBuffers containing the bytes for this chunk. The
      *      relevant bytes start at data.position() and end at data.limit(). This
      *      buffer needs to be valid for the duration of this method call, but
-     *      may be modified afterwards.
+     *      is safe to modify afterwards.
      */
-    public void sendChunk(ByteBuffer data) {
+    public void sendChunk(List data) {
         manager.invokeAndWait(new CTPChunkToSend(this, data));
     }
 
@@ -449,7 +449,9 @@ public final class CTPConnection {
                 
                 // handle the chunk
                 if(chunkSize != 0) {
-                    handler.receiveChunk(this, chunkBuffer);
+                    List chunkAsList = new ArrayList();
+                    chunkAsList.add(chunkBuffer);
+                    handler.receiveChunk(this, chunkAsList);
                     return true;
                 } else {
                     return close();
@@ -460,7 +462,9 @@ public final class CTPConnection {
             
                 // handle the simulated chunk
                 if(chunkBuffer.hasRemaining()) {
-                    handler.receiveChunk(this, chunkBuffer);
+                    List chunkAsList = new ArrayList();
+                    chunkAsList.add(chunkBuffer);
+                    handler.receiveChunk(this, chunkAsList);
                     return true;
                 } else {
                     return false;

@@ -35,10 +35,10 @@ class CTPConnectionToEstablish implements CTPRunnable {
     /**
      * Create a new CTPConnectionToEstablish.
      */
-    public CTPConnectionToEstablish(String host, int port, CTPHandler handler) {
+    public CTPConnectionToEstablish(CTPHandler handler, String host, int port) {
+        this.handler = handler;
         this.host = host;
         this.port = port;
-        this.handler = handler;
     }
     
     /**

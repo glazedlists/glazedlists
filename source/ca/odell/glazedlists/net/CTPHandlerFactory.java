@@ -12,7 +12,7 @@ import java.nio.*;
 /**
  * The CTPHandlerFactory provides a factory to handle incoming connections.
  */
-public interface CTPHandlerFactory {
+interface CTPHandlerFactory {
     
     /**
      * Upon a connect, a CTPHandler is required to handle the data of this connection.

@@ -58,8 +58,9 @@ class StaticCTPHandler implements CTPHandler {
     /**
      * Handle the specified incoming data.
      */
-    public synchronized void receiveChunk(CTPConnection source, ByteBuffer data) {
-        if(!data.hasRemaining()) return;
+    public synchronized void receiveChunk(CTPConnection source, List data) {
+        if(true) throw new IllegalStateException("convert list data into buffer");
+        /*if(!data.hasRemaining()) return;
         
         if(tasks.size() == 0) throw new IllegalStateException("Unexpected data " + data);
         Expected expected = (Expected)tasks.get(0);
@@ -67,7 +68,7 @@ class StaticCTPHandler implements CTPHandler {
         if(remain == 0) {
             tasks.remove(0);
             handlePendingTasks();
-        }
+        }*/
     }
     
     /**
@@ -86,7 +87,9 @@ class StaticCTPHandler implements CTPHandler {
     private void handlePendingTasks() {
         while(tasks.size() > 0 && tasks.get(0) instanceof Enqueued) {
             Enqueued enqueued = (Enqueued)tasks.remove(0);
-            connection.sendChunk(enqueued.getData());
+            List dataAsList = new ArrayList();
+            dataAsList.add(enqueued.getData());
+            connection.sendChunk(dataAsList);
         }
         if(tasks.isEmpty()) {
             notifyAll();

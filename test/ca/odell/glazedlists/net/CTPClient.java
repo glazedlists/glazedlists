@@ -31,7 +31,7 @@ public class CTPClient {
         
         // connect to the target host
         if(targetHost != null) {
-            manager.connect(targetHost, targetPort, new ClientHandler());
+            manager.connect(new ClientHandler(), targetHost, targetPort);
         
             // wait for the connection
             while(true) {
@@ -51,7 +51,9 @@ public class CTPClient {
                 if(dataString != null) {
                     System.out.println("read a string of length " + dataString.length());
                     ByteBuffer data = ByteBuffer.wrap(dataString.getBytes("US-ASCII"));
-                    connection.sendChunk(data);
+                    List dataAsList = new ArrayList();
+                    dataAsList.add(data);
+                    connection.sendChunk(dataAsList);
                 } else {
                     connection.close();
                 }
@@ -102,15 +104,16 @@ public class CTPClient {
                 connection = source;
             }
         }
-        public void receiveChunk(CTPConnection source, ByteBuffer data) {
-            try {
+        public void receiveChunk(CTPConnection source, List data) {
+            if(true) throw new IllegalStateException("Convert buffer list into buffer");
+            /*try {
                 byte[] dataBytes = new byte[data.remaining()];
                 data.get(dataBytes);
                 String dataString = new String(dataBytes, "US-ASCII");
                 System.out.println("DATA: \"" + dataString + "\"");
             } catch(UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
-            }
+            }*/
         }
     }
     class ClientHandlerFactory implements CTPHandlerFactory {

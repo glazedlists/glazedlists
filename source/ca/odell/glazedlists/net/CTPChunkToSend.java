@@ -27,12 +27,12 @@ class CTPChunkToSend implements CTPRunnable {
     private CTPConnection connection;
 
     /** the content */
-    private ByteBuffer data;
+    private List data;
 
     /**
      * Create a new CTPConnectionToEstablish.
      */
-    public CTPChunkToSend(CTPConnection connection, ByteBuffer data) {
+    public CTPChunkToSend(CTPConnection connection, List data) {
         this.connection = connection;
         this.data = data;
     }
@@ -44,7 +44,14 @@ class CTPChunkToSend implements CTPRunnable {
         if(connection.state != CTPConnection.STATE_READY) throw new IllegalStateException();
         
         try {
-            String chunkSizeInHex = Integer.toString(data.remaining(), 16);
+            // calculate the total bytes remaining
+            int totalRemaining = 0;
+            for(int b = 0; b < data.size(); b++) {
+                totalRemaining += ((ByteBuffer)data.get(b)).remaining();
+            }
+            
+            // write the chunk
+            String chunkSizeInHex = Integer.toString(totalRemaining, 16);
             connection.writer.write(chunkSizeInHex);
             connection.writer.write("\r\n");
             connection.writer.write(data);

@@ -23,7 +23,7 @@ import java.util.logging.*;
  * all read and write operations on all connections. A pool of other threads are
  * used to notify the handlers of the data and status of a connection.
  */
-public final class CTPConnectionManager implements Runnable {
+final class CTPConnectionManager implements Runnable {
     
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnectionManager.class.toString());
@@ -219,10 +219,10 @@ public final class CTPConnectionManager implements Runnable {
     /**
      * Connect to the specified host.
      */
-    public void connect(String host, int port, CTPHandler handler) {
-        invokeLater(new CTPConnectionToEstablish(host, port, handler));
+    public void connect(CTPHandler handler, String host, int port) {
+        invokeLater(new CTPConnectionToEstablish(handler, host, port));
     }
-    public void connect(String host, CTPHandler handler) {
-        connect(host, DEFAULT_PORT, handler);
+    public void connect(CTPHandler handler, String host) {
+        connect(handler, host, DEFAULT_PORT);
     }
 }

@@ -62,6 +62,18 @@ public class ByteChannelWriter {
      */
     public void write(ByteBuffer source) throws IOException {
         pendingBuffers.add(source.duplicate());
+        source.position(source.limit());
+    }
+    
+    /**
+     * Writes the specified list of ByteBuffers.
+     */
+    public void write(List data) {
+        for(int i = 0; i < data.size(); i++) {
+            ByteBuffer byteBuffer = (ByteBuffer)data.get(i);
+            pendingBuffers.add(byteBuffer.duplicate());
+            byteBuffer.position(byteBuffer.limit());
+        }
     }
     
     /**

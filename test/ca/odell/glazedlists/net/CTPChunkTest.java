@@ -61,7 +61,7 @@ public class CTPChunkTest extends TestCase {
             server.addEnqueued("HELLO WORLD");
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", serverPort, client);
+            connectionManager.connect(client, "localhost", serverPort);
             
             client.assertComplete((long)1000);
             client.close();
@@ -86,7 +86,7 @@ public class CTPChunkTest extends TestCase {
             server.addExpected("WORLD O HELL");
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", serverPort, client);
+            connectionManager.connect(client, "localhost", serverPort);
             
             client.assertComplete((long)1000);
             server.assertComplete((long)1000);
@@ -115,7 +115,7 @@ public class CTPChunkTest extends TestCase {
             server.addEnqueued(serverSendData);
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", serverPort, client);
+            connectionManager.connect(client, "localhost", serverPort);
             
             client.assertComplete((long)1000);
             client.close();
@@ -146,7 +146,7 @@ public class CTPChunkTest extends TestCase {
             }
             
             handlerFactory.addHandler(server);
-            connectionManager.connect("localhost", serverPort, client);
+            connectionManager.connect(client, "localhost", serverPort);
             
             client.assertComplete((long)1000);
             client.close();

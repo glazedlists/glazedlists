@@ -58,7 +58,7 @@ class CTPConnectionToClose implements CTPRunnable {
 
             // if we've already responded, send an empty chunk
             } else if(connection.state == CTPConnection.STATE_READY) {
-                connection.sendChunk(ByteBuffer.wrap(new byte[0]));
+                connection.sendChunk(Collections.EMPTY_LIST);
             }
         }
         
