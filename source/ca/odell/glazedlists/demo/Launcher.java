@@ -115,6 +115,11 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	}
 
 
+	/**
+	 * Shoudl be used by other demo applications to tell when they're being run from the
+	 * Launcher. This is useful to know when those demos should exit the VM when closed
+	 * (when this returns false) and when they should do nothing.
+	 */
 	public static boolean runningInLauncher() {
 		return in_launcher;
 	}
