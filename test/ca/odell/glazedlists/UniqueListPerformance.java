@@ -64,14 +64,20 @@ public class UniqueListPerformance {
         in.close();
 
         // Now set up the transformations
-        System.out.println("Setting up list transformations...");
+        System.out.print("Setting up list transformations");
         long setUpStart = System.currentTimeMillis();
         AllOrOneValueFilter firstFilter =  new AllOrOneValueFilter(source, GlazedLists.beanPropertyComparator(MozillaEntry.class, "user"));
+        System.out.print(".");
         UniqueList secondFilter = new UniqueList(firstFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
+        System.out.print(".");
         UniqueList thirdFilter =  new UniqueList(secondFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
+        System.out.print(".");
         UniqueList fourthFilter = new UniqueList(thirdFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
+        System.out.print(".");
         UniqueList fifthFilter =  new UniqueList(fourthFilter, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
+        System.out.print(".");
         UniqueList sixthFilter =  new UniqueList(fifthFilter,  GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
+        System.out.println(".");
         long setUpEnd = System.currentTimeMillis();
         long setUpTime = setUpEnd - setUpStart;
         System.out.println("Done.  List transformations took " + setUpTime + " to initialize.\n");
