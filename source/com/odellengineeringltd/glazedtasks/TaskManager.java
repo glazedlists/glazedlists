@@ -19,7 +19,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TaskManager implements Runnable {
+public class TaskManager {
 
     /** the contexts for the tasks */
     private List taskContexts = new ArrayList();
@@ -149,17 +149,35 @@ public class TaskManager implements Runnable {
      * manager so that it can update the GUI progress bar.
      */
     public synchronized void taskUpdated(TaskContext taskContext) {
-        SwingUtilities.invokeLater(this);
+        SwingUtilities.invokeLater(new TaskListenerNotifier(taskContext));
     }
     
     /**
-     * When the task manager is executed on the event dispatch thread,
-     * it sends notifcation of update evenets to all listening TaskListeners.
+     * A simple class that notifies task listeners. This executes
+     * on the event dispatch thread.
      */
-    public void run() {
-        for(Iterator i = taskListeners.iterator(); i.hasNext(); ) {
-            TaskListener taskListener = (TaskListener)i.next();
-            taskListener.taskUpdated(null);
+    class TaskListenerNotifier implements Runnable {
+        
+        /** the task that has been updated */
+        private TaskContext task;
+        
+        /**
+         * Creates a new TaskListenerNotifier that notifies listeners
+         * that the specified task has been updated.
+         */
+        public TaskListenerNotifier(TaskContext task) {
+            this.task = task;
+        }
+        
+        /**
+         * When the task manager is executed on the event dispatch thread,
+         * it sends notifcation of update evenets to all listening TaskListeners.
+         */
+        public void run() {
+            for(Iterator i = taskListeners.iterator(); i.hasNext(); ) {
+                TaskListener taskListener = (TaskListener)i.next();
+                taskListener.taskUpdated(task);
+            }
         }
     }
     

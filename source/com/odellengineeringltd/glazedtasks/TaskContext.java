@@ -31,7 +31,10 @@ public class TaskContext {
     private String actionCaption = "";
     
     /** the context state of this task */
-    private boolean taskComplete = false;
+    private boolean taskFinished = false;
+    
+    /** the exception that this task failed or cancelled with */
+    private Exception finishedException = null;
 
     /**
      * Creates a new progress bar task context that notifies the
@@ -53,6 +56,7 @@ public class TaskContext {
     public void setProgress(double progress) {
         if(progress < 0.0 || progress > 1.0) throw new RuntimeException("Progress must be between 0.0 and 1.0");
         this.progress = progress;
+        this.busy = false;
         taskManager.taskUpdated(this);
     }
     
@@ -106,6 +110,28 @@ public class TaskContext {
     }
     
     /**
+     * Gets the current action caption for the task.
+     */
+    public String getActionCaption() {
+        return actionCaption;
+    }
+    
+    /**
+     * Gets whether this task has completed, either due to success,
+     * cancellation or error.
+     */
+    public boolean isTaskFinished() {
+        return taskFinished;
+    }
+    
+    /**
+     * Gets the exception that this task finished with.
+     */
+    public Exception getFinishedException() {
+        return finishedException;
+    }
+    
+    /**
      * Gets the task that this task context is responsible to run.
      */
     public Task getTask() {
@@ -136,6 +162,7 @@ public class TaskContext {
      * task runners may complete their tasks simultaneously.
      */
     public synchronized void taskInterrupted(InterruptedException e) {
+        finishedException = e;
         System.out.println("[tasks] Task interrupted: " + task);
         e.printStackTrace();
         taskDone("Cancelled");
@@ -147,6 +174,7 @@ public class TaskContext {
      * task runners may complete their tasks simultaneously.
      */
     public synchronized void taskFailed(Exception e) {
+        finishedException = e;
         System.out.println("[tasks] Task failed: " + task);
         e.printStackTrace();
         taskDone("Failed");
@@ -163,7 +191,7 @@ public class TaskContext {
         cancellable = false;
         
         // update the context state
-        taskComplete = true;
+        taskFinished = true;
         
         // notify the task manager
         taskManager.taskRunnerFree(taskRunner);
@@ -175,6 +203,6 @@ public class TaskContext {
      * silently do nothing.
      */
     public synchronized void cancelTask() {
-        if(cancellable && !taskComplete) taskRunner.cancelTask();
+        if(cancellable) taskRunner.cancelTask();
     }
 }

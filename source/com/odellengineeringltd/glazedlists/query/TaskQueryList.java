@@ -111,7 +111,7 @@ public class TaskQueryList extends QueryList {
          * Gets this task's name.
          */
         public String toString() {
-            return "Running query: " + query.getName();
+            return "Query: " + query.getName();
         }
     }
 }

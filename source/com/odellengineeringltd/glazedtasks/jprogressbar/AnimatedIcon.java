@@ -16,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.Icon;
 // for lists of task contexts
 import java.util.*;
+// for responding to user actions
+import java.awt.event.*;
 
 /**
  * A task listener that displays an animated icon when work is being done
@@ -23,7 +25,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class AnimatedIcon implements TaskListener {
+public class AnimatedIcon implements TaskListener, MouseListener {
     
     /** the task manager to get status from */
     private TaskManager taskManager;
@@ -35,6 +37,9 @@ public class AnimatedIcon implements TaskListener {
     private Icon idleIcon;
     private Icon busyIcon;
     
+    /** the tasks panel to show when clicked */
+    private CurrentTasksPanel tasksPanel;
+    
     /**
      * Creates a new progress bar that monitors the specified task manager.
      */
@@ -44,6 +49,8 @@ public class AnimatedIcon implements TaskListener {
         this.idleIcon = idleIcon;
         this.busyIcon = busyIcon;
         iconHost = new JLabel(idleIcon);
+        tasksPanel = new CurrentTasksPanel(taskManager);
+        iconHost.addMouseListener(this);
         
         taskManager.addTaskListener(this);
     }
@@ -68,4 +75,19 @@ public class AnimatedIcon implements TaskListener {
         if(busy) iconHost.setIcon(busyIcon);
         else iconHost.setIcon(idleIcon);
     }
+
+    /**
+     * Open the dialog when the user clicks the icon.
+     */
+    public void mouseClicked(MouseEvent mouseEvent) {
+        tasksPanel.getTasksFrame().show();
+    }
+    /**
+     * These methods are necessary to implement the MouseListener
+     * interface.
+     */
+    public void mouseEntered(MouseEvent mouseEvent) { }
+    public void mouseExited(MouseEvent mouseEvent) { }
+    public void mousePressed(MouseEvent mouseEvent) { }
+    public void mouseReleased(MouseEvent mouseEvent) { }
 }
