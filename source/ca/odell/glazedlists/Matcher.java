@@ -13,10 +13,10 @@ package ca.odell.glazedlists;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.FilterList
- * @see ca.odell.glazedlists.event.matchers.MatcherEditorListener
+ * @see ca.odell.glazedlists.matchers.MatcherEditorListener
  */
 public interface Matcher {
-    
+
     /**
      * Return true if an item matches a filter.
      *

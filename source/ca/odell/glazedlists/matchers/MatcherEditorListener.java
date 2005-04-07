@@ -10,28 +10,28 @@ import ca.odell.glazedlists.Matcher;
 
 /**
  * A MatcherEditorListener handles changes fired by a {@link MatcherEditor}.
- * The most notable implementation will be {@link FilterList} which uses these
- * events to update its state.
+ * The most notable implementation will be {@link ca.odell.glazedlists.FilterList FilterList}
+ * which uses these events to update its state.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.Matcher
  */
 public interface MatcherEditorListener {
-    
+
     /**
-     * Indicates that the {@link MatcherEditor} has been changed to always return true.. 
+     * Indicates that the {@link MatcherEditor} has been changed to always return true..
      * In response to this change, all elements will be included.
      */
     public void matchAll(MatcherEditor source);
 
     /**
-     * Indicates that the {@link MatcherEditor} has been changed to always return false.. 
+     * Indicates that the {@link MatcherEditor} has been changed to always return false..
      * In response to this change, no elements will be included.
      */
     public void matchNone(MatcherEditor source);
-    
+
     /**
-     * Indicates that the {@link Matcher} has changed.  In response to this 
+     * Indicates that the {@link Matcher} has changed.  In response to this
      * change, all elements must be tested.
      *
      * @param matcher a {@link Matcher} that has no relationship to the previous

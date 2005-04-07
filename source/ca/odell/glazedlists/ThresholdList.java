@@ -225,7 +225,7 @@ public final class ThresholdList extends TransformedList {
 
     /**
      * Sets the lower threshold for this list to be the result of calling
-     * {@link ThresholdEvalutor#evaluate evaluate()} on the given object.
+     * {@link ThresholdEvaluator#evaluate(Object) evaluate()} on the given object.
      *
      * <p>This list can be used programmatically rather than hooking it up to
      * a UI component. <strong>Calling this method directly while this list
@@ -313,7 +313,7 @@ public final class ThresholdList extends TransformedList {
 
     /**
      * Sets the upper threshold for this list to be the result of calling
-     * {@link ThresholdEvalutor#evaluate evaluate()} on the given object.
+     * {@link ThresholdEvaluator#evaluate(Object) evaluate()} on the given object.
      *
      * <p>This list can be used programmatically rather than hooking it up to
      * a UI component. <strong>Calling this method directly while this list

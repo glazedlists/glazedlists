@@ -22,13 +22,13 @@ public class TextMatcher implements Matcher {
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator filterator;
-    
+
     /** a parallel array to locate filter substrings in arbitrary text */
     private final TextSearchStrategy[] filterStrategies;
-    
+
     /** a heavily recycled list of filter Strings, call clear() before use */
     private final List filterStrings = new ArrayList();
-    
+
     /**
      * @param filters an array of {@link #normalizeFilters(String[]) normalized}
      *      filter Strings.
@@ -38,14 +38,14 @@ public class TextMatcher implements Matcher {
      */
     public TextMatcher(String[] filters, TextFilterator filterator) {
         this.filterator = filterator;
-        
+
         // build the filter -> TextSearchStrategy map for the new filters
         filterStrategies = new TextSearchStrategy[filters.length];
         for(int i = 0; i < filters.length; i++) {
             filterStrategies[i] = selectTextSearchStrategy(filters[i]);
         }
     }
-    
+
     /** {@inheritDoc} */
     public boolean matches(Object element) {
         // populate the strings for this object
@@ -69,7 +69,7 @@ public class TextMatcher implements Matcher {
                     continue filters;
                 }
             }
-            // no field matched this filter 
+            // no field matched this filter
             return false;
         }
         // all filters have been matched
@@ -89,7 +89,7 @@ public class TextMatcher implements Matcher {
      */
     private static TextSearchStrategy selectTextSearchStrategy(String filter) {
         TextSearchStrategy result = null;
-        
+
         // if the filter is only 1 character, use the optimized SingleCharacter strategy
         if(filter.length() == 1) {
             result = new SingleCharacterCaseInsensitiveTextSearchStrategy();
@@ -97,14 +97,14 @@ public class TextMatcher implements Matcher {
         } else {
             result = new BoyerMooreCaseInsensitiveTextSearchStrategy();
         }
-        
+
         // apply the subtext
         result.setSubtext(filter);
-        
+
         return result;
     }
-    
-    
+
+
     /**
      * This convenience method returns a copy of the <code>filterStrings</code>
      * in upper case format with null and <code>""</code> values removed. It
@@ -163,7 +163,7 @@ public class TextMatcher implements Matcher {
 
         return upperCaseFilterStrings;
     }
-    
+
     /**
      * By default, text filters are considered to be equal if:
      *
@@ -279,9 +279,9 @@ public class TextMatcher implements Matcher {
      * <code>isFilterRelaxed(newFilter, oldFilter)</code>. See
      * {@link #isFilterRelaxed} for a description of why that holds.
      *
-     * @param oldFilters an array of {@link #normalizeFilters(String[]) normalized}
+     * @param oldFilter an array of {@link #normalizeFilters(String[]) normalized}
      *      filter Strings.
-     * @param newFilters another array of {@link #normalizeFilters(String[]) normalized}
+     * @param newFilter another array of {@link #normalizeFilters(String[]) normalized}
      *      filter Strings.
      * @return <tt>true</tt> if <code>newFilter</code> is a constrained version
      *      of <code>oldFilter</code>; <tt>false</tt> otherwise

@@ -30,7 +30,7 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator filterator;
-    
+
     /** the filters list is currently just a list of Substrings to include */
     private String[] filters = new String[0];
 
@@ -45,7 +45,7 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
     public TextMatcherEditor(TextFilterator filterator) {
         this.filterator = filterator;
     }
-    
+
     /**
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
      * implement the {@link TextFilterable} interface.
@@ -57,20 +57,20 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
     public TextMatcherEditor() {
         this(null);
     }
-    
+
     /**
      * Adjusts the filters of this {@link TextMatcherEditor} and fires a change
      * to the {@link Matcher}.
      *
-     * @param newFilter the {@link String}s representing all of the filter values
+     * @param filterStrings the {@link String}s representing all of the filter values
      */
     public void setFilterText(String[] filterStrings) {
         String[] oldFilters = this.filters;
         this.filters = TextMatcher.normalizeFilters(filterStrings);
-        
+
         // fire the event only as necessary
         if(!TextMatcher.isFilterEqual(oldFilters, filters)) {
-            
+
             // classify the change in filter and apply the new filter to this list
             if(filters.length == 0) {
                 fireMatchAll();

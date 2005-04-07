@@ -34,21 +34,21 @@ public class EventSelectionModelTest extends SwingTestCase {
      */
     public void guiTearDown() {
     }
-    
+
     /**
      * Tests the user interface. This is a mandatory method in SwingTestCase classes.
      */
     public void testGui() {
         super.testGui();
     }
-    
+
     /**
      * Verifies that the selected index is cleared when the selection is cleared.
      */
     public void guiTestClear() {
         BasicEventList list = new BasicEventList();
         EventSelectionModel eventSelectionModel = new EventSelectionModel(list);
-        
+
         // populate the list
         list.add("A");
         list.add("B");
@@ -56,30 +56,30 @@ public class EventSelectionModelTest extends SwingTestCase {
         list.add("D");
         list.add("E");
         list.add("F");
-        
+
         // make sure Swing is caught up
         //flushEventDispatchThread();
-        
+
         // make a selection
         eventSelectionModel.addSelectionInterval(1, 4);
-        
+
         // test the selection
         assertEquals(list.subList(1, 5), eventSelectionModel.getEventList());
-        
+
         // clear the selection
         eventSelectionModel.clearSelection();
-        
+
         // test the selection
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getEventList());
         assertEquals(-1, eventSelectionModel.getMinSelectionIndex());
         assertEquals(-1, eventSelectionModel.getMaxSelectionIndex());
         assertEquals(true, eventSelectionModel.isSelectionEmpty());
     }
-    
+
     /**
      * Tests a problem where the {@link EventSelectionModel} fails to fire events
      *
-     * @author Sergey Bogatyrjov
+     * This test was contributed by: Sergey Bogatyrjov
      */
     public void guiTestSelectionModel() {
         String[] data = new String[] { "one", "two", "three" };
