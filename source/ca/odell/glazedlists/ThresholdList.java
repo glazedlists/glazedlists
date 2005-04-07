@@ -224,6 +224,22 @@ public final class ThresholdList extends TransformedList {
     }
 
     /**
+     * Sets the lower threshold for this list to be the result of calling
+     * {@link ThresholdEvalutor#evaluate evaluate()} on the given object.
+     *
+     * <p>This list can be used programmatically rather than hooking it up to
+     * a UI component. <strong>Calling this method directly while this list
+     * is connected to a particular widget could result in errors.</strong>
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
+     */
+    public void setLowerThreshold(Object object) {
+        setLowerThreshold(evaluator.evaluate(object));
+    }
+
+    /**
      * Sets the lower threshold for this list.
      *
      * <p>This list can be used programmatically rather than hooking it up to
@@ -296,6 +312,22 @@ public final class ThresholdList extends TransformedList {
     }
 
     /**
+     * Sets the upper threshold for this list to be the result of calling
+     * {@link ThresholdEvalutor#evaluate evaluate()} on the given object.
+     *
+     * <p>This list can be used programmatically rather than hooking it up to
+     * a UI component. <strong>Calling this method directly while this list
+     * is connected to a particular widget could result in errors.</strong>
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
+     */
+    public void setUpperThreshold(Object object) {
+        setUpperThreshold(evaluator.evaluate(object));
+    }
+
+    /**
      * Sets the upper threshold for this list.
      *
      * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
@@ -363,6 +395,14 @@ public final class ThresholdList extends TransformedList {
      */
     public int getUpperThreshold() {
         return upperThreshold;
+    }
+
+    /**
+     * A convenience method to allow access to the {@link ThresholdEvaluator}
+     * that was provided on construction.
+     */
+    public ThresholdEvaluator getThresholdEvaluator() {
+        return evaluator;
     }
 
     /** {@inheritDoc} */
