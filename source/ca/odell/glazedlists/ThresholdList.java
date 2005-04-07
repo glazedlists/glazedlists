@@ -198,7 +198,7 @@ public final class ThresholdList extends TransformedList {
                     if(value >= lowerThreshold && value <= upperThreshold) {
                         upperThresholdIndex ++;
                         updates.addInsert(transformedIndex);
-                    } else if(sortedIndex == lowerThresholdIndex) {
+                    } else if(sortedIndex == lowerThresholdIndex && value <= upperThreshold) {
                         lowerThresholdIndex ++;
                         upperThresholdIndex ++;
                     }
@@ -335,8 +335,8 @@ public final class ThresholdList extends TransformedList {
         }
 
         // the index at the threshold has changed but no event should be thrown
-        if((newListIndex == size() && upperThresholdIndex == size() - 1) ||
-           (newListIndex == size() - 1 && upperThresholdIndex == size())) {
+        if((newListIndex == sourceSize && upperThresholdIndex == sourceSize - 1) ||
+           (newListIndex == sourceSize - 1 && upperThresholdIndex == sourceSize)) {
             upperThresholdIndex = newListIndex;
             return;
         }
