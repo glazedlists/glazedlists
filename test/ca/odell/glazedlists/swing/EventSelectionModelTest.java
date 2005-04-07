@@ -64,13 +64,13 @@ public class EventSelectionModelTest extends SwingTestCase {
         eventSelectionModel.addSelectionInterval(1, 4);
 
         // test the selection
-        assertEquals(list.subList(1, 5), eventSelectionModel.getEventList());
+        assertEquals(list.subList(1, 5), eventSelectionModel.getSelected());
 
         // clear the selection
         eventSelectionModel.clearSelection();
 
         // test the selection
-        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getEventList());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
         assertEquals(-1, eventSelectionModel.getMinSelectionIndex());
         assertEquals(-1, eventSelectionModel.getMaxSelectionIndex());
         assertEquals(true, eventSelectionModel.isSelectionEmpty());
@@ -83,7 +83,8 @@ public class EventSelectionModelTest extends SwingTestCase {
      */
     public void guiTestSelectionModel() {
         String[] data = new String[] { "one", "two", "three" };
-        EventList source = new BasicEventList(Arrays.asList(data));
+        EventList source = new BasicEventList();
+        source.addAll(Arrays.asList(data));
         BooleanFilteredList filtered = new BooleanFilteredList(source);
 
         // create selection model
