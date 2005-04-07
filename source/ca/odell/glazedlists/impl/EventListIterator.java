@@ -65,7 +65,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
      *      from the ListEventListener list of the source list once it is
      *      otherwise out of scope.
      *
-     * @see ca.odell.glazedlists.event.WeakReferenceProxy
+     * @see GlazedLists#weakReferenceProxy(EventList, ListEventListener)
      */
     public EventListIterator(EventList source, int nextIndex, boolean automaticallyRemove) {
         this.source = source;
@@ -73,7 +73,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
 
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            WeakReferenceProxy gcProxy = new WeakReferenceProxy(source, this);
+            ListEventListener gcProxy = GlazedLists.weakReferenceProxy(source, this);
             source.addListEventListener(gcProxy);
             // do not manage dependencies for iterators, they never have multiple sources
             source.getPublisher().removeDependency(source, gcProxy);

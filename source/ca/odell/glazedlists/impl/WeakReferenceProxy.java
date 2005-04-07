@@ -4,17 +4,18 @@
  *
  * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
  */
-package ca.odell.glazedlists.event;
+package ca.odell.glazedlists.impl;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.*;
 // for managing weak references
 import java.lang.ref.*;
 
 /**
  * This class is a proxy to another ListEventListener that may go out of
  * scope without explicitly removing itself from the source list's set of
- * listeners. 
+ * listeners.
  *
  * <p>WeakReferenceProxy exists to solve a garbage
  * collection problem. Suppose I have an EventList <i>L</i> and I request
@@ -35,17 +36,17 @@ import java.lang.ref.*;
  *
  * @see java.lang.ref.WeakReference
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=21">Bug 21</a>
- * 
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class WeakReferenceProxy implements ListEventListener {
 
     /** a weak reference the target ListEventListener */
     private WeakReference proxyTargetReference;
-    
+
     /** the list to remove this listener from when done */
     private EventList source;
-    
+
     /**
      * Creates a new WeakReferenceProxy that listens for
      * events from the specified list and forwards them to the specified
@@ -53,7 +54,7 @@ public final class WeakReferenceProxy implements ListEventListener {
      */
     public WeakReferenceProxy(EventList source, ListEventListener proxyTarget) {
         if(source == null || proxyTarget == null) throw new NullPointerException();
-        
+
         this.source = source;
         proxyTargetReference = new WeakReference(proxyTarget);
     }
@@ -64,7 +65,7 @@ public final class WeakReferenceProxy implements ListEventListener {
      */
     public void listChanged(ListEvent listChanges) {
         ListEventListener proxyTarget = (ListEventListener)proxyTargetReference.get();
-        
+
         if(source != null && (proxyTarget == null || proxyTargetReference.isEnqueued())) {
             source.removeListEventListener(this);
             source = null;

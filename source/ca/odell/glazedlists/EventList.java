@@ -44,6 +44,7 @@ import java.util.*;
  * @see GlazedLists#eventList(Collection)
  * @see GlazedLists#readOnlyList(EventList)
  * @see GlazedLists#threadSafeList(EventList)
+ * @see GlazedLists#weakReferenceProxy(EventList, ListEventListener)
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

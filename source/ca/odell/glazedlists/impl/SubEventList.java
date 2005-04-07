@@ -14,7 +14,7 @@ import ca.odell.glazedlists.*;
 /**
  * A SubEventList is a view of a sub-range of an EventList.
  *
- * <p>Although the <code>SubEventList</code>'s size is initially fixed, the 
+ * <p>Although the <code>SubEventList</code>'s size is initially fixed, the
  * <code>SubEventList</code> can change size as a consequence of changes to
  * the source list that occur within the range covered by the <code>SubEventList</code>.
  *
@@ -34,10 +34,10 @@ public final class SubEventList extends TransformedList {
 
     /** the start index of this list, inclusive */
     private int startIndex;
-    
+
     /** the end index of this list, exclusive */
     private int endIndex;
-    
+
     /**
      * Creates a new SubEventList that covers the specified range of indices
      * in the source list.
@@ -49,38 +49,38 @@ public final class SubEventList extends TransformedList {
      *      from the ListEventListener list of the source list once it is
      *      otherwise out of scope.
      *
-     * @see ca.odell.glazedlists.event.WeakReferenceProxy
+     * @see GlazedLists#weakReferenceProxy(EventList, ListEventListener)
      */
     public SubEventList(EventList source, int startIndex, int endIndex, boolean automaticallyRemove) {
         super(source);
-        
+
         // do consistency checking
         if(startIndex < 0 || endIndex < startIndex || endIndex > source.size()) {
             throw new IllegalArgumentException("The range " + startIndex + "-" + endIndex + " is not valid over a list of size " + source.size());
         }
-        
+
         // save the sublist bounds
         this.startIndex = startIndex;
         this.endIndex = endIndex;
-    
+
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            source.addListEventListener(new WeakReferenceProxy(source, this));
+            source.addListEventListener(GlazedLists.weakReferenceProxy(source, this));
         } else {
             source.addListEventListener(this);
         }
     }
-    
+
     /** {@inheritDoc} */
     public int size() {
         return endIndex - startIndex;
     }
-    
+
     /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
         return mutationIndex + startIndex;
     }
-    
+
     /** {@inheritDoc} */
     protected boolean isWritable() {
         return true;
@@ -106,7 +106,7 @@ public final class SubEventList extends TransformedList {
             while(listChanges.next()) {
                 int changeIndex = listChanges.getIndex();
                 int changeType = listChanges.getType();
-                
+
                 // if it is a change before
                 if(changeIndex < startIndex || (changeType == ListEvent.INSERT && changeIndex == startIndex)) {
                     if(changeType == ListEvent.INSERT) {

@@ -7,6 +7,8 @@
 package ca.odell.glazedlists;
 
 import java.util.*;
+// for weak reference proxying
+import ca.odell.glazedlists.event.ListEventListener;
 // for access to volatile classes
 import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.impl.sort.*;
@@ -29,7 +31,7 @@ public final class GlazedLists {
     private GlazedLists() {
         throw new UnsupportedOperationException();
     }
-    
+
     // Utility Methods // // // // // // // // // // // // // // // // // // //
 
     /**
@@ -57,7 +59,7 @@ public final class GlazedLists {
     public static void replaceAll(EventList target, List source, boolean updates) {
         Diff.replaceAll(target, source, updates);
     }
-    
+
 
     // Comparators // // // // // // // // // // // // // // // // // // // //
 
@@ -148,7 +150,7 @@ public final class GlazedLists {
      * table columns via Reflection.
      *
      * @param baseClass the class of the Object to divide into columns. If specified,
-     *      the returned class will provide implementation of 
+     *      the returned class will provide implementation of
      *      {@link AdvancedTableFormat#getColumnClass(int)} and
      *      {@link AdvancedTableFormat#getColumnComparator(int)} by examining the
      *      classes of the column value.
@@ -156,7 +158,7 @@ public final class GlazedLists {
     public static TableFormat tableFormat(Class baseClass, String[] propertyNames, String[] columnLabels) {
         return new BeanTableFormat(baseClass, propertyNames, columnLabels);
     }
-    
+
     /**
      * Creates a {@link TableFormat} that binds JavaBean properties to
      * table columns via Reflection. The returned {@link TableFormat} implements
@@ -172,7 +174,7 @@ public final class GlazedLists {
      * {@link WritableTableFormat} and may be used for an editable table.
      *
      * @param baseClass the class of the Object to divide into columns. If specified,
-     *      the returned class will provide implementation of 
+     *      the returned class will provide implementation of
      *      {@link AdvancedTableFormat#getColumnClass(int)} and
      *      {@link AdvancedTableFormat#getColumnComparator(int)} by examining the
      *      classes of the column value.
@@ -227,7 +229,7 @@ public final class GlazedLists {
         result.addAll(contents);
         return result;
     }
-    
+
     /**
      * Wraps the source in an {@link EventList} that does not allow writing operations.
      *
@@ -279,5 +281,32 @@ public final class GlazedLists {
      */
     public static TransformedList threadSafeList(EventList source) {
         return new ThreadSafeList(source);
+    }
+
+    /**
+     * Provides a proxy to another ListEventListener that may go out of
+     * scope without explicitly removing itself from the source list's set of
+     * listeners.
+     *
+     * <p>This exists to solve a garbage collection problem. Suppose I have an
+     * {@link EventList} <i>L</i> and I request a {@link ListIterator} for <i>L</i>.
+     * The {@link ListIterator} must listen for change events to <i>L</i> in order
+     * to be consistent. Therefore such an iterator will register
+     * itself as a listener for <i>L</i>. When the iterator goes out of scope (as
+     * they usually do), it will remain as a listener for <i>L</i>. This prevents
+     * the iterator object from ever being garbage collected! But the iterator is
+     * never used again. Because iterators can be used very frequently, this will
+     * cause an unacceptable memory leak.
+     *
+     * <p>Instead of adding the iterator directly as a listener for <i>L</i>, add
+     * the proxy instead. The proxy will retain a <code>WeakReference</code> to the
+     * iterator and forward events to the iterator as long as it is reachable. When
+     * theiterator is no longer reachable, the proxy will remove itself from the list
+     * of listeners for <i>L</i>. All garbage is then available for collection.
+     *
+     * @see java.lang.ref.WeakReference
+     */
+    public static ListEventListener weakReferenceProxy(EventList source, ListEventListener target) {
+        return new WeakReferenceProxy(source, target);
     }
 }
