@@ -8,13 +8,15 @@ package ca.odell.glazedlists;
 
 /**
  * Immutable interface that is implemented to represent the value of a filter contained
- * by a {@link MatcherSource}. The implementation simply determines
+ * by a {@link ca.odell.glazedlists.matchers.MatcherEditor MatcherEditor}. The
+ * implementation simply determines
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.FilterList
- * @see ca.odell.glazedlists.event.MatcherSourceListener
+ * @see ca.odell.glazedlists.event.matchers.MatcherEditorListener
  */
 public interface Matcher {
+    
     /**
      * Return true if an item matches a filter.
      *

@@ -117,6 +117,12 @@ public abstract class AbstractEventList implements EventList, Serializable {
     /**
      * Returns an iterator over the elements in this list in proper sequence.
      *
+     * <p>The returned {@link Iterator} will become inconsistent if the
+     * {@link EventList} that it views is modified. To overcome this problem,
+     * use {@link #listIterator()}. When used concurrently, the returned
+     * {@link Iterator} requires locking via this list's
+     * {@link #getReadWriteLock() ReadWriteLock}.
+     *
      * @return an iterator over the elements in this list in proper sequence.
      */
     public Iterator iterator() {
@@ -599,6 +605,12 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * Returns a list iterator of the elements in this list (in proper
      * sequence).
      *
+     * <p>Unlike the {@link ListIterator} from a regular {@link List}, the
+     * {@link EventList}'s {@link ListIterator} will remain consistent even if the
+     * {@link EventList} is changed externally. Note that when used concurrently, 
+     * the returned {@link ListIterator} requires locking via this list's
+     * {@link #getReadWriteLock() ReadWriteLock}.
+     *
      * @return a list iterator of the elements in this list (in proper
      *         sequence).
      */
@@ -613,6 +625,12 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * an initial call to the <tt>next</tt> method.  An initial call to
      * the <tt>previous</tt> method would return the element with the
      * specified index minus one.
+     *
+     * <p>Unlike the {@link ListIterator} from a regular {@link List}, the
+     * {@link EventList}'s {@link ListIterator} will remain consistent even if the
+     * {@link EventList} is changed externally. Note that when used concurrently, 
+     * the returned {@link ListIterator} requires locking via this list's
+     * {@link #getReadWriteLock() ReadWriteLock}.
      *
      * @param index index of first element to be returned from the
      *          list iterator (by a call to the <tt>next</tt> method).
@@ -629,10 +647,15 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * Returns a view of the portion of this list between the specified
      * <tt>fromIndex</tt>, inclusive, and <tt>toIndex</tt>, exclusive.  (If
      * <tt>fromIndex</tt> and <tt>toIndex</tt> are equal, the returned list is
-     * empty.)  The returned list is backed by this list, so non-structural
-     * changes in the returned list are reflected in this list, and vice-versa.
-     * The returned list supports all of the optional list operations supported
-     * by this list.
+     * empty.)  
+     
+     * <p>Unlike the standard {@link List#subList(int,int) List.subList()}
+     * method, the {@link List} returned by this method will continue to be 
+     * consistent even if the {@link EventList} it views is modified, 
+     * structurally or otherwise. The returned {@link List} can always be safely 
+     * cast to {@link EventList}. Note that when used concurrently, the returned
+     * {@link List} requires locking via this list's
+     * {@link #getReadWriteLock() ReadWriteLock}.
      *
      * <p>This method eliminates the need for explicit range operations (of
      * the sort that commonly exist for arrays).   Any operation that expects
@@ -645,12 +668,6 @@ public abstract class AbstractEventList implements EventList, Serializable {
      * Similar idioms may be constructed for <tt>indexOf</tt> and
      * <tt>lastIndexOf</tt>, and all of the algorithms in the
      * <tt>Collections</tt> class can be applied to a subList.
-     *
-     * <p>The semantics of the list returned by this method become undefined if
-     * the backing list (i.e., this list) is <i>structurally modified</i> in
-     * any way other than via the returned list.  (Structural modifications are
-     * those that change the size of this list, or otherwise perturb it in such
-     * a fashion that iterations in progress may yield incorrect results.)
      *
      * @param fromIndex low endpoint (inclusive) of the subList.
      * @param toIndex high endpoint (exclusive) of the subList.

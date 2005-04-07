@@ -76,8 +76,9 @@ public class TextFilterPerformance {
         // prepare the filter list
         BasicEventList unfiltered = new BasicEventList();
         unfiltered.addAll(elements);
-        DefaultTextFilterList filtered = new DefaultTextFilterList(unfiltered, new CollectionTextFilterator());
-
+        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new CollectionTextFilterator());
+        FilterList filtered = new FilterList(unfiltered, textMatcherEditor);
+        
         // track time
         long startTime = 0;
         long finishTime = 0;
@@ -92,7 +93,7 @@ public class TextFilterPerformance {
 
             int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
             startTime = System.currentTimeMillis();
-            filtered.setFilterText(filter.split("[ \t]"));
+            textMatcherEditor.setFilterText(filter.split("[ \t]"));
             finishTime = System.currentTimeMillis();
             long totalFilteringTime = (finishTime - startTime);
             fullFilterTime += totalFilteringTime;
@@ -123,7 +124,7 @@ public class TextFilterPerformance {
                 String subFilter = filter.substring(0, j);
 
                 startTime = System.currentTimeMillis();
-                filtered.setFilterText(subFilter.split("[ \t]"));
+                textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
                 finishTime = System.currentTimeMillis();
 
                 totalFilteringTime += (finishTime - startTime);
@@ -134,7 +135,7 @@ public class TextFilterPerformance {
             for (int j = 1; j <= filter.length(); j++) {
                 String subFilter = filter.substring(0, filter.length() - j);
                 startTime = System.currentTimeMillis();
-                filtered.setFilterText(subFilter.split("[ \t]"));
+                textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
                 finishTime = System.currentTimeMillis();
 
                 totalUnfilteringTime += (finishTime - startTime);

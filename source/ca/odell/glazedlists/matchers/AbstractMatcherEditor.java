@@ -16,11 +16,11 @@ import java.util.*;
  *
  * <p>Extending classes can fire events to listener using "fire" methods: 
  * <ul>
- *    <li>{@link #fireMatchNone(Matcher)}</li>
+ *    <li>{@link #fireMatchNone()}</li>
  *    <li>{@link #fireConstrained(Matcher)}</li>
  *    <li>{@link #fireChanged(Matcher)}</li>
  *    <li>{@link #fireRelaxed(Matcher)}</li>
- *    <li>{@link #fireMatchAll(Matcher)}</li>
+ *    <li>{@link #fireMatchAll()}</li>
  * </ul>
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>

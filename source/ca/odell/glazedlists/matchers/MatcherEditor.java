@@ -10,7 +10,7 @@ import ca.odell.glazedlists.Matcher;
 
 /**
  * A facility for modifying the {@link Matcher}s which specify the behaviour of a
- * {@link FilterList}.
+ * {@link ca.odell.glazedlists.FilterList FilterList}.
  *
  * <p>Although this interface is called an <i>Editor</i>, the
  * implementor should create new {@link Matcher} instances on each
