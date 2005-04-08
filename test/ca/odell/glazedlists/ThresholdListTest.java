@@ -1059,6 +1059,32 @@ public class ThresholdListTest extends TestCase {
         assertEquals(1, counter.getChangeCount(1));
         assertEquals(Collections.EMPTY_LIST, thresholdList);
     }
+
+    /** 
+     * Tests a sliding windows works. This is the case when the upper and lower
+     * threshold keep shifting.
+     */
+    public void testSlidingWindow() {
+        // count events
+        ListEventCounter counter = new ListEventCounter();
+        thresholdList.addListEventListener(counter);
+        
+        thresholdList.setLowerThreshold(-14938);
+        thresholdList.setUpperThreshold(-1938);
+        source.add(new Integer(995));
+        thresholdList.setLowerThreshold(-13937);
+        thresholdList.setUpperThreshold(-937);
+        source.add(new Integer(1155));
+        thresholdList.setLowerThreshold(4062);
+        thresholdList.setUpperThreshold(17062);
+        source.add(new Integer(19970));
+        thresholdList.setLowerThreshold(5063);
+        thresholdList.setUpperThreshold(18063);
+        source.add(new Integer(20279));
+        thresholdList.setLowerThreshold(7063);
+        thresholdList.setUpperThreshold(20063);
+    }
+
     
     /**
      * Tests that the JavaBean constructor and supporting code
