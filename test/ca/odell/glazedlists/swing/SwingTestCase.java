@@ -74,7 +74,11 @@ public abstract class SwingTestCase extends TestCase {
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         } catch(InvocationTargetException e) {
-            throw new RuntimeException(e.getCause());
+            Throwable cause = e;
+            while(cause.getCause() != null) cause = cause.getCause();
+            if(cause instanceof RuntimeException) throw (RuntimeException)cause;
+            else if(cause instanceof Error) throw (Error)cause;
+            else throw new RuntimeException(cause);
         }
     }
     private class TestOnSwingThread implements Runnable {
@@ -111,7 +115,7 @@ public abstract class SwingTestCase extends TestCase {
                     if(tearDown != null) tearDown.invoke(instance, SEND_NO_PARAMETERS);
                 }
             } catch(InvocationTargetException e) {
-                Assert.fail(e.getCause().getClass() + ": \"" + e.getCause().getMessage() + "\"");
+                throw new RuntimeException(e.getCause());
             } catch(NoSuchMethodException e) {
                 throw new RuntimeException(e);
             } catch(InstantiationException e) {
