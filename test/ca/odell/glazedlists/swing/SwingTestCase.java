@@ -131,7 +131,7 @@ public abstract class SwingTestCase extends TestCase {
      * method is called will have executed. It provides no guarantee that the event
      * dispatch thread will be empty upon return.
      */
-    private void flushEventDispatchThread() {
+    /*private void flushEventDispatchThread() {
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
@@ -141,6 +141,68 @@ public abstract class SwingTestCase extends TestCase {
             throw new RuntimeException(e);
         } catch(java.lang.reflect.InvocationTargetException e) {
             throw new RuntimeException(e);
+        }
+    }*/
+    
+    
+    /**
+     * Run the specified task on a background thread. This method does not return
+     * until the task has completed.
+     */
+    public static void doBackgroundTask(Runnable task) {
+        // start the background task
+        BackgroundRunnable runnable = new BackgroundRunnable(task, Thread.currentThread());
+        Thread background = new Thread(runnable);
+        background.start();
+        
+        // wait for the task to complete
+        waitForInterrupt();
+    }
+    
+    /**
+     * Wait until interrupted.
+     */
+    public static void waitForInterrupt() {
+        try {
+            Object pillow = new Object();
+            synchronized(pillow) {
+                pillow.wait();
+            }
+        } catch(InterruptedException e) {
+            // do nothing
+        }
+    }
+    
+    /**
+     * Sleep a little while.
+     */
+    public void sleep(long duration) {
+        try {
+            Object pillow = new Object();
+            synchronized(pillow) {
+                pillow.wait(duration);
+            }
+        } catch(InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * Run a task on a background thread and then interrupt the caller.
+     */
+    private static class BackgroundRunnable implements Runnable {
+        private Runnable target;
+        private Thread blocking;
+        public BackgroundRunnable(Runnable target, Thread blocking) {
+            this.target = target;
+            this.blocking = blocking;
+        }
+        public void run() {
+            try {
+                target.run();
+            } finally {
+                blocking.interrupt();
+            }
         }
     }
 }
