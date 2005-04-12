@@ -7,9 +7,16 @@
 package ca.odell.glazedlists;
 
 /**
- * Immutable interface that is implemented to represent the value of a filter contained
- * by a {@link ca.odell.glazedlists.matchers.MatcherEditor MatcherEditor}. The
- * implementation simply determines
+ * Determines which values should be filtered.
+ *
+ * <p>For best safety, implementations of {@link Matcher} should be
+ * <a href="http://en.wikipedia.org/wiki/Immutable_object">immutable</a>. This
+ * guarantees that {@link FilterList}s can safely call
+ * {@link #matches(Object) matches()} without synchronization.
+ *
+ * <p>In order to create dynamic filtering, use a {@link MatcherEditor}, which
+ * can create immutable {@link Matcher} Objects each time the matching constraints
+ * change.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.FilterList
