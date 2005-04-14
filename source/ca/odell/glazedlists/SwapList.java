@@ -18,6 +18,12 @@ import ca.odell.glazedlists.event.*;
  * data. For example, if the elements of a {@link EventList} represent a model,
  * a {@link SwapList} can be used to add view and controller objects.
  *
+ * <p>Although this list supports operations like {@link #add(Object) add()} and
+ * {@link #set(int,Object) set()}, these methods will simply be called on the
+ * source {@link EventList} without adjusting the paramter values. In effect,
+ * the method {@link SwapList#add(Object) swapList.add()} is equivalent to
+ * {@link EventList#add(Object) source.add()}.
+ *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
