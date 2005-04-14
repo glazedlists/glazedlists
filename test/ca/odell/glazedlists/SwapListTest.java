@@ -57,6 +57,12 @@ public class SwapListTest extends TestCase {
         swapList.retainAll(Arrays.asList(new String[] { "driberif", "azzip" }));
         assertEquals(Arrays.asList(new String[] { "driberif", "azzip" }), swapList);
         
+        // validate that the swapList add methods work, albeit awkwardly
+        swapList.add(0, "nedebor");
+        assertEquals("robeden", swapList.get(0));
+        swapList.set(2, "kingnayrb");
+        assertEquals("bryangnik", swapList.get(2));
+        
     }
 
 

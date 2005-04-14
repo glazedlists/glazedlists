@@ -14,7 +14,8 @@ package ca.odell.glazedlists;
  * guarantees that {@link FilterList}s can safely call
  * {@link #matches(Object) matches()} without synchronization.
  *
- * <p>In order to create dynamic filtering, use a {@link MatcherEditor}, which
+ * <p>In order to create dynamic filtering, use a
+ * {@link ca.odell.glazedlists.matchers.MatcherEditor}, which
  * can create immutable {@link Matcher} Objects each time the matching constraints
  * change.
  *
