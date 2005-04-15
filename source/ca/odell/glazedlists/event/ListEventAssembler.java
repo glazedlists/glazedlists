@@ -197,6 +197,10 @@ public final class ListEventAssembler {
      *
      * <p>Note that this method should be preferred to manually forwarding events
      * because it is heavily optimized.
+     *
+     * <p>Note that currently this implementation does a best effort to preserve
+     * reorderings. This means that a reordering is lost if it is combined with
+     * any other ListEvent.
      */
     public void forwardEvent(ListEvent listChanges) {
         // if we're not nested, we can fire the event directly
@@ -208,8 +212,13 @@ public final class ListEventAssembler {
         // if we're nested, we have to copy this event's parts to our queue
         } else {
             beginEvent();
-            while(listChanges.nextBlock()) {
-                addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+            this.reorderMap = null;
+            if(atomicChangeBlocks.isEmpty() && listChanges.isReordering()) {
+                reorder(listChanges.getReorderMap());
+            } else {
+                while(listChanges.nextBlock()) {
+                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                }
             }
             commitEvent();
         }
