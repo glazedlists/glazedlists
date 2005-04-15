@@ -41,6 +41,37 @@ public class EventSelectionModelTest extends SwingTestCase {
     public void testGui() {
         super.testGui();
     }
+    
+    /**
+     * Tests that selection survives a sorting.
+     */
+    public void guiTestSort() {
+        BasicEventList list = new BasicEventList();
+        SortedList sorted = new SortedList(list, null);
+        EventSelectionModel eventSelectionModel = new EventSelectionModel(sorted);
+        
+        // populate the list
+        list.add("E");
+        list.add("C");
+        list.add("F");
+        list.add("B");
+        list.add("A");
+        list.add("D");
+        assertEquals(Arrays.asList(new String[] { }), eventSelectionModel.getSelected());
+        
+        // select the vowels
+        eventSelectionModel.addSelectionInterval(0, 0);
+        eventSelectionModel.addSelectionInterval(4, 4);
+        assertEquals(Arrays.asList(new String[] { "E", "A" }), eventSelectionModel.getSelected());
+        
+        // flip the list
+        sorted.setComparator(GlazedLists.comparableComparator());
+        assertEquals(Arrays.asList(new String[] { "A", "E" }), eventSelectionModel.getSelected());
+        
+        // flip the list again
+        sorted.setComparator(GlazedLists.reverseComparator());
+        assertEquals(Arrays.asList(new String[] { "E", "A" }), eventSelectionModel.getSelected());
+    }
 
     /**
      * Verifies that the selected index is cleared when the selection is cleared.
@@ -56,9 +87,6 @@ public class EventSelectionModelTest extends SwingTestCase {
         list.add("D");
         list.add("E");
         list.add("F");
-
-        // make sure Swing is caught up
-        //flushEventDispatchThread();
 
         // make a selection
         eventSelectionModel.addSelectionInterval(1, 4);
@@ -93,18 +121,15 @@ public class EventSelectionModelTest extends SwingTestCase {
         model.addListSelectionListener(counter);
 
         // select the 1th
-        //flushEventDispatchThread();
         model.setSelectionInterval(1, 1);
         assertEquals(1, counter.getCountAndReset());
 
         // clear the filter
         filtered.setMatchAll(false);
-        //flushEventDispatchThread();
         assertEquals(1, counter.getCountAndReset());
 
         // unclear the filter
         filtered.setMatchAll(true);
-        //flushEventDispatchThread();
         assertEquals(0, counter.getCountAndReset());
 
         // select the 0th
@@ -113,7 +138,6 @@ public class EventSelectionModelTest extends SwingTestCase {
 
         // clear the filter
         filtered.setMatchAll(false);
-        //flushEventDispatchThread();
         assertEquals(1, counter.getCountAndReset());
     }
 
