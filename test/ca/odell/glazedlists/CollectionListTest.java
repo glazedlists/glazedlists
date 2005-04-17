@@ -1,9 +1,5 @@
-/**
- * Glazed Lists
- * http://glazedlists.dev.java.net/
- *
- * COPYRIGHT 2003-2005 O'DELL ENGINEERING LTD.
- */
+/*             Glazed Lists  http://publicobject.com/glazedlists/             */                        
+/*        Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.       */
 package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
