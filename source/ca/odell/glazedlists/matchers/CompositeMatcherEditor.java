@@ -91,6 +91,7 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
             // update listeners for the list change
             boolean inserts = false;
             boolean deletes = false;
+            boolean wasEmpty = matcherEditorListeners.isEmpty();
             while (listChanges.next()) {
                 int index = listChanges.getIndex();
                 int type = listChanges.getType();
@@ -117,27 +118,27 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
                     
                 }
             }
+            boolean isEmpty = matcherEditorListeners.isEmpty();
             
             // fire events
             if(mode == AND) {
-                if(matcherEditors.isEmpty()) {
-                    fireMatchAll(); // optimization
-                } else if(inserts && deletes) {
+                if(inserts && deletes) {
                     fireChanged(rebuildMatcher());
                 } else if(inserts) {
                     fireConstrained(rebuildMatcher());
                 } else if(deletes) {
-                    fireRelaxed(rebuildMatcher());
+                    if(isEmpty) fireMatchAll(); 
+                    else fireRelaxed(rebuildMatcher());
                 }
             } else if(mode == OR) {
-                if(matcherEditors.isEmpty()) {
-                    fireMatchAll();
-                } else if(inserts && deletes) {
+                if(inserts && deletes) {
                     fireChanged(rebuildMatcher());
                 } else if(inserts) {
-                    fireRelaxed(rebuildMatcher());
+                    if(wasEmpty) fireConstrained(rebuildMatcher());
+                    else fireRelaxed(rebuildMatcher());
                 } else if(deletes) {
-                    fireConstrained(rebuildMatcher());
+                    if(isEmpty) fireMatchAll();
+                    else fireConstrained(rebuildMatcher());
                 }
             } else {
                 throw new IllegalStateException();
@@ -156,8 +157,12 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
         int oldMode = this.mode;
         this.mode = mode;
         
+        // don't fire events if there's no filters
+        if(matcherEditors.isEmpty()) {
+            return;
+        
         // requiring all to requiring any is a relax
-        if(oldMode == AND && mode == OR) {
+        } else if(oldMode == AND && mode == OR) {
             fireRelaxed(rebuildMatcher());
             
         // requiring any to requiring all is a constrain
