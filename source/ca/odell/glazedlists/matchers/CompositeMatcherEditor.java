@@ -179,7 +179,7 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
     /**
      * Models a Matcher that only matches if all child elements match.
      */
-    public class AndMatcher implements Matcher {
+    private class AndMatcher implements Matcher {
         private List matchers = new ArrayList();
         public AndMatcher(List matchers) {
             this.matchers.addAll(matchers);
