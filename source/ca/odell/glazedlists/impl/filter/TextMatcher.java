@@ -253,17 +253,17 @@ public class TextMatcher implements Matcher {
         newFiltersCoveredByOld:
         for(int i = 0; i < newFilters.length; i++) {
             for(int j = 0; j < oldFilters.length; j++) {
-                if(oldFilters[j].startsWith(newFilters[i])) continue newFiltersCoveredByOld;
+                if(oldFilters[j].indexOf(newFilters[i]) != -1) continue newFiltersCoveredByOld;
             }
             return false;
         }
 
-        // search for 1 old filter value has no counterpart in the new filter value that
+        // search for an old filter value has no counterpart in the new filter value that
         // starts with it (and thus the old filter value is not covered by the new filter value)
         oldFiltersNotCoveredByNew:
         for(int i = 0; i < oldFilters.length; i++) {
             for(int j = 0; j < newFilters.length; j++) {
-                if(newFilters[j].startsWith(oldFilters[i])) continue oldFiltersNotCoveredByNew;
+                if(newFilters[j].indexOf(oldFilters[i]) != -1) continue oldFiltersNotCoveredByNew;
             }
             return true;
         }
