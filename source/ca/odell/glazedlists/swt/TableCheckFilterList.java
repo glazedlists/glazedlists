@@ -1,5 +1,6 @@
-/*             Glazed Lists  http://publicobject.com/glazedlists/             */                        
-/*        Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.       */
+/* Glazed Lists                                                 (c) 2003-2005 */
+/*                                                     O'Dell Engineering Ltd.*/
+/* http://publicobject.com/glazedlists/                      publicboject.com,*/
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
