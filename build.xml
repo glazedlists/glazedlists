@@ -1,8 +1,6 @@
 <!--
  ! Glazed Lists
- ! COPYRIGHT 2003 O'DELL ENGINEERING LTD.
- !
- ! see Apache Ant documentation: http://jakarta.apache.org/ant
+ ! Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.
 -->
 
 <project name="glazedlists" default="jar" basedir=".">

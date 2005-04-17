@@ -1,9 +1,3 @@
-/**
- * Glazed Lists
- * http://glazedlists.dev.java.net/
- *
- * COPYRIGHT 2003 O'DELL ENGINEERING LTD.
- */
 package ca.odell.glazedlists.demo.issuebrowser;
 
 /**
