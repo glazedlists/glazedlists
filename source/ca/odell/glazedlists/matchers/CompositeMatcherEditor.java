@@ -16,8 +16,16 @@ import ca.odell.glazedlists.event.*;
  */
 public class CompositeMatcherEditor extends AbstractMatcherEditor {
     
+    /** require all matchers in the {@link MatcherEditor} to match */
+    public static final int AND = 42;
+    /** require any matchers in the {@link MatcherEditor} to match */
+    public static final int OR = 24;
+    
     /** the delegates */
     private EventList matcherEditors;
+    
+    /** whether to match with AND or OR */
+    private int mode = AND;
 
     /** listeners for each delegate */
     private List matcherEditorListeners = new ArrayList();
@@ -70,7 +78,9 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
             MatcherEditor matcherEditor = (MatcherEditor)i.next();
             matchers.add(matcherEditor.getMatcher());
         }
-        return new AndMatcher(matchers);
+        if(mode == AND) return new AndMatcher(matchers);
+        else if(mode == OR) return new OrMatcher(matchers);
+        else throw new IllegalStateException();
     }
     
     /**
@@ -79,8 +89,8 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
     private class MatcherEditorsListListener implements ListEventListener {
         public void listChanged(ListEvent listChanges) {
             // update listeners for the list change
-            boolean relaxed = true;
-            boolean constrained = true;
+            boolean inserts = false;
+            boolean deletes = false;
             while (listChanges.next()) {
                 int index = listChanges.getIndex();
                 int type = listChanges.getType();
@@ -89,36 +99,85 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
                 if(type == ListEvent.INSERT) {
                     MatcherEditor inserted = (MatcherEditor)matcherEditors.get(index);
                     matcherEditorListeners.add(new DelegateMatcherEditorListener(inserted));
-                    relaxed = false;
+                    inserts = true;
                     
                 // when a MatcherEditor is removed, stop listening to it
                 } else if(type == ListEvent.DELETE) {
                     DelegateMatcherEditorListener listener = (DelegateMatcherEditorListener)matcherEditorListeners.remove(index);
                     listener.stopListening();
-                    constrained = false;
+                    deletes = true;
                     
                 // when a MatcherEditor is updated, update the listener
                 } else if(type == ListEvent.UPDATE) {
                     MatcherEditor updated = (MatcherEditor)matcherEditors.get(index);
                     DelegateMatcherEditorListener listener = (DelegateMatcherEditorListener)matcherEditorListeners.remove(index);
                     listener.setMatcherEditor(updated);
-                    relaxed = false;
-                    constrained = false;
+                    inserts = true;
+                    deletes = true;
                     
                 }
             }
             
             // fire events
-            if(matcherEditors.isEmpty()) {
-                fireMatchAll(); // optimization
-            } else if(relaxed) {
-                fireRelaxed(rebuildMatcher());
-            } else if(constrained) {
-                fireConstrained(rebuildMatcher());
+            if(mode == AND) {
+                if(matcherEditors.isEmpty()) {
+                    fireMatchAll(); // optimization
+                } else if(inserts && deletes) {
+                    fireChanged(rebuildMatcher());
+                } else if(inserts) {
+                    fireConstrained(rebuildMatcher());
+                } else if(deletes) {
+                    fireRelaxed(rebuildMatcher());
+                }
+            } else if(mode == OR) {
+                if(matcherEditors.isEmpty()) {
+                    fireMatchAll();
+                } else if(inserts && deletes) {
+                    fireChanged(rebuildMatcher());
+                } else if(inserts) {
+                    fireRelaxed(rebuildMatcher());
+                } else if(deletes) {
+                    fireConstrained(rebuildMatcher());
+                }
             } else {
-                fireChanged(rebuildMatcher());
+                throw new IllegalStateException();
             }
         }
+    }
+    
+    /**
+     * Set the match mode for this {@link CompositeMatcherEditor}.
+     *
+     * @param mode either <code>CompositeMatcherEditor.AND</code> to match all
+     *      <code>CompositeMatcherEditor.OR</code> to match any.
+     */
+    public void setMode(int mode) {
+        if(this.mode == mode) return;
+        int oldMode = this.mode;
+        this.mode = mode;
+        
+        // requiring all to requiring any is a relax
+        if(oldMode == AND && mode == OR) {
+            fireRelaxed(rebuildMatcher());
+            
+        // requiring any to requiring all is a constrain
+        } else if(oldMode == OR && mode == AND) {
+            fireConstrained(rebuildMatcher());
+            
+        // we don't support this mode
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
+    /**
+     * Get the match mode for this {@link CompositeMatcherEditor}.
+     *
+     * @return either <code>CompositeMatcherEditor.AND</code> for match all
+     *      <code>CompositeMatcherEditor.OR</code> for match any.
+     */
+    public int getMode() {
+        return mode;
     }
     
     /**
@@ -174,7 +233,7 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
     }
     
     /**
-     * Models a Matcher that only matches if all child elements match.
+     * Models a Matcher that matches if all child elements match.
      */
     private class AndMatcher implements Matcher {
         private List matchers = new ArrayList();
@@ -189,6 +248,25 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
                 if(!matcher.matches(item)) return false;
             }
             return true;
+        }
+    }
+    
+    /**
+     * Models a Matcher that matches if any child elements match.
+     */
+    private class OrMatcher implements Matcher {
+        private List matchers = new ArrayList();
+        public OrMatcher(List matchers) {
+            this.matchers.addAll(matchers);
+        }
+        /** {@inheritDoc} */
+        public boolean matches(Object item) {
+            // true only if everything matches
+            for(Iterator i = matchers.iterator(); i.hasNext(); ) {
+                Matcher matcher = (Matcher)i.next();
+                if(matcher.matches(item)) return true;
+            }
+            return false;
         }
     }
 }
