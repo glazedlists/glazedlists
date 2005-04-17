@@ -48,7 +48,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
         for(Iterator i = listeners.iterator(); i.hasNext(); ) {
             if(i.next() == listener) {
                 i.remove();
-                break;
+                return;
             }
         }
         throw new IllegalStateException("Listener not found: " + listener);
