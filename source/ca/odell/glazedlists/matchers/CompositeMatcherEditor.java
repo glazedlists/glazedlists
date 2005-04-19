@@ -111,7 +111,7 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
                 // when a MatcherEditor is updated, update the listener
                 } else if(type == ListEvent.UPDATE) {
                     MatcherEditor updated = (MatcherEditor)matcherEditors.get(index);
-                    DelegateMatcherEditorListener listener = (DelegateMatcherEditorListener)matcherEditorListeners.remove(index);
+                    DelegateMatcherEditorListener listener = (DelegateMatcherEditorListener)matcherEditorListeners.get(index);
                     listener.setMatcherEditor(updated);
                     inserts = true;
                     deletes = true;
