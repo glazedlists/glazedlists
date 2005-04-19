@@ -144,10 +144,13 @@ public class CompositeMatcherEditorTest extends TestCase {
         anotherTextMatcherEditor.setFilterText(new String[] { "Quake" });
         listener.assertRelaxed(10);
         
-        compositeMatcherEditor.getMatcherEditors().remove(1);
+        anotherTextMatcherEditor.setFilterText(new String[0]);
         listener.assertRelaxed(11);
+        
+        compositeMatcherEditor.getMatcherEditors().remove(1);
+        listener.assertRelaxed(12);
         compositeMatcherEditor.getMatcherEditors().remove(0);
-        listener.assertMatchAll(12);
+        listener.assertMatchAll(13);
     }
     
     /**
@@ -176,10 +179,13 @@ public class CompositeMatcherEditorTest extends TestCase {
         anotherTextMatcherEditor.setFilterText(new String[] { "Quake" });
         listener.assertRelaxed(10);
         
+        anotherTextMatcherEditor.setFilterText(new String[0]);
+        listener.assertRelaxed(11);
+        
         compositeMatcherEditor.getMatcherEditors().remove(1);
-        listener.assertConstrained(11);
+        listener.assertConstrained(12);
         compositeMatcherEditor.getMatcherEditors().remove(0);
-        listener.assertMatchAll(12);
+        listener.assertMatchAll(13);
     }
     
     /**
