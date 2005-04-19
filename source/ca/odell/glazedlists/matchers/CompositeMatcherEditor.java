@@ -201,7 +201,7 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
         }
         /** {@inheritDoc} */
         public void matchAll(MatcherEditor source) {
-            if(matcherEditors.size() == 1) fireMatchAll();
+            if(matcherEditors.size() == 1) fireMatchAll(); // optimization
             else fireRelaxed(rebuildMatcher());
         }
         /** {@inheritDoc} */
