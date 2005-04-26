@@ -3,9 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import java.util.*;
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.Matcher;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A {@link MatcherEditor} composed of zero or more delegate
@@ -193,7 +199,7 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
         private MatcherEditor source;
         /**
          * Create a new listener for the specified MatcherEditor. Listening is
-         * started automatically and should be stopped using {@link stopListening()}.
+         * started automatically and should be stopped using {@link #stopListening()}.
          */
         public DelegateMatcherEditorListener(MatcherEditor source) {
             this.source = source;
