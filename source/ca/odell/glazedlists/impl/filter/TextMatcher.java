@@ -7,7 +7,6 @@ package ca.odell.glazedlists.impl.filter;
 import java.util.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.*;
 
 /**
  * Matcher for matching text.
@@ -101,18 +100,17 @@ public class TextMatcher implements Matcher {
         return result;
     }
 
-
     /**
      * This convenience method returns a copy of the <code>filterStrings</code>
      * in upper case format with null and <code>""</code> values removed. It
      * also removes irrelevant search filters which are search filters that do
-     * not constrain the filter. <p>
+     * not constrain the filter.
      *
      * <p>For example, if <code>filterStrings</code> contained both
      * <code>"black"</code> and <code>"blackened"</code> then this method's
      * return value would not contain <code>"black"</code> since
      * <code>"blackened"</code> is a more precise search term that contains
-     * <code>"black"</code>.<p>
+     * <code>"black"</code>.
      *
      * <p>Similarly, <code>"this"</code> and <code>"his"</code> would prune
      * <code>"his"</code> since <code>"his"</code> is less precise than
@@ -139,8 +137,8 @@ public class TextMatcher implements Matcher {
         for(int i = 0; i < minimalFilter.length; i++) {
             if(minimalFilter[i]) {
 
-                // attempt to search for another minimal filter that starts
-                // with minimalFilter[i] to prove that minimalFilter[i] is not
+                // attempt to search for another minimal filter that contains
+                // minimalFilter[i] to prove that minimalFilter[i] is not
                 // a *required* filter
                 for(int j = 0; j < minimalFilter.length; j++) {
                     if(minimalFilter[j] && i != j && filterStrings[j].indexOf(filterStrings[i]) != -1) {
@@ -215,7 +213,7 @@ public class TextMatcher implements Matcher {
      *
      *   <li> for each value, n[i], in <code>newFilter</code> there is a value
      *        o[j], in <code>oldFilter</code>, for which
-     *        <code>o[j].startsWith(n[i])</code> is <tt>true</tt>. This is
+     *        <code>o[j].indexOf(n[i])</code> is <tt>&gt; &nbsp; -1</tt>. This is
      *        a modified notion of Set coverage. This requirement stipulates
      *        that <code>newFilter</code> must be covered by
      *        <code>oldFilter</code>.
@@ -223,8 +221,8 @@ public class TextMatcher implements Matcher {
      *   <li> there exists a value, o[i], in <code>oldFilter</code> for which
      *        there is <strong>NO</strong> value, n[j], in
      *        <code>newFilter</code> that satisifies
-     *        <code>o[i].startsWith(n[j])</code>. This is a modified notion of
-     *        full Set coverage. This requirement stipulates that
+     *        <code>o[i].indexOf(n[j]) &gt; &nbsp; -1</code>. This is a modified
+     *        notion of full Set coverage. This requirement stipulates that
      *        <code>oldFilter</code> must <strong>NOT</strong> be
      *        <strong>fully</strong> covered by <code>newFilter</code>. This
      *        requirement prevents filters that are equal from being considered
@@ -249,7 +247,7 @@ public class TextMatcher implements Matcher {
      */
     public static boolean isFilterRelaxed(final String[] oldFilters, final String[] newFilters) {
         // ensure each new filter value has a counterpart in the old filter value that
-        // starts with it (and thus the new filter value is covered by the old filter value)
+        // contains it (and thus the new filter value is covered by the old filter value)
         newFiltersCoveredByOld:
         for(int i = 0; i < newFilters.length; i++) {
             for(int j = 0; j < oldFilters.length; j++) {
@@ -259,7 +257,7 @@ public class TextMatcher implements Matcher {
         }
 
         // search for an old filter value has no counterpart in the new filter value that
-        // starts with it (and thus the old filter value is not covered by the new filter value)
+        // contains it (and thus the old filter value is not covered by the new filter value)
         oldFiltersNotCoveredByNew:
         for(int i = 0; i < oldFilters.length; i++) {
             for(int j = 0; j < newFilters.length; j++) {

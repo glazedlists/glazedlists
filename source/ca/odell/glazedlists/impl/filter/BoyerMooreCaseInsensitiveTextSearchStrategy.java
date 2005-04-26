@@ -75,7 +75,7 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
         int textPosition = this.lastSubtextIndex;
         char textChar = ' ';
         int subtextPosition;
-        int textLength = text.length();
+        final int textLength = text.length();
 
         // search through text until the textPosition exceeds the textLength
         while(textPosition < textLength) {
