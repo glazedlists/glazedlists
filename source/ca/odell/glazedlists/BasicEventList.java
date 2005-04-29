@@ -35,7 +35,7 @@ public final class BasicEventList extends AbstractEventList {
      * Creates a {@link BasicEventList}.
      */
     public BasicEventList() {
-        this(new ArrayList());
+        this(new J2SE12ReadWriteLock());
     }
 
     /**
