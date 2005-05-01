@@ -410,9 +410,9 @@ public class Launcher implements ActionListener, ListSelectionListener {
 		} catch(Exception ex) {
 		}
 
-		Enumeration enum = props.propertyNames();
-		while (enum.hasMoreElements()) {
-			String name = (String) enum.nextElement();
+		Enumeration enumeration = props.propertyNames();
+		while (enumeration.hasMoreElements()) {
+			String name = (String) enumeration.nextElement();
 
 			// Skip anything that's not a "main" element
 			if (name.endsWith(".class") || name.endsWith(".desc") ||

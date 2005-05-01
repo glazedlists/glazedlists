@@ -47,8 +47,8 @@ public final class FilterList extends TransformedList {
     private MatcherEditor currentEditor = null;
     
     /** listener handles changes to the matcher */
-    private PrivateMatcherEditorListener listener = new PrivateMatcherEditorListener();
-    
+    protected MatcherEditorListener listener = new PrivateMatcherEditorListener();
+
     /**
      * Creates a {@link FilterList} that includes a subset of the specified
      * source {@link EventList}.
@@ -221,9 +221,9 @@ public final class FilterList extends TransformedList {
         // commit the changes and notify listeners
         updates.commitEvent();
     }
-    
+
     /**
-     * Listens to changes from the current {@link MatcherEditor} and handle them.
+     * Listens to changes from the current {@link MatcherEditor} and handles them.
      */
     private class PrivateMatcherEditorListener implements MatcherEditorListener {
 
