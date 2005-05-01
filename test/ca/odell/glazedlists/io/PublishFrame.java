@@ -3,11 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import java.util.*;
 import java.io.*;
 import javax.swing.*;
-import javax.swing.event.*;
-import java.applet.*;
 import java.awt.event.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -15,8 +12,6 @@ import java.awt.Insets;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
-import ca.odell.glazedlists.io.*;
-import ca.odell.glazedlists.impl.io.*;
 
 /**
  * A frame that shows a published list.
@@ -65,7 +60,7 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
         frame.setSize(200, 300);
         frame.getContentPane().setLayout(new GridBagLayout());
         frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        frame.show();
+        frame.setVisible(true);
     }
     
     /**

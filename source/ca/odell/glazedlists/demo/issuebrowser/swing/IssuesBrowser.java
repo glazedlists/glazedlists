@@ -100,7 +100,7 @@ public class IssuesBrowser extends Applet {
         frame.setSize(640, 480);
         frame.getContentPane().setLayout(new GridBagLayout());
         frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        frame.show();
+        frame.setVisible(true);
     }
 
     /**
