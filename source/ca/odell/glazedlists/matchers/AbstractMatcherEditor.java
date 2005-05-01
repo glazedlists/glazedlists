@@ -4,14 +4,15 @@
 package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.*;
-import java.util.*;
+
+import javax.swing.event.EventListenerList;
 
 /**
  * Basic building block for {@link MatcherEditor} implementations that
- * handles the details of dealing with listeners. All {@link MatcherEditor}
+ * handles the details of dealing with listenerList. All {@link MatcherEditor}
  * implementators are encouraged to extends this class for its convenience methods.
  *
- * <p>Extending classes can fire events to listener using "fire" methods: 
+ * <p>Extending classes can fire events to listenerList using "fire" methods:
  * <ul>
  *    <li>{@link #fireMatchNone()}</li>
  *    <li>{@link #fireConstrained(Matcher)}</li>
@@ -24,8 +25,8 @@ import java.util.*;
  */
 public abstract class AbstractMatcherEditor implements MatcherEditor {
     
-    /** listeners for this Editor */
-    private final List listeners = new ArrayList(1);  // normally only one listener
+    /** listenerList for this Editor */
+    private EventListenerList listenerList = new EventListenerList(); // normally only one listener
 
 	/** the current Matcher in effect */
 	protected Matcher currentMatcher = Matchers.trueMatcher();
@@ -37,18 +38,12 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
 
 	/** {@inheritDoc} */
     public final void addMatcherEditorListener(MatcherEditorListener listener) {
-        listeners.add(listener);
+        listenerList.add(MatcherEditorListener.class, listener);
     }
 
     /** {@inheritDoc} */
     public final void removeMatcherEditorListener(MatcherEditorListener listener) {
-        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-            if(i.next() == listener) {
-                i.remove();
-                return;
-            }
-        }
-        throw new IllegalStateException("Listener not found: " + listener);
+        listenerList.remove(MatcherEditorListener.class, listener);
     }
 
     /**
@@ -56,12 +51,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
      */
     protected final void fireMatchAll() {
 		this.currentMatcher = Matchers.trueMatcher();
-
-        // notify all listeners
-        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-            MatcherEditorListener listener = (MatcherEditorListener)i.next();
-            listener.matchAll(this);
-        }
+        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.MATCH_ALL));
     }
 
     /**
@@ -70,12 +60,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
     protected final void fireChanged(Matcher matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-
-        // notify all listeners
-        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-            MatcherEditorListener listener = (MatcherEditorListener)i.next();
-            listener.changed(this, currentMatcher);
-        }
+        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, this.currentMatcher));
     }
 
     /**
@@ -85,12 +70,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
     protected final void fireConstrained(Matcher matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-
-        // notify all listeners
-        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-            MatcherEditorListener listener = (MatcherEditorListener)i.next();
-            listener.constrained(this, currentMatcher);
-        }
+        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.CONSTRAINED, this.currentMatcher));
     }
 
     /**
@@ -100,12 +80,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
     protected final void fireRelaxed(Matcher matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-
-        // notify all listeners
-        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-            MatcherEditorListener listener = (MatcherEditorListener)i.next();
-            listener.relaxed(this, currentMatcher);
-        }
+        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.RELAXED, this.currentMatcher));
     }
     
     /**
@@ -113,11 +88,16 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
      */
     protected final void fireMatchNone() {
 		this.currentMatcher = Matchers.falseMatcher();
+        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.MATCH_NONE));
+    }
 
-        // notify all listeners
-        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-            MatcherEditorListener listener = (MatcherEditorListener)i.next();
-            listener.matchNone(this);
-        }
+    protected final void fireChangedMatcher(MatcherEvent me) {
+        // Guaranteed to return a non-null array
+        final Object[] listeners = this.listenerList.getListenerList();
+
+        // Process the listenerList last to first, notifying
+        // those that are interested in this event
+        for (int i = listeners.length-2; i>=0; i-=2)
+            ((MatcherEditorListener) listeners[i+1]).changedMatcher(me);
     }
 }

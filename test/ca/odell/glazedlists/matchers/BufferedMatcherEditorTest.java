@@ -66,34 +66,34 @@ public class BufferedMatcherEditorTest extends TestCase {
     }
 
     public void testSimpleCoalescing() {
-        assertEquals(matchAll, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchAll}));
-        assertEquals(matchNone, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchNone}));
-        assertEquals(matchRelaxed, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchRelaxed}));
-        assertEquals(matchConstrained, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchConstrained}));
-        assertEquals(matchChanged, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchChanged}));
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchAll}, MatcherEvent.MATCH_ALL);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchNone}, MatcherEvent.MATCH_NONE);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchRelaxed}, MatcherEvent.RELAXED);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchConstrained}, MatcherEvent.CONSTRAINED);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchChanged}, MatcherEvent.CHANGED);
     }
 
     public void testCoalescingSameElements() {
-        assertEquals(matchAll, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchAll, matchAll, matchAll}));
-        assertEquals(matchNone, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchNone, matchNone, matchNone}));
-        assertEquals(matchRelaxed, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchRelaxed, matchRelaxed, matchRelaxed}));
-        assertEquals(matchConstrained, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchConstrained, matchConstrained, matchConstrained}));
-        assertEquals(matchChanged, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchChanged, matchChanged, matchChanged}));
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchAll, matchAll, matchAll}, MatcherEvent.MATCH_ALL);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchNone, matchNone, matchNone}, MatcherEvent.MATCH_NONE);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchRelaxed, matchRelaxed, matchRelaxed}, MatcherEvent.RELAXED);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchConstrained, matchConstrained, matchConstrained}, MatcherEvent.CONSTRAINED);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchChanged, matchChanged, matchChanged}, MatcherEvent.CHANGED);
     }
 
     public void testCoalescingMatchAll() {
-        assertEquals(matchAll, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchNone, matchRelaxed, matchConstrained, matchChanged, matchAll}));
-        assertEquals(matchAll, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchNone, matchAll}));
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchNone, matchRelaxed, matchConstrained, matchChanged, matchAll}, MatcherEvent.MATCH_ALL);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchNone, matchAll}, MatcherEvent.MATCH_ALL);
     }
 
     public void testCoalescingMatchNone() {
-        assertEquals(matchNone, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchAll, matchRelaxed, matchConstrained, matchChanged, matchNone}));
-        assertEquals(matchNone, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchAll, matchNone}));
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchAll, matchRelaxed, matchConstrained, matchChanged, matchNone}, MatcherEvent.MATCH_NONE);
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchAll, matchNone}, MatcherEvent.MATCH_NONE);
     }
 
     public void testCoalescingMatchChanged() {
-        assertEquals(matchChanged, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchAll, matchChanged}));
-        assertEquals(matchChanged, bufferedMatcherEditor.coalesceMatcherEvents(new MatcherEvent[] {matchNone, matchChanged}));
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchAll, matchChanged});
+        this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchNone, matchChanged});
 
         this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchRelaxed, matchConstrained});
         this.runCoalescingMatchChangedTest(new MatcherEvent[] {matchConstrained, matchRelaxed});
@@ -109,9 +109,16 @@ public class BufferedMatcherEditorTest extends TestCase {
     }
 
     private void runCoalescingMatchChangedTest(MatcherEvent[] events) {
+        this.runCoalescingMatchChangedTest(events, MatcherEvent.CHANGED);
+    }
+
+    private void runCoalescingMatchChangedTest(MatcherEvent[] events, int type) {
         final MatcherEvent coalescedMatcherEvent = bufferedMatcherEditor.coalesceMatcherEvents(events);
         // ensure the type is CHANGED
-        assertEquals(MatcherEvent.CHANGED, coalescedMatcherEvent.getType());
+        assertEquals(type, coalescedMatcherEvent.getType());
+
+        // ensure the Matcher returned is == to the last MatcherEvent's Matcher
+        assertTrue(bufferedMatcherEditor == coalescedMatcherEvent.getMatcherEditor());
 
         // ensure the Matcher returned is == to the last MatcherEvent's Matcher
         assertTrue(events[events.length-1].getMatcher() == coalescedMatcherEvent.getMatcher());
@@ -253,7 +260,7 @@ public class BufferedMatcherEditorTest extends TestCase {
         assertEquals(relaxed, counter.relaxed);
     }
 
-    private class CountingMatcherEditorListener implements MatcherEditorListener {
+    private class CountingMatcherEditorListener extends MatcherEditorAdapter {
         private int matchAll = 0;
         private int matchNone = 0;
         private int changed = 0;
@@ -268,27 +275,27 @@ public class BufferedMatcherEditorTest extends TestCase {
             }
         }
 
-        public void matchAll(MatcherEditor source) {
+        protected void matchAll(MatcherEditor source) {
             this.matchAll++;
             this.delay();
         }
 
-        public void matchNone(MatcherEditor source) {
+        protected void matchNone(MatcherEditor source) {
             this.matchNone++;
             this.delay();
         }
 
-        public void changed(MatcherEditor source, Matcher matcher) {
+        protected void changed(MatcherEditor source, Matcher matcher) {
             this.changed++;
             this.delay();
         }
 
-        public void constrained(MatcherEditor source, Matcher matcher) {
+        protected void constrained(MatcherEditor source, Matcher matcher) {
             this.constrained++;
             this.delay();
         }
 
-        public void relaxed(MatcherEditor source, Matcher matcher) {
+        protected void relaxed(MatcherEditor source, Matcher matcher) {
             this.relaxed++;
             this.delay();
         }

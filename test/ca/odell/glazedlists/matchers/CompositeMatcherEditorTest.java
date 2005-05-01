@@ -199,18 +199,18 @@ public class CompositeMatcherEditorTest extends TestCase {
     /**
      * A MatcherEditorListener that simply remembers how the filter has been changed.
      */
-    private class SimpleMatcherEditorListener implements MatcherEditorListener {
+    private class SimpleMatcherEditorListener extends MatcherEditorAdapter {
         private boolean matchAll = false;
         private boolean matchNone = false;
         private boolean changed = false;
         private boolean constrained = false;
         private boolean relaxed = false;
         private int changes = 0;
-        public void matchAll(MatcherEditor source) { changes++; matchAll = true; }
-        public void matchNone(MatcherEditor source) { changes++; matchNone = true; }
-        public void changed(MatcherEditor source, Matcher matcher) { changes++; changed = true; }
-        public void constrained(MatcherEditor source, Matcher matcher) { changes++; constrained = true; }
-        public void relaxed(MatcherEditor source, Matcher matcher) { changes++; relaxed = true; }
+        protected void matchAll(MatcherEditor source) { changes++; matchAll = true; }
+        protected void matchNone(MatcherEditor source) { changes++; matchNone = true; }
+        protected void changed(MatcherEditor source, Matcher matcher) { changes++; changed = true; }
+        protected void constrained(MatcherEditor source, Matcher matcher) { changes++; constrained = true; }
+        protected void relaxed(MatcherEditor source, Matcher matcher) { changes++; relaxed = true; }
         public void assertMatchAll(int expectedChanges) {
             assertEquals(expectedChanges, changes);
             assertTrue(matchAll & !matchNone & !changed & !constrained & !relaxed);

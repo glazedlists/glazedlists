@@ -194,37 +194,37 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
     /**
      * Listens to a specific MatcherEditor and fires events as that MatcherEditor changes.
      */
-    private class DelegateMatcherEditorListener implements MatcherEditorListener {
+    private class DelegateMatcherEditorListener extends MatcherEditorAdapter {
         /** the matcher editor this listens to */
         private MatcherEditor source;
         /**
          * Create a new listener for the specified MatcherEditor. Listening is
          * started automatically and should be stopped using {@link #stopListening()}.
          */
-        public DelegateMatcherEditorListener(MatcherEditor source) {
+        protected DelegateMatcherEditorListener(MatcherEditor source) {
             this.source = source;
             source.addMatcherEditorListener(this);
         }
         /** {@inheritDoc} */
-        public void matchAll(MatcherEditor source) {
+        protected void matchAll(MatcherEditor source) {
             if(matcherEditors.size() == 1) fireMatchAll(); // optimization
             else fireRelaxed(rebuildMatcher());
         }
         /** {@inheritDoc} */
-        public void matchNone(MatcherEditor source) {
+        protected void matchNone(MatcherEditor source) {
             if(matcherEditors.size() == 1) fireMatchNone(); // optimization
             else fireConstrained(rebuildMatcher());
         }
         /** {@inheritDoc} */
-        public void changed(MatcherEditor source, Matcher matcher) {
+        protected void changed(MatcherEditor source, Matcher matcher) {
             fireChanged(rebuildMatcher());
         }
         /** {@inheritDoc} */
-        public void constrained(MatcherEditor source, Matcher matcher) {
+        protected void constrained(MatcherEditor source, Matcher matcher) {
             fireConstrained(rebuildMatcher());
         }
         /** {@inheritDoc} */
-        public void relaxed(MatcherEditor source, Matcher matcher) {
+        protected void relaxed(MatcherEditor source, Matcher matcher) {
             fireRelaxed(rebuildMatcher());
         }
         /**

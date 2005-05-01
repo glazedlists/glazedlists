@@ -6,7 +6,6 @@ package ca.odell.glazedlists;
 import java.util.*;
 import java.io.*;
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.BufferedMatcherEditor;
 
@@ -126,17 +125,33 @@ public class TextFilterPerformance {
 
                 startTime = System.currentTimeMillis();
                 textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
+                // simulate a small delay between keystrokes, as normally occurs when one types
+                if (j <= filter.length())
+                    Thread.sleep(100);
                 finishTime = System.currentTimeMillis();
 
                 totalFilteringTime += (finishTime - startTime);
             }
             characterFilterTime += totalFilteringTime;
 
+            // check the filtered result
+            int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
+            if(filtered.size() != expectedResult) {
+                System.out.println("expected size " + expectedResult + " != actual size " + filtered.size() + " for filter " + filter);
+                for(int j = 0; j < filtered.size(); j++) {
+                    System.out.println("" + j + ": " + filtered.get(j));
+                }
+                return;
+            }
+
             // simulate unfiltering by the keystroke
             for (int j = 1; j <= filter.length(); j++) {
                 String subFilter = filter.substring(0, filter.length() - j);
                 startTime = System.currentTimeMillis();
                 textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
+                // simulate a small delay between keystrokes, as normally occurs when one types
+                if (j <= filter.length())
+                    Thread.sleep(100);
                 finishTime = System.currentTimeMillis();
 
                 totalUnfilteringTime += (finishTime - startTime);
@@ -171,7 +186,7 @@ public class TextFilterPerformance {
 
                 // simulate a small delay between keystrokes, as normally occurs when one types
                 if (j <= filter.length())
-                    Thread.sleep(150);
+                    Thread.sleep(100);
             }
 
             // poll until the filter is fully applied
@@ -197,7 +212,7 @@ public class TextFilterPerformance {
 
                 // simulate a small delay between keystrokes, as normally occurs when one types
                 if (j <= filter.length())
-                    Thread.sleep(150);
+                    Thread.sleep(100);
             }
 
             // poll until the filter is fully applied

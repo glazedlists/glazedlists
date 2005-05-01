@@ -143,35 +143,35 @@ public class BufferedMatcherEditor extends AbstractMatcherEditor {
      *      sequentially
      */
     protected MatcherEvent coalesceMatcherEvents(MatcherEvent[] matcherEvents) {
+        boolean changeType = false;
+
         // fetch the last matcher event - it is the basis of the MatcherEvent which must be returned
         // all that remains is to determine the type of the MatcherEvent to return
         final MatcherEvent lastMatcherEvent = matcherEvents[matcherEvents.length-1];
         final int lastMatcherEventType = lastMatcherEvent.getType();
 
         // if the last MatcherEvent is a MATCH_ALL or MATCH_NONE type, we can safely return it immediately
-        if (lastMatcherEventType == MatcherEvent.MATCH_ALL || lastMatcherEventType == MatcherEvent.MATCH_NONE)
-            return lastMatcherEvent;
+        if (lastMatcherEventType != MatcherEvent.MATCH_ALL && lastMatcherEventType != MatcherEvent.MATCH_NONE) {
+            // otherwise determine if any constraining and/or relaxing MatcherEvents exist
+            boolean constrained = false;
+            boolean relaxed = false;
 
-        // otherwise determine if any constraining and/or relaxing MatcherEvents exist
-        boolean constrained = false;
-        boolean relaxed = false;
-
-        for (int i = 0; i < matcherEvents.length; i++) {
-            switch (matcherEvents[i].getType()) {
-                case MatcherEvent.MATCH_ALL: relaxed = true; break;
-                case MatcherEvent.MATCH_NONE: constrained = true; break;
-                case MatcherEvent.RELAXED: relaxed = true; break;
-                case MatcherEvent.CONSTRAINED: constrained = true; break;
-                case MatcherEvent.CHANGED: constrained = relaxed = true; break;
+            for (int i = 0; i < matcherEvents.length; i++) {
+                switch (matcherEvents[i].getType()) {
+                    case MatcherEvent.MATCH_ALL: relaxed = true; break;
+                    case MatcherEvent.MATCH_NONE: constrained = true; break;
+                    case MatcherEvent.RELAXED: relaxed = true; break;
+                    case MatcherEvent.CONSTRAINED: constrained = true; break;
+                    case MatcherEvent.CHANGED: constrained = relaxed = true; break;
+                }
             }
+
+            changeType = constrained && relaxed && lastMatcherEventType != MatcherEvent.CHANGED;
         }
 
         // if both constraining and relaxing MatcherEvents exist, ensure we must return a CHANGED MatcherEvent
         // otherwise the last MatcherEvent must represent the coalesced MatcherEvent
-        if (constrained && relaxed && lastMatcherEventType != MatcherEvent.CHANGED)
-            return new MatcherEvent(lastMatcherEvent.getMatcherEditor(), MatcherEvent.CHANGED, lastMatcherEvent.getMatcher());
-        else
-            return lastMatcherEvent;
+        return new MatcherEvent(this, changeType ? MatcherEvent.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
     }
 
     /**
@@ -215,28 +215,8 @@ public class BufferedMatcherEditor extends AbstractMatcherEditor {
      * MatcherEvents as soon as possible.
      */
     private class QueuingMatcherEditorListener implements MatcherEditorListener {
-        public void matchAll(MatcherEditor source) {
-            matcherEventQueue.add(new MatcherEvent(source, MatcherEvent.MATCH_ALL));
-            drainQueue();
-        }
-
-        public void matchNone(MatcherEditor source) {
-            matcherEventQueue.add(new MatcherEvent(source, MatcherEvent.MATCH_NONE));
-            drainQueue();
-        }
-
-        public void changed(MatcherEditor source, Matcher matcher) {
-            matcherEventQueue.add(new MatcherEvent(source, MatcherEvent.CHANGED, matcher));
-            drainQueue();
-        }
-
-        public void constrained(MatcherEditor source, Matcher matcher) {
-            matcherEventQueue.add(new MatcherEvent(source, MatcherEvent.CONSTRAINED, matcher));
-            drainQueue();
-        }
-
-        public void relaxed(MatcherEditor source, Matcher matcher) {
-            matcherEventQueue.add(new MatcherEvent(source, MatcherEvent.RELAXED, matcher));
+        public void changedMatcher(MatcherEvent matcherEvent) {
+            matcherEventQueue.add(matcherEvent);
             drainQueue();
         }
     }
@@ -272,36 +252,21 @@ public class BufferedMatcherEditor extends AbstractMatcherEditor {
                     // coalesce all of the current MatcherEvents to a single representative MatcherEvent
                     final MatcherEvent coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
 
-                    // execute the single coalesced MatcherEvent to respect the latest Matcher value
-                    this.fireMatcherEvent(coalescedMatcherEvent);
+                    // fire the single coalesced MatcherEvent
+                    fireChangedMatcher(coalescedMatcherEvent);
 
                     // we can now safely remove the MatcherEvents from the queue
                     // NOTE: this is the only destructive operation we perform on the matcherEventQueue
                     for (int i = 0; i < matcherEvents.length; i++)
                         matcherEventQueue.remove(0);
                 }
+            } catch (Throwable t) {
+                t.printStackTrace();
+
             } finally {
                 // no matter the circumstance for us exitting the Runnable,
                 // ensure we indicate we are no longer draining the queue
                 isDrainingQueue = false;
-            }
-        }
-
-        /**
-         * This convenience method fires the given <code>event</code> to all
-         * registered MatcherEditorListeners.
-         *
-         * @param event the MatcherEvent to fire
-         */
-        private void fireMatcherEvent(MatcherEvent event) {
-            final Matcher matcher = event.getMatcher();
-
-            switch (event.getType()) {
-                case MatcherEvent.MATCH_ALL: fireMatchAll(); break;
-                case MatcherEvent.MATCH_NONE: fireMatchNone(); break;
-                case MatcherEvent.CHANGED: fireChanged(matcher); break;
-                case MatcherEvent.CONSTRAINED: fireConstrained(matcher); break;
-                case MatcherEvent.RELAXED: fireRelaxed(matcher); break;
             }
         }
     }

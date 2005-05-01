@@ -96,7 +96,7 @@ public final class FilterList extends TransformedList {
         }
         
         // refilter
-        listener.changed(currentEditor, matcher);
+        listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, matcher));
     }
     
     /**
@@ -123,7 +123,7 @@ public final class FilterList extends TransformedList {
         }
         
         // refilter
-        listener.changed(currentEditor, currentMatcher);
+        listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, currentMatcher));
     }
 
     /** {@inheritDoc} */
@@ -225,14 +225,14 @@ public final class FilterList extends TransformedList {
     /**
      * Listens to changes from the current {@link MatcherEditor} and handles them.
      */
-    private class PrivateMatcherEditorListener implements MatcherEditorListener {
+    private class PrivateMatcherEditorListener extends MatcherEditorAdapter {
 
         /**
          * Handles a clearing of the filter. That is, the filter list will act as
          * a passthrough and not discriminate any of the elements of the wrapped
          * source list.
          */
-        public void matchNone(MatcherEditor editor) {
+        protected void matchNone(MatcherEditor editor) {
             throw new UnsupportedOperationException();
         }
             
@@ -241,7 +241,7 @@ public final class FilterList extends TransformedList {
          * a passthrough and not discriminate any of the elements of the wrapped
          * source list.
          */
-        public void matchAll(MatcherEditor editor) {
+        protected void matchAll(MatcherEditor editor) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
@@ -275,7 +275,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        public void relaxed(MatcherEditor editor, Matcher matcher) {
+        protected void relaxed(MatcherEditor editor, Matcher matcher) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
@@ -325,7 +325,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        public void constrained(MatcherEditor editor, Matcher matcher) {
+        protected void constrained(MatcherEditor editor, Matcher matcher) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
@@ -360,7 +360,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        public void changed(MatcherEditor editor, Matcher matcher) {
+        protected void changed(MatcherEditor editor, Matcher matcher) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
