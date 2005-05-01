@@ -7,6 +7,8 @@ import java.util.*;
 import java.io.*;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.BufferedMatcherEditor;
 
 
 /**
@@ -79,7 +81,8 @@ public class TextFilterPerformance {
         // track time
         long startTime = 0;
         long finishTime = 0;
-        
+
+
         System.out.println("");
         System.out.println("Full Filter");
         long fullFilterTime = 0;
@@ -94,7 +97,7 @@ public class TextFilterPerformance {
             finishTime = System.currentTimeMillis();
             long totalFilteringTime = (finishTime - startTime);
             fullFilterTime += totalFilteringTime;
-            
+
             if(filtered.size() != expectedResult) {
                 System.out.println("expected size " + expectedResult + " != actual size " + filtered.size() + " for filter " + filter);
                 for(int j = 0; j < filtered.size(); j++) {
@@ -106,8 +109,9 @@ public class TextFilterPerformance {
         }
         System.out.println("Total: " + fullFilterTime);
 
+
         System.out.println("");
-        System.out.println("Character-by-character Filter");
+        System.out.println("Character-by-character Filter (with TextMatcherEditor)");
         long characterFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {
@@ -127,7 +131,7 @@ public class TextFilterPerformance {
                 totalFilteringTime += (finishTime - startTime);
             }
             characterFilterTime += totalFilteringTime;
-            
+
             // simulate unfiltering by the keystroke
             for (int j = 1; j <= filter.length(); j++) {
                 String subFilter = filter.substring(0, filter.length() - j);
@@ -138,10 +142,82 @@ public class TextFilterPerformance {
                 totalUnfilteringTime += (finishTime - startTime);
             }
             characterFilterTime += totalUnfilteringTime;
-            
+
             System.out.println(" done. Filter: " + totalFilteringTime + ", Unfilter: " + totalUnfilteringTime + ", Total: " + (totalFilteringTime + totalUnfilteringTime));
         }
         System.out.println("Total: " + characterFilterTime);
+
+
+        // attach a BufferedMatcherEditor to the FilterList rather than a regular TextMatcherEditor
+        textMatcherEditor = new TextMatcherEditor(new CollectionTextFilterator());
+        MatcherEditor bufferedMatcherEditor = new BufferedMatcherEditor(textMatcherEditor);
+        filtered = new FilterList(unfiltered, bufferedMatcherEditor);
+
+        System.out.println("");
+        System.out.println("Character-by-character Filter (with BufferedMatcherEditor)");
+        long bufferedCharacterFilterTime = 0;
+        // perform the filters 1 char at a time (to simulate the user typing)
+        for(int i = 0; i < testFilters.size(); i++) {
+            String filter = (String)testFilters.get(i);
+            long totalFilteringTime = 0;
+            long totalUnfilteringTime = 0;
+            System.out.print("Filtering " + i + ", \"" + filter + "\" by character with buffering...");
+
+            startTime = System.currentTimeMillis();
+            // simulate filter by the keystroke
+            for (int j = 1; j <= filter.length(); j++) {
+                String subFilter = filter.substring(0, j);
+                textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
+
+                // simulate a small delay between keystrokes, as normally occurs when one types
+                if (j <= filter.length())
+                    Thread.sleep(150);
+            }
+
+            // poll until the filter is fully applied
+            int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
+            long pollingStartTime = System.currentTimeMillis();
+            while (filtered.size() != expectedResult) {
+                if (System.currentTimeMillis() - pollingStartTime > 10000) {
+                    System.out.println("Stopping performance test because buffered Character-by-character Filter failed to be applied within 10 seconds.");
+                    System.exit(-1);
+                }
+                Thread.sleep(100);
+            }
+
+            finishTime = System.currentTimeMillis();
+            totalFilteringTime += (finishTime - startTime);
+            bufferedCharacterFilterTime += totalFilteringTime;
+
+            // simulate unfiltering by the keystroke
+            startTime = System.currentTimeMillis();
+            for (int j = 1; j <= filter.length(); j++) {
+                String subFilter = filter.substring(0, filter.length() - j);
+                textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
+
+                // simulate a small delay between keystrokes, as normally occurs when one types
+                if (j <= filter.length())
+                    Thread.sleep(150);
+            }
+
+            // poll until the filter is fully applied
+            pollingStartTime = System.currentTimeMillis();
+            while (filtered.size() != unfiltered.size()) {
+                if (System.currentTimeMillis() - pollingStartTime > 10000) {
+                    System.out.println("Stopping performance test because buffered Character-by-character Filter failed to be applied within 10 seconds.");
+                    System.exit(-1);
+                }
+                Thread.sleep(100);
+            }
+
+            finishTime = System.currentTimeMillis();
+            totalUnfilteringTime += (finishTime - startTime);
+            bufferedCharacterFilterTime += totalUnfilteringTime;
+
+            System.out.println(" done. Filter: " + totalFilteringTime + ", Unfilter: " + totalUnfilteringTime + ", Total: " + (totalFilteringTime + totalUnfilteringTime));
+        }
+
+        System.out.println("Total: " + bufferedCharacterFilterTime);
     }
     
     /**

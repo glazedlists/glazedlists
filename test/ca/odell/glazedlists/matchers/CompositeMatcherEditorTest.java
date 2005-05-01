@@ -7,7 +7,6 @@ package ca.odell.glazedlists.matchers;
 import junit.framework.*;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 

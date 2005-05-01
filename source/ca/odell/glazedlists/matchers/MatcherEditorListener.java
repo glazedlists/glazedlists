@@ -5,6 +5,8 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.Matcher;
 
+import java.util.EventListener;
+
 /**
  * A MatcherEditorListener handles changes fired by a {@link MatcherEditor}.
  * The most notable implementation will be {@link ca.odell.glazedlists.FilterList FilterList}
@@ -13,7 +15,7 @@ import ca.odell.glazedlists.Matcher;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.Matcher
  */
-public interface MatcherEditorListener {
+public interface MatcherEditorListener extends EventListener {
 
     /**
      * Indicates that the {@link MatcherEditor} has been changed to always return true..
