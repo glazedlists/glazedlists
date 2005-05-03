@@ -184,14 +184,9 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
             }
 
             // if the comparator has changed
-            ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().lock();
-            try {
-                Comparator currentComparator = sortedList.getComparator();
-                if(currentComparator != sortedListComparator) {
-                    redetectComparator(currentComparator);
-                }
-            } finally {
-                ((InternalReadWriteLock)sortedList.getReadWriteLock()).internalLock().unlock();
+            Comparator currentComparator = sortedList.getComparator();
+            if(currentComparator != sortedListComparator) {
+                redetectComparator(currentComparator);
             }
         }
     }
