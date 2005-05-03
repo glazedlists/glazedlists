@@ -2,9 +2,9 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.Matcher;
 
-import java.util.List;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A MatcherEditor which decorates a source MatcherEditor with functionality.
@@ -27,17 +27,17 @@ import java.util.LinkedList;
  *
  *   <li> {@link #coalesceMatcherEvents(MatcherEvent[])} is used to compress
  *        many enqueued MatcherEvents into a single representative
- *        MatcherEvent. This is implies a contract between all registered
+ *        MatcherEvent. This implies a contract between all registered
  *        MatcherEditorListeners and this {@link ThreadedMatcherEditor} that
  *        guarantees that processing the coalesced MatcherEvent is equivalent
  *        to processing all MatcherEvents sequentially.
  * </ol>
  *
- * Typical usage patterns of this MatcherEditor resemble:
+ * Typical usage patterns of ThreadedMatcherEditor resemble:
  *
  * <pre>
- *   MatcherEditor matcherEditor = new ThreadedMatcherEditor(new AnyMatcherEditor());
- *   matcherEditor.addMatcherEditorListener(new AnyMatcherEditorListener());
+ *   MatcherEditor threadedMatcherEditor = new ThreadedMatcherEditor(new AnyMatcherEditor());
+ *   FilterList filterList = new FilterList(new BasicEventList(), threadedMatcherEditor);
  * </pre>
  *
  * @author James Lemieux

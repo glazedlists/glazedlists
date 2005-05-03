@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Arrays;
 
 /**
- * Test the {@link BufferedMatcherEditor}.
+ * Test the {@link ThreadedMatcherEditor}.
  *
  * @author James Lemieux
  */
-public class BufferedMatcherEditorTest extends TestCase {
+public class ThreadedMatcherEditorTest extends TestCase {
 
     // The amount of time (in ms) to wait until the CountingMatcherEditorListener is done processing and begins delaying
     private static final long SIMULATED_PROCESSING_DELAY_STARTS = 100;
@@ -28,9 +28,9 @@ public class BufferedMatcherEditorTest extends TestCase {
     private MatcherEvent matchChanged;
 
     /** combine multiple matcher editors */
-    private BufferedMatcherEditor bufferedMatcherEditor;
+    private ThreadedMatcherEditor threadedMatcherEditor;
 
-    /** a matcher editor to help test the bufferedMatcherEditor */
+    /** a matcher editor to help test the threadedMatcherEditor */
     private TextMatcherEditor textMatcherEditor;
 
     private FilterList filterList;
@@ -40,21 +40,21 @@ public class BufferedMatcherEditorTest extends TestCase {
      */
     public void setUp() {
         textMatcherEditor = new TextMatcherEditor(new StringFilterator());
-        bufferedMatcherEditor = new BufferedMatcherEditor(textMatcherEditor);
-        filterList = new FilterList(new BasicEventList(), bufferedMatcherEditor);
+        threadedMatcherEditor = new ThreadedMatcherEditor(textMatcherEditor);
+        filterList = new FilterList(new BasicEventList(), threadedMatcherEditor);
 
-        matchAll = new MatcherEvent(bufferedMatcherEditor, MatcherEvent.MATCH_ALL);
-        matchNone = new MatcherEvent(bufferedMatcherEditor, MatcherEvent.MATCH_NONE);
-        matchRelaxed = new MatcherEvent(bufferedMatcherEditor, MatcherEvent.RELAXED, bufferedMatcherEditor.getMatcher());
-        matchConstrained = new MatcherEvent(bufferedMatcherEditor, MatcherEvent.CONSTRAINED, bufferedMatcherEditor.getMatcher());
-        matchChanged = new MatcherEvent(bufferedMatcherEditor, MatcherEvent.CHANGED, bufferedMatcherEditor.getMatcher());
+        matchAll = new MatcherEvent(threadedMatcherEditor, MatcherEvent.MATCH_ALL);
+        matchNone = new MatcherEvent(threadedMatcherEditor, MatcherEvent.MATCH_NONE);
+        matchRelaxed = new MatcherEvent(threadedMatcherEditor, MatcherEvent.RELAXED, threadedMatcherEditor.getMatcher());
+        matchConstrained = new MatcherEvent(threadedMatcherEditor, MatcherEvent.CONSTRAINED, threadedMatcherEditor.getMatcher());
+        matchChanged = new MatcherEvent(threadedMatcherEditor, MatcherEvent.CHANGED, threadedMatcherEditor.getMatcher());
     }
 
     /**
      * Clean up after the test.
      */
     public void tearDown() {
-        bufferedMatcherEditor = null;
+        threadedMatcherEditor = null;
         textMatcherEditor = null;
         filterList = null;
 
@@ -113,12 +113,12 @@ public class BufferedMatcherEditorTest extends TestCase {
     }
 
     private void runCoalescingMatchChangedTest(MatcherEvent[] events, int type) {
-        final MatcherEvent coalescedMatcherEvent = bufferedMatcherEditor.coalesceMatcherEvents(events);
+        final MatcherEvent coalescedMatcherEvent = threadedMatcherEditor.coalesceMatcherEvents(events);
         // ensure the type is CHANGED
         assertEquals(type, coalescedMatcherEvent.getType());
 
         // ensure the Matcher returned is == to the last MatcherEvent's Matcher
-        assertTrue(bufferedMatcherEditor == coalescedMatcherEvent.getMatcherEditor());
+        assertTrue(threadedMatcherEditor == coalescedMatcherEvent.getMatcherEditor());
 
         // ensure the Matcher returned is == to the last MatcherEvent's Matcher
         assertTrue(events[events.length-1].getMatcher() == coalescedMatcherEvent.getMatcher());
@@ -139,7 +139,7 @@ public class BufferedMatcherEditorTest extends TestCase {
 
     public void testQueuingConstraints() throws InterruptedException {
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-        bufferedMatcherEditor.addMatcherEditorListener(counter);
+        threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"J"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "J"
@@ -158,7 +158,7 @@ public class BufferedMatcherEditorTest extends TestCase {
 
     public void testQueuingRelaxations() throws InterruptedException {
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-        bufferedMatcherEditor.addMatcherEditorListener(counter);
+        threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
@@ -177,7 +177,7 @@ public class BufferedMatcherEditorTest extends TestCase {
 
     public void testQueuingMatchall() throws InterruptedException {
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-        bufferedMatcherEditor.addMatcherEditorListener(counter);
+        threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
@@ -193,7 +193,7 @@ public class BufferedMatcherEditorTest extends TestCase {
 
     public void testQueuingChanged() throws InterruptedException {
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-        bufferedMatcherEditor.addMatcherEditorListener(counter);
+        threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
@@ -208,7 +208,7 @@ public class BufferedMatcherEditorTest extends TestCase {
 
     public void testQueuingAllSorts_WithPause() throws InterruptedException {
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-        bufferedMatcherEditor.addMatcherEditorListener(counter);
+        threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
@@ -239,7 +239,7 @@ public class BufferedMatcherEditorTest extends TestCase {
 
     public void testQueuingAllSorts_WithoutPause() throws InterruptedException {
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-        bufferedMatcherEditor.addMatcherEditorListener(counter);
+        threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
         textMatcherEditor.setFilterText(new String[] {"Ja"});
