@@ -194,37 +194,52 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
     /**
      * Listens to a specific MatcherEditor and fires events as that MatcherEditor changes.
      */
-    private class DelegateMatcherEditorListener extends MatcherEditorAdapter {
+    private class DelegateMatcherEditorListener implements MatcherEditorListener {
         /** the matcher editor this listens to */
         private MatcherEditor source;
+
+        /**
+         * This implementation of this method simply delegates the handling of
+         * the given <code>matcherEvent</code> to one of the protected methods
+         * defined by this class. This clearly separates the logic for each
+         * type of Matcher change.
+         *
+         * @param matcherEvent a MatcherEvent describing the change in the
+         *      Matcher produced by the MatcherEditor
+         */
+        public void changedMatcher(MatcherEvent matcherEvent) {
+            switch (matcherEvent.getType()) {
+                case MatcherEvent.CONSTRAINED: this.constrained(); break;
+                case MatcherEvent.RELAXED: this.relaxed(); break;
+                case MatcherEvent.CHANGED: this.changed(); break;
+                case MatcherEvent.MATCH_ALL: this.matchAll(); break;
+                case MatcherEvent.MATCH_NONE: this.matchNone(); break;
+            }
+        }
+
         /**
          * Create a new listener for the specified MatcherEditor. Listening is
          * started automatically and should be stopped using {@link #stopListening()}.
          */
-        protected DelegateMatcherEditorListener(MatcherEditor source) {
+        private DelegateMatcherEditorListener(MatcherEditor source) {
             this.source = source;
             source.addMatcherEditorListener(this);
         }
-        /** {@inheritDoc} */
-        protected void matchAll(MatcherEditor source) {
+        private void matchAll() {
             if(matcherEditors.size() == 1) fireMatchAll(); // optimization
             else fireRelaxed(rebuildMatcher());
         }
-        /** {@inheritDoc} */
-        protected void matchNone(MatcherEditor source) {
+        private void matchNone() {
             if(matcherEditors.size() == 1) fireMatchNone(); // optimization
             else fireConstrained(rebuildMatcher());
         }
-        /** {@inheritDoc} */
-        protected void changed(MatcherEditor source, Matcher matcher) {
+        private void changed() {
             fireChanged(rebuildMatcher());
         }
-        /** {@inheritDoc} */
-        protected void constrained(MatcherEditor source, Matcher matcher) {
+        private void constrained() {
             fireConstrained(rebuildMatcher());
         }
-        /** {@inheritDoc} */
-        protected void relaxed(MatcherEditor source, Matcher matcher) {
+        private void relaxed() {
             fireRelaxed(rebuildMatcher());
         }
         /**

@@ -260,7 +260,7 @@ public class BufferedMatcherEditorTest extends TestCase {
         assertEquals(relaxed, counter.relaxed);
     }
 
-    private class CountingMatcherEditorListener extends MatcherEditorAdapter {
+    private class CountingMatcherEditorListener implements MatcherEditorListener {
         private int matchAll = 0;
         private int matchNone = 0;
         private int changed = 0;
@@ -275,28 +275,15 @@ public class BufferedMatcherEditorTest extends TestCase {
             }
         }
 
-        protected void matchAll(MatcherEditor source) {
-            this.matchAll++;
-            this.delay();
-        }
+        public void changedMatcher(MatcherEvent matcherEvent) {
+            switch (matcherEvent.getType()) {
+                case MatcherEvent.CONSTRAINED: this.constrained++; break;
+                case MatcherEvent.RELAXED: this.relaxed++; break;
+                case MatcherEvent.CHANGED: this.changed++; break;
+                case MatcherEvent.MATCH_ALL: this.matchAll++; break;
+                case MatcherEvent.MATCH_NONE: this.matchNone++; break;
+            }
 
-        protected void matchNone(MatcherEditor source) {
-            this.matchNone++;
-            this.delay();
-        }
-
-        protected void changed(MatcherEditor source, Matcher matcher) {
-            this.changed++;
-            this.delay();
-        }
-
-        protected void constrained(MatcherEditor source, Matcher matcher) {
-            this.constrained++;
-            this.delay();
-        }
-
-        protected void relaxed(MatcherEditor source, Matcher matcher) {
-            this.relaxed++;
             this.delay();
         }
     }

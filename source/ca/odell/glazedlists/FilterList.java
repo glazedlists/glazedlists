@@ -225,14 +225,36 @@ public final class FilterList extends TransformedList {
     /**
      * Listens to changes from the current {@link MatcherEditor} and handles them.
      */
-    private class PrivateMatcherEditorListener extends MatcherEditorAdapter {
+    private class PrivateMatcherEditorListener implements MatcherEditorListener {
+
+        /**
+         * This implementation of this method simply delegates the handling of
+         * the given <code>matcherEvent</code> to one of the protected methods
+         * defined by this class. This clearly separates the logic for each
+         * type of Matcher change.
+         *
+         * @param matcherEvent a MatcherEvent describing the change in the
+         *      Matcher produced by the MatcherEditor
+         */
+        public void changedMatcher(MatcherEvent matcherEvent) {
+            final MatcherEditor matcherEditor = matcherEvent.getMatcherEditor();
+            final Matcher matcher = matcherEvent.getMatcher();
+
+            switch (matcherEvent.getType()) {
+                case MatcherEvent.CONSTRAINED: this.constrained(matcherEditor, matcher); break;
+                case MatcherEvent.RELAXED: this.relaxed(matcherEditor, matcher); break;
+                case MatcherEvent.CHANGED: this.changed(matcherEditor, matcher); break;
+                case MatcherEvent.MATCH_ALL: this.matchAll(matcherEditor); break;
+                case MatcherEvent.MATCH_NONE: this.matchNone(matcherEditor); break;
+            }
+        }
 
         /**
          * Handles a clearing of the filter. That is, the filter list will act as
          * a passthrough and not discriminate any of the elements of the wrapped
          * source list.
          */
-        protected void matchNone(MatcherEditor editor) {
+        private void matchNone(MatcherEditor editor) {
             throw new UnsupportedOperationException();
         }
             
@@ -241,7 +263,7 @@ public final class FilterList extends TransformedList {
          * a passthrough and not discriminate any of the elements of the wrapped
          * source list.
          */
-        protected void matchAll(MatcherEditor editor) {
+        private void matchAll(MatcherEditor editor) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
@@ -275,7 +297,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        protected void relaxed(MatcherEditor editor, Matcher matcher) {
+        private void relaxed(MatcherEditor editor, Matcher matcher) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
@@ -325,7 +347,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        protected void constrained(MatcherEditor editor, Matcher matcher) {
+        private void constrained(MatcherEditor editor, Matcher matcher) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
@@ -360,7 +382,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        protected void changed(MatcherEditor editor, Matcher matcher) {
+        private void changed(MatcherEditor editor, Matcher matcher) {
             ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
             try {
                 // update my matchers
