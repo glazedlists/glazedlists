@@ -103,6 +103,15 @@ public final class EventSelectionModel implements ListSelectionModel {
 
     /**
      * Creates a new selection model that also presents a list of the selection.
+     *
+     * The {@link EventSelectionModel} listens to this {@link EventList} in order
+     * to adjust selection when the {@link EventList} is modified. For example,
+     * when an element is added to the {@link EventList}, this may offset the
+     * selection of the following elements.
+     *
+     * @param source the {@link EventList} whose selection will be managed. This should
+     *      be the same {@link EventList} passed to the constructor of your
+     *      {@link EventTableModel} or {@link EventListModel}. 
      */
     public EventSelectionModel(EventList source) {
         swingSource = GlazedListsSwing.swingThreadProxyList(source);
