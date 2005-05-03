@@ -13,7 +13,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 // for responding to user actions
 import java.awt.event.*;
-import java.awt.AWTEventMulticaster;
+import java.awt.*;
 import javax.swing.event.*;
 // for keeping lists of comparators
 import java.util.*;
@@ -254,7 +254,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
         /**
          * Renders the header in the default way but with the addition of an icon.
          */
-        public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
+        public Component getTableCellRendererComponent(JTable table, Object value,
         boolean isSelected, boolean hasFocus, int row, int column) {
             if(iconInjection) {
                 DefaultTableCellRenderer jLabelRenderer = (DefaultTableCellRenderer)delegateRenderer;
