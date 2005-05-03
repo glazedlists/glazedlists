@@ -7,7 +7,7 @@ import java.util.*;
 import java.io.*;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.matchers.BufferedMatcherEditor;
+import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 
 
 /**
@@ -163,13 +163,13 @@ public class TextFilterPerformance {
         System.out.println("Total: " + characterFilterTime);
 
 
-        // attach a BufferedMatcherEditor to the FilterList rather than a regular TextMatcherEditor
+        // attach a ThreadedMatcherEditor to the FilterList rather than a regular TextMatcherEditor
         textMatcherEditor = new TextMatcherEditor(new CollectionTextFilterator());
-        MatcherEditor bufferedMatcherEditor = new BufferedMatcherEditor(textMatcherEditor);
+        MatcherEditor bufferedMatcherEditor = new ThreadedMatcherEditor(textMatcherEditor);
         filtered = new FilterList(unfiltered, bufferedMatcherEditor);
 
         System.out.println("");
-        System.out.println("Character-by-character Filter (with BufferedMatcherEditor)");
+        System.out.println("Character-by-character Filter (with ThreadedMatcherEditor)");
         long bufferedCharacterFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {

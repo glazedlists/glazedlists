@@ -13,7 +13,7 @@ import java.util.LinkedList;
  * MatcherEvents are produced by the source MatcherEditor and the rate at
  * which they are consumed by registered MatcherEditorListeners. <p>
  *
- * Internally, a {@link BufferedMatcherEditor} enqueues MatcherEvents as they
+ * Internally, a {@link ThreadedMatcherEditor} enqueues MatcherEvents as they
  * they are received from the source MatcherEditor. The MatcherEvents on the
  * queue are fired by another Thread as rapidly as the MatcherEditorListeners
  * can consume them. Two methods exist on this class which enable subclasses
@@ -28,7 +28,7 @@ import java.util.LinkedList;
  *   <li> {@link #coalesceMatcherEvents(MatcherEvent[])} is used to compress
  *        many enqueued MatcherEvents into a single representative
  *        MatcherEvent. This is implies a contract between all registered
- *        MatcherEditorListeners and this {@link BufferedMatcherEditor} that
+ *        MatcherEditorListeners and this {@link ThreadedMatcherEditor} that
  *        guarantees that processing the coalesced MatcherEvent is equivalent
  *        to processing all MatcherEvents sequentially.
  * </ol>
@@ -36,13 +36,13 @@ import java.util.LinkedList;
  * Typical usage patterns of this MatcherEditor resemble:
  *
  * <pre>
- *   MatcherEditor matcherEditor = new BufferedMatcherEditor(new AnyMatcherEditor());
+ *   MatcherEditor matcherEditor = new ThreadedMatcherEditor(new AnyMatcherEditor());
  *   matcherEditor.addMatcherEditorListener(new AnyMatcherEditorListener());
  * </pre>
  *
  * @author James Lemieux
  */
-public class BufferedMatcherEditor extends AbstractMatcherEditor {
+public class ThreadedMatcherEditor extends AbstractMatcherEditor {
 
     /** The underlying MatcherEditor whose MatcherEvents are being queued and fired on an alternate Thread. */
     private final MatcherEditor source;
@@ -74,14 +74,14 @@ public class BufferedMatcherEditor extends AbstractMatcherEditor {
     private Runnable drainMatcherEventQueueRunnable = new DrainMatcherEventQueueRunnable();
 
     /**
-     * Creates a BufferedMatcherEditor which wraps the given <code>source</code>.
+     * Creates a ThreadedMatcherEditor which wraps the given <code>source</code>.
      * MatcherEvents fired from the <code>source</code> will be enqueued within
      * this MatcherEditor until they are processed on an alternate Thread.
      *
      * @param source the MatcherEditor to wrap with buffering functionality
      * @throws NullPointerException if <code>source</code> is <code>null</code>
      */
-    public BufferedMatcherEditor(MatcherEditor source) {
+    public ThreadedMatcherEditor(MatcherEditor source) {
         if (source == null)
             throw new NullPointerException("source may not be null");
         this.source = source;
@@ -227,7 +227,7 @@ public class BufferedMatcherEditor extends AbstractMatcherEditor {
      * batch of MatcherEvents includes all MatcherEvents available at the time
      * the queue is inspected. The MatcherEvents are then coalesced and the
      * resulting singular MatcherEvent is fired to MatcherEditorListeners
-     * attached to this BufferedMatcherEditor on a different Thread. When the
+     * attached to this ThreadedMatcherEditor on a different Thread. When the
      * fire method returns, the queue is drained again if it has accumulated
      * MatcherEvents otherwise the DrainMatcherEventQueueRunnable exits.
      */
