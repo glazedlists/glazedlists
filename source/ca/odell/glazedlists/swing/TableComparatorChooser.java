@@ -8,9 +8,6 @@ import ca.odell.glazedlists.*;
 // the Glazed Lists util and impl packages include default comparators
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.SortIconFactory;
-import ca.odell.glazedlists.impl.sort.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import javax.swing.table.*;
@@ -263,7 +260,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
                 DefaultTableCellRenderer jLabelRenderer = (DefaultTableCellRenderer)delegateRenderer;
                 Icon iconToUse = icons[getSortingStyle(column)];
                 jLabelRenderer.setIcon(iconToUse);
-                jLabelRenderer.setHorizontalTextPosition(jLabelRenderer.LEADING);
+                jLabelRenderer.setHorizontalTextPosition(SwingConstants.LEADING);
                 return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             } else {
                 return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
