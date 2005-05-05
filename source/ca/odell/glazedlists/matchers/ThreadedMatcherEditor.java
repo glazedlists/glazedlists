@@ -166,7 +166,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
                 }
             }
 
-            changeType = constrained && relaxed && lastMatcherEventType != MatcherEvent.CHANGED;
+            changeType = constrained && relaxed;
         }
 
         // if both constraining and relaxing MatcherEvents exist, ensure we must return a CHANGED MatcherEvent
