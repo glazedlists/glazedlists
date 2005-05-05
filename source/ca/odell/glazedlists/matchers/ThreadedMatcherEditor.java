@@ -110,26 +110,29 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      *
      * <ol>
      *   <li> if <code>matcherEvents</code> ends in a MatcherEvent which is a
-     *        <code>matchAll</code> or <code>matchNone</code> type, the last
-     *        MatcherEvent is returned, regardless of previous MatcherEvents
+     *        {@link MatcherEvent#MATCH_ALL} or {@link MatcherEvent#MATCH_NONE}
+     *        type, the last MatcherEvent is returned, regardless of previous
+     *        MatcherEvents <p>
      *
      *   <li> if <code>matcherEvents</code> only contains a series of
      *        monotonically constraining MatcherEvents, the final MatcherEvent
-     *        is returned
+     *        is returned <p>
      *
      *   <li> if <code>matcherEvents</code> only contains a series of
      *        monotonically relaxing MatcherEvents, the final MatcherEvent is
-     *        returned
+     *        returned <p>
      *
      *   <li> if <code>matcherEvents</code> contains both constraining and
      *        relaxing MatcherEvents, the final MatcherEvent is returned with
-     *        its type as <code>changed</code>
+     *        its type as {@link MatcherEvent#CHANGED}
      * </ol>
      *
      * Note that <code>1, 2,</code> and <code>3</code> above merely represent
      * safe optimizations of the type of MatcherEvent that can be returned.
-     * They could also have been returned as <code>changed</code> MatcherEvents
-     * and be assumed to work correctly, though less efficiently. <p>
+     * It could also have been returned as a MatcherEvent with a type of
+     * {@link MatcherEvent#CHANGED} and be assumed to work correctly, though
+     * potentially less efficiently, since it is a more generic type of change.
+     * <p>
      *
      * Subclasses with the ability to fire precise MatcherEvents with fine grain
      * types (i.e. <code>relaxed</code> or <code>constrained</code>) when
