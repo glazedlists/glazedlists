@@ -260,9 +260,6 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
                     for (int i = 0; i < matcherEvents.length; i++)
                         matcherEventQueue.remove(0);
                 }
-            } catch (Throwable t) {
-                t.printStackTrace();
-
             } finally {
                 // no matter the circumstance for us exitting the Runnable,
                 // ensure we indicate we are no longer draining the queue
