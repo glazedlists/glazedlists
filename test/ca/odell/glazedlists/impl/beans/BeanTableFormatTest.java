@@ -115,7 +115,7 @@ public class BeanTableFormatTest extends TestCase {
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(1));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(2));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(3));
-        assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(4));
+        assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(4));
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(5));
     }
 }

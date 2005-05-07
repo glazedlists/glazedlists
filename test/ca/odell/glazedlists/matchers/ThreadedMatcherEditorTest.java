@@ -112,12 +112,14 @@ public class ThreadedMatcherEditorTest extends TestCase {
         this.runCoalescingMatchChangedTest(events, MatcherEvent.CHANGED);
     }
 
-    private void runCoalescingMatchChangedTest(MatcherEvent[] events, int type) {
+    private void runCoalescingMatchChangedTest(MatcherEvent[] events, int expectedType) {
         final MatcherEvent coalescedMatcherEvent = threadedMatcherEditor.coalesceMatcherEvents(events);
-        // ensure the type is CHANGED
-        assertEquals(type, coalescedMatcherEvent.getType());
+        // ensure the expectedType is received
+        assertEquals(expectedType, coalescedMatcherEvent.getType());
 
-        // ensure the Matcher returned is == to the last MatcherEvent's Matcher
+        // ensure the MatcherEditor returned is == to the threadedMatcherEditor (the MatcherEditor which wraps the source)
+        // (that is, we rebrand the coalescedMatcherEvent to look like it originates from the ThreadedMatcherEditor
+        // rather than the underlying decorated MatcherEditor)
         assertTrue(threadedMatcherEditor == coalescedMatcherEvent.getMatcherEditor());
 
         // ensure the Matcher returned is == to the last MatcherEvent's Matcher
