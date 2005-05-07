@@ -166,7 +166,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_STARTS);
 
-        // now fill the queue with constraints one at a time, as through the user were typing "James"
+        // now fill the queue with relaxations one at a time, as through the user were deleting "James"
         textMatcherEditor.setFilterText(new String[] {"Jame"});
         textMatcherEditor.setFilterText(new String[] {"Jam"});
         textMatcherEditor.setFilterText(new String[] {"Ja"});
@@ -177,7 +177,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         assertCounterState(counter, 0, 0, 0, 1, 1);
     }
 
-    public void testQueuingMatchall() throws InterruptedException {
+    public void testQueuingMatchAll() throws InterruptedException {
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
@@ -185,6 +185,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_STARTS);
 
+        // simulate changing, then clearing the filter text
         textMatcherEditor.setFilterText(new String[] {"Scott"});
         textMatcherEditor.setFilterText(new String[0]);
 
@@ -202,6 +203,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
         Thread.sleep(SIMULATED_PROCESSING_DELAY_STARTS);
 
         textMatcherEditor.setFilterText(new String[] {"Scott"});
+        textMatcherEditor.setFilterText(new String[] {"Jesse"});
+        textMatcherEditor.setFilterText(new String[] {"Kevin"});
 
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
