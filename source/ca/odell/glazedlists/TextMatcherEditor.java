@@ -5,8 +5,6 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.matchers.*;
 import ca.odell.glazedlists.impl.filter.*;
-// for recycling filter strings
-import java.util.*;
 
 /**
  * A matcher editor that matches Objects that contain a filter text

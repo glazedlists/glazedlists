@@ -4,7 +4,6 @@
 package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // i'm a table model event
 import javax.swing.event.TableModelEvent;

@@ -5,7 +5,6 @@ package ca.odell.glazedlists;
 
 import java.util.List;
 
-
 /**
  * Provides the logic to map a parent record (e.g., a records album) to its children
  * (e.g., the songs on the record). Serves basically the same purpose as

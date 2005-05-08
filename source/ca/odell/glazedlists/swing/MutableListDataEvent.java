@@ -3,14 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
-import javax.swing.*;
-import java.awt.event.*;
 import javax.swing.event.*;
-
 
 /**
  * The mutable list data event is a list data event that can be rewritten

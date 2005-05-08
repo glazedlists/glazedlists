@@ -3,11 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import java.util.*;
 import ca.odell.glazedlists.*;
 // for access to volatile classes
 import ca.odell.glazedlists.impl.matchers.*;
-
 
 /**
  * A factory for creating Matchers.

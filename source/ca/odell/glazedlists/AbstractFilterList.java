@@ -6,10 +6,6 @@ package ca.odell.glazedlists;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.matchers.*;
-// volatile implementation support
-import ca.odell.glazedlists.impl.adt.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 
 /**
  * An {@link EventList} that shows a subset of the elements of a source

@@ -6,9 +6,6 @@ package ca.odell.glazedlists.swing;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.matchers.*;
-// access to the volatile implementation pacakge
-import ca.odell.glazedlists.impl.filter.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 // for automatically responding to changes in the filter field

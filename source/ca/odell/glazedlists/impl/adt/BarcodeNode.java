@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt;
 
-// for iterators
-import java.util.*;
-
 /**
  * A BarcodeNode models a node in an Barcode.  This class
  * does the bulk of the heavy lifting for Barcode.

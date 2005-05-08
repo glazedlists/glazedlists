@@ -19,5 +19,4 @@ public interface ThresholdEvaluator {
      * not relative to any other object unlike a {@link java.util.Comparator}.
      */
     public int evaluate(Object object);
-
 }

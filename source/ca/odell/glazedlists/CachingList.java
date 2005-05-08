@@ -373,7 +373,6 @@ class CacheTestHelper {
      * CachingList to be one-half the size of the source list.
      *
      * @param sourceListSize The size of the underlying list
-     * @param cacheSize The explicitly set size for the CachingList
      * @param requestWaitTime The amount of time to delay when requesting
      *        information from the underlying list
      */

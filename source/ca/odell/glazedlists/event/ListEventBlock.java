@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
 // for sorting the list
 import java.util.List;
 

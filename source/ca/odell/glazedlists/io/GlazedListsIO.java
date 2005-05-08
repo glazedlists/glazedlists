@@ -3,13 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import java.util.*;
-// for access to volatile classes
-import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.impl.io.*;
-// implemented interfaces
-import ca.odell.glazedlists.io.ByteCoder;
-
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.

@@ -3,10 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.gui;
 
-// the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-
 /**
  * Specifies how to edit the elements of table.
  *

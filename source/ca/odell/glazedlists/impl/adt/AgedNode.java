@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt;
 
-// for use in creating the underlying containers
-import java.util.*;
-
 /**
  * A thin wrapper class for Objects to be inserted in the
  * age sorted tree representation of the cache.

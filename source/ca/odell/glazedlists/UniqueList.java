@@ -323,8 +323,8 @@ public final class UniqueList extends TransformedList {
      * the index is queued and not added to the change event immediately. This
      * allows UPDATE events to be discarded if they intersect with an INSERT or
      * REMOVE event. Because of this queueing, it is always necessary to call
-     * {@link #flushPendingEvents()} before {@link #commitEvent()} to guarantee
-     * that all UPDATE events have been sent.
+     * {@link #flushEnqueuedEvents()} before {@link ListEventAssembler#commitEvent()}
+     * to guarantee that all UPDATE events have been sent.
      *
      * @param index The index of the change
      * @param type The type of this change

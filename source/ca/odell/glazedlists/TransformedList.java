@@ -5,8 +5,6 @@ package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 // for access to iterators and the Collection interface
 import java.util.*;
 

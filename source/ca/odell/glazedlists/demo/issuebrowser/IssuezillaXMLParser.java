@@ -11,10 +11,6 @@ import org.xml.sax.helpers.*;
 import java.text.*;
 // glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.demo.issuebrowser.Description;
-import ca.odell.glazedlists.demo.issuebrowser.Issue;
-import ca.odell.glazedlists.swing.*;
-
 
 /**
  * Parses IssueZilla issue as described by their XML.

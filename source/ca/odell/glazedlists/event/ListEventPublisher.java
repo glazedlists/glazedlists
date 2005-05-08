@@ -234,7 +234,7 @@ public final class ListEventPublisher {
     }
     
     /**
-     * A {@ListEventListener} and the {@EventList}s that it depends on.
+     * A {@link ListEventListener} and the {@link EventList}s that it depends on.
      */
     class DependentListener {
 
@@ -300,7 +300,7 @@ public final class ListEventPublisher {
         }
 
         /**
-         * Adds the specified {@linkListEvent} to be fired upon the completion of
+         * Adds the specified {@link ListEvent} to be fired upon the completion of
          * its dependencies.
          */
         public void addPendingEvent(ListEvent pendingEvent) {

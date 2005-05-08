@@ -400,12 +400,12 @@ public final class SortedList extends TransformedList {
      * A comparator that takes an indexed node, and compares the value
      * of an object in a list that has the index of that node.
      *
-     * <p>If one of the objects passed to {@link #compare()} is not an
+     * <p>If one of the objects passed to {@link #compare} is not an
      * {@link IndexedTreeNode}, it will compare the object directly to the object
      * in the source {@link EventList} referenced by the {@link IndexedTreeNode}.
      * This functionality is necessary to allow use of the underlying
-     * {@link Comparator} within {@link IndexedTree} to support {@link #indexOf()},
-     * {@link #lastIndexOf()}, and {@link #contains()}.
+     * {@link Comparator} within {@link IndexedTree} to support {@link List#indexOf},
+     * {@link List#lastIndexOf}, and {@link List#contains}.
      */
     private class IndexedTreeNodeComparator implements Comparator {
 

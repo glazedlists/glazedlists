@@ -8,7 +8,6 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
-import java.awt.event.*;
 import javax.swing.event.*;
 // this class uses tables for displaying message lists
 import java.util.*;

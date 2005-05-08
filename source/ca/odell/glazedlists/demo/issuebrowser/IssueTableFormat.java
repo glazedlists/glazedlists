@@ -2,11 +2,8 @@ package ca.odell.glazedlists.demo.issuebrowser;
 
 import java.util.Comparator;
 // glazed lists
-import ca.odell.glazedlists.demo.issuebrowser.Issue;
-import ca.odell.glazedlists.demo.issuebrowser.Priority;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.GlazedLists;
-
 
 /**
  * The IssueTableFormat specifies how an issue is displayed in a table.

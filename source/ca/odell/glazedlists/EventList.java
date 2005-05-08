@@ -69,5 +69,4 @@ public interface EventList extends List {
      * Get the publisher used to distribute {@link ListEvent}s.
      */
     public ListEventPublisher getPublisher();
-
 }

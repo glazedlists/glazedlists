@@ -4,8 +4,6 @@ package ca.odell.glazedlists.demo.issuebrowser;
 import ca.odell.glazedlists.*;
 // Loading problems
 import java.io.*;
-// For dates and lists
-import java.util.*;
 
 /**
  * This loads issues by project as they are requested. When a new project is

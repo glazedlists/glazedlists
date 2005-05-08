@@ -30,4 +30,3 @@ public interface ReadWriteLock {
      */
     public Lock writeLock();
 }
-

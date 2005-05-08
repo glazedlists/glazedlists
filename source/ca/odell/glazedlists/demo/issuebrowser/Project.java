@@ -1,10 +1,7 @@
 package ca.odell.glazedlists.demo.issuebrowser;
 
 // GlazedLists
-
 import ca.odell.glazedlists.*;
-// For dates and lists
-import java.util.*;
 
 /**
  * Models a project on Java.net.

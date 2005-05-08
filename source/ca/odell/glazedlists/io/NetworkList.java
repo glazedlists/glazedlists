@@ -5,7 +5,6 @@ package ca.odell.glazedlists.io;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.event.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.impl.rbp.*;
@@ -14,7 +13,6 @@ import ca.odell.glazedlists.impl.io.*;
 import ca.odell.glazedlists.util.concurrent.*;
 // NIO is used for BRP
 import java.util.*;
-import java.nio.*;
 import java.io.*;
 
 /**

@@ -3,8 +3,6 @@ package ca.odell.glazedlists.demo.issuebrowser;
 import java.util.*;
 // glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-
 
 /**
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
