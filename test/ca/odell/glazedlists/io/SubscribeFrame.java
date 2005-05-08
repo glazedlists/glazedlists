@@ -3,20 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import java.util.*;
 import java.io.*;
 import javax.swing.*;
-import javax.swing.event.*;
-import java.applet.*;
 import java.awt.event.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-// glazed lists
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.swing.*;
-import ca.odell.glazedlists.io.*;
-import ca.odell.glazedlists.impl.io.*;
 
 /**
  * A frame that shows a subscribed list.

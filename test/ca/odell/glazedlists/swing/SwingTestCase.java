@@ -5,15 +5,10 @@ package ca.odell.glazedlists.swing;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
-// standard collections
-import java.util.*;
 // reflection for invoking methods by name
 import java.lang.reflect.*;
 // swing utilities for interacting with the event dispatch thread
 import javax.swing.SwingUtilities;
-import javax.swing.event.*;
 
 /**
  * Utility class for running JUnit tests with Swing code.

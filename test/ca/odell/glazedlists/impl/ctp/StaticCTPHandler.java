@@ -4,12 +4,6 @@
 package ca.odell.glazedlists.impl.ctp;
 
 import java.util.*;
-// for being a JUnit test case
-import junit.framework.*;
-// NIO is used for CTP
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.UnsupportedEncodingException;
 // Glazed Lists I/O
 import ca.odell.glazedlists.impl.io.Bufferlo;
 import java.text.ParseException;

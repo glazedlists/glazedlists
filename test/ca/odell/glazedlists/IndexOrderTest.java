@@ -44,8 +44,6 @@ public class IndexOrderTest extends TestCase {
     public void testIncreasingOrder() {
         EventList unsorted = new BasicEventList();
         IntegerArrayFilterList filteredOnce = new IntegerArrayFilterList(unsorted, 0, 50);
-        SortedList sortedOnce = new SortedList(filteredOnce, new IntegerArrayComparator(0));
-        SortedList sortedTwice = new SortedList(sortedOnce, new IntegerArrayComparator(1));
         
         // add a block of new elements one hundred times
         for(int a = 0; a < 100; a++) {

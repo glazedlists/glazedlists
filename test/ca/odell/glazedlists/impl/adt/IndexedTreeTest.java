@@ -121,7 +121,6 @@ public class IndexedTreeTest extends TestCase {
         }
 
         // verify the list contains only the original 100 Bs and 100 Ds
-        List indexedTreeList = new ArrayList();
         for(Iterator i = indexedTree.iterator(); i.hasNext(); ) {
             IndexedTreeNode node = (IndexedTreeNode)i.next();
             if(node.getValue().equals("B")) BCount--;

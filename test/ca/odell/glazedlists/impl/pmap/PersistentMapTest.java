@@ -5,12 +5,8 @@ package ca.odell.glazedlists.impl.pmap;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.io.*;
 import ca.odell.glazedlists.impl.io.*;
-// standard collections
-import java.util.*;
 // for testing files
 import java.io.*;
 // for testing colors

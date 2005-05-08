@@ -5,8 +5,6 @@ package ca.odell.glazedlists.impl.filter;
 
 // for being a JUnit test case
 import junit.framework.*;
-// standard collections
-import java.util.*;
 
 /**
  * This test verifies that the TextSearchStrategy implementations work.

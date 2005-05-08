@@ -3,14 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// for being a JUnit test case
-import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
 // standard collections
 import java.util.*;
-// swing utilities for interacting with the event dispatch thread
-import javax.swing.SwingUtilities;
 import javax.swing.event.*;
 
 /**

@@ -5,8 +5,6 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 
@@ -669,7 +667,6 @@ public class UniqueListTest extends TestCase {
         source = new BasicEventList();
         IntArrayFilterList filterList = new IntArrayFilterList(source);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
-        SortedList sorted = new SortedList(filterList, new IntArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {

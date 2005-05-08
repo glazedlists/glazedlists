@@ -354,11 +354,6 @@ public class IteratorTest extends TestCase {
                 list.set(index, new Integer(random.nextInt()));
             }
 
-            // create an iterator for this list
-            Iterator iterator = list.iterator();
-            // create a SubList for this list
-            List subList = list.subList(0, list.size()/2);
-
             // test and output memory usage
             long newMemoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);
             if(newMemoryUsage > memoryUsage) {

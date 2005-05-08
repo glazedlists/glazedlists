@@ -5,7 +5,7 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the volatile Glazed Lists pacakge
+// the volatile Glazed Lists package
 import ca.odell.glazedlists.impl.sort.*;
 // standard collections
 import java.util.*;
@@ -53,12 +53,6 @@ public class MultipleListenersTest extends TestCase {
         Comparator comparator = GlazedLists.comparableComparator();
         SortedList sorted = new SortedList(root, comparator);
         IntegerSizeFilterList filtered = new IntegerSizeFilterList(root, 50);
-
-        // create 2nd level derivatives
-        SortedList sortedSorted = new SortedList(sorted, comparator);
-        IntegerSizeFilterList sortedFiltered = new IntegerSizeFilterList(sorted, 75);
-        SortedList filteredSorted = new SortedList(filtered, comparator);
-        IntegerSizeFilterList filteredFiltered = new IntegerSizeFilterList(filtered, 75);
 
         // repeatedly make updates and verify the derivates keep up
         for(int i = 0; i < 30; i++) {

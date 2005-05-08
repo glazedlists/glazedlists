@@ -9,7 +9,6 @@ import java.io.*;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 
-
 /**
  * Utility class for analyzing the performance of the TextFilterList.
  *

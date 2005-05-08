@@ -17,9 +17,6 @@ import java.util.*;
  */
 public class SubListTest extends TestCase {
 
-    /** for randomly choosing list indicies */
-    private Random random = new Random();
-
     /**
      * Prepare for the test.
      */

@@ -15,8 +15,6 @@ public class DefaultTextFilterListTest extends TestCase {
     private List monotonicAlphabet = Arrays.asList(new Object[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
 
     public void testNormalizeValue() {
-        FilterList list = new FilterList(new BasicEventList(), new TextMatcherEditor());
-
         assertTrue(Arrays.equals(new String[0], TextMatcher.normalizeFilters(new String[0])));
         assertTrue(Arrays.equals(new String[0], TextMatcher.normalizeFilters(new String[] {null, ""})));
         assertTrue(Arrays.equals(new String[] {"X"}, TextMatcher.normalizeFilters(new String[] {"x", null, ""})));
@@ -178,7 +176,6 @@ public class DefaultTextFilterListTest extends TestCase {
      */
     public void testFilterBeforeAndAfter() {
         // set up
-        Random random = new Random();
         BasicEventList unfilteredList = new BasicEventList();
         TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
         FilterList filteredList = new FilterList(unfilteredList, textMatcherEditor);

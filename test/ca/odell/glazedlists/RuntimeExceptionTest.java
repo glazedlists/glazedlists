@@ -7,8 +7,6 @@ package ca.odell.glazedlists;
 import junit.framework.*;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
-// Java collections are used for underlying data storage
-import java.util.*;
 
 /**
  * Validates that {@link EventList}s can recover from {@link RuntimeException}s.

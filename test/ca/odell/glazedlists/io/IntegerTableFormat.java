@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-// glazed lists
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 
 /**

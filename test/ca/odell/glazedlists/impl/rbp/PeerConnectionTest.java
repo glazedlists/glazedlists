@@ -3,13 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.rbp;
 
-import java.util.*;
 // for being a JUnit test case
 import junit.framework.*;
-// NIO is used for CTP
 import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
 
 /**
  * A CTPChunk test verifies that the CTPConnection provides proper chunks.

@@ -5,15 +5,8 @@ package ca.odell.glazedlists.io;
 
 // for being a JUnit test case
 import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
-// standard collections
-import java.util.*;
 // for testing files
 import java.io.*;
-// for testing colors
-import java.awt.Color;
-
 
 /**
  * This test verifies that the FileList works.

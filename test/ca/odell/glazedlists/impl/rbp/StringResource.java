@@ -4,12 +4,6 @@
 package ca.odell.glazedlists.impl.rbp;
 
 import java.util.*;
-// for being a JUnit test case
-import junit.framework.*;
-// NIO is used for CTP
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.UnsupportedEncodingException;
 import ca.odell.glazedlists.impl.io.Bufferlo;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;

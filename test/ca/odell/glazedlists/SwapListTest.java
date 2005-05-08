@@ -4,8 +4,6 @@
 package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
-import ca.odell.glazedlists.matchers.*;
-import ca.odell.glazedlists.impl.filter.*;
 // standard collections
 import java.util.*;
 

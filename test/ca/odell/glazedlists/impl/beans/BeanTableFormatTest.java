@@ -5,8 +5,6 @@ package ca.odell.glazedlists.impl.beans;
 
 // for being a JUnit test case
 import junit.framework.*;
-// standard collections
-import java.util.*;
 // test objects
 import java.awt.Color;
 // table forms

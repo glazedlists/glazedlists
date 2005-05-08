@@ -3,19 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// for being a JUnit test case
-import junit.framework.*;
 import java.util.*;
-// NIO
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
-// regular expressions
-import java.util.regex.*;
-import java.text.ParseException;
-// logging
-import java.util.logging.*;
-import java.text.ParseException;
 
 /**
  * Produces random data for test cases to consume.

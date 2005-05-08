@@ -3,23 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import java.util.*;
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.io.*;
-import ca.odell.glazedlists.event.*;
-// NIO
-import java.nio.*;
-import java.nio.channels.*;
 import java.io.*;
-// for being a JUnit test case
-import junit.framework.*;
-import ca.odell.glazedlists.*;
-// regular expressions
-import java.util.regex.*;
-import java.text.ParseException;
-// logging
-import java.util.logging.*;
-import java.text.ParseException;
 
 /**
  * Encodes integers and decodes them.

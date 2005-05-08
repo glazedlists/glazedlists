@@ -3,19 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import java.util.*;
-// NIO
-import java.nio.*;
-import java.nio.channels.*;
 import java.io.*;
 // for being a JUnit test case
 import junit.framework.*;
-import ca.odell.glazedlists.*;
-// regular expressions
-import java.util.regex.*;
-import java.text.ParseException;
-// logging
-import java.util.logging.*;
 import java.text.ParseException;
 
 /**
@@ -175,7 +165,7 @@ public class BufferloTest extends TestCase {
     public void testReadUntilBadInput() {
         try {
             Bufferlo parser = getBufferlo("hello world");
-            String result = parser.readUntil("earth");
+            parser.readUntil("earth");
             fail();
         } catch(ParseException e) {
             // exception is desired output
@@ -217,7 +207,6 @@ public class BufferloTest extends TestCase {
     public void testMix() throws IOException, ParseException {
         Bufferlo bufferlo = new Bufferlo();
         Writer writer = new OutputStreamWriter(bufferlo.getOutputStream(), "US-ASCII");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(bufferlo.getInputStream(), "US-ASCII"));
         
         // write a bunch of bytes
         int bytesWritten = 0;

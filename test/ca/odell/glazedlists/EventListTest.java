@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the Glazed Lists
-import ca.odell.glazedlists.event.*;
 // for being a JUnit test case
 import junit.framework.*;
 // standard collections

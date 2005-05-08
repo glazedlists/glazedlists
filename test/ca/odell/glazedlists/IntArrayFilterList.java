@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// Java collections are used for underlying data storage
-import java.util.*;
-
 /**
  * A filter list for filtering integerr arrays, which are particularly well
  * suited for sorting and filtering tests.

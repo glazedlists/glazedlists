@@ -3,11 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the Glazed Lists
-import ca.odell.glazedlists.event.*;
-// standard collections
-import java.util.*;
-
 /**
  * Verifies that ListEventAssembler is well behaved.
  *

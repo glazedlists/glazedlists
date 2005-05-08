@@ -3,11 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-// NIO is used for BRP
-import java.util.*;
-import java.nio.*;
-import java.io.*;
-
 /**
  * Listens to the current status of a {@link NetworkList} with respect to the network.
  *

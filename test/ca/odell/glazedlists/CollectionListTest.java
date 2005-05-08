@@ -6,7 +6,6 @@ package ca.odell.glazedlists;
 import junit.framework.TestCase;
 import java.util.*;
 
-
 /**
  * This test verifies that the {@link CollectionList} behaves as expected.
  *
