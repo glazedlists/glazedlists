@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
@@ -289,11 +289,39 @@ public final class ThresholdList extends TransformedList {
 
         // The threshold is lower
         if(newListIndex < lowerThresholdIndex) {
-            updates.addInsert(0, lowerThresholdIndex - Math.max(newListIndex, 0) - 1);
+            // The list was empty and stays that way
+            if(newListIndex > upperThresholdIndex) {
+                // definite no-op
+
+            // The list was empty and should now contain values
+            } else if(lowerThresholdIndex > upperThresholdIndex) {
+                // make sure that it should contain new values
+                if(!(newListIndex == -1 && upperThresholdIndex == -1)) {
+                    updates.addInsert(0, upperThresholdIndex - Math.max(newListIndex, 0));
+                }
+
+            // The list contains more values
+            } else {
+                updates.addInsert(0, lowerThresholdIndex - Math.max(newListIndex, 0) - 1);
+            }
 
         // The threshold is higher
         } else if(newListIndex > lowerThresholdIndex) {
-            updates.addDelete(0, newListIndex - Math.max(lowerThresholdIndex, 0) - 1);
+            // The list was empty and stays that way
+            if(lowerThresholdIndex > upperThresholdIndex) {
+                // definite no-op
+
+            // The list contained values and should now be empty
+            } else if(newListIndex > upperThresholdIndex) {
+                // make sure the list contained values
+                if(!(lowerThresholdIndex == -1 && upperThresholdIndex == -1)) {
+                    updates.addDelete(0, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
+                }
+
+            // The list contains fewer values
+            } else {
+                updates.addDelete(0, newListIndex - Math.max(lowerThresholdIndex, 0) - 1);
+            }
         }
 
         // Update the lowerThresholdIndex and fire the event
@@ -375,11 +403,36 @@ public final class ThresholdList extends TransformedList {
 
         // The threshold is lower
         if(newListIndex < upperThresholdIndex) {
-            updates.addDelete(newListIndex + 1, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
+            // The list was empty and stays that way
+            if(upperThresholdIndex < lowerThresholdIndex) {
+                // definite no-op
+
+            // The list contained values and should now be empty
+            } else if(newListIndex < lowerThresholdIndex) {
+                // make sure the list contained values
+                if(!(lowerThresholdIndex == sourceSize && upperThresholdIndex == sourceSize)) {
+                    updates.addDelete(0, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
+                }
+
+            // The list contains fewer values
+            } else {
+                updates.addDelete(newListIndex + 1, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
+            }
 
         // The threshold is higher
         } else if(newListIndex > upperThresholdIndex) {
-            updates.addInsert(upperThresholdIndex - Math.max(lowerThresholdIndex, 0) + 1, newListIndex);
+            // The list was empty and stays that way
+            if(newListIndex < lowerThresholdIndex) {
+                // definite no-op
+
+            // The list was empty and should now contain values
+            } else if(upperThresholdIndex < lowerThresholdIndex) {
+                updates.addInsert(0, newListIndex - Math.max(lowerThresholdIndex, 0));
+
+            // The list contains more values
+            } else {
+                updates.addInsert(upperThresholdIndex - Math.max(lowerThresholdIndex, 0) + 1, newListIndex);
+            }
         }
 
         // Update the upperThresholdIndex and fire the event

@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
@@ -970,7 +970,7 @@ public class ThresholdListTest extends TestCase {
         validateListsEquals(sortedBase, sortedCover);
     }
 
-    /** 
+    /**
      * Verifies that the ThresholdList fires consistent events.
      */
     public void testEventFiringIsConsistent() {
@@ -994,21 +994,21 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setUpperThreshold(3069);
     }
 
-    /** 
+    /**
      * Verifies that the ThresholdList fires consistent events.
      */
     public void testNumberOfEventsFired() {
         // count events
         ListEventCounter counter = new ListEventCounter();
         thresholdList.addListEventListener(counter);
-        
+
         // putz around with the thresholds on an empty list
         thresholdList.setLowerThreshold(-14922);
         thresholdList.setUpperThreshold(-1922);
         thresholdList.setLowerThreshold(-13923);
         thresholdList.setUpperThreshold(-923);
         assertEquals(0, counter.getEventCount());
-        
+
         // add an element that is not in range
         source.add(new Integer(1139));
         assertEquals(0, counter.getEventCount());
@@ -1017,7 +1017,7 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setLowerThreshold(-11922);
         thresholdList.setUpperThreshold(1078);
         thresholdList.setLowerThreshold(-10923);
-        
+
         // adjust the range to include our element
         thresholdList.setUpperThreshold(2077);
         assertEquals(source, thresholdList);
@@ -1049,7 +1049,7 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setUpperThreshold(13077);
         thresholdList.setLowerThreshold(1077);
         thresholdList.setUpperThreshold(14077);
-        
+
         // move past our element
         thresholdList.setLowerThreshold(2078);
         assertEquals(2, counter.getEventCount());
@@ -1057,15 +1057,15 @@ public class ThresholdListTest extends TestCase {
         assertEquals(Collections.EMPTY_LIST, thresholdList);
     }
 
-    /** 
-     * Tests a sliding windows works. This is the case when the upper and lower
-     * threshold keep shifting.
+    /**
+     * Tests that a increasing sliding windows works. This is the case where
+     * the upper and lower thresholds keep keep shifting to higher values.
      */
-    public void testSlidingWindow() {
+    public void testIncreasingSlidingWindow() {
         // count events
         ListEventCounter counter = new ListEventCounter();
         thresholdList.addListEventListener(counter);
-        
+
         thresholdList.setLowerThreshold(-14938);
         thresholdList.setUpperThreshold(-1938);
         source.add(new Integer(995));
@@ -1082,7 +1082,23 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setUpperThreshold(20063);
     }
 
-    
+    /**
+     * Tests that a decreasing sliding windows works. This is the case where
+     * both the upper and lower thresholds keep shifting to lower values.
+     */
+    public void testDecreasingSlidingWindow() {
+        // count events
+        ListEventCounter counter = new ListEventCounter();
+        thresholdList.addListEventListener(counter);
+
+        thresholdList.setUpperThreshold(20063);
+        thresholdList.setLowerThreshold(7063);
+        source.add(new Integer(7000));
+        thresholdList.setUpperThreshold(6000);
+        thresholdList.setLowerThreshold(0);
+    }
+
+
     /**
      * Tests that the JavaBean constructor and supporting code
      * works as expected.
@@ -1128,7 +1144,7 @@ public class ThresholdListTest extends TestCase {
             return value;
         }
     }
-    
+
     private class IntegerEvaluator implements ThresholdEvaluator {
         /**
          * Returns an integer value which represents the object.
