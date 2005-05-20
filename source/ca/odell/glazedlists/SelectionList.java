@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// core glazed lists packages
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 // the common user interface classes
 import ca.odell.glazedlists.gui.*;
@@ -18,7 +16,7 @@ import java.util.*;
  * {@link EventList} does not perform a transformation on the source, but
  * instead provides two additional {@link EventList}s:
  * <ul>
- *   <li>{@link #getSelected()Selected} - an {@link EventList} that contains only the selected values.</li>
+ *   <li>{@link #getSelected() Selected} - an {@link EventList} that contains only the selected values.</li>
  *   <li>{@link #getDeselected() Deselected} - an {@link EventList} that contains only the deselected values.</li>
  * </ul>
  *
