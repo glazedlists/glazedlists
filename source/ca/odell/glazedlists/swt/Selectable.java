@@ -1,12 +1,10 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-// to proxy access to listeners
+// to proxy access to listener registration
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Display;
 
 /**
  * This interface is used by the Viewer classes that represent
@@ -32,11 +30,6 @@ interface Selectable {
     public void removeSelectionListener(SelectionListener listener);
 
     /**
-     * Gets the number of items selected.
-     */
-    public int getSelectionCount();
-
-    /**
      * Gets the index of the most recently selected item.
      */
     public int getSelectionIndex();
@@ -53,18 +46,13 @@ interface Selectable {
     public int getStyle();
 
     /**
-     * Returns whether or not the item at index is selected.
+     * Selects the item at index.
      */
-    public boolean isSelected(int index);
+    public void select(int index);
 
     /**
-     * Clears the selection
+     * Deselects the item at index.
      */
-    public void deselectAll();
+    public void deselect(int index);
 
-    /**
-     * Selects items at the indices specified in the array.  This
-     * appends to the currect selection rather than replacing it.
-     */
-    public void select(int[] selectionIndices);
 }

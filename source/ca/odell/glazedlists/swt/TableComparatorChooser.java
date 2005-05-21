@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
@@ -88,11 +88,11 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
     /**
      * Handles column clicks.
      */
-    class ColumnListener implements SelectionListener {
+    class ColumnListener implements org.eclipse.swt.events.SelectionListener {
         public void widgetSelected(SelectionEvent e) {
-			TableColumn column = (TableColumn)e.widget;
-			Table table = column.getParent();
-			int columnIndex = table.indexOf(column);
+            TableColumn column = (TableColumn)e.widget;
+            Table table = column.getParent();
+            int columnIndex = table.indexOf(column);
             columnClicked(columnIndex, 1);
         }
         public void widgetDefaultSelected(SelectionEvent e) {

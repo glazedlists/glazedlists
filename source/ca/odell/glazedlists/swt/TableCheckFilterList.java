@@ -1,6 +1,6 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /*                                                     O'Dell Engineering Ltd.*/
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
@@ -29,14 +29,14 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-final class TableCheckFilterList extends AbstractFilterList implements SelectionListener {
-    
+final class TableCheckFilterList extends AbstractFilterList implements org.eclipse.swt.events.SelectionListener {
+
     /** whether this displays all or only checked elements */
     private boolean checkedOnly = false;
-    
+
     /** the table that checkboxes are displayed in */
     private Table table;
-    
+
     /** for checking table items */
     private CheckableTableFormat checkableTableFormat;
 
@@ -45,7 +45,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
      * checked in the table.
      *
      * @param elementsAreCheckable whether the elements of the source list
-     *      implement Checkable. If false, the list objects will be transparently 
+     *      implement Checkable. If false, the list objects will be transparently
      *      wrapped to provide state management.
      */
     public TableCheckFilterList(EventList source, Table table, TableFormat tableFormat) {
@@ -56,14 +56,14 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         } else {
             this.checkableTableFormat = null;
         }
-        
+
         // listen for changes in checkedness
         table.addSelectionListener(this);
-        
+
         // prepare the filter
         handleFilterChanged();
     }
-    
+
 
     /**
      * Set the specified list element in the source list as checked.
@@ -98,7 +98,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         return getChecked(source.get(getSourceIndex(index)));
     }
 
-    
+
     /**
      * Returns true if the specified Object is checked.
      */
@@ -109,7 +109,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
             return true;
         }
     }
-    
+
 
     /**
      * Gets a static snapshot of the checked Objects in this list.
@@ -123,7 +123,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         }
         return result;
     }
-    
+
 
     /**
      * Set whether this filter list displays all elements, or only checked elements.
@@ -140,7 +140,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
     public boolean getCheckedOnly() {
         return checkedOnly;
     }
-    
+
 
     /**
      * Returns the element at the specified position in this list. This unwraps
@@ -155,9 +155,9 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         }
     }
 
-    
+
     /**
-     * Sent when selection occurs in the control.    
+     * Sent when selection occurs in the control.
      */
     public void widgetSelected(SelectionEvent e) {
         if(e.detail == SWT.CHECK) {
@@ -180,7 +180,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         }
     }
 
-    
+
     /**
      * When the check status of a table item is changed, this changes the
      * checked property of the corresponding CheckWrapped object.
@@ -198,12 +198,12 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         int index = table.indexOf(updated);
         boolean checked = updated.getChecked();
         setChecked(index, checked);
-    
+
         // force an update event
         int sourceIndex = getSourceIndex(index);
         source.set(sourceIndex, source.get(sourceIndex));
     }
-    
+
     /**
      * Registers the specified listener to receive notification of changes
      * to this list.
@@ -214,7 +214,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
      */
     public void addListEventListener(ListEventListener listChangeListener) {
         super.addListEventListener(listChangeListener);
-        
+
         // also adjust the table's checked rows
         if(listChangeListener instanceof EventTableViewer) {
             super.addListEventListener(new TableChecker());
@@ -228,7 +228,7 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
         }
         super.dispose();
     }
-    
+
     /**
      * The TableChecker checks the table rows after they have been updated.
      */
@@ -264,13 +264,13 @@ final class TableCheckFilterList extends AbstractFilterList implements Selection
  * list.
  */
 class CheckableWrapperList extends TransformedList {
-    
+
     /** wrapped list contains CheckWrapped elements only */
     private List wrappedSource = new ArrayList();
 
     public CheckableWrapperList(EventList source) {
         super(source);
-        
+
         source.getReadWriteLock().readLock().lock();
         try {
             prepareElements();
@@ -279,7 +279,7 @@ class CheckableWrapperList extends TransformedList {
             source.getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * The CheckableWrapperList supports only one write operation, which is to
      * force an update on a specified value. This requires that the parameter value

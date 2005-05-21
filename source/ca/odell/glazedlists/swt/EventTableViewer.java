@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
@@ -23,7 +23,7 @@ import org.eclipse.swt.events.SelectionListener;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventTableViewer implements ListEventListener, Selectable {
+public class EventTableViewer implements ListEventListener {
 
     /** the heavyweight table */
     private Table table;
@@ -44,7 +44,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
     private TableFormat tableFormat;
 
     /** For selection management */
-    private SelectionList selectionList = null;
+    private SelectionManager selection = null;
 
     /**
      * Creates a new viewer for the given {@link Table} that updates the table
@@ -64,8 +64,6 @@ public class EventTableViewer implements ListEventListener, Selectable {
      */
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
-        //((ca.odell.glazedlists.impl.gui.ThreadProxyEventList)swtSource).debug = true;
-        
         disposeSource = swtSource;
 
         // insert a checked source if supported by the table
@@ -79,7 +77,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
         this.tableFormat = tableFormat;
 
         // Enable the selection lists
-        selectionList = new SelectionList(swtSource, this);
+        selection = new SelectionManager(swtSource, new SelectableTable());
 
         // determine if the provided table is Virtual
         tableIsVirtual = SWT.VIRTUAL == (table.getStyle() & SWT.VIRTUAL);
@@ -208,7 +206,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * viewed {@link Table} that are not currently selected.
      */
     public EventList getDeselected() {
-        return selectionList.getDeselected();
+        return selection.getSelectionList().getDeselected();
     }
 
     /**
@@ -216,7 +214,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * viewed {@link Table} that are currently selected.
      */
     public EventList getSelected() {
-        return selectionList.getSelected();
+        return selection.getSelectionList().getSelected();
     }
 
     /**
@@ -244,13 +242,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
             }
 
             // Reapply selection to the Table
-            for(int i = firstModified;i < table.getItemCount();i++) {
-                if(selectionList.isSelected(i)) {
-                    table.select(i);
-                } else {
-                    table.deselect(i);
-                }
-            }
+            selection.fireSelectionChanged(firstModified, swtSource.size() - 1);
         } finally {
             swtSource.getReadWriteLock().readLock().unlock();
         }
@@ -260,54 +252,47 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * Inverts the current selection.
      */
     public void invertSelection() {
-        selectionList.invertSelection();
+        selection.getSelectionList().invertSelection();
     }
 
-    /** Methods for the Selectable Interface */
+    /**
+     * To use common selectable widget logic in a widget unaware fashion.
+     */
+    private final class SelectableTable implements Selectable {
+        /** {@inheritDoc} */
+        public void addSelectionListener(SelectionListener listener) {
+            table.addSelectionListener(listener);
+        }
 
-    /** {@inheritDoc} */
-    public void addSelectionListener(SelectionListener listener) {
-        table.addSelectionListener(listener);
-    }
+        /** {@inheritDoc} */
+        public void removeSelectionListener(SelectionListener listener) {
+            table.removeSelectionListener(listener);
+        }
 
-    /** {@inheritDoc} */
-    public void removeSelectionListener(SelectionListener listener) {
-        table.removeSelectionListener(listener);
-    }
+        /** {@inheritDoc} */
+        public int getSelectionIndex() {
+            return table.getSelectionIndex();
+        }
 
-    /** {@inheritDoc} */
-    public int getSelectionCount() {
-        return table.getSelectionCount();
-    }
+        /** {@inheritDoc} */
+        public int[] getSelectionIndices() {
+            return table.getSelectionIndices();
+        }
 
-    /** {@inheritDoc} */
-    public int getSelectionIndex() {
-        return table.getSelectionIndex();
-    }
+        /** {@inheritDoc} */
+        public int getStyle() {
+            return table.getStyle();
+        }
 
-    /** {@inheritDoc} */
-    public int[] getSelectionIndices() {
-        return table.getSelectionIndices();
-    }
+        /** {@inheritDoc} */
+        public void select(int index) {
+            table.select(index);
+        }
 
-    /** {@inheritDoc} */
-    public int getStyle() {
-        return table.getStyle();
-    }
-
-    /** {@inheritDoc} */
-    public boolean isSelected(int index) {
-        return table.isSelected(index);
-    }
-
-    /** {@inheritDoc} */
-    public void deselectAll() {
-        table.deselectAll();
-    }
-
-    /** {@inheritDoc} */
-    public void select(int[] selectionIndices) {
-        table.select(selectionIndices);
+        /** {@inheritDoc} */
+        public void deselect(int index) {
+            table.deselect(index);
+        }
     }
 
     /**
@@ -338,7 +323,7 @@ public class EventTableViewer implements ListEventListener, Selectable {
      * to call any method on a {@link EventTableViewer} after it has been disposed.
      */
     public void dispose() {
+        selection.dispose();
         disposeSource.dispose();
-        if(!selectionList.isDisposed()) selectionList.dispose();
     }
 }

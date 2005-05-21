@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class EventListViewer implements ListEventListener, Selectable {
+public class EventListViewer implements ListEventListener {
 
     /** the SWT List */
     private List list = null;
@@ -36,7 +36,7 @@ public class EventListViewer implements ListEventListener, Selectable {
     private ILabelProvider labelProvider = null;
 
     /** For selection management */
-    private SelectionList selectionList = null;
+    private SelectionManager selection = null;
 
     /**
      * Creates a new List that displays and responds to changes in source.
@@ -57,7 +57,7 @@ public class EventListViewer implements ListEventListener, Selectable {
         this.labelProvider = labelProvider;
 
         // Enable the selection lists
-        selectionList = new SelectionList(swtSource, this);
+        selection = new SelectionManager(swtSource, new SelectableList());
 
         // setup initial values
         populateList();
@@ -95,7 +95,7 @@ public class EventListViewer implements ListEventListener, Selectable {
      * viewed Table that are not currently selected.
      */
     public EventList getDeselected() {
-        return selectionList.getDeselected();
+        return selection.getSelectionList().getDeselected();
     }
 
     /**
@@ -103,7 +103,7 @@ public class EventListViewer implements ListEventListener, Selectable {
      * viewed Table that are currently selected.
      */
     public EventList getSelected() {
-        return selectionList.getSelected();
+        return selection.getSelectionList().getSelected();
     }
 
     /**
@@ -152,13 +152,7 @@ public class EventListViewer implements ListEventListener, Selectable {
             }
 
             // Reapply selection to the List
-            for(int i = firstModified;i < list.getItemCount();i++) {
-                if(selectionList.isSelected(i)) {
-                    list.select(i);
-                } else {
-                    list.deselect(i);
-                }
-            }
+            selection.fireSelectionChanged(firstModified, swtSource.size() - 1);
         } finally {
             swtSource.getReadWriteLock().readLock().unlock();
         }
@@ -168,54 +162,48 @@ public class EventListViewer implements ListEventListener, Selectable {
      * Inverts the current selection.
      */
     public void invertSelection() {
-        selectionList.invertSelection();
+        selection.getSelectionList().invertSelection();
     }
 
-    /** Methods for the Selectable Interface */
 
-    /** {@inheritDoc} */
-    public void addSelectionListener(SelectionListener listener) {
-        list.addSelectionListener(listener);
-    }
+    /**
+     * To use common selectable widget logic in a widget unaware fashion.
+     */
+    private final class SelectableList implements Selectable {
+        /** {@inheritDoc} */
+        public void addSelectionListener(SelectionListener listener) {
+            list.addSelectionListener(listener);
+        }
 
-    /** {@inheritDoc} */
-    public void removeSelectionListener(SelectionListener listener) {
-        list.removeSelectionListener(listener);
-    }
+        /** {@inheritDoc} */
+        public void removeSelectionListener(SelectionListener listener) {
+            list.removeSelectionListener(listener);
+        }
 
-    /** {@inheritDoc} */
-    public int getSelectionCount() {
-        return list.getSelectionCount();
-    }
+        /** {@inheritDoc} */
+        public int getSelectionIndex() {
+            return list.getSelectionIndex();
+        }
 
-    /** {@inheritDoc} */
-    public int getSelectionIndex() {
-        return list.getSelectionIndex();
-    }
+        /** {@inheritDoc} */
+        public int[] getSelectionIndices() {
+            return list.getSelectionIndices();
+        }
 
-    /** {@inheritDoc} */
-    public int[] getSelectionIndices() {
-        return list.getSelectionIndices();
-    }
+        /** {@inheritDoc} */
+        public int getStyle() {
+            return list.getStyle();
+        }
 
-    /** {@inheritDoc} */
-    public int getStyle() {
-        return list.getStyle();
-    }
+        /** {@inheritDoc} */
+        public void select(int index) {
+            list.select(index);
+        }
 
-    /** {@inheritDoc} */
-    public boolean isSelected(int index) {
-        return list.isSelected(index);
-    }
-
-    /** {@inheritDoc} */
-    public void deselectAll() {
-        list.deselectAll();
-    }
-
-    /** {@inheritDoc} */
-    public void select(int[] selectionIndices) {
-        list.select(selectionIndices);
+        /** {@inheritDoc} */
+        public void deselect(int index) {
+            list.deselect(index);
+        }
     }
 
     /**
@@ -233,7 +221,7 @@ public class EventListViewer implements ListEventListener, Selectable {
      * to call any method on a {@link EventListViewer} after it has been disposed.
      */
     public void dispose() {
+        selection.dispose();
         swtSource.dispose();
-        if(!selectionList.isDisposed()) selectionList.dispose();
     }
 }
