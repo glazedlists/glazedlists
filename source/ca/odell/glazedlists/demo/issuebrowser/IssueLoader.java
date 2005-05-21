@@ -9,8 +9,8 @@ import java.io.*;
  * This loads issues by project as they are requested. When a new project is
  * requested, a working project may be interrupted. This may have violent side
  * effects such as InterruptedExceptions printed to the console by certain
- * XML parsing libararies that aren't exactly interruption friendly.
- * <p/>
+ * XML parsing libraries that aren't exactly interruption friendly.
+ *
  * <p>Issues are streamed to the issues list as they are loaded.
  *
  * @author <a href="jesse@odel.on.ca">Jesse Wilson</a>
