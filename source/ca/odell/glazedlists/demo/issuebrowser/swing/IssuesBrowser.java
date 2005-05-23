@@ -8,13 +8,11 @@ import ca.odell.glazedlists.demo.issuebrowser.*;
 import ca.odell.glazedlists.demo.Launcher;
 // swing
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.applet.*;
-import java.awt.Color;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import java.awt.*;
 import java.net.URL;
 // glazed lists
 import ca.odell.glazedlists.*;
@@ -29,8 +27,14 @@ import java.util.Hashtable;
  */
 public class IssuesBrowser extends Applet {
 
-    /** this doesn't belong here at all */
+    /** these don't belong here at all */
     private static final Color GLAZED_LISTS_ORANGE = new Color(255, 119, 0);
+    private static final Color GLAZED_LISTS_ORANGE_LIGHT = new Color(241, 212, 189);
+
+    private static final Color FILTER_PANEL_BLUE = new Color(126, 165, 232);
+    private static final Color FILTER_PANEL_BLUE_LIGHT = new Color(197, 210, 232);
+
+    private static final Border BLACK_LINE_BORDER = BorderFactory.createLineBorder(Color.BLACK);
 
     /** an event list to host the issues */
     private UniqueList issuesEventList = new UniqueList(new BasicEventList());
@@ -112,6 +116,8 @@ public class IssuesBrowser extends Applet {
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
         SortedList issuesSortedList = new SortedList(priorityList);
 
+        issuesTextFiltered.getFilterEdit().setBorder(BLACK_LINE_BORDER);
+
         // issues table
         EventTableModel issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
@@ -127,15 +133,18 @@ public class IssuesBrowser extends Applet {
         issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
 //        TableComparatorChooser tableSorter = new TableComparatorChooser(issuesJTable, issuesSortedList, true);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        issuesTableScrollPane.setBorder(BLACK_LINE_BORDER);
 
         // users table
         JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        usersListScrollPane.setBorder(BLACK_LINE_BORDER);
 
         // descriptions
         EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
         JTable descriptionsTable = new JTable(descriptionsTableModel);
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
         JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        descriptionsTableScrollPane.setBorder(BLACK_LINE_BORDER);
 
         // priority slider
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
@@ -144,10 +153,12 @@ public class IssuesBrowser extends Applet {
         Hashtable prioritySliderLabels = new Hashtable();
         prioritySliderLabels.put(new Integer(0), new JLabel("Low"));
         prioritySliderLabels.put(new Integer(100), new JLabel("High"));
+        prioritySlider.setOpaque(false);
         prioritySlider.setLabelTable(prioritySliderLabels);
         prioritySlider.setSnapToTicks(true);
         prioritySlider.setPaintLabels(true);
         prioritySlider.setPaintTicks(true);
+        prioritySlider.setForeground(UIManager.getColor("Label.foreground"));
         prioritySlider.setMajorTickSpacing(25);
 
         // projects
@@ -157,7 +168,7 @@ public class IssuesBrowser extends Applet {
         EventComboBoxModel projectsComboModel = new EventComboBoxModel(projects);
         JComboBox projectsCombo = new JComboBox(projectsComboModel);
         projectsCombo.setEditable(false);
-        projectsCombo.setBackground(GLAZED_LISTS_ORANGE);
+        projectsCombo.setBackground(GLAZED_LISTS_ORANGE_LIGHT);
         projectsCombo.addItemListener(new ProjectChangeListener());
         projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project..."));
 
@@ -175,19 +186,18 @@ public class IssuesBrowser extends Applet {
         iconBar.add(throbber,                                new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
         // create the filters panel
-        JPanel filtersPanel = new JPanel();
+        JPanel filtersPanel = new GradientPanel(FILTER_PANEL_BLUE, FILTER_PANEL_BLUE_LIGHT);
         filtersPanel.setLayout(new GridBagLayout());
-        filtersPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+        filtersPanel.setBorder(BLACK_LINE_BORDER);
         filtersPanel.add(new JLabel("Text Filter"),          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 5, 10), 0, 0));
         filtersPanel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
-        filtersPanel.add(new JLabel("Minimum Priority"),     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE, new Insets(5,  10, 5,   10), 0, 0));
-        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,  10, 15,  10), 0, 0));
+        filtersPanel.add(new JLabel("Minimum Priority"),     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
+        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
         filtersPanel.add(new JLabel("User"),                 new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
         filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 10, 10), 0, 0));
 
-
         // a panel with a table
-        JPanel panel = new JPanel();
+        JPanel panel = new GradientPanel(GLAZED_LISTS_ORANGE, GLAZED_LISTS_ORANGE_LIGHT);
         panel.setLayout(new GridBagLayout());
         panel.add(iconBar,                                   new GridBagConstraints(0, 0, 2, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
         panel.add(filtersPanel,                              new GridBagConstraints(0, 1, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
@@ -245,22 +255,55 @@ public class IssuesBrowser extends Applet {
      */
     private class IndeterminateToggler implements Runnable, Throbber {
 
-        /** whether the throbber will be turned on and off */
+        /** whether the throbber will be turned on or off */
         private boolean on = false;
 
         public synchronized void setOn() {
-            on = true;
-            SwingUtilities.invokeLater(this);
+            if (!on) {
+                on = true;
+                SwingUtilities.invokeLater(this);
+            }
         }
 
         public synchronized void setOff() {
-            on = false;
-            SwingUtilities.invokeLater(this);
+            if (on) {
+                on = false;
+                SwingUtilities.invokeLater(this);
+            }
         }
 
         public synchronized void run() {
             if(on) throbber.setIcon(throbberActive);
             else throbber.setIcon(throbberStatic);
+        }
+    }
+
+    /**
+     * A customized panel which paints a color gradient for its background
+     * rather than a single color. The start and end colors of the gradient
+     * are specified via the constructor.
+     */
+    private static class GradientPanel extends JPanel {
+        private Color gradientStartColor;
+        private Color gradientEndColor;
+
+        public GradientPanel(Color gradientStartColor, Color gradientEndColor) {
+            this.gradientStartColor = gradientStartColor;
+            this.gradientEndColor = gradientEndColor;
+        }
+
+        public void paintComponent(Graphics g) {
+            if (this.isOpaque()) {
+                Graphics2D g2 = (Graphics2D) g;
+                final Paint oldPainter = g2.getPaint();
+
+                try {
+                    g2.setPaint(new GradientPaint(0, 0, this.gradientStartColor, 0, this.getHeight(), this.gradientEndColor));
+                    g2.fill(g2.getClip());
+                } finally {
+                    g2.setPaint(oldPainter);
+                }
+            }
         }
     }
 }
