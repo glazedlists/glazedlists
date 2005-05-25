@@ -311,8 +311,13 @@ public class EventTableViewer implements ListEventListener {
         public void handleEvent(Event e) {
             TableItem item = (TableItem)e.item;
             int tableIndex = table.indexOf(item);
-            Object value = swtSource.get(tableIndex);
-            setItemText(item, value);
+
+            // since deletes may occur in bulk, the Table could fire improper
+            // Virtual Table events to access values that are no longer available.
+            if(tableIndex < swtSource.size()) {
+                Object value = swtSource.get(tableIndex);
+                setItemText(item, value);
+            }
         }
     }
 
