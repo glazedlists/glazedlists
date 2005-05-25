@@ -223,8 +223,11 @@ public class EventTableViewer implements ListEventListener {
      */
     public void listChanged(ListEvent listChanges) {
         swtSource.getReadWriteLock().readLock().lock();
-        int firstModified = swtSource.size();
+        int firstChange = swtSource.size();
         try {
+            // Disable redraws so that the table is updated in bulk
+            table.setRedraw(false);
+
             // Apply changes to the list
             while(listChanges.next()) {
                 int changeIndex = listChanges.getIndex();
@@ -232,17 +235,22 @@ public class EventTableViewer implements ListEventListener {
 
                 if(changeType == ListEvent.INSERT) {
                     addRow(changeIndex, swtSource.get(changeIndex));
-                    firstModified = Math.min(changeIndex, firstModified);
+                    firstChange = Math.min(changeIndex, firstChange);
                 } else if(changeType == ListEvent.UPDATE) {
                     updateRow(changeIndex, swtSource.get(changeIndex));
                 } else if(changeType == ListEvent.DELETE) {
                     table.remove(changeIndex);
-                    firstModified = Math.min(changeIndex, firstModified);
+                    firstChange = Math.min(changeIndex, firstChange);
                 }
             }
 
             // Reapply selection to the Table
-            selection.fireSelectionChanged(firstModified, swtSource.size() - 1);
+            if(firstChange < swtSource.size()) {
+                selection.fireSelectionChanged(firstChange, swtSource.size() - 1);
+            }
+
+            // Re-enable redraws to update the table
+            table.setRedraw(true);
         } finally {
             swtSource.getReadWriteLock().readLock().unlock();
         }
