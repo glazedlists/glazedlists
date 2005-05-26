@@ -5,7 +5,6 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
 // to respond to selection changes
 import ca.odell.glazedlists.gui.*;
 // for listening to list selection events
