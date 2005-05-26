@@ -122,6 +122,7 @@ public class IssuesBrowser extends Applet {
         EventTableModel issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel(issuesSortedList);
+        issuesSelectionModel.setSelectionMode(SelectionList.SINGLE_SELECTION);
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
         issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);
@@ -134,6 +135,8 @@ public class IssuesBrowser extends Applet {
         TableComparatorChooser tableSorter = new TableComparatorChooser(issuesJTable, issuesSortedList, true);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         issuesTableScrollPane.setBorder(BLACK_LINE_BORDER);
+        issuesTableScrollPane.setOpaque(false);
+        issuesTableScrollPane.getViewport().setOpaque(false);
 
         // users table
         JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -145,6 +148,8 @@ public class IssuesBrowser extends Applet {
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
         JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         descriptionsTableScrollPane.setBorder(BLACK_LINE_BORDER);
+        descriptionsTableScrollPane.setOpaque(false);
+        descriptionsTableScrollPane.getViewport().setBackground(UIManager.getColor("List.background"));
 
         // priority slider
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
