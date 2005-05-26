@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/ 
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.demo.issuebrowser.swt;
 
@@ -80,18 +80,6 @@ public class IssuesUserFilter extends AbstractFilterList {
 
         /** {@inheritDoc} */
         public void listChanged(ListEvent listChanges) {
-            // skip reorderings
-            if(listChanges.isReordering()) {
-                listChanges.getReorderMap();
-                return;
-            }
-
-            // Loop through all the changes to see how the filters change
-            boolean constrained = false;
-            boolean relaxed = false;
-            while(listChanges.next()) {
-                // do nothing
-            }
 
             // The filter now contains a different set of users
             getReadWriteLock().writeLock().lock();

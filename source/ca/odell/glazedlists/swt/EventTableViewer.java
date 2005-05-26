@@ -7,6 +7,8 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
+// to make of use Barcode
+import ca.odell.glazedlists.impl.adt.*;
 // SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
@@ -46,6 +48,9 @@ public class EventTableViewer implements ListEventListener {
     /** For selection management */
     private SelectionManager selection = null;
 
+    /** To track multiple removes in one change to fix issue 197 */
+    private Barcode deletes = new Barcode();
+
     /**
      * Creates a new viewer for the given {@link Table} that updates the table
      * contents in response to changes on the specified {@link EventList}.  The
@@ -65,6 +70,7 @@ public class EventTableViewer implements ListEventListener {
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
         disposeSource = swtSource;
+        deletes.addWhite(0, swtSource.size());
 
         // insert a checked source if supported by the table
         if((table.getStyle() & SWT.CHECK) > 0) {
@@ -231,17 +237,36 @@ public class EventTableViewer implements ListEventListener {
             // Apply changes to the list
             while(listChanges.next()) {
                 int changeIndex = listChanges.getIndex();
+                int adjustedIndex = deletes.getIndex(changeIndex, Barcode.WHITE);
                 int changeType = listChanges.getType();
 
+                // Insert a new element in the Table and the Barcode
                 if(changeType == ListEvent.INSERT) {
-                    addRow(changeIndex, swtSource.get(changeIndex));
+                    deletes.addWhite(adjustedIndex, 1);
+                    addRow(adjustedIndex, swtSource.get(changeIndex));
                     firstChange = Math.min(changeIndex, firstChange);
+
+                // Update the element in the Table
                 } else if(changeType == ListEvent.UPDATE) {
-                    updateRow(changeIndex, swtSource.get(changeIndex));
+                    updateRow(adjustedIndex, swtSource.get(changeIndex));
+
+                // Just mark the element as deleted in the Barcode
                 } else if(changeType == ListEvent.DELETE) {
-                    table.remove(changeIndex);
+                    deletes.setBlack(adjustedIndex, 1);
                     firstChange = Math.min(changeIndex, firstChange);
                 }
+            }
+
+            // Process the deletes as a single Table change
+            if(deletes.blackSize() > 0) {
+                int[] deletedIndices = new int[deletes.blackSize()];
+                for(BarcodeIterator i = deletes.iterator(); i.hasNextBlack(); ) {
+                    i.nextBlack();
+                    deletedIndices[i.getBlackIndex()] = i.getIndex();
+                }
+                table.remove(deletedIndices);
+                deletes.clear();
+                deletes.addWhite(0, swtSource.size());
             }
 
             // Reapply selection to the Table
@@ -309,15 +334,19 @@ public class EventTableViewer implements ListEventListener {
      */
     protected final class VirtualTableListener implements Listener {
         public void handleEvent(Event e) {
+            // Get the TableItem from the Table
             TableItem item = (TableItem)e.item;
             int tableIndex = table.indexOf(item);
 
-            // since deletes may occur in bulk, the Table could fire improper
-            // Virtual Table events to access values that are no longer available.
-            if(tableIndex < swtSource.size()) {
-                Object value = swtSource.get(tableIndex);
-                setItemText(item, value);
+            // Adjust the index to where it should be if it is beyond size
+            if(tableIndex >= swtSource.size()) {
+                tableIndex = deletes.getWhiteIndex(tableIndex, false);
             }
+
+
+
+            // Set the value on the Virtual element
+            setItemText(item, swtSource.get(tableIndex));
         }
     }
 

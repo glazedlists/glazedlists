@@ -594,6 +594,12 @@ public class SelectionList extends TransformedList {
      * sorted, ascending order.
      */
     public void setSelection(int[] indices) {
+        // fast fail is the selection is empty
+        if(indices.length == 0) {
+            deselectAll();
+            return;
+        }
+
         // have to keep track of what deselected values were added and removed
         List changes = new ArrayList();
 
@@ -604,7 +610,7 @@ public class SelectionList extends TransformedList {
         // iterate through the barcode updating the selected list as you go
         selectedList.updates().beginEvent();
         int currentIndex = 0;
-        for(BarcodeIterator i = barcode.iterator();i.hasNext() && currentIndex != indices.length; ) {
+        for(BarcodeIterator i = barcode.iterator();i.hasNext(); ) {
             Object value = i.next();
             // this element should be selected
             if(i.getIndex() == indices[currentIndex]) {
@@ -613,10 +619,12 @@ public class SelectionList extends TransformedList {
                     if(firstAffectedIndex == -1) firstAffectedIndex = i.getIndex();
                     lastAffectedIndex = i.getIndex();
                     int deselectedIndex = i.getColourIndex(deselected);
-                    changes.add(new DeselectedChange(ListEvent.INSERT, deselectedIndex));
+                    changes.add(new DeselectedChange(ListEvent.DELETE, deselectedIndex));
                     selectedList.updates().addInsert(i.set(selected));
                 }
-                currentIndex++;
+
+                // look at the next value
+                if(currentIndex < indices.length - 1) currentIndex++;
 
             // element was selected and isn't within the new selection
             } else if(value == selected) {
