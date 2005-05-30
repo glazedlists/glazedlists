@@ -48,9 +48,6 @@ public class EventTableViewer implements ListEventListener {
     /** For selection management */
     private SelectionManager selection = null;
 
-    /** To track multiple removes in one change to fix issue 197 */
-    private Barcode deletes = new Barcode();
-
     /**
      * Creates a new viewer for the given {@link Table} that updates the table
      * contents in response to changes on the specified {@link EventList}.  The
@@ -70,7 +67,6 @@ public class EventTableViewer implements ListEventListener {
     public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
         disposeSource = swtSource;
-        deletes.addWhite(0, swtSource.size());
 
         // insert a checked source if supported by the table
         if((table.getStyle() & SWT.CHECK) > 0) {
@@ -94,7 +90,9 @@ public class EventTableViewer implements ListEventListener {
             populateTable();
         } else {
             table.setItemCount(source.size());
-            table.addListener(SWT.SetData, new VirtualTableListener());
+            VirtualTableHandler vtHandler = new VirtualTableHandler();
+            table.addListener(SWT.SetData, vtHandler);
+            swtSource.addListEventListener(vtHandler);
         }
 
         // listen for events, using the user interface thread
@@ -229,6 +227,8 @@ public class EventTableViewer implements ListEventListener {
      */
     public void listChanged(ListEvent listChanges) {
         swtSource.getReadWriteLock().readLock().lock();
+        Barcode deletes = new Barcode();
+        deletes.addWhite(0, swtSource.size());
         int firstChange = swtSource.size();
         try {
             // Disable redraws so that the table is updated in bulk
@@ -267,11 +267,6 @@ public class EventTableViewer implements ListEventListener {
                 table.remove(deletedIndices);
                 deletes.clear();
                 deletes.addWhite(0, swtSource.size());
-            }
-
-            // Reapply selection to the Table
-            if(firstChange < swtSource.size()) {
-                selection.fireSelectionChanged(firstChange, swtSource.size() - 1);
             }
 
             // Re-enable redraws to update the table
@@ -329,24 +324,68 @@ public class EventTableViewer implements ListEventListener {
     }
 
     /**
-     * Respond to view changes on a {@link Table} that is created with the
-     * {@link SWT#VIRTUAL} style flag.
+     * Handles the inner workings of Virtual Tables.
      */
-    protected final class VirtualTableListener implements Listener {
+    protected final class VirtualTableHandler implements Listener, ListEventListener {
+
+        /** to keep track of what's been requested */
+        private Barcode requested = null;
+
+        /**
+         * Create a new VirtualTableHandler.
+         */
+        public VirtualTableHandler() {
+            requested = new Barcode();
+            requested.addWhite(0, swtSource.size());
+        }
+
+        /**
+         * To update the Barcode as change events come in.
+         */
+        public void listChanged(ListEvent listChanges) {
+            // process all the changes.
+            while(listChanges.next()) {
+
+                int changeType = listChanges.getType();
+                int changeIndex = listChanges.getIndex();
+
+                // Insert a value
+                if(changeType == ListEvent.INSERT) {
+                    // The value will be added as a Virtual item
+                    if(changeIndex == requested.size()) {
+                        requested.addWhite(requested.size(), 1);
+
+                    // The value will be added explictly
+                    } else {
+                        requested.addBlack(changeIndex, 1);
+                    }
+
+                // Updates anywhere require explicit value setting
+                } else if(changeType == ListEvent.UPDATE) {
+                    requested.setBlack(changeIndex, 1);
+
+                // Remove a value
+                } else if(changeType == ListEvent.DELETE) {
+                    requested.remove(changeIndex, 1);
+                }
+            }
+        }
+
+        /**
+         * Respond to requests for values to fill Virtual rows.
+         */
         public void handleEvent(Event e) {
             // Get the TableItem from the Table
             TableItem item = (TableItem)e.item;
-            int tableIndex = table.indexOf(item);
 
-            // Adjust the index to where it should be if it is beyond size
-            if(tableIndex >= swtSource.size()) {
-                tableIndex = deletes.getWhiteIndex(tableIndex, false);
-            }
-
-
+            // Calculate the index that should be requested because the Table
+            // might be sending incorrectly indexed TableItems in the event.
+            int whiteIndex = requested.getWhiteIndex(table.getTopIndex(), false);
+            int index = requested.getIndex(whiteIndex, Barcode.WHITE);
 
             // Set the value on the Virtual element
-            setItemText(item, swtSource.get(tableIndex));
+            requested.setBlack(index, 1);
+            setItemText(item, swtSource.get(index));
         }
     }
 
