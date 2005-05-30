@@ -23,7 +23,7 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N)</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>88 bytes per element, plus 140 bytes per unique element</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>196 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
@@ -34,11 +34,11 @@ public final class PopularityList extends TransformedList {
 
     /** the list of distinct elements */
     private UniqueList uniqueList;
-    
+
     /**
      * Creates a new {@link PopularityList} that provides frequency-ranking for the
      * specified {@link EventList}.
-     * 
+     *
      * @param uniqueComparator The {@link Comparator} used to determine equality.
      */
     public PopularityList(EventList source, Comparator uniqueComparator) {
@@ -52,7 +52,7 @@ public final class PopularityList extends TransformedList {
     public PopularityList(EventList source) {
         this(source, new UniqueList(source));
     }
-    
+
     /**
      * Private constructor is used as a Java-language hack to allow us to save
      * a reference to the specified {@link UniqueList}.
