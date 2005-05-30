@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicboject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.nio;
 
