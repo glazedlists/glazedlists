@@ -30,8 +30,8 @@ public class EventTableViewer implements ListEventListener {
     /** the heavyweight table */
     private Table table;
 
-    /** whether the underlying table is Virtual */
-    private boolean tableIsVirtual = false;
+    /** to manipulate Tables in a generic way */
+    private TableHandler tableHandler = null;
 
     /** the first source event list to dispose */
     private TransformedList disposeSource = null;
@@ -69,7 +69,7 @@ public class EventTableViewer implements ListEventListener {
         disposeSource = swtSource;
 
         // insert a checked source if supported by the table
-        if((table.getStyle() & SWT.CHECK) > 0) {
+        if((table.getStyle() & SWT.CHECK) == SWT.CHECK) {
             checkFilter = new TableCheckFilterList(swtSource, table, tableFormat);
             swtSource = checkFilter;
         }
@@ -78,22 +78,19 @@ public class EventTableViewer implements ListEventListener {
         this.table = table;
         this.tableFormat = tableFormat;
 
-        // Enable the selection lists
+        // enable the selection lists
         selection = new SelectionManager(swtSource, new SelectableTable());
 
-        // determine if the provided table is Virtual
-        tableIsVirtual = SWT.VIRTUAL == (table.getStyle() & SWT.VIRTUAL);
-
-        // setup initial values
-        initTable();
-        if(!tableIsVirtual) {
-            populateTable();
+        // configure how the Table will be manipulated
+        if((table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL) {
+            tableHandler = new VirtualTableHandler();
         } else {
-            table.setItemCount(source.size());
-            VirtualTableHandler vtHandler = new VirtualTableHandler();
-            table.addListener(SWT.SetData, vtHandler);
-            swtSource.addListEventListener(vtHandler);
+            tableHandler = new DefaultTableHandler();
         }
+
+        // setup the Table with initial values
+        initTable();
+        tableHandler.populateTable();
 
         // listen for events, using the user interface thread
         swtSource.addListEventListener(this);
@@ -109,38 +106,6 @@ public class EventTableViewer implements ListEventListener {
             column.setText((String)tableFormat.getColumnName(c));
             column.setWidth(80);
         }
-    }
-
-    /**
-     * Populates the table with the initial data from the list.
-     */
-    private void populateTable() {
-        for(int r = 0; r < swtSource.size(); r++) {
-            addRow(r, swtSource.get(r));
-        }
-    }
-
-    /**
-     * Adds the item at the specified row.
-     */
-    private void addRow(int row, Object value) {
-        // Table isn't Virtual, or adding in the middle
-        if(!tableIsVirtual || row < table.getItemCount()) {
-            TableItem item = new TableItem(table, 0, row);
-            setItemText(item, value);
-
-        // Table is Virtual and adding at the end
-        } else {
-            table.setItemCount(table.getItemCount() + 1);
-        }
-    }
-
-    /**
-     * Updates the item at the specified row.
-     */
-    private void updateRow(int row, Object value) {
-        TableItem item = table.getItem(row);
-        setItemText(item, value);
     }
 
     /**
@@ -243,12 +208,12 @@ public class EventTableViewer implements ListEventListener {
                 // Insert a new element in the Table and the Barcode
                 if(changeType == ListEvent.INSERT) {
                     deletes.addWhite(adjustedIndex, 1);
-                    addRow(adjustedIndex, swtSource.get(changeIndex));
+                    tableHandler.addRow(adjustedIndex, swtSource.get(changeIndex));
                     firstChange = Math.min(changeIndex, firstChange);
 
                 // Update the element in the Table
                 } else if(changeType == ListEvent.UPDATE) {
-                    updateRow(adjustedIndex, swtSource.get(changeIndex));
+                    tableHandler.updateRow(adjustedIndex, swtSource.get(changeIndex));
 
                 // Just mark the element as deleted in the Barcode
                 } else if(changeType == ListEvent.DELETE) {
@@ -265,8 +230,6 @@ public class EventTableViewer implements ListEventListener {
                     deletedIndices[i.getBlackIndex()] = i.getIndex();
                 }
                 table.remove(deletedIndices);
-                deletes.clear();
-                deletes.addWhite(0, swtSource.size());
             }
 
             // Re-enable redraws to update the table
@@ -281,6 +244,26 @@ public class EventTableViewer implements ListEventListener {
      */
     public void invertSelection() {
         selection.getSelectionList().invertSelection();
+    }
+
+    /**
+     * Releases the resources consumed by this {@link EventTableViewer} so that it
+     * may eventually be garbage collected.
+     *
+     * <p>An {@link EventTableViewer} will be garbage collected without a call to
+     * {@link #dispose()}, but not before its source {@link EventList} is garbage
+     * collected. By calling {@link #dispose()}, you allow the {@link EventTableViewer}
+     * to be garbage collected before its source {@link EventList}. This is
+     * necessary for situations where an {@link EventTableViewer} is short-lived but
+     * its source {@link EventList} is long-lived.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on a {@link EventTableViewer} after it has been disposed.
+     */
+    public void dispose() {
+        tableHandler.dispose();
+        selection.dispose();
+        disposeSource.dispose();
     }
 
     /**
@@ -324,9 +307,74 @@ public class EventTableViewer implements ListEventListener {
     }
 
     /**
-     * Handles the inner workings of Virtual Tables.
+     * Defines how Tables will be manipulated.
      */
-    protected final class VirtualTableHandler implements Listener, ListEventListener {
+    private interface TableHandler {
+
+        /**
+         * Populate the Table with data.
+         */
+        public void populateTable();
+
+        /**
+         * Add a row with the given value.
+         */
+        public void addRow(int row, Object value);
+
+        /**
+         * Update a row with the given value.
+         */
+        public void updateRow(int row, Object value);
+
+        /**
+         * Disposes of this TableHandler
+         */
+        public void dispose();
+    }
+
+    /**
+     * Allows manipulation of standard SWT Tables.
+     */
+    private final class DefaultTableHandler implements TableHandler {
+        /**
+         * Populate the Table with initial data.
+         */
+        public void populateTable() {
+            for(int r = 0; r < swtSource.size(); r++) {
+                addRow(r, swtSource.get(r));
+            }
+        }
+
+        /**
+         * Adds a row with the given value.
+         */
+        public void addRow(int row, Object value) {
+            TableItem item = new TableItem(table, 0, row);
+            setItemText(item, value);
+        }
+
+        /**
+         * Updates a row with the given value.
+         */
+        public void updateRow(int row, Object value) {
+            TableItem item = table.getItem(row);
+            setItemText(item, value);
+        }
+
+        /**
+         * Disposes of this TableHandler.
+         */
+        public void dispose() {
+            // no-op for default Tables
+        }
+    }
+
+    /**
+     * Allows manipulation of Virtual Tables and handles additional aspects
+     * like providing the SetData callback method and tracking tracking which
+     * values are Virtual.
+     */
+    private final class VirtualTableHandler implements TableHandler, Listener, ListEventListener {
 
         /** to keep track of what's been requested */
         private Barcode requested = null;
@@ -337,6 +385,60 @@ public class EventTableViewer implements ListEventListener {
         public VirtualTableHandler() {
             requested = new Barcode();
             requested.addWhite(0, swtSource.size());
+            table.addListener(SWT.SetData, this);
+            swtSource.addListEventListener(this);
+        }
+
+        /**
+         * Populate the Table with initial data.
+         */
+        public void populateTable() {
+            table.setItemCount(swtSource.size());
+        }
+
+        /**
+         * Adds a row with the given value.
+         */
+        public void addRow(int row, Object value) {
+            // Adding before the last non-Virtual value
+            if(row <= getLastIndex()) {
+                TableItem item = new TableItem(table, 0, row);
+                setItemText(item, value);
+
+            // Adding in the Virtual values at the end
+            } else {
+                table.setItemCount(table.getItemCount() + 1);
+            }
+        }
+
+        /**
+         * Updates a row with the given value.
+         */
+        public void updateRow(int row, Object value) {
+            // Only set a row if it is NOT Virtual
+            if(!isVirtual(row)) {
+                TableItem item = table.getItem(row);
+                setItemText(item, value);
+            }
+        }
+
+        /**
+         * Returns the highest index that has been requested or -1 if the
+         * Table is entirely Virtual.
+         */
+        private int getLastIndex() {
+            // Everything is Virtual
+            if(requested.blackSize() == 0) return -1;
+
+            // Return the last index
+            else return requested.getIndex(requested.blackSize() - 1, Barcode.BLACK);
+        }
+
+        /**
+         * Returns whether a particular row is Virtual in the Table.
+         */
+        private boolean isVirtual(int rowIndex) {
+            return requested.getBlackIndex(rowIndex) == -1;
         }
 
         /**
@@ -387,24 +489,13 @@ public class EventTableViewer implements ListEventListener {
             requested.setBlack(index, 1);
             setItemText(item, swtSource.get(index));
         }
-    }
 
-    /**
-     * Releases the resources consumed by this {@link EventTableViewer} so that it
-     * may eventually be garbage collected.
-     *
-     * <p>An {@link EventTableViewer} will be garbage collected without a call to
-     * {@link #dispose()}, but not before its source {@link EventList} is garbage
-     * collected. By calling {@link #dispose()}, you allow the {@link EventTableViewer}
-     * to be garbage collected before its source {@link EventList}. This is
-     * necessary for situations where an {@link EventTableViewer} is short-lived but
-     * its source {@link EventList} is long-lived.
-     *
-     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
-     * to call any method on a {@link EventTableViewer} after it has been disposed.
-     */
-    public void dispose() {
-        selection.dispose();
-        disposeSource.dispose();
+        /**
+         * Allows this handler to clean up after itself.
+         */
+        public void dispose() {
+            table.removeListener(SWT.SetData, this);
+            swtSource.removeListEventListener(this);
+        }
     }
 }

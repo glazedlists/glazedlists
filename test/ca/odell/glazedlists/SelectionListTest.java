@@ -179,4 +179,31 @@ public class SelectionListTest extends TestCase {
         assertEquals(new Integer(15), selectedList.get(5));
         assertEquals(14, deselectedList.size());
     }
+
+    /**
+     * Test setting selection via an index array.
+     */
+    public void testSettingSelectionByArray() {
+        int[] testArray1 = {0, 1, 5, 6, 8, 9, 14, 15, 18, 19};
+        int[] testArray2 = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        int[] testArray3 = {0, 1, 2, 3, 4, 15, 16, 17, 18, 19};
+        for(int i = 0; i < 20; i++) {
+            source.add(new Integer(i));
+        }
+
+        // select with array 1
+        source.setSelection(testArray1);
+        assertEquals(10, selectedList.size());
+        assertEquals(10, deselectedList.size());
+
+        // select with array 2
+        source.setSelection(testArray2);
+        assertEquals(10, selectedList.size());
+        assertEquals(10, deselectedList.size());
+
+        // select with array 3
+        source.setSelection(testArray3);
+        assertEquals(10, selectedList.size());
+        assertEquals(10, deselectedList.size());
+    }
 }
