@@ -8,6 +8,8 @@ import ca.odell.glazedlists.demo.issuebrowser.*;
 import ca.odell.glazedlists.demo.Launcher;
 // swing
 import javax.swing.*;
+import javax.swing.table.TableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.border.Border;
 import javax.swing.event.*;
 import java.awt.event.*;
@@ -16,9 +18,13 @@ import java.awt.*;
 import java.net.URL;
 // glazed lists
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
+import java.util.Vector;
+import java.text.MessageFormat;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -40,16 +46,21 @@ public class IssuesBrowser extends Applet {
     private UniqueList issuesEventList = new UniqueList(new BasicEventList());
 
     /** the currently selected issues */
-    private EventSelectionModel issuesSelectionModel;
+    private EventSelectionModel issuesSelectionModel = null;
 
-    /** an event list to host the descriptions */
+    private TableModel issuesTableModel = null;
+
     private Issue descriptionIssue = null;
+    /** an event list to host the descriptions */
     private EventList descriptions = new BasicEventList();
 
     /** monitor loading the issues */
     private JLabel throbber = null;
     private ImageIcon throbberActive = null;
     private ImageIcon throbberStatic = null;
+
+    /** a label to display the count of issues in the issue table */
+    private IssueCounterLabel issueCounter = null;
 
     /** loads issues as requested */
     private IssueLoader issueLoader = new IssueLoader(issuesEventList, new IndeterminateToggler());
@@ -114,12 +125,17 @@ public class IssuesBrowser extends Applet {
         IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
         TextFilterList issuesTextFiltered = new TextFilterList(issuesUserFiltered);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-        SortedList issuesSortedList = new SortedList(priorityList);
+        final SortedList issuesSortedList = new SortedList(priorityList);
 
         issuesTextFiltered.getFilterEdit().setBorder(BLACK_LINE_BORDER);
 
         // issues table
-        EventTableModel issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
+        issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
+        issuesSortedList.addListEventListener(new ListEventListener() {
+            public void listChanged(ListEvent listChanges) {
+                issueCounter.setIssueCount(issuesSortedList.size());
+            }
+        });
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel(issuesSortedList);
         issuesSelectionModel.setSelectionMode(SelectionList.SINGLE_SELECTION);
@@ -132,7 +148,7 @@ public class IssuesBrowser extends Applet {
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
         issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
-        TableComparatorChooser tableSorter = new TableComparatorChooser(issuesJTable, issuesSortedList, true);
+        new TableComparatorChooser(issuesJTable, issuesSortedList, true);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         issuesTableScrollPane.setBorder(BLACK_LINE_BORDER);
         issuesTableScrollPane.setOpaque(false);
@@ -192,8 +208,9 @@ public class IssuesBrowser extends Applet {
 
         // create the filters panel
         JPanel filtersPanel = new GradientPanel(FILTER_PANEL_BLUE, FILTER_PANEL_BLUE_LIGHT);
-        filtersPanel.setLayout(new GridBagLayout());
         filtersPanel.setBorder(BLACK_LINE_BORDER);
+        filtersPanel.setPreferredSize(new Dimension(200, 400));
+        filtersPanel.setLayout(new GridBagLayout());
         filtersPanel.add(new JLabel("Text Filter"),          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 5, 10), 0, 0));
         filtersPanel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
         filtersPanel.add(new JLabel("Minimum Priority"),     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
@@ -201,18 +218,26 @@ public class IssuesBrowser extends Applet {
         filtersPanel.add(new JLabel("User"),                 new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
         filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 10, 10), 0, 0));
 
-        // a panel to layout the filters with the data tables
-        JPanel filterAndDataPanel = new GradientPanel(GLAZED_LISTS_ORANGE, GLAZED_LISTS_ORANGE_LIGHT);
-        filterAndDataPanel.setLayout(new GridBagLayout());
-        filterAndDataPanel.add(filtersPanel,                              new GridBagConstraints(0, 0, 1, 2, 0.15, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 5, 5), 0, 0));
-        filterAndDataPanel.add(issuesTableScrollPane,                     new GridBagConstraints(1, 0, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 5, 5), 0, 0));
-        filterAndDataPanel.add(descriptionsTableScrollPane,               new GridBagConstraints(1, 1, 1, 1, 0.85, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+        // put some insets around the filters panel
+        JPanel filterSpacerPanel = new GradientPanel(GLAZED_LISTS_ORANGE, GLAZED_LISTS_ORANGE_LIGHT);
+        filterSpacerPanel.setLayout(new GridBagLayout());
+        filterSpacerPanel.add(filtersPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 5, 5), 0, 0));
+
+        // build a label to display the number of issues in the issue table
+        issueCounter = new IssueCounterLabel();
+
+        // assemble all data components on a common panel
+        JPanel dataPanel = new GradientPanel(GLAZED_LISTS_ORANGE, GLAZED_LISTS_ORANGE_LIGHT);
+        dataPanel.setLayout(new GridBagLayout());
+        dataPanel.add(issuesTableScrollPane,       new GridBagConstraints(0, 0, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 0, 5), 0, 0));
+        dataPanel.add(issueCounter,                new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 5, 0, 5), 0, 0));
+        dataPanel.add(descriptionsTableScrollPane, new GridBagConstraints(0, 2, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 5, 5), 0, 0));
 
         // the outermost panel to layout the icon bar with the other panels
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridBagLayout());
-        mainPanel.add(iconBar,            new GridBagConstraints(0, 0, 1, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        mainPanel.add(filterAndDataPanel, new GridBagConstraints(0, 1, 1, 1, 1.00, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(iconBar,           BorderLayout.NORTH);
+        mainPanel.add(filterSpacerPanel, BorderLayout.WEST);
+        mainPanel.add(dataPanel,         BorderLayout.CENTER);
 
         return mainPanel;
     }
@@ -285,6 +310,26 @@ public class IssuesBrowser extends Applet {
         public synchronized void run() {
             if(on) throbber.setIcon(throbberActive);
             else throbber.setIcon(throbberStatic);
+        }
+    }
+
+    /**
+     * A custom label designed for displaying the number of issues in the issue
+     * table. Use {@link #setIssueCount(int)} to update the text of the label
+     * to reflect a new issue count.
+     */
+    private static class IssueCounterLabel extends JLabel {
+        private int issueCount = -1;
+
+        {
+            this.setIssueCount(0);
+        }
+
+        public void setIssueCount(int issueCount) {
+            if (this.issueCount != issueCount) {
+                this.issueCount = issueCount;
+                this.setText(MessageFormat.format("{0} {0,choice,0#issues|1#issue|1<issues}", new Object[] {new Integer(issueCount)}));
+            }
         }
     }
 
