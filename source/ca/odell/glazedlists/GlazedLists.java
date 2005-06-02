@@ -306,4 +306,38 @@ public final class GlazedLists {
     public static ListEventListener weakReferenceProxy(EventList source, ListEventListener target) {
         return new WeakReferenceProxy(source, target);
     }
+
+    // ObservableElementList Connectors // // // // // // // // // // // // //
+
+    /**
+     * Create a new Connector for the {@link ObservableElementList} that works with
+     * JavaBeans' {@link java.beans.PropertyChangeListener}. The methods to add
+     * and remove listeners are detected automatically by examining the bean class
+     * and searching for a method prefixed with "add" or "remove" taking a single
+     * {@link java.beans.PropertyChangeListener} argument.
+     *
+     *
+     * @param beanClass a class with both <code>addPropertyChangeListener(PropertyChangeListener)</code>
+     *      and <code>removePropertyChangeListener(PropertyChangeListener)</code>,
+     *      or similar methods.
+     * @return an ObservableElementList.Connector for the specified class
+     */
+    public static ObservableElementList.Connector beanConnector(Class beanClass) {
+        return new JavaBeanEventListConnector(beanClass);
+    }
+
+    /**
+     * Create a new Connector for the {@link ObservableElementList} that works with
+     * JavaBeans' {@link java.beans.PropertyChangeListener}. The methods to add
+     * and remove listeners are specified by name. Such methods must take a single
+     * {@link java.beans.PropertyChangeListener} argument.
+     *
+     * @param beanClass a class with both methods as specified.
+     * @param addListener a method name such as "addPropertyChangeListener"
+     * @param removeListener a method name such as "removePropertyChangeListener"
+     * @return an ObservableElementList.Connector for the specified class
+     */
+    public static ObservableElementList.Connector beanConnector(Class beanClass, String addListener, String removeListener) {
+        return new JavaBeanEventListConnector(beanClass, addListener, removeListener);
+    }
 }

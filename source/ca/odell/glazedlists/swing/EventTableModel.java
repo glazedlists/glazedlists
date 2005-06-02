@@ -97,6 +97,29 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     }
 
     /**
+     * Retrieves the value at the specified location from the table.
+     *
+     * <p>This may be used by renderers to paint the cells of a row differently
+     * based on the entire value for that row. 
+     *
+     * @see ca.odell.glazedlists.swing.EventTableModel#getValueAt(int,int) ListTable
+     */
+    public Object getElementAt(int index) {
+        swingSource.getReadWriteLock().readLock().lock();
+        try {
+            // ensure that this value still exists before retrieval
+            if(index < swingSource.size()) {
+                return swingSource.get(index);
+            } else {
+                return null;
+            }
+        } finally {
+            swingSource.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+
+    /**
      * For implementing the ListEventListener interface. This sends changes
      * to the table which can repaint the table cells. Because this class uses
      * a EventThreadProxy, it is guaranteed that all natural
