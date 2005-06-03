@@ -17,6 +17,8 @@ import java.awt.*;
 import java.net.URL;
 // glazed lists
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
@@ -119,13 +121,16 @@ public class IssuesBrowser extends Applet {
      * Display a frame for browsing issues.
      */
     private JPanel constructView() {
+        // create a MatcherEditor which edits the filter text
+        final JTextField filterTextField = new JTextField();
+        filterTextField.setBorder(BLACK_LINE_BORDER);
+        final MatcherEditor filterMatcherEditor = new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterTextField, null));
+
         // create the lists
         IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
-        TextFilterList issuesTextFiltered = new TextFilterList(issuesUserFiltered);
+        FilterList issuesTextFiltered = new FilterList(issuesUserFiltered, filterMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
         final SortedList issuesSortedList = new SortedList(priorityList);
-
-        issuesTextFiltered.getFilterEdit().setBorder(BLACK_LINE_BORDER);
 
         // issues table
         issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
@@ -210,7 +215,7 @@ public class IssuesBrowser extends Applet {
         filtersPanel.setPreferredSize(new Dimension(200, 400));
         filtersPanel.setLayout(new GridBagLayout());
         filtersPanel.add(new JLabel("Text Filter"),          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 5, 10), 0, 0));
-        filtersPanel.add(issuesTextFiltered.getFilterEdit(), new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
+        filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
         filtersPanel.add(new JLabel("Minimum Priority"),     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
         filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
         filtersPanel.add(new JLabel("User"),                 new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));

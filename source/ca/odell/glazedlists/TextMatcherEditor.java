@@ -10,7 +10,7 @@ import ca.odell.glazedlists.impl.filter.*;
  * A matcher editor that matches Objects that contain a filter text
  * string. This {@link TextMatcherEditor} is not coupled with any UI
  * component that allows the user to edit the filter text. That job is left to
- * subclasses. This list is fully concrete, and may be used directly by
+ * subclasses. This matcher is fully concrete, and may be used directly by
  * headless applications.
  *
  * <p>The {@link TextMatcherEditor} requires that either a
@@ -30,18 +30,6 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
     private String[] filters = new String[0];
 
     /**
-     * Creates a {@link TextMatcherEditor} that matches Objects using the
-     * specified {@link TextFilterator} to get the {@link String}s to search.
-     *
-     * @param filterator the object that will extract filter Strings from each
-     *      object in the <code>source</code>; <code>null</code> indicates the
-     *      list elements implement {@link TextFilterable}
-     */
-    public TextMatcherEditor(TextFilterator filterator) {
-        this.filterator = filterator;
-    }
-
-    /**
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
      * implement the {@link TextFilterable} interface.
      *
@@ -51,6 +39,18 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
      */
     public TextMatcherEditor() {
         this(null);
+    }
+
+    /**
+     * Creates a {@link TextMatcherEditor} that matches Objects using the
+     * specified {@link TextFilterator} to get the {@link String}s to search.
+     *
+     * @param filterator the object that will extract filter Strings from each
+     *      object in the <code>source</code>; <code>null</code> indicates the
+     *      list elements implement {@link TextFilterable}
+     */
+    public TextMatcherEditor(TextFilterator filterator) {
+        this.filterator = filterator;
     }
 
     /**
