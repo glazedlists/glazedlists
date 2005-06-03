@@ -343,7 +343,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
     protected class ReaderLock extends Signaller implements Lock {
         
         public  void lock() /*throws InterruptedException*/ {
-            if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
+            //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
             InterruptedException ie = null;
             synchronized(this) {
                 if (!startReadFromNewReader()) {
@@ -366,7 +366,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
                 // This notification is not really needed here, 
                 //   but may be in plausible subclasses
                 writerLock_.signalWaiters();
-                throw new RuntimeException("Lock interrupted", ie);
+                throw new RuntimeException("Lock interrupted, " + ie);
             }
         }
         
@@ -381,7 +381,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
         
         public boolean tryLock() /* throws InterruptedException */ { 
             long msecs = 0;
-            if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
+            //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
             InterruptedException ie = null;
             synchronized(this) {
                 if (msecs <= 0)
@@ -412,7 +412,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
             }
             // safeguard on interrupt or timeout:
             writerLock_.signalWaiters();
-            if (ie != null) throw new RuntimeException("Lock interrupted", ie);
+            if (ie != null) throw new RuntimeException("Lock interrupted, " + ie);
             else return false; // timed out
         }
     }
@@ -420,7 +420,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
     protected class WriterLock extends Signaller implements  Lock {
         
         public void lock() /*throws InterruptedException*/ {
-            if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
+            //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
             InterruptedException ie = null;
             synchronized(this) {
                 if (!startWriteFromNewWriter()) {
@@ -444,7 +444,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
                 //  On exception, we may need to signal readers.
                 //  It is not worth checking here whether it is strictly necessary.
                 readerLock_.signalWaiters();
-                throw new RuntimeException("Lock interrupted", ie);
+                throw new RuntimeException("Lock interrupted, " + ie);
             }
         }
         
@@ -457,7 +457,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
         
         public boolean tryLock() /* throws InterruptedException */ {
             long msecs = 0;
-            if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
+            //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
             InterruptedException ie = null;
             synchronized(this) {
                 if (msecs <= 0)
@@ -490,7 +490,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
             }
             
             readerLock_.signalWaiters();
-            if (ie != null) throw new RuntimeException("Lock interrupted", ie);
+            if (ie != null) throw new RuntimeException("Lock interrupted, " + ie);
             else return false; // timed out
         }
     }
