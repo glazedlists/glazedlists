@@ -9,7 +9,6 @@ import ca.odell.glazedlists.demo.Launcher;
 // swing
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.border.Border;
 import javax.swing.event.*;
 import java.awt.event.*;
@@ -23,7 +22,6 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
-import java.util.Vector;
 import java.text.MessageFormat;
 
 /**
