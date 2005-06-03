@@ -261,7 +261,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
                         matcherEventQueue.remove(0);
                 }
             } finally {
-                // no matter the circumstance for us exitting the Runnable,
+                // no matter the circumstance for us exiting the Runnable,
                 // ensure we indicate we are no longer draining the queue
                 isDrainingQueue = false;
             }
