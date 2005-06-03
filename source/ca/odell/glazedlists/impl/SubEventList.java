@@ -62,7 +62,7 @@ public final class SubEventList extends TransformedList {
 
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            source.addListEventListener(GlazedLists.weakReferenceProxy(source, this));
+            source.addListEventListener(new WeakReferenceProxy(source, this));
         } else {
             source.addListEventListener(this);
         }
@@ -130,7 +130,7 @@ public final class SubEventList extends TransformedList {
                 }
             }
         }
-        assert(startIndex <= endIndex);
+        if(startIndex > endIndex) throw new IllegalStateException();
         updates.commitEvent();
     }
 }

@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.util.concurrent;
 
-// the Glazed Lists for testing the internal lock
-import ca.odell.glazedlists.SortedList;
-
 /**
  * An internal read-write lock manages a pair of read-write locks. This allows
  * modification at two levels: at the source level and at the local/internal
@@ -14,8 +11,9 @@ import ca.odell.glazedlists.SortedList;
  * source level with only a read-lock, while locking the local/internal level with
  * a write lock.
  *
- * <p>This is useful for classes such as {@link SortedList}, where changes
- * to the internal structure occur without modifying the source structure.
+ * <p>This is useful for classes such as {@link ca.odell.glazedlists.SortedList},
+ * where changes to the internal structure occur without modifying the source
+ * structure.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

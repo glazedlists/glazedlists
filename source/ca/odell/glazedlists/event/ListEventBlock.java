@@ -36,8 +36,8 @@ final class ListEventBlock {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.type = type;
-        assert(startIndex >= 0 && endIndex >= startIndex);
-        assert(type == ListEvent.INSERT || type == ListEvent.UPDATE || type == ListEvent.DELETE);
+        if(startIndex < 0 || endIndex < startIndex) throw new IllegalArgumentException();
+        if(type != ListEvent.INSERT && type != ListEvent.UPDATE && type != ListEvent.DELETE) throw new IllegalArgumentException();
     }
 
     /**
@@ -54,7 +54,7 @@ final class ListEventBlock {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.type = type;
-        assert(startIndex >= 0 && endIndex >= startIndex);
+        if(startIndex < 0 || endIndex < startIndex) throw new IllegalArgumentException();
     }
     
     /**
@@ -110,7 +110,7 @@ final class ListEventBlock {
             startIndex = Math.min(appendStartIndex, startIndex);
             endIndex = Math.max(appendEndIndex, endIndex);
         }
-        assert(startIndex >= 0 && endIndex >= startIndex);
+        if(startIndex < 0 || endIndex < startIndex) throw new IllegalStateException();
         return true;
     }
     
@@ -204,7 +204,7 @@ final class ListEventBlock {
      * Removes the contradiction contained within the specified list of two blocks.
      */
     private static void simplifyContradiction(List contradictingPair) {
-        assert(contradictingPair.size() == 2);
+        if(contradictingPair.size() != 2) throw new IllegalStateException();
         ListEventBlock first = (ListEventBlock)contradictingPair.get(0);
         ListEventBlock second = (ListEventBlock)contradictingPair.get(1);
         
@@ -330,7 +330,7 @@ final class ListEventBlock {
         } else if(beta.type == ListEvent.DELETE) {
             alpha.startIndex -= movedLength;
             alpha.endIndex -= movedLength;
-            assert(alpha.startIndex >= 0);
+            if(alpha.startIndex < 0) throw new IllegalStateException();
         }
     }
     

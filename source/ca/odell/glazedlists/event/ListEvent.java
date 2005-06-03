@@ -99,7 +99,7 @@ public final class ListEvent extends EventObject {
             
         // we can just increment the row on the current change
         } else {
-            assert(rowIndex < currentBlock.getEndIndex());
+            if(rowIndex >= currentBlock.getEndIndex()) throw new IllegalStateException();
             rowIndex++;
             return true;
         }

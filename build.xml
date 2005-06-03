@@ -171,6 +171,23 @@
 
 
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       SPECIAL TARGETS
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <target name="java13" depends="init" description="Compile a limited subset of Glazed Lists for deployment on a J2SE 1.3">
+        <mkdir dir="classes"/>
+        <javac destdir="classes" srcdir="source" debug="on" source="1.3" target="1.3" deprecation="on">
+            <exclude name="*"/>
+            <include name="**/event/**"/>
+            <include name="**/BasicEventList.java"/>
+            <include name="**/EventList.java"/>
+            <include name="**/SubEventList.java"/>
+            <include name="**/EventListIterator.java"/>
+            <include name="**/SimpleIterator.java"/>
+            <include name="**/concurrent/**"/>
+        </javac>
+    </target>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	   REDISTRIBUTING THE SOURCE
