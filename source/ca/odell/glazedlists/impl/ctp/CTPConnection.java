@@ -6,7 +6,6 @@ package ca.odell.glazedlists.impl.ctp;
 // NIO is used for CTP
 import ca.odell.glazedlists.impl.nio.*;
 import java.util.*;
-import java.nio.*;
 import java.nio.channels.*;
 import java.net.*;
 import java.io.*;
@@ -257,7 +256,7 @@ public final class CTPConnection implements NIOAttachment {
     /**
      * Sends the request header to the server.
      *
-     * @param code an HTTP response code such as 200 (OK). See HTTP/1.1 RFC, 6.1.1
+     * @param uri the web address of the target page
      * @param headers a Map of HTTP request headers. See HTTP/1.1 RFC, 6.2. This can
      *      be null to indicate no headers.
      */
@@ -531,9 +530,6 @@ public final class CTPConnection implements NIOAttachment {
      * <li>If the state is READY, the goodbye is a single 0-byte chunk
      * <li>If the state is SERVER_AWAITING_REQUEST, the goodbye is a request error
      * <li>If the state is RECEIVED_CLOSE, no goodbye message is sent
-     *
-     * @return This method returns false because the connection is always in an
-     *      unreadable and unwritable state after a close.
      */
     public void close(Exception reason) {
         manager.getNIODaemon().invokeLater(new CloseConnection(this, reason));
