@@ -241,16 +241,13 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
                     // acquire the monitor that guards assigning the drainMatcherEventQueueRunnable
                     // to a processing Thread as well as exiting the drainMatcherEventQueueRunnable
                     synchronized (matcherEventQueue) {
-                        // if no work exists in the queue, signal that we're no longer draining
-                        // the queue and exit the Runnable
+                        // if no work exists in the queue, exit the Runnable
                         if (matcherEventQueue.isEmpty())
                             return;
                     }
 
-                    // we intentionally don't specify a size for the array so that the call to fetch all of the current
-                    // MatcherEvents is atomic. i.e. matcherEventQueue.toArray(new MatcherEvent[matcherEventQueue.size()] is NOT
-                    // atomic since it involves TWO calls into matcherEventQueue which could be interleaved with mutations
-                    final MatcherEvent[] matcherEvents = (MatcherEvent[]) matcherEventQueue.toArray(new MatcherEvent[0]);
+                    // fetch a copy of all MatcherEvents currently in the queue
+                    final MatcherEvent[] matcherEvents = (MatcherEvent[]) matcherEventQueue.toArray(new MatcherEvent[matcherEventQueue.size()]);
 
                     // coalesce all of the current MatcherEvents to a single representative MatcherEvent
                     final MatcherEvent coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
