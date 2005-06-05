@@ -9,7 +9,7 @@ import ca.odell.glazedlists.event.*;
 import java.util.*;
 
 /**
- * A convenience class for {@link EventList}s that decorate other {@link EventList}s.
+ * A convenience class for {@link EventList}s that decorate another {@link EventList}.
  * Extending classes transform their source {@link EventList} by modifying the
  * order, visibility and value of its elements.
  *
@@ -20,7 +20,7 @@ import java.util.*;
  * source writable via this API.
  *
  * <p>Extending classes must explicitly call {@link #addListEventListener(ListEventListener)}
- * to receive for change notification from the source {@link EventList}.
+ * to receive change notifications from the source {@link EventList}.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
@@ -36,7 +36,7 @@ public abstract class TransformedList extends AbstractEventList implements ListE
     /**
      * Creates a {@link TransformedList} to transform the specified {@link EventList}.
      *
-     * @param source the {@link EventList} to transform..
+     * @param source the {@link EventList} to transform.
      */
     protected TransformedList(EventList source) {
         super(source.getPublisher());
