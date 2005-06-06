@@ -242,7 +242,18 @@ public final class ListEventAssembler {
             fireEvent();
         }
     }
-    
+
+    /**
+     * Returns <tt>true</tt> if the current atomic change to this list change
+     * queue is empty; <tt>false</tt> otherwise.
+     *
+     * @return <tt>true</tt> if the current atomic change to this list change
+     *      queue is empty; <tt>false</tt> otherwise
+     */
+    public boolean isEventEmpty() {
+        return this.atomicChangeBlocks == null || this.atomicChangeBlocks.isEmpty();
+    }
+
     /**
      * Fires the current event. This needs to be called for each fired
      * event exactly once, even if that event includes nested events.
@@ -250,7 +261,7 @@ public final class ListEventAssembler {
     private void fireEvent() {
         try {
             // bail on empty changes
-            if(atomicChangeBlocks.size() == 0) return;
+            if(atomicChangeBlocks.isEmpty()) return;
 
             // protect against the listener set changing via a duplicate list
             List listenersToNotify = new ArrayList();
