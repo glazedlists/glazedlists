@@ -1,15 +1,12 @@
 package ca.odell.glazedlists.impl.beans;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 import junit.framework.TestCase;
 
 import javax.swing.*;
-
-import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.GlazedLists;
-
-import java.util.List;
 
 public class JavaBeanEventListConnectorTest extends TestCase {
 
