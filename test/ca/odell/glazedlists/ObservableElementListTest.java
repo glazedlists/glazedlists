@@ -3,9 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.beans.JavaBeanEventListConnector;
 import junit.framework.TestCase;
 
 import javax.swing.*;
+import java.util.EventListener;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -129,5 +131,43 @@ public class ObservableElementListTest extends TestCase {
         assertTrue(listElement1 == list.get(0));
         list.remove(0);
         assertTrue(list.isEmpty());
+    }
+
+    public void testPickyConnector() {
+        final ObservableElementList list = new ObservableElementList(new BasicEventList(), new PickyConnector(JLabel.class));
+        final JLabel listElement1 = new JLabel();
+        final int initialListenerCount = listElement1.getPropertyChangeListeners().length;
+
+        list.add(listElement1);
+        assertEquals(initialListenerCount, listElement1.getPropertyChangeListeners().length);
+
+        list.add(listElement1);
+        assertEquals(initialListenerCount + 1, listElement1.getPropertyChangeListeners().length);
+
+        list.remove(0);
+        assertEquals(initialListenerCount + 1, listElement1.getPropertyChangeListeners().length);
+
+        list.remove(0);
+        assertTrue(list.isEmpty());
+        assertEquals(initialListenerCount, listElement1.getPropertyChangeListeners().length);
+    }
+
+    /**
+     * This connector only installs JavaBean listeners on every second element
+     * that is added to the associated {@link ObservableElementList}.
+     */
+    private class PickyConnector extends JavaBeanEventListConnector {
+        private int elementCount = 0;
+
+        public PickyConnector(Class beanClass) {
+            super(beanClass);
+        }
+
+        public EventListener installListener(Object element) {
+            if (this.elementCount++ % 2 == 0)
+                return null;
+
+            return super.installListener(element);
+        }
     }
 }

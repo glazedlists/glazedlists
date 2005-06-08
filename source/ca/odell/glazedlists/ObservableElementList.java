@@ -167,7 +167,7 @@ public class ObservableElementList extends TransformedList {
         if (this.elementConnector == null)
             throw new IllegalStateException("This list has been disposed and can no longer be used.");
 
-        if (listElement != null)
+        if (listElement != null && listener != null)
             this.elementConnector.uninstallListener(listElement, listener);
     }
 
