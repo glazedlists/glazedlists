@@ -4,6 +4,8 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.Barcode;
+import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -16,8 +18,8 @@ import java.util.Iterator;
  * on every list element. Listeners are registered as elements are added to
  * this list and unregistered as elements are removed from this list. Users
  * must specify an implementation of a {@link Connector} in the constructor
- * which contains the necessary logic for registering and unregistering a
- * appropriate listener for detecting modifications on an observable list
+ * which contains the necessary logic for registering and unregistering an
+ * appropriate listener for detecting modifications to an observable list
  * element.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
@@ -45,14 +47,7 @@ public class ObservableElementList extends TransformedList {
      * the removed element as part of the ListEvent. We use this list to locate
      * removed elements for the purpose of unregistering listeners from them.
      */
-    private final List observedElements;
-
-    /**
-     * A list which parallels {@link #observedElements}. It stores the
-     * {@link EventListener} associated with the observed element at the same
-     * index within {@link #observedElements}.
-     */
-    private final List listeners;
+    private List observedElements;
 
     /**
      * The connector object containing the logic for registering and
@@ -62,6 +57,38 @@ public class ObservableElementList extends TransformedList {
      * to notify this list of the changed object.
      */
     private Connector elementConnector = null;
+
+    /**
+     * <tt>true</tt> indicates a single shared EventListener is used for each
+     * element being observed. Consequently, {@link #singleEventListenerRegistry}
+     * is the compact data structure used to track which elements are being
+     * listened to by the {@link #singleEventListener}. <tt>false</tt>
+     * indicates {@link #multiEventListenerRegistry} is used to track each
+     * individual EventListener installed on each individual list element.
+     */
+    private boolean singleListenerMode = true;
+
+    /**
+     * A list which parallels {@link #observedElements}. It stores the unique
+     * {@link EventListener} associated with the observed element at the same
+     * index within {@link #observedElements}.
+     */
+    private List multiEventListenerRegistry = null;
+
+    /**
+     * The single {@link EventListener} shared by all list elements if a
+     * common listener is returned from the {@link Connector} of this list.
+     */
+    private EventListener singleEventListener = null;
+
+    /**
+     * The compact data structure which identifies the observed elements that
+     * have had the {@link #singleEventListener} registered on them.
+     * {@link Barcode#BLACK} indicates the {@link #singleEventListener} has
+     * been registered on the element at the index; {@link Barcode#WHITE}
+     * indicates no listener was registered on the element at the index.
+     */
+    private Barcode singleEventListenerRegistry = null;
 
     /**
      * Constructs an <code>ObservableElementList</code> which wraps the given
@@ -85,13 +112,22 @@ public class ObservableElementList extends TransformedList {
         // which List to notify of their modifications
         this.elementConnector.setObservableElementList(this);
 
+        // for speed, we add all source elements together, rather than individually
         this.observedElements = new ArrayList(source);
-        this.listeners = new ArrayList(source.size());
+
+        // we initialize the single EventListener registry, as we optimistically
+        // assume we'll be using a single listener for all observed elements
+        this.singleEventListenerRegistry = new Barcode();
+        this.singleEventListenerRegistry.addWhite(0, source.size());
 
         // add listeners to all source list elements
-        for (Iterator iter = this.iterator(); iter.hasNext();) {
-            EventListener listener = this.connectElement(iter.next());
-            this.listeners.add(listener);
+        int index = 0;
+        for (Iterator iter = this.iterator(); iter.hasNext(); index++) {
+            // connect a listener to the element
+            final EventListener listener = this.connectElement(iter.next());
+
+            // record the listener in the registry
+            this.registerListener(index, listener, false);
         }
 
         // begin listening to the source list
@@ -99,6 +135,9 @@ public class ObservableElementList extends TransformedList {
     }
 
     public void listChanged(ListEvent listChanges) {
+        if (this.observedElements == null)
+            throw new IllegalStateException("This list has been disposed and can no longer be used.");
+
         // add listeners to inserted list elements and remove listeners from deleted elements
         while(listChanges.next()) {
             final int changeIndex = listChanges.getIndex();
@@ -107,14 +146,20 @@ public class ObservableElementList extends TransformedList {
             // register a listener on the inserted object
             if (changeType == ListEvent.INSERT) {
                 final Object inserted = get(changeIndex);
-                final EventListener listener = this.connectElement(inserted);
                 this.observedElements.add(changeIndex, inserted);
-                this.listeners.add(changeIndex, listener);
+
+                // connect a listener to the freshly inserted element
+                final EventListener listener = this.connectElement(inserted);
+                // record the listener in the registry
+                this.registerListener(changeIndex, listener, false);
 
             // unregister a listener on the deleted object
             } else if (changeType == ListEvent.DELETE) {
                 final Object deleted = this.observedElements.remove(changeIndex);
-                final EventListener listener = (EventListener) this.listeners.remove(changeIndex);
+
+                // remove the listener from the registry
+                final EventListener listener = this.unregisterListener(changeIndex);
+                // disconnect the listener from the freshly deleted element
                 this.disconnectElement(deleted, listener);
 
             // register/unregister listeners if the value at the changeIndex is now a different object
@@ -122,17 +167,93 @@ public class ObservableElementList extends TransformedList {
                 final Object previousValue = this.observedElements.get(changeIndex);
                 final Object newValue = get(changeIndex);
 
+                // if a different object is present at the index
                 if (newValue != previousValue) {
-                    this.disconnectElement(previousValue, (EventListener) this.listeners.get(changeIndex));
-                    final EventListener listener = this.connectElement(newValue);
                     this.observedElements.set(changeIndex, newValue);
-                    this.listeners.set(changeIndex, listener);
+
+                    // disconnect the listener from the previous element at the index
+                    this.disconnectElement(previousValue, this.getListener(changeIndex));
+                    // connect the listener to the new element at the index
+                    final EventListener listener = this.connectElement(newValue);
+                    // replace the old listener in the registry with the new listener for the new element
+                    this.registerListener(changeIndex, listener, true);
                 }
             }
         }
 
         listChanges.reset();
         this.updates.forwardEvent(listChanges);
+    }
+
+    /**
+     * A convenience method for adding a listener into the appropriate listener
+     * registry. The <code>listener</code> will be registered at the specified
+     * <code>index</code> and will be added if <code>replace</code> is <tt>true</tt>
+     * or will replace any existing listener at the <code>index</code> if
+     * <code>replace</code> is <tt>false</tt>.
+     *
+     * @param index the index of the observed element the <code>listener</code>
+     *      is attached to
+     * @param listener the {@link EventListener} registered to the observed
+     *      element at the given <code>index</code>
+     * @param replace <tt>true</tt> indicates the listener should be replaced
+     *      at the given index; <tt>false</tt> indicates it should be added
+     */
+    private void registerListener(int index, EventListener listener, boolean replace) {
+        if (replace) {
+            // if replace is false, we should call set() on the appropriate registry
+            if (this.singleListenerMode)
+                this.singleEventListenerRegistry.set(index, listener == null ? Barcode.WHITE : Barcode.BLACK, 1);
+            else
+                this.multiEventListenerRegistry.set(index, listener);
+        } else {
+            // if replace is true, we should call replace() on the appropriate registry
+            if (this.singleListenerMode)
+                this.singleEventListenerRegistry.add(index, listener == null ? Barcode.WHITE : Barcode.BLACK, 1);
+            else
+                this.multiEventListenerRegistry.add(index, listener);
+        }
+    }
+
+    /**
+     * Returns the {@link EventListener} at the given <code>index</code>.
+     *
+     * @param index the location of the {@link EventListener} to be returned
+     * @return the {@link EventListener} at the given <code>index</code>
+     */
+    private EventListener getListener(int index) {
+        EventListener listener = null;
+
+        if (this.singleListenerMode) {
+            if (this.singleEventListenerRegistry.get(index) == Barcode.BLACK)
+                listener = this.singleEventListener;
+        } else {
+            listener = (EventListener) this.multiEventListenerRegistry.get(index);
+        }
+
+        return listener;
+    }
+
+    /**
+     * A convenience method for removing a listener at the specified
+     * <code>index</code> from the appropriate listener registry.
+     *
+     * @param index the index of the {@link EventListener} to be unregistered
+     * @return the EventListener that was unregistered or <code>null</code> if
+     *      no EventListener existed at the given <code>index</code>
+     */
+    private EventListener unregisterListener(int index) {
+        EventListener listener = null;
+
+        if (this.singleListenerMode) {
+            if (this.singleEventListenerRegistry.get(index) == Barcode.BLACK)
+                listener = this.singleEventListener;
+            this.singleEventListenerRegistry.remove(index, 1);
+        } else {
+            listener = (EventListener) this.multiEventListenerRegistry.remove(index);
+        }
+
+        return listener;
     }
 
     /**
@@ -147,10 +268,22 @@ public class ObservableElementList extends TransformedList {
      *      list elements
      */
     private EventListener connectElement(Object listElement) {
-        if (this.elementConnector == null)
-            throw new IllegalStateException("This list has been disposed and can no longer be used.");
+        // listeners cannot be installed on null listElements
+        if (listElement == null)
+            return null;
 
-        return listElement == null ? null : this.elementConnector.installListener(listElement);
+        // use the elementConnector to install a listener on the listElement
+        final EventListener listener = this.elementConnector.installListener(listElement);
+
+        // test if the new listener transfers us from single event mode to multi event mode
+        if (this.singleListenerMode && listener != null) {
+            if (this.singleEventListener == null)
+                this.singleEventListener = listener;
+            else if (listener != this.singleEventListener)
+                this.switchToMultiListenerMode();
+        }
+
+        return listener;
     }
 
     /**
@@ -164,11 +297,44 @@ public class ObservableElementList extends TransformedList {
      *      list elements
      */
     private void disconnectElement(Object listElement, EventListener listener) {
-        if (this.elementConnector == null)
-            throw new IllegalStateException("This list has been disposed and can no longer be used.");
-
         if (listElement != null && listener != null)
             this.elementConnector.uninstallListener(listElement, listener);
+    }
+
+    /**
+     * This method converts the data structures which are optimized for storing
+     * a single instance of an EventListener shared amongst all observed
+     * elements into data structures which are appropriate for storing
+     * individual instances of EventListeners for each observed element.
+     *
+     * <p>Note: this is a one-time switch only and cannot be reversed
+     */
+    private void switchToMultiListenerMode() {
+        assert(this.singleListenerMode);
+
+        // build a new data structure appropriate for individual storing
+        // listeners for each observed element
+        this.multiEventListenerRegistry = new ArrayList(this.source.size());
+
+        // for each black entry in the singleEventListenerRegistry create an
+        // entry in the multiEventListenerRegistry at the corresponding index
+        // for the singleEventListener
+        for (BarcodeIterator iter = this.singleEventListenerRegistry.iterator(); iter.hasNextBlack();) {
+            iter.nextBlack();
+            this.multiEventListenerRegistry.add(iter.getIndex(), this.singleEventListener);
+        }
+
+        // null out the reference to the single EventListener,
+        // since we'll now track the EventListener for each element
+        this.singleEventListener = null;
+
+        // null out the reference to the single EventList registry, since we
+        // are replacing its listener tracking mechanism with the multiEventListenerRegistry
+        this.singleEventListenerRegistry = null;
+
+        // indicate this list is no longer in single listener mode meaning we
+        // no longer assume the same listener is installed on every element
+        this.singleListenerMode = false;
     }
 
     protected boolean isWritable() {
@@ -193,16 +359,18 @@ public class ObservableElementList extends TransformedList {
         // remove all listeners from all list elements
         for (int i = 0; i < this.observedElements.size(); i++) {
             final Object element = this.observedElements.get(i);
-            final EventListener listener = (EventListener) this.listeners.get(i);
+            final EventListener listener = this.getListener(i);
             this.disconnectElement(element, listener);
         }
-        this.observedElements.clear();
-        this.listeners.clear();
 
         // clear out the reference to this list from the associated connector
         this.elementConnector.setObservableElementList(null);
 
-        // stop this list from wrongly connecting future list elements
+        // null out all references to internal data structures
+        this.observedElements = null;
+        this.multiEventListenerRegistry = null;
+        this.singleEventListener = null;
+        this.singleEventListenerRegistry = null;
         this.elementConnector = null;
 
         super.dispose();
@@ -219,6 +387,9 @@ public class ObservableElementList extends TransformedList {
      * @param element the List element which has been modified.
      */
     public void elementChanged(Object element) {
+        if (this.observedElements == null)
+            throw new IllegalStateException("This list has been disposed and can no longer be used.");
+
         this.updates.beginEvent();
 
         // locate all indexes containing the given element
@@ -240,7 +411,7 @@ public class ObservableElementList extends TransformedList {
 
     /**
      * An interface defining the methods required for registering and
-     * unregistering change listeners on list elements within
+     * unregistering change listeners on list elements within an
      * {@link ObservableElementList}. Implementations typically install a
      * single listener, such as a {@link java.beans.PropertyChangeListener} on
      * list elements to detect changes in the state of the element. The
@@ -251,11 +422,17 @@ public class ObservableElementList extends TransformedList {
     public interface Connector {
         /**
          * Start listening for events from the specified <code>element</code>.
+         * Alternatively, if the <code>element</code> does not require a
+         * listener to be attached to it (e.g. the <code>element</code> is
+         * immutable), <code>null</code> may be returned to signal that no
+         * listener was installed.
          *
          * @param element the element to be observed
          * @return the listener that was installed on the <code>element</code>
-         *      to be used as a parameter to
-         *      {@link #uninstallListener(Object, EventListener)}
+         *      to be used as a parameter to {@link #uninstallListener(Object, EventListener)}.
+         *      <code>null</code> is taken to mean no listener was installed
+         *      and thus {@link #uninstallListener(Object, EventListener)} need
+         *      not be called.
          */
         public EventListener installListener(Object element);
 

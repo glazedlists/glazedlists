@@ -30,7 +30,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
     private ObservableElementList list = null;
 
     /** The PropertyChangeListener to install on each list element. */
-    private PropertyChangeListener propertyChangeListener = new PropertyChangeHandler();
+    protected PropertyChangeListener propertyChangeListener = new PropertyChangeHandler();
 
     /**
      * Reflection is used to install/uninstall the {@link #propertyChangeListener}
@@ -146,7 +146,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
      * {@link ObservableElementList} within this Connector of changes to
      * list elements.
      */
-    private class PropertyChangeHandler implements PropertyChangeListener {
+    public class PropertyChangeHandler implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
             list.elementChanged(event.getSource());
         }
