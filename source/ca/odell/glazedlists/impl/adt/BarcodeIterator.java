@@ -338,7 +338,7 @@ public class BarcodeIterator implements Iterator {
                 affectedNode.setWhite(getIndex(), currentLocalIndex, 1);
                 if(barcode.getRootNode() != null) barcode.treeSizeChanged();
                 if(currentNode.whiteSpace == 0 && currentNode.rootSize == 0) currentNode = affectedNode;
-                return whiteSoFar + currentNode.whiteSpace;
+                return whiteSoFar + localIndex - currentNode.rootSize;
             }
 
         // Setting only one element into the trailing whitespace
