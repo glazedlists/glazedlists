@@ -44,7 +44,7 @@ public class BarcodeIterator implements Iterator {
     }
 
     /**
-     * Returns whether or not there are more values in the SparseList to
+     * Returns whether or not there are more values in the {@link Barcode} to
      * iterate over.
      */
     public boolean hasNext() {

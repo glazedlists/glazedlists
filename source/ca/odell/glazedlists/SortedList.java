@@ -287,40 +287,42 @@ public final class SortedList extends TransformedList {
         this.comparator = comparator;
         // keep the old trees to construct the reordering
         IndexedTree previousSorted = sorted;
-        IndexedTree previousUnsorted = unsorted;
         // create the sorted list with a simple comparator
         Comparator treeComparator = null;
         if(comparator != null) treeComparator = new IndexedTreeNodeComparator(comparator);
         else treeComparator = new IndexedTreeNodeRawOrderComparator();
         sorted = new IndexedTree(treeComparator);
-        // create a list which knows the offsets of the indexes
-        unsorted = new IndexedTree();
+
+        // create a list which knows the offsets of the indexes to initialize this list
+        if(previousSorted == null && unsorted == null) {
+            unsorted = new IndexedTree();
+            // add all elements in the source list, in order
+            for(int i = 0; i < source.size(); i++) {
+                IndexedTreeNode unsortedNode = unsorted.addByNode(i, this);
+                insertByUnsortedNode(unsortedNode);
+            }
+            // this is the first sort so we're done
+            return;
+        }
 
         // if the lists are empty, we're done
         if(source.size() == 0) return;
 
-        // add all elements in the source list, in order
-        for(int i = 0; i < source.size(); i++) {
-            IndexedTreeNode unsortedNode = unsorted.addByNode(i, this);
+        // rebuild the sorted tree to reflect the new Comparator
+        for(Iterator i = unsorted.iterator();i.hasNext(); ) {
+            IndexedTreeNode unsortedNode = (IndexedTreeNode)i.next();
             insertByUnsortedNode(unsortedNode);
         }
 
-        // if this is the first sort, we're done
-        if(previousSorted == null && previousUnsorted == null) return;
-
         // construct the reorder map
         int[] reorderMap = new int[size()];
-        for(int i = 0; i < reorderMap.length; i++) {
-            // first get unsorted index at i
-            IndexedTreeNode sortedNode = sorted.getNode(i);
-            IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
-            int unsortedIndex = unsortedNode.getIndex();
-            // now find original index for that unsorted index
-            IndexedTreeNode previousUnsortedNode = previousUnsorted.getNode(unsortedIndex);
-            IndexedTreeNode previousSortedNode = (IndexedTreeNode)previousUnsortedNode.getValue();
-            int previousIndex = previousSortedNode.getIndex();
-            // save the values in the reorder map
-            reorderMap[i] = previousIndex;
+        int oldSortedIndex = 0;
+        for(Iterator i = previousSorted.iterator();i.hasNext();oldSortedIndex++) {
+            IndexedTreeNode oldSortedNode = (IndexedTreeNode)i.next();
+            IndexedTreeNode unsortedNode = (IndexedTreeNode)oldSortedNode.getValue();
+            IndexedTreeNode newSortedNode = (IndexedTreeNode)unsortedNode.getValue();
+            int newSortedIndex = newSortedNode.getIndex();
+            reorderMap[newSortedIndex] = oldSortedIndex;
         }
 
         // notification about the big change

@@ -103,9 +103,10 @@ public final class IndexedTree {
      */
     public IndexedTreeNode removeByIndex(int index) {
         if(index > size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
-        IndexedTreeNode treeNode = root.getNodeWithIndex(index);
-        treeNode.removeFromTree(this);
-        return treeNode;
+        //IndexedTreeNode treeNode = root.getNodeWithIndex(index);
+        //treeNode.removeFromTree(this);
+        //return treeNode;
+        return root.removeNode(this, index);
     }
 
     /**
@@ -181,6 +182,13 @@ public final class IndexedTree {
         if(root == null) return 0;
         return root.indexOf(comparator, object, true);
     }
+
+    /**
+     * Returns an {@link Iterator} that is optimized for tree traversal.
+     */
+    //public Iterator iterator() {
+    //    return new IndexedTreeIterator(this);
+    //}
 
     /**
      * Validates the entire tree by iterating over its nodes and validating

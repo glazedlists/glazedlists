@@ -29,8 +29,8 @@ public final class IndexedTreeNode {
     private IndexedTreeNode right = null;
 
     /** the size of the left and right subtrees */
-    private int leftSize = 0;
-    private int rightSize = 0;
+    int leftSize = 0;
+    int rightSize = 0;
 
     /** the height of this subtree */
     private int height = 0;
@@ -231,6 +231,151 @@ public final class IndexedTreeNode {
         }
     }
 
+    /**
+     * Recurses down from the root and removes the node at the given index.
+     */
+    IndexedTreeNode removeNode(IndexedTree host, int index) {
+        // recurse to the left
+        if(index < leftSize) {
+            leftSize--;
+            return left.removeNode(host, index);
+
+        // recurse on the right side
+        } else if(index > leftSize) {
+            rightSize--;
+            return right.removeNode(host, index - (leftSize + 1));
+        }
+
+        // if this is a leaf, we can delete it outright
+        if(leftSize == 0 && rightSize == 0) {
+            // update the parent
+            if(parent != null) {
+                parent.replaceChildNode(this, null);
+                parent.ensureAVL(host);
+            } else {
+                host.setRootNode(null);
+            }
+        // if this node has only a left child, we can replace this with that child
+        } else if(leftSize > 0 && rightSize == 0) {
+            // update the left child
+            left.parent = parent;
+            // update the parent
+            if(parent != null) {
+                parent.replaceChildNode(this, left);
+                parent.ensureAVL(host);
+            } else {
+                host.setRootNode(left);
+            }
+        // if this node has only a right child, we can replace this with that child
+        } else if(leftSize == 0 && rightSize > 0) {
+            // update the right child
+            right.parent = parent;
+            // update the parent
+            if(parent != null) {
+                parent.replaceChildNode(this, right);
+                parent.ensureAVL(host);
+            } else {
+                host.setRootNode(right);
+            }
+        // if this node has two children, replace this node with the best of the biggest
+        } else {
+            IndexedTreeNode replacement = null;
+            // if the left side is larger, use a left side node
+            if(leftSize > rightSize) {
+                leftSize--;
+                replacement = left.pruneLargestChild(host);
+
+            // otherwise use a right side node
+            } else {
+                rightSize--;
+                replacement = right.pruneSmallestChild(host);
+            }
+
+            // update the left child
+            replacement.left = left;
+            replacement.leftSize = leftSize;
+            if(left != null) left.parent = replacement;
+
+            // update the right child
+            replacement.right = right;
+            replacement.rightSize = rightSize;
+            if(right != null) right.parent = replacement;
+            // update the height
+            replacement.height = height;
+            // update the parent
+            replacement.parent = parent;
+            if(parent != null) {
+                parent.replaceChildNode(this, replacement);
+            } else {
+                host.setRootNode(replacement);
+            }
+        }
+        // clear all the linking and size values
+        clearNodeValues();
+        return this;
+    }
+
+    /**
+     * Removes the smallest child of the subtree rooted at this and returns it.
+     */
+    IndexedTreeNode pruneSmallestChild(IndexedTree host) {
+        // recurse down the tree
+        if(leftSize > 0) {
+            leftSize--;
+            return left.pruneSmallestChild(host);
+        }
+
+        IndexedTreeNode replacement = null;
+        // this node has a right child
+        if(rightSize != 0) {
+            replacement = right;
+            right.parent = parent;
+        }
+
+        // update the parent
+        if(parent != null) {
+            parent.replaceChildNode(this, replacement);
+            parent.ensureAVL(host);
+        } else {
+            host.setRootNode(replacement);
+        }
+
+        // clear all the linking and size values
+        clearNodeValues();
+        return this;
+    }
+
+
+    /**
+     * Removes the largest child of the subtree rooted at this and returns it.
+     */
+    IndexedTreeNode pruneLargestChild(IndexedTree host) {
+        // recurse down the tree
+        if(rightSize > 0) {
+            rightSize--;
+            return right.pruneLargestChild(host);
+        }
+
+        IndexedTreeNode replacement = null;
+        // this node has a left child
+        if(leftSize != 0) {
+            replacement = left;
+            left.parent = parent;
+        }
+
+        // update the parent
+        if(parent != null) {
+            parent.replaceChildNode(this, replacement);
+            parent.ensureAVL(host);
+        } else {
+            host.setRootNode(replacement);
+        }
+
+        // clear all the linking and size values
+        clearNodeValues();
+        return this;
+    }
+
 
     /**
      * Unlinks this node from the sorted tree. This may cause the tree to
@@ -249,8 +394,6 @@ public final class IndexedTreeNode {
             } else {
                 host.setRootNode(null);
             }
-            // clear the parent
-            parent = null;
         // if this node has only a left child, we can replace this with that child
         } else if(leftSize > 0 && rightSize == 0) {
             // update the left child
@@ -307,6 +450,15 @@ public final class IndexedTreeNode {
                 host.setRootNode(middle);
             }
         }
+        // clear all the linking and size values
+        clearNodeValues();
+    }
+
+    /**
+     * Clears all values related to how this node is linked in the tree, but
+     * does NOT clear the value of the node available via setValue().
+     */
+    private void clearNodeValues() {
         // clear the parent
         parent = null;
         // clear the left child
@@ -316,6 +468,7 @@ public final class IndexedTreeNode {
         right = null;
         rightSize = 0;
     }
+
     /**
      * Notifies that a node has been removed from the specified subtree.
      * This simply decrements the count on that subtree.
