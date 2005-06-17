@@ -39,13 +39,13 @@ public final class FilterList extends TransformedList {
 
     /** the flag list contains Barcode.BLACK for items that match the current filter and Barcode.WHITE for others */
     private Barcode flagList = new Barcode();
-    
+
     /** the matcher determines whether elements get filtered in or out */
     private Matcher currentMatcher = Matchers.trueMatcher();
 
     /** the editor changes the matcher and fires events */
     private MatcherEditor currentEditor = null;
-    
+
     /** listener handles changes to the matcher */
     protected MatcherEditorListener listener = new PrivateMatcherEditorListener();
 
@@ -61,7 +61,7 @@ public final class FilterList extends TransformedList {
 
         // build a list of what is filtered and what's not
         flagList.addBlack(0, source.size());
-        
+
         // listen for changes to the source list
         source.addListEventListener(this);
     }
@@ -81,10 +81,10 @@ public final class FilterList extends TransformedList {
         this(source);
         setMatcherEditor(matcherEditor);
     }
-    
+
     /**
      * Set the {@link Matcher} which specifies which elements shall be filtered.
-     * 
+     *
      * <p>This will remove the current {@link Matcher} or {@link MatcherEditor}
      * and refilter the entire list.
      */
@@ -94,11 +94,11 @@ public final class FilterList extends TransformedList {
             currentEditor.removeMatcherEditorListener(listener);
             currentEditor = null;
         }
-        
+
         // refilter
-        listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, matcher));
+        listener.changedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, matcher));
     }
-    
+
     /**
      * Set the {@link MatcherEditor} which provides a dynamic {@link Matcher}
      * to determine which elements shall be filtered.
@@ -110,20 +110,18 @@ public final class FilterList extends TransformedList {
         // cancel the previous editor
         if(currentEditor != null) {
             currentEditor.removeMatcherEditorListener(listener);
-            currentEditor = null;
         }
-        
+
         // use the new editor
         this.currentEditor = editor;
         if(currentEditor != null) {
             currentEditor.addMatcherEditorListener(listener);
             currentMatcher = currentEditor.getMatcher();
+			listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, currentMatcher));
         } else {
             currentMatcher = Matchers.trueMatcher();
-        }
-        
-        // refilter
-        listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, currentMatcher));
+			listener.changedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, currentMatcher));
+		}
     }
 
     /** {@inheritDoc} */
@@ -257,7 +255,7 @@ public final class FilterList extends TransformedList {
         private void matchNone(MatcherEditor editor) {
             throw new UnsupportedOperationException();
         }
-            
+
         /**
          * Handles a clearing of the filter. That is, the filter list will act as
          * a passthrough and not discriminate any of the elements of the wrapped
@@ -269,10 +267,10 @@ public final class FilterList extends TransformedList {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
                 currentMatcher = Matchers.trueMatcher();
-                
+
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
-        
+
                 // for all filtered items, add them
                 for(BarcodeIterator i = flagList.iterator();i.hasNextWhite(); ) {
                     i.nextWhite();
@@ -280,14 +278,14 @@ public final class FilterList extends TransformedList {
                 }
                 flagList.clear();
                 flagList.addBlack(0, source.size());
-        
+
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
                 ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
             }
         }
-    
+
         /**
          * Handles a relaxing or widening of the filter. This may change the
          * contents of this {@link EventList} as filtered elements are unfiltered
@@ -303,10 +301,10 @@ public final class FilterList extends TransformedList {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
                 currentMatcher = matcher;
-                
+
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
-                
+
                 // debugs
                 /*System.out.print("BEFORE: ");
                 for(int i = 0; i < flagList.size(); i++) {
@@ -330,14 +328,14 @@ public final class FilterList extends TransformedList {
                         updates.addInsert(i.setBlack());
                     }
                 }
-        
+
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
                 ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
             }
         }
-    
+
         /**
          * Handles a constraining or narrowing of the filter. This may change the
          * contents of this {@link EventList} as elements are further filtered due
@@ -353,10 +351,10 @@ public final class FilterList extends TransformedList {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
                 currentMatcher = matcher;
-                
+
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
-        
+
                 // for all unfiltered items, see what the change is
                 for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack(); ) {
                     i.nextBlack();
@@ -366,14 +364,14 @@ public final class FilterList extends TransformedList {
                         updates.addDelete(blackIndex);
                     }
                 }
-        
+
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
                 ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
             }
         }
-    
+
         /**
          * Handles changes to the behavior of the filter. This may change the contents
          * of this {@link EventList} as elements are filtered and unfiltered.
@@ -388,31 +386,31 @@ public final class FilterList extends TransformedList {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
                 currentMatcher = matcher;
-                
+
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
-        
+
                 // for all source items, see what the change is
                 for(BarcodeIterator i = flagList.iterator();i.hasNext(); ) {
                     i.next();
-        
+
                     // determine if this value was already filtered out or not
                     int filteredIndex = i.getBlackIndex();
                     boolean wasIncluded = filteredIndex != -1;
                     // whether we should add this item
                     boolean include = currentMatcher.matches(source.get(i.getIndex()));
-        
+
                     // this element is being removed as a result of the change
                     if(wasIncluded && !include) {
                         i.setWhite();
                         updates.addDelete(filteredIndex);
-        
+
                     // this element is being added as a result of the change
                     } else if(!wasIncluded && include) {
                         updates.addInsert(i.setBlack());
                     }
                 }
-        
+
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {

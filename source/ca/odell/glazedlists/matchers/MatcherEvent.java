@@ -1,8 +1,9 @@
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.Matcher;
-
 import java.util.EventObject;
+
+import ca.odell.glazedlists.Matcher;
+import ca.odell.glazedlists.FilterList;
 
 /**
  * A MatcherEvent models a change in the {@link Matcher} produced by a
@@ -60,6 +61,7 @@ public class MatcherEvent extends EventObject {
      */
     public static final int CHANGED = 4;
 
+	private MatcherEditor matcherEditor;
     private final Matcher matcher;
     private final int type;
 
@@ -69,12 +71,24 @@ public class MatcherEvent extends EventObject {
 
     public MatcherEvent(MatcherEditor matcherEditor, int changeType, Matcher matcher) {
         super(matcherEditor);
+		this.matcherEditor = matcherEditor;
         this.type = changeType;
         this.matcher = matcher;
     }
 
+	public MatcherEvent(FilterList eventSource, int changeType, Matcher matcher) {
+		super(eventSource);
+		this.type = changeType;
+		this.matcher = matcher;
+	}
+
+	/**
+	 * Get the {@link MatcherEditor} that originated this event, or null
+	 * if this event originated directly from a {@link FilterList} in a call
+	 * to {@link FilterList#setMatcher(Matcher}}.
+	 */
     public MatcherEditor getMatcherEditor() {
-        return (MatcherEditor) this.getSource();
+		return this.matcherEditor;
     }
 
     public Matcher getMatcher() {
