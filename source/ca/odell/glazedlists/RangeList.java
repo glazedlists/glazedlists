@@ -40,11 +40,12 @@ public class RangeList extends TransformedList {
     public void listChanged(ListEvent listChanges) {
         // This EventList handles changes to the source EventList using a
         // two-phase approach:
-        // 1. The change event is iterated and the currently indices are
+        // 1. The change event is iterated and the current bound indices are
         //    offset to reflect the change. Each change event within the
         //    range of indices is forwarded.
-        // 2. In the second phase, the current indices are adjusted back to
-        //    their previously set 'desired values' if possible.
+        // 2. In the second phase, during setRange(), the current indices
+        //    are adjusted back to their previously set 'desired values'
+        //    if possible.
 
         updates.beginEvent(true);
 

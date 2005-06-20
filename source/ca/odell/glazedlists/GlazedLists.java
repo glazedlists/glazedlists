@@ -10,8 +10,10 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.beans.*;
+import ca.odell.glazedlists.impl.matchers.*;
 // implemented interfaces
 import ca.odell.glazedlists.gui.*;
+import ca.odell.glazedlists.matchers.*;
 import java.util.Comparator;
 
 
@@ -339,5 +341,14 @@ public final class GlazedLists {
      */
     public static ObservableElementList.Connector beanConnector(Class beanClass, String addListener, String removeListener) {
         return new JavaBeanEventListConnector(beanClass, addListener, removeListener);
+    }
+
+    // Matchers // // // // // // // // // // // // // // // // // // // // // // //
+
+    /**
+     * Get a {@link MatcherEditor} that is fixed on the specified {@link Matcher}.
+     */
+    public static MatcherEditor fixedMatcherEditor(Matcher matcher) {
+        return new FixedMatcherEditor(matcher);
     }
 }
