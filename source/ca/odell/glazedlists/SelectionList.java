@@ -303,15 +303,18 @@ public class SelectionList extends TransformedList {
 
         // Update the selected list to reflect the selection inversion
         selectedList.updates().beginEvent();
-        selectedList.updates().addDelete(0, barcode.colourSize(deselected));
-        selectedList.updates().addInsert(0, barcode.colourSize(selected));
+        selectedList.updates().addDelete(0, barcode.colourSize(deselected) - 1);
+        selectedList.updates().addInsert(0, barcode.colourSize(selected) - 1);
         selectedList.updates().commitEvent();
 
         // Update the deselected list to reflect the selection inversion
         deselectedList.updates().beginEvent();
-        deselectedList.updates().addDelete(0, barcode.colourSize(selected));
-        deselectedList.updates().addInsert(0, barcode.colourSize(deselected));
+        deselectedList.updates().addDelete(0, barcode.colourSize(selected) - 1);
+        deselectedList.updates().addInsert(0, barcode.colourSize(deselected) - 1);
         deselectedList.updates().commitEvent();
+
+        // notify selection listeners that selection has been inverted
+        fireSelectionChanged(0, size() - 1);
     }
 
     /**
@@ -408,8 +411,11 @@ public class SelectionList extends TransformedList {
      * Deselects all elements.
      */
     public void deselectAll() {
-        // keep track of how many deselected elements there were
+        // keep track of how many selected elements there were
         int selectionChangeSize = barcode.colourSize(selected);
+
+        // fast fail if there is no change to make
+        if(selectionChangeSize == 0) return;
 
         // keep track of the range of values that were affected
         int firstAffectedIndex = -1;
@@ -418,7 +424,7 @@ public class SelectionList extends TransformedList {
         // update the deselected list while processing the change
         deselectedList.updates().beginEvent();
         for(BarcodeIterator i = barcode.iterator(); i.hasNextColour(selected); ) {
-            i.next();
+            i.nextColour(selected);
             if(firstAffectedIndex == -1) firstAffectedIndex = i.getIndex();
             lastAffectedIndex = i.getIndex();
             deselectedList.updates().addInsert(i.getIndex());
@@ -428,15 +434,13 @@ public class SelectionList extends TransformedList {
         barcode.add(0, deselected, source.size());
         deselectedList.updates().commitEvent();
 
-        // update the selected list if necessary
-        if(selectionChangeSize > 0) {
-            selectedList.updates().beginEvent();
-            selectedList.updates().addDelete(0, selectionChangeSize);
-            selectedList.updates().commitEvent();
-        }
+        // update the selected list
+        selectedList.updates().beginEvent();
+        selectedList.updates().addDelete(0, selectionChangeSize - 1);
+        selectedList.updates().commitEvent();
 
         // notify listeners of selection change
-        if(firstAffectedIndex > -1) fireSelectionChanged(firstAffectedIndex, lastAffectedIndex);
+        fireSelectionChanged(firstAffectedIndex, lastAffectedIndex);
     }
 
     /**
@@ -531,6 +535,9 @@ public class SelectionList extends TransformedList {
         // keep track of how many deselected elements there were
         int deselectionChangeSize = barcode.colourSize(deselected);
 
+        // fast fail if there is nothing to change
+        if(deselectionChangeSize == 0) return;
+
         // keep track of the range of values that were affected
         int firstAffectedIndex = -1;
         int lastAffectedIndex = -1;
@@ -538,7 +545,7 @@ public class SelectionList extends TransformedList {
         // update the selected list while processing the change
         selectedList.updates().beginEvent();
         for(BarcodeIterator i = barcode.iterator(); i.hasNextColour(deselected); ) {
-            i.next();
+            i.nextColour(deselected);
             if(firstAffectedIndex == -1) firstAffectedIndex = i.getIndex();
             lastAffectedIndex = i.getIndex();
             selectedList.updates().addInsert(i.getIndex());
@@ -550,11 +557,11 @@ public class SelectionList extends TransformedList {
 
         // update the deselected list
         deselectedList.updates().beginEvent();
-        deselectedList.updates().addDelete(0, deselectionChangeSize);
+        deselectedList.updates().addDelete(0, deselectionChangeSize - 1);
         deselectedList.updates().commitEvent();
 
         // notify listeners of selection change
-        if(firstAffectedIndex > -1) fireSelectionChanged(firstAffectedIndex, lastAffectedIndex);
+        fireSelectionChanged(firstAffectedIndex, lastAffectedIndex);
     }
 
     /**
