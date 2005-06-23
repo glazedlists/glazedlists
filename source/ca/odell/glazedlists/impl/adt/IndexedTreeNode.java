@@ -22,11 +22,11 @@ import java.util.*;
 public final class IndexedTreeNode {
 
     /** the parent node, used to delete from leaf up */
-    private IndexedTreeNode parent;
+    IndexedTreeNode parent;
 
     /** the left and right child nodes */
-    private IndexedTreeNode left = null;
-    private IndexedTreeNode right = null;
+    IndexedTreeNode left = null;
+    IndexedTreeNode right = null;
 
     /** the size of the left and right subtrees */
     int leftSize = 0;
@@ -106,14 +106,6 @@ public final class IndexedTreeNode {
      */
     int size() {
         return leftSize + 1 + rightSize;
-    }
-
-    /**
-     * Creates an iterator starting at this node and continuing from here
-     * through the tree.
-     */
-    Iterator iterator() {
-        return new IndexedTreeIterator(this);
     }
 
     /**
@@ -803,69 +795,6 @@ public final class IndexedTreeNode {
             return ".";
         } else {
             return valueString;
-        }
-    }
-
-    /**
-     * A simple read-only iterator of the indexed tree.
-     *
-     * @todo implement write capability, and backward-forward
-     *      motion to complete the ListIterator interface.
-     */
-    static class IndexedTreeIterator implements Iterator {
-
-        /** the last tree node returned by this iterator */
-        private IndexedTreeNode next;
-
-        /**
-         * Creates an iterator that iterates the tree starting at the specified
-         * node.
-         */
-        public IndexedTreeIterator(IndexedTreeNode first) {
-            this.next = first;
-        }
-
-        /**
-         * Returns true if the iteration has more elements.
-         */
-        public boolean hasNext() {
-            return (next != null);
-         }
-
-        /**
-         * Returns the next element in the iteration.
-         */
-        public Object next() {
-            // there are no more nodes right of this one
-            if (next == null) throw new NoSuchElementException();
-            // before returning the result, calculate the result to follow
-            IndexedTreeNode result = next;
-            // if there's a right child, return that child's leftmost child
-            if(next.rightSize != 0) {
-                next = next.right.getSmallestChildNode();
-            // if there's no right child, return the first right parent
-            } else {
-                IndexedTreeNode currentParent = next;
-                next = null;
-                // set the next value if this node has a parent on the right somewhere
-                while(currentParent.parent != null) {
-                    if(currentParent.parent.left == currentParent) {
-                        next = currentParent.parent;
-                        break;
-                    } else {
-                        currentParent = currentParent.parent;
-                    }
-                }
-            }
-            return result;
-        }
-
-        /**
-         * This operation is <strong>not implemented</strong>. Removes from
-         * the underlying collection the last element returned by the iterator.
-         */
-        public void remove() {
-            throw new UnsupportedOperationException("The method is not implemented.");
         }
     }
 }

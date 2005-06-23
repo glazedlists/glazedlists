@@ -28,7 +28,7 @@ public final class IndexedTree {
     private Comparator comparator;
 
     /** the root node of the tree, this may be replaced by a delete */
-    private IndexedTreeNode root = null;
+    IndexedTreeNode root = null;
 
     /**
      * Creates a new empty tree that uses the specified comparator to sort values.
@@ -87,8 +87,27 @@ public final class IndexedTree {
      * values use the node's {@link IndexedTreeNode#getValue()} method.
      */
     public Iterator iterator() {
-        if(root != null) return root.getSmallestChildNode().iterator();
-        else return Collections.EMPTY_LIST.iterator();
+        return new IndexedTreeIterator(this);
+    }
+
+    /**
+     * Gets an iterator for this tree. The iterator moves in sorted order
+     * for sorted trees and order of increasing index for indexed trees.
+     * This iterator returns {@link IndexedTreeNode}s, so to get the
+     * values use the node's {@link IndexedTreeNode#getValue()} method.
+     */
+    public ListIterator listIterator() {
+        return new IndexedTreeIterator(this);
+    }
+
+    /**
+     * Gets an iterator for this tree. The iterator moves in sorted order
+     * for sorted trees and order of increasing index for indexed trees.
+     * This iterator returns {@link IndexedTreeNode}s, so to get the
+     * values use the node's {@link IndexedTreeNode#getValue()} method.
+     */
+    public ListIterator listIterator(int index) {
+        return new IndexedTreeIterator(this, index);
     }
 
     /**
