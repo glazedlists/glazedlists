@@ -364,7 +364,7 @@ final class ListEventBlock {
     }
         
     /**
-     * Breaks an udpate block into two smaller update blocks. One part is stored
+     * Breaks an update block into two smaller update blocks. One part is stored
      * in the update block parameter and the other part is returned.
      */
     private static ListEventBlock split(ListEventBlock first, ListEventBlock second) {
