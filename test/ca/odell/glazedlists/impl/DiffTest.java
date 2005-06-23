@@ -33,32 +33,39 @@ public class DiffTest extends TestCase {
      * Tests to verify that Diff performs the correct number of changes.
      */
     public void testDiff() {
-        assertEquals(4, getChangeCount("algorithm", "logarithm"));
-        assertEquals(5, getChangeCount("abcabba", "cbabac"));
+        assertEquals(4, getChangeCount("algorithm", "logarithm", false));
+        assertEquals(5, getChangeCount("abcabba", "cbabac", false));
+        assertEquals(0, getChangeCount("Jesse", "JESSE", true));
+        assertEquals(8, getChangeCount("Jesse", "JESSE", false));
     }
     
     /**
      * Counts the number of changes to change target to source.
+     *
+     * <p>If case sensitivity is specified, an appropriate {@link Comparator} will be
+     * used to determine equality between elements.
      */
-    private int getChangeCount(String target, String source) {
+    private int getChangeCount(String target, String source, boolean caseSensitive) {
         EventList targetList = new BasicEventList();
         targetList.addAll(stringToList(target));
         List sourceList = stringToList(source);
-        
+
         ListEventCounter counter = new ListEventCounter();
         targetList.addListEventListener(counter);
-        
-        GlazedLists.replaceAll(targetList, sourceList, false);
+
+        if(caseSensitive) GlazedLists.replaceAll(targetList, sourceList, false, GlazedLists.caseInsensitiveComparator());
+        else GlazedLists.replaceAll(targetList, sourceList, false);
+
         return counter.getEventCount();
     }
-    
+
     /**
      * Create a list, where each element is a character from the String.
      */
     private List stringToList(String data) {
         List result = new ArrayList();
         for(int c = 0; c < data.length(); c++) {
-            result.add(new Character(data.charAt(c)));
+            result.add(data.substring(c, c+1));
         }
         return result;
     }

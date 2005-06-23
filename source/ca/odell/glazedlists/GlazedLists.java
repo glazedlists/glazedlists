@@ -59,6 +59,20 @@ public final class GlazedLists {
         Diff.replaceAll(target, source, updates);
     }
 
+    /**
+     * Overloaded version of {@link #replaceAll(EventList,List,boolean)} that uses
+     * a {@link Comparator} to determine equality rather than
+     * {@link Object#equals(Object) equals()}.
+     *
+     * @param comparator the {@link Comparator} to determine equality between
+     *      elements. This {@link Comparator} must return <code>0</code> for
+     *      elements that are equal and nonzero for elements that are not equal.
+     *      Sort order is not used.
+     */
+    public static void replaceAll(EventList target, List source, boolean updates, Comparator comparator) {
+        Diff.replaceAll(target, source, updates, comparator);
+    }
+
 
     // Comparators // // // // // // // // // // // // // // // // // // // //
 

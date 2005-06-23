@@ -22,15 +22,26 @@ import java.util.*;
 public final class Diff {
 
     /**
+     * Convenience method for {@link #replaceAll(EventList,List,boolean,Comparator) replaceAll()}
+     * that uses {@link Object#equals(Object)} to determine equality.
+     */
+    public static void replaceAll(EventList target, List source, boolean updates) {
+        replaceAll(target, source, updates, new EqualsComparator());
+    }
+
+    /**
      * Replace the complete contents of the target {@link EventList} with the complete
      * contents of the source {@link EventList} while making as few list changes as
      * possible.
      *
+     * @param comparator a {@link Comparator} to use to test only for equality.
+     *      This comparator shall return 0 to signal that two elements are equal,
+     *      and nonzero otherwise.
      * @param updates whether to fire update events for Objects that are equal in both
      *                {@link List}s.
      */
-    public static void replaceAll(EventList target, List source, boolean updates) {
-        DiffMatcher listDiffMatcher = new ListDiffMatcher(target, source);
+    public static void replaceAll(EventList target, List source, boolean updates, Comparator comparator) {
+        DiffMatcher listDiffMatcher = new ListDiffMatcher(target, source, comparator);
         List editScript = shortestEditScript(listDiffMatcher);
         
         // target is x axis. Changes in X mean advance target index
@@ -166,9 +177,9 @@ public final class Diff {
             betaList.add(new Character(beta.charAt(c)));
         }
 
-        drawGrid(new ListDiffMatcher(alphaList, betaList));
+        drawGrid(new ListDiffMatcher(alphaList, betaList, null));
 
-        replaceAll(alphaList, betaList, false);
+        replaceAll(alphaList, betaList, false, null);
         System.out.println(alphaList);
     }
 
@@ -274,6 +285,11 @@ public final class Diff {
 
     /**
      * Determines if the values at the specified points match or not.
+     *
+     * <p>This class specifies that each element should specify a character value.
+     * This is for testing and debugging only and it is safe for implementing
+     * classes to throw {@link UnsupportedOperationException} for both the
+     * {@link #alphaAt(int)} and {@link #betaAt(int)} methods.
      */
     private interface DiffMatcher {
         public int getAlphaLength();
@@ -326,10 +342,12 @@ public final class Diff {
     private static class ListDiffMatcher implements DiffMatcher {
         private List alpha;
         private List beta;
+        private Comparator comparator;
 
-        public ListDiffMatcher(List alpha, List beta) {
+        public ListDiffMatcher(List alpha, List beta, Comparator comparator) {
             this.alpha = alpha;
             this.beta = beta;
+            this.comparator = comparator;
         }
 
         public int getAlphaLength() {
@@ -349,14 +367,18 @@ public final class Diff {
         }
 
         public boolean matchPair(int alphaIndex, int betaIndex) {
-            Object alphaValue = alpha.get(alphaIndex);
-            Object betaValue = beta.get(betaIndex);
-            if (alphaValue == null && betaValue == null)
-                return true;
-            else if (alphaValue == null || betaValue == null)
-                return false;
-            else
-                return alphaValue.equals(betaValue);
+            return (comparator.compare(alpha.get(alphaIndex), beta.get(betaIndex)) == 0);
+        }
+    }
+
+    /**
+     * This non-symmetric comparator returns 0 if two Objects are equal as
+     * specified by {@link Object#equals(Object)}, or 1 otherwise.
+     */
+    private static class EqualsComparator implements Comparator {
+        public int compare(Object alpha, Object beta) {
+            boolean equal = alpha == null ? beta == null : alpha.equals(beta);
+            return equal ? 0 : 1;
         }
     }
 }
