@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
-import java.util.EventListener;
+import java.util.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -179,13 +179,17 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(initialListenerCount1 + 2 * bloomCount, listElement1.getPropertyChangeListeners().length);
 
         final PropertyChangeListener[] propertyChangeListeners = listElement1.getPropertyChangeListeners();
-        // verify that listeners at indexes 1 through 1 + bloomCount are identical
-        for (int i = 1; i < bloomCount; i++)
-            assertTrue(propertyChangeListeners[i] == propertyChangeListeners[i+1]);
-
-        // verify that listeners at indexes initialListenerCount1 + bloomCount through the end are NOT identical
-        for (int i = bloomCount + initialListenerCount1; i < propertyChangeListeners.length - 1; i++)
-            assertTrue(propertyChangeListeners[i] != propertyChangeListeners[i+1]);
+        
+        // verify we have 2xbloomcount listeners
+        List listeners = new ArrayList();
+        Set uniqueListeners = new HashSet();
+        for(int i = 0; i < propertyChangeListeners.length; i++) {
+            if(!(propertyChangeListeners[i] instanceof JavaBeanEventListConnector.PropertyChangeHandler)) continue;
+            listeners.add(propertyChangeListeners[i]);
+            uniqueListeners.add(propertyChangeListeners[i]);
+        }
+        assertEquals(bloomCount * 2, listeners.size());
+        assertEquals(bloomCount + 1, uniqueListeners.size());
 
         // install a completely new list element
         final JLabel listElement2 = new JLabel();

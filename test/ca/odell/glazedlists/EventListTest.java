@@ -322,4 +322,29 @@ public class EventListTest extends TestCase {
             assertFalse(list.equals(copy));
         }
     }
+
+    /**
+     * Test that the {@link GlazedLists#eventList(java.util.Collection)} factory
+     * method works.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=234">Bug 234</a>
+     */
+    public void testGlazedListsEventList() {
+        // make sure they have different backing stores
+        List list = new ArrayList();
+        EventList eventList = GlazedLists.eventList(list);
+        assertEquals(list, eventList);
+
+        list.add("A");
+        assertTrue(!list.equals(eventList));
+
+        eventList.add("B");
+        assertTrue(!list.equals(eventList));
+
+        // make sure null is supported
+        EventList empty = GlazedLists.eventList(null);
+        assertEquals(Collections.EMPTY_LIST, empty);
+    }
 }
+
+

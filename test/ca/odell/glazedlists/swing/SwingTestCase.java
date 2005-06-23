@@ -147,58 +147,62 @@ public abstract class SwingTestCase extends TestCase {
      */
     public static void doBackgroundTask(Runnable task) {
         // start the background task
-        BackgroundRunnable runnable = new BackgroundRunnable(task, Thread.currentThread());
-        Thread background = new Thread(runnable);
+        //BackgroundRunnable runnable = new BackgroundRunnable(task, Thread.currentThread());
+        Thread background = new Thread(task);
         background.start();
         
         // wait for the task to complete
-        waitForInterrupt();
-    }
-    
-    /**
-     * Wait until interrupted.
-     */
-    public static void waitForInterrupt() {
         try {
-            Object pillow = new Object();
-            synchronized(pillow) {
-                pillow.wait();
-            }
-        } catch(InterruptedException e) {
-            // do nothing
-        }
-    }
-    
-    /**
-     * Sleep a little while.
-     */
-    public void sleep(long duration) {
-        try {
-            Object pillow = new Object();
-            synchronized(pillow) {
-                pillow.wait(duration);
-            }
-        } catch(InterruptedException e) {
+            background.join();
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
     
-    /**
-     * Run a task on a background thread and then interrupt the caller.
-     */
-    private static class BackgroundRunnable implements Runnable {
-        private Runnable target;
-        private Thread blocking;
-        public BackgroundRunnable(Runnable target, Thread blocking) {
-            this.target = target;
-            this.blocking = blocking;
-        }
-        public void run() {
-            try {
-                target.run();
-            } finally {
-                blocking.interrupt();
-            }
-        }
-    }
+//    /**
+//     * Wait until interrupted.
+//     */
+//    public static void waitForInterrupt() {
+//        try {
+//            Object pillow = new Object();
+//            synchronized(pillow) {
+//                pillow.wait();
+//            }
+//        } catch(InterruptedException e) {
+//            // do nothing
+//        }
+//    }
+//
+//    /**
+//     * Sleep a little while.
+//     */
+//    public void sleep(long duration) {
+//        try {
+//            Object pillow = new Object();
+//            synchronized(pillow) {
+//                pillow.wait(duration);
+//            }
+//        } catch(InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+    
+//    /**
+//     * Run a task on a background thread and then interrupt the caller.
+//     */
+//    private static class BackgroundRunnable implements Runnable {
+//        private Runnable target;
+//        private Thread blocking;
+//        public BackgroundRunnable(Runnable target, Thread blocking) {
+//            this.target = target;
+//            this.blocking = blocking;
+//        }
+//        public void run() {
+//            try {
+//                target.run();
+//            } finally {
+//                blocking.interrupt();
+//            }
+//        }
+//    }
 }

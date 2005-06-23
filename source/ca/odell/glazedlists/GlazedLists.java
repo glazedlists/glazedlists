@@ -225,7 +225,7 @@ public final class GlazedLists {
      */
     public static EventList eventList(Collection contents) {
         BasicEventList result = new BasicEventList();
-        result.addAll(contents);
+        if(contents != null) result.addAll(contents);
         return result;
     }
 

@@ -65,12 +65,13 @@ public class ConflictingThreadsTest extends SwingTestCase {
                 labelsList.getReadWriteLock().writeLock().unlock();
             }
         });
-        
-        assertEquals(0, labelsTable.getRowCount());
-        
-        labelsList.getReadWriteLock().readLock().lock();
+
+        labelsList.getReadWriteLock().writeLock().lock();
         assertEquals(0, labelsList.size());
-        labelsList.getReadWriteLock().readLock().unlock();
+        labelsList.add(new JLabel("Coca-Cola"));
+        labelsList.getReadWriteLock().writeLock().unlock();
+
+        assertEquals(1, labelsTable.getRowCount());
     }
     
     public static void main(String[] args) {

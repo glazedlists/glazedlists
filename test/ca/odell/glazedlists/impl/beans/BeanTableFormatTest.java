@@ -113,7 +113,10 @@ public class BeanTableFormatTest extends TestCase {
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(1));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(2));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(3));
-        assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(4));
+        // this returns GlazedLists.comparableComparator() on Java 5, where Boolean implements Comparable,
+        // but it returns null on prior versions where Boolean does not implement Comparable
+        boolean booleanIsComparable = (Object)Boolean.TRUE instanceof Comparable;
+        assertEquals(booleanIsComparable, GlazedLists.comparableComparator() == fullAdvancedFootballFormat.getColumnComparator(4));
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(5));
     }
 }
