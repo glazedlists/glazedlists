@@ -533,4 +533,58 @@ public final class SortedList extends TransformedList {
             return index - otherIndexNodePair.index;
         }
     }
+
+    /** {@inheritDoc} */
+    public Iterator iterator() {
+        return new SortedListIterator();
+    }
+
+    /**
+     * The fast iterator for SortedList
+     */
+    private class SortedListIterator implements Iterator {
+
+        /** the IndexedTreeIterator to use to move across the tree */
+        private ListIterator treeIterator = sorted.listIterator(0);
+
+        /** the last unsorted index to be returned by this iterator */
+        private int lastUnsortedIndex = -1;
+
+        /**
+         * Returns true iff there are more value to iterate on by caling next()
+         */
+        public boolean hasNext() {
+            return treeIterator.hasNext();
+        }
+
+        /**
+         * Returns the next value in the iteration.
+         */
+        public Object next() {
+            IndexedTreeNode sortedNode = (IndexedTreeNode)treeIterator.next();
+            IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
+            lastUnsortedIndex = unsortedNode.getIndex();
+            return source.get(lastUnsortedIndex);
+        }
+
+        /**
+         * Removes the last value returned by this iterator.
+         */
+        public void remove() {
+            // fast fail if next hasn't been called
+            if(lastUnsortedIndex == -1) throw new NoSuchElementException("Cannot remove before next is called");
+
+            // this isn't the first value so just step the iterator back one and remove
+            if(treeIterator.hasPrevious()) {
+                treeIterator.previous();
+                source.remove(lastUnsortedIndex);
+
+            // this is the first value so just remove and reset the tree iterator
+            } else {
+                source.remove(lastUnsortedIndex);
+                treeIterator = sorted.listIterator(0);
+            }
+            lastUnsortedIndex = -1;
+        }
+    }
 }

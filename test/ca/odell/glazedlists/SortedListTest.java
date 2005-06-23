@@ -39,7 +39,7 @@ public class SortedListTest extends TestCase {
         unsortedList = null;
         sortedList = null;
     }
-    
+
     /**
      * Test that the indexOf() and lastIndexOf() methods work if the SortedList
      * is not actually sorted.
@@ -56,7 +56,7 @@ public class SortedListTest extends TestCase {
         sortedList.add("Ti-Cats");
         sortedList.add("Riders");
         sortedList.add("Als");
-        
+
         assertEquals(0, sortedList.indexOf("Riders"));
         assertEquals(6, sortedList.lastIndexOf("Riders"));
         assertEquals(8, sortedList.indexOfSimulated("Riders"));
@@ -504,7 +504,7 @@ public class SortedListTest extends TestCase {
         unsortedList.add(4, "eerie"); // a b c d e f g h
         assertEquals(unsortedList, sortedList);
     }
-    
+
     /**
      * Test that the SortedList doesn't get grumpy if everything is always equal.
      */
@@ -522,7 +522,7 @@ public class SortedListTest extends TestCase {
         unsortedList.add(new Integer(9));
         assertEquals(unsortedList, sortedList);
     }
-    
+
     /**
      * Test that the SortedList doesn't get grumpy if half the elements are null.
      */
@@ -540,9 +540,128 @@ public class SortedListTest extends TestCase {
         sortedList.set(2, p);
         assertEquals(unsortedList, sortedList);
     }
-    
+
+    /**
+     * Tests an empty sorted list's iterator
+     */
+    public void testIteratorOnEmptySortedList() {
+        Iterator i = sortedList.iterator();
+
+        // validate hasNext()
+        assertEquals(false, i.hasNext());
+
+        // validate next() fires the correct exception
+        try {
+            i.next();
+            fail("An expected Exception was not thrown.");
+
+        } catch(NoSuchElementException e) {
+            // test passes
+
+        } catch(Exception e) {
+            fail("The following Exception was not expected:\n" + e);
+        }
+
+        // validate remove() fires the correct exception
+        i = sortedList.iterator();
+        try {
+            i.next();
+            fail("An expected Exception was not thrown.");
+
+        } catch(NoSuchElementException e) {
+            // test passes
+
+        } catch(Exception e) {
+            fail("The following Exception was not expected:\n" + e);
+        }
+    }
+
+    /**
+     * Tests a SortedList's iterator, read-only
+     */
+    public void testIteratorReadOnly() {
+        sortedList.add("Riders");
+        sortedList.add("Stampeders");
+        sortedList.add("Bombers");
+        sortedList.add("Eskimos");
+        sortedList.add("Argos");
+        sortedList.add("Ti-Cats");
+        sortedList.add("Renegades");
+        sortedList.add("Als");
+
+        String[] expected = {"Als", "Argos", "Bombers", "Eskimos", "Renegades", "Riders", "Stampeders", "Ti-Cats"};
+
+        int counter = 0;
+        for(Iterator i = sortedList.iterator(); i.hasNext(); counter++) {
+            assertEquals(expected[counter], i.next());
+        }
+
+        assertEquals(expected.length, counter);
+    }
+
+    /**
+     * Tests a SortedList's iterator while removing
+     */
+    public void testIteratorRemoves() {
+        sortedList.add("Riders");
+        sortedList.add("Stampeders");
+        sortedList.add("Bombers");
+        sortedList.add("Eskimos");
+        sortedList.add("Argos");
+        sortedList.add("Ti-Cats");
+        sortedList.add("Renegades");
+        sortedList.add("Als");
+
+        String[] expected = {"Als", "Argos", "Bombers", "Eskimos", "Renegades", "Riders", "Stampeders", "Ti-Cats"};
+
+        // validate remove() fires the correct exception before iteration starts
+        Iterator i = sortedList.iterator();
+        try {
+            i.remove();
+            fail("An expected Exception was not thrown.");
+
+        } catch(NoSuchElementException e) {
+            // test passes
+
+        } catch(Exception e) {
+            fail("The following Exception was not expected:\n" + e);
+        }
+
+
+        int counter = 0;
+        for(i = sortedList.iterator(); i.hasNext(); counter++) {
+            assertEquals(expected[counter], i.next());
+            i.remove();
+            try {
+                i.remove();
+                fail("An expected Exception was not thrown.");
+
+            } catch(NoSuchElementException e) {
+                // test passes
+
+            } catch(Exception e) {
+                fail("The following Exception was not expected:\n" + e);
+            }
+        }
+
+        assertEquals(expected.length, counter);
+        assertEquals(0, sortedList.size());
+
+        // validate remove() fires the correct exception after all values are removed
+        try {
+            i.remove();
+            fail("An expected Exception was not thrown.");
+
+        } catch(NoSuchElementException e) {
+            // test passes
+
+        } catch(Exception e) {
+            fail("The following Exception was not expected:\n" + e);
+        }
+    }
+
     public static void main(String[] args) {
-        
+
         SortedListTest test = new SortedListTest();
         test.setUp();
         test.testHalfNullComparator();
@@ -581,7 +700,7 @@ public class SortedListTest extends TestCase {
         public String toString() {
             return "P:" + position;
         }
-        public int compareTo(Object o) { 
+        public int compareTo(Object o) {
             return position - ((Position)o).position;
         }
     }
