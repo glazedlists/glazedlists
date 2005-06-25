@@ -29,8 +29,8 @@ public class CompositeMatcherEditorTest extends TestCase {
      */
     public void setUp() {
         compositeMatcherEditor = new CompositeMatcherEditor();
-        textMatcherEditor = new TextMatcherEditor(new StringFilterator());
-        anotherTextMatcherEditor = new TextMatcherEditor(new StringFilterator());
+        textMatcherEditor = new TextMatcherEditor(GlazedLists.toStringTextFilterator());
+        anotherTextMatcherEditor = new TextMatcherEditor(GlazedLists.toStringTextFilterator());
     }
 
     /**
@@ -185,69 +185,5 @@ public class CompositeMatcherEditorTest extends TestCase {
         listener.assertConstrained(12);
         compositeMatcherEditor.getMatcherEditors().remove(0);
         listener.assertMatchAll(13);
-    }
-    
-    /**
-     * A String's Strings are itself.
-     */
-    private class StringFilterator implements TextFilterator {
-        public void getFilterStrings(List baseList, Object element) {
-            baseList.add(element);
-        }
-    }
-    
-    /**
-     * A MatcherEditorListener that simply remembers how the filter has been changed.
-     */
-    private class SimpleMatcherEditorListener implements MatcherEditorListener {
-        private boolean matchAll = false;
-        private boolean matchNone = false;
-        private boolean changed = false;
-        private boolean constrained = false;
-        private boolean relaxed = false;
-        private int changes = 0;
-        public void changedMatcher(MatcherEvent matcherEvent) {
-            switch (matcherEvent.getType()) {
-                case MatcherEvent.CONSTRAINED: changes++; constrained = true; break;
-                case MatcherEvent.RELAXED: changes++; relaxed = true; break;
-                case MatcherEvent.CHANGED: changes++; changed = true; break;
-                case MatcherEvent.MATCH_ALL: changes++; matchAll = true; break;
-                case MatcherEvent.MATCH_NONE: changes++; matchNone = true; break;
-            }
-        }
-        public void assertMatchAll(int expectedChanges) {
-            assertEquals(expectedChanges, changes);
-            assertTrue(matchAll & !matchNone & !changed & !constrained & !relaxed);
-            // reset on success
-            matchAll = false;
-        }
-        public void assertMatchNone(int expectedChanges) {
-            assertEquals(expectedChanges, changes);
-            assertTrue(!matchAll & matchNone & !changed & !constrained & !relaxed);
-            // reset on success
-            matchNone = false;
-        }
-        public void assertChanged(int expectedChanges) {
-            assertEquals(expectedChanges, changes);
-            assertTrue(!matchAll & !matchNone & changed & !constrained & !relaxed);
-            // reset on success
-            changed = false;
-        }
-        public void assertConstrained(int expectedChanges) {
-            assertEquals(expectedChanges, changes);
-            assertTrue(!matchAll & !matchNone & !changed & constrained & !relaxed);
-            // reset on success
-            constrained = false;
-        }
-        public void assertRelaxed(int expectedChanges) {
-            assertEquals(expectedChanges, changes);
-            assertTrue(!matchAll & !matchNone & !changed & !constrained & relaxed);
-            // reset on success
-            relaxed = false;
-        }
-        public void assertNoEvents(int expectedChanges) {
-            assertEquals(expectedChanges, changes);
-            assertTrue(!matchAll & !matchNone & !changed & !constrained & !relaxed);
-        }
     }
 }

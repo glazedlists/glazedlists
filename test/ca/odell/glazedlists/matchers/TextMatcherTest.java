@@ -1,14 +1,17 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.matchers;
 
 import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.filter.*;
+import ca.odell.glazedlists.TextMatcherEditor;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.BasicEventList;
 // standard collections
 import java.util.*;
 
-public class DefaultTextFilterListTest extends TestCase {
+public class TextMatcherTest extends TestCase {
 
     private List numbers = Arrays.asList(new Object[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
 
@@ -294,14 +297,5 @@ public class DefaultTextFilterListTest extends TestCase {
 
         // verify the lists are equal
         assertEquals(controlList, filteredList);
-    }
-    
-    /**
-     * A filterator for strings.
-     */
-    private class StringTextFilterator implements TextFilterator {
-        public void getFilterStrings(List baseList, Object element) {
-            baseList.add(element);
-        }
     }
 }

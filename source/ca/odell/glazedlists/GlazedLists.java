@@ -8,6 +8,7 @@ import java.util.*;
 import ca.odell.glazedlists.event.ListEventListener;
 // for access to volatile classes
 import ca.odell.glazedlists.impl.*;
+import ca.odell.glazedlists.impl.filter.StringTextFilterator;
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.matchers.*;
@@ -199,12 +200,23 @@ public final class GlazedLists {
 
     // TextFilterators // // // // // // // // // // // // // // // // // // //
 
+    private static StringTextFilterator stringTextFilterator = null;
+
     /**
      * Creates a {@link TextFilterator} that searches the given JavaBean
      * properties.
      */
     public static TextFilterator textFilterator(String[] propertyNames) {
         return new BeanTextFilterator(propertyNames);
+    }
+
+    /**
+     * Creates a {@link TextFilterator} that searches against an Object's
+     * {@link Object#toString() toString()} value.
+     */
+    public static TextFilterator toStringTextFilterator() {
+        if(stringTextFilterator == null) stringTextFilterator = new StringTextFilterator();
+        return stringTextFilterator;
     }
 
 

@@ -132,7 +132,7 @@ public final class ListEventPublisher {
         // populate the list of satisfied EventLists
         if(!listContains(satisfiedEventLists, source)) satisfiedEventLists.add(source);
 
-        // process listeners that don't have dependencies
+        // animate listeners that don't have dependencies
         for(int i = 0; i < listeners.size(); i++) {
             ListEventListener listener = (ListEventListener)listeners.get(i);
             ListEvent event = (ListEvent)events.get(i);
@@ -157,7 +157,7 @@ public final class ListEventPublisher {
             }
         }
         
-        // process listeners that have dependencies
+        // animate listeners that have dependencies
         for(Iterator i = unsatisfiedListeners.iterator(); i.hasNext(); ) {
             DependentListener dependentListener = (DependentListener)i.next();
             if(!dependenciesSatisfied(dependentListener)) continue;

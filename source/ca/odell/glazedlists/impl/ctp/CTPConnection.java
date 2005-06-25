@@ -226,7 +226,7 @@ public final class CTPConnection implements NIOAttachment {
      * When connected, prepare the higher-level connection.
      */
     public void handleConnect() {
-        // finish up the connect() process
+        // finish up the connect() animate
         try {
             socketChannel.finishConnect();
         } catch(IOException e) {

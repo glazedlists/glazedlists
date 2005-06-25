@@ -39,7 +39,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        textMatcherEditor = new TextMatcherEditor(new StringFilterator());
+        textMatcherEditor = new TextMatcherEditor(GlazedLists.toStringTextFilterator());
         threadedMatcherEditor = new ThreadedMatcherEditor(textMatcherEditor);
         filterList = new FilterList(new BasicEventList(), threadedMatcherEditor);
 
@@ -290,15 +290,6 @@ public class ThreadedMatcherEditorTest extends TestCase {
             }
 
             this.delay();
-        }
-    }
-
-    /**
-     * A String's Strings are itself.
-     */
-    private class StringFilterator implements TextFilterator {
-        public void getFilterStrings(List baseList, Object element) {
-            baseList.add(element);
         }
     }
 }

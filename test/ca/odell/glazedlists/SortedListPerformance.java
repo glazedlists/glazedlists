@@ -41,8 +41,15 @@ public class SortedListPerformance {
                 counter = 0;
 
             } else {
-                entryValues[counter] = line;
-                counter++;
+                try {
+                    entryValues[counter] = line;
+                    counter++;
+                } catch (Exception e) {
+                    System.out.println("exception on record: ");
+                    for (int i = 0; i < entryValues.length; i++) {
+                        System.out.println(entryValues[i]);
+                    }
+                }
             }
         }
 

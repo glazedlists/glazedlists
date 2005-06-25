@@ -100,7 +100,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
     /**
      * This method implements the strategy for coalescing many queued
      * MatcherEvents into a single representative MatcherEvent. Listeners which
-     * process the MatcherEvent returned from this method should match the state
+     * animate the MatcherEvent returned from this method should match the state
      * that would exist if each of the <code>matcherEvents</code> were fired
      * sequentially. In general, any group of <code>matcherEvents</code> can be
      * succesfully coalesced as a single MatcherEvent with a type of
@@ -225,7 +225,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
     }
 
     /**
-     * This Runnable contains logic which continues to process batches of
+     * This Runnable contains logic which continues to animate batches of
      * MatcherEvents from the matcherEventQueue until the queue is empty. Each
      * batch of MatcherEvents includes all MatcherEvents available at the time
      * the queue is inspected. The MatcherEvents are then coalesced and the
