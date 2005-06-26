@@ -17,6 +17,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.swt.*;
+import ca.odell.glazedlists.matchers.*;
 
 
 /**
@@ -47,7 +48,7 @@ public class IssuesBrowser {
 
         // Various Layered List Transformations
         issuesUserFiltered = new IssuesUserFilter(issuesEventList);
-        TextFilterList issuesTextFiltered = new TextFilterList(issuesUserFiltered);
+        FilterList issuesTextFiltered = new FilterList(issuesUserFiltered);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
         SortedList issuesSortedList = new SortedList(priorityList);
 
@@ -88,7 +89,7 @@ public class IssuesBrowser {
 
         // Add the various filters
         Text filterText = createFilterText(filterPanel);
-        issuesTextFiltered.setFilterEdit(filterText);
+        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterText, null)));
         createPrioritySlider(filterPanel, priorityList);
         createUsersList(shell, filterPanel);
 
