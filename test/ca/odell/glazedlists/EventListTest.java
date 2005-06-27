@@ -8,6 +8,8 @@ import junit.framework.*;
 // standard collections
 import java.util.*;
 
+import ca.odell.glazedlists.event.ListEventListener;
+
 /**
  * Verifies that EventList matches the List API.
  *
@@ -345,6 +347,42 @@ public class EventListTest extends TestCase {
         EventList empty = GlazedLists.eventList(null);
         assertEquals(Collections.EMPTY_LIST, empty);
     }
+
+
+    /**
+     * Tests taht the {@link GlazedLists#syncEventListToList(EventList, java.util.List)}
+     * factory method.
+     */
+    public void testGlazedListsSync() {
+        EventList source = new BasicEventList();
+        source.add("McCallum");
+        source.add("Keith");
+        List target = new ArrayList();
+        target.add("Greene");
+
+        ListEventListener listener = GlazedLists.syncEventListToList(source, target);
+        assertEquals(source, target);
+
+        source.add("Szakra");
+        assertEquals(source, target);
+
+        source.addAll(Arrays.asList(new String[] { "Moore", "Holmes" }));
+        assertEquals(source, target);
+
+        source.add(1, "Burris");
+        assertEquals(source, target);
+
+        source.set(1, "Crandell");
+        assertEquals(source, target);
+
+        Collections.sort(source);
+        assertEquals(source, target);
+
+        source.clear();
+        assertEquals(source, target);
+
+        source.removeListEventListener(listener);
+        source.add("Davis");
+        assertFalse(source.equals(target));
+    }
 }
-
-

@@ -106,7 +106,7 @@ public final class NIODaemon implements Runnable {
     }
     
     /**
-     * Wake up the CTP thread so that it may animate pending events.
+     * Wake up the CTP thread so that it may process pending events.
      */
     private void wakeUp() {
         selector.wakeup();

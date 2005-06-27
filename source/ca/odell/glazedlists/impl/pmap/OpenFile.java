@@ -71,7 +71,7 @@ class OpenFile implements Runnable {
      */
     private void readHeader() throws IOException {
         try {
-            // animate the file header
+            // process the file header
             Bufferlo fileHeader = new Bufferlo();
             fileHeader.readFromChannel(persistentMap.getFileChannel(), 8);
             fileHeader.consume("GLAZED\n\n");

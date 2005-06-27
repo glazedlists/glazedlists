@@ -377,4 +377,50 @@ public final class GlazedLists {
     public static MatcherEditor fixedMatcherEditor(Matcher matcher) {
         return new FixedMatcherEditor(matcher);
     }
+
+
+    // ListEventListeners // // // // // // // // // // // // // // // // // //
+
+    /**
+     * Synchronize the specified {@link EventList} to the specified {@link List}.
+     * Each time the {@link EventList} is changed, the changes are applied to the
+     * {@link List} as well, so that the two lists are always equal.
+     *
+     * <p>This is useful when a you need to support a {@link List} datamodel
+     * but would prefer to manipulate that {@link List} with the convenience
+     * of {@link EventList}s:
+     * <pre><code>List someList = ...
+     *
+     * // create an EventList with the contents of someList
+     * EventList eventList = GlazedLists.eventList(someList);
+     *
+     * // propagate changes from eventList to someList
+     * GlazedLists.syncEventListToList(eventList, someList);
+     *
+     * // test it out, should print "true, true, true true"
+     * eventList.add("boston creme");
+     * System.out.println(eventList.equals(someList));
+     * eventList.add("crueller");
+     * System.out.println(eventList.equals(someList));
+     * eventList.remove("bostom creme");
+     * System.out.println(eventList.equals(someList));
+     * eventList.clear();
+     * System.out.println(eventList.equals(someList));</code></pre>
+     *
+     * @param source the {@link EventList} which provides the master view.
+     *      Each change to this {@link EventList} will be applied to the
+     *      {@link List}.
+     * @param target the {@link List} to host a copy of the {@link EventList}.
+     *      This {@link List} should not be changed after the lists have been
+     *      synchronized. Otherwise a {@link RuntimeException} will be thrown
+     *      when the drift is detected. This class must support all mutating
+     *      {@link List} operations.
+     * @return the {@link ListEventListener} providing the link from the
+     *      source {@link EventList} to the target {@link List}. To stop the
+     *      synchronization, use
+     *      {@link EventList#removeListEventListener(ListEventListener)}.
+     */
+    public static ListEventListener syncEventListToList(EventList source, List target) {
+        return new SyncListener(source, target);
+    }
 }

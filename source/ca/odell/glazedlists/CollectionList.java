@@ -161,7 +161,7 @@ public class CollectionList extends TransformedList implements ListEventListener
      * Handle changes in the parent list. We'll need to update our node list sizes.
      */
     public void listChanged(ListEvent listChanges) {
-        // Need to animate the changes so that our size caches are up to date.
+        // Need to process the changes so that our size caches are up to date.
         updates.beginEvent();
         while(listChanges.next()) {
             int index = listChanges.getIndex();

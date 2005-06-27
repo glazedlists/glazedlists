@@ -305,7 +305,7 @@ public final class ListEventAssembler {
      * For each listener, a ListEvent is created, which provides
      * a read-only view to the list changes in the list. The same
      * ListChangeView object is used for all notifications to the specified
-     * listener, so if a listener does not animate a set of changes, those
+     * listener, so if a listener does not process a set of changes, those
      * changes will persist in the next notification.
      */
     public synchronized void addListEventListener(ListEventListener listChangeListener) {

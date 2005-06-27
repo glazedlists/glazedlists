@@ -277,7 +277,7 @@ final class OldCompositeList extends AbstractEventList {
         /** the last reported size of the source list */
         private int size;
         
-        /** a list of changes to animate */
+        /** a list of changes to process */
         private LinkedList changeQueue = new LinkedList();
         
         /**
@@ -313,11 +313,11 @@ final class OldCompositeList extends AbstractEventList {
          * also.
          *
          * Changes are propogated in the following sequence:
-         * Add the change event to this member list's queue of changes to animate.
+         * Add the change event to this member list's queue of changes to process.
          * Add this member list to the global list of lists with changes
          * do while the global list of changes is not empty
          *     Attempt to obtain the writer lock to this list
-         *     If the writer lock is obtained, animate all events
+         *     If the writer lock is obtained, process all events
          *     If the writer lock is not obtained, break
          * loop
          */
@@ -385,7 +385,7 @@ final class OldCompositeList extends AbstractEventList {
         
         /**
          * Obtaining this lock includes obtaining a read lock on all
-         * member lists. This is a complex animate and may require
+         * member lists. This is a complex process and may require
          * the forwarding of change events in order to gain acquisition.
          *
          * First, a race lock is acquired. This guarantees that only
@@ -427,7 +427,7 @@ final class OldCompositeList extends AbstractEventList {
         }
         
         /**
-         * Trying for this lock follows the same animate as obtaining
+         * Trying for this lock follows the same process as obtaining
          * the lock naturally. If the raceLock cannot be acquired, this
          * fails fast. If it can be acquired, this obtains all read locks
          * using the lock() method and not the immediate tryLock() method.

@@ -325,7 +325,7 @@ public final class Chunk {
         // skip any excess
         chunkAsBytes.clear();
 
-        // animate the read data
+        // process the read data
         key = persistentMap.getKeyCoder().decode(keyBytes.getInputStream());
     }
 

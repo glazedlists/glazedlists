@@ -80,7 +80,7 @@ public final class ListEvent extends EventObject {
     /**
      * Resets this event's position to the previously-marked position. This should
      * be used for {@link TransformedList}s that require multiple-passes of the 
-     * {@link ListEvent} in order to animate it.
+     * {@link ListEvent} in order to process it.
      */
     public void reset() {
         currentBlock = null;
