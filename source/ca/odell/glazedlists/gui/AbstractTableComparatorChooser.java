@@ -289,7 +289,14 @@ public abstract class AbstractTableComparatorChooser {
     public Comparator createComparatorForElement(Comparator comparatorForColumn, int column) {
         return new TableColumnComparator(tableFormat, column, comparatorForColumn);
     }
-    
+
+    public void dispose() {
+        // null out references to potentially long lived objects so we are eligible for gc'ing
+        this.sortedList = null;
+        this.tableFormat = null;
+        this.sortedListComparator = null;
+    }
+
     /**
      * A ColumnClickTracker monitors the clicks on a specified column
      * and provides access to the most appropriate comparator for that

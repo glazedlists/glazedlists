@@ -46,8 +46,14 @@ import java.util.*;
  */
 public class TableComparatorChooser extends AbstractTableComparatorChooser {
 
+    /**
+     * the header renderer which decorates an underlying renderer
+     * (the table header's default renderer) with a sort arrow icon.
+     */
+    private final SortArrowHeaderRenderer sortArrowHeaderRenderer;
+
     /** listen for table and mouse events */
-    private Listener listener = new Listener();
+    private final Listener listener = new Listener();
 
     /** the table being sorted */
     private JTable table = null;
@@ -75,8 +81,9 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
         // save the Swing-specific state
         this.table = table;
 
-        // set the table header
-        table.getTableHeader().setDefaultRenderer(new SortArrowHeaderRenderer());
+        // build and set the table header renderer which decorates the existing renderer with sort arrows
+        sortArrowHeaderRenderer = new SortArrowHeaderRenderer();
+        table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer);
 
         // listen for events on the specified table
         table.setColumnSelectionAllowed(false);
@@ -195,7 +202,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * <p>A {@link TableComparatorChooser} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link TableComparatorChooser}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link TableComparatorChooser} is short-lived but
      * its source {@link EventList} is long-lived.
      * 
@@ -203,8 +210,19 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * to call any method on a {@link TableComparatorChooser} after it has been disposed.
      */
     public void dispose() {
+        super.dispose();
+
+        // if the default renderer within the table header is our sort arrow renderer,
+        // uninstall it by restoring the table header's original default renderer
+        if (table.getTableHeader().getDefaultRenderer() == sortArrowHeaderRenderer)
+            table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer.getDelegateRenderer());
+
+        // remove our listeners from the table's header and model
         table.getTableHeader().removeMouseListener(listener);
         table.getModel().removeTableModelListener(listener);
+
+        // null out our table reference so we are eligible be gc'd sooner than the table
+        table = null;
     }
     
     /**
@@ -249,6 +267,13 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
 
             // determine if we can inject icons into the delegate
             iconInjection = (delegateRenderer instanceof DefaultTableCellRenderer);
+        }
+
+        /**
+         * Returns the delegate renderer that is decorated with sort arrows.
+         */
+        public TableCellRenderer getDelegateRenderer() {
+            return this.delegateRenderer;
         }
 
         /**
