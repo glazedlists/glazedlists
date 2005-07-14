@@ -248,12 +248,38 @@ public final class FilterList extends TransformedList {
         }
 
         /**
-         * Handles a clearing of the filter. That is, the filter list will act as
-         * a passthrough and not discriminate any of the elements of the wrapped
-         * source list.
+         * Handles a constraining of the filter to a degree that guarantees no
+         * values can be matched. That is, the filter list will act as a total
+         * filter and not match any of the elements of the wrapped source list.
          */
         private void matchNone(MatcherEditor editor) {
-            throw new UnsupportedOperationException();
+            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
+            try {
+                // update my matchers
+                if(currentEditor != editor) throw new IllegalStateException();
+                currentMatcher = Matchers.falseMatcher();
+
+                // all of these changes to this list happen "atomically"
+                updates.beginEvent();
+
+                // for all unfiltered items, see what the change is
+                for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack(); ) {
+                    i.nextBlack();
+                    int blackIndex = i.getBlackIndex();
+
+                    // todo Kevin, what does this line accomplish that makes it necessary ???
+                    i.setWhite();
+                    updates.addDelete(blackIndex);
+                }
+
+                flagList.clear();
+                flagList.addWhite(0, source.size());
+
+                // commit the changes and notify listeners
+                updates.commitEvent();
+            } finally {
+                ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
+            }
         }
 
         /**
@@ -272,7 +298,7 @@ public final class FilterList extends TransformedList {
                 updates.beginEvent();
 
                 // for all filtered items, add them
-                for(BarcodeIterator i = flagList.iterator();i.hasNextWhite(); ) {
+                for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite(); ) {
                     i.nextWhite();
                     updates.addInsert(i.getIndex());
                 }

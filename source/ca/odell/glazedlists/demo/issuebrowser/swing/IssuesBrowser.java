@@ -19,11 +19,14 @@ import java.net.URL;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
+import java.util.Set;
+import java.util.HashSet;
 import java.text.MessageFormat;
 
 /**
@@ -111,7 +114,8 @@ public class IssuesBrowser extends Applet {
             frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         }
 
-        frame.setSize(640, 480);
+        frame.setSize(800, 600);
+        frame.setLocationRelativeTo(null);
         frame.getContentPane().setLayout(new GridBagLayout());
         frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         frame.setVisible(true);
@@ -124,11 +128,15 @@ public class IssuesBrowser extends Applet {
         // create a MatcherEditor which edits the filter text
         final JTextField filterTextField = new JTextField();
         filterTextField.setBorder(BLACK_LINE_BORDER);
-        final MatcherEditor filterMatcherEditor = new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterTextField, null));
+        final MatcherEditor textFilterMatcherEditor = new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterTextField, null));
 
-        // create the lists
+        // create a MatcherEditor which edits the state filter
+        StateMatcherEditor stateMatcherEditor = new StateMatcherEditor();
+
+        // create the pipeline of glazed lists
         IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
-        FilterList issuesTextFiltered = new FilterList(issuesUserFiltered, filterMatcherEditor);
+        FilterList issuesStateFiltered = new FilterList(issuesUserFiltered, stateMatcherEditor);
+        FilterList issuesTextFiltered = new FilterList(issuesStateFiltered, textFilterMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
         final SortedList issuesSortedList = new SortedList(priorityList);
 
@@ -216,10 +224,12 @@ public class IssuesBrowser extends Applet {
         filtersPanel.setLayout(new GridBagLayout());
         filtersPanel.add(new JLabel("Text Filter"),          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 5, 10), 0, 0));
         filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
-        filtersPanel.add(new JLabel("Minimum Priority"),     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
-        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
-        filtersPanel.add(new JLabel("User"),                 new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
-        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 5, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 10, 10), 0, 0));
+        filtersPanel.add(new JLabel("State"),                new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
+        filtersPanel.add(stateMatcherEditor.getComponent(),  new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
+        filtersPanel.add(new JLabel("Minimum Priority"),     new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
+        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 5, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
+        filtersPanel.add(new JLabel("User"),                 new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
+        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 7, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 10, 10), 0, 0));
 
         // put some insets around the filters panel
         JPanel filterSpacerPanel = new GradientPanel(GLAZED_LISTS_ORANGE, GLAZED_LISTS_ORANGE_LIGHT);
@@ -332,6 +342,103 @@ public class IssuesBrowser extends Applet {
             if (this.issueCount != issueCount) {
                 this.issueCount = issueCount;
                 this.setText(MessageFormat.format("{0} {0,choice,0#issues|1#issue|1<issues}", new Object[] {new Integer(issueCount)}));
+            }
+        }
+    }
+
+    /**
+     * A MatcherEditor that produces Matchers that filter the issues based on the selected states.
+     */
+    private static class StateMatcherEditor extends AbstractMatcherEditor implements ActionListener {
+        /** A panel housing a checkbox for each state. */
+        private JPanel checkBoxPanel = new JPanel(new GridLayout(2, 2));
+
+        /** A checkbox for each possible state. */
+        private final JCheckBox[] stateCheckBoxes;
+
+        public StateMatcherEditor() {
+            final JCheckBox newStateCheckBox = buildCheckBox("New");
+            final JCheckBox resolvedStateCheckBox = buildCheckBox("Resolved");
+            final JCheckBox startedStateCheckBox = buildCheckBox("Started");
+            final JCheckBox closeStateCheckBox = buildCheckBox("Closed");
+
+            this.stateCheckBoxes = new JCheckBox[] {newStateCheckBox, resolvedStateCheckBox, startedStateCheckBox, closeStateCheckBox};
+
+            this.checkBoxPanel.setOpaque(false);
+
+            // add each checkbox to the panel and start listening to selections
+            for (int i = 0; i < this.stateCheckBoxes.length; i++) {
+                this.stateCheckBoxes[i].addActionListener(this);
+                this.checkBoxPanel.add(this.stateCheckBoxes[i]);
+            }
+        }
+
+        /**
+         * Returns the component responsible for editing the state filter
+         */
+        public Component getComponent() {
+            return this.checkBoxPanel;
+        }
+
+        /**
+         * A convenience method to build a state checkbox with the given name.
+         */
+        private static JCheckBox buildCheckBox(String name) {
+            final JCheckBox checkBox = new JCheckBox(name, true);
+            checkBox.setOpaque(false);
+            checkBox.setFocusable(false);
+            checkBox.setMargin(new Insets(0, 0, 0, 0));
+            return checkBox;
+        }
+
+        /**
+         * Returns a StateMatcher which matches Issues if their state is one
+         * of the selected states.
+         */
+        private StateMatcher buildMatcher() {
+            final Set allowedStates = new HashSet();
+            for (int i = 0; i < this.stateCheckBoxes.length; i++) {
+                if (this.stateCheckBoxes[i].isSelected())
+                    allowedStates.add(this.stateCheckBoxes[i].getText().toUpperCase());
+            }
+
+            return new StateMatcher(allowedStates);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            final boolean isCheckBoxSelected = ((JCheckBox) e.getSource()).isSelected();
+
+            final StateMatcher stateMatcher = this.buildMatcher();
+
+            if (stateMatcher.getStateCount() == 0)
+//                this.fireConstrained(stateMatcher);
+                this.fireMatchNone();
+            else if (stateMatcher.getStateCount() == this.stateCheckBoxes.length)
+                this.fireMatchAll();
+            else if (isCheckBoxSelected)
+                this.fireRelaxed(stateMatcher);
+            else
+                this.fireConstrained(stateMatcher);
+        }
+
+        /**
+         * A StateMatcher returns <tt>true</tt> if the state of the Issue is
+         * one of the viewable states selected by the user.
+         */
+        private static class StateMatcher implements Matcher {
+            private final Set allowedStates;
+
+            public StateMatcher(Set allowedStates) {
+                this.allowedStates = allowedStates;
+            }
+
+            public int getStateCount() {
+                return this.allowedStates.size();
+            }
+
+            public boolean matches(Object item) {
+                final Issue issue = (Issue) item;
+                return this.allowedStates.contains(issue.getStatus());
             }
         }
     }

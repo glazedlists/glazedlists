@@ -309,9 +309,9 @@ public class IssuezillaXMLParser {
 
         public void addFieldAndValue(String currentField, String value) {
             if(currentField.equals("issue_id")) currentIssue.setId(Integer.valueOf(value));
-            else if(currentField.equals("issue_status")) currentIssue.setStatus(value);
+            else if(currentField.equals("issue_status")) currentIssue.setStatus(value.intern());
             else if(currentField.equals("priority")) currentIssue.setPriority(Priority.lookup(value));
-            else if(currentField.equals("resolution")) currentIssue.setResolution(value);
+            else if(currentField.equals("resolution")) currentIssue.setResolution(value.intern());
             else if(currentField.equals("component")) currentIssue.setComponent(value);
             else if(currentField.equals("version")) currentIssue.setVersion(value);
             else if(currentField.equals("rep_platform")) currentIssue.setRepPlatform(value);
@@ -320,7 +320,7 @@ public class IssuezillaXMLParser {
             else if(currentField.equals("subcomponent")) currentIssue.setSubcomponent(value);
             else if(currentField.equals("reporter")) currentIssue.setReporter(value);
             else if(currentField.equals("target_milestone")) currentIssue.setTargetMilestone(value);
-            else if(currentField.equals("issue_type")) currentIssue.setIssueType(value);
+            else if(currentField.equals("issue_type")) currentIssue.setIssueType(value.intern());
             else if(currentField.equals("creation_ts")) currentIssue.setCreationTimestamp(null);
             else if(currentField.equals("qa_contact")) currentIssue.setQAContact(value);
             else if(currentField.equals("status_whiteboard")) currentIssue.setStatusWhiteboard(value);
