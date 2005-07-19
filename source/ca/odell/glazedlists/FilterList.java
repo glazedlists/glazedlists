@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/* <http://publicobject.com/glazedlists/>                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
@@ -33,7 +33,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@odel.on.ca <mailto:jesse@odel.on.ca>">Jesse Wilson</a>
  */
 public final class FilterList extends TransformedList {
 
@@ -262,9 +262,10 @@ public final class FilterList extends TransformedList {
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
 
-                // filter out all items
-                updates.addDelete(0, flagList.blackSize());
+                // filter out all remaining items in this list
+                updates.addDelete(0, size());
 
+                // reset the flaglist to all white (which matches nothing)
                 flagList.clear();
                 flagList.addWhite(0, source.size());
 
@@ -290,7 +291,15 @@ public final class FilterList extends TransformedList {
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
 
-                // for all filtered items, add them
+                // for all filtered items, add them.
+                // this code exploits the fact that all flags before
+                // the current index are all conceptually black. we don't change
+                // the flag to black immediately as a performance optimization
+                // because the current implementation of barcode is faster for
+                // batch operations. The call to i.getIndex() is exploiting the
+                // fact that i.getIndex() == i.blackIndex() when all flags before
+                // are conceptually black. Otherwise we would need to change flags
+                // to black as we go so that flag offsets are correct
                 for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite(); ) {
                     i.nextWhite();
                     updates.addInsert(i.getIndex());
@@ -323,22 +332,6 @@ public final class FilterList extends TransformedList {
 
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
-
-                // debugs
-                /*System.out.print("BEFORE: ");
-                for(int i = 0; i < flagList.size(); i++) {
-                    if(i > 0) System.out.print(", ");
-                    if(flagList.get(i) == Barcode.WHITE) System.out.print("0");
-                    else System.out.print("1");
-                }
-                System.out.print("\n");
-                System.out.print("AFTER : ");
-                for(int i = 0; i < source.size(); i++) {
-                    if(i > 0) System.out.print(", ");
-                    if(currentMatcher.matches(source.get(i))) System.out.print("1");
-                    else System.out.print("0");
-                }
-                System.out.print("\n");*/
 
                 // for all filtered items, see what the change is
                 for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite(); ) {
