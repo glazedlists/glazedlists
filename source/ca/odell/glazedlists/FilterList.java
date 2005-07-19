@@ -117,11 +117,11 @@ public final class FilterList extends TransformedList {
         if(currentEditor != null) {
             currentEditor.addMatcherEditorListener(listener);
             currentMatcher = currentEditor.getMatcher();
-			listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, currentMatcher));
+            listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, currentMatcher));
         } else {
             currentMatcher = Matchers.trueMatcher();
-			listener.changedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, currentMatcher));
-		}
+            listener.changedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, currentMatcher));
+        }
     }
 
     /** {@inheritDoc} */
@@ -262,15 +262,8 @@ public final class FilterList extends TransformedList {
                 // all of these changes to this list happen "atomically"
                 updates.beginEvent();
 
-                // for all unfiltered items, see what the change is
-                for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack(); ) {
-                    i.nextBlack();
-                    int blackIndex = i.getBlackIndex();
-
-                    // todo Kevin, what does this line accomplish that makes it necessary ???
-                    i.setWhite();
-                    updates.addDelete(blackIndex);
-                }
+                // filter out all items
+                updates.addDelete(0, flagList.blackSize());
 
                 flagList.clear();
                 flagList.addWhite(0, source.size());
