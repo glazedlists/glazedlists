@@ -40,7 +40,36 @@ public class DiffTest extends TestCase {
     }
     
     /**
+     * Tests that diff works for a large number of elements.
+     */
+    public void testMemory() {
+        EventList sequence = new BasicEventList(new SparseDifferencesList(new ReallyBigList(1000 * 1000)));
+        List modifiedSequence = new SparseDifferencesList(new ReallyBigList(1000 * 1000));
+        assertEquals(0, getChangeCount(sequence, modifiedSequence, false, null));
+
+        Random dice = new Random();
+        for(int i = 0; i < 10; i++) {
+            modifiedSequence.set(dice.nextInt(modifiedSequence.size()), new Object());
+        }
+        assertEquals(20, getChangeCount(sequence, modifiedSequence, false, null));
+        assertEquals(sequence, modifiedSequence);
+    }
+
+    /**
      * Counts the number of changes to change target to source.
+     */
+    private int getChangeCount(EventList targetList, List sourceList, boolean updates, Comparator comparator) {
+        ListEventCounter counter = new ListEventCounter();
+        targetList.addListEventListener(counter);
+
+        if(comparator != null) GlazedLists.replaceAll(targetList, sourceList, false, comparator);
+        else GlazedLists.replaceAll(targetList, sourceList, false);
+
+        return counter.getEventCount();
+    }
+
+    /**
+     * Converts the strings to lists and counts the changes between them.
      *
      * <p>If case sensitivity is specified, an appropriate {@link Comparator} will be
      * used to determine equality between elements.
@@ -50,13 +79,7 @@ public class DiffTest extends TestCase {
         targetList.addAll(stringToList(target));
         List sourceList = stringToList(source);
 
-        ListEventCounter counter = new ListEventCounter();
-        targetList.addListEventListener(counter);
-
-        if(caseSensitive) GlazedLists.replaceAll(targetList, sourceList, false, GlazedLists.caseInsensitiveComparator());
-        else GlazedLists.replaceAll(targetList, sourceList, false);
-
-        return counter.getEventCount();
+        return getChangeCount(targetList, sourceList, false, caseSensitive ? GlazedLists.caseInsensitiveComparator() : null);
     }
 
     /**
@@ -68,5 +91,60 @@ public class DiffTest extends TestCase {
             result.add(data.substring(c, c+1));
         }
         return result;
+    }
+
+    /**
+     * A list that returns the integer index as the row value.
+     */
+    private class ReallyBigList extends AbstractList {
+        private int size;
+        public ReallyBigList(int size) {
+            this.size = size;
+        }
+        public Object get(int index) {
+            return new Integer(index);
+        }
+
+        public int size() {
+            return size;
+        }
+        public Object remove(int index) {
+            size--;
+            return new Integer(index);
+        }
+        public void add(int index, Object value) {
+            size++;
+        }
+    }
+
+    /**
+     * Decorates a list with a small set of changes.
+     */
+    private class SparseDifferencesList extends AbstractList {
+        private Map values = new HashMap();
+        private List delegate;
+        public SparseDifferencesList(List delegate) {
+            this.delegate = delegate;
+        }
+        public Object get(int index) {
+            Object mapValue = values.get(new Integer(index));
+            if(mapValue != null) return mapValue;
+
+            return delegate.get(index);
+        }
+        public int size() {
+            return delegate.size();
+        }
+
+        public Object set(int index, Object value) {
+            return values.put(new Integer(index), value);
+        }
+        public void add(int index, Object element) {
+            delegate.add(index, element);
+            set(index, element);
+        }
+        public Object remove(int index) {
+            return delegate.remove(index);
+        }
     }
 }

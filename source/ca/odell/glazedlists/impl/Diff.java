@@ -51,11 +51,11 @@ public final class Diff {
 
         // walk through points, applying changes as they arrive
         Point previousPoint = null;
-        for (Iterator i = editScript.iterator(); i.hasNext();) {
+        for(Iterator i = editScript.iterator(); i.hasNext();) {
             Point currentPoint = (Point) i.next();
             
             // skip the first point
-            if (previousPoint == null) {
+            if(previousPoint == null) {
                 previousPoint = currentPoint;
                 continue;
             }
@@ -65,22 +65,26 @@ public final class Diff {
             int deltaY = currentPoint.getY() - previousPoint.getY();
             
             // handle an update
-            if (deltaX == 1 && deltaY == 1) {
-                if (updates) target.set(targetIndex, source.get(sourceIndex));
-                targetIndex++;
-                sourceIndex++;
+            if(deltaX == deltaY) {
+                if(updates) {
+                    for(int u = 0; u < deltaX; u++) {
+                        target.set(targetIndex + u, source.get(sourceIndex + u));
+                    }
+                }
+                targetIndex += deltaX;
+                sourceIndex += deltaY;
 
-                // handle a remove
-            } else if (deltaX == 1 && deltaY == 0) {
+            // handle a remove
+            } else if(deltaX == 1 && deltaY == 0) {
                 target.remove(targetIndex);
 
-                // handle an insert
-            } else if (deltaX == 0 && deltaY == 1) {
+            // handle an insert
+            } else if(deltaX == 0 && deltaY == 1) {
                 target.add(targetIndex, source.get(sourceIndex));
                 sourceIndex++;
                 targetIndex++;
 
-                // should never be reached
+            // should never be reached
             } else {
                 throw new IllegalStateException();
             }
@@ -107,29 +111,29 @@ public final class Diff {
 
         // walk through in stages, each stage adding one non-diagonal.
         // D == count of non-diagonals in current stage
-        for (int D = 0; D <= maxSteps; D++) {
+        for(int D = 0; D <= maxSteps; D++) {
 
             // exploit diagonals in order to save storing both X and Y
             // diagonal k means every point on k, (k = x - y)
-            for (int k = -D; k <= D; k += 2) {
+            for(int k = -D; k <= D; k += 2) {
                 // the furthest reaching D-path on the left and right diagonals
                 // either of these may be null. The terms 'below left' and 'above right'
                 // refer to the diagonals that the points are on and may not be
                 // representative of the point positions
-                Point belowLeft = (Point) furthestReachingPoints.get(new Integer(k - 1));
-                Point aboveRight = (Point) furthestReachingPoints.get(new Integer(k + 1));
+                Point belowLeft = (Point)furthestReachingPoints.get(new Integer(k - 1));
+                Point aboveRight = (Point)furthestReachingPoints.get(new Integer(k + 1));
                 
                 // the new furthest reaching point to create
                 Point point;
                 
                 // first round: we have matched zero in word X
-                if (furthestReachingPoints.isEmpty()) {
+                if(furthestReachingPoints.isEmpty()) {
                     point = new Point(0, 0);
 
                     // if this is the leftmost diagonal, or the left edge is further
                     // than the right edge, our new X is that value and our y is one greater
                     // (shift verically by one)
-                } else if (k == -D || (k != D && belowLeft.getX() < aboveRight.getX())) {
+                } else if(k == -D || (k != D && belowLeft.getX() < aboveRight.getX())) {
                     point = aboveRight.createDeltaPoint(0, 1);
 
                     // if the right edge is further than the left edge, use that x
@@ -139,15 +143,15 @@ public final class Diff {
                 }
                 
                 // match as much diagonal as possible from the previous endpoint
-                while (point.isLessThan(maxPoint) && input.matchPair(point.getX(), point.getY())) {
-                    point = point.createDeltaPoint(1, 1);
+                while(point.isLessThan(maxPoint) && input.matchPair(point.getX(), point.getY())) {
+                    point = point.incrementDiagonally();
                 }
 
                 // save this furthest reaching path
                 furthestReachingPoints.put(new Integer(k), point);
                 
                 // if we're past the end, we have a solution!
-                if (point.isEqualToOrGreaterThan(maxPoint)) {
+                if(point.isEqualToOrGreaterThan(maxPoint)) {
                     return point.trail();
                 }
             }
@@ -244,6 +248,26 @@ public final class Diff {
         public Point createDeltaPoint(int deltaX, int deltaY) {
             Point result = new Point(x + deltaX, y + deltaY);
             result.predecessor = this;
+            return result;
+        }
+
+        /**
+         * Shifts <code>x</code> and <code>y</code> values down and to the
+         * right by one.
+         */
+        public Point incrementDiagonally() {
+            Point result = createDeltaPoint(1, 1);
+
+            // shortcut to the predecessor (to save memory!)
+            if(predecessor != null) {
+                int deltaX = result.x - predecessor.x;
+                int deltaY = result.y - predecessor.y;
+
+                if(deltaX == deltaY) {
+                    result.predecessor = this.predecessor;
+                }
+            }
+
             return result;
         }
 
