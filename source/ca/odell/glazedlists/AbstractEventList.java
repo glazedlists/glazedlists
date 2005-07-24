@@ -11,8 +11,6 @@ import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.util.concurrent.*;
 // for iterators
 import java.util.*;
-// for being serializable
-import java.io.Serializable;
 
 /**
  * A convenience class that implements common functionality for all {@link EventList}s.
@@ -25,7 +23,7 @@ import java.io.Serializable;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class AbstractEventList implements EventList, Serializable {
+public abstract class AbstractEventList implements EventList {
 
     /** the change event and notification system */
     protected ListEventAssembler updates = null;

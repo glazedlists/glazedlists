@@ -25,7 +25,7 @@ public interface Matcher {
     /**
      * Return true if an item matches a filter.
      *
-     * @param item The item possibly beig filtered.
+     * @param item The item possibly being filtered.
      */
     public boolean matches(Object item);
 }

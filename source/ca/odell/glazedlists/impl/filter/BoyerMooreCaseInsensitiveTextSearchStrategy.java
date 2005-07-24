@@ -14,6 +14,9 @@ import java.util.Arrays;
  */
 public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchStrategy {
 
+    /** the number of characters, starting at \0 to cache */
+    private static final int CHARACTER_CACHE_SIZE = 256;
+
     /** The length of the subtext to locate. */
     private int subtextLength;
 
@@ -24,7 +27,15 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
     private char[] subtextChars;
 
     /** The Boyer-Moore shift table reduced to only 256 elements rather than all 65,536 Unicode characters. */
-    private int[] shiftTable = new int[256];
+    private int[] shiftTable = new int[CHARACTER_CACHE_SIZE];
+
+    /** caching upper case characters has shown a 5% performance boost over Character.toUpperCase() */
+    private static final char[] UPPER_CASE_CACHE = new char[CHARACTER_CACHE_SIZE];
+    static {
+        for(char c = 0; c < UPPER_CASE_CACHE.length; c++) {
+            UPPER_CASE_CACHE[c] = Character.toUpperCase(c);
+        }
+    }
 
     /**
      * This method builds a shortened version of the Boyer-Moore shift table.
@@ -60,7 +71,7 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
 
         // for each character in the subtext, calculate its maximum safe shift distance
         for(int i = 0; i < this.lastSubtextIndex; i++) {
-            this.shiftTable[this.subtextChars[i] % 256] = this.lastSubtextIndex - i;
+            this.shiftTable[this.subtextChars[i] % CHARACTER_CACHE_SIZE] = this.lastSubtextIndex - i;
         }
     }
 
@@ -73,7 +84,7 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
 
         // initialize some variables modified within the text search loop
         int textPosition = this.lastSubtextIndex;
-        char textChar = ' ';
+        char upperCase = ' ';
         int subtextPosition;
         final int textLength = text.length();
 
@@ -84,17 +95,17 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
 
             if(subtextPosition >= 0) {
                 // locate the character in the text to be compared against
-                textChar = Character.toUpperCase(text.charAt(textPosition));
+                upperCase = toUpperCase(text.charAt(textPosition));
 
                 // check for matching character from the end to the beginning of the subtext
-                while(subtextPosition >= 0 && this.subtextChars[subtextPosition] == textChar) {
+                while(subtextPosition >= 0 && this.subtextChars[subtextPosition] == upperCase) {
                     // the text char and subtext char matched, so shift both positions left and recompare
                     subtextPosition--;
                     textPosition--;
 
                     // calculate the next character of the text to compare
                     if(textPosition != -1) {
-                        textChar = Character.toUpperCase(text.charAt(textPosition));
+                        upperCase = toUpperCase(text.charAt(textPosition));
                     }
                 }
             }
@@ -108,10 +119,21 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
 
             // otherwise we had a mismatch, so calculate the maximum safe shift
             // and move ahead to the next search position in the text
-            textPosition += Math.max(this.shiftTable[textChar % 256], this.subtextLength-subtextPosition);
+            textPosition += Math.max(this.shiftTable[upperCase % CHARACTER_CACHE_SIZE], this.subtextLength-subtextPosition);
         }
 
         // if we fall out of the search loop then we couldn't find the subtext
         return -1;
+    }
+
+    /**
+     * Our superfast toUpperCase method only works when a character is in the base
+     * 256 characters. Those values are precalculated because Character.toUpperCase()
+     * has proven to be a bottleneck.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=136">Issue 136</a>
+     */
+    private static char toUpperCase(char anyCase) {
+        return anyCase < UPPER_CASE_CACHE.length ? UPPER_CASE_CACHE[anyCase] : Character.toUpperCase(anyCase);
     }
 }

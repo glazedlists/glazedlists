@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* <http://publicobject.com/glazedlists/>                      publicobject.com,*/
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
@@ -33,7 +33,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
- * @author <a href="mailto:jesse@odel.on.ca <mailto:jesse@odel.on.ca>">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class FilterList extends TransformedList {
 
