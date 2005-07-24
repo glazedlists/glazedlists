@@ -21,11 +21,12 @@ public class NotMatcher implements Matcher {
 	}
 
 
+    /** {@inheritDoc} */
 	public boolean matches(Object item) {
 		return !parent.matches(item);
 	}
 
-
+    /** {@inheritDoc} */
 	public String toString() {
 		return "[NotMatcher parent:" + parent + "]";
 	}

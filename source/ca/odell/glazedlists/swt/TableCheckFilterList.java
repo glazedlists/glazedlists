@@ -44,9 +44,9 @@ final class TableCheckFilterList extends AbstractFilterList implements org.eclip
      * Creates a new filter that filters elements depending on whether they are
      * checked in the table.
      *
-     * @param elementsAreCheckable whether the elements of the source list
-     *      implement Checkable. If false, the list objects will be transparently
-     *      wrapped to provide state management.
+     * @param tableFormat if this class implements {@link CheckableTableFormat}
+     *      it will be used to store check state. Otherwise check state will be
+     *      stored transiently within this class' state.
      */
     public TableCheckFilterList(EventList source, Table table, TableFormat tableFormat) {
         super(tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source));

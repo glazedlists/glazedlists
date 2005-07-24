@@ -8,7 +8,6 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.SelectionListener;
 // glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 // JFace label providers
 import org.eclipse.jface.viewers.*;

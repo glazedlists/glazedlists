@@ -13,12 +13,9 @@ import ca.odell.glazedlists.Matcher;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
 public class TrueMatcher implements Matcher {
-	/**
-	 * Singleton instance of TrueMatcher.
-	 */
+
+	/** Singleton instance of TrueMatcher. */
 	private static final Matcher INSTANCE = new TrueMatcher();
-
-
 	/**
 	 * Return a singleton instance.
 	 */
@@ -26,8 +23,7 @@ public class TrueMatcher implements Matcher {
 		return INSTANCE;
 	}
 
-
-
+    /** {@inheritDoc} */
 	public boolean matches( Object item ) {
 		return true;
 	}

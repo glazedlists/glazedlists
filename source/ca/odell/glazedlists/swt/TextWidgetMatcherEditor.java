@@ -5,9 +5,7 @@ package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-// access to the volatile implementation pacakge
-import ca.odell.glazedlists.impl.filter.*;
+import ca.odell.glazedlists.matchers.*;
 // for working with SWT Text widgets
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.*;
@@ -42,8 +40,7 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
      *      <code>null</code> then all filtered objects are expected to
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      *
-     * @see GlazedLists.textFilterator(String[])
-     * @see GlazedLists.toStringFilterator()
+     * @see GlazedLists#textFilterator(String[])
      */
     public TextWidgetMatcherEditor(Text text, TextFilterator textFilterator) {
         this(text, textFilterator, true);

@@ -3,25 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-import java.util.*;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.event.*;
 // for access to volatile classes
-import ca.odell.glazedlists.impl.*;
-import ca.odell.glazedlists.impl.sort.*;
-import ca.odell.glazedlists.impl.io.*;
-import ca.odell.glazedlists.impl.beans.*;
-import ca.odell.glazedlists.impl.gui.*;
 import ca.odell.glazedlists.impl.swt.*;
 // implemented interfaces
-import ca.odell.glazedlists.io.ByteCoder;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.ThresholdEvaluator;
-import java.util.Comparator;
 import org.eclipse.jface.viewers.ILabelProvider;
 // SWT components
 import org.eclipse.swt.widgets.Display;

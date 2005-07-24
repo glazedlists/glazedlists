@@ -9,7 +9,7 @@ import junit.framework.*;
 import java.util.*;
 
 /**
- * Verifies that {@link SelectionList} works as expected.
+ * Verifies that {@link ListSelection} works as expected.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
@@ -18,8 +18,11 @@ public class SelectionListTest extends TestCase {
     /** to generate some random values */
     private Random dice = new Random(167);
 
-    /** the selection list */
-    private SelectionList source = null;
+    /** the target list */
+    private EventList source = null;
+
+    /** the list selection */
+    private ListSelection listSelection = null;
 
     /** the list of selected elements */
     private EventList selectedList = null;
@@ -31,10 +34,11 @@ public class SelectionListTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        source = new SelectionList(new BasicEventList());
-        selectedList = source.getSelected();
-        deselectedList = source.getDeselected();
-        source.addListEventListener(new ConsistencyTestList(source, "SelectionList: ", false));
+        source = new BasicEventList();
+        listSelection = new ListSelection(source);
+        selectedList = listSelection.getSelected();
+        deselectedList = listSelection.getDeselected();
+        source.addListEventListener(new ConsistencyTestList(source, "source: ", false));
         selectedList.addListEventListener(new ConsistencyTestList(selectedList, "selected: ", false));
         deselectedList.addListEventListener(new ConsistencyTestList(deselectedList, "deselected: ", false));
     }
@@ -43,7 +47,8 @@ public class SelectionListTest extends TestCase {
      * Clean up after the test.
      */
     public void tearDown() {
-        source.dispose();
+        listSelection.dispose();
+        listSelection = null;
         source = null;
         selectedList = null;
         deselectedList = null;
@@ -59,12 +64,12 @@ public class SelectionListTest extends TestCase {
         source.add(0, new Integer(1));
 
         // select on a completely deselected list
-        source.selectAll();
+        listSelection.selectAll();
         assertEquals(source.size(), selectedList.size());
         assertEquals(0, deselectedList.size());
 
         // select on an already selected list
-        source.selectAll();
+        listSelection.selectAll();
         assertEquals(source.size(), selectedList.size());
         assertEquals(0, deselectedList.size());
     }
@@ -79,13 +84,13 @@ public class SelectionListTest extends TestCase {
         source.add(0, new Integer(1));
 
         // deselect on an already deselected list
-        source.deselectAll();
+        listSelection.deselectAll();
         assertEquals(0, selectedList.size());
         assertEquals(source.size(), deselectedList.size());
 
         // deselect on a completely selected list
-        source.selectAll();
-        source.deselectAll();
+        listSelection.selectAll();
+        listSelection.deselectAll();
         assertEquals(0, selectedList.size());
         assertEquals(source.size(), deselectedList.size());
     }
@@ -98,7 +103,7 @@ public class SelectionListTest extends TestCase {
         source.add(0, new Integer(15));
         assertEquals(0, selectedList.size());
         assertEquals(source.size(), deselectedList.size());
-        source.select(0);
+        listSelection.select(0);
 
         source.add(1, new Integer(155));
         source.add(2, new Integer(1555));
@@ -117,11 +122,11 @@ public class SelectionListTest extends TestCase {
      * for the MULTIPLE_INTERVAL_SELECTION mode.
      */
     public void testMultipleIntervalSelectionMode() {
-        source.setSelectionMode(SelectionList.MULTIPLE_INTERVAL_SELECTION);
+        listSelection.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION);
         source.add(0, new Integer(15));
         assertEquals(0, selectedList.size());
         assertEquals(source.size(), deselectedList.size());
-        source.select(0);
+        listSelection.select(0);
 
         source.add(1, new Integer(155));
         source.add(2, new Integer(1555));
@@ -145,10 +150,10 @@ public class SelectionListTest extends TestCase {
 
         for(int i = 0;i < 100; i++) {
             int selectionIndex = dice.nextInt(20);
-            source.setSelection(selectionIndex);
+            listSelection.setSelection(selectionIndex);
             assertEquals(1, selectedList.size());
             assertEquals(source.get(selectionIndex), selectedList.get(0));
-            assertEquals(true, source.isSelected(selectionIndex));
+            assertEquals(true, listSelection.isSelected(selectionIndex));
             assertEquals(19, deselectedList.size());
         }
     }
@@ -164,15 +169,15 @@ public class SelectionListTest extends TestCase {
         int oldSize = 0;
         for(int i = 0;i < 100; i++) {
             int selectionIndex = dice.nextInt(20);
-            boolean wasSelected = source.isSelected(selectionIndex);
-            source.select(selectionIndex);
+            boolean wasSelected = listSelection.isSelected(selectionIndex);
+            listSelection.select(selectionIndex);
             if(!wasSelected) oldSize++;
             assertEquals(oldSize, selectedList.size());
             assertEquals(20 - oldSize, deselectedList.size());
-            assertEquals(true, source.isSelected(selectionIndex));
+            assertEquals(true, listSelection.isSelected(selectionIndex));
 
             if(selectedList.size() == 20) {
-                source.deselectAll();
+                listSelection.deselectAll();
                 oldSize = 0;
             }
         }
@@ -185,20 +190,20 @@ public class SelectionListTest extends TestCase {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
         }
-        source.selectAll();
+        listSelection.selectAll();
 
         int oldSize = 0;
         for(int i = 0;i < 100; i++) {
             int selectionIndex = dice.nextInt(20);
-            boolean wasSelected = source.isSelected(selectionIndex);
-            source.deselect(selectionIndex);
+            boolean wasSelected = listSelection.isSelected(selectionIndex);
+            listSelection.deselect(selectionIndex);
             if(wasSelected) oldSize++;
             assertEquals(oldSize, deselectedList.size());
             assertEquals(20 - oldSize, selectedList.size());
-            assertEquals(false, source.isSelected(selectionIndex));
+            assertEquals(false, listSelection.isSelected(selectionIndex));
 
             if(deselectedList.size() == 20) {
-                source.selectAll();
+                listSelection.selectAll();
                 oldSize = 0;
             }
         }
@@ -213,28 +218,28 @@ public class SelectionListTest extends TestCase {
         }
 
         // select an initial range
-        source.setSelection(5, 14);
+        listSelection.setSelection(5, 14);
         assertEquals(10, selectedList.size());
         assertEquals(new Integer(5), selectedList.get(0));
         assertEquals(new Integer(14), selectedList.get(9));
         assertEquals(10, deselectedList.size());
 
         // select a unique range
-        source.setSelection(15, 16);
+        listSelection.setSelection(15, 16);
         assertEquals(2, selectedList.size());
         assertEquals(new Integer(15), selectedList.get(0));
         assertEquals(new Integer(16), selectedList.get(1));
         assertEquals(18, deselectedList.size());
 
         // select a range with some overlap
-        source.setSelection(10, 19);
+        listSelection.setSelection(10, 19);
         assertEquals(10, selectedList.size());
         assertEquals(new Integer(10), selectedList.get(0));
         assertEquals(new Integer(19), selectedList.get(9));
         assertEquals(10, deselectedList.size());
 
         // select an overlapping range
-        source.setSelection(10, 15);
+        listSelection.setSelection(10, 15);
         assertEquals(6, selectedList.size());
         assertEquals(new Integer(10), selectedList.get(0));
         assertEquals(new Integer(15), selectedList.get(5));
@@ -250,28 +255,28 @@ public class SelectionListTest extends TestCase {
         }
 
         // select an initial range
-        source.select(5, 14);
+        listSelection.select(5, 14);
         assertEquals(10, selectedList.size());
         assertEquals(new Integer(5), selectedList.get(0));
         assertEquals(new Integer(14), selectedList.get(9));
         assertEquals(10, deselectedList.size());
 
         // select a mutually exclusive range
-        source.select(15, 16);
+        listSelection.select(15, 16);
         assertEquals(12, selectedList.size());
         assertEquals(new Integer(5), selectedList.get(0));
         assertEquals(new Integer(16), selectedList.get(11));
         assertEquals(8, deselectedList.size());
 
         // select a range with some overlap
-        source.select(10, 19);
+        listSelection.select(10, 19);
         assertEquals(15, selectedList.size());
         assertEquals(new Integer(5), selectedList.get(0));
         assertEquals(new Integer(19), selectedList.get(14));
         assertEquals(5, deselectedList.size());
 
         // select an entirely overlapping range
-        source.select(10, 15);
+        listSelection.select(10, 15);
         assertEquals(15, selectedList.size());
         assertEquals(new Integer(5), selectedList.get(0));
         assertEquals(new Integer(19), selectedList.get(14));
@@ -286,31 +291,31 @@ public class SelectionListTest extends TestCase {
             source.add(new Integer(i));
         }
 
-        source.selectAll();
+        listSelection.selectAll();
 
         // deselect an initial range
-        source.deselect(5, 14);
+        listSelection.deselect(5, 14);
         assertEquals(10, deselectedList.size());
         assertEquals(new Integer(5), deselectedList.get(0));
         assertEquals(new Integer(14), deselectedList.get(9));
         assertEquals(10, selectedList.size());
 
         // deselect a mutually exclusive range
-        source.deselect(15, 16);
+        listSelection.deselect(15, 16);
         assertEquals(12, deselectedList.size());
         assertEquals(new Integer(5), deselectedList.get(0));
         assertEquals(new Integer(16), deselectedList.get(11));
         assertEquals(8, selectedList.size());
 
         // deselect a range with some overlap
-        source.deselect(10, 19);
+        listSelection.deselect(10, 19);
         assertEquals(15, deselectedList.size());
         assertEquals(new Integer(5), deselectedList.get(0));
         assertEquals(new Integer(19), deselectedList.get(14));
         assertEquals(5, selectedList.size());
 
         // deselect an entirely overlapping range
-        source.deselect(10, 15);
+        listSelection.deselect(10, 15);
         assertEquals(15, deselectedList.size());
         assertEquals(new Integer(5), deselectedList.get(0));
         assertEquals(new Integer(19), deselectedList.get(14));
@@ -329,17 +334,17 @@ public class SelectionListTest extends TestCase {
         }
 
         // select with array 1
-        source.setSelection(testArray1);
+        listSelection.setSelection(testArray1);
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
 
         // select with array 2
-        source.setSelection(testArray2);
+        listSelection.setSelection(testArray2);
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
 
         // select with array 3
-        source.setSelection(testArray3);
+        listSelection.setSelection(testArray3);
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
     }
@@ -357,22 +362,22 @@ public class SelectionListTest extends TestCase {
         }
 
         // select with array 1
-        source.select(allUnselected);
+        listSelection.select(allUnselected);
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
 
         // select with array 2
-        source.select(totallyOverlapping);
+        listSelection.select(totallyOverlapping);
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
 
         // select with array 3
-        source.select(partialOverlap);
+        listSelection.select(partialOverlap);
         assertEquals(15, selectedList.size());
         assertEquals(5, deselectedList.size());
 
         // select with array 4
-        source.select(remainingElements);
+        listSelection.select(remainingElements);
         assertEquals(20, selectedList.size());
         assertEquals(0, deselectedList.size());
     }
@@ -389,25 +394,25 @@ public class SelectionListTest extends TestCase {
             source.add(new Integer(i));
         }
 
-        source.selectAll();
+        listSelection.selectAll();
 
         // deselect with array 1
-        source.deselect(allDeselected);
+        listSelection.deselect(allDeselected);
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
 
         // deselect with array 2
-        source.deselect(totallyOverlapping);
+        listSelection.deselect(totallyOverlapping);
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
 
         // deselect with array 3
-        source.deselect(partialOverlap);
+        listSelection.deselect(partialOverlap);
         assertEquals(5, selectedList.size());
         assertEquals(15, deselectedList.size());
 
         // deselect with array 4
-        source.deselect(remainingElements);
+        listSelection.deselect(remainingElements);
         assertEquals(0, selectedList.size());
         assertEquals(20, deselectedList.size());
     }
@@ -422,29 +427,29 @@ public class SelectionListTest extends TestCase {
 
         // select all the even values
         for(int i = 0; i < 20; i += 2) {
-            source.select(i);
+            listSelection.select(i);
         }
 
         // invert once
-        source.invertSelection();
+        listSelection.invertSelection();
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
         for(int i = 1; i < 20; i += 2) {
-            assertEquals(true, source.isSelected(i));
+            assertEquals(true, listSelection.isSelected(i));
         }
         for(int i = 0; i < 20; i += 2) {
-            assertEquals(false, source.isSelected(i));
+            assertEquals(false, listSelection.isSelected(i));
         }
 
         // invert again
-        source.invertSelection();
+        listSelection.invertSelection();
         assertEquals(10, selectedList.size());
         assertEquals(10, deselectedList.size());
         for(int i = 1; i < 20; i += 2) {
-            assertEquals(false, source.isSelected(i));
+            assertEquals(false, listSelection.isSelected(i));
         }
         for(int i = 0; i < 20; i += 2) {
-            assertEquals(true, source.isSelected(i));
+            assertEquals(true, listSelection.isSelected(i));
         }
 
     }

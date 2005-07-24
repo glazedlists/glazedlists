@@ -149,7 +149,7 @@ public class IssuesBrowser extends Applet {
         });
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel(issuesSortedList);
-        issuesSelectionModel.setSelectionMode(SelectionList.SINGLE_SELECTION);
+        issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
         issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);

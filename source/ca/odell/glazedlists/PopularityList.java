@@ -83,19 +83,19 @@ public final class PopularityList extends TransformedList {
         sortedSource.dispose();
         uniqueList.dispose();
     }
-}
 
-/**
- * Compares objects by their popularity.
- */
-class PopularityComparator implements Comparator {
-    private UniqueList target;
-    public PopularityComparator(UniqueList target) {
-        this.target = target;
-    }
-    public int compare(Object a, Object b) {
-        int aCount = target.getCount(a);
-        int bCount = target.getCount(b);
-        return bCount - aCount;
+    /**
+     * Compares objects by their popularity.
+     */
+    private static class PopularityComparator implements Comparator {
+        private UniqueList target;
+        public PopularityComparator(UniqueList target) {
+            this.target = target;
+        }
+        public int compare(Object a, Object b) {
+            int aCount = target.getCount(a);
+            int bCount = target.getCount(b);
+            return bCount - aCount;
+        }
     }
 }

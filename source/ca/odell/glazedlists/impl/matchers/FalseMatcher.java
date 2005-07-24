@@ -13,12 +13,9 @@ import ca.odell.glazedlists.Matcher;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
 public class FalseMatcher implements Matcher {
-	/**
-	 * Singleton instance of FalseMatcher.
-	 */
+
+	/** Singleton instance of FalseMatcher. */
 	private static final Matcher INSTANCE = new FalseMatcher();
-
-
 	/**
 	 * Return a singleton instance.
 	 */
@@ -26,8 +23,7 @@ public class FalseMatcher implements Matcher {
 		return INSTANCE;
 	}
 
-	
-
+    /** {@inheritDoc} */
 	public boolean matches( Object item ) {
 		return false;
 	}

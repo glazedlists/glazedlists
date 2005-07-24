@@ -29,14 +29,14 @@ import java.util.*;
  * <code>MULTIPLE_INTERVAL_SELECTION</code> mode, it becomes selected. But in
  * the <code>MULTIPLE_INTERVAL_SELECTION_DEFENSIVE</code> mode, it does not
  * become selected. To set this mode, use
- * {@link #setSelectionMode(int) setSelectionMode(SelectionList.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE)}.
+ * {@link #setSelectionMode(int) setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE)}.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class EventSelectionModel implements ListSelectionModel {
 
     /** the event lists that provide an event list view of the selection */
-    private SelectionList selectionList;
+    private ListSelection listSelection;
 
     /** the proxy moves events to the Swing Event Dispatch thread */
     private TransformedList swingSource;
@@ -68,8 +68,8 @@ public final class EventSelectionModel implements ListSelectionModel {
         swingSource = GlazedListsSwing.swingThreadProxyList(source);
 
         // build a list for reading the selection
-        this.selectionList = new SelectionList(swingSource);
-        selectionList.addSelectionListener(new SwingSelectionListener());
+        this.listSelection = new ListSelection(swingSource);
+        listSelection.addSelectionListener(new SwingSelectionListener());
     }
 
     /**
@@ -86,7 +86,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Gets an {@link EventList} that always contains the current selection.
      */
     public EventList getSelected() {
-        return selectionList.getSelected();
+        return listSelection.getSelected();
     }
 
     /**
@@ -94,7 +94,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * that are currently deselected.
      */
     public EventList getDeselected() {
-        return selectionList.getDeselected();
+        return listSelection.getDeselected();
     }
 
     /**
@@ -128,10 +128,10 @@ public final class EventSelectionModel implements ListSelectionModel {
     }
 
     /**
-     * Listens to selection changes on the {@link SelectionList} and fires
+     * Listens to selection changes on the {@link ListSelection} and fires
      * {@link ListSelectionEvent}s to registered listeners.
      */
-    private class SwingSelectionListener implements SelectionList.Listener {
+    private class SwingSelectionListener implements ListSelection.Listener {
 
         /** {@inheritDoc} */
         public void selectionChanged(int changeStart, int changeEnd) {
@@ -164,7 +164,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Inverts the current selection.
      */
     public void invertSelection() {
-        selectionList.invertSelection();
+        listSelection.invertSelection();
     }
 
     /**
@@ -181,7 +181,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     public void setSelectionInterval(int index0, int index1) {
         if(!enabled) return;
-        selectionList.setSelection(index0, index1);
+        listSelection.setSelection(index0, index1);
     }
 
     /**
@@ -189,14 +189,14 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     public void addSelectionInterval(int index0, int index1) {
         if(!enabled) return;
-        selectionList.select(index0, index1);
+        listSelection.select(index0, index1);
     }
     /**
      * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
      */
     public void removeSelectionInterval(int index0, int index1) {
         if(!enabled) return;
-        selectionList.deselect(index0, index1);
+        listSelection.deselect(index0, index1);
     }
 
     /**
@@ -208,48 +208,48 @@ public final class EventSelectionModel implements ListSelectionModel {
      * in table size.
      */
     public boolean isSelectedIndex(int index) {
-        return (selectionList.isSelected(index));
+        return (listSelection.isSelected(index));
     }
 
     /**
      * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
     public int getAnchorSelectionIndex() {
-        return selectionList.getAnchorSelectionIndex();
+        return listSelection.getAnchorSelectionIndex();
     }
     /**
      * Set the anchor selection index.
      */
     public void setAnchorSelectionIndex(int anchorSelectionIndex) {
         if(!enabled) return;
-        selectionList.setAnchorSelectionIndex(anchorSelectionIndex);
+        listSelection.setAnchorSelectionIndex(anchorSelectionIndex);
     }
     /**
      * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
     public int getLeadSelectionIndex() {
-        return selectionList.getLeadSelectionIndex();
+        return listSelection.getLeadSelectionIndex();
     }
     /**
      * Set the lead selection index.
      */
     public void setLeadSelectionIndex(int leadSelectionIndex) {
         if(!enabled) return;
-        selectionList.setLeadSelectionIndex(leadSelectionIndex);
+        listSelection.setLeadSelectionIndex(leadSelectionIndex);
     }
 
     /**
      * Gets the index of the first selected element.
      */
     public int getMinSelectionIndex() {
-        return selectionList.getMinSelectionIndex();
+        return listSelection.getMinSelectionIndex();
     }
 
     /**
      * Gets the index of the last selected element.
      */
     public int getMaxSelectionIndex() {
-        return selectionList.getMaxSelectionIndex();
+        return listSelection.getMaxSelectionIndex();
     }
 
     /**
@@ -257,26 +257,26 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     public void clearSelection() {
         if(!enabled) return;
-        selectionList.deselectAll();
+        listSelection.deselectAll();
     }
     /**
      * Returns true if no indices are selected.
      */
     public boolean isSelectionEmpty() {
-        return (selectionList.getSelected().size() == 0);
+        return (listSelection.getSelected().size() == 0);
     }
 
     /**
      * Insert length indices beginning before/after index.
      */
     public void insertIndexInterval(int index, int length, boolean before) {
-        // these changes are handled by the SelectionList
+        // these changes are handled by the ListSelection
     }
     /**
      * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
      */
     public void removeIndexInterval(int index0, int index1) {
-        // these changes are handled by the SelectionList
+        // these changes are handled by the ListSelection
     }
 
     /**
@@ -306,14 +306,14 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Set the selection mode.
      */
     public void setSelectionMode(int selectionMode) {
-        selectionList.setSelectionMode(selectionMode);
+        listSelection.setSelectionMode(selectionMode);
     }
 
     /**
      * Returns the current selection mode.
      */
     public int getSelectionMode() {
-        return selectionList.getSelectionMode();
+        return listSelection.getSelectionMode();
     }
 
     /**
@@ -350,6 +350,6 @@ public final class EventSelectionModel implements ListSelectionModel {
      * to call any method on a {@link EventSelectionModel} after it has been disposed.
      */
     public void dispose() {
-        selectionList.dispose();
+        listSelection.dispose();
     }
 }

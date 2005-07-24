@@ -21,7 +21,7 @@ import java.util.*;
  *
  * <p>I have implemented EventJList. The class shares the following with ListTable:
  * <li>SelectionListener interface
- * <li>SelectionList / Selection Model
+ * <li>ListSelection / Selection Model
  *
  * <p>This class never batches groups of changes like ListTable does. It also
  * does not use a Mutable change event. It may be necessary to create a mutable

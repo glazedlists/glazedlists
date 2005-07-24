@@ -31,25 +31,45 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class SelectionList extends TransformedList {
+public class ListSelection {
 
-    /** A selection mode where at most one element may be selected at one time. */
-    public static final int SINGLE_SELECTION = 100;
+    /**
+     * A selection mode where at most one element may be selected at one time.
+     * For convenience, this value equals {@link javax.swing.ListSelectionModel#SINGLE_SELECTION}.
+     */
+    public static final int SINGLE_SELECTION = 0;
 
-    /** A selection mode where at most one range of elements may be selected at one time. */
-    public static final int SINGLE_INTERVAL_SELECTION = 101;
+    /**
+     * A selection mode where at most one range of elements may be selected at one time.
+     * For convenience, this value equals {@link javax.swing.ListSelectionModel#SINGLE_INTERVAL_SELECTION}.
+     */
+    public static final int SINGLE_INTERVAL_SELECTION = 1;
 
-    /** A selection mode where any element may be selected and elements added adjacent to selected elements are selected. */
-    public static final int MULTIPLE_INTERVAL_SELECTION = 102;
+    /**
+     * A selection mode where any element may be selected and elements added
+     * adjacent to selected elements are selected. For convenience, this value
+     * equals {@link javax.swing.ListSelectionModel#MULTIPLE_INTERVAL_SELECTION}.
+     */
+    public static final int MULTIPLE_INTERVAL_SELECTION = 2;
 
-    /** A selection mode where any element may be selected and freshly added elements are always deselected. */
+    /**
+     * A selection mode where any element may be selected and freshly added elements
+     * are always deselected. No equivalent policy exists in
+     * {@link javax.swing.ListSelectionModel}
+     */
     public static final int MULTIPLE_INTERVAL_SELECTION_DEFENSIVE = 103;
 
+    /** the source list */
+    private final EventList source;
+
     /** the selected view */
-    private SelectedList selectedList = null;
+    private final SelectedList selectedList;
 
     /** the deselected view */
-    private DeselectedList deselectedList = null;
+    private final DeselectedList deselectedList;
+
+    /** observe the source list */
+    private final SourceListener sourceListener = new SourceListener();
 
     /** the selection state */
     private Barcode barcode = new Barcode();
@@ -73,180 +93,178 @@ public class SelectionList extends TransformedList {
     private List selectionListeners = new ArrayList(1);
 
     /**
-     * Creates a new SelectionList that listens to changes on the given source.
+     * Creates a new ListSelection that listens to changes on the given source.
      * When using this constructor, all elements are deselected by default.
      */
-    public SelectionList(EventList source) {
-        super(source);
+    public ListSelection(EventList source) {
+        this.source = source;
         barcode.add(0, deselected, source.size());
-        source.addListEventListener(this);
+        source.addListEventListener(sourceListener);
         deselectedList = new DeselectedList(source);
         selectedList = new SelectedList(source);
     }
 
     /**
-     * Creates a new SelectionList that listens to changes on the given source
+     * Creates a new ListSelection that listens to changes on the given source
      * and initializes selection with the given array of indices.
      */
-    public SelectionList(EventList source, int[] initialSelection) {
+    public ListSelection(EventList source, int[] initialSelection) {
         this(source);
         select(initialSelection);
     }
 
-    /** {@inheritDoc} */
-    protected boolean isWritable() {
-        return true;
-    }
+    /**
+     * Handle changes to the source list by adjusting our selection state and
+     * the contents of the selected and deselected lists.
+     */
+    private class SourceListener implements ListEventListener {
 
-    /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+        /** {@inheritDoc} */
+        public void listChanged(ListEvent listChanges) {
 
-        // keep track of what used to be selected
-        int minSelectionIndexBefore = getMinSelectionIndex();
-        int maxSelectionIndexBefore = getMaxSelectionIndex();
+            // keep track of what used to be selected
+            int minSelectionIndexBefore = getMinSelectionIndex();
+            int maxSelectionIndexBefore = getMaxSelectionIndex();
 
-        // handle reordering events
-        if(listChanges.isReordering()) {
-            // prepare for the reordering event
-            selectedList.updates().beginEvent();
+            // handle reordering events
+            if(listChanges.isReordering()) {
+                // prepare for the reordering event
+                selectedList.updates().beginEvent();
 
-            int[] sourceReorderMap = listChanges.getReorderMap();
-            int[] selectReorderMap = new int[barcode.colourSize(selected)];
-            int[] deselectReorderMap = new int[barcode.colourSize(deselected)];
+                int[] sourceReorderMap = listChanges.getReorderMap();
+                int[] selectReorderMap = new int[barcode.colourSize(selected)];
+                int[] deselectReorderMap = new int[barcode.colourSize(deselected)];
 
-            // adjust the flaglist & construct a reorder map to propagate
-            Barcode previousBarcode = barcode;
-            barcode = new Barcode();
-            for(int c = 0; c < sourceReorderMap.length; c++) {
-                Object flag = previousBarcode.get(sourceReorderMap[c]);
-                boolean wasSelected = (flag != deselected);
-                barcode.add(c, flag, 1);
-                if(wasSelected) {
-                    int previousIndex = previousBarcode.getColourIndex(sourceReorderMap[c], selected);
-                    int currentIndex = barcode.getColourIndex(c, selected);
-                    selectReorderMap[currentIndex] = previousIndex;
-                } else {
-                    int previousIndex = previousBarcode.getColourIndex(sourceReorderMap[c], deselected);
-                    int currentIndex = barcode.getColourIndex(c, deselected);
-                    deselectReorderMap[currentIndex] = previousIndex;
-                }
-            }
-
-            // adjust other internal state
-            anchorSelectionIndex = -1;
-            leadSelectionIndex = -1;
-
-            // fire the reorder on the selected list
-            selectedList.updates().reorder(selectReorderMap);
-            selectedList.updates().commitEvent();
-
-            // fire the reorder on the deselected list
-            deselectedList.updates().beginEvent();
-            deselectedList.updates().reorder(deselectReorderMap);
-            deselectedList.updates().commitEvent();
-
-        // handle non-reordering events
-        } else {
-            // Keep track of deselected changes as you go
-            ArrayList savedChanges = new ArrayList();
-
-            // prepare a sequence of changes
-            selectedList.updates().beginEvent();
-
-            // for all changes update the barcode
-            while(listChanges.next()) {
-                int index = listChanges.getIndex();
-                int changeType = listChanges.getType();
-
-                // learn about what it was
-                int previousSelectionIndex = barcode.getColourIndex(index, selected);
-                boolean previouslySelected = previousSelectionIndex != -1;
-
-                // when an element is deleted, blow it away
-                if(changeType == ListEvent.DELETE) {
-
-                    // delete selected values
-                    if(previouslySelected) {
-                        barcode.remove(index, 1);
-                        selectedList.updates().addDelete(previousSelectionIndex);
-
-                    // delete deselected values
+                // adjust the flaglist & construct a reorder map to propagate
+                Barcode previousBarcode = barcode;
+                barcode = new Barcode();
+                for(int c = 0; c < sourceReorderMap.length; c++) {
+                    Object flag = previousBarcode.get(sourceReorderMap[c]);
+                    boolean wasSelected = (flag != deselected);
+                    barcode.add(c, flag, 1);
+                    if(wasSelected) {
+                        int previousIndex = previousBarcode.getColourIndex(sourceReorderMap[c], selected);
+                        int currentIndex = barcode.getColourIndex(c, selected);
+                        selectReorderMap[currentIndex] = previousIndex;
                     } else {
-                        int deselectedIndex = barcode.getColourIndex(index, deselected);
-                        savedChanges.add(new DeselectedChange(ListEvent.DELETE, deselectedIndex));
-                        barcode.remove(index, 1);
+                        int previousIndex = previousBarcode.getColourIndex(sourceReorderMap[c], deselected);
+                        int currentIndex = barcode.getColourIndex(c, deselected);
+                        deselectReorderMap[currentIndex] = previousIndex;
                     }
+                }
+
+                // adjust other internal state
+                anchorSelectionIndex = -1;
+                leadSelectionIndex = -1;
+
+                // fire the reorder on the selected list
+                selectedList.updates().reorder(selectReorderMap);
+                selectedList.updates().commitEvent();
+
+                // fire the reorder on the deselected list
+                deselectedList.updates().beginEvent();
+                deselectedList.updates().reorder(deselectReorderMap);
+                deselectedList.updates().commitEvent();
+
+            // handle non-reordering events
+            } else {
+                // Keep track of deselected changes as you go
+                ArrayList savedChanges = new ArrayList();
+
+                // prepare a sequence of changes
+                selectedList.updates().beginEvent();
+
+                // for all changes update the barcode
+                while(listChanges.next()) {
+                    int index = listChanges.getIndex();
+                    int changeType = listChanges.getType();
+
+                    // learn about what it was
+                    int previousSelectionIndex = barcode.getColourIndex(index, selected);
+                    boolean previouslySelected = previousSelectionIndex != -1;
+
+                    // when an element is deleted, blow it away
+                    if(changeType == ListEvent.DELETE) {
+
+                        // delete selected values
+                        if(previouslySelected) {
+                            barcode.remove(index, 1);
+                            selectedList.updates().addDelete(previousSelectionIndex);
+
+                        // delete deselected values
+                        } else {
+                            int deselectedIndex = barcode.getColourIndex(index, deselected);
+                            savedChanges.add(new DeselectedChange(ListEvent.DELETE, deselectedIndex));
+                            barcode.remove(index, 1);
+                        }
 
 
-                // when an element is inserted, it is selected if its index was selected
-                } else if(changeType == ListEvent.INSERT) {
+                    // when an element is inserted, it is selected if its index was selected
+                    } else if(changeType == ListEvent.INSERT) {
 
-                    // when selected, decide based on selection mode
-                    if(previouslySelected) {
+                        // when selected, decide based on selection mode
+                        if(previouslySelected) {
 
-                        // select the inserted for single interval and multiple interval selection
-                        if(selectionMode == SINGLE_INTERVAL_SELECTION
-                        || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
-                            barcode.add(index, selected, 1);
-                            selectedList.updates().addInsert(previousSelectionIndex);
+                            // select the inserted for single interval and multiple interval selection
+                            if(selectionMode == SINGLE_INTERVAL_SELECTION
+                            || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
+                                barcode.add(index, selected, 1);
+                                selectedList.updates().addInsert(previousSelectionIndex);
 
-                        // do not select the inserted for single selection and defensive selection
+                            // do not select the inserted for single selection and defensive selection
+                            } else {
+                                barcode.add(index, deselected, 1);
+                                int deselectedIndex = barcode.getColourIndex(index, deselected);
+                                savedChanges.add(new DeselectedChange(ListEvent.INSERT, deselectedIndex));
+                            }
+
+                        // add a deselected value
                         } else {
                             barcode.add(index, deselected, 1);
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
                             savedChanges.add(new DeselectedChange(ListEvent.INSERT, deselectedIndex));
                         }
 
-                    // add a deselected value
-                    } else {
-                        barcode.add(index, deselected, 1);
-                        int deselectedIndex = barcode.getColourIndex(index, deselected);
-                        savedChanges.add(new DeselectedChange(ListEvent.INSERT, deselectedIndex));
+                    // when an element is changed, assume selection stays the same
+                    } else if(changeType == ListEvent.UPDATE) {
+                        // update a selected value
+                        if(previouslySelected) {
+                            selectedList.updates().addUpdate(previousSelectionIndex);
+
+                        // update a deselected value
+                        } else {
+                            int deselectedIndex = barcode.getColourIndex(index, deselected);
+                            savedChanges.add(new DeselectedChange(ListEvent.UPDATE, deselectedIndex));
+                        }
                     }
 
-                // when an element is changed, assume selection stays the same
-                } else if(changeType == ListEvent.UPDATE) {
-                    // update a selected value
-                    if(previouslySelected) {
-                        selectedList.updates().addUpdate(previousSelectionIndex);
-
-                    // update a deselected value
-                    } else {
-                        int deselectedIndex = barcode.getColourIndex(index, deselected);
-                        savedChanges.add(new DeselectedChange(ListEvent.UPDATE, deselectedIndex));
-                    }
+                    // adjust other internal state
+                    anchorSelectionIndex = adjustIndex(anchorSelectionIndex, changeType, index);
+                    leadSelectionIndex = adjustIndex(leadSelectionIndex, changeType, index);
                 }
+                // fire changes on the selected list
+                selectedList.updates().commitEvent();
 
-                // adjust other internal state
-                anchorSelectionIndex = adjustIndex(anchorSelectionIndex, changeType, index);
-                leadSelectionIndex = adjustIndex(leadSelectionIndex, changeType, index);
+                // Forward all of the collected changes made to the deselected list
+                deselectedList.updates().beginEvent();
+                for(int i = 0;i < savedChanges.size();i++) {
+                    DeselectedChange change = (DeselectedChange)savedChanges.get(i);
+                    change.fireChange();
+                }
+                savedChanges.clear();
+                deselectedList.updates().commitEvent();
             }
-            // fire changes on the selected list
-            selectedList.updates().commitEvent();
 
-            // Forward all of the collected changes made to the deselected list
-            deselectedList.updates().beginEvent();
-            for(int i = 0;i < savedChanges.size();i++) {
-                DeselectedChange change = (DeselectedChange)savedChanges.get(i);
-                change.fireChange();
+            // notify listeners of selection change
+            if(minSelectionIndexBefore != -1 && maxSelectionIndexBefore != -1) {
+                int minSelectionIndexAfter = getMinSelectionIndex();
+                int maxSelectionIndexAfter = getMaxSelectionIndex();
+                int changeStart = minSelectionIndexBefore;
+                int changeFinish = maxSelectionIndexBefore;
+                if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
+                if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
+                fireSelectionChanged(changeStart, changeFinish);
             }
-            savedChanges.clear();
-            deselectedList.updates().commitEvent();
-        }
-
-        // forward events on the primary EventList
-        listChanges.reset();
-        updates.forwardEvent(listChanges);
-
-        // notify listeners of selection change
-        if(minSelectionIndexBefore != -1 && maxSelectionIndexBefore != -1) {
-            int minSelectionIndexAfter = getMinSelectionIndex();
-            int maxSelectionIndexAfter = getMaxSelectionIndex();
-            int changeStart = minSelectionIndexBefore;
-            int changeFinish = maxSelectionIndexBefore;
-            if(minSelectionIndexAfter != -1 && minSelectionIndexAfter < changeStart) changeStart = minSelectionIndexAfter;
-            if(maxSelectionIndexAfter != -1 && maxSelectionIndexAfter > changeFinish) changeFinish = maxSelectionIndexAfter;
-            fireSelectionChanged(changeStart, changeFinish);
         }
     }
 
@@ -285,6 +303,13 @@ public class SelectionList extends TransformedList {
     }
 
     /**
+     * Get the {@link EventList} that selection is being managed for.
+     */
+    public EventList getSource() {
+        return source;
+    }
+
+    /**
      * Inverts the current selection.
      */
     public void invertSelection() {
@@ -314,7 +339,7 @@ public class SelectionList extends TransformedList {
         deselectedList.updates().commitEvent();
 
         // notify selection listeners that selection has been inverted
-        fireSelectionChanged(0, size() - 1);
+        fireSelectionChanged(0, source.size() - 1);
     }
 
     /**
@@ -873,7 +898,7 @@ public class SelectionList extends TransformedList {
     }
 
     /**
-     * Register a {@link ca.odell.glazedlists.SelectionList.Listener Listener}
+     * Register a {@link ca.odell.glazedlists.ListSelection.Listener Listener}
      * that will be notified when selection is changed.
      */
     public void addSelectionListener(Listener selectionListener) {
@@ -881,7 +906,7 @@ public class SelectionList extends TransformedList {
     }
 
     /**
-     * Remove a {@link ca.odell.glazedlists.SelectionList.Listener Listener}
+     * Remove a {@link ca.odell.glazedlists.ListSelection.Listener Listener}
      * so that it will no longer be notified when selection changes.
      */
     public void removeSelectionListener(Listener selectionListener) {
@@ -900,13 +925,13 @@ public class SelectionList extends TransformedList {
     }
 
     /**
-     * Disposes of this SelectionList freeing up it's resources for
-     * garbage collection.  It is an error to use a SelectionList after
+     * Disposes of this ListSelection freeing up it's resources for
+     * garbage collection.  It is an error to use a ListSelection after
      * dispose() has been called.
      */
     public void dispose() {
+        source.removeListEventListener(sourceListener);
         selectionListeners.clear();
-        super.dispose();
     }
 
     /**
@@ -962,7 +987,7 @@ public class SelectionList extends TransformedList {
 
         /**
          * Creates an {@link EventList} that provides a view of the
-         * deselected items in a SelectionList.
+         * deselected items in a ListSelection.
          */
         SelectedList(EventList source) {
             super(source);
@@ -980,7 +1005,7 @@ public class SelectionList extends TransformedList {
 
         /** {@inheritDoc} */
         public void listChanged(ListEvent listChanges) {
-            // Do nothing as all state changes are handled in SelectionList.listChanged()
+            // Do nothing as all state changes are handled in ListSelection.listChanged()
         }
 
         /**
@@ -1007,7 +1032,7 @@ public class SelectionList extends TransformedList {
 
         /**
          * Creates an {@link EventList} that provides a view of the
-         * deselected items in a SelectionList.
+         * deselected items in a ListSelection.
          */
         DeselectedList(EventList source) {
             super(source);
@@ -1025,7 +1050,7 @@ public class SelectionList extends TransformedList {
 
         /** {@inheritDoc} */
         public void listChanged(ListEvent listChanges) {
-            // Do nothing as all state changes are handled in SelectionList.listChanged()
+            // Do nothing as all state changes are handled in ListSelection.listChanged()
         }
 
         /**

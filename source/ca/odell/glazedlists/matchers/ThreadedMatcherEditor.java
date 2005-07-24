@@ -25,7 +25,7 @@ import java.util.List;
  *        drain the queue of MatcherEvents. Subclasses may override to
  *        customize which Thread is used.
  *
- *   <li> {@link #coalesceMatcherEvents(MatcherEvent[])} is used to compress
+ *   <li> {@link #coalesceMatcherEvents(MatcherEditor.Event[])} is used to compress
  *        many enqueued MatcherEvents into a single representative
  *        MatcherEvent. This implies a contract between all registered
  *        MatcherEditorListeners and this {@link ThreadedMatcherEditor} that
@@ -110,7 +110,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      *
      * <ol>
      *   <li> if <code>matcherEvents</code> ends in a MatcherEvent which is a
-     *        {@link MatcherEvent#MATCH_ALL} or {@link MatcherEvent#MATCH_NONE}
+     *        {@link MatcherEditor.Event#MATCH_ALL} or {@link MatcherEditor.Event#MATCH_NONE}
      *        type, the last MatcherEvent is returned, regardless of previous
      *        MatcherEvents <p>
      *
@@ -124,13 +124,13 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      *
      *   <li> if <code>matcherEvents</code> contains both constraining and
      *        relaxing MatcherEvents, the final MatcherEvent is returned with
-     *        its type as {@link MatcherEvent#CHANGED}
+     *        its type as {@link MatcherEditor.Event#CHANGED}
      * </ol>
      *
      * Note that <code>1, 2,</code> and <code>3</code> above merely represent
      * safe optimizations of the type of MatcherEvent that can be returned.
      * It could also have been returned as a MatcherEvent with a type of
-     * {@link MatcherEvent#CHANGED} and be assumed to work correctly, though
+     * {@link MatcherEditor.Event#CHANGED} and be assumed to work correctly, though
      * potentially less efficiently, since it is a more generic type of change.
      * <p>
      *
@@ -145,27 +145,27 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      *      same state as if all <code>matcherEvents</code> had been fired
      *      sequentially
      */
-    protected MatcherEditor.Event coalesceMatcherEvents(MatcherEditor.Event[] matcherEvents) {
+    protected Event coalesceMatcherEvents(Event[] matcherEvents) {
         boolean changeType = false;
 
         // fetch the last matcher event - it is the basis of the MatcherEvent which must be returned
         // all that remains is to determine the type of the MatcherEvent to return
-        final MatcherEditor.Event lastMatcherEvent = matcherEvents[matcherEvents.length-1];
+        final Event lastMatcherEvent = matcherEvents[matcherEvents.length-1];
         final int lastMatcherEventType = lastMatcherEvent.getType();
 
         // if the last MatcherEvent is a MATCH_ALL or MATCH_NONE type, we can safely return it immediately
-        if (lastMatcherEventType != MatcherEditor.Event.MATCH_ALL && lastMatcherEventType != MatcherEditor.Event.MATCH_NONE) {
+        if (lastMatcherEventType != Event.MATCH_ALL && lastMatcherEventType != Event.MATCH_NONE) {
             // otherwise determine if any constraining and/or relaxing MatcherEvents exist
             boolean constrained = false;
             boolean relaxed = false;
 
             for (int i = 0; i < matcherEvents.length; i++) {
                 switch (matcherEvents[i].getType()) {
-                    case MatcherEditor.Event.MATCH_ALL: relaxed = true; break;
-                    case MatcherEditor.Event.MATCH_NONE: constrained = true; break;
-                    case MatcherEditor.Event.RELAXED: relaxed = true; break;
-                    case MatcherEditor.Event.CONSTRAINED: constrained = true; break;
-                    case MatcherEditor.Event.CHANGED: constrained = relaxed = true; break;
+                    case Event.MATCH_ALL: relaxed = true; break;
+                    case Event.MATCH_NONE: constrained = true; break;
+                    case Event.RELAXED: relaxed = true; break;
+                    case Event.CONSTRAINED: constrained = true; break;
+                    case Event.CHANGED: constrained = relaxed = true; break;
                 }
             }
 
@@ -174,7 +174,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
 
         // if both constraining and relaxing MatcherEvents exist, ensure we must return a CHANGED MatcherEvent
         // otherwise the last MatcherEvent must represent the coalesced MatcherEvent
-        return new MatcherEditor.Event(this, changeType ? MatcherEditor.Event.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
+        return new Event(this, changeType ? Event.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
     }
 
     /**
@@ -218,7 +218,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      * MatcherEvents as soon as possible.
      */
     private class QueuingMatcherEditorListener implements MatcherEditor.Listener {
-        public void changedMatcher(MatcherEditor.Event matcherEvent) {
+        public void changedMatcher(Event matcherEvent) {
             matcherEventQueue.add(matcherEvent);
             drainQueue();
         }
@@ -247,10 +247,10 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
                     }
 
                     // fetch a copy of all MatcherEvents currently in the queue
-                    final MatcherEditor.Event[] matcherEvents = (MatcherEditor.Event[]) matcherEventQueue.toArray(new MatcherEditor.Event[matcherEventQueue.size()]);
+                    final Event[] matcherEvents = (Event[]) matcherEventQueue.toArray(new Event[matcherEventQueue.size()]);
 
                     // coalesce all of the current MatcherEvents to a single representative MatcherEvent
-                    final MatcherEditor.Event coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
+                    final Event coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
 
                     // fire the single coalesced MatcherEvent
                     fireChangedMatcher(coalescedMatcherEvent);
