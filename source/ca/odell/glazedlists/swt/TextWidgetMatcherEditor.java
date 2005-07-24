@@ -59,7 +59,7 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      * @param live <code>true</code> to filter by the keystroke or <code>false</code>
      *      to filter only when the ENTER key is pressed within the Text.  Optionnally,
-     *      you can use the {@link SelectionListener} provided via {@link #getFilterSelectionListener())
+     *      you can use the {@link SelectionListener} provided via {@link #getFilterSelectionListener()}
      *      to register a Button or other component to trigger filtering.
      *
      * @see GlazedLists#textFilterator(String[])
