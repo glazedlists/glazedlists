@@ -137,7 +137,7 @@ public interface MatcherEditor {
         /**
          * Get the {@link MatcherEditor} that originated this event, or null
          * if this event originated directly from a {@link FilterList} in a call
-         * to {@link FilterList#setMatcher(Matcher}}.
+         * to {@link FilterList#setMatcher(Matcher)}.
          */
         public MatcherEditor getMatcherEditor() {
             return this.matcherEditor;

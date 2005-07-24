@@ -62,8 +62,7 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
      *      you can use the {@link SelectionListener} provided via {@link #getFilterSelectionListener())
      *      to register a Button or other component to trigger filtering.
      *
-     * @see GlazedLists.textFilterator(String[])
-     * @see GlazedLists.toStringFilterator()
+     * @see GlazedLists#textFilterator(String[])
      */
     public TextWidgetMatcherEditor(Text text, TextFilterator textFilterator, boolean live) {
         super(textFilterator);

@@ -18,7 +18,7 @@ package ca.odell.glazedlists;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.FilterList
- * @see ca.odell.glazedlists.matchers.MatcherEditorListener
+ * @see ca.odell.glazedlists.matchers.MatcherEditor
  */
 public interface Matcher {
 

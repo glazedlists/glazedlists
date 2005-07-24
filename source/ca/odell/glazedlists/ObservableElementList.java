@@ -28,7 +28,7 @@ import java.util.Iterator;
  * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>inserts: O(1), deletes: O(1), updates: O(1), elementChanged: O(n)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>8 bytes per element</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>{@link ObservableElementListTest}</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>ObservableElementListTest</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
