@@ -873,7 +873,7 @@ public class SelectionList extends TransformedList {
     }
 
     /**
-     * Register a {@link ca.odell.glazedlists.gui.SelectionListener SelectionListener}
+     * Register a {@link ca.odell.glazedlists.SelectionList.Listener Listener}
      * that will be notified when selection is changed.
      */
     public void addSelectionListener(Listener selectionListener) {
@@ -881,7 +881,7 @@ public class SelectionList extends TransformedList {
     }
 
     /**
-     * Remove a {@link ca.odell.glazedlists.gui.SelectionListener SelectionListener}
+     * Remove a {@link ca.odell.glazedlists.SelectionList.Listener Listener}
      * so that it will no longer be notified when selection changes.
      */
     public void removeSelectionListener(Listener selectionListener) {
