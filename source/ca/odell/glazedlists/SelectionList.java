@@ -876,7 +876,7 @@ public class SelectionList extends TransformedList {
      * Register a {@link ca.odell.glazedlists.gui.SelectionListener SelectionListener}
      * that will be notified when selection is changed.
      */
-    public void addSelectionListener(SelectionListener selectionListener) {
+    public void addSelectionListener(Listener selectionListener) {
         selectionListeners.add(selectionListener);
     }
 
@@ -884,7 +884,7 @@ public class SelectionList extends TransformedList {
      * Remove a {@link ca.odell.glazedlists.gui.SelectionListener SelectionListener}
      * so that it will no longer be notified when selection changes.
      */
-    public void removeSelectionListener(SelectionListener selectionListener) {
+    public void removeSelectionListener(Listener selectionListener) {
         selectionListeners.remove(selectionListener);
     }
 
@@ -894,7 +894,7 @@ public class SelectionList extends TransformedList {
     private void fireSelectionChanged(int start, int end) {
         // notify all
         for(Iterator i = selectionListeners.iterator(); i.hasNext(); ) {
-            SelectionListener listener = (SelectionListener)i.next();
+            Listener listener = (Listener)i.next();
             listener.selectionChanged(start, end);
         }
     }
@@ -907,6 +907,22 @@ public class SelectionList extends TransformedList {
     public void dispose() {
         selectionListeners.clear();
         super.dispose();
+    }
+
+    /**
+     * A generic interface to respond to changes in selection that doesn't
+     * require including a particular GUI toolkit.
+     */
+    public interface Listener {
+
+        /**
+         * Notifies this SelectionListener of a change in selection.
+         *
+         * @param changeStart The first zero-relative index affected by a change in selection.
+         * @param changeEnd   The last zero-relative index affected by a change in selection.
+         */
+        public void selectionChanged(int changeStart, int changeEnd);
+
     }
 
     /**

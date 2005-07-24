@@ -5,8 +5,6 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-// to respond to selection changes
-import ca.odell.glazedlists.gui.*;
 // for listening to list selection events
 import javax.swing.*;
 import javax.swing.event.*;
@@ -133,7 +131,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Listens to selection changes on the {@link SelectionList} and fires
      * {@link ListSelectionEvent}s to registered listeners.
      */
-    private class SwingSelectionListener implements SelectionListener {
+    private class SwingSelectionListener implements SelectionList.Listener {
 
         /** {@inheritDoc} */
         public void selectionChanged(int changeStart, int changeEnd) {
