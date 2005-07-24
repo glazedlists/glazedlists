@@ -37,13 +37,13 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
 	}
 
 	/** {@inheritDoc} */
-    public final void addMatcherEditorListener(MatcherEditorListener listener) {
-        listenerList.add(MatcherEditorListener.class, listener);
+    public final void addMatcherEditorListener(MatcherEditor.Listener listener) {
+        listenerList.add(MatcherEditor.Listener.class, listener);
     }
 
     /** {@inheritDoc} */
-    public final void removeMatcherEditorListener(MatcherEditorListener listener) {
-        listenerList.remove(MatcherEditorListener.class, listener);
+    public final void removeMatcherEditorListener(MatcherEditor.Listener listener) {
+        listenerList.remove(MatcherEditor.Listener.class, listener);
     }
 
     /**
@@ -51,7 +51,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
      */
     protected final void fireMatchAll() {
 		this.currentMatcher = Matchers.trueMatcher();
-        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.MATCH_ALL));
+        this.fireChangedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.MATCH_ALL));
     }
 
     /**
@@ -60,7 +60,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
     protected final void fireChanged(Matcher matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.CHANGED, this.currentMatcher));
     }
 
     /**
@@ -70,7 +70,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
     protected final void fireConstrained(Matcher matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.CONSTRAINED, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.CONSTRAINED, this.currentMatcher));
     }
 
     /**
@@ -80,7 +80,7 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
     protected final void fireRelaxed(Matcher matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.RELAXED, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.RELAXED, this.currentMatcher));
     }
     
     /**
@@ -88,16 +88,16 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
      */
     protected final void fireMatchNone() {
 		this.currentMatcher = Matchers.falseMatcher();
-        this.fireChangedMatcher(new MatcherEvent(this, MatcherEvent.MATCH_NONE));
+        this.fireChangedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.MATCH_NONE));
     }
 
-    protected final void fireChangedMatcher(MatcherEvent me) {
+    protected final void fireChangedMatcher(MatcherEditor.Event me) {
         // Guaranteed to return a non-null array
         final Object[] listeners = this.listenerList.getListenerList();
 
         // Process the listenerList last to first, notifying
         // those that are interested in this event
         for (int i = listeners.length-2; i>=0; i-=2)
-            ((MatcherEditorListener) listeners[i+1]).changedMatcher(me);
+            ((MatcherEditor.Listener) listeners[i+1]).changedMatcher(me);
     }
 }

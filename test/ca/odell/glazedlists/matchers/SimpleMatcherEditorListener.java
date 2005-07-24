@@ -7,20 +7,20 @@ import junit.framework.Assert;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SimpleMatcherEditorListener implements MatcherEditorListener {
+public class SimpleMatcherEditorListener implements MatcherEditor.Listener {
     private boolean matchAll = false;
     private boolean matchNone = false;
     private boolean changed = false;
     private boolean constrained = false;
     private boolean relaxed = false;
     private int changes = 0;
-    public void changedMatcher(MatcherEvent matcherEvent) {
+    public void changedMatcher(MatcherEditor.Event matcherEvent) {
         switch (matcherEvent.getType()) {
-            case MatcherEvent.CONSTRAINED: changes++; constrained = true; break;
-            case MatcherEvent.RELAXED: changes++; relaxed = true; break;
-            case MatcherEvent.CHANGED: changes++; changed = true; break;
-            case MatcherEvent.MATCH_ALL: changes++; matchAll = true; break;
-            case MatcherEvent.MATCH_NONE: changes++; matchNone = true; break;
+            case MatcherEditor.Event.CONSTRAINED: changes++; constrained = true; break;
+            case MatcherEditor.Event.RELAXED: changes++; relaxed = true; break;
+            case MatcherEditor.Event.CHANGED: changes++; changed = true; break;
+            case MatcherEditor.Event.MATCH_ALL: changes++; matchAll = true; break;
+            case MatcherEditor.Event.MATCH_NONE: changes++; matchNone = true; break;
         }
     }
     public void assertMatchAll(int expectedChanges) {

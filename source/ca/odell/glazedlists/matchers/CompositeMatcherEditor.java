@@ -194,7 +194,7 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
     /**
      * Listens to a specific MatcherEditor and fires events as that MatcherEditor changes.
      */
-    private class DelegateMatcherEditorListener implements MatcherEditorListener {
+    private class DelegateMatcherEditorListener implements MatcherEditor.Listener {
         /** the matcher editor this listens to */
         private MatcherEditor source;
 
@@ -207,13 +207,13 @@ public class CompositeMatcherEditor extends AbstractMatcherEditor {
          * @param matcherEvent a MatcherEvent describing the change in the
          *      Matcher produced by the MatcherEditor
          */
-        public void changedMatcher(MatcherEvent matcherEvent) {
+        public void changedMatcher(MatcherEditor.Event matcherEvent) {
             switch (matcherEvent.getType()) {
-                case MatcherEvent.CONSTRAINED: this.constrained(); break;
-                case MatcherEvent.RELAXED: this.relaxed(); break;
-                case MatcherEvent.CHANGED: this.changed(); break;
-                case MatcherEvent.MATCH_ALL: this.matchAll(); break;
-                case MatcherEvent.MATCH_NONE: this.matchNone(); break;
+                case MatcherEditor.Event.CONSTRAINED: this.constrained(); break;
+                case MatcherEditor.Event.RELAXED: this.relaxed(); break;
+                case MatcherEditor.Event.CHANGED: this.changed(); break;
+                case MatcherEditor.Event.MATCH_ALL: this.matchAll(); break;
+                case MatcherEditor.Event.MATCH_NONE: this.matchNone(); break;
             }
         }
 

@@ -59,7 +59,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      * The MatcherEditorListener which reacts to MatcherEvents from the {@link #source}
      * by enqueuing them for firing on another Thread at some later time.
      */
-    private MatcherEditorListener queuingMatcherEditorListener = new QueuingMatcherEditorListener();
+    private MatcherEditor.Listener queuingMatcherEditorListener = new QueuingMatcherEditorListener();
 
     /**
      * <tt>true</tt> indicates a Thread is currently executing the
@@ -145,27 +145,27 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      *      same state as if all <code>matcherEvents</code> had been fired
      *      sequentially
      */
-    protected MatcherEvent coalesceMatcherEvents(MatcherEvent[] matcherEvents) {
+    protected MatcherEditor.Event coalesceMatcherEvents(MatcherEditor.Event[] matcherEvents) {
         boolean changeType = false;
 
         // fetch the last matcher event - it is the basis of the MatcherEvent which must be returned
         // all that remains is to determine the type of the MatcherEvent to return
-        final MatcherEvent lastMatcherEvent = matcherEvents[matcherEvents.length-1];
+        final MatcherEditor.Event lastMatcherEvent = matcherEvents[matcherEvents.length-1];
         final int lastMatcherEventType = lastMatcherEvent.getType();
 
         // if the last MatcherEvent is a MATCH_ALL or MATCH_NONE type, we can safely return it immediately
-        if (lastMatcherEventType != MatcherEvent.MATCH_ALL && lastMatcherEventType != MatcherEvent.MATCH_NONE) {
+        if (lastMatcherEventType != MatcherEditor.Event.MATCH_ALL && lastMatcherEventType != MatcherEditor.Event.MATCH_NONE) {
             // otherwise determine if any constraining and/or relaxing MatcherEvents exist
             boolean constrained = false;
             boolean relaxed = false;
 
             for (int i = 0; i < matcherEvents.length; i++) {
                 switch (matcherEvents[i].getType()) {
-                    case MatcherEvent.MATCH_ALL: relaxed = true; break;
-                    case MatcherEvent.MATCH_NONE: constrained = true; break;
-                    case MatcherEvent.RELAXED: relaxed = true; break;
-                    case MatcherEvent.CONSTRAINED: constrained = true; break;
-                    case MatcherEvent.CHANGED: constrained = relaxed = true; break;
+                    case MatcherEditor.Event.MATCH_ALL: relaxed = true; break;
+                    case MatcherEditor.Event.MATCH_NONE: constrained = true; break;
+                    case MatcherEditor.Event.RELAXED: relaxed = true; break;
+                    case MatcherEditor.Event.CONSTRAINED: constrained = true; break;
+                    case MatcherEditor.Event.CHANGED: constrained = relaxed = true; break;
                 }
             }
 
@@ -174,7 +174,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
 
         // if both constraining and relaxing MatcherEvents exist, ensure we must return a CHANGED MatcherEvent
         // otherwise the last MatcherEvent must represent the coalesced MatcherEvent
-        return new MatcherEvent(this, changeType ? MatcherEvent.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
+        return new MatcherEditor.Event(this, changeType ? MatcherEditor.Event.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
     }
 
     /**
@@ -217,8 +217,8 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      * order it is received and then schedules a Runnable to drain the queue of
      * MatcherEvents as soon as possible.
      */
-    private class QueuingMatcherEditorListener implements MatcherEditorListener {
-        public void changedMatcher(MatcherEvent matcherEvent) {
+    private class QueuingMatcherEditorListener implements MatcherEditor.Listener {
+        public void changedMatcher(MatcherEditor.Event matcherEvent) {
             matcherEventQueue.add(matcherEvent);
             drainQueue();
         }
@@ -247,10 +247,10 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
                     }
 
                     // fetch a copy of all MatcherEvents currently in the queue
-                    final MatcherEvent[] matcherEvents = (MatcherEvent[]) matcherEventQueue.toArray(new MatcherEvent[matcherEventQueue.size()]);
+                    final MatcherEditor.Event[] matcherEvents = (MatcherEditor.Event[]) matcherEventQueue.toArray(new MatcherEditor.Event[matcherEventQueue.size()]);
 
                     // coalesce all of the current MatcherEvents to a single representative MatcherEvent
-                    final MatcherEvent coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
+                    final MatcherEditor.Event coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
 
                     // fire the single coalesced MatcherEvent
                     fireChangedMatcher(coalescedMatcherEvent);

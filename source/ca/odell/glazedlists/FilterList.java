@@ -47,7 +47,7 @@ public final class FilterList extends TransformedList {
     private MatcherEditor currentEditor = null;
 
     /** listener handles changes to the matcher */
-    protected MatcherEditorListener listener = new PrivateMatcherEditorListener();
+    protected MatcherEditor.Listener listener = new PrivateMatcherEditorListener();
 
     /**
      * Creates a {@link FilterList} that includes a subset of the specified
@@ -96,7 +96,7 @@ public final class FilterList extends TransformedList {
         }
 
         // refilter
-        listener.changedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, matcher));
+        listener.changedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.CHANGED, matcher));
     }
 
     /**
@@ -117,10 +117,10 @@ public final class FilterList extends TransformedList {
         if(currentEditor != null) {
             currentEditor.addMatcherEditorListener(listener);
             currentMatcher = currentEditor.getMatcher();
-            listener.changedMatcher(new MatcherEvent(currentEditor, MatcherEvent.CHANGED, currentMatcher));
+            listener.changedMatcher(new MatcherEditor.Event(currentEditor, MatcherEditor.Event.CHANGED, currentMatcher));
         } else {
             currentMatcher = Matchers.trueMatcher();
-            listener.changedMatcher(new MatcherEvent(this, MatcherEvent.CHANGED, currentMatcher));
+            listener.changedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.CHANGED, currentMatcher));
         }
     }
 
@@ -223,7 +223,7 @@ public final class FilterList extends TransformedList {
     /**
      * Listens to changes from the current {@link MatcherEditor} and handles them.
      */
-    private class PrivateMatcherEditorListener implements MatcherEditorListener {
+    private class PrivateMatcherEditorListener implements MatcherEditor.Listener {
 
         /**
          * This implementation of this method simply delegates the handling of
@@ -234,16 +234,16 @@ public final class FilterList extends TransformedList {
          * @param matcherEvent a MatcherEvent describing the change in the
          *      Matcher produced by the MatcherEditor
          */
-        public void changedMatcher(MatcherEvent matcherEvent) {
+        public void changedMatcher(MatcherEditor.Event matcherEvent) {
             final MatcherEditor matcherEditor = matcherEvent.getMatcherEditor();
             final Matcher matcher = matcherEvent.getMatcher();
 
             switch (matcherEvent.getType()) {
-                case MatcherEvent.CONSTRAINED: this.constrained(matcherEditor, matcher); break;
-                case MatcherEvent.RELAXED: this.relaxed(matcherEditor, matcher); break;
-                case MatcherEvent.CHANGED: this.changed(matcherEditor, matcher); break;
-                case MatcherEvent.MATCH_ALL: this.matchAll(matcherEditor); break;
-                case MatcherEvent.MATCH_NONE: this.matchNone(matcherEditor); break;
+                case MatcherEditor.Event.CONSTRAINED: this.constrained(matcherEditor, matcher); break;
+                case MatcherEditor.Event.RELAXED: this.relaxed(matcherEditor, matcher); break;
+                case MatcherEditor.Event.CHANGED: this.changed(matcherEditor, matcher); break;
+                case MatcherEditor.Event.MATCH_ALL: this.matchAll(matcherEditor); break;
+                case MatcherEditor.Event.MATCH_NONE: this.matchNone(matcherEditor); break;
             }
         }
 
