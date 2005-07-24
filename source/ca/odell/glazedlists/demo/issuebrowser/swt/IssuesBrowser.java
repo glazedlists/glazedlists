@@ -89,7 +89,7 @@ public class IssuesBrowser {
 
         // Add the various filters
         Text filterText = createFilterText(filterPanel);
-        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterText, null)));
+        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor(new TextWidgetMatcherEditor(filterText, null)));
         createPrioritySlider(filterPanel, priorityList);
         createUsersList(shell, filterPanel);
 

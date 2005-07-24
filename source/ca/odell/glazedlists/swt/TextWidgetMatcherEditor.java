@@ -13,18 +13,18 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.*;
 
 /**
- * A MatcherEditor that matches Objects that contain the filter text located
- * within a {@link Text} field. This {@link TextMatcherEditor} is directly
- * coupled with a Text and fires MatcherEditor changes in response to
- * {@link ModifyEvent}s received from the Text. This matcher is fully concrete
- * for use in SWT applications.
+ * A {@link MatcherEditor} that matches elements that contain the filter text located
+ * within a {@link Text} field. This {@link TextWidgetMatcherEditor} is directly
+ * coupled with a {@link Text} and fires {@link MatcherEditor} events in response to
+ * {@link ModifyEvent}s received from the {@link Text}. This matcher is fully
+ * concrete for use in SWT applications.
  *
- * <p>If this MatcherEditor must be garbage collected before the underlying
+ * <p>If this {@link MatcherEditor} must be garbage collected before the underlying
  * Text, the listener can be unregistered by calling {@link #dispose()}.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class TextComponentMatcherEditor extends TextMatcherEditor {
+public final class TextWidgetMatcherEditor extends TextMatcherEditor {
 
     /** the filter edit text field */
     private Text text;
@@ -33,10 +33,10 @@ public final class TextComponentMatcherEditor extends TextMatcherEditor {
     private FilterChangeListener filterChangeListener = new FilterChangeListener();
 
     /**
-     * Creates a TextMatcherEditor bound to the provided {@link Text}
+     * Creates a TextWidgetMatcherEditor bound to the provided {@link Text}
      * with the given <code>textFilterator</code>.
      *
-     * @param text the Text component that drives the text-filtering
+     * @param text the {@link Text} widget that drives the text-filtering
      * @param textFilterator an object capable of producing Strings from the
      *      objects being filtered. If <code>textFilterator</code> is
      *      <code>null</code> then all filtered objects are expected to
@@ -45,17 +45,17 @@ public final class TextComponentMatcherEditor extends TextMatcherEditor {
      * @see GlazedLists.textFilterator(String[])
      * @see GlazedLists.toStringFilterator()
      */
-    public TextComponentMatcherEditor(Text text, TextFilterator textFilterator) {
+    public TextWidgetMatcherEditor(Text text, TextFilterator textFilterator) {
         this(text, textFilterator, true);
     }
 
     /**
-     * Creates a TextMatcherEditor bound to the provided {@link Text}
+     * Creates a TextWidgetMatcherEditor bound to the provided {@link Text}
      * with the given <code>textFilterator</code> where filtering can
      * be specified as "live" or to be based on another event such as the
      * user pressing Enter or a button being clicked.
      *
-     * @param text the Text component that drives the text-filtering
+     * @param text the {@link Text} widget that drives the text-filtering
      * @param textFilterator an object capable of producing Strings from the
      *      objects being filtered. If <code>textFilterator</code> is
      *      <code>null</code> then all filtered objects are expected to
@@ -68,7 +68,7 @@ public final class TextComponentMatcherEditor extends TextMatcherEditor {
      * @see GlazedLists.textFilterator(String[])
      * @see GlazedLists.toStringFilterator()
      */
-    public TextComponentMatcherEditor(Text text, TextFilterator textFilterator, boolean live) {
+    public TextWidgetMatcherEditor(Text text, TextFilterator textFilterator, boolean live) {
         super(textFilterator);
         this.text = text;
 

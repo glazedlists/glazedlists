@@ -66,7 +66,7 @@ class SelectionManager {
      * Listens to selection changes on the {@link SelectionList} and updates
      * the selection on the {@link Selectable} widget.
      */
-    private final class SelectionListListener implements ca.odell.glazedlists.gui.SelectionListener {
+    private final class SelectionListListener implements SelectionList.Listener {
 
         /** {@inheritDoc} */
         public void selectionChanged(int changeStart, int changeEnd) {
