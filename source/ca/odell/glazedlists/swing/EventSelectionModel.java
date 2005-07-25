@@ -196,6 +196,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     public void removeSelectionInterval(int index0, int index1) {
         if(!enabled) return;
+        if(index0 == 0 && index1 == 0 && swingSource.isEmpty()) return; // hack for Java 5 compatibility
         listSelection.deselect(index0, index1);
     }
 
