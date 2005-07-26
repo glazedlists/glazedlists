@@ -109,8 +109,55 @@ public class TextFilterPerformance {
 
 
         System.out.println("");
-        System.out.println("Character-by-character Filter (with TextMatcherEditor)");
-        long characterFilterTime = 0;
+        System.out.println("Character-by-character Filter (no delays with TextMatcherEditor)");
+        fullFilterTime = 0;
+        // perform the filters 1 char at a time (to simulate the user typing)
+        for(int i = 0; i < testFilters.size(); i++) {
+            String filter = (String)testFilters.get(i);
+            long totalFilteringTime = 0;
+            long totalUnfilteringTime = 0;
+            System.out.print("Filtering " + i + ", \"" + filter + "\" by character...");
+
+            // simulate filter by the keystroke
+            for (int j = 1; j <= filter.length(); j++) {
+                String subFilter = filter.substring(0, j);
+
+                startTime = System.currentTimeMillis();
+                textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
+                finishTime = System.currentTimeMillis();
+
+                totalFilteringTime += (finishTime - startTime);
+            }
+
+            // check the filtered result
+            int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
+            if(filtered.size() != expectedResult) {
+                System.out.println("expected size " + expectedResult + " != actual size " + filtered.size() + " for filter " + filter);
+                for(int j = 0; j < filtered.size(); j++) {
+                    System.out.println("" + j + ": " + filtered.get(j));
+                }
+                return;
+            }
+
+            // simulate unfiltering by the keystroke
+            for (int j = 1; j <= filter.length(); j++) {
+                String subFilter = filter.substring(0, filter.length() - j);
+                startTime = System.currentTimeMillis();
+                textMatcherEditor.setFilterText(subFilter.split("[ \t]"));
+                finishTime = System.currentTimeMillis();
+
+                totalUnfilteringTime += (finishTime - startTime);
+            }
+
+            System.out.println(" done. Filter: " + totalFilteringTime + ", Unfilter: " + totalUnfilteringTime + ", Total: " + (totalFilteringTime + totalUnfilteringTime));
+            fullFilterTime += (totalFilteringTime + totalUnfilteringTime);
+        }
+        System.out.println("Total: " + fullFilterTime);
+
+
+        System.out.println("");
+        System.out.println("Simulated Typing Character-by-character Filter (delays with TextMatcherEditor)");
+        fullFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {
             String filter = (String)testFilters.get(i);
@@ -131,7 +178,7 @@ public class TextFilterPerformance {
 
                 totalFilteringTime += (finishTime - startTime);
             }
-            characterFilterTime += totalFilteringTime;
+            fullFilterTime += totalFilteringTime;
 
             // check the filtered result
             int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
@@ -155,11 +202,11 @@ public class TextFilterPerformance {
 
                 totalUnfilteringTime += (finishTime - startTime);
             }
-            characterFilterTime += totalUnfilteringTime;
+            fullFilterTime += totalUnfilteringTime;
 
             System.out.println(" done. Filter: " + totalFilteringTime + ", Unfilter: " + totalUnfilteringTime + ", Total: " + (totalFilteringTime + totalUnfilteringTime));
         }
-        System.out.println("Total: " + characterFilterTime);
+        System.out.println("Total: " + fullFilterTime);
 
 
         // attach a ThreadedMatcherEditor to the FilterList rather than a regular TextMatcherEditor
@@ -168,8 +215,8 @@ public class TextFilterPerformance {
         filtered = new FilterList(unfiltered, bufferedMatcherEditor);
 
         System.out.println("");
-        System.out.println("Character-by-character Filter (with ThreadedMatcherEditor)");
-        long bufferedCharacterFilterTime = 0;
+        System.out.println("Simulated Typing Character-by-character Filter (delays with ThreadedMatcherEditor)");
+        fullFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {
             String filter = (String)testFilters.get(i);
@@ -201,7 +248,7 @@ public class TextFilterPerformance {
 
             finishTime = System.currentTimeMillis();
             totalFilteringTime += (finishTime - startTime);
-            bufferedCharacterFilterTime += totalFilteringTime;
+            fullFilterTime += totalFilteringTime;
 
             // simulate unfiltering by the keystroke
             startTime = System.currentTimeMillis();
@@ -226,12 +273,12 @@ public class TextFilterPerformance {
 
             finishTime = System.currentTimeMillis();
             totalUnfilteringTime += (finishTime - startTime);
-            bufferedCharacterFilterTime += totalUnfilteringTime;
+            fullFilterTime += totalUnfilteringTime;
 
             System.out.println(" done. Filter: " + totalFilteringTime + ", Unfilter: " + totalUnfilteringTime + ", Total: " + (totalFilteringTime + totalUnfilteringTime));
         }
 
-        System.out.println("Total: " + bufferedCharacterFilterTime);
+        System.out.println("Total: " + fullFilterTime);
     }
     
     /**
