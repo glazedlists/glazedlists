@@ -3,10 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.rbp;
 
-import java.util.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple resource for a String.
@@ -16,7 +18,7 @@ import ca.odell.glazedlists.util.concurrent.*;
 public class StringResource implements Resource {
 
     /** the read/write lock provides mutual exclusion to access */
-    private ReadWriteLock readWriteLock = new J2SE12ReadWriteLock();
+    private ReadWriteLock readWriteLock = LockFactory.createReadWriteLock();
     
     /** the value of this resource */
     private String value = "";

@@ -15,7 +15,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class J2SE12ReadWriteLock implements ReadWriteLock {
+final class J2SE12ReadWriteLock implements ReadWriteLock {
     
     /** delegate locking to the professionals! */
     ReentrantWriterPreferenceReadWriteLock j2se12ReadWriteLock = new ReentrantWriterPreferenceReadWriteLock();
@@ -94,7 +94,6 @@ public final class J2SE12ReadWriteLock implements ReadWriteLock {
  *
  * 
  * <p>[<a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html"> Introduction to this package. </a>]
- * @see ReentrantLock
  */
 class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLock {
     

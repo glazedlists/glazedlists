@@ -4,11 +4,16 @@
 package ca.odell.glazedlists;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.event.*;
-// Java collections are used for underlying data storage
-import java.util.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.util.concurrent.Lock;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An {@link EventList} composed of multiple source {@link EventList}s. This list
@@ -375,7 +380,7 @@ final class OldCompositeList extends AbstractEventList {
     private class CompositeLock implements Lock {
     
         /** use a delegate lock to guarantee mutual exclusion */
-        private Lock raceLock = new J2SE12ReadWriteLock().writeLock();
+        private Lock raceLock = LockFactory.createLock();
     
         /** list of MemberLists whose locks are currently acquired */
         private List lockedMemberLists = new ArrayList();

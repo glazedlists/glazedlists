@@ -1,10 +1,11 @@
 package ca.odell.glazedlists.matchers;
 
-import junit.framework.TestCase;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextMatcherEditor;
-import ca.odell.glazedlists.*;
+import junit.framework.TestCase;
 
-import java.util.List;
 import java.util.Arrays;
 
 /**
@@ -48,7 +49,9 @@ public class ThreadedMatcherEditorTest extends TestCase {
         matchRelaxed = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.RELAXED, threadedMatcherEditor.getMatcher());
         matchConstrained = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.CONSTRAINED, threadedMatcherEditor.getMatcher());
         matchChanged = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.CHANGED, threadedMatcherEditor.getMatcher());
-    }
+
+		System.out.println("** Using Java version: " + System.getProperty("java.version"));
+	}
 
     /**
      * Clean up after the test.

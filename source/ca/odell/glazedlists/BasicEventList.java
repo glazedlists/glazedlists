@@ -33,7 +33,7 @@ public final class BasicEventList extends AbstractEventList {
      * Creates a {@link BasicEventList}.
      */
     public BasicEventList() {
-        this(new J2SE12ReadWriteLock());
+        this(LockFactory.createReadWriteLock());
     }
 
     /**
@@ -63,7 +63,7 @@ public final class BasicEventList extends AbstractEventList {
     public BasicEventList(List list) {
         super(null);
         data = list;
-        readWriteLock = new J2SE12ReadWriteLock();
+        readWriteLock = LockFactory.createReadWriteLock();
     }
     
     /** {@inheritDoc} */

@@ -4,14 +4,14 @@
 package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.event.*;
-// volatile implementation support
-import ca.odell.glazedlists.impl.adt.*;
-import ca.odell.glazedlists.impl.sort.*;
-// Java collections are used for underlying data storage
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.IndexedTree;
+import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
+import ca.odell.glazedlists.impl.sort.ComparableComparator;
+import ca.odell.glazedlists.util.concurrent.InternalReadWriteLock;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+
 import java.util.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 
 /**
  * An {@link EventList} that shows its source {@link EventList} in sorted order.
@@ -68,7 +68,8 @@ public final class SortedList extends TransformedList {
         super(source);
 
         // use an Internal Lock to avoid locking the source list during a sort
-        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(), new J2SE12ReadWriteLock());
+        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
+			LockFactory.createReadWriteLock());
 
         // trees are instansiated when a comparator is set
         setComparator(comparator);
