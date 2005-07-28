@@ -1,10 +1,11 @@
-/*
- * Copyright(c) 2005, NEXVU Technologies
- * All rights reserved.
- */
-package ca.odell.glazedlists;
+/* Glazed Lists                                                      (c) 2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+/*                                                          StarLight Systems */
+package ca.odell.glazedlists.util.concurrent;
 
-import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 import java.util.Random;
 
