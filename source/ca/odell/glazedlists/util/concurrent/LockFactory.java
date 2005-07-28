@@ -1,7 +1,7 @@
-/*
- * Copyright(c) 2005, NEXVU Technologies
- * All rights reserved.
- */
+/* Glazed Lists                                                      (c) 2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+/*                                                          StarLight Systems */
 package ca.odell.glazedlists.util.concurrent;
 
 /**
