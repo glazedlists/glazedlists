@@ -399,19 +399,22 @@ public class IssuesBrowser extends Applet {
             final Set allowedStates = new HashSet();
             for (int i = 0; i < this.stateCheckBoxes.length; i++) {
                 if (this.stateCheckBoxes[i].isSelected())
-                    allowedStates.add(this.stateCheckBoxes[i].getText().toUpperCase());
+                    allowedStates.add(this.stateCheckBoxes[i].getText().toUpperCase().intern());
             }
 
             return new StateMatcher(allowedStates);
         }
 
         public void actionPerformed(ActionEvent e) {
+            // determine if the checkbox that generated this ActionEvent is freshly checked or freshly unchecked
+            // - we'll use that information to determine whether this is a constrainment or relaxation of the matcher
             final boolean isCheckBoxSelected = ((JCheckBox) e.getSource()).isSelected();
 
+            // build a StateMatcher
             final StateMatcher stateMatcher = this.buildMatcher();
 
+            // fire a MatcherEvent of the appropriate type
             if (stateMatcher.getStateCount() == 0)
-//                this.fireConstrained(stateMatcher);
                 this.fireMatchNone();
             else if (stateMatcher.getStateCount() == this.stateCheckBoxes.length)
                 this.fireMatchAll();
