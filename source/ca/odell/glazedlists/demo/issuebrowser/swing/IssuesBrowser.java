@@ -9,6 +9,8 @@ import ca.odell.glazedlists.demo.Launcher;
 // swing
 import javax.swing.*;
 import javax.swing.table.TableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import javax.swing.border.Border;
 import javax.swing.event.*;
 import java.awt.event.*;
@@ -40,10 +42,13 @@ public class IssuesBrowser extends Applet {
     private static final Color GLAZED_LISTS_ORANGE = new Color(255, 119, 0);
     private static final Color GLAZED_LISTS_ORANGE_LIGHT = new Color(241, 212, 189);
 
-    private static final Color FILTER_PANEL_BLUE = new Color(126, 165, 232);
-    private static final Color FILTER_PANEL_BLUE_LIGHT = new Color(197, 210, 232);
+    private static final Color BLUE_DARK = new Color(126, 165, 232);
+    private static final Color BLUE_LIGHT = new Color(197, 210, 232);
 
     private static final Border BLACK_LINE_BORDER = BorderFactory.createLineBorder(Color.BLACK);
+
+    /** A header renderer that paints a gradient background from BLUE_DARK to BLUE_LIGHT */
+    private static final GradientTableHeaderCellRenderer DEFAULT_HEADER_RENDERER = new GradientTableHeaderCellRenderer(BLUE_DARK, BLUE_LIGHT);
 
     /** an event list to host the issues */
     private UniqueList issuesEventList = new UniqueList(new BasicEventList());
@@ -152,6 +157,7 @@ public class IssuesBrowser extends Applet {
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
+        issuesJTable.getTableHeader().setDefaultRenderer(DEFAULT_HEADER_RENDERER);
         issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(10);
@@ -172,6 +178,7 @@ public class IssuesBrowser extends Applet {
         // descriptions
         EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
         JTable descriptionsTable = new JTable(descriptionsTableModel);
+        descriptionsTable.getTableHeader().setDefaultRenderer(DEFAULT_HEADER_RENDERER);
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
         JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         descriptionsTableScrollPane.setBorder(BLACK_LINE_BORDER);
@@ -218,7 +225,7 @@ public class IssuesBrowser extends Applet {
         iconBar.add(throbber,                                new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
         // create the filters panel
-        JPanel filtersPanel = new GradientPanel(FILTER_PANEL_BLUE, FILTER_PANEL_BLUE_LIGHT);
+        JPanel filtersPanel = new GradientPanel(BLUE_DARK, BLUE_LIGHT);
         filtersPanel.setBorder(BLACK_LINE_BORDER);
         filtersPanel.setPreferredSize(new Dimension(200, 400));
         filtersPanel.setLayout(new GridBagLayout());
@@ -447,6 +454,42 @@ public class IssuesBrowser extends Applet {
     }
 
     /**
+     * A customized TableCellRenderer which paints a color gradient for its
+     * background rather than a single color. The start and end colors of the
+     * gradient are specified via the constructor.
+     */
+    private static class GradientTableHeaderCellRenderer extends DefaultTableCellRenderer {
+        private Color gradientStartColor;
+        private Color gradientEndColor;
+
+        public GradientTableHeaderCellRenderer(Color gradientStartColor, Color gradientEndColor) {
+            this.gradientStartColor = gradientStartColor;
+            this.gradientEndColor = gradientEndColor;
+            this.setHorizontalAlignment(JLabel.CENTER);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (table != null) {
+                JTableHeader header = table.getTableHeader();
+                if (header != null) {
+                    setForeground(header.getForeground());
+                    setBackground(header.getBackground());
+                    setFont(header.getFont());
+                }
+            }
+
+            setText((value == null) ? "" : value.toString());
+            setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+            return this;
+        }
+
+        public void paintComponent(Graphics g) {
+            paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, this.getHeight());
+            super.paintComponent(g);
+        }
+    }
+
+    /**
      * A customized panel which paints a color gradient for its background
      * rather than a single color. The start and end colors of the gradient
      * are specified via the constructor.
@@ -461,17 +504,22 @@ public class IssuesBrowser extends Applet {
         }
 
         public void paintComponent(Graphics g) {
-            if (this.isOpaque()) {
-                Graphics2D g2 = (Graphics2D) g;
-                final Paint oldPainter = g2.getPaint();
+            if (this.isOpaque())
+                paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, this.getHeight());
+        }
+    }
 
-                try {
-                    g2.setPaint(new GradientPaint(0, 0, this.gradientStartColor, 0, this.getHeight(), this.gradientEndColor));
-                    g2.fill(g2.getClip());
-                } finally {
-                    g2.setPaint(oldPainter);
-                }
-            }
+    /**
+     * A convenience method to paint a gradient between <code>gradientStartColor</code>
+     * and <code>gradientEndColor</code> over <code>height</code> pixels.
+     */
+    private static void paintGradient(Graphics2D g2d, Color gradientStartColor, Color gradientEndColor, int height) {
+        final Paint oldPainter = g2d.getPaint();
+        try {
+            g2d.setPaint(new GradientPaint(0, 0, gradientStartColor, 0, height, gradientEndColor));
+            g2d.fill(g2d.getClip());
+        } finally {
+            g2d.setPaint(oldPainter);
         }
     }
 }
