@@ -74,7 +74,33 @@ public class FilterListTest extends TestCase {
 
     }
 
-    /**
+	/**
+	 * Test Matchers that fire matchAll() and matchNone() events.
+	 */
+	public void testMatchAllOrNothing() {
+		EventList base_list = new BasicEventList();
+		base_list.add(new Integer(1));
+		base_list.add(new Integer(2));
+		base_list.add(new Integer(3));
+		base_list.add(new Integer(4));
+		base_list.add(new Integer(5));
+
+		AllOrNothingMatcherEditor matcher = new AllOrNothingMatcherEditor();
+		FilterList filter_list = new FilterList(base_list,matcher);
+
+		// Test initial size
+		assertEquals(5, filter_list.size());
+
+		// Clear it
+		matcher.showAll(false);
+		assertEquals(0, filter_list.size());
+
+		// Put it back
+		matcher.showAll(true);
+		assertEquals(5, filter_list.size());
+	}
+
+	/**
      * Convert the specified int[] array to a List of Integers.
      */
     private List intArrayToIntegerCollection(int[] values) {
@@ -131,4 +157,27 @@ public class FilterListTest extends TestCase {
             return ((Integer)value).intValue() >= minimum;
         }
     }
+
+	/**
+	 * Matcher that allows testing matchAll() and matchNone().
+	 */
+	static class AllOrNothingMatcherEditor extends AbstractMatcherEditor {
+		private boolean show_all = true;		// otherwise nothin'
+
+
+		/**
+		 * @param state True show everything, otherwise show nothing
+		 */
+		public void showAll(boolean state) {
+			if (state == show_all) return;
+
+			show_all = state;
+			if (state) fireMatchAll();
+			else fireMatchNone();
+		}
+
+		public Matcher getMatcher() {
+			return show_all ? Matchers.trueMatcher() : Matchers.falseMatcher();
+		}
+	}
 }
