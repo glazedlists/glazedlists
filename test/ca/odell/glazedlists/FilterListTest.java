@@ -87,6 +87,7 @@ public class FilterListTest extends TestCase {
 
 		AllOrNothingMatcherEditor matcher = new AllOrNothingMatcherEditor();
 		FilterList filter_list = new FilterList(base_list,matcher);
+		filter_list.addListEventListener(new ConsistencyTestList(filter_list, "Filter List"));
 
 		// Test initial size
 		assertEquals(5, filter_list.size());
