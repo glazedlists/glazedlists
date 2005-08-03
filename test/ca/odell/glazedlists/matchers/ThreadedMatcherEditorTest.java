@@ -255,6 +255,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
+        Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
         assertCounterState(counter, 1, 0, 0, 0, 0);
     }
 
