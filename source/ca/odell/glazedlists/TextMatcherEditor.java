@@ -63,7 +63,9 @@ public class TextMatcherEditor extends AbstractValueMatcherEditor {
      * @param filterStrings the {@link String}s representing all of the filter values
      */
     public void setFilterText(String[] filterStrings) {
-        String[] oldFilters = this.filters;
+		if (filterStrings == null) filterStrings = new String[0];
+		
+		String[] oldFilters = this.filters;
         this.filters = TextMatcher.normalizeFilters(filterStrings);
 
 		boolean need_to_fire_update = setValue(TextMatcher.normalizeFilters(filterStrings));
@@ -76,11 +78,11 @@ public class TextMatcherEditor extends AbstractValueMatcherEditor {
 				if(filters.length == 0) {
 					fireMatchAll();
 				} else if(TextMatcher.isFilterRelaxed(oldFilters, filters)) {
-					fireRelaxed(createMatcher(filters));
+					fireRelaxed(getMatcher());
 				} else if(TextMatcher.isFilterConstrained(oldFilters, filters)) {
-					fireConstrained(createMatcher(filters));
+					fireConstrained(getMatcher());
 				} else {
-					fireChanged(createMatcher(filters));
+					fireChanged(getMatcher());
 				}
 			}
 		}
