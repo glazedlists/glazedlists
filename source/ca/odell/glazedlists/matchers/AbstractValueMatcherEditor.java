@@ -42,7 +42,10 @@ public abstract class AbstractValueMatcherEditor extends AbstractMatcherEditor
 
 	/**
 	 * Must be implemented by extending classes to create a matcher that is based
-	 * on the given value.
+	 * on the given value. This method is intended for internal use by the
+	 * AbstractValueMatcherEditor class and should not be used directly by extending
+	 * classes because logic inversion will not be handled correctly. Instead they
+	 * should use {@link #getMatcher()}.
 	 * <p/>
 	 * Note: this method will not be called with a null value.
 	 *
