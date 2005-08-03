@@ -64,7 +64,7 @@ public class TextMatcherEditor extends AbstractValueMatcherEditor {
      */
     public void setFilterText(String[] filterStrings) {
 		if (filterStrings == null) filterStrings = new String[0];
-		
+
 		String[] oldFilters = this.filters;
         this.filters = TextMatcher.normalizeFilters(filterStrings);
 
@@ -87,6 +87,20 @@ public class TextMatcherEditor extends AbstractValueMatcherEditor {
 			}
 		}
     }
+
+
+	/**
+	 * Returns the text filterator used by this editor.
+	 * <p/>
+	 * Note: It's recommended that the filterator be immutable. However, if it is not and
+	 * changes are made to it such that it would return different filter values,
+	 * {@link #fireChanged(Matcher)} should be called to tell the listeners that this
+	 * matcher's value has changed.
+	 */
+	public TextFilterator getTextFilterator() {
+		return filterator;
+	}
+
 
 	/**
 	 * {@inheritDoc}
