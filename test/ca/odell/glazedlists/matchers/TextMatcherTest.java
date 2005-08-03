@@ -90,8 +90,12 @@ public class TextMatcherTest extends TestCase {
         list.addAll(numbers);
         assertEquals(list, numbers);
 
-        textMatcherEditor.setFilterText(new String[] {"0"});
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener(0);
+        textMatcherEditor.addMatcherEditorListener(counter);
+
+        textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
         assertEquals(Arrays.asList(new Object[] {"0"}), list);
+		counter.assertCounterState(0, 0, 0, 1, 0);
     }
 
     public void testRelaxingFilter() {
@@ -100,20 +104,28 @@ public class TextMatcherTest extends TestCase {
 
         list.addAll(numbers);
 
-        textMatcherEditor.setFilterText(new String[] {"0"});
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener(0);
+        textMatcherEditor.addMatcherEditorListener(counter);
+
+		textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
         assertEquals(Arrays.asList(new Object[] {"0"}), list);
-        textMatcherEditor.setFilterText(new String[0]);
+        textMatcherEditor.setFilterText(new String[0]);				// match all
         assertEquals(numbers, list);
+		counter.assertCounterState(1, 0, 0, 1, 0);
+		counter.resetCounterState();
 
-        textMatcherEditor.setFilterText(new String[] {"01"});
+		textMatcherEditor.setFilterText(new String[] {"01"});		// constrained
+        assertEquals(Collections.EMPTY_LIST, list);
+        textMatcherEditor.setFilterText(new String[] {"0"});		// relaxed
+        assertEquals(Arrays.asList(new Object[] {"0"}), list);
+		counter.assertCounterState(0, 0, 0, 1, 1);
+		counter.resetCounterState();
+
+        textMatcherEditor.setFilterText(new String[] {"0", "1"});	// constrained
         assertEquals(Collections.EMPTY_LIST, list);
         textMatcherEditor.setFilterText(new String[] {"0"});
-        assertEquals(Arrays.asList(new Object[] {"0"}), list);
-
-        textMatcherEditor.setFilterText(new String[] {"0", "1"});
-        assertEquals(Collections.EMPTY_LIST, list);
-        textMatcherEditor.setFilterText(new String[] {"0"});
-        assertEquals(Arrays.asList(new Object[] {"0"}), list);
+        assertEquals(Arrays.asList(new Object[] {"0"}), list);		// relaxed
+		counter.assertCounterState(0, 0, 0, 1, 1);
     }
 
     public void testRelaxAndConstrainFilter() {
@@ -165,11 +177,18 @@ public class TextMatcherTest extends TestCase {
         
         list.addAll(numbers);
 
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener(0);
+        textMatcherEditor.addMatcherEditorListener(counter);
+
         assertEquals(list, numbers);
-        textMatcherEditor.setFilterText(new String[] {"6"});
-        assertEquals(Arrays.asList(new String[] {"6"}), list);
-        textMatcherEditor.setFilterText(new String[0]);
-        assertEquals(list, numbers);
+        textMatcherEditor.setFilterText(new String[] {"6"});		// constrained
+		counter.assertCounterState(0, 0, 0, 1, 0);
+		counter.resetCounterState();
+		assertEquals(Arrays.asList(new String[] {"6"}), list);
+
+		textMatcherEditor.setFilterText(new String[0]);				// match all
+		counter.assertCounterState(1, 0, 0, 0, 0);
+		assertEquals(list, numbers);
     }
 
 

@@ -21,7 +21,7 @@ import ca.odell.glazedlists.impl.filter.*;
  * @author James Lemieux
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TextMatcherEditor extends AbstractMatcherEditor {
+public class TextMatcherEditor extends AbstractValueMatcherEditor {
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator filterator;
@@ -50,7 +50,10 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
      *      list elements implement {@link TextFilterable}
      */
     public TextMatcherEditor(TextFilterator filterator) {
-        this.filterator = filterator;
+		// Start with normal logic and no value set
+		super( false, null );
+
+		this.filterator = filterator;
     }
 
     /**
@@ -63,19 +66,36 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
         String[] oldFilters = this.filters;
         this.filters = TextMatcher.normalizeFilters(filterStrings);
 
-        // fire the event only as necessary
-        if(!TextMatcher.isFilterEqual(oldFilters, filters)) {
+		boolean need_to_fire_update = setValue(TextMatcher.normalizeFilters(filterStrings));
+		if (need_to_fire_update) {
 
-            // classify the change in filter and apply the new filter to this list
-            if(filters.length == 0) {
-                fireMatchAll();
-            } else if(TextMatcher.isFilterRelaxed(oldFilters, filters)) {
-                fireRelaxed(new TextMatcher(filters, filterator));
-            } else if(TextMatcher.isFilterConstrained(oldFilters, filters)) {
-                fireConstrained(new TextMatcher(filters, filterator));
-            } else {
-                fireChanged(new TextMatcher(filters, filterator));
-            }
-        }
+			// fire the event only as necessary
+			if(!TextMatcher.isFilterEqual(oldFilters, filters)) {
+
+				// classify the change in filter and apply the new filter to this list
+				if(filters.length == 0) {
+					fireMatchAll();
+				} else if(TextMatcher.isFilterRelaxed(oldFilters, filters)) {
+					fireRelaxed(createMatcher(filters));
+				} else if(TextMatcher.isFilterConstrained(oldFilters, filters)) {
+					fireConstrained(createMatcher(filters));
+				} else {
+					fireChanged(createMatcher(filters));
+				}
+			}
+		}
     }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * Create the matcher for the filter string.
+	 *
+	 * Note: this will not
+	 *
+	 * @param value		The filter strings
+	 */
+	protected Matcher createMatcher(Object value) {
+		return new TextMatcher((String[])value, filterator);
+	}
 }

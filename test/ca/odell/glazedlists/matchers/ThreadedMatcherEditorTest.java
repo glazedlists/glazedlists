@@ -141,7 +141,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     public void testQueuingConstraints() throws InterruptedException {
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener counter =
+			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"J"});
@@ -156,11 +157,12 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 0, 0, 0, 2, 0);
+        counter.assertCounterState(0, 0, 0, 2, 0);
     }
 
     public void testQueuingRelaxations() throws InterruptedException {
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener counter =
+			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -175,11 +177,12 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 0, 0, 0, 1, 1);
+        counter.assertCounterState(0, 0, 0, 1, 1);
     }
 
     public void testQueuingMatchAll() throws InterruptedException {
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener counter =
+			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -192,11 +195,12 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 1, 0, 0, 1, 0);
+        counter.assertCounterState(1, 0, 0, 1, 0);
     }
 
     public void testQueuingChanged() throws InterruptedException {
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener counter =
+			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -209,42 +213,44 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 0, 0, 1, 1, 0);
+        counter.assertCounterState(0, 0, 1, 1, 0);
     }
 
     public void testQueuingAllSorts_WithPause() throws InterruptedException {
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener counter =
+			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_STARTS);
-        assertCounterState(counter, 0, 0, 0, 1, 0);
+        counter.assertCounterState(0, 0, 0, 1, 0);
 
         textMatcherEditor.setFilterText(new String[] {"Ja"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 0, 0, 0, 1, 1);
+        counter.assertCounterState(0, 0, 0, 1, 1);
 
         textMatcherEditor.setFilterText(new String[] {"Col"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 0, 0, 1, 1, 1);
+        counter.assertCounterState(0, 0, 1, 1, 1);
 
         textMatcherEditor.setFilterText(new String[] {"Colin"});
         // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 0, 0, 1, 2, 1);
+        counter.assertCounterState(0, 0, 1, 2, 1);
 
         textMatcherEditor.setFilterText(new String[0]);
 
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 1, 0, 1, 2, 1);
+        counter.assertCounterState(1, 0, 1, 2, 1);
     }
 
     public void testQueuingAllSorts_WithoutPause() throws InterruptedException {
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener counter =
+			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -256,42 +262,6 @@ public class ThreadedMatcherEditorTest extends TestCase {
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        assertCounterState(counter, 1, 0, 0, 0, 0);
-    }
-
-    private void assertCounterState(CountingMatcherEditorListener counter, int matchAll, int matchNone, int changed, int constrained, int relaxed) {
-        assertEquals(matchAll, counter.matchAll);
-        assertEquals(matchNone, counter.matchNone);
-        assertEquals(changed, counter.changed);
-        assertEquals(constrained, counter.constrained);
-        assertEquals(relaxed, counter.relaxed);
-    }
-
-    private class CountingMatcherEditorListener implements MatcherEditor.Listener {
-        private int matchAll = 0;
-        private int matchNone = 0;
-        private int changed = 0;
-        private int constrained = 0;
-        private int relaxed = 0;
-
-        private void delay() {
-            try {
-                Thread.sleep(SIMULATED_PROCESSING_DELAY);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void changedMatcher(MatcherEditor.Event matcherEvent) {
-            switch (matcherEvent.getType()) {
-                case MatcherEditor.Event.CONSTRAINED: this.constrained++; break;
-                case MatcherEditor.Event.RELAXED: this.relaxed++; break;
-                case MatcherEditor.Event.CHANGED: this.changed++; break;
-                case MatcherEditor.Event.MATCH_ALL: this.matchAll++; break;
-                case MatcherEditor.Event.MATCH_NONE: this.matchNone++; break;
-            }
-
-            this.delay();
-        }
+        counter.assertCounterState(1, 0, 0, 0, 0);
     }
 }
