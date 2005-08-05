@@ -338,7 +338,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
      * to perform the notifications.  This base class simplifies mechanics.
      */
     
-    protected abstract class Signaller  { // base for ReaderLock and WriterLock
+    protected abstract class Signaller { // base for ReaderLock and WriterLock
         abstract void signalWaiters();
     }
     
@@ -419,7 +419,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
         }
     }
     
-    protected class WriterLock extends Signaller implements  Lock {
+    protected class WriterLock extends Signaller implements Lock {
         
         public void lock() /*throws InterruptedException*/ {
             //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
