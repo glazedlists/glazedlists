@@ -71,27 +71,27 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		threshold_matchereditor.setThreshold(new Integer(5));
 
 		// Not inverted
-		threshold_matchereditor.setLogicInverted(false);
+		//threshold_matchereditor.setLogicInverted(false);
 		assertEquals(threshold_list.toString(), 5, threshold_list.size()); // 6 7 8 9 10
 		for (int i = 0; i < 5; i++) {
 			assertEquals(new Integer(6 + i), threshold_list.get(i));
 		}
 
 		// Inverted
-		threshold_matchereditor.setLogicInverted(true);
-		assertEquals(threshold_list.toString(), 6, threshold_list.size()); // 0 1 2 3 4 5
-		for (int i = 0; i < 6; i++) {
-			assertEquals(new Integer(i), threshold_list.get(i));
-		}
-
+//		threshold_matchereditor.setLogicInverted(true);
+//		assertEquals(threshold_list.toString(), 6, threshold_list.size()); // 0 1 2 3 4 5
+//		for (int i = 0; i < 6; i++) {
+//			assertEquals(new Integer(i), threshold_list.get(i));
+//		}
+//
 		threshold_matchereditor.setThreshold(new Integer(7));
-		assertEquals(threshold_list.toString(), 8, threshold_list.size()); // 0 1 2 3 4 5 6 7
-		for (int i = 0; i < 6; i++) {
-			assertEquals(new Integer(i), threshold_list.get(i));
-		}
+//		assertEquals(threshold_list.toString(), 8, threshold_list.size()); // 0 1 2 3 4 5 6 7
+//		for (int i = 0; i < 6; i++) {
+//			assertEquals(new Integer(i), threshold_list.get(i));
+//		}
 
 		// Not inverted
-		threshold_matchereditor.setLogicInverted(false);
+//		threshold_matchereditor.setLogicInverted(false);
 		assertEquals(threshold_list.toString(), 3, threshold_list.size()); // 8 9 10
 		for (int i = 0; i < 3; i++) {
 			assertEquals(new Integer(8 + i), threshold_list.get(i));
@@ -173,7 +173,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 
 		// In the middle
 		threshold_matchereditor.setThreshold(new Integer(5));
-		assertEquals(5, threshold_list.size()); // 0 1 2 3 4
+		assertEquals(threshold_list.toString(), 5, threshold_list.size()); // 0 1 2 3 4
 		for (int i = 0; i < 5; i++) {
 			assertEquals(new Integer(i), threshold_list.get(i));
 		}
@@ -276,7 +276,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		// At min value
 		threshold_matchereditor.setThreshold(new Integer(0));
 		assertEquals(parent_list.size() - 1, threshold_list.size());
-		assertFalse(threshold_list.contains(new Integer(0)));
+		assertFalse(threshold_list.toString(), threshold_list.contains(new Integer(0)));
 
 		// Below min value
 		threshold_matchereditor.setThreshold(new Integer(-1));

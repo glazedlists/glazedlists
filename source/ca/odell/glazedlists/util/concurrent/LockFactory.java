@@ -5,96 +5,90 @@
 package ca.odell.glazedlists.util.concurrent;
 
 /**
- * Factory allows creation of the best locks for the VM we're running in. Overriding this
- * class can allow usage of specialized locks. To use a custom factory class, set the
- * class name in the system property <tt>glazedlists.lockfactory</tt>.
+ * This factory provides an implementation of {@link Lock} that is optimized
+ * for the current platform.
+ *
+ * <p>To override the default {@link Lock} implementation used by this class,
+ * set the <code>glazedlists.lockfactory</code> system property to the fully
+ * qualified classname of a class that extends {@link LockFactory}. This can
+ * be used to exercise <code>java.util.concurrent</code> when that package
+ * is available (ie. Java 5 or better).
  *
  * @author <a "mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class LockFactory {
-	// System properties used by this class
-	private static final String LOCKING_PROPERTY = "glazedlists.lockfactory";
-	private static final String LOCKING_DEBUG_PROPERTY = LOCKING_PROPERTY + ".debug";
+public interface LockFactory {
 
+	/** System property key */
+	public static final String LOCKING_PROPERTY = "glazedlists.lockfactory";
 
-	private static LockFactory instance;
+    /** the current Lock factory */
+	public static final LockFactory DEFAULT = SimpleLockFactory.createDefaultLockFactory();
 
-	static {
-		// See if we should print a debugging message saying what locks we're using
-		boolean debug = false;
-		try {
-			debug = System.getProperty(LOCKING_DEBUG_PROPERTY, null) != null;
-		} catch( SecurityException ex ) {}		// ignore
+    /**
+     * Create a {@link ReadWriteLock}.
+     *
+     * <p>The default implementation returns an implementation that has been
+     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
+     */
+    public ReadWriteLock createReadWriteLock();
 
+    /**
+     * Create a {@link Lock}.
+     */
+    public Lock createLock();
 
-		LockFactory special_lock_factory = null;
+}
 
-		// See if the user has specified their own lock factory implementation
-		try {
-			String user_lock_factory = System.getProperty(LOCKING_PROPERTY, null);
-			if (user_lock_factory != null) {
-				try {
-					special_lock_factory = (LockFactory) Class.forName(
-						user_lock_factory).newInstance();
+/**
+ * A simple implementation of {@link LockFactory} that has been
+ * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
+ */
+class SimpleLockFactory implements LockFactory {
 
-					if (debug) System.out.println("*** GlazedLists will use user-defined " +
-						"Locking: " + user_lock_factory + " ***");
-				}
-				catch (Exception ex) {
-					System.err.println("Unable to load user-defined lock factory. " +
-						"Default will be used.");
-					ex.printStackTrace();
-				}
-				catch (NoClassDefFoundError er) {
-					System.err.println("Unable to load user-defined lock factory. " +
-						"Default will be used.");
-					er.printStackTrace();
-				}
-			}
-		}
-		catch(SecurityException ex ) {}			// ignore
+    /**
+     * Determine which LockFactory implementation to delegate to at
+     * class initialization time.
+     */
+    public static LockFactory createDefaultLockFactory() {
 
-		// Set the singleton instance
-		if (special_lock_factory != null) {
-			instance = special_lock_factory;
-		} else {
-			if (debug) System.out.println("*** GlazedLists will use 1.2+ Locking ***");
-			instance = new LockFactory();
-		}
-	}
+        // if the user has specified their own LockFactory, use that
+        String userLockFactoryClassname = "";
+        try {
+            userLockFactoryClassname = System.getProperty(LOCKING_PROPERTY, null);
+            if (userLockFactoryClassname != null) {
+                return (LockFactory)Class.forName(userLockFactoryClassname).newInstance();
+            }
+        } catch(SecurityException e) {
+            // accessing the System property failed! Just use the default lock.
+        } catch(Exception e) {
+            System.err.println("Unable to load user-defined lock factory, \"" + userLockFactoryClassname + "\", default will be used.");
+            e.printStackTrace();
+        } catch (NoClassDefFoundError e) {
+            System.err.println("Unable to load user-defined lock factory, \"" + userLockFactoryClassname + "\", default will be used.");
+            e.printStackTrace();
+        }
 
+        // use the default implementation if we couldn't find a better one
+        return new SimpleLockFactory();
+    }
 
-	/**
-	 * Create a new {@link ReadWriteLock}.
-	 */
-	public static ReadWriteLock createReadWriteLock() {
-		return instance._internalCreateReadWriteLock();
-	}
+    /**
+     * Create a {@link ReadWriteLock}.
+     *
+     * <p>The default implementation returns an implementation that has been
+     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
+     */
+    public ReadWriteLock createReadWriteLock() {
+        return new J2SE12ReadWriteLock();
+    }
 
-	/**
-	 * Create a new {@link Lock}.
-	 */
-	public static Lock createLock() {
-		return instance._internalCreateLock();
-	}
-
-
-	/**
-	 * Should be overridden by LockFactory implementations to return a ReadWriteLock
-	 * implementation. The default implementation returns a {@link J2SE12ReadWriteLock},
-	 * which works in 1.2+ VM's.
-	 */
-	protected ReadWriteLock _internalCreateReadWriteLock() {
-		return new J2SE12ReadWriteLock();
-	}
-
-
-	/**
-	 * Should be overridden by LockFactory implementations to return a Lock implementation.
-	 * The default implementation uses a {@link J2SE12ReadWriteLock}, which works in 1.2+
-	 * VM's.
-	 */
-	protected Lock _internalCreateLock() {
-		return new J2SE12ReadWriteLock().writeLock();
-	}
+    /**
+     * Create a {@link Lock}.
+     *
+     * <p>The default implementation returns an implementation that has been
+     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
+     */
+    public Lock createLock() {
+        return new J2SE12ReadWriteLock().writeLock();
+    }
 }

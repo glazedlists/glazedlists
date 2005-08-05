@@ -90,7 +90,7 @@ public class TextMatcherTest extends TestCase {
         list.addAll(numbers);
         assertEquals(list, numbers);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener(0);
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
         textMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
@@ -106,7 +106,7 @@ public class TextMatcherTest extends TestCase {
 
         list.addAll(monotonicAlphabet);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener(0);
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
         textMatcherEditor.addMatcherEditorListener(counter);
 
 		// Make sure it includes everything to start with (no filter)
@@ -145,7 +145,7 @@ public class TextMatcherTest extends TestCase {
 
         list.addAll(numbers);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener(0);
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
         textMatcherEditor.addMatcherEditorListener(counter);
 
 		textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
@@ -218,7 +218,7 @@ public class TextMatcherTest extends TestCase {
         
         list.addAll(numbers);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener(0);
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
         textMatcherEditor.addMatcherEditorListener(counter);
 
         assertEquals(list, numbers);

@@ -8,7 +8,8 @@ import junit.framework.Assert;
 
 
 /**
- *
+ * Count matcher events, inserting a delay if requested to test multithreaded
+ * matchers.
  */
 class CountingMatcherEditorListener implements MatcherEditor.Listener {
 	private int matchAll = 0;
@@ -19,9 +20,19 @@ class CountingMatcherEditorListener implements MatcherEditor.Listener {
 
 	private final long delay_ms;
 
+    /**
+     * Create a {@link CountingMatcherEditorListener} that blocks for the specified
+     * duration whenever a matcher event is received.
+     */
 	CountingMatcherEditorListener(long delay_ms) {
 		this.delay_ms = delay_ms;
 	}
+    /**
+     * Create a {@link CountingMatcherEditorListener} with no delay.
+     */
+    CountingMatcherEditorListener() {
+        this(0);
+    }
 
 	private void delay() {
 		if (delay_ms == 0) return;

@@ -18,7 +18,7 @@ import java.util.List;
 public class StringResource implements Resource {
 
     /** the read/write lock provides mutual exclusion to access */
-    private ReadWriteLock readWriteLock = LockFactory.createReadWriteLock();
+    private ReadWriteLock readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
     
     /** the value of this resource */
     private String value = "";

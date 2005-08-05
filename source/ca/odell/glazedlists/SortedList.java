@@ -69,7 +69,7 @@ public final class SortedList extends TransformedList {
 
         // use an Internal Lock to avoid locking the source list during a sort
         readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
-			LockFactory.createReadWriteLock());
+			LockFactory.DEFAULT.createReadWriteLock());
 
         // trees are instansiated when a comparator is set
         setComparator(comparator);

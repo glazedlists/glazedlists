@@ -24,19 +24,19 @@ public abstract class AbstractValueMatcherEditor extends AbstractMatcherEditor
 
 	private volatile Object value = null;
 
-	private volatile boolean logic_inverted = false;
+	private volatile boolean logicInverted = false;
 
 
 	/**
 	 * Basic constructor.
 	 *
-	 * @param logic_inverted		See {@link ValueMatcherEditor#setLogicInverted(boolean)}
-	 * @param initial_value			The initial value for the editor, see
-	 * 								{@link #setValue(Object)}.
+	 * @param logicInverted		See {@link ValueMatcherEditor#setLogicInverted(boolean)}
+	 * @param initialValue			The initial value for the editor, see
+	 * 							{@link #setValue(Object)}.
 	 */
-	protected AbstractValueMatcherEditor(boolean logic_inverted, Object initial_value) {
-		setLogicInverted(logic_inverted);
-		setValue(initial_value);
+	protected AbstractValueMatcherEditor(boolean logicInverted, Object initialValue) {
+		setLogicInverted(logicInverted);
+		setValue(initialValue);
 	}
 
 
@@ -46,8 +46,8 @@ public abstract class AbstractValueMatcherEditor extends AbstractMatcherEditor
 	 * AbstractValueMatcherEditor class and should not be used directly by extending
 	 * classes because logic inversion will not be handled correctly. Instead they
 	 * should use {@link #getMatcher()}.
-	 * <p/>
-	 * Note: this method will not be called with a null value.
+     *
+	 * <p>Note that this method will not be called with a null value.
 	 *
 	 * @param value		The current value. This will always be non-null.
 	 */
@@ -64,7 +64,7 @@ public abstract class AbstractValueMatcherEditor extends AbstractMatcherEditor
 		if (value == null) return TrueMatcher.getInstance();
 
 		Matcher parent = createMatcher(value);
-		if (logic_inverted) {
+		if (logicInverted) {
 			return Matchers.invert(parent);
 		} else {
 			return parent;
@@ -76,17 +76,17 @@ public abstract class AbstractValueMatcherEditor extends AbstractMatcherEditor
 	 * {@inheritDoc}
 	 */
 	public boolean isLogicInverted() {
-		return logic_inverted;
+		return logicInverted;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setLogicInverted(boolean logic_inverted) {
-		boolean old_state = this.logic_inverted;
+		boolean old_state = this.logicInverted;
 		if (old_state == logic_inverted) return;		// no change
 
-		this.logic_inverted = logic_inverted;
+		this.logicInverted = logic_inverted;
 
 		fireChanged(getMatcher());
 	}
@@ -94,8 +94,8 @@ public abstract class AbstractValueMatcherEditor extends AbstractMatcherEditor
 
 	/**
 	 * Set the value the matcher will compare against.
-	 * <p/>
-	 * This must be called <strong>after</strong> the internal state of the extending class
+     *
+	 * <p>This must be called <strong>after</strong> the internal state of the extending class
 	 * has been updated such that {@link #createMatcher(Object)} will return a correct value.
 	 * Note that {@link #getValue()} will return the value set here when {@link
 	 * #createMatcher(Object)} is called (and will be passed in as an argument), so if that

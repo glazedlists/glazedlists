@@ -5,6 +5,7 @@
 package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.Matcher;
+import ca.odell.glazedlists.GlazedLists;
 
 import java.util.Comparator;
 
@@ -16,31 +17,20 @@ import java.util.Comparator;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
-	public static MatchOperation GREATER_THAN = new MatchOperation(">");
-	public static MatchOperation GREATER_THAN_OR_EQUAL = new MatchOperation(">=");
-	public static MatchOperation LESS_THAN = new MatchOperation("<");
-	public static MatchOperation LESS_THAN_OR_EQUAL = new MatchOperation("<=");
-	public static MatchOperation EQUAL = new MatchOperation("==");
-	public static MatchOperation NOT_EQUAL = new MatchOperation("!=");
+public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 
-	// Changes for MatchOperation.changeType(...)
-	private static final int CHANGE_NONE = 0;
-	private static final int CHANGE_CONSTRAINED = 1;
-	private static final int CHANGE_RELAXED = 2;
-	private static final int CHANGE_UNKNOWN = 3;
+	public static final MatchOperation GREATER_THAN = new MatchOperation(1, false);
+	public static final MatchOperation GREATER_THAN_OR_EQUAL = new MatchOperation(1, true);
+	public static final MatchOperation LESS_THAN = new MatchOperation(-1, false);
+	public static final MatchOperation LESS_THAN_OR_EQUAL = new MatchOperation(-1, true);
+	public static final MatchOperation EQUAL = new MatchOperation(0, true);
+	public static final MatchOperation NOT_EQUAL = new MatchOperation(0, false);
 
-	// Operations for MatchOperation
-	private static final int OP_GREATER = 0;
-	private static final int OP_GREATER_EQUAL = 1;
-	private static final int OP_LESS = 2;
-	private static final int OP_LESS_EQUAL = 3;
-	private static final int OP_EQUAL = 4;
-	private static final int OP_NOT_EQUAL = 5;
+    private MatchOperation currentMatcher = null;
 
-
-	private volatile MatchOperation operation;
-	private volatile Comparator comparator;
+    private Comparator comparator = null;
+    private MatchOperation operation = null;
+    private Object threshold = null;
 
 	/**
 	 * Construct an instance that will require elements to be greater than the threshold
@@ -48,7 +38,7 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 	 * list implementing {@link Comparable}.
 	 */
 	public ThresholdMatcherEditor() {
-		this(null, null, null, false);
+		this(null, null, null);
 	}
 
 	/**
@@ -59,7 +49,7 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 	 * @param threshold The initial threshold, or null if none.
 	 */
 	public ThresholdMatcherEditor(Comparable threshold) {
-		this(threshold, null, null, false);
+		this(threshold, null, null);
 	}
 
 	/**
@@ -73,24 +63,7 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 	 *                  will use {@link #GREATER_THAN}.
 	 */
 	public ThresholdMatcherEditor(Comparable threshold, MatchOperation operation) {
-		this(threshold, operation, null, false);
-	}
-
-
-	/**
-	 * Construct an instance.
-	 *
-	 * @param threshold  The initial threshold, or null if none.
-	 * @param operation  The operation to determine what relation list elements should have
-	 *                   to the threshold in order to match (i.e., be visible). Specifying
-	 *                   null will use {@link #GREATER_THAN}.
-	 * @param comparator Determines how objects compare. If null, the threshold object and
-	 *                   list elements must implement {@link Comparable}.
-	 */
-	public ThresholdMatcherEditor(Comparable threshold, MatchOperation operation,
-		Comparator comparator) {
-
-		this(threshold, operation, comparator, false);
+		this(threshold, operation, null);
 	}
 
 	/**
@@ -103,18 +76,18 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 	 * @param comparator Determines how objects compare. If null, the threshold object and
 	 *                   list elements must implement {@link Comparable}.
 	 */
-	public ThresholdMatcherEditor(Object threshold, MatchOperation operation,
-		Comparator comparator, boolean logic_inverted) {
-
-		super(logic_inverted, null);
-
+	public ThresholdMatcherEditor(Object threshold, MatchOperation operation, Comparator comparator) {
 		// Defaults
 		if (operation == null) operation = GREATER_THAN;
-		if (comparator == null) comparator = new DefaultComparator();
+		if (comparator == null) comparator = GlazedLists.comparableComparator();
 
 		this.operation = operation;
 		this.comparator = comparator;
-		setValue(threshold);
+        this.threshold = threshold;
+
+        // if this is our first matcher, it's automatically a constrain
+        currentMatcher = operation.instance(comparator, threshold);
+        fireConstrained(currentMatcher);
 	}
 
 
@@ -125,32 +98,20 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 	 * @param threshold		The threshold, or null to match everything.
 	 */
 	public synchronized void setThreshold(Object threshold) {
-		Object old_threshold = getThreshold();
-		// See if there was a value change
-		if (threshold != null && old_threshold != null) {
-			if (comparator.compare(old_threshold, threshold) == 0) return;
-		}
-
-		boolean need_to_fire_update = setValue(threshold);
-
-		if (need_to_fire_update) {
-			// The operation can be smart about how the threshold changed
-			int change = operation.changeType(old_threshold, threshold, comparator);
-			fireChange(change);
-		}
+        this.threshold = threshold;
+        rebuildMatcher();
 	}
-
 	/**
 	 * See {@link #getThreshold()}.
 	 */
 	public Object getThreshold() {
-		return getValue();
+		return threshold;
 	}
 
 
 	/**
-	 * Update the operation used to determine what relation list elements should have to the
-	 * threshold in order to match (i.e., be visible). Must be non-null.
+	 * Update the operation used to determine what relation list elements should
+     * have to the threshold in order to match (i.e., be visible). Must be non-null.
 	 *
 	 * @see #GREATER_THAN
 	 * @see #GREATER_THAN_OR_EQUAL
@@ -164,17 +125,13 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 			throw new IllegalArgumentException("Operation cannot be null");
 		}
 
-		MatchOperation old_operation = this.operation;
-		this.operation = operation;
-
-		int change = operation.changeType(old_operation);
-		fireChange(change);
+        this.operation = operation;
+        rebuildMatcher();
 	}
-
 	/**
 	 * See {@link #setMatchOperation}.
 	 */
-	public MatchOperation getMatchOperation() {
+	public Object getMatchOperation() {
 		return operation;
 	}
 
@@ -184,13 +141,11 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 	 * the list implement {@link Comparable}.
 	 */
 	public synchronized void setComparator(Comparator comparator) {
-		if (comparator == null) comparator = new DefaultComparator();
+		if (comparator == null) comparator = GlazedLists.comparableComparator();
 
 		this.comparator = comparator;
-
-		fireChange(CHANGE_UNKNOWN);
+        rebuildMatcher();
 	}
-
 	/**
 	 * See {@link #setComparator}.
 	 */
@@ -202,173 +157,91 @@ public class ThresholdMatcherEditor extends AbstractValueMatcherEditor {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Matcher createMatcher(Object value) {
-		return new ThresholdMatcher(value, operation, comparator);
+	private void rebuildMatcher() {
+        MatchOperation newMatcher = operation.instance(comparator, threshold);
+
+        // otherwise test how the matchers relate
+        boolean moreStrict = newMatcher.isMoreStrict(currentMatcher);
+        boolean lessStrict = currentMatcher.isMoreStrict(newMatcher);
+
+        // if they're equal we're done and we won't change the matcher.
+        if(!moreStrict && !lessStrict) {
+            return;
+        }
+
+        // otherwise, fire the appropriate event
+        this.currentMatcher = newMatcher;
+        if(moreStrict && lessStrict) {
+            fireChanged(this.currentMatcher);
+        } else if(moreStrict) {
+            fireConstrained(this.currentMatcher);
+        } else if(lessStrict) {
+            fireRelaxed(this.currentMatcher);
+        }
 	}
 
+    /**
+     * A {@link MatchOperation serves as both a {@link Matcher} in and of itself
+     * and as an enumerated type representing its type as an operation.
+     */
+    public static class MatchOperation implements Matcher {
 
-	/**
-	 * Fire the change for the given op code.
-	 */
-	private void fireChange(int op_code) {
-		if (isLogicInverted()) {
-			if (op_code == CHANGE_CONSTRAINED) op_code = CHANGE_RELAXED;
-			else if (op_code == CHANGE_RELAXED) op_code = CHANGE_CONSTRAINED;
-		}
+        /** the comparator to compare values against */
+        protected final Comparator comparator;
+        /** the pivot value to compare with */
+        protected final Object threshold;
+        /** either 1 for greater, 0 for equal, or -1 for less than */
+        private final int polarity;
+        /** either true for equal or false for not equal */
+        private final boolean inclusive;
 
-		if (op_code == CHANGE_CONSTRAINED) {
-			fireConstrained(getMatcher());
-		} else if (op_code == CHANGE_RELAXED) {
-			fireRelaxed(getMatcher());
-		} else {
-			fireChanged(getMatcher());
-		} // Note: CHANGE_NONE falls through...
-	}
+        private MatchOperation(Comparator comparator, Object threshold, int polarity, boolean inclusive) {
+            this.comparator = comparator;
+            this.threshold = threshold;
+            this.polarity = polarity;
+            this.inclusive = inclusive;
+        }
+        private MatchOperation(int polarity, boolean inclusive) {
+            this(null, null, polarity, inclusive);
+        }
 
+        /**
+         * Factory method to create a {@link MatchOperation} of the same type
+         * as this {@link MatchOperation}.
+         */
+        private MatchOperation instance(Comparator comparator, Object threshold) {
+            return new MatchOperation(comparator, threshold, this.polarity, this.inclusive);
+        }
 
-	/**
-	 * Basic matcher used when a value is set.
-	 */
-	private static class ThresholdMatcher implements Matcher {
-		private final Object threshold;
-		private final MatchOperation operation;
-		private final Comparator comparator;
+        /**
+         * Compare this to another {@link MatchOperation}.
+         *
+         * @return true if there exists some Object i such that <code>this.matches(i)</code>
+         *      is <code>false</code> when <code>other.matches(i)<code> is
+         *      <code>true</code>. Two MatcherOperations can be mutually more
+         *       strict than each other.
+         */
+        boolean isMoreStrict(MatchOperation other) {
+            if(other.polarity != this.polarity) return true;
+            if(other.comparator != this.comparator) return true;
+            if(this.threshold == other.threshold) {
+                if(this.inclusive && !other.inclusive) return true;
+            } else {
+                if(this.polarity == 0) return true;
+                else if(!this.matches(other.threshold)) return true;
+            }
+            return false;
+        }
 
-		public ThresholdMatcher(Object threshold, MatchOperation operation,
-			Comparator comparator) {
-
-			this.threshold = threshold;
-			this.operation = operation;
-			this.comparator = comparator;
-
-			if (threshold ==
-				null) throw new IllegalArgumentException("Threshold cannot be null");
-			if (operation ==
-				null) throw new IllegalArgumentException("Operation cannot be null");
-			if (comparator ==
-				null) throw new IllegalArgumentException("Comparator cannot be null");
-		}
-
-		public boolean matches(Object item) {
-			return operation.applies(item, threshold, comparator);
-		}
-	}
-
-
-	/**
-	 * Simple comparator that relies on the objects implementing Comparable. Sure seems like
-	 * this class should exist in the standard JDK somewhere, but I can't fine one like it.
-	 */
-	private static final class DefaultComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			return ((Comparable) o1).compareTo(o2);
-		}
-	}
-
-
-	/**
-	 * Enumeration class that allows the relating to the threshold that will match items.
-	 */
-	private static final class MatchOperation {
-		private final int operation;
-
-		private MatchOperation(String operation) {
-			if (operation.equals(">")) {
-				this.operation = OP_GREATER;
-			} else if (operation.equals(">=")) {
-				this.operation = OP_GREATER_EQUAL;
-			} else if (operation.equals("<")) {
-				this.operation = OP_LESS;
-			} else if (operation.equals("<=")) {
-				this.operation = OP_LESS_EQUAL;
-			} else if (operation.equals("==")) {
-				this.operation = OP_EQUAL;
-			} else if (operation.equals("!=")) {
-				this.operation = OP_NOT_EQUAL;
-			} else {
-				throw new IllegalArgumentException("Unknown operation: " + operation);
-			}
-		}
-
-
-		/**
-		 * Test a value to see if it matches based on the operation.
-		 */
-		boolean applies(Object threshold, Object item, Comparator comparator) {
-			int value = comparator.compare(threshold, item);
-
-			switch (operation) {
-				case OP_GREATER:			 // >
-					return value > 0;
-				case OP_GREATER_EQUAL:	   // >=
-					return value >= 0;
-				case OP_LESS:				// <
-					return value < 0;
-				case OP_LESS_EQUAL:		  // <=
-					return value <= 0;
-				case OP_EQUAL:			   // ==
-					return value == 0;
-				case OP_NOT_EQUAL:		   // !=
-					return value != 0;
-			}
-
-			// Umm, shouldn't get here!?!?  (See validity check in constructor)
-			throw new IllegalStateException("Unknown state: invalid operation: " +
-				operation);
-		}
-
-
-		/**
-		 * Indicates the type of change for the given threshold change.
-		 */
-		int changeType(Object old_threshold, Object new_threshold,
-			Comparator comparator) {
-			int value = comparator.compare(old_threshold, new_threshold);
-
-			// No change
-			if (value == 0) return CHANGE_NONE;
-
-			if (value > 0) {
-				if (operation == OP_GREATER ||
-					operation == OP_GREATER_EQUAL) {   // > or >=
-					return CHANGE_RELAXED;
-				} else if (operation == OP_LESS ||
-					operation == OP_LESS_EQUAL) {	// < or <=
-					return CHANGE_CONSTRAINED;
-				}
-				// == or !=   fall through...
-			} else {
-				if (operation == OP_GREATER ||
-					operation == OP_GREATER_EQUAL) {   // > or >=
-					return CHANGE_CONSTRAINED;
-				} else if (operation == OP_LESS ||
-					operation == OP_LESS_EQUAL) {	// < or <=
-					return CHANGE_RELAXED;
-				}
-				// == or !=   fall through...
-			}
-
-			return CHANGE_UNKNOWN;
-		}
-
-
-		/**
-		 * Indicates the type of change for the given operation change.
-		 */
-		int changeType(MatchOperation old_operation) {
-			int old_op = old_operation.operation;
-			int new_op = operation;
-
-			if (old_op == new_op) return CHANGE_NONE;
-
-			if (old_op == OP_GREATER && new_op == OP_GREATER_EQUAL) return CHANGE_RELAXED;
-			if (old_op == OP_LESS && new_op == OP_LESS_EQUAL) return CHANGE_RELAXED;
-
-			if (old_op == OP_GREATER_EQUAL &&
-				new_op == OP_GREATER) return CHANGE_CONSTRAINED;
-			if (old_op == OP_LESS_EQUAL && new_op == OP_LESS) return CHANGE_CONSTRAINED;
-
-			return CHANGE_UNKNOWN;
-		}
-	}
+        /** {@inheritDoc} */
+        public boolean matches(Object item) {
+            int compareResult = comparator.compare(item, this.threshold);
+            // item equals threshold, match <=, == and >=
+            if(compareResult == 0) return inclusive;
+            // for == and !=, handle the case when the item is not equal to threshold
+            if(polarity == 0) return !inclusive;
+            // item is below threshold and match <, <= or item is above and match >, >=
+            return ((compareResult < 0) == (polarity < 0));
+        }
+    }
 }

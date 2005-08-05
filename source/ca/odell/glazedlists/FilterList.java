@@ -58,7 +58,7 @@ public final class FilterList extends TransformedList {
 
         // use an Internal Lock to avoid locking the source list during a sort
         readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
-			LockFactory.createReadWriteLock());
+			LockFactory.DEFAULT.createReadWriteLock());
 
         // build a list of what is filtered and what's not
         flagList.addBlack(0, source.size());

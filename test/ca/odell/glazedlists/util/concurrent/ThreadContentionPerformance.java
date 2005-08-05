@@ -61,7 +61,7 @@ public class ThreadContentionPerformance {
 		list.add("three");
 
 		System.out.println("ReadWriteLock class: " +
-			LockFactory.createReadWriteLock().getClass().getName());
+			LockFactory.DEFAULT.createReadWriteLock().getClass().getName());
 
 		System.out.print("Starting threads...");
 

@@ -380,7 +380,7 @@ final class OldCompositeList extends AbstractEventList {
     private class CompositeLock implements Lock {
     
         /** use a delegate lock to guarantee mutual exclusion */
-        private Lock raceLock = LockFactory.createLock();
+        private Lock raceLock = LockFactory.DEFAULT.createLock();
     
         /** list of MemberLists whose locks are currently acquired */
         private List lockedMemberLists = new ArrayList();
