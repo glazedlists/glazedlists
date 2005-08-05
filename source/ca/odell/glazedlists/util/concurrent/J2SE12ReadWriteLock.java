@@ -152,7 +152,7 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
         Thread t = Thread.currentThread();
         Object c = readers_.get(t);
         if (c == null)
-            throw new IllegalStateException();
+            throw new IllegalStateException("Attempted to unlock a readlock which was not locked. Please ensure the readlock is always locked and unlocked symmetrically.");
         --activeReaders_;
         if (c != IONE) { // more than one hold; decrement count
             int h = ((Integer)(c)).intValue()-1;
@@ -173,6 +173,9 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
     }
     
     protected synchronized Signaller endWrite() {
+        if (activeWriter_ == null)
+            throw new IllegalStateException("Attempted to unlock a writelock which was not locked. Please ensure the writelock is always locked and unlocked symmetrically.");
+
         --writeHolds_;
         if (writeHolds_ > 0)   // still being held
             return null;

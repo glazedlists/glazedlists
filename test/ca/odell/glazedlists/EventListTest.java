@@ -385,4 +385,28 @@ public class EventListTest extends TestCase {
         source.add("Davis");
         assertFalse(source.equals(target));
     }
+
+    public void testEventListLock() {
+        final EventList source = new BasicEventList();
+
+        // asymmetric unlocking of the readlock should fail-fast
+        try {
+            source.getReadWriteLock().readLock().unlock();
+            fail("failed to receive an IllegalStateException when unlocking and unlocked readlock");
+        } catch (IllegalStateException iae) {}
+
+        // asymmetric unlocking of the writelock should fail-fast
+        try {
+            source.getReadWriteLock().writeLock().unlock();
+            fail("failed to receive an IllegalStateException when unlocking and unlocked writelock");
+        } catch (IllegalStateException iae) {}
+
+        // symmetric locking/unlocking of the readlock should succeed
+        source.getReadWriteLock().readLock().lock();
+        source.getReadWriteLock().readLock().unlock();
+
+        // symmetric locking/unlocking of the writelock should succeed
+        source.getReadWriteLock().writeLock().lock();
+        source.getReadWriteLock().writeLock().unlock();
+    }
 }
