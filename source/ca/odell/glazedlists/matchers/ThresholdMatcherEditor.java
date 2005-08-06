@@ -225,7 +225,8 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
             if(other.polarity != this.polarity) return true;
             if(other.comparator != this.comparator) return true;
             if(this.threshold == other.threshold) {
-                if(this.inclusive && !other.inclusive) return true;
+                if(polarity == 0) return this.inclusive != other.inclusive;
+                else return (!this.inclusive && other.inclusive);
             } else {
                 if(this.polarity == 0) return true;
                 else if(!this.matches(other.threshold)) return true;

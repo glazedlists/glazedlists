@@ -65,6 +65,92 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		}
 	}
 
+    /**
+     * Test that toggling between equal and not equal works as expected.
+     */
+    public void testToggleEqual() {
+		threshold_matchereditor.setThreshold(new Integer(5));
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+		assertEquals(1, threshold_list.size());
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.NOT_EQUAL);
+		assertEquals(10, threshold_list.size());
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+		assertEquals(1, threshold_list.size());
+	}
+
+    /**
+     * Test that toggling between operations works as expected.
+     */
+    public void testToggleOperations() {
+		threshold_matchereditor.setThreshold(new Integer(6));
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+		assertEquals(5, threshold_list.size());
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+		assertEquals(4, threshold_list.size());
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+		assertEquals(5, threshold_list.size());
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+		assertEquals(7, threshold_list.size());
+
+		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+		assertEquals(6, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+        assertEquals(7, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+        assertEquals(4, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+        assertEquals(5, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+        assertEquals(7, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+        assertEquals(4, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+        assertEquals(7, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+        assertEquals(5, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+        assertEquals(4, threshold_list.size());
+
+        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, threshold_list.size());
+	}
+
 
 	public void testLogicInverted() {
 		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
