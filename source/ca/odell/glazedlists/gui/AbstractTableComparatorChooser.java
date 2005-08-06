@@ -57,19 +57,22 @@ public abstract class AbstractTableComparatorChooser {
      */
     protected AbstractTableComparatorChooser(SortedList sortedList, TableFormat tableFormat, boolean multipleColumnSort) {
         this.sortedList = sortedList;
-        this.tableFormat = tableFormat;
         this.multipleColumnSort = multipleColumnSort;
+        this.setTableFormat(tableFormat);
+    }
 
-        // set up the column click counters
+    protected void setTableFormat(TableFormat tableFormat) {
+        this.tableFormat = tableFormat;
+        // reinit the column click trackers
         rebuildColumns();
     }
-    
+
     /**
      * When the column model is changed, this resets the column clicks and
      * comparator list for each column.
      */
     protected void rebuildColumns() {
-        // build the column click managers
+        // build the column click trackers
         columnClickTrackers = new ColumnClickTracker[tableFormat.getColumnCount()];
         for(int i = 0; i < columnClickTrackers.length; i++) {
             columnClickTrackers[i] = new ColumnClickTracker(tableFormat, i);

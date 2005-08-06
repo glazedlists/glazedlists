@@ -182,9 +182,11 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
          * clear the comparators and columns.
          */
         public void tableChanged(TableModelEvent event) {
-            if(event.getFirstRow() == TableModelEvent.HEADER_ROW
-            && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
-                rebuildColumns();
+            if(event.getFirstRow() == TableModelEvent.HEADER_ROW &&
+               event.getColumn() == TableModelEvent.ALL_COLUMNS) {
+                // the table structure may have changed due to a change in the
+                // table format so we conservatively reset the TableFormat
+                setTableFormat(((EventTableModel)table.getModel()).getTableFormat());
             }
 
             // if the comparator has changed
