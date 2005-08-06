@@ -33,11 +33,7 @@ final class ListEventBlock {
      * index and type.
      */
     ListEventBlock(int startIndex, int endIndex, int type) {
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
-        this.type = type;
-        if(startIndex < 0 || endIndex < startIndex) throw new IllegalArgumentException();
-        if(type != ListEvent.INSERT && type != ListEvent.UPDATE && type != ListEvent.DELETE) throw new IllegalArgumentException();
+        setData(startIndex, endIndex, type);
     }
 
     /**
@@ -55,6 +51,7 @@ final class ListEventBlock {
         this.endIndex = endIndex;
         this.type = type;
         if(startIndex < 0 || endIndex < startIndex) throw new IllegalArgumentException();
+        if(type != ListEvent.INSERT && type != ListEvent.UPDATE && type != ListEvent.DELETE) throw new IllegalArgumentException();
     }
     
     /**
@@ -346,8 +343,8 @@ final class ListEventBlock {
         
         // find which block is update, which one is INSERT/DELETE
         boolean updateIsFirst = (first.type == ListEvent.UPDATE);
-        ListEventBlock updateBlock = null;
-        ListEventBlock otherBlock = null;
+        final ListEventBlock updateBlock;
+        final ListEventBlock otherBlock;
         if(updateIsFirst) {
             updateBlock = first;
             otherBlock = second;
@@ -359,7 +356,7 @@ final class ListEventBlock {
         // verify we have a span for a split
         if(updateBlock.startIndex >= otherBlock.startIndex) return false;
         if(updateBlock.endIndex < otherBlock.startIndex) return false;
-        
+
         return true;
     }
         
@@ -370,8 +367,8 @@ final class ListEventBlock {
     private static ListEventBlock split(ListEventBlock first, ListEventBlock second) {
         // find which block is update, which one is INSERT/DELETE
         boolean updateIsFirst = (first.type == ListEvent.UPDATE);
-        ListEventBlock updateBlock = null;
-        ListEventBlock otherBlock = null;
+        final ListEventBlock updateBlock;
+        final ListEventBlock otherBlock;
         if(updateIsFirst) {
             updateBlock = first;
             otherBlock = second;
