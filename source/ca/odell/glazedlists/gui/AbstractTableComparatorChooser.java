@@ -61,6 +61,10 @@ public abstract class AbstractTableComparatorChooser {
         this.setTableFormat(tableFormat);
     }
 
+    /**
+     * Adjusts the TableFormat this comparator chooser uses when selecting
+     * comparators. Calling this method will clear any active sorting.
+     */
     protected void setTableFormat(TableFormat tableFormat) {
         this.tableFormat = tableFormat;
         // reinit the column click trackers
