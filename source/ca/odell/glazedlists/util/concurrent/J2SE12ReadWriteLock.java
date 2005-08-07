@@ -201,12 +201,11 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
  and everyone contributing, testing, and using this code.
  
  History:
- Date       Who                What
+ Date       Who              What
  11Jun1998  dl               Create public version
- 5Aug1998  dl               replaced int counters with longs
+ 5Aug1998   dl               replaced int counters with longs
  25aug1998  dl               record writer thread
- 3May1999  dl               add notifications on interrupt/timeout
- 
+ 3May1999   dl               add notifications on interrupt/timeout
  */
 
 /** 
@@ -252,8 +251,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
     protected boolean allowReader() {
         return activeWriter_ == null && waitingWriters_ == 0;
     }
-    
-    
+
     protected synchronized boolean startRead() {
         boolean allowRead = allowReader();
         if (allowRead)  ++activeReaders_;
@@ -366,7 +364,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
             if (ie != null) {
                 // fall through outside synch on interrupt.
                 // This notification is not really needed here, 
-                //   but may be in plausible subclasses
+                // but may be in plausible subclasses
                 writerLock_.signalWaiters();
                 throw new RuntimeException("Lock interrupted, " + ie);
             }
@@ -443,8 +441,8 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
             }
             if (ie != null) {
                 // Fall through outside synch on interrupt.
-                //  On exception, we may need to signal readers.
-                //  It is not worth checking here whether it is strictly necessary.
+                // On exception, we may need to signal readers.
+                // It is not worth checking here whether it is strictly necessary.
                 readerLock_.signalWaiters();
                 throw new RuntimeException("Lock interrupted, " + ie);
             }
