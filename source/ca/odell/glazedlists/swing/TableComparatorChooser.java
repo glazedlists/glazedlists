@@ -223,7 +223,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
         table.getTableHeader().removeMouseListener(listener);
         table.getModel().removeTableModelListener(listener);
 
-        // null out our table reference so we are eligible be gc'd sooner than the table
+        // null out our table reference for safety's sake
         table = null;
     }
     
