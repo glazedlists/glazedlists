@@ -189,7 +189,7 @@
         <tstamp prefix="jar">
             <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
         </tstamp>
-        <jar destfile="glazedlists_13.jar" update="true" index="true">
+        <jar destfile="glazedlists_java13.jar" update="true" index="true">
             <fileset dir="classes"/>
             <manifest>
                 <attribute name="Sealed" value="true"/>
