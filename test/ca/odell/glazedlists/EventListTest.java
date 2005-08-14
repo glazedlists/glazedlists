@@ -9,6 +9,7 @@ import junit.framework.*;
 import java.util.*;
 
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEvent;
 
 /**
  * Verifies that EventList matches the List API.
@@ -42,13 +43,13 @@ public class EventListTest extends TestCase {
         List jesseArrayList = new ArrayList();
         jesseArrayList.addAll(jesse);
         jesseArrayList.removeAll(wilson);
-        
+
         // test the BasicEventList list
         List jesseBasicEventList = new BasicEventList();
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
-        
+
         // test the SortedList list
         List jesseSortedList = new SortedList(new BasicEventList(), null);
         jesseSortedList.addAll(jesse);
@@ -67,13 +68,13 @@ public class EventListTest extends TestCase {
         List jesseArrayList = new ArrayList();
         jesseArrayList.addAll(jesse);
         jesseArrayList.retainAll(wilson);
-        
+
         // test the BasicEventList list
         List jesseBasicEventList = new BasicEventList();
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
-        
+
         // test the SortedList list
         List jesseSortedList = new SortedList(new BasicEventList(), null);
         jesseSortedList.addAll(jesse);
@@ -90,17 +91,17 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
             assertEquals(false, list.contains(null));
             assertEquals(true,  list.contains("Western"));
-            
+
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
@@ -119,18 +120,18 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
             assertEquals(true, list.containsAll(Arrays.asList(new String[] { "Sleeman", "Molson" })));
             assertEquals(false, list.containsAll(Arrays.asList(new String[] { "Molson", null })));
             assertEquals(false, list.containsAll(Arrays.asList(new String[] { "Molson", "Busch" })));
-            
+
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
@@ -150,17 +151,17 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
             assertTrue(-1 == list.indexOf(null));
             assertTrue(-1 != list.indexOf("Western"));
-            
+
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
@@ -181,17 +182,17 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
             assertTrue(-1 == list.lastIndexOf(null));
             assertTrue(-1 != list.lastIndexOf("Western"));
-            
+
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
@@ -210,17 +211,17 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
             assertEquals(false, list.remove(null));
             assertEquals(true,  list.remove("Sleeman"));
-            
+
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
@@ -239,17 +240,17 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
             assertEquals(true, list.removeAll(Arrays.asList(new String[] { "Western", null })));
             assertEquals(false,  list.removeAll(Arrays.asList(new String[] { null, "Busch" })));
-            
+
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
@@ -268,17 +269,17 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
             assertEquals(true,  list.retainAll(Arrays.asList(new String[] { "Western", null })));
             assertEquals(true, list.retainAll(Arrays.asList(new String[] { "Moslon", null })));
-            
+
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
@@ -297,12 +298,12 @@ public class EventListTest extends TestCase {
         listTypes.add(new ArrayList());
         listTypes.add(new BasicEventList());
         listTypes.add(new SortedList(new BasicEventList()));
-        
+
         // test all different list types
         for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
             List list = (List)i.next();
             List copy = new ArrayList();
-            
+
             // test a list that doesn't contain nulls
             list.clear();
             copy.clear();
@@ -312,7 +313,7 @@ public class EventListTest extends TestCase {
             assertTrue(list.equals(copy));
             copy.set(0, "Busch");
             assertFalse(list.equals(copy));
-            
+
             // test a list that does contain nulls
             list.clear();
             copy.clear();
@@ -408,5 +409,134 @@ public class EventListTest extends TestCase {
         // symmetric locking/unlocking of the writelock should succeed
         source.getReadWriteLock().writeLock().lock();
         source.getReadWriteLock().writeLock().unlock();
+    }
+
+    public void testCombineEvents() {
+        TransactionalEventList list = new TransactionalEventList(new BasicEventList());
+        for (int i = 0; i < 16; i++)
+             list.add(new Integer(0));
+
+        list.addListEventListener(new ConsistencyTestList(list, "transactional", true));
+
+        list.beginEvent();
+
+        for(int i = 0; i < 4; i++) list.add(8, new Object());
+        for(int j = 7; j >= 0; j--) {
+            for(int i = 0; i < 10; i++) list.add(j, new Object());
+        }
+        list.remove(55);
+        list.remove(95);
+        list.remove(14);
+        list.remove(22);
+        list.remove(27);
+        list.remove(78);
+        list.remove(1);
+        list.remove(85);
+        list.remove(52);
+        list.remove(14);
+        list.remove(39);
+        list.remove(38);
+        list.remove(61);
+        list.remove(69);
+        list.remove(8);
+        list.remove(57);
+        list.remove(10);
+        list.remove(5);
+        list.remove(71);
+        list.remove(60);
+        list.remove(42);
+        list.remove(21);
+        list.remove(15);
+        list.remove(59);
+        list.remove(15);
+        list.remove(14);
+        list.remove(24);
+        list.remove(43);
+        list.remove(35);
+        list.remove(12);
+        list.remove(11);
+        list.remove(34);
+        list.remove(42);
+        list.remove(32);
+        list.remove(19);
+        list.add(32, new Integer(92));
+        list.remove(44);
+        list.remove(19);
+        list.remove(45);
+        list.remove(55);
+        list.remove(23);
+        list.remove(11);
+        list.remove(8);
+        list.remove(50);
+        list.remove(29);
+        list.remove(31);
+        list.remove(33);
+        list.remove(45);
+        list.remove(15);
+        list.remove(25);
+        list.remove(8);
+        list.add(40, new Integer(95));
+        list.remove(32);
+        list.remove(3);
+        list.remove(26);
+        list.remove(14);
+        list.remove(36);
+        list.add(39, new Integer(96));
+        list.remove(34);
+        list.remove(21);
+        list.remove(13);
+        list.remove(32);
+        list.remove(30);
+        list.add(36, new Integer(97));
+        list.remove(43);
+        list.remove(2);
+        list.remove(34);
+        list.remove(35);
+        list.remove(17);
+        list.add(39, new Integer(98));
+        for(int i = 0; i < 5; i++) {
+            list.remove(list.size() - 1);
+        }
+        list.add(29, new Integer(99));
+        for(int i = 0; i < 5; i++) {
+            list.remove(list.size() - 1);
+        }
+        list.add(22, new Integer(100));
+        for(int i = 0; i < 5; i++) {
+            list.remove(list.size() - 1);
+        }
+        list.set(25, new Integer(101)); // critical
+        for(int j = 0; j < 4; j++) {
+            for(int i = 0; i < 5; i++) list.remove(0);
+            list.add(0, new Integer(102));
+        }
+        for(int i = 0; i < 10; i++) list.remove(0);
+        list.add(0, new Integer(107));
+        for(int i = 0; i < 2; i++) list.remove(0);
+
+        list.commitEvent();
+    }
+
+    private static class TransactionalEventList extends TransformedList {
+        public TransactionalEventList(EventList source) {
+            super(source);
+            source.addListEventListener(this);
+        }
+
+        public void listChanged(ListEvent listChanges) {
+            updates.forwardEvent(listChanges);
+        }
+
+        public void beginEvent() {
+            updates.beginEvent(true);
+        }
+
+        public void commitEvent() {
+            updates.commitEvent();
+        }
+
+        protected boolean isWritable() {
+            return true;
+        }
     }
 }
