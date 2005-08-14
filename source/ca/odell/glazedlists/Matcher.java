@@ -20,12 +20,12 @@ package ca.odell.glazedlists;
  * @see ca.odell.glazedlists.FilterList
  * @see ca.odell.glazedlists.matchers.MatcherEditor
  */
-public interface Matcher {
+public interface Matcher<E> {
 
     /**
      * Return true if an item matches a filter.
      *
      * @param item The item possibly being filtered.
      */
-    public boolean matches(Object item);
+    public boolean matches(E item);
 }
