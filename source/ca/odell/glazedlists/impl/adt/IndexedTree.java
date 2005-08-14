@@ -155,24 +155,28 @@ public final class IndexedTree {
 
     /**
      * Returns true if this list contains the specified element.
+     *
+     * commented out 08/13/2005 as SortedList no longer uses it, and thus no clients have need of it
      */
-    public boolean contains(Object object) {
-        if(root == null) return false;
-        return root.contains(comparator, object);
-    }
+//    public boolean contains(Object object) {
+//        if(root == null) return false;
+//        return root.contains(comparator, object);
+//    }
 
     /**
      * Returns true if this list contains all of the elements of the specified collection.
+     * 
+     * commented out 08/13/2005 as SortedList no longer uses it, and thus no clients have need of it
      */
-    public boolean containsAll(Collection collection) {
-        // look for something that is missing
-        for(Iterator i = collection.iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(!contains(a)) return false;
-        }
-        // contained everything we looked for
-        return true;
-    }
+//    public boolean containsAll(Collection collection) {
+//        // look for something that is missing
+//        for(Iterator i = collection.iterator(); i.hasNext(); ) {
+//            Object a = i.next();
+//            if(!contains(a)) return false;
+//        }
+//        // contained everything we looked for
+//        return true;
+//    }
 
     /**
      * Returns the index in this list of the first occurrence of the specified

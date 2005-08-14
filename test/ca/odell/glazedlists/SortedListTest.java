@@ -232,6 +232,34 @@ public class SortedListTest extends TestCase {
     }
 
     /**
+     * Test indexOf() consistency with a "weak" Comparator. A weak Comparator
+     * is one that returns 0 to indicate two object compare as equal even when
+     * .equals() would return false.
+     */
+    public void testIndexOfWithWeakComparator() {
+        BasicEventList source = new BasicEventList();
+        SortedList sorted = new SortedList(source, GlazedLists.comparableComparator());
+
+        final Song enterSandman = new Song("Metallica", "Enter Sandman");
+        final Song masterOfPuppets = new Song("Metallica", "Master of Puppets");
+        final Song battery = new Song("Metallica", "Battery");
+
+        sorted.add(enterSandman);
+        sorted.add(masterOfPuppets);
+
+        assertEquals(0, sorted.indexOf(enterSandman));
+        assertEquals(1, sorted.indexOf(masterOfPuppets));
+
+        assertEquals(-1, sorted.indexOf(battery));
+        sorted.add(battery);
+        assertEquals(2, sorted.indexOf(battery));
+
+        assertEquals(-1, sorted.indexOf(null));
+        sorted.add(null);
+        assertEquals(0, sorted.indexOf(null));
+    }
+
+    /**
      * Test lastIndexOf() consistency
      */
     public void testLastIndexOf() {
@@ -276,6 +304,42 @@ public class SortedListTest extends TestCase {
         // Test containment of a 10
         int fourthTest = sorted.lastIndexOf(ten);
         assertEquals(-1, fourthTest);
+    }
+
+     /**
+      * Test lastIndexOf() consistency with a "weak" Comparator. A weak Comparator
+      * is one that returns 0 to indicate two object compare as equal even when
+      * .equals() would return false.
+      */
+    public void testLastIndexOfWithWeakComparator() {
+        BasicEventList source = new BasicEventList();
+        SortedList sorted = new SortedList(source, GlazedLists.comparableComparator());
+
+        final Song enterSandman = new Song("Metallica", "Enter Sandman");
+        final Song masterOfPuppets = new Song("Metallica", "Master of Puppets");
+        final Song battery = new Song("Metallica", "Battery");
+
+        sorted.add(enterSandman);
+        sorted.add(masterOfPuppets);
+        sorted.add(battery);
+
+        assertEquals(2, sorted.lastIndexOf(battery));
+        assertEquals(1, sorted.lastIndexOf(masterOfPuppets));
+        assertEquals(0, sorted.lastIndexOf(enterSandman));
+
+        sorted.add(enterSandman);
+        sorted.add(masterOfPuppets);
+        sorted.add(battery);
+
+        assertEquals(5, sorted.lastIndexOf(battery));
+        assertEquals(4, sorted.lastIndexOf(masterOfPuppets));
+        assertEquals(3, sorted.lastIndexOf(enterSandman));
+
+        assertEquals(-1, sorted.lastIndexOf(null));
+        sorted.add(null);
+        assertEquals(0, sorted.lastIndexOf(null));
+        sorted.add(null);
+        assertEquals(1, sorted.lastIndexOf(null));
     }
 
     /**
@@ -323,6 +387,34 @@ public class SortedListTest extends TestCase {
         // Test containment of a 10
         boolean fourthTest = sorted.contains(ten);
         assertEquals(false, fourthTest);
+    }
+
+
+    /**
+     * Test contains() consistency with a "weak" Comparator. A weak Comparator
+     * is one that returns 0 to indicate two object compare as equal even when
+     * .equals() would return false.
+     */
+    public void testContainsWithWeakComparator() {
+        BasicEventList source = new BasicEventList();
+        SortedList sorted = new SortedList(source, GlazedLists.comparableComparator());
+
+        final Song enterSandman = new Song("Metallica", "Enter Sandman");
+        final Song masterOfPuppets = new Song("Metallica", "Master of Puppets");
+        final Song battery = new Song("Metallica", "Battery");
+
+        sorted.add(enterSandman);
+        sorted.add(masterOfPuppets);
+        sorted.add(battery);
+
+        assertTrue(sorted.contains(enterSandman));
+        assertTrue(sorted.contains(masterOfPuppets));
+        assertTrue(sorted.contains(battery));
+        assertFalse(sorted.contains(new Song("Metallica", "One")));
+
+        assertFalse(sorted.contains(null));
+        sorted.add(null);
+        assertTrue(sorted.contains(null));
     }
 
 
@@ -732,7 +824,7 @@ public class SortedListTest extends TestCase {
      * A Comparator that compares strings from end to beginning rather than
      * normally.
      */
-    class ReverseStringComparator implements Comparator {
+    private static class ReverseStringComparator implements Comparator {
         public Comparator delegate = GlazedLists.comparableComparator();
 
         public int compare(Object a, Object b) {
@@ -749,8 +841,53 @@ public class SortedListTest extends TestCase {
                 originalAsChars[i] = originalAsChars[length - i - 1];
                 originalAsChars[length - i - 1] = temp;
             }
-            String originalReversed = new String(originalAsChars);
-            return originalReversed;
+            return new String(originalAsChars);
+        }
+    }
+
+    private static class Song implements Comparable {
+        String artist;
+        String song;
+
+        public Song(String artist, String song) {
+            this.artist = artist;
+            this.song = song;
+        }
+
+        public String getArtist() {
+            return artist;
+        }
+
+        public String getSong() {
+            return song;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            final Song song1 = (Song) o;
+
+            if (!artist.equals(song1.artist)) return false;
+            if (!song.equals(song1.song)) return false;
+
+            return true;
+        }
+
+        public int hashCode() {
+            int result;
+            result = artist.hashCode();
+            result = 29 * result + song.hashCode();
+            return result;
+        }
+
+        public int compareTo(Object o) {
+            final Song song = (Song) o;
+            return this.getArtist().compareTo(song.getArtist());
+        }
+
+        public String toString() {
+            return this.getArtist() + " - " + this.getSong();
         }
     }
 }

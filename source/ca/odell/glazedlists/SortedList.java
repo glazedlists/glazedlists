@@ -8,6 +8,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.IndexedTree;
 import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
 import ca.odell.glazedlists.impl.sort.ComparableComparator;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.util.concurrent.InternalReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 
@@ -347,18 +348,64 @@ public final class SortedList extends TransformedList {
 
     /** {@inheritDoc} */
     public boolean contains(Object object) {
-        return sorted.contains(object);
+        return indexOf(object) != -1;
     }
 
     /** {@inheritDoc} */
     public int indexOf(Object object) {
-        if(comparator != null) return sorted.indexOf(object);
+        if(comparator != null) {
+            // use the fact that we have sorted data to quickly locate a position
+            // at which we can begin a linear search for an object that .equals(object)
+            int index = sorted.indexOf(object);
+
+            // if we couldn't use the comparator to find the index, return -1
+            if (index == -1) return -1;
+
+            // otherwise, we must now begin a linear search for the index of an element
+            // that .equals() the given object
+            for (; index < size(); index++) {
+                Object objectAtIndex = get(index);
+
+                // if the objectAtIndex no longer compares equally with the given object, stop the linear search
+                if (comparator.compare(object, objectAtIndex) != 0) return -1;
+
+                // if the objectAtIndex and object are equal, return the index
+                if (GlazedListsImpl.equal(object, objectAtIndex))
+                    return index;
+            }
+
+            // if we fall out of the loop we could not locate the object
+            return -1;
+        }
         else return source.indexOf(object);
     }
 
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
-        if(comparator != null) return sorted.lastIndexOf(object);
+        if(comparator != null) {
+            // use the fact that we have sorted data to quickly locate a position
+            // at which we can begin a linear search for an object that .equals(object)
+            int index = sorted.lastIndexOf(object);
+
+            // if we couldn't use the comparator to find the index, return -1
+            if (index == -1) return -1;
+
+            // otherwise, we must now begin a linear search for the index of an element
+            // that .equals() the given object
+            for (; index > -1; index--) {
+                Object objectAtIndex = get(index);
+
+                // if the objectAtIndex no longer compares equally with the given object, stop the linear search
+                if (comparator.compare(object, objectAtIndex) != 0) return -1;
+
+                // if the objectAtIndex and object are equal, return the index
+                if (GlazedListsImpl.equal(object, objectAtIndex))
+                    return index;
+            }
+
+            // if we fall out of the loop we could not locate the object
+            return -1;
+        }
         else return source.lastIndexOf(object);
     }
 

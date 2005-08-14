@@ -649,25 +649,28 @@ public final class IndexedTreeNode {
      * <p>This method has package-level protection as if it is
      * called on a node directly it will have non-deterministic
      * results.
+     *
+     * commented out 08/13/2005 as IndexedTree no longer exposes contains
+     * or containsAll, and thus no clients have need of it
      */
-    boolean contains(Comparator comparator, Object object) {
-        int sortSide = comparator.compare(object, value);
-
-        // if it sorts on the left side, search there
-        if(sortSide < 0) {
-            if(left == null) return false;
-            return left.contains(comparator, object);
-
-        // if it equals this node, return this
-        } else if(sortSide == 0) {
-            return true;
-
-        // if it sorts on the right side, search there
-        } else {
-            if(right == null) return false;
-            return right.contains(comparator, object);
-        }
-    }
+//    boolean contains(Comparator comparator, Object object) {
+//        int sortSide = comparator.compare(object, value);
+//
+//        // if it sorts on the left side, search there
+//        if(sortSide < 0) {
+//            if(left == null) return false;
+//            return left.contains(comparator, object);
+//
+//        // if it equals this node, return this
+//        } else if(sortSide == 0) {
+//            return true;
+//
+//        // if it sorts on the right side, search there
+//        } else {
+//            if(right == null) return false;
+//            return right.contains(comparator, object);
+//        }
+//    }
 
     /**
      * Returns the index in this list of the first occurrence of the specified
