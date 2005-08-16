@@ -352,16 +352,6 @@ public final class SortedList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public boolean remove(Object toRemove) {
-        if(comparator == null) return source.remove(toRemove);
-
-        int index = indexOf(toRemove);
-        if(index == -1) return false;
-        this.remove(index);
-        return true;
-    }
-
-    /** {@inheritDoc} */
     public int indexOf(Object object) {
         if(comparator == null) return source.indexOf(object);
 
