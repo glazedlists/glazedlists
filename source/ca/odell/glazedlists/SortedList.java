@@ -352,61 +352,69 @@ public final class SortedList extends TransformedList {
     }
 
     /** {@inheritDoc} */
+    public boolean remove(Object toRemove) {
+        if(comparator == null) return source.remove(toRemove);
+
+        int index = indexOf(toRemove);
+        if(index == -1) return false;
+        this.remove(index);
+        return true;
+    }
+
+    /** {@inheritDoc} */
     public int indexOf(Object object) {
-        if(comparator != null) {
-            // use the fact that we have sorted data to quickly locate a position
-            // at which we can begin a linear search for an object that .equals(object)
-            int index = sorted.indexOf(object);
+        if(comparator == null) return source.indexOf(object);
 
-            // if we couldn't use the comparator to find the index, return -1
-            if (index == -1) return -1;
+        // use the fact that we have sorted data to quickly locate a position
+        // at which we can begin a linear search for an object that .equals(object)
+        int index = sorted.indexOf(object);
 
-            // otherwise, we must now begin a linear search for the index of an element
-            // that .equals() the given object
-            for (; index < size(); index++) {
-                Object objectAtIndex = get(index);
+        // if we couldn't use the comparator to find the index, return -1
+        if (index == -1) return -1;
 
-                // if the objectAtIndex no longer compares equally with the given object, stop the linear search
-                if (comparator.compare(object, objectAtIndex) != 0) return -1;
+        // otherwise, we must now begin a linear search for the index of an element
+        // that .equals() the given object
+        for (; index < size(); index++) {
+            Object objectAtIndex = get(index);
 
-                // if the objectAtIndex and object are equal, return the index
-                if (GlazedListsImpl.equal(object, objectAtIndex))
-                    return index;
-            }
+            // if the objectAtIndex no longer compares equally with the given object, stop the linear search
+            if (comparator.compare(object, objectAtIndex) != 0) return -1;
 
-            // if we fall out of the loop we could not locate the object
-            return -1;
+            // if the objectAtIndex and object are equal, return the index
+            if (GlazedListsImpl.equal(object, objectAtIndex))
+                return index;
         }
-        else return source.indexOf(object);
+
+        // if we fall out of the loop we could not locate the object
+        return -1;
     }
 
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
-        if(comparator != null) {
-            // use the fact that we have sorted data to quickly locate a position
-            // at which we can begin a linear search for an object that .equals(object)
-            int index = sorted.lastIndexOf(object);
+        if(comparator == null) return source.lastIndexOf(object);
 
-            // if we couldn't use the comparator to find the index, return -1
-            if (index == -1) return -1;
+        // use the fact that we have sorted data to quickly locate a position
+        // at which we can begin a linear search for an object that .equals(object)
+        int index = sorted.lastIndexOf(object);
 
-            // otherwise, we must now begin a linear search for the index of an element
-            // that .equals() the given object
-            for (; index > -1; index--) {
-                Object objectAtIndex = get(index);
+        // if we couldn't use the comparator to find the index, return -1
+        if (index == -1) return -1;
 
-                // if the objectAtIndex no longer compares equally with the given object, stop the linear search
-                if (comparator.compare(object, objectAtIndex) != 0) return -1;
+        // otherwise, we must now begin a linear search for the index of an element
+        // that .equals() the given object
+        for (; index > -1; index--) {
+            Object objectAtIndex = get(index);
 
-                // if the objectAtIndex and object are equal, return the index
-                if (GlazedListsImpl.equal(object, objectAtIndex))
-                    return index;
-            }
+            // if the objectAtIndex no longer compares equally with the given object, stop the linear search
+            if (comparator.compare(object, objectAtIndex) != 0) return -1;
 
-            // if we fall out of the loop we could not locate the object
-            return -1;
+            // if the objectAtIndex and object are equal, return the index
+            if (GlazedListsImpl.equal(object, objectAtIndex))
+                return index;
         }
-        else return source.lastIndexOf(object);
+
+        // if we fall out of the loop we could not locate the object
+        return -1;
     }
 
     /**
@@ -420,8 +428,7 @@ public final class SortedList extends TransformedList {
      *      inclusive.
      */
     public int indexOfSimulated(Object object) {
-        if(comparator != null) return sorted.indexOfSimulated(object);
-        else return size();
+        return comparator != null ? sorted.indexOfSimulated(object) : size();
     }
 
     /**

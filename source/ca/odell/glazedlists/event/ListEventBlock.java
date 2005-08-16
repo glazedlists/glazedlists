@@ -148,6 +148,7 @@ final class ListEventBlock {
                 if(blocksContradict(first, second)) {
                     if(!allowContradictingEvents) throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
                     simplifyContradiction(changes.subList(j, j+2));
+                    swapCount++;
                 } else if(requiresSplit(first, second)) {
                     ListEventBlock third = split(first, second);
                     changes.add(j+2, third);

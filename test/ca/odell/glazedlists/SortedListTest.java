@@ -478,6 +478,150 @@ public class SortedListTest extends TestCase {
     }
 
     /**
+     * Tests that remove() works, removing the first instance of an element that
+     * equals() the specified element.
+     */
+    public void testRemoveWithNoComparator() {
+        EventList basic = new BasicEventList();
+        SortedList sorted = new SortedList(basic, null);
+        basic.addAll(charsToList("JamesLemieux"));
+        sorted.remove("e");
+        assertEquals(charsToList("JamsLemieux"), sorted);
+        assertEquals(charsToList("JamsLemieux"), basic);
+        sorted.remove("e");
+        assertEquals(charsToList("JamsLmieux"), sorted);
+        assertEquals(charsToList("JamsLmieux"), basic);
+        sorted.remove("e");
+        assertEquals(charsToList("JamsLmiux"), sorted);
+        assertEquals(charsToList("JamsLmiux"), basic);
+        sorted.remove("e");
+        assertEquals(charsToList("JamsLmiux"), sorted);
+        assertEquals(charsToList("JamsLmiux"), basic);
+        sorted.remove("m");
+        assertEquals(charsToList("JasLmiux"), sorted);
+        assertEquals(charsToList("JasLmiux"), basic);
+        sorted.remove("m");
+        assertEquals(charsToList("JasLiux"), sorted);
+        assertEquals(charsToList("JasLiux"), basic);
+        sorted.remove("m");
+        assertEquals(charsToList("JasLiux"), sorted);
+        assertEquals(charsToList("JasLiux"), basic);
+    }
+
+    /**
+     * Tests that remove() works, removing the first instance of an element that
+     * equals() the specified element.
+     */
+    public void testRemoveWithWeakComparator() {
+        EventList basic = new BasicEventList();
+        SortedList sorted = new SortedList(basic, GlazedLists.caseInsensitiveComparator());
+        basic.addAll(charsToList("aAaBbBcCC"));
+        sorted.remove("A");
+        assertEquals(charsToList("aaBbBcCC"), sorted);
+        assertEquals(charsToList("aaBbBcCC"), basic);
+        sorted.remove("B");
+        assertEquals(charsToList("aabBcCC"), sorted);
+        assertEquals(charsToList("aabBcCC"), basic);
+        sorted.remove("C");
+        assertEquals(charsToList("aabBcC"), sorted);
+        assertEquals(charsToList("aabBcC"), basic);
+        sorted.remove("C");
+        assertEquals(charsToList("aabBc"), sorted);
+        assertEquals(charsToList("aabBc"), basic);
+        sorted.remove("a");
+        assertEquals(charsToList("abBc"), sorted);
+        assertEquals(charsToList("abBc"), basic);
+        sorted.remove("d");
+        assertEquals(charsToList("abBc"), sorted);
+        assertEquals(charsToList("abBc"), basic);
+        sorted.remove("B");
+        assertEquals(charsToList("abc"), sorted);
+        assertEquals(charsToList("abc"), basic);
+        sorted.remove("B");
+        assertEquals(charsToList("abc"), sorted);
+        assertEquals(charsToList("abc"), basic);
+        sorted.remove("A");
+        assertEquals(charsToList("abc"), sorted);
+        assertEquals(charsToList("abc"), basic);
+        sorted.remove("C");
+        assertEquals(charsToList("abc"), sorted);
+        assertEquals(charsToList("abc"), basic);
+        sorted.remove("a");
+        assertEquals(charsToList("bc"), sorted);
+        assertEquals(charsToList("bc"), basic);
+        sorted.remove("c");
+        assertEquals(charsToList("b"), sorted);
+        assertEquals(charsToList("b"), basic);
+        sorted.remove("c");
+        assertEquals(charsToList("b"), sorted);
+        assertEquals(charsToList("b"), basic);
+        sorted.remove("B");
+        assertEquals(charsToList("b"), sorted);
+        assertEquals(charsToList("b"), basic);
+        sorted.remove("b");
+        assertEquals(charsToList(""), sorted);
+        assertEquals(charsToList(""), basic);
+        sorted.remove("b");
+        assertEquals(charsToList(""), sorted);
+        assertEquals(charsToList(""), basic);
+    }
+
+    /**
+     * Tests that remove() works, removing the first instance of an element that
+     * equals() the specified element.
+     */
+    public void testRemoveWithComparator() {
+        EventList basic = new BasicEventList();
+        SortedList sorted = new SortedList(basic, GlazedLists.comparableComparator());
+        basic.addAll(charsToList("ABBCaabcc"));
+        sorted.remove("a");
+        assertEquals(charsToList("ABBCabcc"), basic);
+        assertEquals(charsToList("ABBCabcc"), sorted);
+        sorted.remove("B");
+        assertEquals(charsToList("ABCabcc"), basic);
+        assertEquals(charsToList("ABCabcc"), sorted);
+        sorted.remove("c");
+        assertEquals(charsToList("ABCabc"), basic);
+        assertEquals(charsToList("ABCabc"), sorted);
+        sorted.remove("d");
+        assertEquals(charsToList("ABCabc"), basic);
+        assertEquals(charsToList("ABCabc"), sorted);
+        sorted.remove("C");
+        assertEquals(charsToList("ABabc"), basic);
+        assertEquals(charsToList("ABabc"), sorted);
+        sorted.remove("B");
+        assertEquals(charsToList("Aabc"), basic);
+        assertEquals(charsToList("Aabc"), sorted);
+        sorted.remove("b");
+        assertEquals(charsToList("Aac"), basic);
+        assertEquals(charsToList("Aac"), sorted);
+        sorted.remove("A");
+        assertEquals(charsToList("ac"), basic);
+        assertEquals(charsToList("ac"), sorted);
+        sorted.remove("a");
+        assertEquals(charsToList("c"), basic);
+        assertEquals(charsToList("c"), sorted);
+        sorted.remove("a");
+        assertEquals(charsToList("c"), basic);
+        assertEquals(charsToList("c"), sorted);
+        sorted.remove("c");
+        assertEquals(charsToList(""), basic);
+        assertEquals(charsToList(""), sorted);
+    }
+
+
+    /**
+     * Convert a String into a List of characters. For example, "Cat" becomes
+     * [ 'C', 'a', 't' ].
+     */
+    private List charsToList(String string) {
+        char[] characters = string.toCharArray();
+        List result = new ArrayList(characters.length);
+        for(int c = 0; c < characters.length; c++) result.add("" + characters[c]);
+        return result;
+    }
+
+    /**
      * Test if the SortedList fires update events rather than delete/insert
      * pairs, when using a ReverseComparator.
      *
