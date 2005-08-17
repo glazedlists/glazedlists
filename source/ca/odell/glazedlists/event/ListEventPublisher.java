@@ -4,9 +4,11 @@
 package ca.odell.glazedlists.event;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
-// for keeping a list of changes
-import java.util.*;
+import ca.odell.glazedlists.EventList;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Manager for distributing {@link ListEvent}s to {@link ListEventListener}s.
@@ -153,7 +155,18 @@ public final class ListEventPublisher {
                 }
             // if notification failed, handle that problem later
             } catch(RuntimeException newProblem) {
-                if(toRethrow == null) toRethrow = newProblem;
+				System.err.println( "----- Runtime exception caught in ListEventPublisher -----" );
+				newProblem.printStackTrace();
+				System.err.println( "Event: " + event );
+				System.err.println( "Listener: " + listener );
+				if ( listener instanceof EventList ) {
+					System.err.println( "  Size: " + ( ( EventList ) listener ).size() );
+				}
+				System.err.println( "Source: " + source );
+				System.err.println( "  Size: " + source.size() );
+				System.err.println( "----------------------------------------------------------" );
+
+				if(toRethrow == null) toRethrow = newProblem;
             }
         }
         
