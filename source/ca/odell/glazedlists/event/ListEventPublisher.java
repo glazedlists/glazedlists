@@ -155,18 +155,7 @@ public final class ListEventPublisher {
                 }
             // if notification failed, handle that problem later
             } catch(RuntimeException newProblem) {
-				System.err.println( "----- Runtime exception caught in ListEventPublisher -----" );
-				newProblem.printStackTrace();
-				System.err.println( "Event: " + event );
-				System.err.println( "Listener: " + listener );
-				if ( listener instanceof EventList ) {
-					System.err.println( "  Size: " + ( ( EventList ) listener ).size() );
-				}
-				System.err.println( "Source: " + source );
-				System.err.println( "  Size: " + source.size() );
-				System.err.println( "----------------------------------------------------------" );
-
-				if(toRethrow == null) toRethrow = newProblem;
+                if(toRethrow == null) toRethrow = newProblem;
             }
         }
         
