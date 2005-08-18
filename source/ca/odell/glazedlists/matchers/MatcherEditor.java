@@ -23,32 +23,32 @@ import java.util.EventListener;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  * @author James Lemieux
  */
-public interface MatcherEditor {
-    
+public interface MatcherEditor<E> {
+
     /**
      * Add a listener to be notified when this editor's {@link Matcher} changes.
      */
-	public void addMatcherEditorListener(Listener listener);
-    
+	public void addMatcherEditorListener(Listener<E> listener);
+
     /**
      * Remove the listener so that it no longer receives notification when the
      * {@link Matcher} changes.
      */
-	public void removeMatcherEditorListener(Listener listener);
+	public void removeMatcherEditorListener(Listener<E> listener);
 
 	/**
      * Return the current {@link Matcher} specified by this {@link MatcherEditor}.
      *
      * @return a non-null {@link Matcher}.
 	 */
-	public Matcher getMatcher();
+	public Matcher<E> getMatcher();
 
     /**
      * A MatcherEditor.Listener handles changes fired by a {@link MatcherEditor}.
      * The most notable implementation will be {@link ca.odell.glazedlists.FilterList FilterList}
      * which uses these events to update its state.
      */
-    public interface Listener extends EventListener {
+    public interface Listener<E> extends EventListener {
 
        /**
         * Indicates a changes has occurred in the Matcher produced by the
@@ -57,7 +57,7 @@ public interface MatcherEditor {
         * @param matcherEvent a MatcherEditor.Event describing the change in the
         *      Matcher produced by the MatcherEditor
         */
-        public void changedMatcher(Event matcherEvent);
+        public void changedMatcher(Event<E> matcherEvent);
     }
 
     /**
@@ -84,7 +84,7 @@ public interface MatcherEditor {
      *   <li> {@link #CHANGED}
      * </ul
      */
-    public class Event extends EventObject {
+    public class Event<E> extends EventObject {
 
         /** Indicates the associated Matcher will match anything. */
         public static final int MATCH_ALL = 0;
@@ -113,22 +113,22 @@ public interface MatcherEditor {
          */
         public static final int CHANGED = 4;
 
-        private MatcherEditor matcherEditor;
-        private final Matcher matcher;
+        private MatcherEditor<E> matcherEditor;
+        private final Matcher<E> matcher;
         private final int type;
 
-        public Event(MatcherEditor matcherEditor, int changeType) {
+        public Event(MatcherEditor<E> matcherEditor, int changeType) {
             this(matcherEditor, changeType, null);
         }
 
-        public Event(MatcherEditor matcherEditor, int changeType, Matcher matcher) {
+        public Event(MatcherEditor<E> matcherEditor, int changeType, Matcher<E> matcher) {
             super(matcherEditor);
             this.matcherEditor = matcherEditor;
             this.type = changeType;
             this.matcher = matcher;
         }
 
-        public Event(FilterList eventSource, int changeType, Matcher matcher) {
+        public Event(FilterList eventSource, int changeType, Matcher<E> matcher) {
             super(eventSource);
             this.type = changeType;
             this.matcher = matcher;
@@ -139,11 +139,11 @@ public interface MatcherEditor {
          * if this event originated directly from a {@link FilterList} in a call
          * to {@link FilterList#setMatcher(Matcher)}.
          */
-        public MatcherEditor getMatcherEditor() {
+        public MatcherEditor<E> getMatcherEditor() {
             return this.matcherEditor;
         }
 
-        public Matcher getMatcher() {
+        public Matcher<E> getMatcher() {
             return this.matcher;
         }
 

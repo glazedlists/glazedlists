@@ -45,17 +45,17 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public interface EventList extends List {
+public interface EventList<E> extends List<E> {
 
     /**
      * Registers the specified listener to receive change updates for this list.
      */
-    public void addListEventListener(ListEventListener listChangeListener);
+    public void addListEventListener(ListEventListener<E> listChangeListener);
 
     /**
      * Removes the specified listener from receiving change updates for this list.
      */
-    public void removeListEventListener(ListEventListener listChangeListener);
+    public void removeListEventListener(ListEventListener<E> listChangeListener);
 
     /**
      * Gets the lock required to share this list between multiple threads.

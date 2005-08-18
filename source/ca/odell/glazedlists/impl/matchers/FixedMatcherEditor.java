@@ -11,12 +11,12 @@ import ca.odell.glazedlists.matchers.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class FixedMatcherEditor extends AbstractMatcherEditor {
+public final class FixedMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
     /**
      * Create a {@link FixedMatcherEditor} for the specified {@link Matcher}.
      */
-    public FixedMatcherEditor(Matcher matcher) {
+    public FixedMatcherEditor(Matcher<E> matcher) {
         super.fireChanged(matcher);
     }
 }

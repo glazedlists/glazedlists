@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.matchers;
 
-
 import ca.odell.glazedlists.Matcher;
 
 /**
@@ -12,19 +11,20 @@ import ca.odell.glazedlists.Matcher;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class FalseMatcher implements Matcher {
+public class FalseMatcher<E> implements Matcher<E> {
 
 	/** Singleton instance of FalseMatcher. */
 	private static final Matcher INSTANCE = new FalseMatcher();
-	/**
+
+    /**
 	 * Return a singleton instance.
 	 */
-	public static Matcher getInstance() {
-		return INSTANCE;
+	public static <E> Matcher<E> getInstance() {
+		return (Matcher<E>) INSTANCE;
 	}
 
     /** {@inheritDoc} */
-	public boolean matches( Object item ) {
-		return false;
+	public boolean matches(E item) {
+        return false;
 	}
 }

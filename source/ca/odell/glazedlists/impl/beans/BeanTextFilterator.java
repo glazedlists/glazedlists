@@ -14,7 +14,7 @@ import ca.odell.glazedlists.TextFilterator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class BeanTextFilterator implements TextFilterator {
+public class BeanTextFilterator<E> implements TextFilterator<E> {
 
     /** Java Beans property names */
     private String[] propertyNames;
@@ -33,7 +33,7 @@ public class BeanTextFilterator implements TextFilterator {
      * Gets the specified object as a list of Strings. These Strings should contain
      * all object information so that it can be compared to the filter set.
      */
-    public void getFilterStrings(List baseList, Object element) {
+    public void getFilterStrings(List<String> baseList, E element) {
         if(element == null) return;
 
         // load the property descriptors on first request
@@ -51,7 +51,7 @@ public class BeanTextFilterator implements TextFilterator {
      * Loads the property descriptors which are used to invoke property
      * access methods using the property names.
      */
-    private void loadPropertyDescriptors(Object beanObject) {
+    private void loadPropertyDescriptors(E beanObject) {
         Class beanClass = beanObject.getClass();
         beanProperties = new BeanProperty[propertyNames.length];
         for(int p = 0; p < propertyNames.length; p++) {

@@ -12,10 +12,10 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class SimpleIterator implements Iterator {
+public class SimpleIterator<E> implements Iterator<E> {
 
     /** the list being iterated */
-    private List source;
+    private List<E> source;
 
     /** the index of and reference to the next element to view */
     private int nextIndex = 0;
@@ -26,7 +26,7 @@ public class SimpleIterator implements Iterator {
      *
      * @param source the list to iterate
      */
-    public SimpleIterator(List source) {
+    public SimpleIterator(List<E> source) {
         this.source = source;
     }
 
@@ -43,14 +43,14 @@ public class SimpleIterator implements Iterator {
     /**
      * Returns the next element in the list.
      */
-    public Object next() {
+    public E next() {
         // there are no more values
         if(nextIndex == source.size()) {
             throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
 
         // a next value exists
         } else {
-            Object result = source.get(nextIndex);
+            E result = source.get(nextIndex);
             nextIndex++;
             return result;
         }

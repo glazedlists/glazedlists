@@ -12,9 +12,8 @@ package ca.odell.glazedlists;
  * {@link #matches(Object) matches()} without synchronization.
  *
  * <p>In order to create dynamic filtering, use a
- * {@link ca.odell.glazedlists.matchers.MatcherEditor}, which
- * can create immutable {@link Matcher} Objects each time the matching constraints
- * change.
+ * {@link ca.odell.glazedlists.matchers.MatcherEditor}, which can create
+ * immutable {@link Matcher} Objects each time the matching constraints change.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @see ca.odell.glazedlists.FilterList

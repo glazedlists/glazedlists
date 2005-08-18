@@ -201,6 +201,37 @@
         </jar>
     </target>
 
+    <target name="java14" depends="init,compile" description="Compile Glazed Lists for deployment on a J2SE 1.4">
+        <mkdir dir="java14_build/source"/>
+        <java classpath="classes" classname="ca.odell.glazedlists.impl.java15.Declawer">
+            <arg>source</arg>
+            <arg>classes</arg>
+            <arg>java14_build/source</arg>
+        </java>
+        <!--<javac destdir="classes" srcdir="source" debug="on" source="1.3" target="1.3" deprecation="on">-->
+            <!--<include name="**/event/**"/>-->
+            <!--<include name="**/BasicEventList.java"/>-->
+            <!--<include name="**/EventList.java"/>-->
+            <!--<include name="**/SubEventList.java"/>-->
+            <!--<include name="**/EventListIterator.java"/>-->
+            <!--<include name="**/SimpleIterator.java"/>-->
+            <!--<include name="**/concurrent/**"/>-->
+        <!--</javac>-->
+        <!--<tstamp prefix="jar">-->
+            <!--<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>-->
+        <!--</tstamp>-->
+        <!--<jar destfile="glazedlists_java13.jar" update="true" index="true">-->
+            <!--<fileset dir="classes"/>-->
+            <!--<manifest>-->
+                <!--<attribute name="Sealed" value="true"/>-->
+                <!--<attribute name="Built-By" value="${user.name}"/>-->
+                <!--<attribute name="Implementation-Version" value="${jar.datestamp}"/>-->
+                <!--<attribute name="Implementation-Title" value="Glazed Lists for Java 1.3"/>-->
+                <!--<attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>-->
+            <!--</manifest>-->
+        <!--</jar>-->
+    </target>
+
 
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

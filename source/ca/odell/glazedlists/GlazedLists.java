@@ -79,7 +79,7 @@ public final class GlazedLists {
 
     /** Provide Singleton access for all Comparators with no internal state */
     private static Comparator booleanComparator = null;
-    private static Comparator comparableComparator = null;
+    private static Comparator<Comparable> comparableComparator = null;
     private static Comparator reversedComparable = null;
 
     /**
@@ -129,7 +129,7 @@ public final class GlazedLists {
     /**
      * Creates a {@link Comparator} that compares {@link Comparable} objects.
      */
-    public static Comparator comparableComparator() {
+    public static Comparator<Comparable> comparableComparator() {
         if(comparableComparator == null) comparableComparator = new ComparableComparator();
         return comparableComparator;
     }

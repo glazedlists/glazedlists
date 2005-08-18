@@ -21,7 +21,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ListEvent extends EventObject {
+public final class ListEvent<E> extends EventObject {
     
     /** different types of changes */
     public static final int DELETE = 0;
@@ -36,15 +36,15 @@ public final class ListEvent extends EventObject {
     private int rowIndex;
     
     /** the list that has changed */
-    private EventList sourceList;
+    private EventList<E> sourceList;
     /** the master sequence that this is a view of */
-    private ListEventAssembler masterSequence;
+    private ListEventAssembler<E> masterSequence;
     
     /**
      * Create a new list change sequence that uses the source master list
      * for the source of changes.
      */
-    ListEvent(ListEventAssembler masterSequence, EventList sourceList) {
+    ListEvent(ListEventAssembler<E> masterSequence, EventList<E> sourceList) {
         super(sourceList);
 
         // keep track of the origin sequence and list
@@ -68,7 +68,7 @@ public final class ListEvent extends EventObject {
      * this way the existance of values in the original list guarantees that
      * such values will be visible to the clone.
      */
-    public ListEvent(ListEvent original) {
+    public ListEvent(ListEvent<E> original) {
         super(original.sourceList);
         this.blockCount = original.blockCount;
         this.currentBlock = original.currentBlock;
@@ -199,7 +199,7 @@ public final class ListEvent extends EventObject {
     /**
      * Get the List of ListEventBlocks for this change.
      */
-    List getBlocks() {
+    List<ListEventBlock> getBlocks() {
         return masterSequence.getBlocks();
     }
     

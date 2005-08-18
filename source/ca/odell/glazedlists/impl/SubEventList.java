@@ -27,7 +27,7 @@ import ca.odell.glazedlists.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SubEventList extends TransformedList {
+public final class SubEventList<E> extends TransformedList<E, E> {
 
     /** the start index of this list, inclusive */
     private int startIndex;
@@ -48,7 +48,7 @@ public final class SubEventList extends TransformedList {
      *
      * @see GlazedLists#weakReferenceProxy(EventList, ListEventListener)
      */
-    public SubEventList(EventList source, int startIndex, int endIndex, boolean automaticallyRemove) {
+    public SubEventList(EventList<E> source, int startIndex, int endIndex, boolean automaticallyRemove) {
         super(source);
 
         // do consistency checking
@@ -62,7 +62,7 @@ public final class SubEventList extends TransformedList {
 
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            source.addListEventListener(new WeakReferenceProxy(source, this));
+            source.addListEventListener(new WeakReferenceProxy<E>(source, this));
         } else {
             source.addListEventListener(this);
         }
@@ -84,7 +84,7 @@ public final class SubEventList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent();
 
         // if this sublist is size one, just move the start and end index

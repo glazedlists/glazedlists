@@ -11,16 +11,16 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-class IndexedTreeIterator implements ListIterator {
+public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
 
     /** the index of the current node */
     private int currentIndex = 0;
 
     /** the host tree */
-    private IndexedTree host = null;
+    private IndexedTree<V> host = null;
 
     /** the last tree node returned by this iterator */
-    private IndexedTreeNode currentNode = null;
+    private IndexedTreeNode<V> currentNode = null;
 
     /** the direction of iteration */
     private boolean goingForward = true;
@@ -29,7 +29,7 @@ class IndexedTreeIterator implements ListIterator {
      * Creates an iterator that iterates the tree starting at the specified
      * node.
      */
-    public IndexedTreeIterator(IndexedTree host) {
+    public IndexedTreeIterator(IndexedTree<V> host) {
         this(host, 0);
     }
 
@@ -40,7 +40,7 @@ class IndexedTreeIterator implements ListIterator {
      * @param index the value at index will be the value returned by the
      *              first call to next().
      */
-    public IndexedTreeIterator(IndexedTree host, int index) {
+    public IndexedTreeIterator(IndexedTree<V> host, int index) {
         this.host = host;
         this.currentIndex = index - 1;
 
@@ -75,7 +75,7 @@ class IndexedTreeIterator implements ListIterator {
     /**
      * Returns the next element in the iteration.
      */
-    public Object next() {
+    public IndexedTreeNode<V> next() {
         // handle the empty tree and end of tree cases
         if(currentNode == null || currentIndex >= host.size() - 1) {
             throw new NoSuchElementException();
@@ -119,7 +119,7 @@ class IndexedTreeIterator implements ListIterator {
     /**
      * Returns the previous element in the iteration.
      */
-    public Object previous() {
+    public IndexedTreeNode<V> previous() {
         // handle the empty tree and start of tree cases
         if(currentNode == null || currentIndex < 0) {
             throw new NoSuchElementException();
@@ -162,14 +162,14 @@ class IndexedTreeIterator implements ListIterator {
         // first node in a significantly sized tree
         } else if(currentIndex == 0) {
             currentIndex = -1;
-            IndexedTreeNode nodeToRemove = currentNode;
+            IndexedTreeNode<V> nodeToRemove = currentNode;
             findNextNode();
             nodeToRemove.removeFromTree(host);
 
         // anywhere else in the tree
         } else {
             currentIndex--;
-            IndexedTreeNode nodeToRemove = currentNode;
+            IndexedTreeNode<V> nodeToRemove = currentNode;
             findPreviousNode();
             nodeToRemove.removeFromTree(host);
         }
@@ -179,7 +179,7 @@ class IndexedTreeIterator implements ListIterator {
      * Adds a value into a new IndexedTreeNode after the last node returned.
      * <strong>Warning: this method should not be used if the tree is sorted.</strong>
      */
-    public void add(Object value) {
+    public void addValue(V value) {
         // empty tree case
         if(currentNode == null || currentIndex == -1) {
             host.addByNode(0, value);
@@ -196,7 +196,7 @@ class IndexedTreeIterator implements ListIterator {
      * Sets the value on the last IndexedTreeNode that was returned.
      * <strong>Warning: this method should not be used if the tree is sorted.</strong>
      */
-    public void set(Object value) {
+    public void setValue(V value) {
         // empty tree case
         if(currentNode == null || currentIndex == -1) {
             throw new NoSuchElementException();

@@ -3,11 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.demo.issuebrowser.swing;
 
-// glazed lists
-
-import ca.odell.glazedlists.demo.issuebrowser.Description;
 import ca.odell.glazedlists.gui.*;
-
 
 /**
  * The DescriptionTableFormat specifies how a description is displayed in a table.
@@ -25,8 +21,6 @@ public class DescriptionTableFormat implements TableFormat {
 	}
 
 	public Object getColumnValue(Object baseObject, int column) {
-		if (baseObject == null) return null;
-		Description description = (Description) baseObject;
-		return description;
+		return baseObject;
 	}
 }

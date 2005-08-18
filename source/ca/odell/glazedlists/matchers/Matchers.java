@@ -26,21 +26,21 @@ public final class Matchers {
     /**
      * Get a {@link Matcher} that always returns true, therefore matching everything.
      */
-    public static Matcher trueMatcher() {
+    public static <E> Matcher<E> trueMatcher() {
          return TrueMatcher.getInstance();
     }
     
     /**
      * Get a {@link Matcher} that always returns false, therefore matching nothing..
      */
-    public static Matcher falseMatcher() {
+    public static <E> Matcher<E> falseMatcher() {
          return FalseMatcher.getInstance();
     }
     
     /**
      * Get a {@link Matcher} that returns the opposite of the specified {@link Matcher}.
      */
-    public static Matcher invert(Matcher original) {
-         return new NotMatcher(original);
+    public static <E> Matcher<E> invert(Matcher<E> original) {
+         return new NotMatcher<E>(original);
     }
 }

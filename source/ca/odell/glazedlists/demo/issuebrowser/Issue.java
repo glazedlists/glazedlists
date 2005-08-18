@@ -4,7 +4,6 @@ import java.util.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 
-
 /**
  * An issue models a work effort either due to an existing problem or a desired
  * enhancement.

@@ -21,7 +21,7 @@ import java.util.*;
 public final class ListEventPublisher {
 
     /** the list of DependentListeners managed by this publisher */
-    private List dependentListeners = new ArrayList();
+    private List<DependentListener> dependentListeners = new ArrayList<DependentListener>();
     
     /** whether a change is currently in progress */
     private int changesInProgress = 0;
@@ -30,10 +30,10 @@ public final class ListEventPublisher {
     private RuntimeException toRethrow = null;
     
     /** a list of EventLists that have their dependencies satisfied */
-    private List satisfiedEventLists = new ArrayList();
+    private List<EventList> satisfiedEventLists = new ArrayList<EventList>();
     
     /** a list of DependentLists that have not had their dependencies satisfied */
-    private List unsatisfiedListeners = new ArrayList();
+    private List<DependentListener> unsatisfiedListeners = new ArrayList<DependentListener>();
     
     /** the first event to change in a sequence of events */
     private EventList eventCause  = null;
@@ -96,7 +96,7 @@ public final class ListEventPublisher {
      */
     private DependentListener getDependentListener(ListEventListener listener) {
         for(int i = 0; i < dependentListeners.size(); i++) {
-            DependentListener dependentListener = (DependentListener)dependentListeners.get(i);
+            DependentListener dependentListener = dependentListeners.get(i);
             if(dependentListener.getListener() == listener) return dependentListener;
         }
         return null;
@@ -158,8 +158,8 @@ public final class ListEventPublisher {
         }
         
         // process listeners that have dependencies
-        for(Iterator i = unsatisfiedListeners.iterator(); i.hasNext(); ) {
-            DependentListener dependentListener = (DependentListener)i.next();
+        for(Iterator<DependentListener> i = unsatisfiedListeners.iterator(); i.hasNext(); ) {
+            DependentListener dependentListener = i.next();
             if(!dependenciesSatisfied(dependentListener)) continue;
 
             // satisfy this listener
@@ -219,9 +219,9 @@ public final class ListEventPublisher {
         if(dependentListener == null) return true;
         
         // this dependency is managed, test if it is satisfied
-        List dependenciesToSatisfy = dependentListener.getDependencies();
+        List<EventList> dependenciesToSatisfy = dependentListener.getDependencies();
         for(int d = 0; d < dependenciesToSatisfy.size(); d++) {
-            EventList dependency = (EventList)dependenciesToSatisfy.get(d);
+            EventList dependency = dependenciesToSatisfy.get(d);
             
             if(listContains(satisfiedEventLists, dependency)) continue;
             
@@ -242,10 +242,10 @@ public final class ListEventPublisher {
         private ListEventListener listener;
 
         /** the EventLists that this listener is dependent upon */
-        private List dependencies = new ArrayList();
+        private List<EventList> dependencies = new ArrayList<EventList>();
         
         /** the events to fire the awaiting listeners */
-        private List pendingEvents = new ArrayList();
+        private List<ListEvent> pendingEvents = new ArrayList<ListEvent>();
         
         /**
          * Creates a DependentListener for tracking the dependencies of the specified
@@ -262,9 +262,8 @@ public final class ListEventPublisher {
             StringBuffer result = new StringBuffer();
             result.append(listener.getClass().getName());
             result.append("\n");
-            for(Iterator i = dependencies.iterator(); i.hasNext(); ) {
-                EventList dependency = (EventList)i.next();
-                result.append(" > DEPENDS ON > ").append(dependency.getClass().getName()).append("\n"); //.append(", LIST CONTENTS=" + dependency).append("\n");
+            for(Iterator<EventList> i = dependencies.iterator(); i.hasNext(); ) {
+                result.append(" > DEPENDS ON > ").append(i.next().getClass().getName()).append("\n"); //.append(", LIST CONTENTS=" + dependency).append("\n");
             }
             return result.toString();
         }
@@ -273,7 +272,7 @@ public final class ListEventPublisher {
          * Get a {@link List} of {@link EventList}s that this listener is dependent
          * upon.
          */
-        public List getDependencies() {
+        public List<EventList> getDependencies() {
             return dependencies;
         }
 
@@ -291,9 +290,9 @@ public final class ListEventPublisher {
          */
         public boolean dependsOn(EventList cause) {
             for(int d = 0; d < dependencies.size(); d++) {
-                EventList dependency = (EventList)dependencies.get(d);
+                EventList dependency = dependencies.get(d);
                 if(cause == dependency) return true;
-                DependentListener recursive = (DependentListener)getDependentListener(dependency);
+                DependentListener recursive = getDependentListener(dependency);
                 if(recursive != null && recursive.dependsOn(cause)) return true;
             }
             return false;
@@ -313,7 +312,7 @@ public final class ListEventPublisher {
         public void firePendingEvents() {
             try {
                 for(int i = 0; i < pendingEvents.size(); i++) {
-                    ListEvent event = (ListEvent)pendingEvents.get(i);
+                    ListEvent event = pendingEvents.get(i);
                     listener.listChanged(event);
                 }
             } finally {

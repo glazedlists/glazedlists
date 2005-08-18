@@ -19,14 +19,17 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class IndexedTreeNode {
+public final class IndexedTreeNode<V> {
+
+    /** a token node */
+    public static final IndexedTreeNode EMPTY_NODE = new IndexedTreeNode(null);
 
     /** the parent node, used to delete from leaf up */
-    IndexedTreeNode parent;
+    IndexedTreeNode<V> parent;
 
     /** the left and right child nodes */
-    IndexedTreeNode left = null;
-    IndexedTreeNode right = null;
+    IndexedTreeNode<V> left = null;
+    IndexedTreeNode<V> right = null;
 
     /** the size of the left and right subtrees */
     int leftSize = 0;
@@ -36,19 +39,19 @@ public final class IndexedTreeNode {
     private int height = 0;
 
     /** the value of this node, assuming it is a leaf */
-    private Object value;
+    private V value;
 
     /**
      * Creates a new IndexedTreeNode with the specified parent node.
      */
-    IndexedTreeNode(IndexedTreeNode parent) {
+    IndexedTreeNode(IndexedTreeNode<V> parent) {
         this.parent = parent;
     }
 
     /**
      * Gets the value of this tree node.
      */
-    public Object getValue() {
+    public V getValue() {
         return value;
     }
 
@@ -57,14 +60,14 @@ public final class IndexedTreeNode {
      * the value of a node in a sorted tree may cause sorting to break
      * miserably.
      */
-    public void setValue(Object value) {
+    public void setValue(V value) {
         this.value = value;
     }
 
     /**
      * Gets the object with the specified index in the tree.
      */
-    IndexedTreeNode getNodeWithIndex(int index) {
+    IndexedTreeNode<V> getNodeWithIndex(int index) {
         // recurse to the left
         if(index < leftSize) {
             return left.getNodeWithIndex(index);
@@ -82,7 +85,7 @@ public final class IndexedTreeNode {
     /**
      * Gets the object with the specified value in the tree.
      */
-    IndexedTreeNode getNodeByValue(Comparator comparator, Object searchValue) {
+    IndexedTreeNode<V> getNodeByValue(Comparator comparator, Object searchValue) {
         int sortSide = comparator.compare(searchValue, value);
 
         // if it sorts on the left side, search there
@@ -118,14 +121,14 @@ public final class IndexedTreeNode {
     /**
      * Retrieves the subtree node with the largest value.
      */
-    IndexedTreeNode getLargestChildNode() {
+    IndexedTreeNode<V> getLargestChildNode() {
         if(rightSize > 0) return right.getLargestChildNode();
         else return this;
     }
     /**
      * Retrieves the subtree node with the smallest value.
      */
-    IndexedTreeNode getSmallestChildNode() {
+    IndexedTreeNode<V> getSmallestChildNode() {
         if(leftSize > 0) return left.getSmallestChildNode();
         else return this;
     }
@@ -138,7 +141,7 @@ public final class IndexedTreeNode {
     public int getIndex() {
         return getIndex(null);
     }
-    private int getIndex(IndexedTreeNode child) {
+    private int getIndex(IndexedTreeNode<V> child) {
         // if the child is on the left, return the index recursively
         if(child == left) {
             if(parent != null) return parent.getIndex(this);
@@ -168,7 +171,7 @@ public final class IndexedTreeNode {
      *      use the getIndex() method on the node to discover what the sorted
      *      index of the value is.
      */
-    IndexedTreeNode insert(IndexedTree host, Object inserted) {
+    IndexedTreeNode<V> insert(IndexedTree<V> host, V inserted) {
         // if this is a newborn leaf, the value can be null as long as there are no children
         if(value == null) {
             // can't insert into non-leaf node with null value
@@ -179,13 +182,13 @@ public final class IndexedTreeNode {
 
         // if it sorts on the left side, insert there
         } else if(host.getComparator().compare(inserted, value) < 0) {
-            if(left == null) left = new IndexedTreeNode(this);
+            if(left == null) left = new IndexedTreeNode<V>(this);
             leftSize++;
             return left.insert(host, inserted);
 
         // if it doesn't sort on the left side, insert on the right
         } else {
-            if(right == null) right = new IndexedTreeNode(this);
+            if(right == null) right = new IndexedTreeNode<V>(this);
             rightSize++;
             return right.insert(host, inserted);
         }
@@ -200,7 +203,7 @@ public final class IndexedTreeNode {
      *      index will shift. The getIndex() method can be used to get the
      *      current index of the node at any time.
      */
-    IndexedTreeNode insert(IndexedTree host, int index, Object inserted) {
+    IndexedTreeNode<V> insert(IndexedTree<V> host, int index, V inserted) {
         // if this node has no value, insert as a leaf
         if(index == 0 && value == null) {
             // can't insert into non-leaf node with null value
@@ -211,13 +214,13 @@ public final class IndexedTreeNode {
 
         // if the index is on the left side, insert there
         } else if(index <= leftSize) {
-            if(left == null) left = new IndexedTreeNode(this);
+            if(left == null) left = new IndexedTreeNode<V>(this);
             leftSize++;
             return left.insert(host, index, inserted);
 
         // if the index is not on the left side, insert on the right
         } else {
-            if(right == null) right = new IndexedTreeNode(this);
+            if(right == null) right = new IndexedTreeNode<V>(this);
             rightSize++;
             return right.insert(host, index - leftSize - 1, inserted);
         }
@@ -226,7 +229,7 @@ public final class IndexedTreeNode {
     /**
      * Recurses down from the root and removes the node at the given index.
      */
-    IndexedTreeNode removeNode(IndexedTree host, int index) {
+    IndexedTreeNode<V> removeNode(IndexedTree<V> host, int index) {
         // recurse to the left
         if(index < leftSize) {
             leftSize--;
@@ -271,7 +274,7 @@ public final class IndexedTreeNode {
             }
         // if this node has two children, replace this node with the best of the biggest
         } else {
-            IndexedTreeNode replacement = null;
+            IndexedTreeNode<V> replacement = null;
             // if the left side is larger, use a left side node
             if(leftSize > rightSize) {
                 leftSize--;
@@ -310,14 +313,14 @@ public final class IndexedTreeNode {
     /**
      * Removes the smallest child of the subtree rooted at this and returns it.
      */
-    IndexedTreeNode pruneSmallestChild(IndexedTree host) {
+    IndexedTreeNode<V> pruneSmallestChild(IndexedTree<V> host) {
         // recurse down the tree
         if(leftSize > 0) {
             leftSize--;
             return left.pruneSmallestChild(host);
         }
 
-        IndexedTreeNode replacement = null;
+        IndexedTreeNode<V> replacement = null;
         // this node has a right child
         if(rightSize != 0) {
             replacement = right;
@@ -341,14 +344,14 @@ public final class IndexedTreeNode {
     /**
      * Removes the largest child of the subtree rooted at this and returns it.
      */
-    IndexedTreeNode pruneLargestChild(IndexedTree host) {
+    IndexedTreeNode<V> pruneLargestChild(IndexedTree<V> host) {
         // recurse down the tree
         if(rightSize > 0) {
             rightSize--;
             return right.pruneLargestChild(host);
         }
 
-        IndexedTreeNode replacement = null;
+        IndexedTreeNode<V> replacement = null;
         // this node has a left child
         if(leftSize != 0) {
             replacement = left;
@@ -373,7 +376,7 @@ public final class IndexedTreeNode {
      * Unlinks this node from the sorted tree. This may cause the tree to
      * rotate nodes using AVL rotations.
      */
-    public void removeFromTree(IndexedTree host) {
+    public void removeFromTree(IndexedTree<V> host) {
         // if this node has no value, we have a problem!
         assert(value != null);
         // if this is a leaf, we can delete it outright
@@ -412,7 +415,7 @@ public final class IndexedTreeNode {
             }
         // if this node has two children, replace this node with the best of the biggest
         } else {
-            IndexedTreeNode middle = null;
+            IndexedTreeNode<V> middle = null;
             // if the left side is larger, use a left side node
             if(leftSize > rightSize) {
                 middle = left.getLargestChildNode();
@@ -465,7 +468,7 @@ public final class IndexedTreeNode {
      * Notifies that a node has been removed from the specified subtree.
      * This simply decrements the count on that subtree.
      */
-    private void notifyChildNodeRemoved(IndexedTreeNode subtree) {
+    private void notifyChildNodeRemoved(IndexedTreeNode<V> subtree) {
         if(subtree == left) leftSize--;
         else if(subtree == right) rightSize--;
         else throw new IllegalArgumentException(this + " cannot remove a subtree that does not exist on this node!");
@@ -474,7 +477,7 @@ public final class IndexedTreeNode {
     /**
      * Replaces the specified child with a new child.
      */
-    private void replaceChildNode(IndexedTreeNode original, IndexedTreeNode replacement) {
+    private void replaceChildNode(IndexedTreeNode<V> original, IndexedTreeNode<V> replacement) {
         if(original == left) left = replacement;
         else if(original == right) right = replacement;
         else throw new IllegalArgumentException(this + " cannot replace a non-existant child");
@@ -485,7 +488,7 @@ public final class IndexedTreeNode {
      * order and that their sizes are consistent. This throws a
      * IllegalStateException if any infraction is found.
      */
-    void validate(IndexedTree host) {
+    void validate(IndexedTree<V> host) {
         // first validate the children
         if(left != null) left.validate(host);
         if(right != null) right.validate(host);
@@ -515,7 +518,7 @@ public final class IndexedTreeNode {
      * As such, this method is intended to be called only on a node whose height
      * may be out of sync due to an insertion or deletion.
      */
-    private void ensureAVL(IndexedTree host) {
+    private void ensureAVL(IndexedTree<V> host) {
         int oldHeight = height;
         recalculateHeight();
         avlRotate(host);
@@ -536,7 +539,7 @@ public final class IndexedTreeNode {
     /**
      * Determines if AVL rotations are required and performs them if they are.
      */
-    private void avlRotate(IndexedTree host) {
+    private void avlRotate(IndexedTree<V> host) {
         // look up the left and right heights
         int leftHeight = (left != null ? left.height : 0);
         int rightHeight = (right != null ? right.height : 0);
@@ -575,9 +578,9 @@ public final class IndexedTreeNode {
      * replacement, the new value on this, and the new value on the
      * other node.
      */
-    private void rotateLeft(IndexedTree host) {
+    private void rotateLeft(IndexedTree<V> host) {
         // The replacement node is on the left
-        IndexedTreeNode replacement = left;
+        IndexedTreeNode<V> replacement = left;
 
         // take the right child of the replacement as my left child
         left = replacement.right;
@@ -613,9 +616,9 @@ public final class IndexedTreeNode {
      * replacement, the new value on this, and the new value on the
      * other node.
      */
-    private void rotateRight(IndexedTree host) {
+    private void rotateRight(IndexedTree<V> host) {
         // The replacement node is on the right
-        IndexedTreeNode replacement = right;
+        IndexedTreeNode<V> replacement = right;
 
         // take the right child of the replacement as my left child
         right = replacement.left;
@@ -737,8 +740,8 @@ public final class IndexedTreeNode {
     /**
      * Helper method to the indexOf and lastIndexOf methods
      */
-    private int findLastNode(Comparator comparator, IndexedTreeNode parentNode, Object object, boolean goLeft) {
-        IndexedTreeNode child = null;
+    private int findLastNode(Comparator comparator, IndexedTreeNode<V> parentNode, Object object, boolean goLeft) {
+        IndexedTreeNode<V> child = null;
         if(goLeft) child = parentNode.left;
         else child = parentNode.right;
 
@@ -763,8 +766,8 @@ public final class IndexedTreeNode {
     /**
      * Helper method to the indexOf and lastIndexOf methods
      */
-    private int secondaryLastNodeSearch(Comparator comparator, IndexedTreeNode parentNode, Object object, boolean goLeft) {
-        IndexedTreeNode child = null;
+    private int secondaryLastNodeSearch(Comparator comparator, IndexedTreeNode<V> parentNode, Object object, boolean goLeft) {
+        IndexedTreeNode<V> child = null;
         if(goLeft) child = parentNode.left;
         else child = parentNode.right;
 
@@ -801,4 +804,3 @@ public final class IndexedTreeNode {
         }
     }
 }
-

@@ -133,7 +133,7 @@ public class IssuesBrowser extends Applet {
         // create a MatcherEditor which edits the filter text
         final JTextField filterTextField = new JTextField();
         filterTextField.setBorder(BLACK_LINE_BORDER);
-        final MatcherEditor textFilterMatcherEditor = new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterTextField, null));
+        final MatcherEditor<String> textFilterMatcherEditor = new ThreadedMatcherEditor<String>(new TextComponentMatcherEditor(filterTextField, null));
 
         // create a MatcherEditor which edits the state filter
         StateMatcherEditor stateMatcherEditor = new StateMatcherEditor();
@@ -356,7 +356,7 @@ public class IssuesBrowser extends Applet {
     /**
      * A MatcherEditor that produces Matchers that filter the issues based on the selected states.
      */
-    private static class StateMatcherEditor extends AbstractMatcherEditor implements ActionListener {
+    private static class StateMatcherEditor extends AbstractMatcherEditor<Issue> implements ActionListener {
         /** A panel housing a checkbox for each state. */
         private JPanel checkBoxPanel = new JPanel(new GridLayout(2, 2));
 
@@ -403,7 +403,7 @@ public class IssuesBrowser extends Applet {
          * of the selected states.
          */
         private StateMatcher buildMatcher() {
-            final Set allowedStates = new HashSet();
+            final Set<String> allowedStates = new HashSet<String>();
             for (int i = 0; i < this.stateCheckBoxes.length; i++) {
                 if (this.stateCheckBoxes[i].isSelected())
                     allowedStates.add(this.stateCheckBoxes[i].getText().toUpperCase().intern());
@@ -435,10 +435,10 @@ public class IssuesBrowser extends Applet {
          * A StateMatcher returns <tt>true</tt> if the state of the Issue is
          * one of the viewable states selected by the user.
          */
-        private static class StateMatcher implements Matcher {
-            private final Set allowedStates;
+        private static class StateMatcher implements Matcher<Issue> {
+            private final Set<String> allowedStates;
 
-            public StateMatcher(Set allowedStates) {
+            public StateMatcher(Set<String> allowedStates) {
                 this.allowedStates = allowedStates;
             }
 
@@ -446,8 +446,7 @@ public class IssuesBrowser extends Applet {
                 return this.allowedStates.size();
             }
 
-            public boolean matches(Object item) {
-                final Issue issue = (Issue) item;
+            public boolean matches(Issue issue) {
                 return this.allowedStates.contains(issue.getStatus());
             }
         }

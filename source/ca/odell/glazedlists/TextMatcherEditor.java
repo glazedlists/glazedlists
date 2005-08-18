@@ -21,10 +21,10 @@ import ca.odell.glazedlists.impl.filter.*;
  * @author James Lemieux
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TextMatcherEditor extends AbstractValueMatcherEditor {
+public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
-    private final TextFilterator filterator;
+    private final TextFilterator<E> filterator;
 
     /** the filters list is currently just a list of Substrings to include */
     private String[] filters = new String[0];
@@ -49,11 +49,8 @@ public class TextMatcherEditor extends AbstractValueMatcherEditor {
      *      object in the <code>source</code>; <code>null</code> indicates the
      *      list elements implement {@link TextFilterable}
      */
-    public TextMatcherEditor(TextFilterator filterator) {
-		// Start with normal logic and no value set
-		super( false, null );
-
-		this.filterator = filterator;
+    public TextMatcherEditor(TextFilterator<E> filterator) {
+        this.filterator = filterator;
     }
 
     /**
@@ -63,55 +60,22 @@ public class TextMatcherEditor extends AbstractValueMatcherEditor {
      * @param filterStrings the {@link String}s representing all of the filter values
      */
     public void setFilterText(String[] filterStrings) {
-		if (filterStrings == null) filterStrings = new String[0];
-
-		String[] oldFilters = this.filters;
+        String[] oldFilters = this.filters;
         this.filters = TextMatcher.normalizeFilters(filterStrings);
 
-		boolean need_to_fire_update = setValue(TextMatcher.normalizeFilters(filterStrings));
-		if (need_to_fire_update) {
+        // fire the event only as necessary
+        if(!TextMatcher.isFilterEqual(oldFilters, filters)) {
 
-			// fire the event only as necessary
-			if(!TextMatcher.isFilterEqual(oldFilters, filters)) {
-
-				// classify the change in filter and apply the new filter to this list
-				if(filters.length == 0) {
-					fireMatchAll();
-				} else if(TextMatcher.isFilterRelaxed(oldFilters, filters)) {
-					fireRelaxed(getMatcher());
-				} else if(TextMatcher.isFilterConstrained(oldFilters, filters)) {
-					fireConstrained(getMatcher());
-				} else {
-					fireChanged(getMatcher());
-				}
-			}
-		}
+            // classify the change in filter and apply the new filter to this list
+            if(filters.length == 0) {
+                fireMatchAll();
+            } else if(TextMatcher.isFilterRelaxed(oldFilters, filters)) {
+                fireRelaxed(new TextMatcher<E>(filters, filterator));
+            } else if(TextMatcher.isFilterConstrained(oldFilters, filters)) {
+                fireConstrained(new TextMatcher<E>(filters, filterator));
+            } else {
+                fireChanged(new TextMatcher<E>(filters, filterator));
+            }
+        }
     }
-
-
-	/**
-	 * Returns the text filterator used by this editor.
-	 * <p/>
-	 * Note: It's recommended that the filterator be immutable. However, if it is not and
-	 * changes are made to it such that it would return different filter values,
-	 * {@link #fireChanged(Matcher)} should be called to tell the listeners that this
-	 * matcher's value has changed.
-	 */
-	public TextFilterator getTextFilterator() {
-		return filterator;
-	}
-
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * Create the matcher for the filter string.
-	 *
-	 * Note: this will not
-	 *
-	 * @param value		The filter strings
-	 */
-	protected Matcher createMatcher(Object value) {
-		return new TextMatcher((String[])value, filterator);
-	}
 }

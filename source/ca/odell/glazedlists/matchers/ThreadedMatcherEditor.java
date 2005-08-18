@@ -42,24 +42,24 @@ import java.util.List;
  *
  * @author James Lemieux
  */
-public class ThreadedMatcherEditor extends AbstractMatcherEditor {
+public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
     /** The underlying MatcherEditor whose MatcherEvents are being queued and fired on an alternate Thread. */
-    private final MatcherEditor source;
+    private final MatcherEditor<E> source;
 
     /**
-     * The LinkedList acting as a queue of MatcherEvents in the order in which they are received
+     * The LinkedList acting as a queue of MatcherEditor.Event in the order in which they are received
      * from {@link #source}. We use a synchronized list to ensure atomicity of reads and writes to
      * the queue, and take care to ensure iteration occurs over copies of the queue data and not
      * the queue itself so as to avoid concurrent modification problems.
      */
-    private final List matcherEventQueue = Collections.synchronizedList(new LinkedList());
+    private final List<MatcherEditor.Event> matcherEventQueue = Collections.synchronizedList(new LinkedList<MatcherEditor.Event>());
 
     /**
      * The MatcherEditorListener which reacts to MatcherEvents from the {@link #source}
      * by enqueuing them for firing on another Thread at some later time.
      */
-    private MatcherEditor.Listener queuingMatcherEditorListener = new QueuingMatcherEditorListener();
+    private MatcherEditor.Listener<E> queuingMatcherEditorListener = new QueuingMatcherEditorListener<E>();
 
     /**
      * <tt>true</tt> indicates a Thread is currently executing the
@@ -81,7 +81,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      * @param source the MatcherEditor to wrap with buffering functionality
      * @throws NullPointerException if <code>source</code> is <code>null</code>
      */
-    public ThreadedMatcherEditor(MatcherEditor source) {
+    public ThreadedMatcherEditor(MatcherEditor<E> source) {
         if (source == null)
             throw new NullPointerException("source may not be null");
         this.source = source;
@@ -93,7 +93,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      *
      * @return the current Matcher specified by the source {@link MatcherEditor}
      */
-    public Matcher getMatcher() {
+    public Matcher<E> getMatcher() {
         return this.source.getMatcher();
     }
 
@@ -145,12 +145,12 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      *      same state as if all <code>matcherEvents</code> had been fired
      *      sequentially
      */
-    protected Event coalesceMatcherEvents(Event[] matcherEvents) {
+    protected Event<E> coalesceMatcherEvents(Event<E>[] matcherEvents) {
         boolean changeType = false;
 
         // fetch the last matcher event - it is the basis of the MatcherEvent which must be returned
         // all that remains is to determine the type of the MatcherEvent to return
-        final Event lastMatcherEvent = matcherEvents[matcherEvents.length-1];
+        final Event<E> lastMatcherEvent = matcherEvents[matcherEvents.length-1];
         final int lastMatcherEventType = lastMatcherEvent.getType();
 
         // if the last MatcherEvent is a MATCH_ALL or MATCH_NONE type, we can safely return it immediately
@@ -174,7 +174,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
 
         // if both constraining and relaxing MatcherEvents exist, ensure we must return a CHANGED MatcherEvent
         // otherwise the last MatcherEvent must represent the coalesced MatcherEvent
-        return new Event(this, changeType ? Event.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
+        return new MatcherEditor.Event<E>(this, changeType ? Event.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
     }
 
     /**
@@ -198,7 +198,7 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      * {@link #drainMatcherEventQueueRunnable} is currently being executed in a
      * Thread. Only one Thread is allowed to be using the
      * {@link #drainMatcherEventQueueRunnable} to drain the
-     * {@link #drainMatcherEventQueueRunnable} at any time.
+     * {@link #matcherEventQueue} at any time.
      */
     private void drainQueue() {
         // acquire the monitor that guards assigning the drainMatcherEventQueueRunnable
@@ -217,8 +217,8 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
      * order it is received and then schedules a Runnable to drain the queue of
      * MatcherEvents as soon as possible.
      */
-    private class QueuingMatcherEditorListener implements MatcherEditor.Listener {
-        public void changedMatcher(Event matcherEvent) {
+    private class QueuingMatcherEditorListener<E> implements MatcherEditor.Listener<E> {
+        public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
             matcherEventQueue.add(matcherEvent);
             drainQueue();
         }
@@ -247,10 +247,10 @@ public class ThreadedMatcherEditor extends AbstractMatcherEditor {
                     }
 
                     // fetch a copy of all MatcherEvents currently in the queue
-                    final Event[] matcherEvents = (Event[]) matcherEventQueue.toArray(new Event[matcherEventQueue.size()]);
+                    final Event<E>[] matcherEvents = matcherEventQueue.toArray(new Event[matcherEventQueue.size()]);
 
                     // coalesce all of the current MatcherEvents to a single representative MatcherEvent
-                    final Event coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
+                    final Event<E> coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
 
                     // fire the single coalesced MatcherEvent
                     fireChangedMatcher(coalescedMatcherEvent);

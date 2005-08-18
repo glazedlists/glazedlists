@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public interface TextFilterator {
+public interface TextFilterator<E> {
 
     /**
      * Gets the specified object as a list of Strings. These Strings
@@ -27,5 +27,5 @@ public interface TextFilterator {
      *      List and it is an error to call any method other than add().
      * @param element the object to extract the filter strings from.
      */
-    public void getFilterStrings(List baseList, Object element);
+    public void getFilterStrings(List<String> baseList, E element);
 }

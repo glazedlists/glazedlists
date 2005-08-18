@@ -99,45 +99,45 @@ public class TextMatcherTest extends TestCase {
     }
 
 
-	public void testLogicInversion() {
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-		textMatcherEditor.setLogicInverted(true);
-		FilterList list = new FilterList(new BasicEventList(), textMatcherEditor);
-
-        list.addAll(monotonicAlphabet);
-
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-        textMatcherEditor.addMatcherEditorListener(counter);
-
-		// Make sure it includes everything to start with (no filter)
-		assertEquals(monotonicAlphabet.size(), list.size());
-
-		textMatcherEditor.setFilterText(new String[] {"9"});		// constrained
-		assertEquals(monotonicAlphabet.size() - 1, list.size());
-		counter.assertCounterState(0, 0, 0, 1, 0);
-		counter.resetCounterState();
-
-		textMatcherEditor.setFilterText(new String[] {"1"});		// changed
-		assertEquals(1, list.size());
-		counter.assertCounterState(0, 0, 1, 0, 0);
-		counter.resetCounterState();
-
-		// Go back to normal logic. Should now match all but 1
-		textMatcherEditor.setLogicInverted(false);
-		assertEquals(monotonicAlphabet.size() - 1, list.size());
-		counter.assertCounterState(0, 0, 1, 0, 0);
-		counter.resetCounterState();
-
-		// Return to inverted
-		textMatcherEditor.setLogicInverted(true);
-		counter.assertCounterState(0, 0, 1, 0, 0);
-		counter.resetCounterState();
-
-		// Clear it
-		textMatcherEditor.setFilterText(null);
-		assertEquals(monotonicAlphabet.size(), list.size());
-		counter.assertCounterState(1, 0, 0, 0, 0);
-	}
+//	public void testLogicInversion() {
+//        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
+//		textMatcherEditor.setLogicInverted(true);
+//		FilterList list = new FilterList(new BasicEventList(), textMatcherEditor);
+//
+//        list.addAll(monotonicAlphabet);
+//
+//        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+//        textMatcherEditor.addMatcherEditorListener(counter);
+//
+//		// Make sure it includes everything to start with (no filter)
+//		assertEquals(monotonicAlphabet.size(), list.size());
+//
+//		textMatcherEditor.setFilterText(new String[] {"9"});		// constrained
+//		assertEquals(monotonicAlphabet.size() - 1, list.size());
+//		counter.assertCounterState(0, 0, 0, 1, 0);
+//		counter.resetCounterState();
+//
+//		textMatcherEditor.setFilterText(new String[] {"1"});		// changed
+//		assertEquals(1, list.size());
+//		counter.assertCounterState(0, 0, 1, 0, 0);
+//		counter.resetCounterState();
+//
+//		// Go back to normal logic. Should now match all but 1
+//		textMatcherEditor.setLogicInverted(false);
+//		assertEquals(monotonicAlphabet.size() - 1, list.size());
+//		counter.assertCounterState(0, 0, 1, 0, 0);
+//		counter.resetCounterState();
+//
+//		// Return to inverted
+//		textMatcherEditor.setLogicInverted(true);
+//		counter.assertCounterState(0, 0, 1, 0, 0);
+//		counter.resetCounterState();
+//
+//		// Clear it
+//		textMatcherEditor.setFilterText(null);
+//		assertEquals(monotonicAlphabet.size(), list.size());
+//		counter.assertCounterState(1, 0, 0, 0, 0);
+//	}
 
 	public void testRelaxingFilter() {
         TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
