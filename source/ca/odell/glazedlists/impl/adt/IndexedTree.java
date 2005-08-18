@@ -218,7 +218,7 @@ public final class IndexedTree<V> {
      * them one at a time.
      */
     void validate() {
-        for(Iterator<IndexedTreeNode<V>> i = iterator(); i.hasNext();) {
+        for(Iterator<IndexedTreeNode<V>> i = (Iterator<IndexedTreeNode<V>>)iterator(); i.hasNext();) {
             IndexedTreeNode<V> node = i.next();
             node.validate(this);
         }

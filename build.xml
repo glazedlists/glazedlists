@@ -120,7 +120,7 @@
 
 	<target name="core" depends="init">
 		<mkdir dir="classes"/>
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.5" deprecation="on">
             <!-- swing -->
 			<exclude name="**/swing/**"/>
             <!-- swt -->
@@ -137,7 +137,7 @@
 	</target>
 
 	<target name="swing" depends="core">
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.5" deprecation="on">
 			<include name="**/swing/**"/>
 		</javac>
 	</target>
@@ -147,13 +147,13 @@
 		<available classname="org.eclipse.swt.SWT" property="swt.present"/>
 		<fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>
 		<!-- Compile the java code from source/ into classes/ -->
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.5">
 			<include name="**/swt/**"/>
 		</javac>
 	</target>
 
 	<target name="io" depends="core">
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.5" deprecation="on">
 			<include name="**/ctp/**"/>
 			<include name="**/io/**"/>
 			<include name="**/nio/**"/>
@@ -163,7 +163,7 @@
 	</target>
 
 	<target name="demo" depends="core,swing">
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="1.5" deprecation="on">
 			<include name="**/demo/**"/>
 			<exclude name="**/swt/**"/>
 		</javac>
@@ -202,21 +202,23 @@
     </target>
 
     <target name="java14" depends="init,compile" description="Compile Glazed Lists for deployment on a J2SE 1.4">
+        <property environment="env"/>
+        <echo message="using JAVA HOME = ${env.JAVA_HOME}"/>
+        <echo message="using tools = ${env.JAVA_HOME}/lib/tools.jar"/>
+        <delete dir="java14_build"/>
         <mkdir dir="java14_build/source"/>
-        <java classpath="classes" classname="ca.odell.glazedlists.impl.java15.Declawer">
-            <arg>source</arg>
-            <arg>classes</arg>
-            <arg>java14_build/source</arg>
+        <java classname="ca.odell.glazedlists.impl.java15.Declawer">
+            <classpath>
+                <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
+                <pathelement path="classes"/>
+            </classpath>
+            <arg value="source"/>
+            <arg value="classes"/>
+            <arg value="java14_build/source"/>
         </java>
-        <!--<javac destdir="classes" srcdir="source" debug="on" source="1.3" target="1.3" deprecation="on">-->
-            <!--<include name="**/event/**"/>-->
-            <!--<include name="**/BasicEventList.java"/>-->
-            <!--<include name="**/EventList.java"/>-->
-            <!--<include name="**/SubEventList.java"/>-->
-            <!--<include name="**/EventListIterator.java"/>-->
-            <!--<include name="**/SimpleIterator.java"/>-->
-            <!--<include name="**/concurrent/**"/>-->
-        <!--</javac>-->
+        <mkdir dir="java14_build/classes"/>
+        <javac destdir="java14_build/classes" srcdir="java14_build/source" debug="on" source="1.4" target="1.4" deprecation="on">
+        </javac>
         <!--<tstamp prefix="jar">-->
             <!--<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>-->
         <!--</tstamp>-->

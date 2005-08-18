@@ -11,7 +11,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
+public class IndexedTreeIterator<V> implements Iterator<V> {
 
     /** the index of the current node */
     private int currentIndex = 0;
@@ -20,7 +20,7 @@ public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
     private IndexedTree<V> host = null;
 
     /** the last tree node returned by this iterator */
-    private IndexedTreeNode<V> currentNode = null;
+    private IndexedTreeNode currentNode = null;
 
     /** the direction of iteration */
     private boolean goingForward = true;
@@ -75,7 +75,7 @@ public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
     /**
      * Returns the next element in the iteration.
      */
-    public IndexedTreeNode<V> next() {
+    public V next() {
         // handle the empty tree and end of tree cases
         if(currentNode == null || currentIndex >= host.size() - 1) {
             throw new NoSuchElementException();
@@ -84,7 +84,7 @@ public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
         } else if(currentIndex == -1) {
             currentIndex = 0;
             goingForward = true;
-            return currentNode;
+            return (V)currentNode;
 
         // anywhere else in the tree is the same
         } else {
@@ -92,12 +92,12 @@ public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
             if(goingForward) {
                 currentIndex++;
                 findNextNode();
-                return currentNode;
+                return (V)currentNode;
 
             // switching iteration directions
             } else {
                 goingForward = true;
-                return currentNode;
+                return (V)currentNode;
             }
         }
     }

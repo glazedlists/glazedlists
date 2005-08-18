@@ -5,7 +5,6 @@ package ca.odell.glazedlists.demo.issuebrowser.swing;
 
 // demo
 import ca.odell.glazedlists.demo.issuebrowser.*;
-import ca.odell.glazedlists.demo.Launcher;
 // swing
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -113,11 +112,11 @@ public class IssuesBrowser extends Applet {
     private void constructStandalone() {
         // create a frame with that panel
         JFrame frame = new JFrame("Issues");
-        if (!Launcher.runningInLauncher()) {
+//        if (!Launcher.runningInLauncher()) {
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        } else {
-            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        }
+//        } else {
+//            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+//        }
 
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
@@ -147,11 +146,7 @@ public class IssuesBrowser extends Applet {
 
         // issues table
         issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
-        issuesSortedList.addListEventListener(new ListEventListener() {
-            public void listChanged(ListEvent listChanges) {
-                issueCounter.setIssueCount(issuesSortedList.size());
-            }
-        });
+        issuesSortedList.addListEventListener(new CountUpdater());
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel(issuesSortedList);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
@@ -278,6 +273,16 @@ public class IssuesBrowser extends Applet {
             if(descriptionIssue != null) descriptions.addAll(descriptionIssue.getDescriptions());
         }
     }
+
+    /**
+     * Listen for changes in the {@link EventList} size and update a label
+     * showing its size.
+     */
+    class CountUpdater implements ListEventListener {
+        public void listChanged(ListEvent listChanges) {
+            issueCounter.setIssueCount(listChanges.getSourceList().size());
+        }
+    };
 
     /**
      * Listens for changes to the project combo box and updates which project is

@@ -113,15 +113,15 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // create an array with the sorted nodes
             IndexedTreeNode[] sortedNodes = new IndexedTreeNode[sorted.size()];
             int index = 0;
-            for(Iterator<IndexedTreeNode<IndexedTreeNode>> i = unsorted.iterator(); i.hasNext(); index++) {
-                IndexedTreeNode<IndexedTreeNode> unsortedNode = i.next();
+            for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = (IndexedTreeNode<IndexedTreeNode>)i.next();
                 sortedNodes[index] = unsortedNode.getValue();
             }
 
             // set the unsorted nodes to point to the new set of sorted nodes
             index = 0;
-            for(Iterator<IndexedTreeNode<IndexedTreeNode>> i = unsorted.iterator(); i.hasNext(); index++) {
-                IndexedTreeNode<IndexedTreeNode> unsortedNode = i.next();
+            for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = (IndexedTreeNode<IndexedTreeNode>)i.next();
                 unsortedNode.setValue(sortedNodes[reorderMap[index]]);
                 sortedNodes[reorderMap[index]].setValue(unsortedNode);
             }
