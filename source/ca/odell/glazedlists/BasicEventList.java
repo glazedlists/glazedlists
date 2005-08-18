@@ -109,68 +109,6 @@ public final class BasicEventList extends AbstractEventList {
         return result;
     }
 
-    /**
-     * Appends all of the elements in the specified array to the end of this list.
-     *
-     * @param objects list of elements that are to be added to this list.
-     * @return <tt>true</tt> if this list changed as a result of the call.
-     * 
-     * @throws UnsupportedOperationException if the <tt>addAll</tt> method is
-     *         not supported by this list.
-     * @throws ClassCastException if the class of an element in the specified
-     * 	       array prevents it from being added to this list.
-     * @throws NullPointerException if the specified array contains one
-     *         or more null elements and this list does not support null
-     *         elements, or if the specified array is <tt>null</tt>.
-     * @throws IllegalArgumentException if some aspect of an element in the
-     *         specified array prevents it from being added to this
-     *         list.
-     * @see #add(Object)
-     */
-    public boolean addAll(Object[] objects) {
-        return addAll(size(), objects);
-    }
-
-    /**
-     * Inserts all of the elements in the specified collection into this
-     * list at the specified position. Shifts the element currently at that
-     * position (if any) and any subsequent elements to the right (increases
-     * their indices).
-     *
-     * @param objects list of elements that are to be added to this list.
-     * @return <tt>true</tt> if this list changed as a result of the call.
-     * 
-     * @throws UnsupportedOperationException if the <tt>addAll</tt> method is
-     *         not supported by this list.
-     * @throws ClassCastException if the class of an element in the specified
-     * 	       array prevents it from being added to this list.
-     * @throws NullPointerException if the specified array contains one
-     *         or more null elements and this list does not support null
-     *         elements, or if the specified array is <tt>null</tt>.
-     * @throws IllegalArgumentException if some aspect of an element in the
-     *         specified array prevents it from being added to this
-     *         list.
-     * @see #add(Object)
-     */
-    public boolean addAll(int index, Object[] objects) {
-        // don't do an add of an empty set
-        if(objects.length == 0) return false;
-
-        // create the change event
-        updates.beginEvent();
-        updates.addInsert(index, index + objects.length - 1);
-        // do the actual add
-        boolean overallResult = true;
-        boolean elementResult = true;
-        for(int i = 0; i < objects.length; i++) {
-            elementResult = data.add(objects[i]);
-            overallResult = (overallResult && elementResult);
-        }
-        // fire the event
-        updates.commitEvent();
-        return overallResult;
-    }
-
     /** {@inheritDoc} */
     public Object remove(int index) {
         // create the change event
