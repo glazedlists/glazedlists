@@ -31,6 +31,7 @@ public final class SortIconFactory {
         lookAndFeelResourcePathMap.put("Metal/Ocean", "ocean");
         lookAndFeelResourcePathMap.put("Classic Windows", "windows");
         lookAndFeelResourcePathMap.put("Windows XP", "windowsxp");
+        lookAndFeelResourcePathMap.put("WinLAF", "windowsxp");
     }
 
     /** the icons to use for indicating sort order */
