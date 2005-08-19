@@ -7,6 +7,7 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.*;
 // an arraylist holds the frozen data
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An {@link EventList} that shows the current contents of its source {@link EventList}.
@@ -30,32 +31,32 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class FreezableList extends TransformedList {
+public final class FreezableList<E> extends TransformedList<E,E> {
 
     /** the state of the freezable list */
     private boolean frozen = false;
-    
+
     /** the frozen objects */
-    private ArrayList frozenData = new ArrayList();
-    
+    private List<E> frozenData = new ArrayList<E>();
+
     /**
      * Creates a {@link FreezableList} that can freeze the view of the specified
      * source {@link EventList}.
      */
-    public FreezableList(EventList source) {
+    public FreezableList(EventList<E> source) {
         super(source);
         source.addListEventListener(this);
     }
-    
+
     /** {@inheritDoc} */
-    public Object get(int index) {
+    public E get(int index) {
         if(frozen) {
             return frozenData.get(index);
         } else {
             return source.get(index);
         }
     }
-    
+
     /** {@inheritDoc} */
     public int size() {
         if(frozen) {
@@ -64,12 +65,12 @@ public final class FreezableList extends TransformedList {
             return source.size();
         }
     }
-    
+
     /** {@inheritDoc} */
     protected boolean isWritable() {
         return !frozen;
     }
-    
+
     /**
      * Gets whether this {@link EventList} is showing a previous state of the source
      * {@link EventList}.
@@ -81,7 +82,7 @@ public final class FreezableList extends TransformedList {
     public boolean isFrozen() {
         return frozen;
     }
-    
+
     /**
      * Locks this {@link FreezableList} on the current state of the source
      * {@link EventList}. While frozen, changes to the source {@link EventList}
@@ -93,17 +94,17 @@ public final class FreezableList extends TransformedList {
      */
     public void freeze() {
         if(frozen) throw new IllegalStateException("Cannot freeze a list that is already frozen");
-        
+
         // we are no longer interested in update events
-        ((EventList)source).removeListEventListener(this);
-        
+        source.removeListEventListener(this);
+
         // copy the source array into the frozen list
         frozenData.addAll(source);
-        
+
         // mark this list as frozen
         frozen = true;
     }
-    
+
     /**
      * Unlocks this {@link FreezableList} to show the same contents of the source
      * {@link EventList}. When thawed, changes to the source {@link EventList}
@@ -115,12 +116,12 @@ public final class FreezableList extends TransformedList {
      */
     public void thaw() {
         if(!frozen) throw new IllegalStateException("Cannot thaw a list that is not frozen");
-        
+
         // mark this list as thawed
         frozen = false;
         int frozenDataSize = frozenData.size();
         frozenData.clear();
-        
+
         // fire events to listeners of the thaw
         updates.beginEvent();
         if(frozenDataSize > 0) updates.addDelete(0, frozenDataSize - 1);
@@ -128,17 +129,17 @@ public final class FreezableList extends TransformedList {
         updates.commitEvent();
 
         // being listening to update events
-        ((EventList)source).addListEventListener(this);
+        source.addListEventListener(this);
     }
-    
+
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         if(frozen) {
             // when a list change event arrives and this list is frozen,
             // it is possible that the event was queued before this list
             // was frozen. for this reason we do not throw any exceptions
             // but instead silently ignore the event
-            
+
         } else {
             // just pass on the changes
             updates.forwardEvent(listChanges);

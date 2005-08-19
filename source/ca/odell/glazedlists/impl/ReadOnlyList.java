@@ -29,19 +29,19 @@ import ca.odell.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ReadOnlyList extends TransformedList {
+public final class ReadOnlyList<E> extends TransformedList<E,E> {
 
     /**
      * Creates a {@link ReadOnlyList} to provide a view of an {@link EventList}
      * that does not allow write operations.
      */
-    public ReadOnlyList(EventList source) {
+    public ReadOnlyList(EventList<E> source) {
         super(source);
         source.addListEventListener(this);
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
     }

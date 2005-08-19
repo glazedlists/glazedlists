@@ -26,32 +26,32 @@ public class MatcherTest extends TestCase {
         assertTrue(s.matches("james"));
 
         Matcher<Boolean> b = new NotMatcher<Boolean>(new OnMatcher());
-        assertFalse(b.matches(true));
-        assertTrue(b.matches(false));
+        assertFalse(b.matches(Boolean.TRUE));
+        assertTrue(b.matches(Boolean.FALSE));
     }
 
     public void testGenerics() {
         NumberMatcherEditor numMatcherEditor = new NumberMatcherEditor();
-        assertTrue(numMatcherEditor.getMatcher().matches(5));
-        numMatcherEditor.setNumber(10);
-        assertFalse(numMatcherEditor.getMatcher().matches(5));
-        assertTrue(numMatcherEditor.getMatcher().matches(10));
+        assertTrue(numMatcherEditor.getMatcher().matches(new Integer(5)));
+        numMatcherEditor.setNumber(new Integer(10));
+        assertFalse(numMatcherEditor.getMatcher().matches(new Integer(5)));
+        assertTrue(numMatcherEditor.getMatcher().matches(new Integer(10)));
 
-        numMatcherEditor.setNumber(3.14f);
-        assertFalse(numMatcherEditor.getMatcher().matches(10));
-        assertTrue(numMatcherEditor.getMatcher().matches(3.14f));
+        numMatcherEditor.setNumber(new Float(3.14f));
+        assertFalse(numMatcherEditor.getMatcher().matches(new Integer(10)));
+        assertTrue(numMatcherEditor.getMatcher().matches(new Float(3.14f)));
 
         MatcherEditor<Number> typedMatcherEditor = numMatcherEditor;
-        assertFalse(typedMatcherEditor.getMatcher().matches(10));
-        assertTrue(typedMatcherEditor.getMatcher().matches(3.14f));
+        assertFalse(typedMatcherEditor.getMatcher().matches(new Integer(10)));
+        assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
 
         typedMatcherEditor = new TextMatcherEditor<Number>(GlazedLists.toStringTextFilterator());
-        assertTrue(typedMatcherEditor.getMatcher().matches(10));
-        assertTrue(typedMatcherEditor.getMatcher().matches(3.14f));
+        assertTrue(typedMatcherEditor.getMatcher().matches(new Integer(10)));
+        assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
 
         ((TextMatcherEditor)typedMatcherEditor).setFilterText(new String[] { "3" });
-        assertFalse(typedMatcherEditor.getMatcher().matches(10));
-        assertTrue(typedMatcherEditor.getMatcher().matches(3.14f));
+        assertFalse(typedMatcherEditor.getMatcher().matches(new Integer(10)));
+        assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
     }
 
     private class NumberMatcherEditor extends AbstractMatcherEditor<Number> {

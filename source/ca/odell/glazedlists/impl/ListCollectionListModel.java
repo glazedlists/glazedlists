@@ -13,9 +13,9 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListCollectionListModel implements CollectionListModel {
-    public List getChildren(Object parent) {
+public class ListCollectionListModel<E> implements CollectionListModel<E,EventList<E>> {
+    public List<E> getChildren(EventList<E> parent) {
         if(parent == null) return Collections.EMPTY_LIST;
-        return (List)parent;
+        return parent;
     }
 }

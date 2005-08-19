@@ -17,7 +17,6 @@ import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.matchers.*;
 import java.util.Comparator;
 
-
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
  *
@@ -56,7 +55,7 @@ public final class GlazedLists {
      * @param updates whether to fire update events for Objects that are equal in
      *      both {@link List}s.
      */
-    public static void replaceAll(EventList target, List source, boolean updates) {
+    public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates) {
         Diff.replaceAll(target, source, updates);
     }
 
@@ -70,7 +69,7 @@ public final class GlazedLists {
      *      elements that are equal and nonzero for elements that are not equal.
      *      Sort order is not used.
      */
-    public static void replaceAll(EventList target, List source, boolean updates, Comparator comparator) {
+    public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates, Comparator<E> comparator) {
         Diff.replaceAll(target, source, updates, comparator);
     }
 
@@ -78,16 +77,16 @@ public final class GlazedLists {
     // Comparators // // // // // // // // // // // // // // // // // // // //
 
     /** Provide Singleton access for all Comparators with no internal state */
-    private static Comparator booleanComparator = null;
+    private static Comparator<Boolean> booleanComparator = null;
     private static Comparator<Comparable> comparableComparator = null;
-    private static Comparator reversedComparable = null;
+    private static Comparator<Comparable> reversedComparable = null;
 
     /**
      * Creates a {@link Comparator} that uses Reflection to compare two instances
      * of the specified {@link Class} by the given JavaBean property.  The JavaBean
      * property must implement {@link Comparable}.
      */
-    public static Comparator beanPropertyComparator(Class className, String property) {
+    public static <T> Comparator<T> beanPropertyComparator(Class<T> className, String property) {
         return beanPropertyComparator(className, property, comparableComparator());
     }
 
@@ -96,14 +95,14 @@ public final class GlazedLists {
      * of the specified {@link Class} by the given JavaBean property.  The JavaBean
      * property is compared using the provided {@link Comparator}.
      */
-    public static Comparator beanPropertyComparator(Class className, String property, Comparator propertyComparator) {
-        return new BeanPropertyComparator(className, property, propertyComparator);
+    public static <T> Comparator<T> beanPropertyComparator(Class<T> className, String property, Comparator propertyComparator) {
+        return new BeanPropertyComparator<T>(className, property, propertyComparator);
     }
 
     /**
      * Creates a {@link Comparator} for use with {@link Boolean} objects.
      */
-    public static Comparator booleanComparator() {
+    public static Comparator<Boolean> booleanComparator() {
         if(booleanComparator == null) booleanComparator = new BooleanComparator();
         return booleanComparator;
     }
@@ -113,7 +112,7 @@ public final class GlazedLists {
      * a case-insensitive way.  This {@link Comparator} is equivalent to using
      * {@link String#CASE_INSENSITIVE_ORDER} and exists here for convenience.
      */
-    public static Comparator caseInsensitiveComparator() {
+    public static Comparator<String> caseInsensitiveComparator() {
         return String.CASE_INSENSITIVE_ORDER;
     }
 
@@ -122,8 +121,8 @@ public final class GlazedLists {
      * {@link Comparator}s in the sequence specified until differences or
      * absoulute equality.is determined.
      */
-    public static Comparator chainComparators(List comparators) {
-        return new ComparatorChain(comparators);
+    public static <T> Comparator<T> chainComparators(List<Comparator<T>> comparators) {
+        return new ComparatorChain<T>(comparators);
     }
 
     /**
@@ -137,7 +136,7 @@ public final class GlazedLists {
     /**
      * Creates a reverse {@link Comparator} that works for {@link Comparable} objects.
      */
-    public static Comparator reverseComparator() {
+    public static Comparator<Comparable> reverseComparator() {
         if(reversedComparable == null) reversedComparable = reverseComparator(comparableComparator());
         return reversedComparable;
     }
@@ -145,8 +144,8 @@ public final class GlazedLists {
     /**
      * Creates a reverse {@link Comparator} that inverts the given {@link Comparator}.
      */
-    public static Comparator reverseComparator(Comparator forward) {
-        return new ReverseComparator(forward);
+    public static <T> Comparator<T> reverseComparator(Comparator<T> forward) {
+        return new ReverseComparator<T>(forward);
     }
 
     // TableFormats // // // // // // // // // // // // // // // // // // // //
@@ -155,8 +154,8 @@ public final class GlazedLists {
      * Creates a {@link TableFormat} that binds JavaBean properties to
      * table columns via Reflection.
      */
-    public static TableFormat tableFormat(String[] propertyNames, String[] columnLabels) {
-        return new BeanTableFormat(null, propertyNames, columnLabels);
+    public static <T> TableFormat<T> tableFormat(String[] propertyNames, String[] columnLabels) {
+        return new BeanTableFormat<T>(null, propertyNames, columnLabels);
     }
 
     /**
@@ -169,8 +168,8 @@ public final class GlazedLists {
      *      {@link AdvancedTableFormat#getColumnComparator(int)} by examining the
      *      classes of the column value.
      */
-    public static TableFormat tableFormat(Class baseClass, String[] propertyNames, String[] columnLabels) {
-        return new BeanTableFormat(baseClass, propertyNames, columnLabels);
+    public static <T> TableFormat<T> tableFormat(Class<T> baseClass, String[] propertyNames, String[] columnLabels) {
+        return new BeanTableFormat<T>(baseClass, propertyNames, columnLabels);
     }
 
     /**
@@ -178,8 +177,8 @@ public final class GlazedLists {
      * table columns via Reflection. The returned {@link TableFormat} implements
      * {@link WritableTableFormat} and may be used for an editable table.
      */
-    public static TableFormat tableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        return new BeanTableFormat(null, propertyNames, columnLabels, editable);
+    public static <T> TableFormat<T> tableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
+        return new BeanTableFormat<T>(null, propertyNames, columnLabels, editable);
     }
 
     /**
@@ -193,8 +192,8 @@ public final class GlazedLists {
      *      {@link AdvancedTableFormat#getColumnComparator(int)} by examining the
      *      classes of the column value.
      */
-    public static TableFormat tableFormat(Class baseClass, String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        return new BeanTableFormat(baseClass, propertyNames, columnLabels, editable);
+    public static <T> TableFormat<T> tableFormat(Class<T> baseClass, String[] propertyNames, String[] columnLabels, boolean[] editable) {
+        return new BeanTableFormat<T>(baseClass, propertyNames, columnLabels, editable);
     }
 
 
@@ -206,8 +205,8 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches the given JavaBean
      * properties.
      */
-    public static TextFilterator textFilterator(String[] propertyNames) {
-        return new BeanTextFilterator(propertyNames);
+    public static <E> TextFilterator<E> textFilterator(String[] propertyNames) {
+        return new BeanTextFilterator<E>(propertyNames);
     }
 
     /**
@@ -226,8 +225,8 @@ public final class GlazedLists {
      * Creates a {@link ThresholdEvaluator} that uses Reflection to utilize an
      * integer JavaBean property as the threshold evaluation.
      */
-    public static ThresholdEvaluator thresholdEvaluator(String propertyName) {
-        return new BeanThresholdEvaluator(propertyName);
+    public static <E> ThresholdEvaluator<E> thresholdEvaluator(String propertyName) {
+        return new BeanThresholdEvaluator<E>(propertyName);
     }
 
     // CollectionListModels   // // // // // // // // // // // // // // // // //
@@ -237,8 +236,8 @@ public final class GlazedLists {
      * are the elements of a parent {@link EventList}. This can be used to compose
      * {@link EventList}s from other {@link EventList}s.
      */
-    public static CollectionListModel listCollectionListModel() {
-        return new ListCollectionListModel();
+    public static <E> CollectionListModel<E,EventList<E>> listCollectionListModel() {
+        return new ListCollectionListModel<E>();
     }
 
 
@@ -249,8 +248,8 @@ public final class GlazedLists {
      * {@link Collection}. The {@link EventList}'s order will be determined by
      * {@link Collection#iterator() contents.iterator()}.
      */
-    public static EventList eventList(Collection contents) {
-        BasicEventList result = new BasicEventList();
+    public static <E> EventList<E> eventList(Collection<? extends E> contents) {
+        final EventList<E> result = new BasicEventList<E>();
         if(contents != null) result.addAll(contents);
         return result;
     }
@@ -271,8 +270,8 @@ public final class GlazedLists {
      * is thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public static TransformedList readOnlyList(EventList source) {
-        return new ReadOnlyList(source);
+    public static <E> TransformedList<E,E> readOnlyList(EventList<E> source) {
+        return new ReadOnlyList<E>(source);
     }
 
     /**
@@ -304,8 +303,8 @@ public final class GlazedLists {
      *
      * @see ca.odell.glazedlists.util.concurrent
      */
-    public static TransformedList threadSafeList(EventList source) {
-        return new ThreadSafeList(source);
+    public static <E> TransformedList<E,E> threadSafeList(EventList<E> source) {
+        return new ThreadSafeList<E>(source);
     }
 
     /**
@@ -331,8 +330,8 @@ public final class GlazedLists {
      *
      * @see java.lang.ref.WeakReference
      */
-    public static ListEventListener weakReferenceProxy(EventList source, ListEventListener target) {
-        return new WeakReferenceProxy(source, target);
+    public static <E> ListEventListener<E> weakReferenceProxy(EventList<E> source, ListEventListener<E> target) {
+        return new WeakReferenceProxy<E>(source, target);
     }
 
     // ObservableElementList Connectors // // // // // // // // // // // // //
@@ -350,8 +349,8 @@ public final class GlazedLists {
      *      or similar methods.
      * @return an ObservableElementList.Connector for the specified class
      */
-    public static ObservableElementList.Connector beanConnector(Class beanClass) {
-        return new JavaBeanEventListConnector(beanClass);
+    public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass) {
+        return new JavaBeanEventListConnector<E>(beanClass);
     }
 
     /**
@@ -365,8 +364,8 @@ public final class GlazedLists {
      * @param removeListener a method name such as "removePropertyChangeListener"
      * @return an ObservableElementList.Connector for the specified class
      */
-    public static ObservableElementList.Connector beanConnector(Class beanClass, String addListener, String removeListener) {
-        return new JavaBeanEventListConnector(beanClass, addListener, removeListener);
+    public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, String addListener, String removeListener) {
+        return new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener);
     }
 
     // Matchers // // // // // // // // // // // // // // // // // // // // // // //
@@ -374,8 +373,8 @@ public final class GlazedLists {
     /**
      * Get a {@link MatcherEditor} that is fixed on the specified {@link Matcher}.
      */
-    public static MatcherEditor fixedMatcherEditor(Matcher matcher) {
-        return new FixedMatcherEditor(matcher);
+    public static <E> MatcherEditor<E> fixedMatcherEditor(Matcher<E> matcher) {
+        return new FixedMatcherEditor<E>(matcher);
     }
 
 
@@ -420,7 +419,7 @@ public final class GlazedLists {
      *      synchronization, use
      *      {@link EventList#removeListEventListener(ListEventListener)}.
      */
-    public static ListEventListener syncEventListToList(EventList source, List target) {
-        return new SyncListener(source, target);
+    public static <E> ListEventListener<E> syncEventListToList(EventList<E> source, List<E> target) {
+        return new SyncListener<E>(source, target);
     }
 }

@@ -18,7 +18,7 @@ import java.util.EventListener;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author James Lemieux
  */
-public class JavaBeanEventListConnector implements ObservableElementList.Connector {
+public class JavaBeanEventListConnector<E> implements ObservableElementList.Connector<E> {
 
     /** The method to use when installing a PropertyChangeListener on an object. */
     private Method addListenerMethod = null;
@@ -27,7 +27,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
     private Method removeListenerMethod = null;
 
     /** The list which contains the elements being observed via this {@link ObservableElementList.Connector}. */
-    private ObservableElementList list = null;
+    private ObservableElementList<E> list = null;
 
     /** The PropertyChangeListener to install on each list element. */
     protected PropertyChangeListener propertyChangeListener = new PropertyChangeHandler();
@@ -58,7 +58,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
      * @throws IllegalArgumentException if <code>beanClass</code> does not contain methods
      *      matching the format described
      */
-    public JavaBeanEventListConnector(Class beanClass) {
+    public JavaBeanEventListConnector(Class<E> beanClass) {
         final Method[] methods = beanClass.getMethods();
         for(int m = 0; m < methods.length; m++) {
             if(methods[m].getParameterTypes().length != 1) continue;
@@ -84,7 +84,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
      * @throws IllegalArgumentException if <code>beanClass</code> does not contain the named
      *      methods or if the methods do no take a PropertyChangeListener as the single parameter
      */
-    public JavaBeanEventListConnector(Class beanClass, String addListenerMethodName, String removeListenerMethodName) {
+    public JavaBeanEventListConnector(Class<E> beanClass, String addListenerMethodName, String removeListenerMethodName) {
         try {
             this.addListenerMethod = beanClass.getMethod(addListenerMethodName, new Class[] { PropertyChangeListener.class });
             this.removeListenerMethod = beanClass.getMethod(removeListenerMethodName, new Class[] { PropertyChangeListener.class });
@@ -104,7 +104,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
      * @throws RuntimeException if the reflection call fails to successfully
      *      install the PropertyChangeListener
      */
-    public EventListener installListener(Object element) {
+    public EventListener installListener(E element) {
         try {
             this.addListenerMethod.invoke(element, this.reflectionParameters);
             return this.propertyChangeListener;
@@ -126,7 +126,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
      * @throws RuntimeException if the reflection call fails to successfully
      *      uninstall the PropertyChangeListener
      */
-    public void uninstallListener(Object element, EventListener listener) {
+    public void uninstallListener(E element, EventListener listener) {
         try {
             this.removeListenerMethod.invoke(element, this.reflectionParameters);
         } catch (IllegalAccessException e) {
@@ -137,7 +137,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
     }
 
     /** {@inheritDoc} */
-    public void setObservableElementList(ObservableElementList list) {
+    public void setObservableElementList(ObservableElementList<E> list) {
         this.list = list;
     }
 
@@ -148,7 +148,7 @@ public class JavaBeanEventListConnector implements ObservableElementList.Connect
      */
     public class PropertyChangeHandler implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
-            list.elementChanged(event.getSource());
+            list.elementChanged((E) event.getSource());
         }
     }
 }

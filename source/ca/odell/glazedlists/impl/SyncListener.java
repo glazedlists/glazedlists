@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-
 import java.util.*;
 // the core glazed lists packages
 import ca.odell.glazedlists.event.*;
@@ -15,10 +14,10 @@ import ca.odell.glazedlists.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SyncListener implements ListEventListener {
+public class SyncListener<E> implements ListEventListener<E> {
 
     /** the list to sync against the {@link EventList}. */
-    private List target;
+    private List<E> target;
 
     /** remember sync list size to attempt to detect drifts */
     private int targetSize;
@@ -28,7 +27,7 @@ public class SyncListener implements ListEventListener {
      * specified source {@link EventList} and copies its data to the
      * specified target {@link List}.
      */
-    public SyncListener(EventList source, List target) {
+    public SyncListener(EventList<E> source, List<E> target) {
         this.target = target;
         target.clear();
         target.addAll(source);
@@ -42,8 +41,8 @@ public class SyncListener implements ListEventListener {
 
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
-        EventList source = listChanges.getSourceList();
+    public void listChanged(ListEvent<E> listChanges) {
+        EventList<E> source = listChanges.getSourceList();
 
         // if the list sizes don't match, we have a problem
         if(target.size() != targetSize) {

@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public interface CollectionListModel {
+public interface CollectionListModel<E,S> {
     
 	/**
 	 * Return a list of the child nodes for a parent node.
@@ -23,5 +23,5 @@ public interface CollectionListModel {
 	 * @param parent The parent node.
 	 * @return A List containing the child nodes.
 	 */
-	public List getChildren(Object parent);
+	public List<E> getChildren(S parent);
 }

@@ -218,7 +218,7 @@ public final class ListEvent<E> extends EventObject {
     /**
      * Gets the List where this event originally occured.
      */
-    public EventList getSourceList() {
+    public EventList<E> getSourceList() {
         return sourceList;
     }
     

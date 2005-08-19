@@ -205,20 +205,26 @@
         <property environment="env"/>
         <echo message="using JAVA HOME = ${env.JAVA_HOME}"/>
         <echo message="using tools = ${env.JAVA_HOME}/lib/tools.jar"/>
-        <delete dir="java14_build"/>
-        <mkdir dir="java14_build/source"/>
+        <delete dir="java14_glazedlists"/>
+        <mkdir dir="java14_glazedlists/source"/>
         <java classname="ca.odell.glazedlists.impl.java15.Declawer">
             <classpath>
                 <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
                 <pathelement path="classes"/>
             </classpath>
-            <arg value="source"/>
-            <arg value="classes"/>
-            <arg value="java14_build/source"/>
+            <arg value="source:test"/>
+            <arg value="${ant.home}/lib/junit.jar"/>
+            <arg value="java14_glazedlists/source"/>
         </java>
-        <mkdir dir="java14_build/classes"/>
-        <javac destdir="java14_build/classes" srcdir="java14_build/source" debug="on" source="1.4" target="1.4" deprecation="on">
+        <mkdir dir="java14_glazedlists/classes"/>
+        <javac destdir="java14_glazedlists/classes" srcdir="java14_build/source" debug="on" source="1.4" target="1.4" deprecation="on">
         </javac>
+        <copy todir="java14_glazedlists">
+            <fileset dir=".">
+                <exclude name="source"/>
+                <exclude name="test"/>
+            </fileset>
+        </copy>
         <!--<tstamp prefix="jar">-->
             <!--<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>-->
         <!--</tstamp>-->

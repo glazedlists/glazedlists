@@ -11,11 +11,11 @@ import ca.odell.glazedlists.ThresholdEvaluator;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class BeanThresholdEvaluator implements ThresholdEvaluator {
+public final class BeanThresholdEvaluator<E> implements ThresholdEvaluator<E> {
 
     private String propertyName = null;
 
-    private BeanProperty beanProperty = null;
+    private BeanProperty<E> beanProperty = null;
 
     public BeanThresholdEvaluator(String propertyName) {
         this.propertyName = propertyName;
@@ -26,7 +26,7 @@ public final class BeanThresholdEvaluator implements ThresholdEvaluator {
      * compare that object against a threshold.  This value is
      * not relative to any other object unlike a <code>Comparator</code>.
      */
-    public int evaluate(Object object) {
+    public int evaluate(E object) {
         if(beanProperty == null) loadPropertyDescriptors(object);
         Object property = beanProperty.get(object);
         return ((Integer)property).intValue();
@@ -37,7 +37,7 @@ public final class BeanThresholdEvaluator implements ThresholdEvaluator {
      * access methods using the property names.
      */
     private void loadPropertyDescriptors(Object beanObject) {
-        Class beanClass = beanObject.getClass();
-        beanProperty = new BeanProperty(beanClass, propertyName, true, false);
+        Class<E> beanClass = (Class<E>) beanObject.getClass();
+        beanProperty = new BeanProperty<E>(beanClass, propertyName, true, false);
     }
 }

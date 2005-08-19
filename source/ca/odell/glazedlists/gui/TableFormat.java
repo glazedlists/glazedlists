@@ -10,7 +10,7 @@ package ca.odell.glazedlists.gui;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public interface TableFormat {
+public interface TableFormat<E> {
 
     /**
      * The number of columns to display.
@@ -28,5 +28,5 @@ public interface TableFormat {
      * column. If you have defined a custom renderer, you may choose to return
      * simply the baseObject.
      */
-    public Object getColumnValue(Object baseObject, int column);
+    public Object getColumnValue(E baseObject, int column);
 }

@@ -52,10 +52,10 @@ public class BeanTextFilterator<E> implements TextFilterator<E> {
      * access methods using the property names.
      */
     private void loadPropertyDescriptors(E beanObject) {
-        Class beanClass = beanObject.getClass();
+        Class<E> beanClass = (Class<E>) beanObject.getClass();
         beanProperties = new BeanProperty[propertyNames.length];
         for(int p = 0; p < propertyNames.length; p++) {
-            beanProperties[p] = new BeanProperty(beanClass, propertyNames[p], true, false);
+            beanProperties[p] = new BeanProperty<E>(beanClass, propertyNames[p], true, false);
         }
     }
 }

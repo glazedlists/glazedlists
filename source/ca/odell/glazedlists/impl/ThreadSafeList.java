@@ -39,25 +39,25 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThreadSafeList extends TransformedList {
+public final class ThreadSafeList<E> extends TransformedList<E,E> {
 
     /**
      * Creates a {@link ThreadSafeList} that provides thread safe access to all
      * methods in the source {@link EventList}.
      */
-    public ThreadSafeList(EventList source) {
+    public ThreadSafeList(EventList<E> source) {
         super(source);
         source.addListEventListener(this);
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
     }
 
     /** {@inheritDoc} */
-    public Object get(int index) {
+    public E get(int index) {
         getReadWriteLock().readLock().lock();
         try {
             return source.get(index);
@@ -92,7 +92,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public boolean containsAll(Collection collection) {
+    public boolean containsAll(Collection<?> collection) {
         getReadWriteLock().readLock().lock();
         try {
             return source.containsAll(collection);
@@ -162,7 +162,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public Object[] toArray(Object[] array) {
+    public <T> T[] toArray(T[] array) {
         getReadWriteLock().readLock().lock();
         try {
             return source.toArray(array);
@@ -172,7 +172,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public boolean add(Object value) {
+    public boolean add(E value) {
         getReadWriteLock().writeLock().lock();
         try {
             return source.add(value);
@@ -192,7 +192,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public boolean addAll(Collection values) {
+    public boolean addAll(Collection<? extends E> values) {
         getReadWriteLock().writeLock().lock();
         try {
             return source.addAll(values);
@@ -202,7 +202,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public boolean addAll(int index, Collection values) {
+    public boolean addAll(int index, Collection<? extends E> values) {
         getReadWriteLock().writeLock().lock();
         try {
             return source.addAll(index, values);
@@ -212,7 +212,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public boolean removeAll(Collection values) {
+    public boolean removeAll(Collection<?> values) {
         getReadWriteLock().writeLock().lock();
         try {
             return source.removeAll(values);
@@ -222,7 +222,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public boolean retainAll(Collection values) {
+    public boolean retainAll(Collection<?> values) {
         getReadWriteLock().writeLock().lock();
         try {
             return source.retainAll(values);
@@ -242,7 +242,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public Object set(int index, Object value) {
+    public E set(int index, E value) {
         getReadWriteLock().writeLock().lock();
         try {
             return source.set(index, value);
@@ -252,7 +252,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public void add(int index, Object value) {
+    public void add(int index, E value) {
         getReadWriteLock().writeLock().lock();
         try {
             source.add(index, value);
@@ -262,7 +262,7 @@ public final class ThreadSafeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public Object remove(int index) {
+    public E remove(int index) {
         getReadWriteLock().writeLock().lock();
         try {
             return source.remove(index);

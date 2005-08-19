@@ -18,7 +18,7 @@ package ca.odell.glazedlists.gui;
  * @see AdvancedTableFormat
  * @see TableFormat
  */
-public interface WritableTableFormat extends TableFormat {
+public interface WritableTableFormat<E> extends TableFormat<E> {
 
     /**
      * For editing fields. This returns true if the specified Object in the
@@ -30,7 +30,7 @@ public interface WritableTableFormat extends TableFormat {
      * @return true if the object and column are editable, false otherwise.
      * @since 2004-August-27, as a replacement for isColumnEditable(int).
      */
-    public boolean isEditable(Object baseObject, int column);
+    public boolean isEditable(E baseObject, int column);
     
     /**
      * Sets the specified field of the base object to the edited value. When
@@ -45,5 +45,5 @@ public interface WritableTableFormat extends TableFormat {
      *      If not null, the EventTableModel will set() this revised value in
      *      the list and overwrite the previous value.
      */
-    public Object setColumnValue(Object baseObject, Object editedValue, int column);
+    public E setColumnValue(E baseObject, Object editedValue, int column);
 }

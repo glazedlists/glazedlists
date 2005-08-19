@@ -10,7 +10,7 @@ import ca.odell.glazedlists.gui.*;
  * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class IntegerTableFormat implements TableFormat {
+public class IntegerTableFormat implements TableFormat<Integer> {
     
     public int getColumnCount() {
         return 1;
@@ -20,7 +20,7 @@ public class IntegerTableFormat implements TableFormat {
         return "Value";
     }
 
-    public Object getColumnValue(Object baseObject, int column) {
+    public Object getColumnValue(Integer baseObject, int column) {
         return baseObject;
     }
 }
