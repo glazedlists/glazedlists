@@ -213,24 +213,24 @@ public class CollectionList extends TransformedList implements ListEventListener
     /**
      * Helper for {@link #listChanged(ListEvent)} when deleting.
      */
-    private void handleDelete(int parentIndex) {
+    private void handleDelete(int sourceIndex) {
         // Find the index of the black node with that index
-        int absoluteIndex = getAbsoluteIndex(parentIndex);
-        int nextNodeIndex = getAbsoluteIndex(parentIndex+1);
+        int parentIndex = getAbsoluteIndex(sourceIndex);
+        int nextParentIndex = getAbsoluteIndex(sourceIndex + 1);
         
         // update the list of child lists
-        ChildElement removedChildElement = (ChildElement)childElements.removeByIndex(parentIndex).getValue();
+        ChildElement removedChildElement = (ChildElement)childElements.removeByIndex(sourceIndex).getValue();
         removedChildElement.dispose();
         
         // update the barcode
-        int removeRange = nextNodeIndex - absoluteIndex;
-        barcode.remove(absoluteIndex, removeRange);
+        int childCount = nextParentIndex - parentIndex - 1; // subtract one for the parent
+        barcode.remove(parentIndex, 1 + childCount); // delete the parent and all children
 
-        // add events
-        int childrenToDelete = removeRange - 2; // 1 for parent and 1 for inclusive ranges
-        if(childrenToDelete > 0) {
-            int childIndex = absoluteIndex - parentIndex;
-            updates.addDelete(childIndex, childIndex + childrenToDelete);
+        // fire events
+        if(childCount > 0) {
+            int firstDeletedChildIndex = parentIndex - sourceIndex;
+            int firstNotDeletedChildIndex = firstDeletedChildIndex + childCount;
+            updates.addDelete(firstDeletedChildIndex, firstNotDeletedChildIndex - 1); // inclusive ranges
         }
     }
     
