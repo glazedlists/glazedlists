@@ -241,7 +241,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
     public static void setIconPath(String path) {
         icons = SortIconFactory.loadIcons(path);
     }
-    
+
     /**
      * The SortArrowHeaderRenderer simply delegates most of the rendering
      * to the previous renderer, and adds an icon to indicate sorting
@@ -256,9 +256,6 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
         /** the renderer to delegate */
         private TableCellRenderer delegateRenderer;
 
-        /** whether we can inject icons into this renderer */
-        private boolean iconInjection = false;
-
         /**
          * Creates a new SortArrowHeaderRenderer that delegates most drawing
          * to the tables current header renderer.
@@ -266,9 +263,6 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
         public SortArrowHeaderRenderer() {
             // find the delegate
             this.delegateRenderer = table.getTableHeader().getDefaultRenderer();
-
-            // determine if we can inject icons into the delegate
-            iconInjection = (delegateRenderer instanceof DefaultTableCellRenderer);
         }
 
         /**
@@ -283,15 +277,16 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
          */
         public Component getTableCellRendererComponent(JTable table, Object value,
         boolean isSelected, boolean hasFocus, int row, int column) {
-            if(iconInjection) {
-                DefaultTableCellRenderer jLabelRenderer = (DefaultTableCellRenderer)delegateRenderer;
-                Icon iconToUse = icons[getSortingStyle(column)];
-                jLabelRenderer.setIcon(iconToUse);
-                jLabelRenderer.setHorizontalTextPosition(SwingConstants.LEADING);
-                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            } else {
-                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            final Component rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if(rendered instanceof JLabel) {
+                final JLabel label = (JLabel) rendered;
+                final Icon iconToUse = icons[getSortingStyle(column)];
+                label.setIcon(iconToUse);
+                label.setHorizontalTextPosition(SwingConstants.LEADING);
             }
+
+            return rendered;
         }
     }
 }
