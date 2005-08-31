@@ -429,7 +429,8 @@ public class IssuesBrowser {
      *
      */
     public static void main(String[] args) {
-        System.setProperty("java.library.path", ".");
+//        System.setProperty("java.library.path", ".");
+        System.out.println(System.getProperty("java.library.path"));
 
         Display display = new Display();
         Shell parent = new Shell(display);
