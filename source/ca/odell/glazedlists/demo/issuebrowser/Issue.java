@@ -10,7 +10,7 @@ import ca.odell.glazedlists.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class Issue implements TextFilterable, Comparable {
+public class Issue implements TextFilterable, Comparable<Issue> {
 
     // mandatory issue fields
     private Integer id = null;
@@ -34,19 +34,19 @@ public class Issue implements TextFilterable, Comparable {
     private String votes = null;
     private String operatingSystem = null;
     private String shortDescription = null;
-    private PeerIssue isDuplicate = null;
+    private PeerIssue duplicate = null;
     // optional fields
-    private List keywords = new ArrayList();
-    private List blocks = new ArrayList();
-    private List cc = new ArrayList();
+    private List<String> keywords = new ArrayList<String>();
+    private List<PeerIssue> blocks = new ArrayList<PeerIssue>();
+    private List<String> cc = new ArrayList<String>();
     // issue rich fields
-    private List descriptions = new ArrayList();
-    private List attachments = new ArrayList();
-    private List activities = new ArrayList();
-    private List duplicates = new ArrayList();
-    private List dependsOn = new ArrayList();
+    private List<Description> descriptions = new ArrayList<Description>();
+    private List<Attachment> attachments = new ArrayList<Attachment>();
+    private List<Activity> activities = new ArrayList<Activity>();
+    private List<PeerIssue> duplicates = new ArrayList<PeerIssue>();
+    private List<PeerIssue> dependsOn = new ArrayList<PeerIssue>();
     
-    private List allUsers = null;
+    private List<String> allUsers = null;
 
     /**
      * Creates a new empty issue.
@@ -58,15 +58,15 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * Gets all users related to this issue.
      */
-    public List getAllUsers() {
+    public List<String> getAllUsers() {
         // init the users list if necessary
         if(allUsers == null) {
-            allUsers = new ArrayList();
+            allUsers = new ArrayList<String>();
             if(assignedTo != null) allUsers.add(assignedTo);
             if(reporter != null) allUsers.add(reporter);
             if(qaContact != null) allUsers.add(qaContact);
-            for(Iterator d = descriptions.iterator(); d.hasNext(); ) {
-                Description description = (Description)d.next();
+            for(Iterator<Description> d = descriptions.iterator(); d.hasNext(); ) {
+                Description description = d.next();
                 allUsers.add(description.getWho());
             }
         }
@@ -343,14 +343,14 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * List of keywords for this issue.
      */
-    public List getKeywords() {
+    public List<String> getKeywords() {
         return keywords;
     }
 
     /**
      * List of email addresses of interested parties.s
      */
-    public List getCC() {
+    public List<String> getCC() {
         return cc;
     }
 
@@ -358,42 +358,42 @@ public class Issue implements TextFilterable, Comparable {
      * Data from the longdescs table for this issue id.  Essentially
      * the log of additional comments.
      */
-    public List getDescriptions() {
+    public List<Description> getDescriptions() {
         return descriptions;
     }
 
     /**
      * Get the attachments to this issue.
      */
-    public List getAttachments() {
+    public List<Attachment> getAttachments() {
         return attachments;
     }
 
     /**
      * Get the activity upon this issue.
      */
-    public List getActivities() {
+    public List<Activity> getActivities() {
         return activities;
     }
 
     /**
      * Other issues which were closed as a duplicate of this issue.
      */
-    public List getDuplicates() {
+    public List<PeerIssue> getDuplicates() {
         return duplicates;
     }
 
     /**
      * List of local issue IDs that depend on this one.
      */
-    public List getDependsOn() {
+    public List<PeerIssue> getDependsOn() {
         return dependsOn;
     }
 
     /**
      * List of local issue IDs blocked by this one.
      */
-    public List getBlocks() {
+    public List<PeerIssue> getBlocks() {
         return blocks;
     }
 
@@ -401,10 +401,10 @@ public class Issue implements TextFilterable, Comparable {
      * The issue which this issue was closed as a duplicate of.
      */
     public PeerIssue getDuplicate() {
-        return isDuplicate;
+        return duplicate;
     }
     public void setDuplicate(PeerIssue peerIssue) {
-        this.isDuplicate = isDuplicate;
+        this.duplicate = peerIssue;
     }
 
     /**
@@ -417,18 +417,17 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * Compares two issues by ID.
      */
-    public int compareTo(Object other) {
+    public int compareTo(Issue other) {
         if (other == null) return -1;
-        Issue otherIssue = (Issue) other;
-        return id.compareTo(otherIssue.id);
+        return id.compareTo(other.id);
     }
 
     /**
      * Gets the strings to filter this issue by.
      */
-    public void getFilterStrings(List baseList) {
+    public void getFilterStrings(List<String> baseList) {
         // the displayed strings
-        baseList.add(id);
+        baseList.add(id.toString());
         baseList.add(issueType);
         baseList.add(priority.toString());
         baseList.add(status);

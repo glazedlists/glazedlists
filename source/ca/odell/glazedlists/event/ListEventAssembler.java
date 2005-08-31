@@ -263,12 +263,16 @@ public final class ListEventAssembler<E> {
             // bail on empty changes
             if(atomicChangeBlocks.isEmpty()) return;
 
-            // protect against the listener set changing via a duplicate list
+            // Protect against the listener set changing via a duplicate list.
+            // Some listeners (ie. WeakReferenceProxy) remove themselves as listeners
+            // from within their listChanged() method. If we don't make protective
+            // copies, these lists will change while we're operating on them.
             List<ListEventListener> listenersToNotify = new ArrayList<ListEventListener>(listeners);
             List<ListEvent<E>> listenerEventsToNotify = new ArrayList<ListEvent<E>>(listenerEvents);
+
             // perform the notification on the duplicate list
             publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
-            
+
         // clear the change for the next caller
         } finally {
             atomicChangeBlocks = null;

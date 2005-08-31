@@ -236,7 +236,7 @@ public final class GlazedLists {
      * are the elements of a parent {@link EventList}. This can be used to compose
      * {@link EventList}s from other {@link EventList}s.
      */
-    public static <E> CollectionListModel<E,EventList<E>> listCollectionListModel() {
+    public static <E> CollectionListModel<EventList<E>,E> listCollectionListModel() {
         return new ListCollectionListModel<E>();
     }
 

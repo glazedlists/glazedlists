@@ -25,32 +25,26 @@ public class IssueTableFormat implements AdvancedTableFormat<Issue> {
             case 3: return "State";
             case 4: return "Result";
             case 5: return "Summary";
+            default: throw new IllegalStateException();
         }
-		return null;
 	}
 
 	public Class getColumnClass(int column) {
 		switch(column) {
-			case 0:
-				return Integer.class;
-			case 2:
-				return Priority.class;
-			default:
-				return String.class;
+			case 0: return Integer.class;
+			case 2: return Priority.class;
+			default: return String.class;
 		}
 	}
 
 	public Comparator getColumnComparator(int column) {
-        if(column == 5) {
-            return GlazedLists.caseInsensitiveComparator();
-        } else {
-            return GlazedLists.comparableComparator();
+        switch(column) {
+            case 5: return GlazedLists.caseInsensitiveComparator();
+            default: return GlazedLists.comparableComparator();
         }
 	}
 
 	public Object getColumnValue(Issue issue, int column) {
-		if (issue == null) return null;
-
         switch (column) {
             case 0: return issue.getId();
             case 1: return issue.getIssueType();
@@ -58,7 +52,7 @@ public class IssueTableFormat implements AdvancedTableFormat<Issue> {
             case 3: return issue.getStatus();
             case 4: return issue.getResolution();
             case 5: return issue.getShortDescription();
+            default: throw new IllegalStateException();
         }
-		return null;
 	}
 }

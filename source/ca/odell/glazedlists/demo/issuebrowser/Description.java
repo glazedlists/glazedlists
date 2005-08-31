@@ -1,7 +1,6 @@
 package ca.odell.glazedlists.demo.issuebrowser;
 
 // GlazedLists
-
 import ca.odell.glazedlists.*;
 // For dates and lists
 import java.util.*;
@@ -53,7 +52,7 @@ public class Description implements TextFilterable {
 	/**
 	 * Gets the strings to filter this issue by.
 	 */
-	public void getFilterStrings(List baseList) {
+	public void getFilterStrings(List<String> baseList) {
 		baseList.add(text);
 		baseList.add(who);
 	}

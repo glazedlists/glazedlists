@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
+import javax.swing.*;
 import java.util.*;
 // NIO
 import java.nio.*;

@@ -36,6 +36,12 @@ import ca.odell.glazedlists.matchers.*;
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
+ * @deprecated as of 17-August-2005, this class is replaced with {@link FilterList}
+ *      and {@link MatcherEditor}. The reason for this is that {@link AbstractFilterList}
+ *      is inherently unsafe due to the matches() method being called
+ *      while the matching state is being changed. This class should appear in
+ *      the Glazed Lists 0.9.x migration kit.
+ *
  * @since 2004
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

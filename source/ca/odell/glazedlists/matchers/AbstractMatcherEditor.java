@@ -51,7 +51,7 @@ public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
      */
     protected final void fireMatchAll() {
 		this.currentMatcher = Matchers.trueMatcher();
-        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_ALL));
+        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_ALL, this.currentMatcher));
     }
 
     /**
@@ -88,7 +88,7 @@ public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
      */
     protected final void fireMatchNone() {
 		this.currentMatcher = Matchers.falseMatcher();
-        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_NONE));
+        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_NONE, this.currentMatcher));
     }
 
     protected final void fireChangedMatcher(MatcherEditor.Event<E> event) {

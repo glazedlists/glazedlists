@@ -117,10 +117,6 @@ public interface MatcherEditor<E> {
         private final Matcher<E> matcher;
         private final int type;
 
-        public Event(MatcherEditor<E> matcherEditor, int changeType) {
-            this(matcherEditor, changeType, null);
-        }
-
         public Event(MatcherEditor<E> matcherEditor, int changeType, Matcher<E> matcher) {
             super(matcherEditor);
             this.matcherEditor = matcherEditor;

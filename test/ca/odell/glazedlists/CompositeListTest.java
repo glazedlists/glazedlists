@@ -160,7 +160,6 @@ public class CompositeListTest extends TestCase {
         mcDonalds.add("McLean Deluxe");
         
         CompositeList fastFood = new CompositeList();
-        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
 
@@ -186,5 +185,22 @@ public class CompositeListTest extends TestCase {
         fastFoodVerify.addAll(mcDonalds);
         fastFoodVerify.addAll(mcDonalds);
         assertEquals(fastFoodVerify, fastFood);
+    }
+
+    /**
+     * Test that {@link CompositeList} is well behaved when only a single element
+     * is removed.
+     */
+    public void testSingleElements() {
+        EventList alpha = new BasicEventList();
+        alpha.add("A");
+        EventList beta = new BasicEventList();
+        beta.add("B");
+
+        CompositeList aToB = new CompositeList();
+        aToB.addListEventListener(new ConsistencyTestList(aToB, "AtoB", false));
+        aToB.addMemberList(alpha);
+        aToB.removeMemberList(alpha);
+        aToB.addMemberList(beta);
     }
 }

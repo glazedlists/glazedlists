@@ -23,5 +23,5 @@ public interface CollectionListModel<E,S> {
 	 * @param parent The parent node.
 	 * @return A List containing the child nodes.
 	 */
-	public List<E> getChildren(S parent);
+	public List<S> getChildren(E parent);
 }

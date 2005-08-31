@@ -28,13 +28,13 @@ import javax.swing.table.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventTableModel extends AbstractTableModel implements ListEventListener {
+public class EventTableModel<E> extends AbstractTableModel implements ListEventListener<E> {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList swingSource = null;
+    private TransformedList<E,E> swingThreadSource = null;
 
     /** Specifies how to render table headers and sort */
-    private TableFormat tableFormat;
+    private TableFormat<E> tableFormat;
 
     /** Reusable table event for broadcasting changes */
     private MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
@@ -43,12 +43,12 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * Creates a new table that renders the specified list in the specified
      * format.
      */
-    public EventTableModel(EventList source, TableFormat tableFormat) {
-        swingSource = GlazedListsSwing.swingThreadProxyList(source);
+    public EventTableModel(EventList<E> source, TableFormat<E> tableFormat) {
+        this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
         this.tableFormat = tableFormat;
 
         // prepare listeners
-        swingSource.addListEventListener(this);
+        swingThreadSource.addListEventListener(this);
     }
 
     /**
@@ -70,14 +70,14 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * @param writable an array of booleans specifying which of the columns in
      *      your table are writable.
      */
-    public EventTableModel(EventList source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
-        this(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
+    public EventTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
+        this(source, (TableFormat<E>) GlazedLists.tableFormat(propertyNames, columnLabels, writable));
     }
 
     /**
      * Gets the Table Format.
      */
-    public TableFormat getTableFormat() {
+    public TableFormat<E> getTableFormat() {
         return tableFormat;
     }
     /**
@@ -90,7 +90,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * the best performance, the scroll pane may be scrolled to the top to
      * prevent a delay while rendering off-screen cells.
      */
-    public void setTableFormat(TableFormat tableFormat) {
+    public void setTableFormat(TableFormat<E> tableFormat) {
         this.tableFormat = tableFormat;
         tableModelEvent.setStructureChanged();
         fireTableChanged(tableModelEvent);
@@ -104,17 +104,17 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      *
      * @see ca.odell.glazedlists.swing.EventTableModel#getValueAt(int,int) ListTable
      */
-    public Object getElementAt(int index) {
-        swingSource.getReadWriteLock().readLock().lock();
+    public E getElementAt(int index) {
+        swingThreadSource.getReadWriteLock().readLock().lock();
         try {
             // ensure that this value still exists before retrieval
-            if(index < swingSource.size()) {
-                return swingSource.get(index);
+            if(index < swingThreadSource.size()) {
+                return swingThreadSource.get(index);
             } else {
                 return null;
             }
         } finally {
-            swingSource.getReadWriteLock().readLock().unlock();
+            swingThreadSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -130,8 +130,8 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * then the entire table is notified as changed. Otherwise only the descrete
      * areas that changed are notified.
      */
-    public void listChanged(ListEvent listChanges) {
-        swingSource.getReadWriteLock().readLock().lock();
+    public void listChanged(ListEvent<E> listChanges) {
+        swingThreadSource.getReadWriteLock().readLock().lock();
         try {
             // for all changes, one block at a time
             while(listChanges.nextBlock()) {
@@ -144,7 +144,7 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
                 fireTableChanged(tableModelEvent);
             }
         } finally {
-            swingSource.getReadWriteLock().readLock().unlock();
+            swingThreadSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -159,11 +159,11 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * The number of rows equals the number of entries in the source event list.
      */
     public int getRowCount() {
-        swingSource.getReadWriteLock().readLock().lock();
+        swingThreadSource.getReadWriteLock().readLock().lock();
         try {
-            return swingSource.size();
+            return swingThreadSource.size();
         } finally {
-            swingSource.getReadWriteLock().readLock().unlock();
+            swingThreadSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -202,16 +202,16 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * anyway.
      */
     public Object getValueAt(int row, int column) {
-        swingSource.getReadWriteLock().readLock().lock();
+        swingThreadSource.getReadWriteLock().readLock().lock();
         try {
             // ensure that this value still exists before retrieval
             if(row < getRowCount()) {
-                return tableFormat.getColumnValue(swingSource.get(row), column);
+                return tableFormat.getColumnValue(swingThreadSource.get(row), column);
             } else {
                 return null;
             }
         } finally {
-            swingSource.getReadWriteLock().readLock().unlock();
+            swingThreadSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -222,13 +222,13 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public boolean isCellEditable(int row, int column) {
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
-            WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
-            swingSource.getReadWriteLock().readLock().lock();
+            WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
+            swingThreadSource.getReadWriteLock().readLock().lock();
             try {
-                Object toEdit = swingSource.get(row);
+                E toEdit = swingThreadSource.get(row);
                 return writableTableFormat.isEditable(toEdit, column);
             } finally {
-                swingSource.getReadWriteLock().readLock().unlock();
+                swingThreadSource.getReadWriteLock().readLock().unlock();
             }
         // this is not a writable table
         } else {
@@ -243,19 +243,19 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
     public void setValueAt(Object editedValue, int row, int column) {
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
-            swingSource.getReadWriteLock().writeLock().lock();
+            swingThreadSource.getReadWriteLock().writeLock().lock();
             try {
-                WritableTableFormat writableTableFormat = (WritableTableFormat)tableFormat;
+                WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
                 // get the object being edited from the source list
-                Object baseObject = swingSource.get(row);
+                E baseObject = swingThreadSource.get(row);
                 // tell the table format to set the value based on what it knows
-                Object updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
+                E updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
                 // update the list with the revised value
                 if(updatedObject != null) {
-                    swingSource.set(row, updatedObject);
+                    swingThreadSource.set(row, updatedObject);
                 }
             } finally {
-                swingSource.getReadWriteLock().writeLock().unlock();
+                swingThreadSource.getReadWriteLock().writeLock().unlock();
             }
         // this is not a writable table
         } else {
@@ -278,6 +278,6 @@ public class EventTableModel extends AbstractTableModel implements ListEventList
      * to call any method on a {@link EventTableModel} after it has been disposed.
      */
     public void dispose() {
-        swingSource.dispose();
+        swingThreadSource.dispose();
     }
 }

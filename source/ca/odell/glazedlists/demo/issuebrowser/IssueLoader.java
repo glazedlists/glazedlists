@@ -20,9 +20,9 @@ public class IssueLoader implements Runnable {
     private Project project = null;
     private Throbber throbber = null;
     private Thread issueLoaderThread = null;
-    private EventList issuesList = null;
+    private EventList<Issue> issuesList = null;
     
-    public IssueLoader(EventList issuesList, Throbber throbber) {
+    public IssueLoader(EventList<Issue> issuesList, Throbber throbber) {
         this.issuesList = GlazedLists.threadSafeList(issuesList);
         this.throbber = throbber;
     }
@@ -93,4 +93,3 @@ public class IssueLoader implements Runnable {
         }
     }
 }
-

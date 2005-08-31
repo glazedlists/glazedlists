@@ -33,19 +33,19 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class EventSelectionModel implements ListSelectionModel {
+public final class EventSelectionModel<E> implements ListSelectionModel {
 
     /** the event lists that provide an event list view of the selection */
-    private ListSelection listSelection;
+    private ListSelection<E> listSelection;
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList swingSource;
+    private TransformedList<E,E> swingThreadSource;
 
     /** whether the user can modify the selection */
     private boolean enabled = true;
 
     /** listeners to notify when the selection changes */
-    private List listeners = new ArrayList();
+    private List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
 
     /** whether there are a series of changes on the way */
     private boolean valueIsAdjusting = false;
@@ -64,11 +64,11 @@ public final class EventSelectionModel implements ListSelectionModel {
      *      be the same {@link EventList} passed to the constructor of your
      *      {@link EventTableModel} or {@link EventListModel}.
      */
-    public EventSelectionModel(EventList source) {
-        swingSource = GlazedListsSwing.swingThreadProxyList(source);
+    public EventSelectionModel(EventList<E> source) {
+        swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
 
         // build a list for reading the selection
-        this.listSelection = new ListSelection(swingSource);
+        this.listSelection = new ListSelection<E>(swingThreadSource);
         listSelection.addSelectionListener(new SwingSelectionListener());
     }
 
@@ -78,14 +78,14 @@ public final class EventSelectionModel implements ListSelectionModel {
      * @deprecated As of 2005/02/18, the naming of this method became
      *             ambiguous.  Please use {@link #getSelected()}.
      */
-    public EventList getEventList() {
+    public EventList<E> getEventList() {
         return getSelected();
     }
 
     /**
      * Gets an {@link EventList} that always contains the current selection.
      */
-    public EventList getSelected() {
+    public EventList<E> getSelected() {
         return listSelection.getSelected();
     }
 
@@ -93,7 +93,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      * Gets an {@link EventList} that always contains the items from the source
      * that are currently deselected.
      */
-    public EventList getDeselected() {
+    public EventList<E> getDeselected() {
         return listSelection.getDeselected();
     }
 
@@ -154,8 +154,8 @@ public final class EventSelectionModel implements ListSelectionModel {
 
         // fire the change
         ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
-        for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-            ListSelectionListener listener = (ListSelectionListener)i.next();
+        for(Iterator<ListSelectionListener> i = listeners.iterator(); i.hasNext(); ) {
+            ListSelectionListener listener = i.next();
             listener.valueChanged(event);
         }
     }
@@ -196,7 +196,7 @@ public final class EventSelectionModel implements ListSelectionModel {
      */
     public void removeSelectionInterval(int index0, int index1) {
         if(!enabled) return;
-        if(index0 == 0 && index1 == 0 && swingSource.isEmpty()) return; // hack for Java 5 compatibility
+        if(index0 == 0 && index1 == 0 && swingThreadSource.isEmpty()) return; // hack for Java 5 compatibility
         listSelection.deselect(index0, index1);
     }
 

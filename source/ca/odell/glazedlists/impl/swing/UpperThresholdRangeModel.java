@@ -7,8 +7,6 @@ package ca.odell.glazedlists.impl.swing;
 import ca.odell.glazedlists.*;
 // Swing toolkit stuff for implementing models
 import javax.swing.*;
-// for responding to user actions
-import javax.swing.event.*;
 
 /**
  * A UpperThresholdRangeModel provides an implementation of a bounded-range

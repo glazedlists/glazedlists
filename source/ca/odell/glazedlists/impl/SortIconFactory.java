@@ -24,13 +24,14 @@ public final class SortIconFactory {
     /** a map of look and feels to resource paths for icons */
     private static final String resourceRoot = "resources";
     private static final String defaultResourcePath = "aqua";
-    private static final Map lookAndFeelResourcePathMap = new HashMap();
+    private static final Map<String,String> lookAndFeelResourcePathMap = new HashMap<String,String>();
     static {
         lookAndFeelResourcePathMap.put("Mac OS X Aqua", "aqua");
         lookAndFeelResourcePathMap.put("Metal/Steel", "metal");
         lookAndFeelResourcePathMap.put("Metal/Ocean", "ocean");
         lookAndFeelResourcePathMap.put("Classic Windows", "windows");
         lookAndFeelResourcePathMap.put("Windows XP", "windowsxp");
+        lookAndFeelResourcePathMap.put("WinLAF", "windowsxp");
     }
 
     /** the icons to use for indicating sort order */
@@ -55,19 +56,19 @@ public final class SortIconFactory {
     public static Icon[] loadIcons() {
         // if we've already loaded the default icons, return them
         if(defaultIcons != null) return defaultIcons;
-        
+
         // detect the current look & feel
         String lookAndFeelName = UIManager.getLookAndFeel().getName();
         if(lookAndFeelName.equals("Metal")) lookAndFeelName = PLAFDetector.getMetalTheme();
         else if(lookAndFeelName.equals("Windows")) lookAndFeelName = PLAFDetector.getWindowsTheme();
-        String resourcePath = (String)lookAndFeelResourcePathMap.get(lookAndFeelName);
+        String resourcePath = lookAndFeelResourcePathMap.get(lookAndFeelName);
         if(resourcePath == null) resourcePath = defaultResourcePath;
-        
+
         // save and return the default icons
         defaultIcons = loadIcons(resourceRoot + "/" + resourcePath);
         return defaultIcons;
     }
-    
+
     /**
      * Loads the set of icons from the specified path.
      */
@@ -79,10 +80,10 @@ public final class SortIconFactory {
         Icon[] pathIcons = new Icon[iconFileNames.length];
         for(int i = 0; i < pathIcons.length; i++) {
             URL iconLocation = jarLoader.getResource(path + "/" + iconFileNames[i]);
-            if(iconLocation != null) pathIcons[i] = new ImageIcon(iconLocation);
-            else pathIcons[i] = null;
+            if(iconLocation != null)
+                pathIcons[i] = new ImageIcon(iconLocation);
         }
-        
+
         // return the loaded result
         return pathIcons;
     }

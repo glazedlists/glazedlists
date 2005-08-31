@@ -4,9 +4,11 @@
 package ca.odell.glazedlists.event;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
-// for keeping a list of changes
-import java.util.*;
+import ca.odell.glazedlists.EventList;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Manager for distributing {@link ListEvent}s to {@link ListEventListener}s.

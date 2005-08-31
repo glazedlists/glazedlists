@@ -30,7 +30,7 @@ public class IssuezillaXMLParser {
     // hardcode the servers in California
     static { dateFormat.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles")); }
 
-    private static SortedSet ISSUE_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> ISSUE_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         ISSUE_SIMPLE_FIELDS.add("issue_id");
         ISSUE_SIMPLE_FIELDS.add("issue_status");
@@ -57,14 +57,14 @@ public class IssuezillaXMLParser {
         ISSUE_SIMPLE_FIELDS.add("cc");
     }
 
-    private static SortedSet DESCRIPTION_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> DESCRIPTION_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         DESCRIPTION_SIMPLE_FIELDS.add("who");
         DESCRIPTION_SIMPLE_FIELDS.add("issue_when");
         DESCRIPTION_SIMPLE_FIELDS.add("thetext");
     }
 
-    private static SortedSet ATTACHMENT_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> ATTACHMENT_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         ATTACHMENT_SIMPLE_FIELDS.add("mimetype");
         ATTACHMENT_SIMPLE_FIELDS.add("attachid");
@@ -78,7 +78,7 @@ public class IssuezillaXMLParser {
         ATTACHMENT_SIMPLE_FIELDS.add("attachment_iz_url");
     }
 
-    private static SortedSet ACTIVITY_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> ACTIVITY_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         ACTIVITY_SIMPLE_FIELDS.add("user");
         ACTIVITY_SIMPLE_FIELDS.add("when");
@@ -88,7 +88,7 @@ public class IssuezillaXMLParser {
         ACTIVITY_SIMPLE_FIELDS.add("newvalue");
     }
 
-    private static SortedSet RELATIONSHIP_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> RELATIONSHIP_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         RELATIONSHIP_SIMPLE_FIELDS.add("issue_id");
         RELATIONSHIP_SIMPLE_FIELDS.add("who");
@@ -105,7 +105,7 @@ public class IssuezillaXMLParser {
             return;
         }
 
-        BasicEventList issuesList = new BasicEventList();
+        EventList<Issue> issuesList = new BasicEventList<Issue>();
         loadIssues(issuesList, new FileInputStream(args[0]));
         System.out.println(issuesList);
     }
@@ -113,7 +113,7 @@ public class IssuezillaXMLParser {
     /**
      * Loads issues from the specified URL.
      */
-    public static void loadIssues(EventList target, String baseUrl) throws IOException {
+    public static void loadIssues(EventList<Issue> target, String baseUrl) throws IOException {
         int issuesPerRequest = 100;
 
         // continuously load issues until there's no more
@@ -147,7 +147,7 @@ public class IssuezillaXMLParser {
      * commands to reproduce a lightweight version of this list. This is useful
      * to load the issues as code rather than XML.
      */
-    public static void loadIssues(EventList target, InputStream source) throws IOException {
+    public static void loadIssues(EventList<Issue> target, InputStream source) throws IOException {
         try {
             // configure a SAX parser
             XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
@@ -207,11 +207,11 @@ public class IssuezillaXMLParser {
      * The IssueHandler does the real parsing.
      */
     static class IssueHandler extends AbstractSimpleElementHandler {
-        private EventList issues = null;
+        private EventList<Issue> issues = null;
         private Issue currentIssue;
         private AbstractSimpleElementHandler simpleElementHandler = null;
 
-        public IssueHandler(EventList issues) {
+        public IssueHandler(EventList<Issue> issues) {
             super(null, "issue", ISSUE_SIMPLE_FIELDS);
             this.issues = issues;
             parent = this;
@@ -220,7 +220,7 @@ public class IssuezillaXMLParser {
         /**
          * Gets the list of issues parsed by this handler.
          */
-        public List getIssues() {
+        public List<Issue> getIssues() {
             return issues;
         }
 
@@ -469,22 +469,6 @@ public class IssuezillaXMLParser {
         }
     }
 
-    /**
-     * Convert the specified literal String to a String that the Java compiler
-     * can parse.
-     */
-    private static String escapeToJava(String text) {
-        StringBuffer result = new StringBuffer();
-        for(int c = 0; c < text.length(); c++) {
-            char letter = text.charAt(c);
-            if (letter == '\"') result.append("\\\"");
-            else if (letter == '\\') result.append("\\\\");
-            else if (letter == '\n') result.append("\\n");
-            else result.append(letter);
-        }
-        return result.toString();
-    }
-
 
     /**
      * A simple class for parsing issuezilla element blocks that contain no
@@ -497,15 +481,13 @@ public class IssuezillaXMLParser {
         private Set acceptableFields = null;
         private StringBuffer currentValue;
 
-        protected AbstractSimpleElementHandler(IssueHandler parent, String hostElement,
-            Set acceptableFields) {
+        protected AbstractSimpleElementHandler(IssueHandler parent, String hostElement, Set acceptableFields) {
             this.parent = parent;
             this.hostElement = hostElement;
             this.acceptableFields = acceptableFields;
         }
 
-        public void startElement(String uri, String localName, String qName,
-            Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
             if(currentField != null) {
                 parent.addException(this + " expected end of element " + currentField + " but found " + qName);
             } else if(acceptableFields.contains(qName)) {

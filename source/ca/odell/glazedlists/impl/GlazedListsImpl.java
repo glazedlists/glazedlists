@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-import java.util.*;
-
 /**
  * A utility class containing all sorts of random things that are useful for
  * implementing Glazed Lists but not for using Glazed Lists.

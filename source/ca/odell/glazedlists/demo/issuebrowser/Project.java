@@ -1,7 +1,8 @@
 package ca.odell.glazedlists.demo.issuebrowser;
 
 // GlazedLists
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.BasicEventList;
 
 /**
  * Models a project on Java.net.
@@ -11,9 +12,9 @@ import ca.odell.glazedlists.*;
 public class Project {
 
     /** the sample projects */
-    private static EventList projects;
+    private static final EventList<Project> projects;
     static {
-		projects = new BasicEventList();
+		projects = new BasicEventList<Project>();
 		projects.add(new Project("glazedlists", "Glazed Lists"));
 		projects.add(new Project("lg3d-core", "Project Looking Glass Core"));
 		projects.add(new Project("java-net", "Java.net Watercooler"));
@@ -48,14 +49,14 @@ public class Project {
         return url;
     }
 
-    public String toString() {
-        return projectTitle;
-    }
-    
     /**
      * Get a list of all projects.
      */
-    public static EventList getProjects() {
+    public static EventList<Project> getProjects() {
         return projects;
+    }
+
+    public String toString() {
+        return projectTitle;
     }
 }

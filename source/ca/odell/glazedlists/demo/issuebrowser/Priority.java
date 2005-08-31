@@ -13,25 +13,24 @@ public final class Priority implements Comparable {
 	public static final Priority P4 = new Priority(4);
 	public static final Priority P5 = new Priority(5);
 
-	/**
-	 * the name of this particular priority
-	 */
-	private int value;
+	/** The value of this particular priority. */
+	private final int value;
 
-	/**
+    private Priority(int value) {
+        this.value = value;
+    }
+
+    /**
 	 * Lookup the correct static instance based on the given input string.
 	 */
 	public static Priority lookup(String priority_name) {
-		if (priority_name == null) return null;
+		if ("P1".equals(priority_name)) return P1;
+		if ("P2".equals(priority_name)) return P2;
+		if ("P3".equals(priority_name)) return P3;
+		if ("P4".equals(priority_name)) return P4;
+		if ("P5".equals(priority_name)) return P5;
 
-		if (priority_name.equals("P1")) return P1;
-		if (priority_name.equals("P2")) return P2;
-		if (priority_name.equals("P3")) return P3;
-		if (priority_name.equals("P4")) return P4;
-		if (priority_name.equals("P5")) return P5;
-
-		throw new IllegalArgumentException("Priority \"" + priority_name +
-			"\" not found.");
+		throw new IllegalArgumentException("Priority \"" + priority_name + "\" not found.");
 	}
 
 	/**
@@ -41,31 +40,25 @@ public final class Priority implements Comparable {
 		return 125 - (value * 25);
 	}
 
+    public int compareTo(Object o) {
+        // Note: toggle the sign because P1 is a "higher" priority than P5, etc.
+        return value - ((Priority) o).value;
+    }
 
-	private Priority(int value) {
-		this.value = value;
-	}
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-	public String toString() {
-		return "P" + value;
-	}
+        final Priority priority = (Priority) o;
 
-	public int hashCode() {
-		return value;
-	}
+        return value == priority.value;
+    }
 
-	public boolean equals(Object obj) {
-		if (obj == this) return true;
+    public int hashCode() {
+        return value;
+    }
 
-		if (obj == null || !getClass().equals(obj.getClass())) return false;
-
-		Priority other = (Priority) obj;
-
-		return value == other.value;
-	}
-
-	public int compareTo(Object o) {
-		// Note: toggle the sign because P1 is a "higher" priority than P5, etc.
-		return value - ((Priority) o).value;
-	}
+    public String toString() {
+        return "P" + value;
+    }
 }

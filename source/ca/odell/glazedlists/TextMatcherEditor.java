@@ -1,5 +1,5 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
-/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/* <a href="http://publicobject.com/glazedlists/">http://publicobject.com/glazedlists/</a>                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
@@ -13,13 +13,13 @@ import ca.odell.glazedlists.impl.filter.*;
  * subclasses. This matcher is fully concrete, and may be used directly by
  * headless applications.
  *
- * <p>The {@link TextMatcherEditor} requires that either a
+ * &lt;p&gt;The {@link TextMatcherEditor} requires that either a
  * {@link TextFilterator} be specified in its constructor, or that every Object
  * matched implements the {@link TextFilterable} interface. These
  * are used to specify the {@link String}s to search for each Object.
  *
  * @author James Lemieux
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author &lt;a href="mailto:<a href="mailto:jesse@odel.on.ca">jesse@odel.on.ca</a>"&gt;Jesse Wilson&lt;/a&gt;
  */
 public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
@@ -33,7 +33,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
      * implement the {@link TextFilterable} interface.
      *
-     * <p>The {@link Matcher}s from this {@link MatcherEditor} will fire a
+     * &lt;p&gt;The {@link Matcher}s from this {@link MatcherEditor} will fire a
      * {@link ClassCastException} when called with an Object that does not implement
      * {@link TextFilterable}.
      */
@@ -46,11 +46,18 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * specified {@link TextFilterator} to get the {@link String}s to search.
      *
      * @param filterator the object that will extract filter Strings from each
-     *      object in the <code>source</code>; <code>null</code> indicates the
+     *      object in the &lt;code&gt;source&lt;/code&gt;; &lt;code&gt;null&lt;/code&gt; indicates the
      *      list elements implement {@link TextFilterable}
      */
     public TextMatcherEditor(TextFilterator<E> filterator) {
         this.filterator = filterator;
+    }
+
+    /**
+     * Get the filterator used to extract Strings from the matched elements.
+     */
+    public TextFilterator getFilterator() {
+        return filterator;
     }
 
     /**
@@ -65,7 +72,6 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         // fire the event only as necessary
         if(!TextMatcher.isFilterEqual(oldFilters, filters)) {
-
             // classify the change in filter and apply the new filter to this list
             if(filters.length == 0) {
                 fireMatchAll();

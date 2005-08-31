@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.demo.issuebrowser.swing;
 
-// glazed lists
-
 import ca.odell.glazedlists.demo.issuebrowser.Description;
 
 // for displaying the table cell as HTML
@@ -17,10 +15,9 @@ import java.text.*;
 // for rendering this component inside of a table
 import javax.swing.text.*;
 
-
 /**
  * A {@link TableCellRenderer} for displaying descriptions in a cell.
- * <p/>
+ * 
  * <p>This displays a multi-line description in HTML using a custom renderer
  * from the renderpack project.
  *
@@ -195,8 +192,7 @@ abstract class StyledRenderer implements TableCellRenderer {
 	 *               a small set of predefined formats accessible only to extending
 	 *               classes via protected members.
 	 */
-	public static void append(DefaultStyledDocument targetDocument, String text,
-		Style format) {
+	public static void append(DefaultStyledDocument targetDocument, String text, Style format) {
 		try {
 			int offset = targetDocument.getLength();
 			targetDocument.insertString(offset, text, format);
@@ -216,4 +212,3 @@ abstract class StyledRenderer implements TableCellRenderer {
 		}
 	}
 }
-

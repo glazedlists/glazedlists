@@ -12,10 +12,10 @@ import ca.odell.glazedlists.gui.TableFormat;
 /**
  * A comparator that sorts a table by the column that was clicked.
  */
-public class TableColumnComparator implements Comparator {
+public class TableColumnComparator<E> implements Comparator<E> {
 
     /** the table format knows to map objects to their fields */
-    private TableFormat tableFormat;
+    private TableFormat<E> tableFormat;
 
     /** the field of interest */
     private int column;
@@ -27,7 +27,7 @@ public class TableColumnComparator implements Comparator {
      * Creates a new TableColumnComparator that sorts objects by the specified
      * column using the specified table format.
      */
-    public TableColumnComparator(TableFormat tableFormat, int column) {
+    public TableColumnComparator(TableFormat<E> tableFormat, int column) {
         this(tableFormat, column, GlazedLists.comparableComparator());
     }
 
@@ -35,7 +35,7 @@ public class TableColumnComparator implements Comparator {
      * Creates a new TableColumnComparator that sorts objects by the specified
      * column using the specified table format and the specified comparator.
      */
-    public TableColumnComparator(TableFormat tableFormat, int column, Comparator comparator) {
+    public TableColumnComparator(TableFormat<E> tableFormat, int column, Comparator comparator) {
         this.column = column;
         this.tableFormat = tableFormat;
         this.comparator = comparator;
@@ -44,7 +44,7 @@ public class TableColumnComparator implements Comparator {
     /**
      * Compares the two objects, returning a result based on how they compare.
      */
-    public int compare(Object alpha, Object beta) {
+    public int compare(E alpha, E beta) {
         Object alphaField = tableFormat.getColumnValue(alpha, column);
         Object betaField = tableFormat.getColumnValue(beta, column);
         try {
@@ -66,14 +66,24 @@ public class TableColumnComparator implements Comparator {
      * Test if this TableColumnComparator is equal to the other specified
      * TableColumnComparator.
      */
-    public boolean equals(Object other) {
-        if(!(other instanceof TableColumnComparator)) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        TableColumnComparator otherTableColumnComparator = (TableColumnComparator)other;
-        if(!otherTableColumnComparator.tableFormat.equals(tableFormat)) return false;
-        if(otherTableColumnComparator.column != column) return false;
-        if(!comparator.equals(otherTableColumnComparator.comparator)) return false;
+        final TableColumnComparator that = (TableColumnComparator) o;
+
+        if (column != that.column) return false;
+        if (!comparator.equals(that.comparator)) return false;
+        if (!tableFormat.equals(that.tableFormat)) return false;
 
         return true;
+    }
+
+    public int hashCode() {
+        int result;
+        result = tableFormat.hashCode();
+        result = 29 * result + column;
+        result = 29 * result + comparator.hashCode();
+        return result;
     }
 }

@@ -13,7 +13,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListCollectionListModel<E> implements CollectionListModel<E,EventList<E>> {
+public class ListCollectionListModel<E> implements CollectionListModel<EventList<E>,E> {
     public List<E> getChildren(EventList<E> parent) {
         if(parent == null) return Collections.EMPTY_LIST;
         return parent;

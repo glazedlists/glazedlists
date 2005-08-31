@@ -47,10 +47,10 @@ import ca.odell.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class ThreadProxyEventList extends TransformedList {
+public abstract class ThreadProxyEventList<E> extends TransformedList<E,E> {
     
     /** a local cache of the source list */
-    private List localCache = new ArrayList();
+    private List<E> localCache = new ArrayList<E>();
     
     /** propagates events on the Swing thread */
     private UpdateRunner updateRunner = new UpdateRunner();
@@ -62,7 +62,7 @@ public abstract class ThreadProxyEventList extends TransformedList {
         
     /**
      */
-    public ThreadProxyEventList(EventList source) {
+    public ThreadProxyEventList(EventList<E> source) {
         super(source);
         
         // populate the initial cache value
@@ -76,7 +76,7 @@ public abstract class ThreadProxyEventList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public final void listChanged(ListEvent listChanges) {
+    public final void listChanged(ListEvent<E> listChanges) {
         // if we've haven't scheduled a commit, we need to begin a new event
         if(!scheduled) {
             //if(debug) System.out.print("\nBEGIN[" + Thread.currentThread().getName() + "]");
@@ -105,7 +105,7 @@ public abstract class ThreadProxyEventList extends TransformedList {
     }
     
     /** {@inheritDoc} */
-    public final Object get(int index) {
+    public final E get(int index) {
         return localCache.get(index);
     }
 
@@ -146,15 +146,13 @@ public abstract class ThreadProxyEventList extends TransformedList {
          */
         public void listChanged(ListEvent listChanges) {
             while(listChanges.next()) {
-                int sourceIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
+                final int sourceIndex = listChanges.getIndex();
+                final int changeType = listChanges.getType();
 
-                if(changeType == ListEvent.DELETE) {
-                    localCache.remove(sourceIndex);
-                } else if(changeType == ListEvent.INSERT) {
-                    localCache.add(sourceIndex, source.get(sourceIndex));
-                } else if(changeType == ListEvent.UPDATE) {
-                    localCache.set(sourceIndex, source.get(sourceIndex));
+                switch (changeType) {
+                    case ListEvent.DELETE: localCache.remove(sourceIndex); break;
+                    case ListEvent.INSERT: localCache.add(sourceIndex, source.get(sourceIndex)); break;
+                    case ListEvent.UPDATE: localCache.set(sourceIndex, source.get(sourceIndex)); break;
                 }
             }
         }

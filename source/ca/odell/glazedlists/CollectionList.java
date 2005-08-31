@@ -40,7 +40,7 @@ public class CollectionList<E,S> extends TransformedList<E,S> implements ListEve
     private final ChildElement<E> EMPTY_CHILD_ELEMENT = new SimpleChildElement(Collections.EMPTY_LIST, null);
 
     /** used to extract children */
-    private final CollectionListModel<E,S> collectionListModel;
+    private final CollectionListModel<S,E> collectionListModel;
 
     /**
      * Barcode containing the node mappings. There is a black node for each parent
@@ -55,7 +55,7 @@ public class CollectionList<E,S> extends TransformedList<E,S> implements ListEve
      * Create a {@link CollectionList} that's contents will be the children of the
      * elements in the specified source {@link EventList}.
      */
-    public CollectionList(EventList<S> source, CollectionListModel<E,S> collectionListModel) {
+    public CollectionList(EventList<S> source, CollectionListModel<S,E> collectionListModel) {
         super(source);
         if(collectionListModel == null) throw new IllegalArgumentException("Collection map cannot be null");
 
@@ -216,24 +216,24 @@ public class CollectionList<E,S> extends TransformedList<E,S> implements ListEve
     /**
      * Helper for {@link #listChanged(ListEvent)} when deleting.
      */
-    private void handleDelete(int parentIndex) {
+    private void handleDelete(int sourceIndex) {
         // Find the index of the black node with that index
-        int absoluteIndex = getAbsoluteIndex(parentIndex);
-        int nextNodeIndex = getAbsoluteIndex(parentIndex+1);
+        int parentIndex = getAbsoluteIndex(sourceIndex);
+        int nextParentIndex = getAbsoluteIndex(sourceIndex + 1);
         
         // update the list of child lists
-        ChildElement<E> removedChildElement = childElements.removeByIndex(parentIndex).getValue();
+        ChildElement<E> removedChildElement = childElements.removeByIndex(sourceIndex).getValue();
         removedChildElement.dispose();
         
         // update the barcode
-        int removeRange = nextNodeIndex - absoluteIndex;
-        barcode.remove(absoluteIndex, removeRange);
+        int childCount = nextParentIndex - parentIndex - 1; // subtract one for the parent
+        barcode.remove(parentIndex, 1 + childCount); // delete the parent and all children
 
-        // add events
-        int childrenToDelete = removeRange - 2; // 1 for parent and 1 for inclusive ranges
-        if(childrenToDelete > 0) {
-            int childIndex = absoluteIndex - parentIndex;
-            updates.addDelete(childIndex, childIndex + childrenToDelete);
+        // fire events
+        if(childCount > 0) {
+            int firstDeletedChildIndex = parentIndex - sourceIndex;
+            int firstNotDeletedChildIndex = firstDeletedChildIndex + childCount;
+            updates.addDelete(firstDeletedChildIndex, firstNotDeletedChildIndex - 1); // inclusive ranges
         }
     }
     

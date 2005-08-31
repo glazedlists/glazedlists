@@ -8,11 +8,10 @@ import ca.odell.glazedlists.EventList;
 
 import java.util.*;
 
-
 /**
  * Implementation of Eugene W. Myer's paper, "An O(ND) Difference Algorithm and Its
  * Variations", the same algorithm found in GNU diff.
- * <p/>
+ *
  * <p>Note that this is a cleanroom implementation of this popular algorithm that is
  * particularly suited for the Java programmer. The variable names are descriptive and the
  * approach is more object-oriented than Myer's sample algorithm.
@@ -25,7 +24,7 @@ public final class Diff {
      * Convenience method for {@link #replaceAll(EventList,List,boolean,Comparator) replaceAll()}
      * that uses {@link Object#equals(Object)} to determine equality.
      */
-    public static void replaceAll(EventList target, List source, boolean updates) {
+    public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates) {
         replaceAll(target, source, updates, new EqualsComparator());
     }
 
@@ -40,9 +39,9 @@ public final class Diff {
      * @param updates whether to fire update events for Objects that are equal in both
      *                {@link List}s.
      */
-    public static void replaceAll(EventList target, List source, boolean updates, Comparator comparator) {
-        DiffMatcher listDiffMatcher = new ListDiffMatcher(target, source, comparator);
-        List editScript = shortestEditScript(listDiffMatcher);
+    public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates, Comparator<E> comparator) {
+        DiffMatcher listDiffMatcher = new ListDiffMatcher<E>(target, source, comparator);
+        List<Point> editScript = shortestEditScript(listDiffMatcher);
         
         // target is x axis. Changes in X mean advance target index
         // source is y axis. Changes to y mean advance source index
@@ -51,8 +50,8 @@ public final class Diff {
 
         // walk through points, applying changes as they arrive
         Point previousPoint = null;
-        for(Iterator i = editScript.iterator(); i.hasNext();) {
-            Point currentPoint = (Point) i.next();
+        for(Iterator<Point> i = editScript.iterator(); i.hasNext();) {
+            Point currentPoint = i.next();
             
             // skip the first point
             if(previousPoint == null) {
@@ -98,7 +97,7 @@ public final class Diff {
     /**
      * Calculate the length of the longest common subsequence for the specified input.
      */
-    private static List shortestEditScript(DiffMatcher input) {
+    private static List<Point> shortestEditScript(DiffMatcher input) {
         // calculate limits based on the size of the input matcher
         int N = input.getAlphaLength();
         int M = input.getBetaLength();
@@ -107,7 +106,7 @@ public final class Diff {
         
         // use previous round furthest reaching D-path to determine the 
         // new furthest reaching (D+1)-path
-        Map furthestReachingPoints = new HashMap();
+        Map<Integer,Point> furthestReachingPoints = new HashMap<Integer,Point>();
 
         // walk through in stages, each stage adding one non-diagonal.
         // D == count of non-diagonals in current stage
@@ -120,8 +119,8 @@ public final class Diff {
                 // either of these may be null. The terms 'below left' and 'above right'
                 // refer to the diagonals that the points are on and may not be
                 // representative of the point positions
-                Point belowLeft = (Point)furthestReachingPoints.get(new Integer(k - 1));
-                Point aboveRight = (Point)furthestReachingPoints.get(new Integer(k + 1));
+                Point belowLeft = furthestReachingPoints.get(new Integer(k - 1));
+                Point aboveRight = furthestReachingPoints.get(new Integer(k + 1));
                 
                 // the new furthest reaching point to create
                 Point point;
@@ -169,19 +168,19 @@ public final class Diff {
             return;
         }
 
-        String alpha = args[ 0 ];
-        EventList alphaList = new BasicEventList();
+        String alpha = args[0];
+        EventList<Character> alphaList = new BasicEventList<Character>();
         for (int c = 0; c < alpha.length(); c++) {
             alphaList.add(new Character(alpha.charAt(c)));
         }
 
-        String beta = args[ 1 ];
-        List betaList = new ArrayList();
+        String beta = args[1];
+        List<Character> betaList = new ArrayList<Character>();
         for (int c = 0; c < beta.length(); c++) {
             betaList.add(new Character(beta.charAt(c)));
         }
 
-        drawGrid(new ListDiffMatcher(alphaList, betaList, null));
+        drawGrid(new ListDiffMatcher<Character>(alphaList, betaList, null));
 
         replaceAll(alphaList, betaList, false, null);
         System.out.println(alphaList);
@@ -295,8 +294,8 @@ public final class Diff {
          * Get a trail from the original point to this point. This is a list of all points
          * created via a series of {@link #createDeltaPoint(int,int)} calls.
          */
-        public List trail() {
-            List reverse = new ArrayList();
+        public List<Point> trail() {
+            List<Point> reverse = new ArrayList<Point>();
             Point current = this;
             while (current != null) {
                 reverse.add(current);
@@ -363,12 +362,12 @@ public final class Diff {
     /**
      * Matcher for Lists.
      */
-    private static class ListDiffMatcher implements DiffMatcher {
-        private List alpha;
-        private List beta;
-        private Comparator comparator;
+    private static class ListDiffMatcher<E> implements DiffMatcher {
+        private List<E> alpha;
+        private List<E> beta;
+        private Comparator<E> comparator;
 
-        public ListDiffMatcher(List alpha, List beta, Comparator comparator) {
+        public ListDiffMatcher(List<E> alpha, List<E> beta, Comparator<E> comparator) {
             this.alpha = alpha;
             this.beta = beta;
             this.comparator = comparator;

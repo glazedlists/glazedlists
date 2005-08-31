@@ -10,7 +10,7 @@ import java.lang.reflect.*;
 
 /**
  * A PLAFDetector provides a means to discover which versions of themes
- * are in being used on the host system.
+ * are available on the host system.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -40,7 +40,7 @@ public final class PLAFDetector {
 
     /**
      * Workaround method to get the Windows theme, either "Windows Classic" or
-     * "Windows XP". This test for Windows XP is also an ugly hack because Swing's
+     * "Windows XP". The test for Windows XP is also an ugly hack because Swing's
      * pluggable look-and-feel provides no alternative means for determining if
      * the current theme is XP. For compatibility, the algorithm to determine if
      * the style is XP is derived from similar code in the XPStyle class.

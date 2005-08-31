@@ -15,19 +15,15 @@ import javax.swing.event.*;
 import java.awt.event.*;
 import java.applet.*;
 import java.awt.*;
-import java.net.URL;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
-import java.util.Set;
-import java.util.HashSet;
 import java.text.MessageFormat;
 
 /**
@@ -37,29 +33,25 @@ import java.text.MessageFormat;
  */
 public class IssuesBrowser extends Applet {
 
-    /** these don't belong here at all */
+    /** trippin the light fantastic: the Glazed Lists rainbow in all its day-glo glory */
     private static final Color GLAZED_LISTS_ORANGE = new Color(255, 119, 0);
     private static final Color GLAZED_LISTS_ORANGE_LIGHT = new Color(241, 212, 189);
-
     private static final Color BLUE_DARK = new Color(126, 165, 232);
     private static final Color BLUE_LIGHT = new Color(197, 210, 232);
-
     private static final Border BLACK_LINE_BORDER = BorderFactory.createLineBorder(Color.BLACK);
 
     /** A header renderer that paints a gradient background from BLUE_DARK to BLUE_LIGHT */
     private static final GradientTableHeaderCellRenderer DEFAULT_HEADER_RENDERER = new GradientTableHeaderCellRenderer(BLUE_DARK, BLUE_LIGHT);
 
     /** an event list to host the issues */
-    private UniqueList issuesEventList = new UniqueList(new BasicEventList());
+    private EventList<Issue> issuesEventList = new BasicEventList<Issue>();
 
     /** the currently selected issues */
-    private EventSelectionModel issuesSelectionModel = null;
-
-    private TableModel issuesTableModel = null;
+    private EventSelectionModel<Issue> issuesSelectionModel = null;
 
     private Issue descriptionIssue = null;
     /** an event list to host the descriptions */
-    private EventList descriptions = new BasicEventList();
+    private EventList<Description> descriptions = new BasicEventList<Description>();
 
     /** monitor loading the issues */
     private JLabel throbber = null;
@@ -83,16 +75,8 @@ public class IssuesBrowser extends Applet {
      * Loads the issues browser as standalone or as an applet.
      */
     public IssuesBrowser(boolean applet) {
-        if (applet) {
-            constructApplet();
-        } else {
-            constructStandalone();
-        }
-
-        // debug a problem where the thread is getting interrupted
-        if (Thread.currentThread().isInterrupted()) {
-            new Exception("thread has been interrupted").printStackTrace();
-        }
+        if (applet) constructApplet();
+        else constructStandalone();
 
         // start loading the issues
         issueLoader.start();
@@ -112,11 +96,7 @@ public class IssuesBrowser extends Applet {
     private void constructStandalone() {
         // create a frame with that panel
         JFrame frame = new JFrame("Issues");
-//        if (!Launcher.runningInLauncher()) {
-            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-//        } else {
-//            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-//        }
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
@@ -132,23 +112,26 @@ public class IssuesBrowser extends Applet {
         // create a MatcherEditor which edits the filter text
         final JTextField filterTextField = new JTextField();
         filterTextField.setBorder(BLACK_LINE_BORDER);
-        final MatcherEditor<String> textFilterMatcherEditor = new ThreadedMatcherEditor<String>(new TextComponentMatcherEditor(filterTextField, null));
+        final MatcherEditor<Issue> textFilterMatcherEditor = new ThreadedMatcherEditor<Issue>(new TextComponentMatcherEditor<Issue>(filterTextField, null));
 
         // create a MatcherEditor which edits the state filter
-        StateMatcherEditor stateMatcherEditor = new StateMatcherEditor();
+        final IssuesStateMatcherEditor stateMatcherEditor = new IssuesStateMatcherEditor();
+
+        // create a MatcherEditor for selecting a user
+        final IssuesUserMatcherEditor userMatcherEditor = new IssuesUserMatcherEditor(issuesEventList);
 
         // create the pipeline of glazed lists
-        IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
-        FilterList issuesStateFiltered = new FilterList(issuesUserFiltered, stateMatcherEditor);
-        FilterList issuesTextFiltered = new FilterList(issuesStateFiltered, textFilterMatcherEditor);
-        ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-        final SortedList issuesSortedList = new SortedList(priorityList);
+        final FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, new ThreadedMatcherEditor<Issue>(userMatcherEditor));
+        final FilterList<Issue> issuesStateFiltered = new FilterList<Issue>(issuesUserFiltered, stateMatcherEditor);
+        final FilterList<Issue> issuesTextFiltered = new FilterList<Issue>(issuesStateFiltered, textFilterMatcherEditor);
+        final ThresholdList<Issue> priorityList = new ThresholdList<Issue>(issuesTextFiltered, "priority.rating");
+        final SortedList<Issue> issuesSortedList = new SortedList<Issue>(priorityList);
 
         // issues table
-        issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
+        TableModel issuesTableModel = new EventTableModel<Issue>(issuesSortedList, new IssueTableFormat());
         issuesSortedList.addListEventListener(new CountUpdater());
         JTable issuesJTable = new JTable(issuesTableModel);
-        issuesSelectionModel = new EventSelectionModel(issuesSortedList);
+        issuesSelectionModel = new EventSelectionModel<Issue>(issuesSortedList);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
@@ -160,18 +143,18 @@ public class IssuesBrowser extends Applet {
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
         issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
-        new TableComparatorChooser(issuesJTable, issuesSortedList, true);
+        new TableComparatorChooser<Issue>(issuesJTable, issuesSortedList, true);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         issuesTableScrollPane.setBorder(BLACK_LINE_BORDER);
         issuesTableScrollPane.setOpaque(false);
         issuesTableScrollPane.getViewport().setOpaque(false);
 
         // users table
-        JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane usersListScrollPane = new JScrollPane(userMatcherEditor.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         usersListScrollPane.setBorder(BLACK_LINE_BORDER);
 
         // descriptions
-        EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
+        EventTableModel<Description> descriptionsTableModel = new EventTableModel<Description>(descriptions, new DescriptionTableFormat());
         JTable descriptionsTable = new JTable(descriptionsTableModel);
         descriptionsTable.getTableHeader().setDefaultRenderer(DEFAULT_HEADER_RENDERER);
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
@@ -184,7 +167,7 @@ public class IssuesBrowser extends Applet {
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
         priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
         JSlider prioritySlider = new JSlider(priorityRangeModel);
-        Hashtable prioritySliderLabels = new Hashtable();
+        Hashtable<Integer,JLabel> prioritySliderLabels = new Hashtable<Integer,JLabel>();
         prioritySliderLabels.put(new Integer(0), new JLabel("Low"));
         prioritySliderLabels.put(new Integer(100), new JLabel("High"));
         prioritySlider.setOpaque(false);
@@ -196,10 +179,10 @@ public class IssuesBrowser extends Applet {
         prioritySlider.setMajorTickSpacing(25);
 
         // projects
-        EventList projects = Project.getProjects();
+        EventList<Project> projects = Project.getProjects();
 
         // project select combobox
-        EventComboBoxModel projectsComboModel = new EventComboBoxModel(projects);
+        EventComboBoxModel<Project> projectsComboModel = new EventComboBoxModel<Project>(projects);
         JComboBox projectsCombo = new JComboBox(projectsComboModel);
         projectsCombo.setEditable(false);
         projectsCombo.setBackground(GLAZED_LISTS_ORANGE_LIGHT);
@@ -207,14 +190,10 @@ public class IssuesBrowser extends Applet {
         projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project..."));
 
         // throbber icons
-        JPanel iconBar = new JPanel();
+        JPanel iconBar = new JPanel(new GridBagLayout());
         iconBar.setBackground(GLAZED_LISTS_ORANGE);
-        iconBar.setLayout(new GridBagLayout());
-        ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
-        URL url = jarLoader.getResource("resources/demo/throbber-static.gif");
-        if (url != null) throbberStatic = new ImageIcon(url);
-        url = jarLoader.getResource("resources/demo/throbber-active.gif");
-        if (url != null) throbberActive = new ImageIcon(url);
+        throbberStatic = new ImageIcon(IssuesBrowser.class.getResource("/resources/demo/throbber-static.gif"));
+        throbberActive = new ImageIcon(IssuesBrowser.class.getResource("/resources/demo/throbber-active.gif"));
         throbber = new JLabel(throbberStatic);
         iconBar.add(projectsCombo,                           new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
         iconBar.add(throbber,                                new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
@@ -264,7 +243,7 @@ public class IssuesBrowser extends Applet {
         public void valueChanged(ListSelectionEvent e) {
             // get the newly selected issue
             Issue selected = null;
-            if(issuesSelectionModel.getSelected().size() > 0) selected = (Issue)issuesSelectionModel.getSelected().get(0);
+            if(!issuesSelectionModel.getSelected().isEmpty()) selected = (Issue)issuesSelectionModel.getSelected().get(0);
 
             // update the description issue
             if(selected == descriptionIssue) return;
@@ -319,22 +298,21 @@ public class IssuesBrowser extends Applet {
         private boolean on = false;
 
         public synchronized void setOn() {
-            if (!on) {
-                on = true;
-                SwingUtilities.invokeLater(this);
-            }
+            if(on) return;
+
+            on = true;
+            SwingUtilities.invokeLater(this);
         }
 
         public synchronized void setOff() {
-            if (on) {
-                on = false;
-                SwingUtilities.invokeLater(this);
-            }
+            if(!on) return;
+
+            on = false;
+            SwingUtilities.invokeLater(this);
         }
 
         public synchronized void run() {
-            if(on) throbber.setIcon(throbberActive);
-            else throbber.setIcon(throbberStatic);
+            throbber.setIcon(on ? throbberActive : throbberStatic);
         }
     }
 
@@ -345,7 +323,6 @@ public class IssuesBrowser extends Applet {
      */
     private static class IssueCounterLabel extends JLabel {
         private int issueCount = -1;
-
         {
             this.setIssueCount(0);
         }
@@ -354,105 +331,6 @@ public class IssuesBrowser extends Applet {
             if (this.issueCount != issueCount) {
                 this.issueCount = issueCount;
                 this.setText(MessageFormat.format("{0} {0,choice,0#issues|1#issue|1<issues}", new Object[] {new Integer(issueCount)}));
-            }
-        }
-    }
-
-    /**
-     * A MatcherEditor that produces Matchers that filter the issues based on the selected states.
-     */
-    private static class StateMatcherEditor extends AbstractMatcherEditor<Issue> implements ActionListener {
-        /** A panel housing a checkbox for each state. */
-        private JPanel checkBoxPanel = new JPanel(new GridLayout(2, 2));
-
-        /** A checkbox for each possible state. */
-        private final JCheckBox[] stateCheckBoxes;
-
-        public StateMatcherEditor() {
-            final JCheckBox newStateCheckBox = buildCheckBox("New");
-            final JCheckBox resolvedStateCheckBox = buildCheckBox("Resolved");
-            final JCheckBox startedStateCheckBox = buildCheckBox("Started");
-            final JCheckBox closeStateCheckBox = buildCheckBox("Closed");
-
-            this.stateCheckBoxes = new JCheckBox[] {newStateCheckBox, resolvedStateCheckBox, startedStateCheckBox, closeStateCheckBox};
-
-            this.checkBoxPanel.setOpaque(false);
-
-            // add each checkbox to the panel and start listening to selections
-            for (int i = 0; i < this.stateCheckBoxes.length; i++) {
-                this.stateCheckBoxes[i].addActionListener(this);
-                this.checkBoxPanel.add(this.stateCheckBoxes[i]);
-            }
-        }
-
-        /**
-         * Returns the component responsible for editing the state filter
-         */
-        public Component getComponent() {
-            return this.checkBoxPanel;
-        }
-
-        /**
-         * A convenience method to build a state checkbox with the given name.
-         */
-        private static JCheckBox buildCheckBox(String name) {
-            final JCheckBox checkBox = new JCheckBox(name, true);
-            checkBox.setOpaque(false);
-            checkBox.setFocusable(false);
-            checkBox.setMargin(new Insets(0, 0, 0, 0));
-            return checkBox;
-        }
-
-        /**
-         * Returns a StateMatcher which matches Issues if their state is one
-         * of the selected states.
-         */
-        private StateMatcher buildMatcher() {
-            final Set<String> allowedStates = new HashSet<String>();
-            for (int i = 0; i < this.stateCheckBoxes.length; i++) {
-                if (this.stateCheckBoxes[i].isSelected())
-                    allowedStates.add(this.stateCheckBoxes[i].getText().toUpperCase().intern());
-            }
-
-            return new StateMatcher(allowedStates);
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            // determine if the checkbox that generated this ActionEvent is freshly checked or freshly unchecked
-            // - we'll use that information to determine whether this is a constrainment or relaxation of the matcher
-            final boolean isCheckBoxSelected = ((JCheckBox) e.getSource()).isSelected();
-
-            // build a StateMatcher
-            final StateMatcher stateMatcher = this.buildMatcher();
-
-            // fire a MatcherEvent of the appropriate type
-            if (stateMatcher.getStateCount() == 0)
-                this.fireMatchNone();
-            else if (stateMatcher.getStateCount() == this.stateCheckBoxes.length)
-                this.fireMatchAll();
-            else if (isCheckBoxSelected)
-                this.fireRelaxed(stateMatcher);
-            else
-                this.fireConstrained(stateMatcher);
-        }
-
-        /**
-         * A StateMatcher returns <tt>true</tt> if the state of the Issue is
-         * one of the viewable states selected by the user.
-         */
-        private static class StateMatcher implements Matcher<Issue> {
-            private final Set<String> allowedStates;
-
-            public StateMatcher(Set<String> allowedStates) {
-                this.allowedStates = allowedStates;
-            }
-
-            public int getStateCount() {
-                return this.allowedStates.size();
-            }
-
-            public boolean matches(Issue issue) {
-                return this.allowedStates.contains(issue.getStatus());
             }
         }
     }

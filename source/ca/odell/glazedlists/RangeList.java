@@ -12,7 +12,7 @@ import ca.odell.glazedlists.event.ListEvent;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class RangeList extends TransformedList {
+public class RangeList<E> extends TransformedList<E,E> {
 
     private int desiredStart = 0;
     private int desiredEnd = -1;
@@ -27,7 +27,7 @@ public class RangeList extends TransformedList {
      * Create a new {@link RangeList} that limits the specified {@link EventList}
      * to a desired range.
      */
-    protected RangeList(EventList source) {
+    protected RangeList(EventList<E> source) {
         super(source);
 
         currentStartIndex = 0;
@@ -37,7 +37,7 @@ public class RangeList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // This EventList handles changes to the source EventList using a
         // two-phase approach:
         // 1. The change event is iterated and the current bound indices are

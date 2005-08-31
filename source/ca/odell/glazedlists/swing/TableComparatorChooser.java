@@ -18,7 +18,6 @@ import javax.swing.event.*;
 // for keeping lists of comparators
 import java.util.*;
 
-
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking
  * on the table's headers. It requires that the ListTable has a SortedList as
@@ -44,7 +43,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TableComparatorChooser extends AbstractTableComparatorChooser {
+public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E> {
 
     /**
      * the header renderer which decorates an underlying renderer
@@ -75,14 +74,14 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      *      sorting by multiple columns is more powerful, the user interface is
      *      not as simple and this strategy should only be used where necessary.
      */
-    public TableComparatorChooser(JTable table, SortedList sortedList, boolean multipleColumnSort) {
+    public TableComparatorChooser(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
         super(sortedList, ((EventTableModel)table.getModel()).getTableFormat(), multipleColumnSort);
         
         // save the Swing-specific state
         this.table = table;
 
         // build and set the table header renderer which decorates the existing renderer with sort arrows
-        sortArrowHeaderRenderer = new SortArrowHeaderRenderer();
+        sortArrowHeaderRenderer = new SortArrowHeaderRenderer(table.getTableHeader().getDefaultRenderer());
         table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer);
 
         // listen for events on the specified table
@@ -113,7 +112,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.
      */
-    protected void redetectComparator(Comparator currentComparator) {
+    protected void redetectComparator(Comparator<E> currentComparator) {
         super.redetectComparator(currentComparator);
 
         // force the table header to redraw itself
@@ -241,34 +240,28 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
     public static void setIconPath(String path) {
         icons = SortIconFactory.loadIcons(path);
     }
-    
+
     /**
      * The SortArrowHeaderRenderer simply delegates most of the rendering
      * to the previous renderer, and adds an icon to indicate sorting
      * direction. This eliminates the hassle of setting the border and
      * background colours.
      *
-     * <p>This class fails to add indicator arrows on tables where the
-     * renderer does not extend DefaultTableCellRenderer.
+     * <p>This class fails to add indicator arrows on table headers where the
+     * default renderer does not return a JLabel
      */
     class SortArrowHeaderRenderer implements TableCellRenderer {
 
         /** the renderer to delegate */
         private TableCellRenderer delegateRenderer;
 
-        /** whether we can inject icons into this renderer */
-        private boolean iconInjection = false;
-
         /**
          * Creates a new SortArrowHeaderRenderer that delegates most drawing
-         * to the tables current header renderer.
+         * to the given delegate renderer.
          */
-        public SortArrowHeaderRenderer() {
+        public SortArrowHeaderRenderer(TableCellRenderer delegateRenderer) {
             // find the delegate
-            this.delegateRenderer = table.getTableHeader().getDefaultRenderer();
-
-            // determine if we can inject icons into the delegate
-            iconInjection = (delegateRenderer instanceof DefaultTableCellRenderer);
+            this.delegateRenderer = delegateRenderer;
         }
 
         /**
@@ -283,15 +276,16 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
          */
         public Component getTableCellRendererComponent(JTable table, Object value,
         boolean isSelected, boolean hasFocus, int row, int column) {
-            if(iconInjection) {
-                DefaultTableCellRenderer jLabelRenderer = (DefaultTableCellRenderer)delegateRenderer;
-                Icon iconToUse = icons[getSortingStyle(column)];
-                jLabelRenderer.setIcon(iconToUse);
-                jLabelRenderer.setHorizontalTextPosition(SwingConstants.LEADING);
-                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            } else {
-                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            final Component rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if(rendered instanceof JLabel) {
+                final JLabel label = (JLabel) rendered;
+                final Icon iconToUse = icons[getSortingStyle(column)];
+                label.setIcon(iconToUse);
+                label.setHorizontalTextPosition(SwingConstants.LEADING);
             }
+
+            return rendered;
         }
     }
 }
