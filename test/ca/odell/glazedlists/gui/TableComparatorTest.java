@@ -7,8 +7,6 @@ import junit.framework.TestCase;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
-import ca.odell.glazedlists.gui.TableFormat;
 
 /**
  * Verify that the {@link AbstractTableComparatorChooser} works, especially
@@ -38,16 +36,7 @@ public class TableComparatorTest extends TestCase {
         assertFromAndToString("1 reversed");
         assertFromAndToString("1 comparator 3");
         assertFromAndToString("1 comparator 3 reversed");
-        assertParseFails("1reversed");
-        assertParseFails("1 reversed1");
-        assertParseFails("reversed");
-        assertParseFails("comparator");
-        assertParseFails("comparator reversed");
-        assertParseFails("1 comparator1");
-        assertParseFails("1 reversed comparator");
-        assertParseFails("1 reversed comparator 3");
-        assertParseFails("1 comparator");
-        assertParseFails("1 comparator reversed");
+        assertFromAndToString("1 reversed", "1 reversed, 1 comparator 2");
         assertFromAndToString("1", "  1  ");
         assertFromAndToString("1", " ,, 1  ");
         assertFromAndToString("1", ", 1  ");
@@ -60,6 +49,29 @@ public class TableComparatorTest extends TestCase {
         assertFromAndToString("", "1 comparator 4"); // only 3 comparators on column 1
         assertFromAndToString("", "2 comparator 1"); // only 1 comparator on column 2
         assertFromAndToString("5 reversed", "2 comparator 1, 5 reversed"); // only 1 comparator on column 2
+        assertFromAndToString("", "10"); // only 10 columns
+        assertFromAndToString("0", "0");
+
+        assertParseFails("1reversed");
+        assertParseFails("1 reversed1");
+        assertParseFails("reversed");
+        assertParseFails("comparator");
+        assertParseFails("comparator reversed");
+        assertParseFails("1 comparator1");
+        assertParseFails("1 reversed comparator");
+        assertParseFails("1 reversed comparator 3");
+        assertParseFails("1 comparator");
+        assertParseFails("1 comparator reversed");
+        assertParseFails("1.0");
+        assertParseFails("1.0 reversed");
+        assertParseFails("-1");
+        assertParseFails("1 2");
+        assertParseFails("1 reversed 2");
+        assertParseFails("reversed 2");
+        assertParseFails("1 comparator -1");
+        assertParseFails("1 comparator five");
+        assertParseFails("1 comparator comparator");
+        assertParseFails("1 reversed reversed");
     }
 
     public void assertFromAndToString(String toStringExpected, String fromString) {
