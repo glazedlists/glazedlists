@@ -22,7 +22,7 @@ import ca.odell.glazedlists.impl.sort.*;
 public abstract class AbstractTableComparatorChooser {
 
     /** this regular expression for parsing the string representation of a column */
-    private static final Pattern FROM_STRING_PATTERN = Pattern.compile("^\\s*(\\d+)(\\s+comparator\\s+(\\d+))?(\\s+(reversed))?\\s*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FROM_STRING_PATTERN = Pattern.compile("^\\s*column\\s+(\\d+)(\\s+comparator\\s+(\\d+))?(\\s+(reversed))?\\s*$", Pattern.CASE_INSENSITIVE);
 
     /** the sorted list to choose the comparators for */
     protected SortedList sortedList;
@@ -357,6 +357,7 @@ public abstract class AbstractTableComparatorChooser {
             if(c != 0) result.append(", ");
 
             // write the column index
+            result.append("column ");
             result.append(columnIndex);
 
             // write the comparator index
@@ -380,20 +381,20 @@ public abstract class AbstractTableComparatorChooser {
      * separated by commas. Here are some valid examples:
      *
      * <table border><tr><th>String Representation</th><th>Description</th></tr>
-     * <tr><td><code>"3"</code></td><td>Sort using the column at index 3, using that column's first comparator, in forward order</td></tr>
-     * <tr><td><code>"3 reversed"</code></td><td>Sort using the column at index 3, using that column's first comparator, in reverse order</td></tr>
-     * <tr><td><code>"3, 1"</code></td><td>Sort using the column at index 3, using that column's first comparator, in forward order<br>
+     * <tr><td><code>"column 3"</code></td><td>Sort using the column at index 3, using that column's first comparator, in forward order</td></tr>
+     * <tr><td><code>"column 3 reversed"</code></td><td>Sort using the column at index 3, using that column's first comparator, in reverse order</td></tr>
+     * <tr><td><code>"column 3, column 1"</code></td><td>Sort using the column at index 3, using that column's first comparator, in forward order<br>
      *                                     <i>then by</i><br> the column at index 1, using that column's first comparator, in forward order.</td></tr>
-     * <tr><td><code>"3 comparator 2"</code></td><td>Sort using the column at index 3, using that column's comparator at index 2, in forward order</td></tr>
-     * <tr><td><code>"3 comparator 2 reversed"</code></td><td>Sort using the column at index 3, using that column's comparator at index 2, in reverse order</td></tr>
-     * <tr><td><code>"3 reversed, 1 comparator 2, 5 comparator 1 reversed, 0"</code></td><td>Sort using the column at index 3, using that column's first comparator, in reverse order<br>
+     * <tr><td><code>"column 3 comparator 2"</code></td><td>Sort using the column at index 3, using that column's comparator at index 2, in forward order</td></tr>
+     * <tr><td><code>"column 3 comparator 2 reversed"</code></td><td>Sort using the column at index 3, using that column's comparator at index 2, in reverse order</td></tr>
+     * <tr><td><code>"column 3 reversed, column 1 comparator 2, column 5 comparator 1 reversed, column 0"</code></td><td>Sort using the column at index 3, using that column's first comparator, in reverse order<br>
      *                                     <i>then by</i><br> the column at index 1, using that column's comparator at index 2, in forward order<br>
      *                                     <i>then by</i><br> the column at index 5, using that column's comparator at index 1, in reverse order<br>
      *                                     <i>then by</i><br> the column at index 0, using that column's first comparator, in forward order.</td></tr>
      * </table>
      *
      * <p>More formally, the grammar for this String representation is as follows:
-     * <br><code>&lt;COLUMN&gt; = &lt;COLUMN INDEX&gt; (reversed)? (comparator &lt;COMPARATOR INDEX&gt;)?</code>
+     * <br><code>&lt;COLUMN&gt; = column &lt;COLUMN INDEX&gt; (reversed)? (comparator &lt;COMPARATOR INDEX&gt;)?</code>
      * <br><code>&lt;COMPARATOR SPEC&gt; = ( &lt;COLUMN&gt; (, &lt;COLUMN&gt;)* )?</code>
      */
     public void fromString(String stringEncoded) {
