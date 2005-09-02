@@ -21,7 +21,7 @@ public abstract class AbstractTableComparatorChooser<E> {
 
     /** the sorted list to choose the comparators for */
     protected SortedList<E> sortedList;
-    
+
     /** the columns to sort over */
     private TableFormat<E> tableFormat;
 
@@ -76,13 +76,6 @@ public abstract class AbstractTableComparatorChooser<E> {
      * comparator list for each column.
      */
     protected void rebuildColumns() {
-//        final List<ColumnClickTracker> columnClickTrackerList = new ArrayList<ColumnClickTracker>(tableFormat.getColumnCount());
-//        for(int i = 0; i < columnClickTrackerList.size(); i++) {
-//            columnClickTrackerList.add(new ColumnClickTracker(tableFormat, i));
-//        }
-//
-//        columnClickTrackers = columnClickTrackerList.toArray(new ColumnClickTracker[columnClickTrackerList.size()]);
-
         // build the column click trackers
         columnClickTrackers = new ColumnClickTracker[tableFormat.getColumnCount()];
         for(int i = 0; i < columnClickTrackers.length; i++) {
@@ -285,7 +278,7 @@ public abstract class AbstractTableComparatorChooser<E> {
             }
         }
     }
-    
+
     /**
      * Gets the sorting style currently applied to the specified column.
      */
