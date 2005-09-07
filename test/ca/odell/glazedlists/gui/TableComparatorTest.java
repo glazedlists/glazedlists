@@ -32,55 +32,46 @@ public class TableComparatorTest extends TestCase {
      */
     public void testParsing() {
         assertFromAndToString("");
-        assertFromAndToString("column 1");
-        assertFromAndToString("column 1 reversed");
-        assertFromAndToString("column 1 comparator 3");
-        assertFromAndToString("column 1 comparator 3 reversed");
-        assertFromAndToString("column 1 reversed", "column 1 reversed, column 1 comparator 2");
-        assertFromAndToString("column 1", " column  1  ");
-        assertFromAndToString("column 1", "column     1");
-        assertFromAndToString("column 1", " ,, column 1  ");
-        assertFromAndToString("column 1", ",column  1  ");
-        assertFromAndToString("column 1", "column 1, ");
-        assertFromAndToString("column 1", "column 1,");
-        assertFromAndToString("column 1 comparator 3 reversed, column 2 reversed");
-        assertFromAndToString("column 1 reversed", "column 1 REVERSED");
-        assertFromAndToString("column 1 comparator 1 reversed", "column 1 COMPARATOR 1 REVERSED");
-        assertFromAndToString("column 1 comparator 1", "column 1 COMPARATOR 1");
-        assertFromAndToString("", "column 1 comparator 4"); // only 3 comparators on column 1
-        assertFromAndToString("", "column 2 comparator 1"); // only 1 comparator on column 2
-        assertFromAndToString("column 5 reversed", "column 2 comparator 1, column 5 reversed"); // only 1 comparator on column 2
-        assertFromAndToString("", "column 10"); // only 10 columns
-        assertFromAndToString("column 0", "column 0");
-        assertFromAndToString("column 0", "COLUMN 0");
+        assertFromAndToString("1");
+        assertFromAndToString("1 reversed");
+        assertFromAndToString("1 comparator 3");
+        assertFromAndToString("1 comparator 3 reversed");
+        assertFromAndToString("1 reversed", "1 reversed, 1 comparator 2");
+        assertFromAndToString("1", "  1  ");
+        assertFromAndToString("1", " ,, 1  ");
+        assertFromAndToString("1", ", 1  ");
+        assertFromAndToString("1", "1, ");
+        assertFromAndToString("1", "1,");
+        assertFromAndToString("1 comparator 3 reversed, 2 reversed");
+        assertFromAndToString("1 reversed", "1 REVERSED");
+        assertFromAndToString("1 comparator 1 reversed", "1 COMPARATOR 1 REVERSED");
+        assertFromAndToString("1 comparator 1", "1 COMPARATOR 1");
+        assertFromAndToString("", "1 comparator 4"); // only 3 comparators on column 1
+        assertFromAndToString("", "2 comparator 1"); // only 1 comparator on column 2
+        assertFromAndToString("5 reversed", "2 comparator 1, 5 reversed"); // only 1 comparator on column 2
+        assertFromAndToString("", "10"); // only 10 columns
+        assertFromAndToString("0", "0");
 
-        assertParseFails("column 1reversed");
-        assertParseFails("column 1 reversed1");
+        assertParseFails("1reversed");
+        assertParseFails("1 reversed1");
         assertParseFails("reversed");
         assertParseFails("comparator");
-        assertParseFails("column");
-        assertParseFails("column1");
-        assertParseFails("column reversed");
-        assertParseFails("column comparator 1");
         assertParseFails("comparator reversed");
-        assertParseFails("column 1 comparator1");
-        assertParseFails("column 1 reversed comparator");
-        assertParseFails("column 1 reversed comparator 3");
-        assertParseFails("column 1 comparator");
-        assertParseFails("column 1 comparator reversed");
-        assertParseFails("column 1.0");
-        assertParseFails("column 1.0 reversed");
-        assertParseFails("1");
+        assertParseFails("1 comparator1");
+        assertParseFails("1 reversed comparator");
+        assertParseFails("1 reversed comparator 3");
+        assertParseFails("1 comparator");
+        assertParseFails("1 comparator reversed");
+        assertParseFails("1.0");
+        assertParseFails("1.0 reversed");
         assertParseFails("-1");
-        assertParseFails("1 reversed comparator 1");
-        assertParseFails("column -1");
-        assertParseFails("column 1 2");
-        assertParseFails("column 1 reversed 2");
-        assertParseFails("column reversed 2");
-        assertParseFails("column 1 comparator -1");
-        assertParseFails("column 1 comparator five");
-        assertParseFails("column 1 comparator comparator");
-        assertParseFails("column 1 reversed reversed");
+        assertParseFails("1 2");
+        assertParseFails("1 reversed 2");
+        assertParseFails("reversed 2");
+        assertParseFails("1 comparator -1");
+        assertParseFails("1 comparator five");
+        assertParseFails("1 comparator comparator");
+        assertParseFails("1 reversed reversed");
     }
 
     public void assertFromAndToString(String toStringExpected, String fromString) {

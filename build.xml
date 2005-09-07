@@ -182,6 +182,9 @@
         <javac destdir="classes" srcdir="source" debug="on" source="1.3" target="1.3" deprecation="on">
             <include name="**/event/**"/>
             <include name="**/BasicEventList.java"/>
+            <include name="**/ObservableElementList.java"/>
+            <include name="**/JavaBeanEventListConnector.java"/>
+            <include name="**/AbstractFilterList.java"/>
             <include name="**/EventList.java"/>
             <include name="**/SubEventList.java"/>
             <include name="**/EventListIterator.java"/>

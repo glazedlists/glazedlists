@@ -310,7 +310,7 @@ public class ObservableElementList<E> extends TransformedList<E,E> {
      * <p>Note: this is a one-time switch only and cannot be reversed
      */
     private void switchToMultiListenerMode() {
-        assert(this.singleListenerMode);
+        if (!this.singleListenerMode) throw new IllegalStateException();
 
         // build a new data structure appropriate for individual storing
         // listeners for each observed element

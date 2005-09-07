@@ -125,7 +125,7 @@ public final class Barcode {
      * Inserts a sequence of white into the list
      */
     public void addWhite(int index, int length) {
-        assert(length >= 0);
+        if(length < 0) throw new IllegalStateException();
         if(length == 0) return;
 
         // Adding to the trailing whitespace
@@ -144,7 +144,7 @@ public final class Barcode {
      * Inserts a sequence of black into the list
      */
     public void addBlack(int index, int length) {
-        assert(length >= 0);
+        if(length < 0) throw new IllegalArgumentException();
         if(length == 0) return;
 
         // Make a new root
@@ -185,7 +185,7 @@ public final class Barcode {
      * <code>Barcode.BLACK</code>.
      */
     public void set(int index, Object colour, int length) {
-        assert(length >= 1);
+        if(length < 1) throw new IllegalArgumentException();
 
         // The set affects the trailing whitespace
         int trailingChange = index > treeSize - 1 ? length : index + length - treeSize;
@@ -223,7 +223,7 @@ public final class Barcode {
      * Removes the values from the given index to index + length
      */
     public void remove(int index, int length) {
-        assert(length >= 1);
+        if(length < 1) throw new IllegalArgumentException();
 
         // The remove affects the trailing whitespace
         int trailingChange = index > treeSize ? length : index + length - treeSize;
