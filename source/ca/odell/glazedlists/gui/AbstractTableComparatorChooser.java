@@ -7,6 +7,8 @@ package ca.odell.glazedlists.gui;
 import ca.odell.glazedlists.*;
 // To track clicks
 import java.util.*;
+import java.util.regex.*;
+import java.util.regex.Matcher;
 // For Comparators
 import ca.odell.glazedlists.impl.sort.*;
 
@@ -19,6 +21,9 @@ import ca.odell.glazedlists.impl.sort.*;
  */
 public abstract class AbstractTableComparatorChooser<E> {
 
+    /** this regular expression for parsing the string representation of a column */
+    private static final Pattern FROM_STRING_PATTERN = Pattern.compile("^\\s*(\\d+)(\\s+comparator\\s+(\\d+))?(\\s+(reversed))?\\s*$", Pattern.CASE_INSENSITIVE);
+
     /** the sorted list to choose the comparators for */
     protected SortedList<E> sortedList;
 
@@ -29,7 +34,7 @@ public abstract class AbstractTableComparatorChooser<E> {
     protected Comparator<E> sortedListComparator = null;
 
     /** the columns and their click counts in indexed order */
-    protected ColumnClickTracker[] columnClickTrackers;
+    protected List<ColumnClickTracker> columnClickTrackers;
 
     /** the first comparator in the comparator chain */
     protected int primaryColumn = -1;
@@ -77,10 +82,13 @@ public abstract class AbstractTableComparatorChooser<E> {
      */
     protected void rebuildColumns() {
         // build the column click trackers
-        columnClickTrackers = new ColumnClickTracker[tableFormat.getColumnCount()];
-        for(int i = 0; i < columnClickTrackers.length; i++) {
-            columnClickTrackers[i] = new ColumnClickTracker(tableFormat, i, primaryColumn);
+        final int columnCount = tableFormat.getColumnCount();
+
+        columnClickTrackers = new ArrayList<ColumnClickTracker>(columnCount);
+        for(int i = 0; i < columnCount; i++) {
+            columnClickTrackers.add(new ColumnClickTracker(tableFormat, i));
         }
+        
         primaryColumn = -1;
         recentlyClickedColumns.clear();
     }
@@ -91,7 +99,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * column cannot be sorted.
      */
     public List getComparatorsForColumn(int column) {
-        return columnClickTrackers[column].getComparators();
+        return columnClickTrackers.get(column).getComparators();
     }
 
     /**
@@ -117,28 +125,72 @@ public abstract class AbstractTableComparatorChooser<E> {
      *      is not being used to sort.
      */
     public int getColumnComparatorIndex(int column) {
-        return columnClickTrackers[column].getComparatorIndex();
+        return columnClickTrackers.get(column).getComparatorIndex();
     }
 
     /**
      * Gets whether the comparator in use for the specified column is reverse.
      */
     public boolean isColumnReverse(int column) {
-        return columnClickTrackers[column].isReverse();
+        return columnClickTrackers.get(column).isReverse();
     }
 
     /**
-     * Set the table to use the specified comparator.
+     * Append the comparator specified by the column, comparator index and reverse
+     * parameters to the end of the sequence of comparators this
+     * {@link AbstractTableComparatorChooser} is sorting the {@link SortedList}
+     * by.
+     *
+     * <p><i>Append</i> implies that if this {@link AbstractTableComparatorChooser}
+     * is already sorting that list by another column, this comparator will only
+     * be used to break ties from that {@link Comparator}. If the table is already
+     * sorting by the specified column, it will be silently discarded.
+     *
+     * <p>Suppose we're currently not sorting the table, this method will cause
+     * the table to be sorted by the column specified. If we are sorting the table
+     * by some column c, this will sort by that column first and the column
+     * specified here second.
+     *
+     * <p>If this {@link AbstractTableComparatorChooser} doesn't support multiple
+     * column sort, this will replace the current {@link Comparator} rather than
+     * appending to it.
      *
      * @param column the column to sort by
      * @param comparatorIndex the comparator to use, specify <code>0</code> for the
      *      default comparator.
      * @param reverse whether to reverse the specified comparator.
      */
-    public void chooseComparator(int column, int comparatorIndex, boolean reverse) {
-        if(column > columnClickTrackers.length) throw new IllegalArgumentException("invalid column " + column + ", must be in range 0, " + columnClickTrackers.length);
-        if(comparatorIndex > getComparatorsForColumn(column).size()) throw new IllegalArgumentException("invalid comparator index " + comparatorIndex + ", must be in range 0, " + getComparatorsForColumn(column).size());
+    public void appendComparator(int column, int comparatorIndex, boolean reverse) {
+        appendComparator(column, comparatorIndex, reverse, true);
+    }
+    private void appendComparator(int column, int comparatorIndex, boolean reverse, boolean rebuildComparator) {
+        if(column > columnClickTrackers.size()) throw new IllegalArgumentException("invalid column " + column + ", must be in range 0, " + columnClickTrackers.size());
+        if(comparatorIndex >= getComparatorsForColumn(column).size()) throw new IllegalArgumentException("invalid comparator index " + comparatorIndex + ", must be in range 0, " + getComparatorsForColumn(column).size());
+        if(recentlyClickedColumns.contains(columnClickTrackers.get(column))) return;
 
+        // clear the previous comparator if sorting only allows a single column
+        if(!multipleColumnSort) {
+            clearComparator(false);
+        }
+
+        // add clicks to the specified column
+        columnClickTrackers.get(column).setComparatorIndex(comparatorIndex);
+        columnClickTrackers.get(column).setReverse(reverse);
+
+        // rebuild the clicked column list
+        if(primaryColumn == -1) primaryColumn = column;
+        recentlyClickedColumns.add(columnClickTrackers.get(column));
+        if(rebuildComparator) rebuildComparator();
+    }
+
+    /**
+     * Clear all sorting state and set the {@link SortedList} to use its
+     * natural order.
+     */
+    public void clearComparator() {
+        clearComparator(true);
+    }
+    private void clearComparator(boolean rebuildComparator) {
         // clear the click counts
         for(Iterator<ColumnClickTracker> i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
             ColumnClickTracker columnClickTracker = i.next();
@@ -146,23 +198,14 @@ public abstract class AbstractTableComparatorChooser<E> {
         }
         primaryColumn = -1;
         recentlyClickedColumns.clear();
-
-        // add clicks to the specified column
-        ColumnClickTracker currentTracker = columnClickTrackers[column];
-        currentTracker.setComparatorIndex(comparatorIndex);
-        currentTracker.setReverse(reverse);
-
-        // rebuild the clicked column list
-        primaryColumn = column;
-        recentlyClickedColumns.add(currentTracker);
-        rebuildComparator();
+        if(rebuildComparator) rebuildComparator();
     }
 
     /**
      * Handle a column being clicked by sorting that column.
      */
     protected void columnClicked(int column, int clicks) {
-        ColumnClickTracker currentTracker = columnClickTrackers[column];
+        ColumnClickTracker currentTracker = columnClickTrackers.get(column);
         if(currentTracker.getComparators().isEmpty()) return;
 
         // on a double click, clear the click counts
@@ -202,24 +245,29 @@ public abstract class AbstractTableComparatorChooser<E> {
      * Updates the comparator in use and applies it to the table.
      */
     protected void rebuildComparator() {
+        final Comparator<E> rebuiltComparator;
+
         // build a new comparator
-        if(!recentlyClickedColumns.isEmpty()) {
-            List<Comparator<E>> comparators = new ArrayList<Comparator<E>>();
+        if(recentlyClickedColumns.isEmpty()) {
+            rebuiltComparator = null;
+        } else {
+            List<Comparator<E>> comparators = new ArrayList<Comparator<E>>(recentlyClickedColumns.size());
             for(Iterator<ColumnClickTracker> i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
                 ColumnClickTracker columnClickTracker = i.next();
                 Comparator<E> comparator = columnClickTracker.getComparator();
                 comparators.add(comparator);
             }
-            ComparatorChain<E> comparatorChain = (ComparatorChain<E>)GlazedLists.chainComparators(comparators);
 
-            // select the new comparator
-            sortedList.getReadWriteLock().writeLock().lock();
-            try {
-                sortedListComparator = comparatorChain;
-                sortedList.setComparator(comparatorChain);
-            } finally {
-                sortedList.getReadWriteLock().writeLock().unlock();
-            }
+            rebuiltComparator = (Comparator<E>)GlazedLists.chainComparators(comparators);
+        }
+
+        // select the new comparator
+        sortedList.getReadWriteLock().writeLock().lock();
+        try {
+            sortedListComparator = rebuiltComparator;
+            sortedList.setComparator(rebuiltComparator);
+        } finally {
+            sortedList.getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -234,8 +282,8 @@ public abstract class AbstractTableComparatorChooser<E> {
         sortedListComparator = currentComparator;
 
         // Clear the current click counts
-        for(int c = 0; c < columnClickTrackers.length; c++) {
-            columnClickTrackers[c].resetClickCount();
+        for(int c = 0; c < columnClickTrackers.size(); c++) {
+            columnClickTrackers.get(c).resetClickCount();
         }
         primaryColumn = -1;
         recentlyClickedColumns.clear();
@@ -263,16 +311,17 @@ public abstract class AbstractTableComparatorChooser<E> {
             }
 
             // discover where to add clicks for this comparator
-            for(int c = 0; c < columnClickTrackers.length; c++) {
-                if(recentlyClickedColumns.contains(columnClickTrackers[c])) {
+            for(int c = 0; c < columnClickTrackers.size(); c++) {
+                if(recentlyClickedColumns.contains(columnClickTrackers.get(c))) {
                     continue;
                 }
-                int comparatorIndex = columnClickTrackers[c].getComparators().indexOf(comparator);
+                int comparatorIndex = columnClickTrackers.get(c).getComparators().indexOf(comparator);
                 if(comparatorIndex != -1) {
-                    columnClickTrackers[c].setComparatorIndex(comparatorIndex);
-                    columnClickTrackers[c].setReverse(reverse);
+                    final ColumnClickTracker columnClickTracker = columnClickTrackers.get(c);
+                    columnClickTracker.setComparatorIndex(comparatorIndex);
+                    columnClickTracker.setReverse(reverse);
                     if(recentlyClickedColumns.isEmpty()) primaryColumn = c;
-                    recentlyClickedColumns.add(columnClickTrackers[c]);
+                    recentlyClickedColumns.add(columnClickTracker);
                     if(!multipleColumnSort) break walkThroughComparators;
                 }
             }
@@ -283,7 +332,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * Gets the sorting style currently applied to the specified column.
      */
     protected int getSortingStyle(int column) {
-        return columnClickTrackers[column].getSortingStyle();
+        return columnClickTrackers.get(column).getSortingStyle();
     }
 
     /**
@@ -295,6 +344,90 @@ public abstract class AbstractTableComparatorChooser<E> {
      */
     public Comparator createComparatorForElement(Comparator<E> comparatorForColumn, int column) {
         return new TableColumnComparator<E>(tableFormat, column, comparatorForColumn);
+    }
+
+    /**
+     * Encode the current sorting state as a {@link String}. This specially formatted
+     * {@link String} is ideal for persistence using any preferences API. The
+     * state of this {@link AbstractTableComparatorChooser} can be restored
+     * by passing the return value of this method to {@link #fromString(String)}.
+     */
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        List sortingColumns = getSortingColumns();
+        for(int c = 0; c < sortingColumns.size(); c++) {
+            int columnIndex = ((Integer)sortingColumns.get(c)).intValue();
+
+            // add a comma for every column but the first
+            if(c != 0) result.append(", ");
+
+            // write the column index
+            result.append(columnIndex);
+
+            // write the comparator index
+            int comparatorIndex = getColumnComparatorIndex(columnIndex);
+            if(comparatorIndex != 0) {
+                result.append(" comparator ");
+                result.append(comparatorIndex);
+            }
+
+            // write reversed
+            if(isColumnReverse(columnIndex)) {
+                result.append(" reversed");
+            }
+        }
+        return result.toString();
+    }
+
+    /**
+     * <p>This class is capable of representing its own state with a String, to
+     * persist sorting state externally. The format uses zero or more column specifications,
+     * separated by commas. Here are some valid examples:
+     *
+     * <table border><tr><th>String Representation</th><th>Description</th></tr>
+     * <tr><td><code>"3"</code></td><td>Sort using the column at index 3, using that column's first comparator, in forward order</td></tr>
+     * <tr><td><code>"3 reversed"</code></td><td>Sort using the column at index 3, using that column's first comparator, in reverse order</td></tr>
+     * <tr><td><code>"3, 1"</code></td><td>Sort using the column at index 3, using that column's first comparator, in forward order<br>
+     *                                     <i>then by</i><br> the column at index 1, using that column's first comparator, in forward order.</td></tr>
+     * <tr><td><code>"3 comparator 2"</code></td><td>Sort using the column at index 3, using that column's comparator at index 2, in forward order</td></tr>
+     * <tr><td><code>"3 comparator 2 reversed"</code></td><td>Sort using the column at index 3, using that column's comparator at index 2, in reverse order</td></tr>
+     * <tr><td><code>"3 reversed, 1 comparator 2, 5 comparator 1 reversed, 0"</code></td><td>Sort using the column at index 3, using that column's first comparator, in reverse order<br>
+     *                                     <i>then by</i><br> the column at index 1, using that column's comparator at index 2, in forward order<br>
+     *                                     <i>then by</i><br> the column at index 5, using that column's comparator at index 1, in reverse order<br>
+     *                                     <i>then by</i><br> the column at index 0, using that column's first comparator, in forward order.</td></tr>
+     * </table>
+     *
+     * <p>More formally, the grammar for this String representation is as follows:
+     * <br><code>&lt;COLUMN&gt; = &lt;COLUMN INDEX&gt; (reversed)? (comparator &lt;COMPARATOR INDEX&gt;)?</code>
+     * <br><code>&lt;COMPARATOR SPEC&gt; = ( &lt;COLUMN&gt; (, &lt;COLUMN&gt;)* )?</code>
+     */
+    public void fromString(String stringEncoded) {
+        clearComparator(false);
+
+        // parse each column part in sequence using regex groups
+        String[] parts = stringEncoded.split(",");
+        for(int p = 0; p < parts.length; p++) {
+            // skip empty strings
+            if(parts[p].trim().length() == 0) continue;
+
+            Matcher matcher = FROM_STRING_PATTERN.matcher(parts[p]);
+
+            if(!matcher.find())
+                throw new IllegalArgumentException("Failed to parse column spec, \"" + parts[p] + "\"");
+
+            int columnIndex = Integer.parseInt(matcher.group(1));
+            int comparatorIndex = matcher.group(3) == null ? 0 : Integer.parseInt(matcher.group(3));
+            boolean reversedComparator = matcher.group(5) != null;
+
+            // bail on invalid data
+            if(columnIndex >= tableFormat.getColumnCount()) continue;
+            if(comparatorIndex >= getComparatorsForColumn(columnIndex).size()) continue;
+
+            // add this comparator in sequence
+            appendComparator(columnIndex, comparatorIndex, reversedComparator, false);
+        }
+
+        rebuildComparator();
     }
 
     public void dispose() {
@@ -309,32 +442,29 @@ public abstract class AbstractTableComparatorChooser<E> {
      * and provides access to the most appropriate comparator for that
      * column.
      */
-    private static final class ColumnClickTracker {
+    private final class ColumnClickTracker {
 
-        /** the column for this comparator */
-        private final int primaryColumn;
         /** the column for this comparator */
         private int column = 0;
         /** the number of repeated clicks on this column header */
         private int clickCount = 0;
         /** the sequence of comparators for this column */
-        private List<Comparator> comparators = new ArrayList<Comparator>();
+        private List<Comparator<E>> comparators = new ArrayList<Comparator<E>>();
 
         /**
          * Creates a new ColumnClickTracker for the specified column.
          */
-        public ColumnClickTracker(TableFormat tableFormat, int column, int primaryColumn) {
+        public ColumnClickTracker(TableFormat<E> tableFormat, int column) {
             this.column = column;
-            this.primaryColumn = primaryColumn;
 
             // add the preferred comparator for AdvancedTableFormat
             if(tableFormat instanceof AdvancedTableFormat) {
                 AdvancedTableFormat advancedTableFormat = (AdvancedTableFormat)tableFormat;
                 Comparator columnComparator = advancedTableFormat.getColumnComparator(column);
-                if(columnComparator != null) comparators.add(new TableColumnComparator(tableFormat, column, columnComparator));
+                if(columnComparator != null) comparators.add(new TableColumnComparator<E>(tableFormat, column, columnComparator));
             // otherwise just add the default comparator
             } else {
-                comparators.add(new TableColumnComparator(tableFormat, column));
+                comparators.add(new TableColumnComparator<E>(tableFormat, column));
             }
         }
 
@@ -407,8 +537,8 @@ public abstract class AbstractTableComparatorChooser<E> {
         /**
          * Gets the current best comparator to sort this column.
          */
-        public Comparator getComparator() {
-            Comparator comparator = comparators.get(getComparatorIndex());
+        public Comparator<E> getComparator() {
+            Comparator<E> comparator = comparators.get(getComparatorIndex());
             if(isReverse()) comparator = GlazedLists.reverseComparator(comparator);
             return comparator;
         }

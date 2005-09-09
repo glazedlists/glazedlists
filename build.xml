@@ -1,6 +1,6 @@
 <!--
- ! Glazed Lists
- ! Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.
+   Glazed Lists
+   Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.
 -->
 
 <project name="glazedlists" default="jar" basedir=".">
@@ -20,6 +20,8 @@
 		description="Clean up generated files, forcing them to be rebuilt.">
 		<!-- Delete the directories where generated files fall -->
 		<delete dir="classes"/>
+		<!-- Delete the Java 1.4 build directory -->
+		<delete dir="java14_glazedlists"/>
 		<!-- Delete the documentation directories -->
 		<delete dir="docs/api"/>
 		<delete dir="docs/impl"/>
@@ -55,7 +57,7 @@
 				<exclude name="**/demo/**"/>
 			</packageset>
 			<doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
+			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
 			<link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
 			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
 		</javadoc>
@@ -78,7 +80,7 @@
 			<packageset dir="source"/>
 			<packageset dir="test"/>
 			<doctitle><![CDATA[<h1>Glazed Lists - Developer Docs</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
+			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
 			<link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
 			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
 		</javadoc>
@@ -210,9 +212,13 @@
         <property environment="env"/>
         <echo message="using JAVA HOME = ${env.JAVA_HOME}"/>
         <echo message="using tools = ${env.JAVA_HOME}/lib/tools.jar"/>
+
+        <!-- clean the java14 directory -->
         <delete dir="java14_glazedlists"/>
         <mkdir dir="java14_glazedlists/source"/>
         <mkdir dir="java14_glazedlists/test"/>
+
+        <!-- Declaw the source code to the java14 directory. -->
         <java classname="ca.odell.glazedlists.impl.java15.Declawer">
             <classpath>
                 <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
@@ -222,6 +228,8 @@
             <arg value="${ant.home}/lib/junit.jar"/>
             <arg value="java14_glazedlists/source"/>
         </java>
+
+        <!-- Declaw the tests to the java14 directory. -->
         <java classname="ca.odell.glazedlists.impl.java15.Declawer">
             <classpath>
                 <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
@@ -232,13 +240,19 @@
             <arg value="classes;${ant.home}/lib/junit.jar"/>
             <arg value="java14_glazedlists/test"/>
         </java>
+
+        <!-- Copy all of the resources (non-source files) to the java14 directory. -->
         <copy todir="java14_glazedlists">
             <fileset dir=".">
                 <exclude name="java14_glazedlists/**"/>
                 <exclude name="source/**"/>
                 <exclude name="test/**"/>
+                <exclude name="classes/**"/>
+                <exclude name="docs/**"/>
             </fileset>
         </copy>
+
+        <!-- Alter the target platform in the java14 build.xml file from 1.5 to 1.4. -->
         <replace file="java14_glazedlists/build.xml" token="&lt;property name=&quot;java.target.version&quot; value=&quot;1.5&quot;/&gt;" value="&lt;property name=&quot;java.target.version&quot; value=&quot;1.4&quot;/&gt;"/>
     </target>
 

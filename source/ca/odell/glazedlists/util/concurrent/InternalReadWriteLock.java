@@ -3,59 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.util.concurrent;
 
-/**
- * An internal read-write lock manages a pair of read-write locks. This allows
- * modification at two levels: at the source level and at the local/internal
- * level. By providing a new internal level, internal changes can be made without
- * requiring the full locking of the source level. This is done by locking the
- * source level with only a read-lock, while locking the local/internal level with
- * a write lock.
- *
- * <p>This is useful for classes such as {@link ca.odell.glazedlists.SortedList},
- * where changes to the internal structure occur without modifying the source
- * structure.
- *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
- */
-public final class InternalReadWriteLock implements ReadWriteLock {
-
-    /** the locks to delegate to */
-    private Lock readLock;
-    private Lock writeLock;
-    private Lock internalLock;
-
-    /**
-     * Creates a new InternalReadWriteLock that uses the specified locks for
-     * the source and internal.
-     */
-    public InternalReadWriteLock(ReadWriteLock source, ReadWriteLock internal) {
-        readLock = new LockPair(source.readLock(), internal.readLock());
-        writeLock = new LockPair(source.writeLock(), internal.writeLock());
-        internalLock = new LockPair(source.readLock(), internal.writeLock());
-    }
-
-    /**
-     * Return the lock used for reading.
-     */
-    public Lock readLock() {
-        return readLock;
-    }
-
-    /**
-     * Return the lock used for writing.
-     */
-    public Lock writeLock() {
-        return writeLock;
-    }
-
-    /**
-     * Return the lock used for reading.
-     */
-    public Lock internalLock() {
-        return internalLock;
-    }
-}
-
 
 /**
  * A LockPair is a set of two locks that are locked and unlocked in

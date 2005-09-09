@@ -5,13 +5,11 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.impl.adt.IndexedTree;
-import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
-import ca.odell.glazedlists.impl.adt.IndexedTreeIterator;
-import ca.odell.glazedlists.impl.sort.ComparableComparator;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.util.concurrent.InternalReadWriteLock;
-import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.impl.adt.IndexedTree;
+import ca.odell.glazedlists.impl.adt.IndexedTreeIterator;
+import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
+import ca.odell.glazedlists.impl.sort.ComparableComparator;
 
 import java.util.*;
 
@@ -69,11 +67,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     public SortedList(EventList<E> source, Comparator comparator) {
         super(source);
 
-        // use an Internal Lock to avoid locking the source list during a sort
-        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
-			LockFactory.DEFAULT.createReadWriteLock());
-
-        // trees are instansiated when a comparator is set
+        // trees are instantiated when a comparator is set
         setComparator(comparator);
 
         source.addListEventListener(this);

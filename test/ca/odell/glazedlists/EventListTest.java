@@ -394,13 +394,13 @@ public class EventListTest extends TestCase {
         try {
             source.getReadWriteLock().readLock().unlock();
             fail("failed to receive an IllegalStateException when unlocking and unlocked readlock");
-        } catch (IllegalStateException iae) {}
+        } catch (IllegalMonitorStateException iae) {}
 
         // asymmetric unlocking of the writelock should fail-fast
         try {
             source.getReadWriteLock().writeLock().unlock();
             fail("failed to receive an IllegalStateException when unlocking and unlocked writelock");
-        } catch (IllegalStateException iae) {}
+        } catch (IllegalMonitorStateException iae) {}
 
         // symmetric locking/unlocking of the readlock should succeed
         source.getReadWriteLock().readLock().lock();

@@ -56,10 +56,6 @@ public final class FilterList<E> extends TransformedList<E,E> {
     public FilterList(EventList<E> source) {
         super(source);
 
-        // use an Internal Lock to avoid locking the source list during a sort
-        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
-			LockFactory.DEFAULT.createReadWriteLock());
-
         // build a list of what is filtered and what's not
         flagList.addBlack(0, source.size());
 
@@ -252,7 +248,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
          * filter and not match any of the elements of the wrapped source list.
          */
         private void matchNone(MatcherEditor<E> editor) {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
+            getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
@@ -271,7 +267,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
-                ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
+                getReadWriteLock().writeLock().unlock();
             }
         }
 
@@ -281,7 +277,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
          * source list.
          */
         private void matchAll(MatcherEditor<E> editor) {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
+            getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
@@ -309,7 +305,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
-                ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
+                getReadWriteLock().writeLock().unlock();
             }
         }
 
@@ -323,7 +319,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
          * of thread safe code.
          */
         private void relaxed(MatcherEditor<E> editor, Matcher<E> matcher) {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
+            getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
@@ -343,7 +339,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
-                ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
+                getReadWriteLock().writeLock().unlock();
             }
         }
 
@@ -357,7 +353,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
          * of thread safe code.
          */
         private void constrained(MatcherEditor<E> editor, Matcher<E> matcher) {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
+            getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
@@ -379,7 +375,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
-                ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
+                getReadWriteLock().writeLock().unlock();
             }
         }
 
@@ -392,7 +388,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
          * of thread safe code.
          */
         private void changed(MatcherEditor<E> editor, Matcher<E> matcher) {
-            ((InternalReadWriteLock)getReadWriteLock()).internalLock().lock();
+            getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
                 if(currentEditor != editor) throw new IllegalStateException();
@@ -425,7 +421,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
                 // commit the changes and notify listeners
                 updates.commitEvent();
             } finally {
-                ((InternalReadWriteLock)getReadWriteLock()).internalLock().unlock();
+                getReadWriteLock().writeLock().unlock();
             }
         }
     }

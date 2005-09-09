@@ -1,0 +1,81 @@
+package ca.odell.glazedlists.impl.java15;
+
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+import ca.odell.glazedlists.util.concurrent.Lock;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+/**
+ * An implementation of {@link LockFactory} that has been derived from
+ * {@link java.util.concurrent.locks.ReadWriteLock JDK 1.5 Locks}.
+ *
+ * @author James Lemieux
+ */
+public class J2SE50LockFactory implements LockFactory {
+    public ReadWriteLock createReadWriteLock() {
+        return new J2SE50ReadWriteLock();
+    }
+
+    public Lock createLock() {
+        return new LockAdapter(new java.util.concurrent.locks.ReentrantLock());
+    }
+}
+
+/**
+ * A ReadWriteLock implementation that is compatable with J2SE 5.0 and better. This
+ * implementation is a facade over {@link java.util.concurrent.locks.ReadWriteLock}.
+ *
+ * @author James Lemieux
+ */
+final class J2SE50ReadWriteLock implements ReadWriteLock {
+
+    private final Lock readLock;
+    private final Lock writeLock;
+
+    J2SE50ReadWriteLock() {
+        final java.util.concurrent.locks.ReadWriteLock delegate = new ReentrantReadWriteLock();
+        this.readLock = new LockAdapter(delegate.readLock());
+        this.writeLock = new LockAdapter(delegate.writeLock());
+    }
+
+    /**
+     * Return the lock used for reading.
+     */
+    public Lock readLock() {
+        return this.readLock;
+    }
+
+    /**
+     * Return the lock used for writing.
+     */
+    public Lock writeLock() {
+        return this.writeLock;
+    }
+}
+
+/**
+ * This adapts a J2SE 5.0 compatible Lock to the Glazed Lists Lock interface.
+ *
+ * @author James Lemieux
+ */
+final class LockAdapter implements Lock {
+
+    private final java.util.concurrent.locks.Lock delegateLock;
+
+    LockAdapter(java.util.concurrent.locks.Lock delegateLock) {
+        this.delegateLock = delegateLock;
+    }
+
+    public void lock() {
+        delegateLock.lock();
+    }
+
+    public boolean tryLock() {
+        return delegateLock.tryLock();
+    }
+
+    public void unlock() {
+        delegateLock.unlock();
+    }
+}

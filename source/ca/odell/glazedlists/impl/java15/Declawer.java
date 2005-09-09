@@ -72,8 +72,7 @@ public class Declawer {
                 return pathname.isDirectory() || pathname.getName().endsWith(".java")
                    && pathname.getCanonicalPath().indexOf("swt") == -1
                    && pathname.getCanonicalPath().indexOf("quickr") == -1
-                   && pathname.getCanonicalPath().indexOf("java15") == -1
-                   ;
+                   && pathname.getCanonicalPath().indexOf("java15") == -1;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
