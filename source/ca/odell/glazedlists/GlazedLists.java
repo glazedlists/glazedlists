@@ -371,12 +371,25 @@ public final class GlazedLists {
     // Matchers // // // // // // // // // // // // // // // // // // // // // // //
 
     /**
+     * Create a new Matcher which uses reflection to read properties with the
+     * given <code>propertyName</code> from instances of the given
+     * <code>beanClass</code> and compare them with the given <code>value</code>.
+     *
+     * @param beanClass the type of class containing the named bean property
+     * @param propertyName the name of the bean property
+     * @param value the value to compare with the bean property
+     * @return <tt>true</tt> if the named bean property equals the given <code>value</code>
+     */
+    public static <E> Matcher<E> beanPropertyMatcher(Class<E> beanClass, String propertyName, Object value) {
+        return new BeanPropertyMatcher(new BeanProperty<E>(beanClass, propertyName, true, false), value);
+    }
+
+    /**
      * Get a {@link MatcherEditor} that is fixed on the specified {@link Matcher}.
      */
     public static <E> MatcherEditor<E> fixedMatcherEditor(Matcher<E> matcher) {
         return new FixedMatcherEditor<E>(matcher);
     }
-
 
     // ListEventListeners // // // // // // // // // // // // // // // // // //
 
