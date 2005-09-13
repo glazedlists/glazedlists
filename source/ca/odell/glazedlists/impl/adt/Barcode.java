@@ -393,7 +393,8 @@ public final class Barcode {
      *      <code>size()</code>.
      */
     public int getWhiteIndex(int index, boolean left) {
-        if(root == null || index >= treeSize) return index;
+        if(root == null) return index;
+        else if(index >= treeSize) return index - treeSize + root.whiteSize();
         else return root.getWhiteIndex(index, left);
     }
 

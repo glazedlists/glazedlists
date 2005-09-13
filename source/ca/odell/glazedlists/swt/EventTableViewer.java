@@ -229,7 +229,7 @@ public class EventTableViewer implements ListEventListener {
                     i.nextBlack();
                     deletedIndices[i.getBlackIndex()] = i.getIndex();
                 }
-                table.remove(deletedIndices);
+                tableHandler.removeAll(deletedIndices);
             }
 
             // Re-enable redraws to update the table
@@ -327,6 +327,11 @@ public class EventTableViewer implements ListEventListener {
         public void updateRow(int row, Object value);
 
         /**
+         * Removes a set of rows in a single call
+         */
+        public void removeAll(int[] rows);
+
+        /**
          * Disposes of this TableHandler
          */
         public void dispose();
@@ -362,6 +367,13 @@ public class EventTableViewer implements ListEventListener {
         }
 
         /**
+         * Removes a set of rows in a single call
+         */
+        public void removeAll(int[] rows) {
+            table.remove(rows);
+        }
+
+        /**
          * Disposes of this TableHandler.
          */
         public void dispose() {
@@ -371,10 +383,10 @@ public class EventTableViewer implements ListEventListener {
 
     /**
      * Allows manipulation of Virtual Tables and handles additional aspects
-     * like providing the SetData callback method and tracking tracking which
-     * values are Virtual.
+     * like providing the SetData callback method and tracking which values
+     * are Virtual.
      */
-    private final class VirtualTableHandler implements TableHandler, Listener, ListEventListener {
+    private final class VirtualTableHandler implements TableHandler, Listener {
 
         /** to keep track of what's been requested */
         private Barcode requested = null;
@@ -386,7 +398,6 @@ public class EventTableViewer implements ListEventListener {
             requested = new Barcode();
             requested.addWhite(0, swtSource.size());
             table.addListener(SWT.SetData, this);
-            swtSource.addListEventListener(this);
         }
 
         /**
@@ -402,11 +413,13 @@ public class EventTableViewer implements ListEventListener {
         public void addRow(int row, Object value) {
             // Adding before the last non-Virtual value
             if(row <= getLastIndex()) {
+                requested.addBlack(row, 1);
                 TableItem item = new TableItem(table, 0, row);
                 setItemText(item, value);
 
             // Adding in the Virtual values at the end
             } else {
+                requested.addWhite(requested.size(), 1);
                 table.setItemCount(table.getItemCount() + 1);
             }
         }
@@ -417,9 +430,21 @@ public class EventTableViewer implements ListEventListener {
         public void updateRow(int row, Object value) {
             // Only set a row if it is NOT Virtual
             if(!isVirtual(row)) {
+                requested.setBlack(row, 1);
                 TableItem item = table.getItem(row);
                 setItemText(item, value);
             }
+        }
+
+        /**
+         * Removes a set of rows in a single call
+         */
+        public void removeAll(int[] rows) {
+            // Sync the requested barcode to clear values that have been removed
+            for(int i = 0;i < rows.length;i++) {
+                requested.remove(rows[i] - i, 1);
+            }
+            table.remove(rows);
         }
 
         /**
@@ -439,38 +464,6 @@ public class EventTableViewer implements ListEventListener {
          */
         private boolean isVirtual(int rowIndex) {
             return requested.getBlackIndex(rowIndex) == -1;
-        }
-
-        /**
-         * To update the Barcode as change events come in.
-         */
-        public void listChanged(ListEvent listChanges) {
-            // process all the changes.
-            while(listChanges.next()) {
-
-                int changeType = listChanges.getType();
-                int changeIndex = listChanges.getIndex();
-
-                // Insert a value
-                if(changeType == ListEvent.INSERT) {
-                    // The value will be added as a Virtual item
-                    if(changeIndex == requested.size()) {
-                        requested.addWhite(requested.size(), 1);
-
-                    // The value will be added explictly
-                    } else {
-                        requested.addBlack(changeIndex, 1);
-                    }
-
-                // Updates anywhere require explicit value setting
-                } else if(changeType == ListEvent.UPDATE) {
-                    requested.setBlack(changeIndex, 1);
-
-                // Remove a value
-                } else if(changeType == ListEvent.DELETE) {
-                    requested.remove(changeIndex, 1);
-                }
-            }
         }
 
         /**
@@ -495,7 +488,6 @@ public class EventTableViewer implements ListEventListener {
          */
         public void dispose() {
             table.removeListener(SWT.SetData, this);
-            swtSource.removeListEventListener(this);
         }
     }
 }
