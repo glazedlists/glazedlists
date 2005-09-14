@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * An {@link EventList} that shows a range of the elements of the source
  * {@link EventList}. Each element in the source {@link EventList} is assigned
- * an integer value via a {@link ThresholdEvaluator}. This integer is used
+ * an integer value via a {@link Evaluator}. This integer is used
  * to determine whether the element fits in the {@link ThresholdList}s range.
  *
  * <p>By modifying the upper and lower thresholds in the range, the list can
@@ -21,11 +21,11 @@ import java.util.*;
  * manipulating one of the range's endpoints.
  *
  * <p>One use case for {@link ThresholdList} is in a media player application.
- * By creating a {@link ThresholdEvaluator} for a song's bitrate, the user could
+ * By creating a {@link Evaluator} for a song's bitrate, the user could
  * limit results to MP3 files between 192 and 320kbps.
  *
  * <p>Note that the elements in the {@link ThresholdList} will be presented in
- * order sorted by their {@link ThresholdEvaluator} value.
+ * order sorted by their {@link Evaluator} value.
  *
  * <p>This {@link EventList} supports all write operations.
  *
@@ -63,7 +63,7 @@ public final class ThresholdList extends TransformedList {
     private int sourceSize = 0;
 
     /** the evaluator to use to compare Objects against the threshold */
-    private ThresholdEvaluator evaluator = null;
+    private Evaluator evaluator = null;
 
     /**
      * Creates a {@link ThresholdList} that provides range-filtering based on the
@@ -75,9 +75,9 @@ public final class ThresholdList extends TransformedList {
 
     /**
      * Creates a {@link ThresholdList} that provides range-filtering on the
-     * specified {@link EventList} using the specified {@link ThresholdEvaluator}.
+     * specified {@link EventList} using the specified {@link Evaluator}.
      */
-    public ThresholdList(EventList source, ThresholdEvaluator evaluator) {
+    public ThresholdList(EventList source, Evaluator evaluator) {
         super(new SortedList(source, new ThresholdComparator(evaluator)));
         this.source.addListEventListener(this);
         this.evaluator = evaluator;
@@ -222,7 +222,7 @@ public final class ThresholdList extends TransformedList {
 
     /**
      * Sets the lower threshold for this list to be the result of calling
-     * {@link ThresholdEvaluator#evaluate(Object) evaluate()} on the given object.
+     * {@link Evaluator#evaluate(Object) evaluate()} on the given object.
      *
      * <p>This list can be used programmatically rather than hooking it up to
      * a UI component. <strong>Calling this method directly while this list
@@ -338,7 +338,7 @@ public final class ThresholdList extends TransformedList {
 
     /**
      * Sets the upper threshold for this list to be the result of calling
-     * {@link ThresholdEvaluator#evaluate(Object) evaluate()} on the given object.
+     * {@link Evaluator#evaluate(Object) evaluate()} on the given object.
      *
      * <p>This list can be used programmatically rather than hooking it up to
      * a UI component. <strong>Calling this method directly while this list
@@ -448,10 +448,10 @@ public final class ThresholdList extends TransformedList {
     }
 
     /**
-     * A convenience method to allow access to the {@link ThresholdEvaluator}
+     * A convenience method to allow access to the {@link Evaluator}
      * that was provided on construction.
      */
-    public ThresholdEvaluator getThresholdEvaluator() {
+    public Evaluator getEvaluator() {
         return evaluator;
     }
 
@@ -509,33 +509,48 @@ public final class ThresholdList extends TransformedList {
     }
 
     /**
+     * Provide an integer value for a given {@link Object} in a
+     * {@link ThresholdList}.
+     */
+    public interface Evaluator {
+    
+        /**
+         * Returns an integer value for an {@link Object} to be used to
+         * compare that object against a threshold.  This value is
+         * not relative to any other object unlike a {@link java.util.Comparator}.
+         */
+        public int evaluate(Object object);
+    }
+
+
+    /**
      * A ThresholdComparator is a simple helper class that wraps
-     * a <code>ThresholdEvaluator</code> with a <code>Comparator</code> to
+     * an {@link Evaluator} with a <code>Comparator</code> to
      * be used for sorting of the <code>ThresholdList</code>.
      */
     private static final class ThresholdComparator implements Comparator {
 
         /** the underlying evaluator **/
-        private ThresholdEvaluator evaluator = null;
+        private Evaluator evaluator = null;
 
         /**
          * Creates a new ThresholdComparator
          */
-        ThresholdComparator(ThresholdEvaluator evaluator) {
+        ThresholdComparator(Evaluator evaluator) {
             this.evaluator = evaluator;
         }
 
         /**
          * Compares two <code>Object</code>s, and compares them using the result
          * given when each <code>Object</code> is evaluated using the underlying
-         * <code>ThresholdEvaluator</code>.
+         * {@link Evaluator}.
          *
          * <p>This method is dual-mode as in the case of the Objects passed being
          * <code>Integer</code>s, it returns the value of
          * <code>((Integer)alpha).intValue() - ((Integer)beta).intValue()</code>.
          * This is necessary so that a threshold value can be compared against an
          * <code>Object</code>, and vice versa.  This can cause problems however
-         * if the underlying <code>ThresholdEvaluator</code> were to return the negation
+         * if the underlying {@link Evaluator} were to return the negation
          * of an <code>Integer</code>.
          */
         public int compare(Object alpha, Object beta) {
@@ -554,7 +569,7 @@ public final class ThresholdList extends TransformedList {
 
         /**
          * Returns true iff the object passed is a <code>ThresholdComparator</code> with
-         * the same underlying <code>ThresholdEvaluator</code>.
+         * the same underlying {@link Evaluator}.
          */
         public boolean equals(Object object) {
             if(object == null || !(object instanceof ThresholdComparator)) {
