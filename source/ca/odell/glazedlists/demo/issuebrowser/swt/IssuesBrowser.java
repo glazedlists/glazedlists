@@ -43,10 +43,10 @@ public class IssuesBrowser {
      * Constructs a new IssuesBrowser in the given window
      */
     private IssuesBrowser(Shell shell) {
-
         // Various Layered List Transformations
         usersMatcherEditor = new UsersMatcherEditor(issuesEventList);
-        FilterList issuesTextFiltered = new FilterList(issuesEventList, usersMatcherEditor);
+        FilterList issuesUserFiltered = new FilterList(issuesEventList, usersMatcherEditor);
+        FilterList issuesTextFiltered = new FilterList(issuesUserFiltered, Matchers.trueMatcher());
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
         SortedList issuesSortedList = new SortedList(priorityList);
 
