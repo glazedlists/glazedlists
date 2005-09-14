@@ -39,7 +39,10 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
     private Document document;
 
     /** the JTextField being observed for actions */
-    private JTextField textField;
+    private JTextComponent textComponent;
+
+    /** whether we're listening to each keystroke */
+    private boolean live;
 
     /** The listener attached to the given {@link #document}. */
     private FilterHandler filterHandler = new FilterHandler();
@@ -81,15 +84,10 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
     public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator textFilterator, boolean live) {
         super(textFilterator);
 
-        if(live) {
-            this.document = textComponent.getDocument();
-            this.document.addDocumentListener(this.filterHandler);
-        } else {
-            if(!(textComponent instanceof JTextField)) throw new IllegalArgumentException("Non-live filtering supported only for JTextField (argument class " + textComponent.getClass().getName() + ")");
-            this.textField = (JTextField)textComponent;
-            this.document = this.textField.getDocument();
-            textField.addActionListener(this.filterHandler);
-        }
+        this.textComponent = textComponent;
+        this.document = textComponent.getDocument();
+        this.live = live;
+        registerListeners(live);
 
         // if the document is non-empty to begin with!
         refilter();
@@ -109,10 +107,59 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
     public TextComponentMatcherEditor(Document document, TextFilterator textFilterator) {
         super(textFilterator);
         this.document = document;
-        this.document.addDocumentListener(this.filterHandler);
+        registerListeners(false);
 
         // if the document is non-empty to begin with!
         refilter();
+    }
+
+
+    /**
+     * Whether filtering occurs by the keystroke or not.
+     */
+    public boolean isLive() {
+        return this.live;
+    }
+
+    /**
+     * Toggle between filtering by the keystroke and not.
+     *
+     * @param live <code>true</code> to filter by the keystroke or <code>false</code>
+     *      to filter only when {@link java.awt.event.KeyEvent#VK_ENTER Enter} is pressed
+     *      within the {@link JTextField}. Note that non-live filtering is only
+     *      supported if <code>textComponent</code> is a {@link JTextField}.
+     */
+    public void setLive(boolean live) {
+        if(live == this.live) return;
+        deregisterListeners(this.live);
+        this.live = live;
+        registerListeners(this.live);
+    }
+
+    /**
+     * Listen live or on action performed.
+     */
+    private void registerListeners(boolean live) {
+        if(live) {
+            this.document.addDocumentListener(this.filterHandler);
+        } else {
+            if(textComponent == null) throw new IllegalArgumentException("Non-live filtering supported only for JTextField (document provided)");
+            if(!(textComponent instanceof JTextField)) throw new IllegalArgumentException("Non-live filtering supported only for JTextField (argument class " + textComponent.getClass().getName() + ")");
+            JTextField textField = (JTextField)textComponent;
+            textField.addActionListener(this.filterHandler);
+        }
+    }
+
+    /**
+     * Stop listening.
+     */
+    private void deregisterListeners(boolean live) {
+        if(live) {
+            this.document.removeDocumentListener(this.filterHandler);
+        } else {
+            JTextField textField = (JTextField)textComponent;
+            textField.removeActionListener(this.filterHandler);
+        }
     }
 
     /**
@@ -121,8 +168,7 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
      * MatcherEditor or Document to be garbage collected.
      */
     public void dispose() {
-        if(textField != null) textField.removeActionListener(this.filterHandler);
-        else document.removeDocumentListener(this.filterHandler);
+        deregisterListeners(this.live);
     }
 
     /**
@@ -136,7 +182,6 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
             throw new RuntimeException(ble);
         }
     }
-
 
     /**
      * This class responds to any change in the Document by setting the filter

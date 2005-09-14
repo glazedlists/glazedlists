@@ -5,6 +5,7 @@ package ca.odell.glazedlists.migrationkit.swt;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.swt.TextWidgetMatcherEditor;
 import ca.odell.glazedlists.event.*;
 // access to the volatile implementation pacakge
 import ca.odell.glazedlists.impl.filter.*;
@@ -54,16 +55,10 @@ import org.eclipse.swt.events.*;
 public class TextFilterList extends TransformedList {
 
     /** the text matcher editor does all the real work */
-    private TextMatcherEditor textMatcherEditor;
+    private TextWidgetMatcherEditor matcherEditor;
     
     /** the filter edit text field */
     private Text filterEdit;
-
-    /** the document listener responds to changes, it is null when we're not listening */
-    private FilterModifyListener filterModifyListener = null;
-
-    ///** the selection listener performs a refilter when fired */
-    private FilterSelectionListener filterSelectionListener = new FilterSelectionListener();
 
     /**
      * Creates a new filter list that filters elements out of the
@@ -129,12 +124,10 @@ public class TextFilterList extends TransformedList {
      */
     public TextFilterList(EventList source, Text filterEdit, TextFilterator filterator) {
         super(new FilterList(source));
-        textMatcherEditor = new TextMatcherEditor(filterator);
-        ((FilterList)this.source).setMatcherEditor(textMatcherEditor);
+        this.filterEdit = filterEdit;
+        matcherEditor = new TextWidgetMatcherEditor(filterEdit, filterator, false);
+        ((FilterList)this.source).setMatcherEditor(matcherEditor);
 
-        // listen to filter events
-        if(filterEdit != null) this.setFilterEdit(filterEdit);
-        
         // handle changes
         this.source.addListEventListener(this);
     }
@@ -153,22 +146,16 @@ public class TextFilterList extends TransformedList {
      * with a null value for filterEdit.
      */
     public void setFilterEdit(Text filterEdit) {
-        boolean live = true;
+        if(this.filterEdit == filterEdit) return;
 
-        // stop listening on filter events from the old filter edit
-        if(this.filterEdit != null) {
-            this.filterEdit.removeSelectionListener(filterSelectionListener);
-            live = (filterModifyListener != null);
-            setLive(false);
-        }
+        // clean up the old matcher editor
+        boolean live = matcherEditor.isLive();
+        TextFilterator textFilterator = matcherEditor.getFilterator();
+        matcherEditor.dispose();
 
-        // start listening for filter events from the new filter edit
-        this.filterEdit = filterEdit;
-        filterEdit.addSelectionListener(filterSelectionListener);
-        setLive(live);
-
-        // filter with the new filter edit
-        reFilter();
+        // prepare the new matcher editor
+        this.matcherEditor = new TextWidgetMatcherEditor(filterEdit, textFilterator, live);
+        ((FilterList)source).setMatcherEditor(matcherEditor);
     }
 
     /**
@@ -185,17 +172,7 @@ public class TextFilterList extends TransformedList {
      * you set a valid Text field.
      */
     public void setLive(boolean live) {
-        if(live) {
-            if(filterModifyListener == null) {
-                filterModifyListener = new FilterModifyListener();
-                filterEdit.addModifyListener(filterModifyListener);
-            }
-        } else {
-            if(filterModifyListener != null) {
-                filterEdit.removeModifyListener(filterModifyListener);
-                filterModifyListener = null;
-            }
-        }
+        matcherEditor.setLive(live);
     }
 
     /**
@@ -203,40 +180,21 @@ public class TextFilterList extends TransformedList {
      * listener can be used to filter when the user presses a 'Search' button.
      */
     public SelectionListener getFilterSelectionListener() {
-        return filterSelectionListener;
+        return new FilterSelectionListener();
     }
 
     /**
-     * Implement the ModifyListener interface for text filter updates. When the
-     * user edits the filter text field, this updates the filter to reflect
-     * the current value of that text field.
-     */
-    class FilterModifyListener implements ModifyListener {
-        public void modifyText(ModifyEvent e) {
-            reFilter();
-        }
-    }
-
-    /**
-     * Implements the SelectionListener interface for text filter updates. When
+     * Implement the {@link SelectionListener} interface for text filter updates. When
      * the user clicks a button (supplied by external code), this
-     * SelectionListener can be used to update the filter in response.
+     * {@link SelectionListener} can be used to update the filter in response.
      */
     private class FilterSelectionListener implements SelectionListener {
-        public void widgetSelected(SelectionEvent e) {
-            reFilter();
+        public void widgetSelected(SelectionEvent selectionEvent) {
+            matcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
         }
-        public void widgetDefaultSelected(SelectionEvent e) {
-            reFilter();
+        public void widgetDefaultSelected(SelectionEvent selectionEvent) {
+            matcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
         }
-    }
-
-    /**
-     * When the filter changes, first update the filter values used
-     * to do filtering, then apply the filter on all list elements.
-     */
-    private void reFilter() {
-        textMatcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
     }
 
     /** {@inheritDoc} */
@@ -255,5 +213,6 @@ public class TextFilterList extends TransformedList {
         FilterList filteredSource = (FilterList)source;
         super.dispose();
         filteredSource.dispose();
+        matcherEditor.dispose();
     }
 }

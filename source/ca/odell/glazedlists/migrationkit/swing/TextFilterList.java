@@ -5,6 +5,7 @@ package ca.odell.glazedlists.migrationkit.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
@@ -53,17 +54,11 @@ import java.awt.event.ActionEvent;
  */
 public class TextFilterList extends TransformedList {
 
-    /** the text matcher editor does all the real work */
-    private TextMatcherEditor textMatcherEditor;
-    
+    /** the text component matcher editor does all the real work */
+    private TextComponentMatcherEditor matcherEditor;
+
     /** the field where the filter strings are edited */
     private JTextField filterEdit = null;
-
-    /** the document listener responds to changes, it is null when we're not listening */
-    private FilterEditListener filterEditListener = null;
-
-    /** the action listener performs a refilter when fired */
-    private FilterActionListener filterActionListener = new FilterActionListener();
 
     /**
      * Creates a {@link TextFilterList} that filters the specified {@link EventList}
@@ -128,12 +123,9 @@ public class TextFilterList extends TransformedList {
      */
     public TextFilterList(EventList source, TextFilterator filterator, JTextField filterEdit) {
         super(new FilterList(source));
-        textMatcherEditor = new TextMatcherEditor(filterator);
-        ((FilterList)this.source).setMatcherEditor(textMatcherEditor);
+        this.matcherEditor = new TextComponentMatcherEditor(filterEdit, filterator);
+        ((FilterList)this.source).setMatcherEditor(matcherEditor);
 
-        // listen to filter events
-        this.setFilterEdit(filterEdit);
-        
         // handle changes
         this.source.addListEventListener(this);
     }
@@ -149,22 +141,16 @@ public class TextFilterList extends TransformedList {
      * Sets the {@link JTextField} used to edit the filter search {@link String}.
      */
     public void setFilterEdit(JTextField filterEdit) {
-        boolean live = true;
+        if(filterEdit == this.filterEdit) return;
 
-        // stop listening on filter events from the old filter edit
-        if(this.filterEdit != null) {
-            this.filterEdit.removeActionListener(filterActionListener);
-            live = (filterEditListener != null);
-            setLive(false);
-        }
+        // clean up the old matcher editor
+        boolean live = matcherEditor.isLive();
+        TextFilterator textFilterator = matcherEditor.getFilterator();
+        matcherEditor.dispose();
 
-        // start listening for filter events from the new filter edit
-        this.filterEdit = filterEdit;
-        filterEdit.addActionListener(filterActionListener);
-        setLive(live);
-
-        // filter with the new filter edit
-        reFilter();
+        // prepare the new matcher editor
+        this.matcherEditor = new TextComponentMatcherEditor(filterEdit, textFilterator, live);
+        ((FilterList)source).setMatcherEditor(matcherEditor);
     }
 
     /**
@@ -177,17 +163,7 @@ public class TextFilterList extends TransformedList {
      * button or by pressing <tt>ENTER</tt> in the {@link JTextField}.
      */
     public void setLive(boolean live) {
-        if(live) {
-            if(filterEditListener == null) {
-                filterEditListener = new FilterEditListener();
-                filterEdit.getDocument().addDocumentListener(filterEditListener);
-            }
-        } else {
-            if(filterEditListener != null) {
-                filterEdit.getDocument().removeDocumentListener(filterEditListener);
-                filterEditListener = null;
-            }
-        }
+        matcherEditor.setLive(live);
     }
 
     /**
@@ -195,24 +171,7 @@ public class TextFilterList extends TransformedList {
      * listener can be used to filter when the user presses a button.
      */
     public ActionListener getFilterActionListener() {
-        return filterActionListener;
-    }
-
-    /**
-     * Implement the {@link DocumentListener} interface for text filter updates. When
-     * The user edits the filter {@link JTextField}, this updates the filter to reflect
-     * the current value of that {@link JTextField}.
-     */
-    private class FilterEditListener implements DocumentListener {
-        public void changedUpdate(DocumentEvent e) {
-            reFilter();
-        }
-        public void insertUpdate(DocumentEvent e) {
-            reFilter();
-        }
-        public void removeUpdate(DocumentEvent e) {
-            reFilter();
-        }
+        return new FilterActionListener();
     }
 
     /**
@@ -222,16 +181,8 @@ public class TextFilterList extends TransformedList {
      */
     private class FilterActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            reFilter();
+            matcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
         }
-    }
-
-    /**
-     * When the filter changes, first update the filter values used
-     * to do filtering, then apply the filter on all list elements.
-     */
-    private void reFilter() {
-        textMatcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
     }
 
     /** {@inheritDoc} */
@@ -250,5 +201,6 @@ public class TextFilterList extends TransformedList {
         FilterList filteredSource = (FilterList)source;
         super.dispose();
         filteredSource.dispose();
+        matcherEditor.dispose();
     }
 }

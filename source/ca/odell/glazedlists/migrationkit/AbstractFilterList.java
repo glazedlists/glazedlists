@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.migrationkit;
 
 // the core Glazed Lists packages
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.matchers.*;
 

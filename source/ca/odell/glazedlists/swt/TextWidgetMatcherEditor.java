@@ -11,6 +11,8 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.*;
 
+import javax.swing.*;
+
 /**
  * A {@link MatcherEditor} that matches elements that contain the filter text located
  * within a {@link Text} field. This {@link TextWidgetMatcherEditor} is directly
@@ -27,6 +29,9 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
 
     /** the filter edit text field */
     private Text text;
+
+    /** whether we're listening to each keystroke */
+    private boolean live;
 
     /** the listener that triggers refiltering when events occur */
     private FilterChangeListener filterChangeListener = new FilterChangeListener();
@@ -68,13 +73,56 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
     public TextWidgetMatcherEditor(Text text, TextFilterator textFilterator, boolean live) {
         super(textFilterator);
         this.text = text;
-
-        // add the appropriate listeners
-        this.text.addSelectionListener(filterChangeListener);
-        if(live) this.text.addModifyListener(filterChangeListener);
+        this.live = live;
+        registerListeners(live);
 
         // if the document is non-empty to begin with!
         refilter();
+    }
+
+    /**
+     * Whether filtering occurs by the keystroke or not.
+     */
+    public boolean isLive() {
+        return this.live;
+    }
+
+    /**
+     * Toggle between filtering by the keystroke and not.
+     *
+     * @param live <code>true</code> to filter by the keystroke or <code>false</code>
+     *      to filter only when {@link java.awt.event.KeyEvent#VK_ENTER Enter} is pressed
+     *      within the {@link JTextField}. Note that non-live filtering is only
+     *      supported if <code>textComponent</code> is a {@link JTextField}.
+     */
+    public void setLive(boolean live) {
+        if(live == this.live) return;
+        deregisterListeners(this.live);
+        this.live = live;
+        registerListeners(this.live);
+    }
+
+
+    /**
+     * Listen live or on action performed.
+     */
+    private void registerListeners(boolean live) {
+        if(live) {
+            this.text.addModifyListener(filterChangeListener);
+        } else {
+            this.text.addSelectionListener(filterChangeListener);
+        }
+    }
+
+    /**
+     * Stop listening.
+     */
+    private void deregisterListeners(boolean live) {
+        if(live) {
+            this.text.removeModifyListener(filterChangeListener);
+        } else {
+            this.text.removeSelectionListener(filterChangeListener);
+        }
     }
 
     /**
@@ -94,8 +142,7 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
      * (of disposed of the widget it was registered to).
      */
     public void dispose() {
-        text.removeSelectionListener(filterChangeListener);
-        text.removeModifyListener(filterChangeListener);
+        deregisterListeners(live);
     }
 
     /**
