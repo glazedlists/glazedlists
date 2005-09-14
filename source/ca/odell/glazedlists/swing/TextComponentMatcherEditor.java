@@ -107,7 +107,7 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
     public TextComponentMatcherEditor(Document document, TextFilterator textFilterator) {
         super(textFilterator);
         this.document = document;
-        registerListeners(false);
+        registerListeners(true);
 
         // if the document is non-empty to begin with!
         refilter();
