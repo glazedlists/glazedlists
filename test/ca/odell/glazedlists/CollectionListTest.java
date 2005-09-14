@@ -271,7 +271,7 @@ public class CollectionListTest extends TestCase {
 	/**
 	 * Model that breaks a String into a list of characters.
 	 */
-	private class StringDecomposerModel implements CollectionListModel {
+	private class StringDecomposerModel implements CollectionList.Model {
 		public List getChildren(Object parent) {
 			return stringToList((String)parent);
         }
@@ -279,7 +279,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Returns the List itself for a List of Lists.
      */
-    private static class ListCollectionListModel implements CollectionListModel {
+    private static class ListCollectionListModel implements CollectionList.Model {
         public List getChildren(Object parent) {
             return (List)parent;
         }

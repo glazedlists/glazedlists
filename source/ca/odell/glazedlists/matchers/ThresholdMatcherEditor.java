@@ -4,7 +4,6 @@
 /*                                                          StarLight Systems */
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.Matcher;
 import ca.odell.glazedlists.GlazedLists;
 
 import java.util.Comparator;

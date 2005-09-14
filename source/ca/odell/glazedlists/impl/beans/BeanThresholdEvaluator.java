@@ -4,14 +4,14 @@
 package ca.odell.glazedlists.impl.beans;
 
 // to implement the ThresholdEvaluator interface
-import ca.odell.glazedlists.ThresholdEvaluator;
+import ca.odell.glazedlists.ThresholdList;
 
 /**
  * A ThresholdEvaluator that is powered by JavaBeans and Reflection.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class BeanThresholdEvaluator implements ThresholdEvaluator {
+public final class BeanThresholdEvaluator implements ThresholdList.Evaluator {
 
     private String propertyName = null;
 

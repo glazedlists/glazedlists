@@ -5,6 +5,8 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.Matcher;
 // standard collections
 import java.util.*;
 import javax.swing.event.*;
@@ -106,7 +108,7 @@ public class EventSelectionModelTest extends SwingTestCase {
         String[] data = new String[] { "one", "two", "three" };
         EventList source = new BasicEventList();
         source.addAll(Arrays.asList(data));
-        BooleanFilteredList filtered = new BooleanFilteredList(source);
+        FilterList filtered = new FilterList(source, Matchers.trueMatcher());
 
         // create selection model
         EventSelectionModel model = new EventSelectionModel(filtered);
@@ -118,11 +120,11 @@ public class EventSelectionModelTest extends SwingTestCase {
         assertEquals(1, counter.getCountAndReset());
 
         // clear the filter
-        filtered.setMatchAll(false);
+        filtered.setMatcher(Matchers.falseMatcher());
         assertEquals(1, counter.getCountAndReset());
 
         // unclear the filter
-        filtered.setMatchAll(true);
+        filtered.setMatcher(Matchers.trueMatcher());
         assertEquals(0, counter.getCountAndReset());
 
         // select the 0th
@@ -130,26 +132,8 @@ public class EventSelectionModelTest extends SwingTestCase {
         assertEquals(1, counter.getCountAndReset());
 
         // clear the filter
-        filtered.setMatchAll(false);
+        filtered.setMatcher(Matchers.falseMatcher());
         assertEquals(1, counter.getCountAndReset());
-    }
-
-    /**
-     * A filter list that matches all or none.
-     */
-    private class BooleanFilteredList extends AbstractFilterList {
-        private boolean matchAll = true;
-        public BooleanFilteredList(EventList source) {
-            super(source);
-            handleFilterChanged();
-        }
-        public boolean filterMatches(Object element) {
-            return matchAll;
-        }
-        public void setMatchAll(boolean matchAll) {
-            this.matchAll = matchAll;
-            handleFilterChanged();
-        }
     }
 
     /**

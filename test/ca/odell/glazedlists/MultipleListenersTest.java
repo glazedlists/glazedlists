@@ -7,6 +7,8 @@ package ca.odell.glazedlists;
 import junit.framework.*;
 // the volatile Glazed Lists package
 import ca.odell.glazedlists.impl.sort.*;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
 // standard collections
 import java.util.*;
 
@@ -52,7 +54,8 @@ public class MultipleListenersTest extends TestCase {
         // create sorted and filtered derivatives
         Comparator comparator = GlazedLists.comparableComparator();
         SortedList sorted = new SortedList(root, comparator);
-        IntegerSizeFilterList filtered = new IntegerSizeFilterList(root, 50);
+        IntegerSizeMatcherEditor matcherEditor = new IntegerSizeMatcherEditor(50);
+        FilterList filtered = new FilterList(root, matcherEditor);
 
         // repeatedly make updates and verify the derivates keep up
         for(int i = 0; i < 30; i++) {
@@ -75,7 +78,7 @@ public class MultipleListenersTest extends TestCase {
             // verify that the filtered list is correct
             List filteredControl = new ArrayList();
             for(int j = 0; j < control.size(); j++) {
-                if(filtered.filterMatches(control.get(j))) {
+                if(matcherEditor.getMatcher().matches(control.get(j))) {
                     filteredControl.add(control.get(j));
                 }
             }
@@ -90,27 +93,29 @@ public class MultipleListenersTest extends TestCase {
             sorted.setComparator(comparator);
 
             // adjust the filter
-            filtered.setThreshhold(random.nextInt(100));
+            matcherEditor.setThreshhold(random.nextInt(100));
         }
     }
 
     /**
      * A simple filter for filtering integers by size.
      */
-    class IntegerSizeFilterList extends AbstractFilterList {
-        int threshhold;
-        public IntegerSizeFilterList(EventList source, int threshhold) {
-            super(source);
-            this.threshhold = threshhold;
-            handleFilterChanged();
+    class IntegerSizeMatcherEditor extends AbstractMatcherEditor {
+        public IntegerSizeMatcherEditor(int threshhold) {
+            setThreshhold(threshhold);
         }
         public void setThreshhold(int threshhold) {
-            this.threshhold = threshhold;
-            handleFilterChanged();
+            fireChanged(new IntegerMatcher(threshhold));
         }
-        public boolean filterMatches(Object element) {
-            Integer integer = (Integer)element;
-            return (integer.intValue() >= threshhold);
+        private class IntegerMatcher implements Matcher {
+            int threshhold;
+            public IntegerMatcher(int threshhold) {
+                this.threshhold = threshhold;
+            }
+            public boolean matches(Object element) {
+                Integer integer = (Integer)element;
+                return (integer.intValue() >= threshhold);
+            }
         }
     }
 

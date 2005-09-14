@@ -499,11 +499,12 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 3, 0, 1 });
         source.add(new int[] { 4, 1, 0 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
-        filterList.setFilter(2, 1);
-        filterList.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
+        matcherEditor.setFilter(1, 1);
     }
 
     /**
@@ -518,11 +519,12 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 3, 0, 1 });
         source.add(new int[] { 4, 1, 1 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
-        filterList.setFilter(1, 1);
-        filterList.setFilter(2, 1);
+        matcherEditor.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
 
         assertEquals(3, unique.size());
         assertEquals(1, ((int[])unique.get(0))[0]);
@@ -540,11 +542,12 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 3, 0, 1 });
         source.add(new int[] { 4, 1, 1 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
-        filterList.setFilter(1, 1);
-        filterList.setFilter(2, 1);
+        matcherEditor.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
 
         assertEquals(3, unique.size());
         assertEquals(1, ((int[])unique.get(0))[0]);
@@ -563,11 +566,12 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 4, 0, 1 });
         source.add(new int[] { 5, 0, 1 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
-        filterList.setFilter(1, 1);
-        filterList.setFilter(2, 1);
+        matcherEditor.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
 
         assertEquals(3, unique.size());
         assertEquals(3, ((int[])unique.get(0))[0]);
@@ -592,11 +596,12 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 5, 0, 1 });
         source.add(new int[] { 5, 0, 1 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
-        filterList.setFilter(1, 1);
-        filterList.setFilter(2, 1);
+        matcherEditor.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
 
         assertEquals(3, unique.size());
         assertEquals(3, ((int[])unique.get(0))[0]);
@@ -621,11 +626,12 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 5, 1, 0 });
         source.add(new int[] { 5, 1, 0 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
-        filterList.setFilter(1, 1);
-        filterList.setFilter(2, 1);
+        matcherEditor.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
 
         assertEquals(2, unique.size());
         assertEquals(2, ((int[])unique.get(0))[0]);
@@ -644,12 +650,13 @@ public class UniqueListTest extends TestCase {
         source.add(new int[] { 3, 1, 0, 1 });
         source.add(new int[] { 3, 0, 0, 1 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
-        filterList.setFilter(1, 1);
-        filterList.setFilter(2, 1);
-        filterList.setFilter(3, 1);
+        matcherEditor.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
+        matcherEditor.setFilter(3, 1);
 
         assertEquals(3, unique.size());
         assertEquals(1, ((int[])unique.get(0))[0]);
@@ -665,7 +672,8 @@ public class UniqueListTest extends TestCase {
      */
     public void testLargeRandomSet() {
         source = new BasicEventList();
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         unique = new UniqueList(filterList, new IntArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
@@ -679,7 +687,7 @@ public class UniqueListTest extends TestCase {
         for(int i = 0; i < 10; i++) {
             // apply the filter
             int filterColumn = random.nextInt(3);
-            filterList.setFilter(filterColumn + 1, 1);
+            matcherEditor.setFilter(filterColumn + 1, 1);
 
             // construct the control list
             SortedSet controlSet = new TreeSet(new IntArrayComparator(0));

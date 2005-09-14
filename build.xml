@@ -179,12 +179,15 @@
         <mkdir dir="classes"/>
         <javac destdir="classes" srcdir="source" debug="on" source="1.3" target="1.3" deprecation="on">
             <include name="**/event/**"/>
-            <include name="**/BasicEventList.java"/>
+            <include name="**/FilterList.java"/>
             <include name="**/EventList.java"/>
             <include name="**/SubEventList.java"/>
             <include name="**/EventListIterator.java"/>
             <include name="**/SimpleIterator.java"/>
             <include name="**/concurrent/**"/>
+            <include name="**/BasicEventList.java"/>
+            <include name="**/ObservableElement.java"/>
+            <include name="**/JavaBeanEventListConnector.java"/>
         </javac>
         <tstamp prefix="jar">
             <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>

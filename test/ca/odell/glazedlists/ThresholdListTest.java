@@ -1145,7 +1145,7 @@ public class ThresholdListTest extends TestCase {
         }
     }
 
-    private class IntegerEvaluator implements ThresholdEvaluator {
+    private class IntegerEvaluator implements ThresholdList.Evaluator {
         /**
          * Returns an integer value which represents the object.
          */
@@ -1175,12 +1175,12 @@ public class ThresholdListTest extends TestCase {
     private final class ThresholdComparator implements Comparator {
 
         /** the underlying evaluator **/
-        private ThresholdEvaluator evaluator = null;
+        private ThresholdList.Evaluator evaluator = null;
 
         /**
          * Creates a new ThresholdComparator
          */
-        ThresholdComparator(ThresholdEvaluator evaluator) {
+        ThresholdComparator(ThresholdList.Evaluator evaluator) {
             this.evaluator = evaluator;
         }
 

@@ -7,7 +7,6 @@ package ca.odell.glazedlists.demo.issuebrowser.swt;
 import ca.odell.glazedlists.demo.issuebrowser.*;
 // swt
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
@@ -15,7 +14,6 @@ import org.eclipse.swt.custom.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.swt.*;
 import ca.odell.glazedlists.matchers.*;
 
@@ -32,7 +30,7 @@ public class IssuesBrowser {
     private UniqueList issuesEventList = new UniqueList(new BasicEventList());
 
     /** To get access to the unique list of users */
-    private IssuesUserFilter issuesUserFiltered = null;
+    private UsersMatcherEditor usersMatcherEditor = null;
     private List usersList = null;
 
     /** status bar is a temporary throbber */
@@ -47,8 +45,8 @@ public class IssuesBrowser {
     private IssuesBrowser(Shell shell) {
 
         // Various Layered List Transformations
-        issuesUserFiltered = new IssuesUserFilter(issuesEventList);
-        FilterList issuesTextFiltered = new FilterList(issuesUserFiltered);
+        usersMatcherEditor = new UsersMatcherEditor(issuesEventList);
+        FilterList issuesTextFiltered = new FilterList(issuesEventList, usersMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
         SortedList issuesSortedList = new SortedList(priorityList);
 
@@ -304,8 +302,8 @@ public class IssuesBrowser {
         usersList.setLayoutData(usersListLayout);
 
         // Add filtering based on selection of issue owners
-        EventListViewer listViewer = new EventListViewer(issuesUserFiltered.getUsersList(), usersList);
-        issuesUserFiltered.setSelectionList(listViewer.getSelected());
+        EventListViewer listViewer = new EventListViewer(usersMatcherEditor.getUsersList(), usersList);
+        usersMatcherEditor.setSelectionList(listViewer.getSelected());
     }
 
     private Table createIssuesTable(Composite parent) {

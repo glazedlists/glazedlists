@@ -5,6 +5,9 @@ package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 // SWT toolkit stuff for displaying widgets
@@ -29,10 +32,10 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-final class TableCheckFilterList extends AbstractFilterList implements org.eclipse.swt.events.SelectionListener {
+final class TableCheckFilterList extends TransformedList implements org.eclipse.swt.events.SelectionListener {
 
-    /** whether this displays all or only checked elements */
-    private boolean checkedOnly = false;
+    /** filter out unchecked elements */
+    private CheckMatcherEditor checkMatcherEditor = new CheckMatcherEditor();
 
     /** the table that checkboxes are displayed in */
     private Table table;
@@ -49,7 +52,7 @@ final class TableCheckFilterList extends AbstractFilterList implements org.eclip
      *      stored transiently within this class' state.
      */
     public TableCheckFilterList(EventList source, Table table, TableFormat tableFormat) {
-        super(tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source));
+        super(new FilterList(tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source), Matchers.trueMatcher()));
         this.table = table;
         if(tableFormat instanceof CheckableTableFormat) {
             this.checkableTableFormat = (CheckableTableFormat)tableFormat;
@@ -61,7 +64,11 @@ final class TableCheckFilterList extends AbstractFilterList implements org.eclip
         table.addSelectionListener(this);
 
         // prepare the filter
-        handleFilterChanged();
+        FilterList filteredSource = (FilterList)super.source;
+        filteredSource.setMatcherEditor(checkMatcherEditor);
+
+        // handle changes
+        source.addListEventListener(this);
     }
 
 
@@ -100,13 +107,22 @@ final class TableCheckFilterList extends AbstractFilterList implements org.eclip
 
 
     /**
-     * Returns true if the specified Object is checked.
+     * Match checked elements.
      */
-    public boolean filterMatches(Object element) {
-        if(checkedOnly) {
-            return getChecked(element);
-        } else {
-            return true;
+    private class CheckMatcherEditor extends AbstractMatcherEditor {
+        private boolean checkedOnly = false;
+        private void setCheckedOnly(boolean checkedOnly) {
+            if(checkedOnly == this.checkedOnly) return;
+            if(checkedOnly) fireConstrained(new CheckMatcher());
+            else fireMatchAll();
+        }
+        private boolean getCheckedOnly() {
+            return checkedOnly;
+        }
+        private class CheckMatcher implements Matcher {
+            public boolean matches(Object element) {
+                return getChecked(element);
+            }
         }
     }
 
@@ -129,16 +145,14 @@ final class TableCheckFilterList extends AbstractFilterList implements org.eclip
      * Set whether this filter list displays all elements, or only checked elements.
      */
     public void setCheckedOnly(boolean checkedOnly) {
-        if(checkedOnly != this.checkedOnly) {
-            this.checkedOnly = checkedOnly;
-            handleFilterChanged();
-        }
+        checkMatcherEditor.setCheckedOnly(checkedOnly);
     }
+
     /**
      * Get whether this filter list displays all elements, or only checked elements.
      */
     public boolean getCheckedOnly() {
-        return checkedOnly;
+        return checkMatcherEditor.getCheckedOnly();
     }
 
 
@@ -153,6 +167,11 @@ final class TableCheckFilterList extends AbstractFilterList implements org.eclip
             CheckWrapped checkWrapped = (CheckWrapped)super.get(index);
             return checkWrapped.getWrapped();
         }
+    }
+
+    /** {@inheritDoc} */
+    public void listChanged(ListEvent listChanges) {
+        updates.forwardEvent(listChanges);
     }
 
 

@@ -22,6 +22,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
@@ -139,7 +140,8 @@ public class IssuesBrowser extends Applet {
         StateMatcherEditor stateMatcherEditor = new StateMatcherEditor();
 
         // create the pipeline of glazed lists
-        IssuesUserFilter issuesUserFiltered = new IssuesUserFilter(issuesEventList);
+        SwingUsersMatcherEditor userMatcherEditor = new SwingUsersMatcherEditor(issuesEventList);
+        FilterList issuesUserFiltered = new FilterList(issuesEventList, userMatcherEditor);
         FilterList issuesStateFiltered = new FilterList(issuesUserFiltered, stateMatcherEditor);
         FilterList issuesTextFiltered = new FilterList(issuesStateFiltered, textFilterMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
@@ -172,7 +174,7 @@ public class IssuesBrowser extends Applet {
         issuesTableScrollPane.getViewport().setOpaque(false);
 
         // users table
-        JScrollPane usersListScrollPane = new JScrollPane(issuesUserFiltered.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane usersListScrollPane = new JScrollPane(userMatcherEditor.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         usersListScrollPane.setBorder(BLACK_LINE_BORDER);
 
         // descriptions

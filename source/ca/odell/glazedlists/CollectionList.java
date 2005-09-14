@@ -16,7 +16,7 @@ import ca.odell.glazedlists.impl.adt.*;
  * and use the CollectionList to display the songs on the album.
  * 
  * <p>The actual mapping from the parent list to the child list (record to songs in the
- * above example) is done by a {@link CollectionListModel} that is provided to the
+ * above example) is done by a {@link CollectionList.Model} that is provided to the
  * constructor.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
@@ -29,7 +29,7 @@ import ca.odell.glazedlists.impl.adt.*;
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
- * @see CollectionListModel
+ * @see CollectionList.Model
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
@@ -37,7 +37,7 @@ import ca.odell.glazedlists.impl.adt.*;
 public class CollectionList extends TransformedList implements ListEventListener {
     
     /** used to extract children */
-    private final CollectionListModel collectionListModel;
+    private final Model model;
 
     /**
      * Barcode containing the node mappings. There is a black node for each parent
@@ -52,15 +52,15 @@ public class CollectionList extends TransformedList implements ListEventListener
      * Create a {@link CollectionList} that's contents will be the children of the
      * elements in the specified source {@link EventList}.
      */
-    public CollectionList(EventList source, CollectionListModel collectionListModel) {
+    public CollectionList(EventList source, Model model) {
         super(source);
-        if(collectionListModel == null) throw new IllegalArgumentException("Collection map cannot be null");
+        if(model == null) throw new IllegalArgumentException("Collection map cannot be null");
 
-        this.collectionListModel = collectionListModel;
+        this.model = model;
 
         // Sync the current size and indexes
         for(int i = 0; i < source.size(); i++) {
-            List children = collectionListModel.getChildren(source.get(i));
+            List children = model.getChildren(source.get(i));
 
             // update the list of child lists
             IndexedTreeNode node = childElements.addByNode(i, this);
@@ -193,7 +193,7 @@ public class CollectionList extends TransformedList implements ListEventListener
 
         // Find the size of the new node and add it to the total
         Object parent = source.get(parentIndex);
-        List children = collectionListModel.getChildren(parent);
+        List children = model.getChildren(parent);
 
         // update the list of child lists
         IndexedTreeNode node = childElements.addByNode(parentIndex, this);
@@ -278,7 +278,30 @@ public class CollectionList extends TransformedList implements ListEventListener
         public Object set(int index, Object element);
         public void dispose();
     }
-    
+
+
+
+    /**
+     * Provides the logic to map a parent record (e.g., a records album) to its children
+     * (e.g., the songs on the record). Serves basically the same purpose as
+     * {@link javax.swing.tree.TreeModel} does to a JTree in Swing.
+     *
+     * @see CollectionList
+     * @see GlazedLists#listCollectionListModel()
+     */
+    public interface Model {
+
+        /**
+         * Return a list of the child nodes for a parent node.
+         *
+         * @param parent The parent node.
+         * @return A List containing the child nodes.
+         */
+        public List getChildren(Object parent);
+    }
+
+
+
     /**
      * Manages a standard List that does not implement {@link EventList}.
      */

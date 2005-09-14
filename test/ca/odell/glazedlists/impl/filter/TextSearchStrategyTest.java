@@ -21,7 +21,6 @@ public class TextSearchStrategyTest extends TestCase {
      */
     public void setUp() {
         strategies = new TextSearchStrategy[] {
-            new OldCaseInsensitiveTextSearchStrategy(),
             new BoyerMooreCaseInsensitiveTextSearchStrategy()
         };
     }

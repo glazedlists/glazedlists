@@ -7,6 +7,7 @@ package ca.odell.glazedlists;
 import junit.framework.*;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.matchers.Matchers;
 // Java collections are used for underlying data storage
 import java.util.*;
 
@@ -46,8 +47,8 @@ public class MultipleSourcesTest extends TestCase {
      */
     public void testMultipleSources() {
         BasicEventList source = new BasicEventList();
-        EasyFilterList filterOne = new EasyFilterList(source);
-        EasyFilterList filterTwo = new EasyFilterList(source);
+        FilterList filterOne = new FilterList(source, Matchers.trueMatcher());
+        FilterList filterTwo = new FilterList(source, Matchers.trueMatcher());
         
         source.add("Game Cube");
         source.add("Genesis");
@@ -69,11 +70,11 @@ public class MultipleSourcesTest extends TestCase {
         assertEquals(8, filtersListener.getChangeCount());
 
         // modify filter one
-        filterOne.setMatch(false);
+        filterOne.setMatcher(Matchers.falseMatcher());
         assertEquals(9, filtersListener.getChangeCount());
         
         // modify filter two
-        filterTwo.setMatch(true);
+        filterTwo.setMatcher(Matchers.trueMatcher());
         assertEquals(9, filtersListener.getChangeCount());
     }
     
@@ -83,8 +84,8 @@ public class MultipleSourcesTest extends TestCase {
      */
     public void testMultipleSourcesNoListener() {
         BasicEventList source = new BasicEventList();
-        EasyFilterList filterOne = new EasyFilterList(source);
-        EasyFilterList filterTwo = new EasyFilterList(source);
+        FilterList filterOne = new FilterList(source, Matchers.trueMatcher());
+        FilterList filterTwo = new FilterList(source, Matchers.trueMatcher());
         
         source.add("Game Cube");
         source.add("Genesis");
@@ -108,11 +109,11 @@ public class MultipleSourcesTest extends TestCase {
         assertEquals(4, filtersListener.getChangeCount());
 
         // modify filter one
-        filterOne.setMatch(false);
+        filterOne.setMatcher(Matchers.falseMatcher());
         assertEquals(5, filtersListener.getChangeCount());
         
         // modify filter two
-        filterTwo.setMatch(true);
+        filterTwo.setMatcher(Matchers.trueMatcher());
         assertEquals(5, filtersListener.getChangeCount());
     }
     
@@ -145,23 +146,6 @@ public class MultipleSourcesTest extends TestCase {
                 EventList eventList = (EventList)i.next();
                 eventList.toArray();
             }
-        }
-    }
-
-    /**
-     * Simple TextFilterator for Strings.
-     */
-    class EasyFilterList extends AbstractFilterList {
-        public boolean match = true;
-        public EasyFilterList(EventList source) {
-            super(source);
-        }
-        public boolean filterMatches(Object element) {
-            return match;
-        }
-        public void setMatch(boolean match) {
-            this.match = match;
-            handleFilterChanged();
         }
     }
 }

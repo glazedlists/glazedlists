@@ -1,7 +1,5 @@
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.Matcher;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;

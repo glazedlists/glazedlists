@@ -223,21 +223,21 @@ public final class GlazedLists {
     // ThresholdEvaluators // // // // // // // // // // // // // // // // // //
 
     /**
-     * Creates a {@link ThresholdEvaluator} that uses Reflection to utilize an
+     * Creates a {@link ThresholdList.Evaluator} that uses Reflection to utilize an
      * integer JavaBean property as the threshold evaluation.
      */
-    public static ThresholdEvaluator thresholdEvaluator(String propertyName) {
+    public static ThresholdList.Evaluator thresholdEvaluator(String propertyName) {
         return new BeanThresholdEvaluator(propertyName);
     }
 
     // CollectionListModels   // // // // // // // // // // // // // // // // //
 
     /**
-     * Creates a {@link CollectionListModel} that where {@link List}s or {@link EventList}s
+     * Creates a {@link CollectionList.Model} that where {@link List}s or {@link EventList}s
      * are the elements of a parent {@link EventList}. This can be used to compose
      * {@link EventList}s from other {@link EventList}s.
      */
-    public static CollectionListModel listCollectionListModel() {
+    public static CollectionList.Model listCollectionListModel() {
         return new ListCollectionListModel();
     }
 

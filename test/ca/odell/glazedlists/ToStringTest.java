@@ -8,6 +8,8 @@ import junit.framework.*;
 // standard collections
 import java.util.*;
 
+import ca.odell.glazedlists.matchers.Matchers;
+
 /**
  * This test verifies that the toString() method on all lists is consistent
  * with the toString() method of {@link ArrayList}.
@@ -34,7 +36,7 @@ public class ToStringTest extends TestCase {
     public void testToStringConsistency() {
         ArrayList controlList = new ArrayList();
         BasicEventList basicEventList = new BasicEventList();
-        TrivialFilterList filterList = new TrivialFilterList(basicEventList);
+        FilterList filterList = new FilterList(basicEventList, Matchers.trueMatcher());
         SortedList sortedList = new SortedList(basicEventList);
 
         // Test On Empty Lists
@@ -66,17 +68,4 @@ public class ToStringTest extends TestCase {
 
     }
 
-}
-
-/**
- * The trivial filter list is a simple extension of AbstractFilterList
- * that simply never filters anything out!
- */
-class TrivialFilterList extends AbstractFilterList {
-    public TrivialFilterList(EventList source) {
-        super(source);
-    }
-    public boolean filterMatches(Object element) {
-        return true;
-    }
 }

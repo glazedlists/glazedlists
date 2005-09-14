@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.matchers;
 
-import ca.odell.glazedlists.Matcher;
+import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * A simple {@link Matcher} implementation that inverts the result of another

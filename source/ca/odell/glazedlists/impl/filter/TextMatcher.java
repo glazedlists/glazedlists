@@ -7,6 +7,7 @@ package ca.odell.glazedlists.impl.filter;
 import java.util.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.*;
 
 /**
  * Matcher for matching text.

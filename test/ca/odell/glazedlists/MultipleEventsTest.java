@@ -40,9 +40,10 @@ public class MultipleEventsTest extends TestCase {
         source.add(new int[] { 0 });
         
         // prepare a filter list
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
-        filterList.setFilter(0, 1);
-        
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        matcherEditor.setFilter(0, 1);
+        FilterList filterList = new FilterList(source, matcherEditor);
+
         // listen to changes on the filter list
         ListEventCounter counter = new ListEventCounter();
         filterList.addListEventListener(counter);

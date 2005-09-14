@@ -7,7 +7,7 @@ import ca.odell.glazedlists.*;
 /**
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class IssueUserator implements CollectionListModel {
+public class IssueUserator implements CollectionList.Model {
 
     public List getChildren(Object parent) {
         Issue issue = (Issue)parent;

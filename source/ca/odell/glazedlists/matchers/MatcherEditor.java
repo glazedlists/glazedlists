@@ -3,9 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.Matcher;
 import ca.odell.glazedlists.FilterList;
-
 import java.util.EventObject;
 import java.util.EventListener;
 

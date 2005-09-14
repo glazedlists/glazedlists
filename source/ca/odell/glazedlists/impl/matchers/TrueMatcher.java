@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.impl.matchers;
 
 
-import ca.odell.glazedlists.Matcher;
+import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * A {@link Matcher} implementation that always matches. Use {@link #getInstance()} to

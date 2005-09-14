@@ -114,17 +114,18 @@ public class PopularityListTest extends TestCase {
         source.add(new int[] { 98, 1, 1, 1, 1, 0, 1 });
         source.add(new int[] { 98, 1, 0, 0, 1, 1, 1 });
 
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source, matcherEditor);
         SortedList sortedList = new SortedList(source, new IntArrayComparator(0));
         PopularityList popularityList = new PopularityList(filterList, new IntArrayComparator(0));
         new PopularityListValidator(popularityList, sortedList);
 
-        filterList.setFilter(1, 1);
-        filterList.setFilter(2, 1);
-        filterList.setFilter(3, 1);
-        filterList.setFilter(4, 1);
-        filterList.setFilter(5, 1);
-        filterList.setFilter(6, 1);
+        matcherEditor.setFilter(1, 1);
+        matcherEditor.setFilter(2, 1);
+        matcherEditor.setFilter(3, 1);
+        matcherEditor.setFilter(4, 1);
+        matcherEditor.setFilter(5, 1);
+        matcherEditor.setFilter(6, 1);
     }
 
     /**

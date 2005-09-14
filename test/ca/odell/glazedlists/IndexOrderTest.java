@@ -7,6 +7,8 @@ package ca.odell.glazedlists;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
 // standard collections
 import java.util.*;
 
@@ -43,8 +45,9 @@ public class IndexOrderTest extends TestCase {
      */
     public void testIncreasingOrder() {
         EventList unsorted = new BasicEventList();
-        IntegerArrayFilterList filteredOnce = new IntegerArrayFilterList(unsorted, 0, 50);
-        
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
+        FilterList filteredOnce = new FilterList(unsorted, matcherEditor);
+
         // add a block of new elements one hundred times
         for(int a = 0; a < 100; a++) {
 
@@ -59,7 +62,7 @@ public class IndexOrderTest extends TestCase {
         }
         
         for(int b = 0; b < 100; b++) {
-            filteredOnce.setFilter(random.nextInt(2), random.nextInt(100));
+            matcherEditor.setFilter(random.nextInt(2), random.nextInt(100));
         }
     }
 
@@ -74,7 +77,8 @@ public class IndexOrderTest extends TestCase {
     public void testIndexOutOfOrder() {
         EventList unsorted = new BasicEventList();
         SortedList sortedOnce = new SortedList(unsorted, new IntegerArrayComparator(0));
-        AbstractFilterList filteredOnce = new IntegerArrayFilterList(sortedOnce, 0, 50);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
+        FilterList filteredOnce = new FilterList(sortedOnce, matcherEditor);
         SortedList sortedTwice = new SortedList(filteredOnce, new IntegerArrayComparator(0));
         
         unsorted.addListEventListener(new IncreasingChangeIndexListener());
@@ -99,7 +103,7 @@ public class IndexOrderTest extends TestCase {
             controlList.addAll(currentChange);
             Collections.sort(controlList, sortedTwice.getComparator());
             for(Iterator i = controlList.iterator(); i.hasNext(); ) {
-                if(filteredOnce.filterMatches(i.next())) continue;
+                if(matcherEditor.getMatcher().matches(i.next())) continue;
                 i.remove();
             }
             
@@ -135,24 +139,25 @@ public class IndexOrderTest extends TestCase {
      * A special filter list that filters out integer arrays that don't have
      * an element lower than a specified thresshold.
      */
-    class IntegerArrayFilterList extends AbstractFilterList {
-        private int index;
-        private int threshhold;
-        public IntegerArrayFilterList(EventList source, int index, int threshhold) {
-            super(source);
-            this.index = index;
-            this.threshhold = threshhold;
-            handleFilterChanged();
+    class IntegerArrayMatcherEditor extends AbstractMatcherEditor {
+        public IntegerArrayMatcherEditor(int index, int threshhold) {
+            setFilter(index, threshhold);
         }
         public void setFilter(int index, int threshhold) {
-            this.index = index;
-            this.threshhold = threshhold;
-            handleFilterChanged();
+            fireChanged(new IntegerArrayMatcher(index, threshhold));
         }
-        public boolean filterMatches(Object element) {
-            int[] array = (int[])element;
-            if(array[index] <= threshhold) return true;
-            return false;
+        private class IntegerArrayMatcher implements Matcher {
+            private int index;
+            private int threshhold;
+            public IntegerArrayMatcher(int index, int threshhold) {
+                this.index = index;
+                this.threshhold = threshhold;
+            }
+            public boolean matches(Object element) {
+                int[] array = (int[])element;
+                if(array[index] <= threshhold) return true;
+                return false;
+            }
         }
     }
     

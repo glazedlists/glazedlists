@@ -5,7 +5,7 @@ package ca.odell.glazedlists.demo.collectionlist;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CollectionList;
-import ca.odell.glazedlists.CollectionListModel;
+import ca.odell.glazedlists.CollectionList.Model;
 import ca.odell.glazedlists.demo.Launcher;
 import ca.odell.glazedlists.swing.EventListModel;
 
@@ -328,7 +328,7 @@ public class AlbumBrowser {
 	}
 
 
-	static class RecordCollectionListModel implements CollectionListModel {
+	static class RecordCollectionListModel implements CollectionList.Model {
 		public List getChildren(Object parent) {
 			return ((Record) parent);
 		}

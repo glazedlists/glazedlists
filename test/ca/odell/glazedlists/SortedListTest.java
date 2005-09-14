@@ -155,7 +155,8 @@ public class SortedListTest extends TestCase {
      */
     public void testAgressiveFiltering() {
         BasicEventList source = new BasicEventList();
-        IntArrayFilterList filterList = new IntArrayFilterList(source);
+        IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
+        FilterList filterList = new FilterList(source);
         SortedList sorted = new SortedList(filterList, new IntArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
@@ -169,7 +170,7 @@ public class SortedListTest extends TestCase {
         for(int i = 0; i < 10; i++) {
             // apply the filter
             int filterColumn = random.nextInt(3);
-            filterList.setFilter(filterColumn + 1, 1);
+            matcherEditor.setFilter(filterColumn + 1, 1);
 
             // construct the control list
             ArrayList controlList = new ArrayList();
