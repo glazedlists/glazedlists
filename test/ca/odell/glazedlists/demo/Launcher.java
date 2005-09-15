@@ -33,12 +33,12 @@ public class Launcher implements ActionListener, ListSelectionListener {
 	/**
 	 * Name of the logo image file.
 	 */
-	private static final String LOGO_FILE = "/resources/demo/logoonbrown.gif";
+	private static final String LOGO_FILE = "/ca/odell/glazedlists/demo/logoonbrown.gif";
 
 	/**
 	 * Name of the properties file containing the demos.
 	 */
-	private static final String DEMO_PROPERTY_FILE = "/resources/demo/launcher.properties";
+	private static final String DEMO_PROPERTY_FILE = "/ca/odell/glazedlists/demo/launcher.properties";
 
 	/**
 	 * Background color

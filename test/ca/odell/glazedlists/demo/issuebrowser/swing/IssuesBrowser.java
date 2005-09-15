@@ -218,9 +218,9 @@ public class IssuesBrowser extends Applet {
         iconBar.setBackground(GLAZED_LISTS_ORANGE);
         iconBar.setLayout(new GridBagLayout());
         ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
-        URL url = jarLoader.getResource("resources/demo/throbber-static.gif");
+        URL url = jarLoader.getResource("/ca/odell/glazedlists/demo/throbber-static.gif");
         if (url != null) throbberStatic = new ImageIcon(url);
-        url = jarLoader.getResource("resources/demo/throbber-active.gif");
+        url = jarLoader.getResource("/ca/odell/glazedlists/demo/throbber-active.gif");
         if (url != null) throbberActive = new ImageIcon(url);
         throbber = new JLabel(throbberStatic);
         iconBar.add(projectsCombo,                           new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
