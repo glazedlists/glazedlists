@@ -38,7 +38,7 @@ import ca.odell.glazedlists.matchers.*;
  * </table>
  *
  * @deprecated This class uses inheritance when composition is preferrable. By replacing
- *      the overriding method {@link filterMatches()} with a {@link Matcher} or
+ *      the overriding method {@link #filterMatches(Object)} with a {@link Matcher} or
  *      {@link MatcherEditor}, logic can be reused. That approach is far more flexible
  *      and powerful than the static filtering required by AbstractFilterList.
  *

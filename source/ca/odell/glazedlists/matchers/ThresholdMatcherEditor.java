@@ -180,7 +180,7 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	}
 
     /**
-     * A {@link MatchOperation serves as both a {@link Matcher} in and of itself
+     * A {@link MatchOperation} serves as both a {@link Matcher} in and of itself
      * and as an enumerated type representing its type as an operation.
      */
     public static class MatchOperation implements Matcher {

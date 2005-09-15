@@ -8,7 +8,7 @@ package ca.odell.glazedlists.matchers;
  *
  * <p>For best safety, implementations of {@link Matcher} should be
  * <a href="http://en.wikipedia.org/wiki/Immutable_object">immutable</a>. This
- * guarantees that {@link FilterList}s can safely call
+ * guarantees that {@link ca.odell.glazedlists.FilterList}s can safely call
  * {@link #matches(Object) matches()} without synchronization.
  *
  * <p>In order to create dynamic filtering, use a
