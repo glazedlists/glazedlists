@@ -147,4 +147,102 @@ public class DiffTest extends TestCase {
             return delegate.remove(index);
         }
     }
+
+    /**
+     * Simple test program for Diff.
+     */
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Usage: LCS <alpha> <beta>");
+            return;
+        }
+
+        String alpha = args[ 0 ];
+        EventList alphaList = new BasicEventList();
+        for (int c = 0; c < alpha.length(); c++) {
+            alphaList.add(new Character(alpha.charAt(c)));
+        }
+
+        String beta = args[ 1 ];
+        List betaList = new ArrayList();
+        for (int c = 0; c < beta.length(); c++) {
+            betaList.add(new Character(beta.charAt(c)));
+        }
+
+        drawGrid(new Diff.ListDiffMatcher(alphaList, betaList, null));
+
+        Diff.replaceAll(alphaList, betaList, false, null);
+        System.out.println(alphaList);
+    }
+
+    /**
+     * Draws a simple grid describing the specified matcher.
+     */
+    public static void drawGrid(Diff.DiffMatcher diffMatcher) {
+        System.out.print("      ");
+        for (int x = 0; x < diffMatcher.getAlphaLength(); x++) {
+            System.out.print(x);
+            if (x < 10) System.out.print(" ");
+            if (x < 100) System.out.print(" ");
+        }
+        System.out.println("");
+        System.out.print("      ");
+        for (int x = 0; x < diffMatcher.getAlphaLength(); x++) {
+            System.out.print(diffMatcher.alphaAt(x));
+            System.out.print("  ");
+        }
+        System.out.println("");
+
+        for (int y = 0; y < diffMatcher.getBetaLength(); y++) {
+            System.out.print(y);
+            if (y < 10) System.out.print(" ");
+            if (y < 100) System.out.print(" ");
+            System.out.print(" ");
+            System.out.print(diffMatcher.betaAt(y));
+            System.out.print(" ");
+            for (int x = 0; x < diffMatcher.getAlphaLength(); x++) {
+                boolean match = diffMatcher.matchPair(x, y);
+                if (match)
+                    System.out.print("_\\|");
+                else
+                    System.out.print("__|");
+            }
+            System.out.println("");
+        }
+    }
+
+
+    /**
+     * Matcher for Strings.
+     */
+    private static class StringDiffMatcher implements Diff.DiffMatcher {
+        private String alpha;
+        private String beta;
+
+        public StringDiffMatcher(String alpha, String beta) {
+            this.alpha = alpha;
+            this.beta = beta;
+        }
+
+        public int getAlphaLength() {
+            return alpha.length();
+        }
+
+        public char alphaAt(int index) {
+            return alpha.charAt(index);
+        }
+
+        public char betaAt(int index) {
+            return beta.charAt(index);
+        }
+
+        public int getBetaLength() {
+            return beta.length();
+        }
+
+        public boolean matchPair(int alphaIndex, int betaIndex) {
+            return alpha.charAt(alphaIndex) == beta.charAt(betaIndex);
+        }
+    }
+
 }

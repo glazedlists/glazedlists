@@ -161,69 +161,6 @@ public final class Diff {
     }
 
     /**
-     * Simple test program for Diff.
-     */
-    public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("Usage: LCS <alpha> <beta>");
-            return;
-        }
-
-        String alpha = args[ 0 ];
-        EventList alphaList = new BasicEventList();
-        for (int c = 0; c < alpha.length(); c++) {
-            alphaList.add(new Character(alpha.charAt(c)));
-        }
-
-        String beta = args[ 1 ];
-        List betaList = new ArrayList();
-        for (int c = 0; c < beta.length(); c++) {
-            betaList.add(new Character(beta.charAt(c)));
-        }
-
-        drawGrid(new ListDiffMatcher(alphaList, betaList, null));
-
-        replaceAll(alphaList, betaList, false, null);
-        System.out.println(alphaList);
-    }
-
-    /**
-     * Draws a simple grid describing the specified matcher.
-     */
-    public static void drawGrid(DiffMatcher diffMatcher) {
-        System.out.print("      ");
-        for (int x = 0; x < diffMatcher.getAlphaLength(); x++) {
-            System.out.print(x);
-            if (x < 10) System.out.print(" ");
-            if (x < 100) System.out.print(" ");
-        }
-        System.out.println("");
-        System.out.print("      ");
-        for (int x = 0; x < diffMatcher.getAlphaLength(); x++) {
-            System.out.print(diffMatcher.alphaAt(x));
-            System.out.print("  ");
-        }
-        System.out.println("");
-
-        for (int y = 0; y < diffMatcher.getBetaLength(); y++) {
-            System.out.print(y);
-            if (y < 10) System.out.print(" ");
-            if (y < 100) System.out.print(" ");
-            System.out.print(" ");
-            System.out.print(diffMatcher.betaAt(y));
-            System.out.print(" ");
-            for (int x = 0; x < diffMatcher.getAlphaLength(); x++) {
-                boolean match = diffMatcher.matchPair(x, y);
-                if (match)
-                    System.out.print("_\\|");
-                else
-                    System.out.print("__|");
-            }
-            System.out.println("");
-        }
-    }
-
-    /**
      * Models an X and Y point in a path. The top-left corner of the axis is the point (0,
      * 0). This is the lowest point in both the x and y dimensions. Negative points are
      * not allowed.
@@ -315,55 +252,25 @@ public final class Diff {
      * classes to throw {@link UnsupportedOperationException} for both the
      * {@link #alphaAt(int)} and {@link #betaAt(int)} methods.
      */
-    private interface DiffMatcher {
+    interface DiffMatcher {
         public int getAlphaLength();
 
         public int getBetaLength();
 
         public boolean matchPair(int alphaIndex, int betaIndex);
 
+        /**
+         * Output a character representing the specified element, for
+         * the convenience of testing.
+         */
         public char alphaAt(int index);
-
         public char betaAt(int index);
-    }
-
-    /**
-     * Matcher for Strings.
-     */
-    private static class StringDiffMatcher implements DiffMatcher {
-        private String alpha;
-        private String beta;
-
-        public StringDiffMatcher(String alpha, String beta) {
-            this.alpha = alpha;
-            this.beta = beta;
-        }
-
-        public int getAlphaLength() {
-            return alpha.length();
-        }
-
-        public char alphaAt(int index) {
-            return alpha.charAt(index);
-        }
-
-        public char betaAt(int index) {
-            return beta.charAt(index);
-        }
-
-        public int getBetaLength() {
-            return beta.length();
-        }
-
-        public boolean matchPair(int alphaIndex, int betaIndex) {
-            return alpha.charAt(alphaIndex) == beta.charAt(betaIndex);
-        }
     }
 
     /**
      * Matcher for Lists.
      */
-    private static class ListDiffMatcher implements DiffMatcher {
+    static class ListDiffMatcher implements DiffMatcher {
         private List alpha;
         private List beta;
         private Comparator comparator;
