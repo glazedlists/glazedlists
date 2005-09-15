@@ -196,7 +196,7 @@
 	   This task depends on JUnit, available free at http://www.junit.org
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="test" depends="init,compile"
+	<target name="test" depends="init,compile,swt"
 		description="Compile unit tests and run them using JUnit.">
 		<mkdir dir="classes"/>
 		<!-- Verify that JUnit is available on the classpath -->
