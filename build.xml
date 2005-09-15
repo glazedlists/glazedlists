@@ -53,30 +53,7 @@
 				<exclude name="**/demo/**"/>
 			</packageset>
 			<doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
-			<link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
-			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
-		</javadoc>
-	</target>
-
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	   DEVELOPER JAVADOC
-	   Generate the Javadoc API for internal implementation classes.
-	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<target name="impldocs" depends="init">
-		<mkdir dir="docs"/>
-		<tstamp prefix="javadoc">
-			<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
-		</tstamp>
-		<!-- document all the source -->
-		<javadoc
-			destdir="docs/impldocs" access="protected" author="true" use="true" windowtitle="Glazed Lists - Internal" source="1.4">
-			<packageset dir="source"/>
-			<packageset dir="test"/>
-			<doctitle><![CDATA[<h1>Glazed Lists - Developer Docs</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2004 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
+			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 publicobject.com, O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
 			<link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
 			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
 		</javadoc>
@@ -99,12 +76,14 @@
 				<include name="resources/**"/>
 			</fileset>
 			<manifest>
-				<attribute name="Main-Class" value="ca.odell.glazedlists.demo.issuebrowser.swing.IssuesBrowser"/>
+				<attribute name="Main-Class" value="ca.odell.glazedlists.impl.Main"/>
 				<attribute name="Sealed" value="true"/>
 				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Built-At" value="${jar.datestamp}"/>
 				<attribute name="Implementation-Version" value="${jar.datestamp}"/>
 				<attribute name="Implementation-Title" value="Glazed Lists"/>
 				<attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
+				<attribute name="Contributors" value="Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden"/>
 			</manifest>
 		</jar>
 	</target>
@@ -252,23 +231,5 @@
 		</junit>
 		<fail message="Tests failed. Check test output." if="test.failed"/>
 	</target>
-
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	   PMD
-	   Programming Mistake Detector, available free at http://pmd.sourceforge.net/
-	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-	<target name="pmd">
-		<mkdir dir="docs"/>
-		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask"/>
-		<pmd rulesetfiles="rulesets/strictexception.xml,rulesets/basic.xml,rulesets/design.xml,rulesets/imports.xml,rulesets/unusedcode.xml">
-			<formatter type="html" toFile="docs/pmd.html"/>
-			<fileset dir="source/">
-				<include name="**/*.java"/>
-			</fileset>
-		</pmd>
-	</target>
-
 
 </project>
