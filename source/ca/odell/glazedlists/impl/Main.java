@@ -48,7 +48,8 @@ public class Main {
         }
 
         // the title
-        String titleHtml = "<font size=\"6\">" + attributes.get(Attributes.Name.IMPLEMENTATION_TITLE) + "</font>";
+        String title = (String)attributes.get(Attributes.Name.IMPLEMENTATION_TITLE);
+        String titleHtml = "<font size=\"6\">" + title + "</font>";
 
         // the url
         String urlHtml = (String)attributes.get(Attributes.Name.IMPLEMENTATION_URL);
@@ -67,7 +68,7 @@ public class Main {
         contributorsHtml = contributorsHtml.replaceAll(",\\s*", "<br>");
 
         // lay it all out on a panel
-        JFrame frame = new JFrame();
+        JFrame frame = new JFrame(title);
         frame.getContentPane().setLayout(new GridBagLayout());
         frame.getContentPane().add(new JLabel("<html><font color=\"#000000\">" + titleHtml + "</font></html>"),        new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER,    GridBagConstraints.NONE, new Insets(10, 10, 10, 10), 0, 0));
         frame.getContentPane().add(new JLabel("<html><font color=\"#000000\">" + urlHtml + "</font></html>"),          new GridBagConstraints(0, 1, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER,    GridBagConstraints.NONE, new Insets( 0, 10, 10, 10), 0, 0));
