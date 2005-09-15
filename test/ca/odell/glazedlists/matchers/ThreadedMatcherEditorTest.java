@@ -3,7 +3,7 @@ package ca.odell.glazedlists.matchers;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TextMatcherEditor;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import junit.framework.TestCase;
 
 import java.util.Arrays;

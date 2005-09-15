@@ -5,7 +5,7 @@ package ca.odell.glazedlists.matchers;
 
 import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.filter.*;
-import ca.odell.glazedlists.TextMatcherEditor;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
 // standard collections

@@ -7,6 +7,7 @@ import java.util.*;
 import java.io.*;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 
 /**

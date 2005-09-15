@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.TextMatcherEditor;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;

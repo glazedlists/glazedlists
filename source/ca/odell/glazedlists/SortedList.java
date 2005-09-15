@@ -9,7 +9,6 @@ import ca.odell.glazedlists.impl.adt.IndexedTree;
 import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
 import ca.odell.glazedlists.impl.sort.ComparableComparator;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.util.concurrent.InternalReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 
 import java.util.*;
@@ -67,10 +66,6 @@ public final class SortedList extends TransformedList {
      */
     public SortedList(EventList source, Comparator comparator) {
         super(source);
-
-        // use an Internal Lock to avoid locking the source list during a sort
-        readWriteLock = new InternalReadWriteLock(source.getReadWriteLock(),
-			LockFactory.DEFAULT.createReadWriteLock());
 
         // trees are instansiated when a comparator is set
         setComparator(comparator);
