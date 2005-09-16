@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.io;
 
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
@@ -9,18 +9,19 @@ import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.impl.adt.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.EventList;
 // For the execution of the performance test
-import java.util.Random;
 
 /**
- * An {@link EventList} that caches elements from its source {@link EventList}.
+ * An {@link ca.odell.glazedlists.EventList} that caches elements from its source {@link ca.odell.glazedlists.EventList}.
  *
  * It is useful in cases when the {@link #get(int)} method of an
- * {@link EventList} is expensive. It can also be used when there are too many
+ * {@link ca.odell.glazedlists.EventList} is expensive. It can also be used when there are too many
  * elements to keep in memory simultaneously. For caching to be effective, object
  * access must be clustered.
  *
- * <p>This {@link EventList} caches the most recently requested <i>n</i> elements.
+ * <p>This {@link ca.odell.glazedlists.EventList} caches the most recently requested <i>n</i> elements.
  *
  * <p>By overriding the {@link #preFetch(int)} method, you can modify this
  * CachingList to do predictive lookups for higher performance.
@@ -58,7 +59,7 @@ public class CachingList extends TransformedList {
 
     /**
      * Creates a {@link CachingList} that caches elements from the specified source
-     * {@link EventList}.
+     * {@link ca.odell.glazedlists.EventList}.
      *
      * @param source The source list to use to get values from
      * @param maxSize The maximum size of the cache

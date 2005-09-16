@@ -1,17 +1,18 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.io;
 
-// for being a JUnit test case
-import junit.framework.*;
-// standard collections
-import java.util.*;
-
+import junit.framework.TestCase;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 
+import java.util.Random;
+
 /**
- * This test verifies that the {@link CachingList} behaves as expected.
+ * This test verifies that the {@link ca.odell.glazedlists.io.CachingList} behaves as expected.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
@@ -387,7 +388,6 @@ public class CachingListTest extends TestCase {
         // Now run the tests
         testHelper.runTests();
     }
-
 }
 
 /**
