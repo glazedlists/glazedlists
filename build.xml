@@ -99,6 +99,8 @@
 	<target name="core" depends="init">
 		<mkdir dir="classes"/>
 		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+            <!-- migrationkit -->
+			<exclude name="**/migrationkit/**"/>
             <!-- swing -->
 			<exclude name="**/swing/**"/>
             <!-- swt -->
@@ -112,9 +114,16 @@
 		</javac>
 	</target>
 
+    <target name="migrationkit" depends="core">
+        <javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+            <include name="**/migrationkit/**"/>
+        </javac>
+    </target>
+
 	<target name="swing" depends="core">
 		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
 			<include name="**/swing/**"/>
+			<exclude name="**/migrationkit/**"/>
 		</javac>
 	</target>
 
@@ -125,6 +134,7 @@
 		<!-- Compile the java code from source/ into classes/ -->
 		<javac destdir="classes" srcdir="source" debug="on" source="1.4">
 			<include name="**/swt/**"/>
+            <exclude name="**/migrationkit/**"/>
 		</javac>
 	</target>
 
