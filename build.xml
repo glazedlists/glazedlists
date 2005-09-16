@@ -92,7 +92,7 @@
 	   COMPILE
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="compile" depends="core,swing,io"
+	<target name="compile" depends="core,swing"
 		description="Compile the source.">
 	</target>
 
