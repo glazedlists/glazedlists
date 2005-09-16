@@ -93,7 +93,11 @@
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<target name="compile" depends="core,swing"
-		description="Compile the source.">
+		description="Compile the default components of the source.">
+	</target>
+
+	<target name="compile_all" depends="core,migrationkit,swing,swt,io"
+		description="Compile all components of the source.">
 	</target>
 
 	<target name="core" depends="init">
