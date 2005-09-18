@@ -96,7 +96,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compile_all" depends="core,migrationkit,swing,swt,io"
+	<target name="compileall" depends="core,migrationkit,swing,swt,io"
 		description="Compile all components of the source.">
 	</target>
 
@@ -204,35 +204,58 @@
 	</target>
 
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	   TEST
-	   Compile unit tests and run them using JUnit.
-	   This task depends on JUnit, available free at http://www.junit.org
-	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       TEST
+       Compile unit tests and run them using JUnit.
+       This task depends on JUnit, available free at http://www.junit.org
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="test" depends="init,compile_all"
-		description="Compile unit tests and run them using JUnit.">
-		<mkdir dir="classes"/>
-		<!-- Verify that JUnit is available on the classpath -->
-		<available classname="junit.framework.TestCase" property="junit.present"/>
-		<fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
-		<!-- Compile the test classes from source/ into classes/ -->
-		<javac destdir="classes" srcdir="test" debug="on" source="1.4">
-			<classpath path="${ant.home}/lib/junit.jar"/>
-		</javac>
-		<!-- Execute JUnit tests -->
-		<junit printsummary="true" showoutput="false" fork="true"
-			errorProperty="test.failed" failureProperty="test.failed">
-			<assertions>
-				<enable/>
-			</assertions>
-			<classpath path="classes:${ant.home}/lib/junit.jar"/>
-			<formatter type="brief" usefile="false"/>
-			<batchtest>
-				<fileset dir="classes/" includes="**/**Test.class"/>
-			</batchtest>
-		</junit>
-		<fail message="Tests failed. Check test output." if="test.failed"/>
+    <target name="test" depends="init,compileall"
+            description="Compile unit tests and run them using JUnit.">
+            <mkdir dir="classes"/>
+            <!-- Verify that JUnit is available on the classpath -->
+            <available classname="junit.framework.TestCase" property="junit.present"/>
+            <fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
+            <!-- Compile the test classes from source/ into classes/ -->
+            <javac destdir="classes" srcdir="test" debug="on" source="1.4">
+                    <classpath path="${ant.home}/lib/junit.jar"/>
+            </javac>
+            <!-- Execute JUnit tests -->
+            <junit printsummary="true" showoutput="false" fork="true"
+                    errorProperty="test.failed" failureProperty="test.failed">
+                    <assertions>
+                            <enable/>
+                    </assertions>
+                    <classpath path="classes:${ant.home}/lib/junit.jar"/>
+                    <formatter type="brief" usefile="false"/>
+                    <batchtest>
+                            <fileset dir="classes/" includes="**/**Test.class"/>
+                    </batchtest>
+            </junit>
+            <fail message="Tests failed. Check test output." if="test.failed"/>
+    </target>
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       DEMO JAR
+       Currently the demo classes are stored in the test directory
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <target name="demojar" depends="init,clean,core,swing"
+        description="Create a .jar file with a demo application.">
+        <javac destdir="classes" srcdir="test" deprecation="on">
+            <include name="**/demo/**"/>
+            <exclude name="**/swt/**"/>
+        </javac>
+        <jar destfile="glazedlists-demo.jar" update="true" index="true">
+            <fileset dir="classes"/>
+            <fileset dir="test">
+                <include name ="**/demo/*.gif"/>
+            </fileset>
+            <manifest>
+                <attribute name="Main-Class" value="ca.odell.glazedlists.demo.issuebrowser.swing.IssuesBrowser"/>
+            </manifest>
+        </jar>
 	</target>
 
 </project>
