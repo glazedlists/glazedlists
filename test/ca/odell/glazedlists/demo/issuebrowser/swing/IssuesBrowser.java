@@ -40,16 +40,9 @@ import java.text.MessageFormat;
 public class IssuesBrowser extends Applet {
 
     /** these don't belong here at all */
-    private static final Color GLAZED_LISTS_ORANGE = new Color(255, 119, 0);
-    private static final Color GLAZED_LISTS_ORANGE_LIGHT = new Color(241, 212, 189);
-
-    private static final Color BLUE_DARK = new Color(126, 165, 232);
-    private static final Color BLUE_LIGHT = new Color(197, 210, 232);
-
-    private static final Border BLACK_LINE_BORDER = BorderFactory.createLineBorder(Color.BLACK);
-
-    /** A header renderer that paints a gradient background from BLUE_DARK to BLUE_LIGHT */
-    private static final GradientTableHeaderCellRenderer DEFAULT_HEADER_RENDERER = new GradientTableHeaderCellRenderer(BLUE_DARK, BLUE_LIGHT);
+    private static final Color GLAZED_LISTS_DARK_BROWN = new Color(36, 23, 10);
+    private static final Color GLAZED_LISTS_MEDIUM_BROWN = new Color(69, 64, 56);
+    private static final Color GLAZED_LISTS_LIGHT_BROWN = new Color(246, 237, 220);
 
     /** an event list to host the issues */
     private UniqueList issuesEventList = new UniqueList(new BasicEventList());
@@ -133,7 +126,6 @@ public class IssuesBrowser extends Applet {
     private JPanel constructView() {
         // create a MatcherEditor which edits the filter text
         final JTextField filterTextField = new JTextField();
-        filterTextField.setBorder(BLACK_LINE_BORDER);
         final MatcherEditor textFilterMatcherEditor = new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterTextField, null));
 
         // create a MatcherEditor which edits the state filter
@@ -159,7 +151,6 @@ public class IssuesBrowser extends Applet {
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
-        issuesJTable.getTableHeader().setDefaultRenderer(DEFAULT_HEADER_RENDERER);
         issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);
         issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(10);
@@ -169,23 +160,15 @@ public class IssuesBrowser extends Applet {
         issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
         new TableComparatorChooser(issuesJTable, issuesSortedList, true);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        issuesTableScrollPane.setBorder(BLACK_LINE_BORDER);
-        issuesTableScrollPane.setOpaque(false);
-        issuesTableScrollPane.getViewport().setOpaque(false);
 
         // users table
         JScrollPane usersListScrollPane = new JScrollPane(userMatcherEditor.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        usersListScrollPane.setBorder(BLACK_LINE_BORDER);
 
         // descriptions
         EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
         JTable descriptionsTable = new JTable(descriptionsTableModel);
-        descriptionsTable.getTableHeader().setDefaultRenderer(DEFAULT_HEADER_RENDERER);
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
         JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        descriptionsTableScrollPane.setBorder(BLACK_LINE_BORDER);
-        descriptionsTableScrollPane.setOpaque(false);
-        descriptionsTableScrollPane.getViewport().setBackground(UIManager.getColor("List.background"));
 
         // priority slider
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
@@ -201,6 +184,7 @@ public class IssuesBrowser extends Applet {
         prioritySlider.setPaintTicks(true);
         prioritySlider.setForeground(UIManager.getColor("Label.foreground"));
         prioritySlider.setMajorTickSpacing(25);
+        prioritySlider.setForeground(Color.white);
 
         // projects
         EventList projects = Project.getProjects();
@@ -209,57 +193,65 @@ public class IssuesBrowser extends Applet {
         EventComboBoxModel projectsComboModel = new EventComboBoxModel(projects);
         JComboBox projectsCombo = new JComboBox(projectsComboModel);
         projectsCombo.setEditable(false);
-        projectsCombo.setBackground(GLAZED_LISTS_ORANGE_LIGHT);
+        projectsCombo.setOpaque(false);
         projectsCombo.addItemListener(new ProjectChangeListener());
         projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project..."));
 
+        // build a label to display the number of issues in the issue table
+        issueCounter = new IssueCounterLabel();
+        issueCounter.setHorizontalAlignment(SwingConstants.CENTER);
+        issueCounter.setForeground(Color.WHITE);
+
         // throbber icons
-        JPanel iconBar = new JPanel();
-        iconBar.setBackground(GLAZED_LISTS_ORANGE);
-        iconBar.setLayout(new GridBagLayout());
         ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
         URL url = jarLoader.getResource("ca/odell/glazedlists/demo/throbber-static.gif");
         if (url != null) throbberStatic = new ImageIcon(url);
         url = jarLoader.getResource("ca/odell/glazedlists/demo/throbber-active.gif");
         if (url != null) throbberActive = new ImageIcon(url);
         throbber = new JLabel(throbberStatic);
-        iconBar.add(projectsCombo,                           new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-        iconBar.add(throbber,                                new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+        throbber.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        // header bar
+        JPanel iconBar = new GradientPanel(GLAZED_LISTS_MEDIUM_BROWN, GLAZED_LISTS_DARK_BROWN, true);
+        iconBar.setLayout(new GridLayout(1, 3));
+        iconBar.add(projectsCombo);
+        iconBar.add(issueCounter);
+        iconBar.add(throbber);
+        iconBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // create the filters panel
-        JPanel filtersPanel = new GradientPanel(BLUE_DARK, BLUE_LIGHT);
-        filtersPanel.setBorder(BLACK_LINE_BORDER);
-        filtersPanel.setPreferredSize(new Dimension(200, 400));
+        JLabel textFilterLabel = new JLabel("Filter");
+        textFilterLabel.setFont(textFilterLabel.getFont().deriveFont(11.0f));
+        JLabel priorityLabel = new JLabel("Priority");
+        priorityLabel.setFont(priorityLabel.getFont().deriveFont(11.0f));
+        JLabel stateLabel = new JLabel("State");
+        stateLabel.setFont(stateLabel.getFont().deriveFont(11.0f));
+        JLabel userLabel = new JLabel("User");
+        userLabel.setFont(userLabel.getFont().deriveFont(11.0f));
+
+        JPanel filtersPanel = new JPanel();
+        filtersPanel.setBackground(GLAZED_LISTS_LIGHT_BROWN);
         filtersPanel.setLayout(new GridBagLayout());
-        filtersPanel.add(new JLabel("Text Filter"),          new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 5, 10), 0, 0));
-        filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
-        filtersPanel.add(new JLabel("State"),                new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
-        filtersPanel.add(stateMatcherEditor.getComponent(),  new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
-        filtersPanel.add(new JLabel("Minimum Priority"),     new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
-        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 5, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 15, 10), 0, 0));
-        filtersPanel.add(new JLabel("User"),                 new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 10, 5, 10), 0, 0));
-        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 7, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 10, 10), 0, 0));
-
-        // put some insets around the filters panel
-        JPanel filterSpacerPanel = new GradientPanel(GLAZED_LISTS_ORANGE, GLAZED_LISTS_ORANGE_LIGHT);
-        filterSpacerPanel.setLayout(new GridBagLayout());
-        filterSpacerPanel.add(filtersPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 5, 5), 0, 0));
-
-        // build a label to display the number of issues in the issue table
-        issueCounter = new IssueCounterLabel();
+        filtersPanel.add(textFilterLabel,                    new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
+        filtersPanel.add(stateLabel,                         new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(stateMatcherEditor.getComponent(),  new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
+        filtersPanel.add(priorityLabel,                      new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 5, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
+        filtersPanel.add(userLabel,                          new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 7, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 0, 0, 0), 0, 0));
 
         // assemble all data components on a common panel
-        JPanel dataPanel = new GradientPanel(GLAZED_LISTS_ORANGE, GLAZED_LISTS_ORANGE_LIGHT);
+        JPanel dataPanel = new JPanel();
         dataPanel.setLayout(new GridBagLayout());
-        dataPanel.add(issuesTableScrollPane,       new GridBagConstraints(0, 0, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 0, 5), 0, 0));
-        dataPanel.add(issueCounter,                new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 5, 0, 5), 0, 0));
-        dataPanel.add(descriptionsTableScrollPane, new GridBagConstraints(0, 2, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 5, 5, 5), 0, 0));
+        dataPanel.add(issuesTableScrollPane,       new GridBagConstraints(0, 0, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        dataPanel.add(descriptionsTableScrollPane, new GridBagConstraints(0, 1, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
         // the outermost panel to layout the icon bar with the other panels
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(iconBar,           BorderLayout.NORTH);
-        mainPanel.add(filterSpacerPanel, BorderLayout.WEST);
-        mainPanel.add(dataPanel,         BorderLayout.CENTER);
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.add(iconBar,                     new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(filtersPanel,                new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(dataPanel,                   new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
         return mainPanel;
     }
@@ -456,42 +448,6 @@ public class IssuesBrowser extends Applet {
     }
 
     /**
-     * A customized TableCellRenderer which paints a color gradient for its
-     * background rather than a single color. The start and end colors of the
-     * gradient are specified via the constructor.
-     */
-    private static class GradientTableHeaderCellRenderer extends DefaultTableCellRenderer {
-        private Color gradientStartColor;
-        private Color gradientEndColor;
-
-        public GradientTableHeaderCellRenderer(Color gradientStartColor, Color gradientEndColor) {
-            this.gradientStartColor = gradientStartColor;
-            this.gradientEndColor = gradientEndColor;
-            this.setHorizontalAlignment(JLabel.CENTER);
-        }
-
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            if (table != null) {
-                JTableHeader header = table.getTableHeader();
-                if (header != null) {
-                    setForeground(header.getForeground());
-                    setBackground(header.getBackground());
-                    setFont(header.getFont());
-                }
-            }
-
-            setText((value == null) ? "" : value.toString());
-            setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-            return this;
-        }
-
-        public void paintComponent(Graphics g) {
-            paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, this.getHeight());
-            super.paintComponent(g);
-        }
-    }
-
-    /**
      * A customized panel which paints a color gradient for its background
      * rather than a single color. The start and end colors of the gradient
      * are specified via the constructor.
@@ -499,15 +455,17 @@ public class IssuesBrowser extends Applet {
     private static class GradientPanel extends JPanel {
         private Color gradientStartColor;
         private Color gradientEndColor;
+        private boolean vertical;
 
-        public GradientPanel(Color gradientStartColor, Color gradientEndColor) {
+        public GradientPanel(Color gradientStartColor, Color gradientEndColor, boolean vertical) {
             this.gradientStartColor = gradientStartColor;
             this.gradientEndColor = gradientEndColor;
+            this.vertical = vertical;
         }
 
         public void paintComponent(Graphics g) {
             if (this.isOpaque())
-                paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, this.getHeight());
+                paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, vertical ? this.getHeight() : this.getWidth(), vertical);
         }
     }
 
@@ -515,10 +473,11 @@ public class IssuesBrowser extends Applet {
      * A convenience method to paint a gradient between <code>gradientStartColor</code>
      * and <code>gradientEndColor</code> over <code>height</code> pixels.
      */
-    private static void paintGradient(Graphics2D g2d, Color gradientStartColor, Color gradientEndColor, int height) {
+    private static void paintGradient(Graphics2D g2d, Color gradientStartColor, Color gradientEndColor, int length, boolean vertical) {
         final Paint oldPainter = g2d.getPaint();
         try {
-            g2d.setPaint(new GradientPaint(0, 0, gradientStartColor, 0, height, gradientEndColor));
+            if(vertical) g2d.setPaint(new GradientPaint(0, 0, gradientStartColor, 0, length, gradientEndColor));
+            else g2d.setPaint(new GradientPaint(0, 0, gradientStartColor, length, 0, gradientEndColor));
             g2d.fill(g2d.getClip());
         } finally {
             g2d.setPaint(oldPainter);
