@@ -100,7 +100,6 @@ abstract class StyledRenderer implements TableCellRenderer {
 		this.controlHeight = controlHeight;
 		styledDocument = new DefaultStyledDocument();
 		rendered = new JTextPane(styledDocument);
-		rendered.setEnabled(false);
 	}
 
 	/**

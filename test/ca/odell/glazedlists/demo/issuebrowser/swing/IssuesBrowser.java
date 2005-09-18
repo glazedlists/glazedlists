@@ -167,6 +167,7 @@ public class IssuesBrowser extends Applet {
         // descriptions
         EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
         JTable descriptionsTable = new JTable(descriptionsTableModel);
+        descriptionsTable.setRowSelectionAllowed(false);
         descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
         JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
