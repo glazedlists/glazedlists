@@ -24,10 +24,10 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class BasicEventList extends AbstractEventList {
+public final class BasicEventList<E> extends AbstractEventList<E> {
 
     /** the underlying data list */
-    private List data;
+    private List<E> data;
 
     /**
      * Creates a {@link BasicEventList}.
@@ -42,7 +42,7 @@ public final class BasicEventList extends AbstractEventList {
      */
     public BasicEventList(ReadWriteLock readWriteLock) {
         super(null);
-        this.data = new ArrayList();
+        this.data = new ArrayList<E>();
         this.readWriteLock = readWriteLock;
     }
 
@@ -60,14 +60,14 @@ public final class BasicEventList extends AbstractEventList {
      *     the required events being fired. This constructor has been replaced by
      *     the factory method {@link GlazedLists#eventList(Collection)}.
      */
-    public BasicEventList(List list) {
+    public BasicEventList(List<E> list) {
         super(null);
         data = list;
         readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
     }
     
     /** {@inheritDoc} */
-    public void add(int index, Object element) {
+    public void add(int index, E element) {
         // create the change event
         updates.beginEvent();
         updates.addInsert(index);
@@ -78,7 +78,7 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /** {@inheritDoc} */
-    public boolean add(Object element) {
+    public boolean add(E element) {
         // create the change event
         updates.beginEvent();
         updates.addInsert(size());
@@ -90,12 +90,12 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /** {@inheritDoc} */
-    public boolean addAll(Collection collection) {
+    public boolean addAll(Collection<? extends E> collection) {
         return addAll(size(), collection);
     }
 
     /** {@inheritDoc} */
-    public boolean addAll(int index, Collection collection) {
+    public boolean addAll(int index, Collection<? extends E> collection) {
         // don't do an add of an empty set
         if(collection.size() == 0) return false;
 
@@ -110,12 +110,12 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /** {@inheritDoc} */
-    public Object remove(int index) {
+    public E remove(int index) {
         // create the change event
         updates.beginEvent();
         updates.addDelete(index);
         // do the actual remove
-        Object removed = data.remove(index);
+        E removed = data.remove(index);
         // fire the event
         updates.commitEvent();
         return removed;
@@ -143,19 +143,19 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /** {@inheritDoc} */
-    public Object set(int index, Object element) {
+    public E set(int index, E element) {
         // create the change event
         updates.beginEvent();
         updates.addUpdate(index);
         // do the actual set
-        Object previous = data.set(index, element);
+        E previous = data.set(index, element);
         // fire the event
         updates.commitEvent();
         return previous;
     }
 
     /** {@inheritDoc} */
-    public Object get(int index) {
+    public E get(int index) {
         return data.get(index);
     }
 
@@ -165,7 +165,7 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /** {@inheritDoc} */
-    public boolean removeAll(Collection collection) {
+    public boolean removeAll(Collection<?> collection) {
         boolean changed = false;
         updates.beginEvent();
         for(Iterator i = collection.iterator(); i.hasNext(); ) {
@@ -182,7 +182,7 @@ public final class BasicEventList extends AbstractEventList {
     }
 
     /** {@inheritDoc} */
-    public boolean retainAll(Collection collection) {
+    public boolean retainAll(Collection<?> collection) {
         boolean changed = false;
         updates.beginEvent();
         int index = 0;

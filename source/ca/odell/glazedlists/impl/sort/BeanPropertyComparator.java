@@ -14,7 +14,7 @@ import ca.odell.glazedlists.impl.beans.BeanProperty;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class BeanPropertyComparator implements Comparator {
+public final class BeanPropertyComparator<T> implements Comparator<T> {
 
     /** the comparator to use on the JavaBean property */
     private Comparator propertyComparator;
@@ -27,15 +27,15 @@ public final class BeanPropertyComparator implements Comparator {
      * the provided {@link Comparator}.  This should be accessed from the
      * {@link ca.odell.glazedlists.GlazedLists GlazedLists} tool factory.
      */
-    public BeanPropertyComparator(Class className, String property, Comparator propertyComparator) {
-        beanProperty = new BeanProperty(className, property, true, false);
+    public BeanPropertyComparator(Class<T> className, String property, Comparator propertyComparator) {
+        beanProperty = new BeanProperty<T>(className, property, true, false);
         this.propertyComparator = propertyComparator;
     }
 
     /**
      * Compares the specified objects by the JavaBean property.
      */
-    public int compare(Object alpha, Object beta) {
+    public int compare(T alpha, T beta) {
         // Inspect alpha
         Object alphaProperty = null;
         if(alpha != null) alphaProperty = beanProperty.get(alpha);

@@ -11,10 +11,10 @@ import java.lang.reflect.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class BeanProperty {
+public class BeanProperty<T> {
 
     /** the target class */
-    private Class beanClass = null;
+    private Class<T> beanClass = null;
     /** the property name */
     private String propertyName = null;
     
@@ -22,10 +22,10 @@ public class BeanProperty {
     private Class valueClass = null;
 
     /** the chain of methods for the getter */
-    private List getterChain = null;
+    private List<Method> getterChain = null;
 
     /** the chain of methods for the setter */
-    private List setterChain = null;
+    private List<Method> setterChain = null;
 
     /** commonly used paramters */
     private static Object[] EMPTY_ARGUMENTS = new Object[0];
@@ -35,13 +35,13 @@ public class BeanProperty {
      * Creates a new {@link BeanProperty} that gets the specified property from the
      * specified class.
      */
-    public BeanProperty(Class beanClass, String propertyName, boolean readable, boolean writable) {
+    public BeanProperty(Class<T> beanClass, String propertyName, boolean readable, boolean writable) {
         this.beanClass = beanClass;
         this.propertyName = propertyName;
 
         // look up the common chain
         String[] propertyParts = propertyName.split("\\.");
-        List commonChain = new ArrayList();
+        List<Method> commonChain = new ArrayList<Method>();
         Class currentClass = beanClass;
         for(int p = 0; p < propertyParts.length - 1; p++) {
             Method partGetter = findGetterMethod(currentClass, propertyParts[p]);
@@ -51,7 +51,7 @@ public class BeanProperty {
 
         // look up the final getter
         if(readable) {
-            getterChain = new ArrayList();
+            getterChain = new ArrayList<Method>();
             getterChain.addAll(commonChain);
             Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
             getterChain.add(lastGetter);
@@ -60,7 +60,7 @@ public class BeanProperty {
 
         // look up the final setter
         if(writable) {
-            setterChain = new ArrayList();
+            setterChain = new ArrayList<Method>();
             setterChain.addAll(commonChain);
             Method lastSetter = findSetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
             setterChain.add(lastSetter);
@@ -172,7 +172,7 @@ public class BeanProperty {
     /**
      * Gets the base class that this getter accesses.
      */
-    public Class getBeanClass() {
+    public Class<T> getBeanClass() {
          return beanClass;
     }
 
@@ -208,14 +208,14 @@ public class BeanProperty {
     /**
      * Gets the value of this property for the specified Object.
      */
-    public Object get(Object member) {
+    public Object get(T member) {
         if(!isReadable()) throw new IllegalStateException("Property " + propertyName + " of " + beanClass + " not readable");
 
         try {
             // do all the getters in sequence
             Object currentMember = member;
             for(int i = 0; i < getterChain.size(); i++) {
-                Method currentMethod = (Method)getterChain.get(i);
+                Method currentMethod = getterChain.get(i);
                 currentMember = currentMethod.invoke(currentMember, EMPTY_ARGUMENTS);
                 if(currentMember == null) return null;
             }
@@ -232,22 +232,21 @@ public class BeanProperty {
     /**
      * Gets the value of this property for the specified Object.
      */
-    public Object set(Object member, Object newValue) {
+    public Object set(T member, Object newValue) {
         if(!isWritable()) throw new IllegalStateException("Property " + propertyName + " of " + beanClass + " not writable");
 
         try {
             // everything except the last setter chain element is a getter
             Object currentMember = member;
             for(int i = 0; i < setterChain.size() - 1; i++) {
-                Method currentMethod = (Method)setterChain.get(i);
+                Method currentMethod = setterChain.get(i);
                 currentMember = currentMethod.invoke(currentMember, EMPTY_ARGUMENTS);
                 if(currentMember == null) return null;
             }
 
             // do the remaining setter
-            Method setterMethod = (Method)setterChain.get(setterChain.size() - 1);
-            Object result = setterMethod.invoke(currentMember, new Object[] { newValue });
-            return result;
+            Method setterMethod = setterChain.get(setterChain.size() - 1);
+            return setterMethod.invoke(currentMember, new Object[] { newValue });
         } catch(IllegalAccessException e) {
             throw new SecurityException(e.getMessage());
         } catch(InvocationTargetException e) {

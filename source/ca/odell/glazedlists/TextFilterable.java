@@ -24,5 +24,5 @@ public interface TextFilterable {
      *      strings to via <code>baseList.add()</code>. This may be a non-empty
      *      List and it is an error to call any method other than add().
      */
-    public void getFilterStrings(List baseList);
+    public void getFilterStrings(List<String> baseList);
 }

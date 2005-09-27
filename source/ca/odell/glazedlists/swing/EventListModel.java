@@ -13,37 +13,26 @@ import javax.swing.event.*;
 import java.util.*;
 
 /**
- * A JList that displays the contents of an event-driven list.
+ * An EventListModel adapts a EventList to the ListModel interface making it
+ * appropriate for use with a {@link JList}. Each element of the list
+ * corresponds to an element in the {@link ListModel}.
  *
- * <p>The EventJList class is <strong>not thread-safe</strong>. Unless otherwise
+ * <p>The EventListModel class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the event dispatch thread.
  * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)}.
- *
- * <p>I have implemented EventJList. The class shares the following with ListTable:
- * <li>SelectionListener interface
- * <li>ListSelection / Selection Model
- *
- * <p>This class never batches groups of changes like ListTable does. It also
- * does not use a Mutable change event. It may be necessary to create a mutable
- * ListDataEvent if change event creation proves to be a bottleneck.
- *
- * <p>This class still does not have any extra renderer support. For now if
- * styled rendering is necessary, the use of ListTable is a sufficient work
- * around.
  * 
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=14">Bug 14</a>
- *
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventListModel implements ListEventListener, ListModel {
+public class EventListModel<E> implements ListEventListener<E>, ListModel {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList swingSource = null;
+    private TransformedList<E,E> swingSource = null;
 
     /** whom to notify of data changes */
-    private ArrayList listeners = new ArrayList();
+    private List<ListDataListener> listeners = new ArrayList<ListDataListener>();
 
     /** whenever a list change covers greater than this many rows, redraw the whole thing */
     public int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
@@ -54,7 +43,7 @@ public class EventListModel implements ListEventListener, ListModel {
     /**
      * Creates a new widget that renders the specified list.
      */
-    public EventListModel(EventList source) {
+    public EventListModel(EventList<E> source) {
         swingSource = GlazedListsSwing.swingThreadProxyList(source);
 
         // prepare listeners
@@ -72,7 +61,7 @@ public class EventListModel implements ListEventListener, ListModel {
      * of changes are grouped together as a single change. This is how the
      * ListTable accepts large change events.
      */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // when all events hae already been processed by clearing the event queue
         if(!listChanges.hasNext()) return;
 
@@ -160,7 +149,7 @@ public class EventListModel implements ListEventListener, ListModel {
     protected void fireListDataEvent(ListDataEvent listDataEvent) {
         // notify all listeners about the event
         for(int i = 0; i < listeners.size(); i++) {
-            ListDataListener listDataListener = (ListDataListener)listeners.get(i);
+            ListDataListener listDataListener = listeners.get(i);
             if(listDataEvent.getType() == ListDataEvent.CONTENTS_CHANGED) {
                 listDataListener.contentsChanged(listDataEvent);
             } else if(listDataEvent.getType() == ListDataEvent.INTERVAL_ADDED) {

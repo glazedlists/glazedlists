@@ -34,6 +34,7 @@ final class MutableTableModelEvent extends TableModelEvent {
         this.firstRow = firstRow;
         this.lastRow = lastRow;
     }
+    
     public void setType(int type) {
         this.type = type;
     }
@@ -60,5 +61,4 @@ final class MutableTableModelEvent extends TableModelEvent {
         else if(listChangeType == ListEvent.UPDATE) type = UPDATE;
         column = ALL_COLUMNS;
     }
-
 }

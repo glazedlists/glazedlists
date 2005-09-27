@@ -20,7 +20,7 @@ import java.util.Comparator;
  * @see WritableTableFormat
  * @see TableFormat
  */
-public interface AdvancedTableFormat extends TableFormat {
+public interface AdvancedTableFormat<E> extends TableFormat<E> {
 
     /**
      * Returns the most specific superclass for all the cell values in the column. This

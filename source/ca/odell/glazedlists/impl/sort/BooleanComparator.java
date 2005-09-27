@@ -13,39 +13,15 @@ import java.util.Comparator;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
- public final class BooleanComparator implements Comparator {
+ public final class BooleanComparator implements Comparator<Boolean> {
     /**
      * Compares two Boolean objects using the following sort order:
      * null, Boolean.FALSE, Boolean.TRUE;
      */
-    public int compare(Object alpha, Object beta) {
-        // inspect the value of alpha
-        boolean alphaValue;
-        if(alpha != null) alphaValue = ((Boolean)alpha).booleanValue();
-
-        // equal comparison of nulls
-        else if(beta == null) return 0;
-
-        // null then boolean
-        else return -1;
-
-
-        // inspect the value of beta
-        boolean betaValue;
-        if(beta != null) betaValue = ((Boolean)beta).booleanValue();
-
-        // boolean then null
-        else return 1;
-
-
-        // equal comparison of values
-        if(alphaValue == betaValue) return 0;
-
-        // true then false
-        else if(alphaValue && !betaValue) return 1;
-
-        // false then true
-        else return -1;
+    public int compare(Boolean alpha, Boolean beta) {
+        final int alphaOrdinal = alpha == null ? 0 : !alpha.booleanValue() ? 1 : 2;
+        final int betaOrdinal = beta == null ? 0 : !beta.booleanValue() ? 1 : 2;
+        return alphaOrdinal - betaOrdinal;
     }
 
     /**

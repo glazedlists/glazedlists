@@ -5,8 +5,6 @@ package ca.odell.glazedlists;
 
 // core glazed lists
 import ca.odell.glazedlists.event.*;
-// the common user interface classes
-import ca.odell.glazedlists.gui.*;
 // access to the volatile implementation classes
 import ca.odell.glazedlists.impl.adt.*;
 // to store event info for forwarding on the deselected EventList
@@ -31,7 +29,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class ListSelection {
+public class ListSelection<E> {
 
     /**
      * A selection mode where at most one element may be selected at one time.
@@ -60,16 +58,16 @@ public class ListSelection {
     public static final int MULTIPLE_INTERVAL_SELECTION_DEFENSIVE = 103;
 
     /** the source list */
-    private final EventList source;
+    private final EventList<E> source;
 
     /** the selected view */
-    private final SelectedList selectedList;
+    private final SelectedList<E> selectedList;
 
     /** the deselected view */
-    private final DeselectedList deselectedList;
+    private final DeselectedList<E> deselectedList;
 
     /** observe the source list */
-    private final SourceListener sourceListener = new SourceListener();
+    private final SourceListener<E> sourceListener = new SourceListener<E>();
 
     /** the selection state */
     private Barcode barcode = new Barcode();
@@ -90,25 +88,25 @@ public class ListSelection {
     private Object deselected = Barcode.WHITE;
 
     /** the registered SelectionListeners */
-    private List selectionListeners = new ArrayList(1);
+    private List<Listener> selectionListeners = new ArrayList<Listener>(1);
 
     /**
      * Creates a new ListSelection that listens to changes on the given source.
      * When using this constructor, all elements are deselected by default.
      */
-    public ListSelection(EventList source) {
+    public ListSelection(EventList<E> source) {
         this.source = source;
         barcode.add(0, deselected, source.size());
         source.addListEventListener(sourceListener);
-        deselectedList = new DeselectedList(source);
-        selectedList = new SelectedList(source);
+        deselectedList = new DeselectedList<E>(source);
+        selectedList = new SelectedList<E>(source);
     }
 
     /**
      * Creates a new ListSelection that listens to changes on the given source
      * and initializes selection with the given array of indices.
      */
-    public ListSelection(EventList source, int[] initialSelection) {
+    public ListSelection(EventList<E> source, int[] initialSelection) {
         this(source);
         select(initialSelection);
     }
@@ -117,10 +115,10 @@ public class ListSelection {
      * Handle changes to the source list by adjusting our selection state and
      * the contents of the selected and deselected lists.
      */
-    private class SourceListener implements ListEventListener {
+    private class SourceListener<E> implements ListEventListener<E> {
 
         /** {@inheritDoc} */
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<E> listChanges) {
 
             // keep track of what used to be selected
             int minSelectionIndexBefore = getMinSelectionIndex();
@@ -169,7 +167,7 @@ public class ListSelection {
             // handle non-reordering events
             } else {
                 // Keep track of deselected changes as you go
-                ArrayList savedChanges = new ArrayList();
+                List<DeselectedChange> savedChanges = new ArrayList<DeselectedChange>();
 
                 // prepare a sequence of changes
                 selectedList.updates().beginEvent();
@@ -247,8 +245,8 @@ public class ListSelection {
 
                 // Forward all of the collected changes made to the deselected list
                 deselectedList.updates().beginEvent();
-                for(int i = 0;i < savedChanges.size();i++) {
-                    DeselectedChange change = (DeselectedChange)savedChanges.get(i);
+                for(int i = 0; i < savedChanges.size(); i++) {
+                    DeselectedChange change = savedChanges.get(i);
                     change.fireChange();
                 }
                 savedChanges.clear();
@@ -291,21 +289,21 @@ public class ListSelection {
     /**
      * Provides access to an {@link EventList} that contains only selected values.
      */
-    public EventList getSelected() {
+    public EventList<E> getSelected() {
         return selectedList;
     }
 
     /**
      * Provides access to an {@link EventList} that contains only deselected values.
      */
-    public EventList getDeselected() {
+    public EventList<E> getDeselected() {
         return deselectedList;
     }
 
     /**
      * Get the {@link EventList} that selection is being managed for.
      */
-    public EventList getSource() {
+    public EventList<E> getSource() {
         return source;
     }
 
@@ -395,7 +393,7 @@ public class ListSelection {
      */
     public void deselect(int[] indices) {
         // have to keep track of what deselected values were added
-        List deselections = new ArrayList();
+        List<DeselectedChange> deselections = new ArrayList<DeselectedChange>();
 
         // keep track of the range of values that were affected
         int firstAffectedIndex = -1;
@@ -423,7 +421,7 @@ public class ListSelection {
         // update the deselected list
         deselectedList.updates().beginEvent();
         for(int i = 0; i < deselections.size(); i++) {
-            DeselectedChange change = (DeselectedChange)deselections.get(i);
+            DeselectedChange change = deselections.get(i);
             change.fireChange();
         }
         deselectedList.updates().commitEvent();
@@ -516,7 +514,7 @@ public class ListSelection {
      */
     public void select(int[] indices) {
         // have to keep track of what deselected values were added
-        List selections = new ArrayList();
+        List<DeselectedChange> selections = new ArrayList<DeselectedChange>();
 
         // keep track of the range of values that were affected
         int firstAffectedIndex = -1;
@@ -544,7 +542,7 @@ public class ListSelection {
         // update the deselected list
         deselectedList.updates().beginEvent();
         for(int i = 0; i < selections.size(); i++) {
-            DeselectedChange change = (DeselectedChange)selections.get(i);
+            DeselectedChange change = selections.get(i);
             change.fireChange();
         }
         deselectedList.updates().commitEvent();
@@ -633,7 +631,7 @@ public class ListSelection {
         }
 
         // have to keep track of what deselected values were added and removed
-        List changes = new ArrayList();
+        List<DeselectedChange> changes = new ArrayList<DeselectedChange>();
 
         // keep track of the range of values that were affected
         int firstAffectedIndex = -1;
@@ -672,7 +670,7 @@ public class ListSelection {
         // update the deselected list
         deselectedList.updates().beginEvent();
         for(int i = 0; i < changes.size(); i++) {
-            DeselectedChange change = (DeselectedChange)changes.get(i);
+            DeselectedChange change = changes.get(i);
             change.fireChange();
         }
         deselectedList.updates().commitEvent();
@@ -849,7 +847,7 @@ public class ListSelection {
         selectedList.updates().beginEvent();
 
         // Keep track of deselected changes as you go
-        ArrayList savedChanges = new ArrayList();
+        List<DeselectedChange> savedChanges = new ArrayList<DeselectedChange>();
 
         // walk through the affect range updating selection
         for(int i = minUnionIndex; i <= maxUnionIndex; i++) {
@@ -886,8 +884,8 @@ public class ListSelection {
 
         // Forward all of the collected changes made to the deselected list
         deselectedList.updates().beginEvent();
-        for(int i = 0;i < savedChanges.size();i++) {
-            DeselectedChange change = (DeselectedChange)savedChanges.get(i);
+        for(int i = 0; i < savedChanges.size(); i++) {
+            DeselectedChange change = savedChanges.get(i);
             change.fireChange();
         }
         savedChanges.clear();
@@ -918,8 +916,8 @@ public class ListSelection {
      */
     private void fireSelectionChanged(int start, int end) {
         // notify all
-        for(Iterator i = selectionListeners.iterator(); i.hasNext(); ) {
-            Listener listener = (Listener)i.next();
+        for(Iterator<Listener> i = selectionListeners.iterator(); i.hasNext(); ) {
+            Listener listener = i.next();
             listener.selectionChanged(start, end);
         }
     }
@@ -983,13 +981,13 @@ public class ListSelection {
      * The {@link EventList} that contains only values that are not currently
      * selected.
      */
-    private final class SelectedList extends TransformedList {
+    private final class SelectedList<E> extends TransformedList<E,E> {
 
         /**
          * Creates an {@link EventList} that provides a view of the
          * deselected items in a ListSelection.
          */
-        SelectedList(EventList source) {
+        SelectedList(EventList<E> source) {
             super(source);
         }
 
@@ -1004,14 +1002,14 @@ public class ListSelection {
         }
 
         /** {@inheritDoc} */
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<E> listChanges) {
             // Do nothing as all state changes are handled in ListSelection.listChanged()
         }
 
         /**
          * This allows access to the EventAssembler for this list.
          */
-        public ListEventAssembler updates() {
+        public ListEventAssembler<E> updates() {
             return updates;
         }
 
@@ -1028,13 +1026,13 @@ public class ListSelection {
      * The {@link EventList} that contains only values that are not currently
      * selected.
      */
-    private final class DeselectedList extends TransformedList {
+    private final class DeselectedList<E> extends TransformedList<E,E> {
 
         /**
          * Creates an {@link EventList} that provides a view of the
          * deselected items in a ListSelection.
          */
-        DeselectedList(EventList source) {
+        DeselectedList(EventList<E> source) {
             super(source);
         }
 
@@ -1049,7 +1047,7 @@ public class ListSelection {
         }
 
         /** {@inheritDoc} */
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<E> listChanges) {
             // Do nothing as all state changes are handled in ListSelection.listChanged()
         }
 

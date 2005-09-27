@@ -3,11 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.swing;
 
-// Java collections are used for underlying data storage
-import java.util.*;
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.impl.gui.*;
 // for calling the notification on the Swing thread
 import javax.swing.SwingUtilities;
@@ -19,13 +16,13 @@ import javax.swing.SwingUtilities;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class SwingThreadProxyEventList extends ThreadProxyEventList {
+public class SwingThreadProxyEventList<E> extends ThreadProxyEventList<E> {
 
     /**
      * Create a {@link SwingThreadProxyEventList} that mirrors the specified source
      * {@link EventList} for access on the Swing thread.
      */
-    public SwingThreadProxyEventList(EventList source) {
+    public SwingThreadProxyEventList(EventList<E> source) {
         super(source);
     }
 

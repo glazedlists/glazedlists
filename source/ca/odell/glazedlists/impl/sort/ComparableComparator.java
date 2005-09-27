@@ -6,7 +6,6 @@ package ca.odell.glazedlists.impl.sort;
 // for specifying a sorting algorithm
 import java.util.Comparator;
 
-
 /**
  * A trivial comparator that requires that compared objects implement
  * the comparable interface.
@@ -16,17 +15,16 @@ import java.util.Comparator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ComparableComparator implements Comparator {
+public final class ComparableComparator implements Comparator<Comparable> {
 
     /**
      * Compares object alpha to object beta by casting object one
      * to Comparable, and calling its compareTo method.
      */
-    public int compare(Object alpha, Object beta) {
+    public int compare(Comparable alpha, Comparable beta) {
         // compare using Comparable
         if(alpha != null && beta != null) {
-            Comparable alphaComparable = (Comparable)alpha;
-            return alphaComparable.compareTo(beta);
+            return alpha.compareTo(beta);
         }
 
         // compare nulls

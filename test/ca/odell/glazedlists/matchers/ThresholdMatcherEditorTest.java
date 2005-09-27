@@ -389,20 +389,12 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		// set to a comparator that uses absolute values. If not used, nothing will match.
 		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
 		threshold_matchereditor.setThreshold(new Integer(-1));
-		threshold_matchereditor.setComparator(new Comparator() {
-			public int compare(Object o1, Object o2) {
-				Integer one = new Integer(Math.abs(((Integer) o1).intValue()));
-				Integer two = new Integer(Math.abs(((Integer) o2).intValue()));
-
-				return one.compareTo(two);
-			}
-		});
+		threshold_matchereditor.setComparator(new AbsComparator());
 
 		assertEquals(1, threshold_list.size());
 	}
 
-
-	public void testWrites() {
+    public void testWrites() {
 
 		// Add when not initially shown via filter
 		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
@@ -428,4 +420,16 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		assertEquals(new Integer(11), threshold_list.get(0));
 		assertEquals(new Integer(12), threshold_list.get(1));
 	}
+
+    /**
+     * Compare two Integers by their absolute value.
+     */
+    private static class AbsComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            Integer one = new Integer(Math.abs(((Integer) o1).intValue()));
+            Integer two = new Integer(Math.abs(((Integer) o2).intValue()));
+
+            return one.compareTo(two);
+        }
+    }
 }

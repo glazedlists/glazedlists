@@ -39,7 +39,7 @@ import java.util.Iterator;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author James Lemieux
  */
-public class ObservableElementList extends TransformedList {
+public class ObservableElementList<E> extends TransformedList<E,E> {
 
     /**
      * A list of the observed elements. It is necessary to track the observed
@@ -47,7 +47,7 @@ public class ObservableElementList extends TransformedList {
      * the removed element as part of the ListEvent. We use this list to locate
      * removed elements for the purpose of unregistering listeners from them.
      */
-    private List observedElements;
+    private List<E> observedElements;
 
     /**
      * The connector object containing the logic for registering and
@@ -56,7 +56,7 @@ public class ObservableElementList extends TransformedList {
      * listener is responsible for calling {@link #elementChanged(Object)}
      * to notify this list of the changed object.
      */
-    private Connector elementConnector = null;
+    private Connector<E> elementConnector = null;
 
     /**
      * <tt>true</tt> indicates a single shared EventListener is used for each
@@ -73,7 +73,7 @@ public class ObservableElementList extends TransformedList {
      * {@link EventListener} associated with the observed element at the same
      * index within {@link #observedElements}.
      */
-    private List multiEventListenerRegistry = null;
+    private List<EventListener> multiEventListenerRegistry = null;
 
     /**
      * The single {@link EventListener} shared by all list elements if a
@@ -103,7 +103,7 @@ public class ObservableElementList extends TransformedList {
      *      this list to the given <code>elementConnector</code> by calling
      *      {@link Connector#setObservableElementList(ObservableElementList)}.
      */
-    public ObservableElementList(EventList source, Connector elementConnector) {
+    public ObservableElementList(EventList<E> source, Connector<E> elementConnector) {
         super(source);
 
         this.elementConnector = elementConnector;
@@ -113,7 +113,7 @@ public class ObservableElementList extends TransformedList {
         this.elementConnector.setObservableElementList(this);
 
         // for speed, we add all source elements together, rather than individually
-        this.observedElements = new ArrayList(source);
+        this.observedElements = new ArrayList<E>(source);
 
         // we initialize the single EventListener registry, as we optimistically
         // assume we'll be using a single listener for all observed elements
@@ -122,7 +122,7 @@ public class ObservableElementList extends TransformedList {
 
         // add listeners to all source list elements
         int index = 0;
-        for (Iterator iter = this.iterator(); iter.hasNext(); index++) {
+        for (Iterator<E> iter = this.iterator(); iter.hasNext(); index++) {
             // connect a listener to the element
             final EventListener listener = this.connectElement(iter.next());
 
@@ -134,7 +134,7 @@ public class ObservableElementList extends TransformedList {
         source.addListEventListener(this);
     }
 
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         if (this.observedElements == null)
             throw new IllegalStateException("This list has been disposed and can no longer be used.");
 
@@ -145,7 +145,7 @@ public class ObservableElementList extends TransformedList {
 
             // register a listener on the inserted object
             if (changeType == ListEvent.INSERT) {
-                final Object inserted = get(changeIndex);
+                final E inserted = get(changeIndex);
                 this.observedElements.add(changeIndex, inserted);
 
                 // connect a listener to the freshly inserted element
@@ -155,7 +155,7 @@ public class ObservableElementList extends TransformedList {
 
             // unregister a listener on the deleted object
             } else if (changeType == ListEvent.DELETE) {
-                final Object deleted = this.observedElements.remove(changeIndex);
+                final E deleted = this.observedElements.remove(changeIndex);
 
                 // remove the listener from the registry
                 final EventListener listener = this.unregisterListener(changeIndex);
@@ -164,8 +164,8 @@ public class ObservableElementList extends TransformedList {
 
             // register/unregister listeners if the value at the changeIndex is now a different object
             } else if (changeType == ListEvent.UPDATE) {
-                final Object previousValue = this.observedElements.get(changeIndex);
-                final Object newValue = get(changeIndex);
+                final E previousValue = this.observedElements.get(changeIndex);
+                final E newValue = get(changeIndex);
 
                 // if a different object is present at the index
                 if (newValue != previousValue) {
@@ -228,7 +228,7 @@ public class ObservableElementList extends TransformedList {
             if (this.singleEventListenerRegistry.get(index) == Barcode.BLACK)
                 listener = this.singleEventListener;
         } else {
-            listener = (EventListener) this.multiEventListenerRegistry.get(index);
+            listener = this.multiEventListenerRegistry.get(index);
         }
 
         return listener;
@@ -250,7 +250,7 @@ public class ObservableElementList extends TransformedList {
                 listener = this.singleEventListener;
             this.singleEventListenerRegistry.remove(index, 1);
         } else {
-            listener = (EventListener) this.multiEventListenerRegistry.remove(index);
+            listener = this.multiEventListenerRegistry.remove(index);
         }
 
         return listener;
@@ -267,7 +267,7 @@ public class ObservableElementList extends TransformedList {
      *      thus no longer in a state to be managing listener registrations on
      *      list elements
      */
-    private EventListener connectElement(Object listElement) {
+    private EventListener connectElement(E listElement) {
         // listeners cannot be installed on null listElements
         if (listElement == null)
             return null;
@@ -296,7 +296,7 @@ public class ObservableElementList extends TransformedList {
      *      thus no longer in a state to be managing listener registrations on
      *      list elements
      */
-    private void disconnectElement(Object listElement, EventListener listener) {
+    private void disconnectElement(E listElement, EventListener listener) {
         if (listElement != null && listener != null)
             this.elementConnector.uninstallListener(listElement, listener);
     }
@@ -310,11 +310,11 @@ public class ObservableElementList extends TransformedList {
      * <p>Note: this is a one-time switch only and cannot be reversed
      */
     private void switchToMultiListenerMode() {
-        assert(this.singleListenerMode);
+        if (!this.singleListenerMode) throw new IllegalStateException();
 
         // build a new data structure appropriate for individual storing
         // listeners for each observed element
-        this.multiEventListenerRegistry = new ArrayList(this.source.size());
+        this.multiEventListenerRegistry = new ArrayList<EventListener>(this.source.size());
 
         // for each black entry in the singleEventListenerRegistry create an
         // entry in the multiEventListenerRegistry at the corresponding index
@@ -358,7 +358,7 @@ public class ObservableElementList extends TransformedList {
     public void dispose() {
         // remove all listeners from all list elements
         for (int i = 0; i < this.observedElements.size(); i++) {
-            final Object element = this.observedElements.get(i);
+            final E element = this.observedElements.get(i);
             final EventListener listener = this.getListener(i);
             this.disconnectElement(element, listener);
         }
@@ -377,35 +377,35 @@ public class ObservableElementList extends TransformedList {
     }
 
     /**
-     * Handle a listener being fired for the specified element. This method
+     * Handle a listener being fired for the specified listElement. This method
      * causes a ListEvent to be fired from this EventList indicating an update
-     * occurred at all locations of the given <code>element</code>.
+     * occurred at all locations of the given <code>listElement</code>.
      *
-     * <p>Note that element must be the exact object located within this list
-     * (i.e. <code>element == get(i) for some i >= 0</code>).
+     * <p>Note that listElement must be the exact object located within this list
+     * (i.e. <code>listElement == get(i) for some i >= 0</code>).
      *
-     * @param element the List element which has been modified.
+     * @param listElement the List listElement which has been modified.
      */
-    public void elementChanged(Object element) {
+    public void elementChanged(E listElement) {
         if (this.observedElements == null)
             throw new IllegalStateException("This list has been disposed and can no longer be used.");
 
         this.updates.beginEvent();
 
-        // locate all indexes containing the given element
+        // locate all indexes containing the given listElement
         for (int i = 0; i < size(); i++) {
-            if (element == get(i))
+            if (listElement == get(i))
                 this.updates.addUpdate(i);
         }
 
-        // ensure we found the element at least one time in this list
+        // ensure we found the listElement at least one time in this list
         final boolean foundElement = !this.updates.isEventEmpty();
         this.updates.commitEvent();
 
-        // throw an IllegalStateException if the element could not be found at least
+        // throw an IllegalStateException if the listElement could not be found at least
         // one time within this list since it probably represents a programmer error
         if (!foundElement)
-            throw new IllegalStateException("Failed to find list element \"" + element + "\" in list " + this);
+            throw new IllegalStateException("Failed to find list listElement \"" + listElement + "\" in list " + this);
     }
 
 
@@ -419,7 +419,7 @@ public class ObservableElementList extends TransformedList {
      * {@link ObservableElementList#elementChanged(Object)} in order to have
      * the list broadcast an update at the index of the object.
      */
-    public interface Connector {
+    public interface Connector<E> {
         /**
          * Start listening for events from the specified <code>element</code>.
          * Alternatively, if the <code>element</code> does not require a
@@ -434,7 +434,7 @@ public class ObservableElementList extends TransformedList {
          *      and thus {@link #uninstallListener(Object, EventListener)} need
          *      not be called.
          */
-        public EventListener installListener(Object element);
+        public EventListener installListener(E element);
 
         /**
          * Stop listening for events from the specified <code>element</code>.
@@ -442,7 +442,7 @@ public class ObservableElementList extends TransformedList {
          * @param element the element to be observed
          * @param listener the listener as returned by {@link #installListener(Object)}.
          */
-        public void uninstallListener(Object element, EventListener listener);
+        public void uninstallListener(E element, EventListener listener);
 
         /**
          * Sets the {@link ObservableElementList} to notify when changes occur
@@ -451,6 +451,6 @@ public class ObservableElementList extends TransformedList {
          * @param list the ObservableElementList containing the elements to
          *      observe
          */
-        public void setObservableElementList(ObservableElementList list);
+        public void setObservableElementList(ObservableElementList<E> list);
     }
 }

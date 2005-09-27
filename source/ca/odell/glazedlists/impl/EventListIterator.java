@@ -22,10 +22,10 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventListIterator implements ListIterator, ListEventListener {
+public class EventListIterator<E> implements ListIterator<E>, ListEventListener<E> {
 
     /** the list being iterated */
-    private EventList source;
+    private EventList<E> source;
 
     /** the index of the next element to view */
     private int nextIndex;
@@ -39,7 +39,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
      *
      * @param source the list to iterate
      */
-    public EventListIterator(EventList source) {
+    public EventListIterator(EventList<E> source) {
         this(source, 0, true);
     }
 
@@ -49,7 +49,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
      * @param source the list to iterate
      * @param nextIndex the starting point within the list
      */
-    public EventListIterator(EventList source, int nextIndex) {
+    public EventListIterator(EventList<E> source, int nextIndex) {
         this(source, nextIndex, true);
     }
 
@@ -64,13 +64,13 @@ public class EventListIterator implements ListIterator, ListEventListener {
      *
      * @see GlazedLists#weakReferenceProxy(EventList, ListEventListener)
      */
-    public EventListIterator(EventList source, int nextIndex, boolean automaticallyRemove) {
+    public EventListIterator(EventList<E> source, int nextIndex, boolean automaticallyRemove) {
         this.source = source;
         this.nextIndex = nextIndex;
 
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            ListEventListener gcProxy = new WeakReferenceProxy(source, this);
+            ListEventListener<E> gcProxy = new WeakReferenceProxy<E>(source, this);
             source.addListEventListener(gcProxy);
             // do not manage dependencies for iterators, they never have multiple sources
             source.getPublisher().removeDependency(source, gcProxy);
@@ -94,7 +94,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
     /**
      * Returns the next element in the list.
      */
-    public Object next() {
+    public E next() {
         // next shouldn't have been called.
         if(nextIndex == source.size()) {
            throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
@@ -126,7 +126,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
     /**
      * Returns the previous element in the list.
      */
-    public Object previous() {
+    public E previous() {
         // previous shouldn't have been called
         if(nextIndex == 0) {
             throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
@@ -149,7 +149,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
     /**
      * Inserts the specified element into the list (optional operation).
      */
-    public void add(Object o) {
+    public void add(E o) {
         source.add(nextIndex, o);
     }
 
@@ -166,7 +166,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
      * Replaces the last element returned by next or previous with the
      * specified element (optional operation).
      */
-    public void set(Object o) {
+    public void set(E o) {
         if(lastIndex == -1) throw new IllegalStateException("Cannot set() without a prior call to next() or previous()");
         source.set(lastIndex, o);
     }
@@ -174,7 +174,7 @@ public class EventListIterator implements ListIterator, ListEventListener {
     /**
      * When the list is changed, the iterator adjusts its index.
      */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();

@@ -36,32 +36,32 @@ import java.lang.ref.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class WeakReferenceProxy implements ListEventListener {
+public final class WeakReferenceProxy<E> implements ListEventListener<E> {
 
     /** a weak reference the target ListEventListener */
-    private WeakReference proxyTargetReference;
+    private WeakReference<ListEventListener<E>> proxyTargetReference;
 
     /** the list to remove this listener from when done */
-    private EventList source;
+    private EventList<E> source;
 
     /**
      * Creates a new WeakReferenceProxy that listens for
      * events from the specified list and forwards them to the specified
      * listener.
      */
-    public WeakReferenceProxy(EventList source, ListEventListener proxyTarget) {
+    public WeakReferenceProxy(EventList<E> source, ListEventListener<E> proxyTarget) {
         if(source == null || proxyTarget == null) throw new NullPointerException();
 
         this.source = source;
-        proxyTargetReference = new WeakReference(proxyTarget);
+        proxyTargetReference = new WeakReference<ListEventListener<E>>(proxyTarget);
     }
 
     /**
      * Accepts notification for the changes and forwards them to the proxy target
      * if it has not yet been garbage collected.
      */
-    public void listChanged(ListEvent listChanges) {
-        ListEventListener proxyTarget = (ListEventListener)proxyTargetReference.get();
+    public void listChanged(ListEvent<E> listChanges) {
+        ListEventListener<E> proxyTarget = proxyTargetReference.get();
 
         if(source != null && (proxyTarget == null || proxyTargetReference.isEnqueued())) {
             source.removeListEventListener(this);
@@ -71,4 +71,3 @@ public final class WeakReferenceProxy implements ListEventListener {
         }
     }
 }
-

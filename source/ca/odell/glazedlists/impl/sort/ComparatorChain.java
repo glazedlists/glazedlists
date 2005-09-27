@@ -12,10 +12,10 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ComparatorChain implements Comparator {
+public final class ComparatorChain<T> implements Comparator<T> {
 
     /** the comparators to execute in sequence */
-    private List comparators;
+    private List<Comparator<T>> comparators;
 
     /**
      * Creates a comparator chain that views the specified comparators in
@@ -25,16 +25,16 @@ public final class ComparatorChain implements Comparator {
      *      an error to modify the specified list after using it as an
      *      argument to comparator chain.
      */
-    public ComparatorChain(List comparators) {
+    public ComparatorChain(List<Comparator<T>> comparators) {
         this.comparators = comparators;
     }
 
     /**
      * Compares the two objects with each comparator in sequence.
      */
-    public int compare(Object alpha, Object beta) {
-        for(Iterator i = comparators.iterator(); i.hasNext(); ) {
-            Comparator currentComparator = (Comparator)i.next();
+    public int compare(T alpha, T beta) {
+        for(Iterator<Comparator<T>> i = comparators.iterator(); i.hasNext(); ) {
+            Comparator<T> currentComparator = i.next();
             int compareResult = currentComparator.compare(alpha, beta);
             if(compareResult != 0) return compareResult;
         }
@@ -45,7 +45,7 @@ public final class ComparatorChain implements Comparator {
      * Retrieves a {@link List} of the {@link Comparator}s in this
      * <code>ComparatorChain</code>.
      */
-    public List getComparators() {
+    public List<Comparator<T>> getComparators() {
         return comparators;
     }
 

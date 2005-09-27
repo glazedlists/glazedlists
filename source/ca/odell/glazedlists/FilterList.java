@@ -35,25 +35,25 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class FilterList extends TransformedList {
+public final class FilterList<E> extends TransformedList<E,E> {
 
     /** the flag list contains Barcode.BLACK for items that match the current filter and Barcode.WHITE for others */
     private Barcode flagList = new Barcode();
 
     /** the matcher determines whether elements get filtered in or out */
-    private Matcher currentMatcher = Matchers.trueMatcher();
+    private Matcher<E> currentMatcher = Matchers.trueMatcher();
 
     /** the editor changes the matcher and fires events */
-    private MatcherEditor currentEditor = null;
+    private MatcherEditor<E> currentEditor = null;
 
     /** listener handles changes to the matcher */
-    protected MatcherEditor.Listener listener = new PrivateMatcherEditorListener();
+    protected MatcherEditor.Listener<E> listener = new PrivateMatcherEditorListener();
 
     /**
      * Creates a {@link FilterList} that includes a subset of the specified
      * source {@link EventList}.
      */
-    public FilterList(EventList source) {
+    public FilterList(EventList<E> source) {
         super(source);
 
         // build a list of what is filtered and what's not
@@ -66,7 +66,7 @@ public final class FilterList extends TransformedList {
      * Convenience constructor for creating a {@link FilterList} and setting its
      * {@link Matcher}.
      */
-    public FilterList(EventList source, Matcher matcher) {
+    public FilterList(EventList<E> source, Matcher<E> matcher) {
         this(source);
         setMatcher(matcher);
     }
@@ -74,7 +74,7 @@ public final class FilterList extends TransformedList {
      * Convenience constructor for creating a {@link FilterList} and setting its
      * {@link MatcherEditor}.
      */
-    public FilterList(EventList source, MatcherEditor matcherEditor) {
+    public FilterList(EventList<E> source, MatcherEditor<E> matcherEditor) {
         this(source);
         setMatcherEditor(matcherEditor);
     }
@@ -85,7 +85,7 @@ public final class FilterList extends TransformedList {
      * <p>This will remove the current {@link Matcher} or {@link MatcherEditor}
      * and refilter the entire list.
      */
-    public void setMatcher(Matcher matcher) {
+    public void setMatcher(Matcher<E> matcher) {
         // cancel the previous editor
         if(currentEditor != null) {
             currentEditor.removeMatcherEditorListener(listener);
@@ -93,7 +93,7 @@ public final class FilterList extends TransformedList {
         }
 
         // refilter
-        listener.changedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.CHANGED, matcher));
+        listener.changedMatcher(new MatcherEditor.Event<E>(this, MatcherEditor.Event.CHANGED, matcher));
     }
 
     /**
@@ -103,7 +103,7 @@ public final class FilterList extends TransformedList {
      * <p>This will remove the current {@link Matcher} or {@link MatcherEditor}
      * and refilter the entire list.
      */
-    public void setMatcherEditor(MatcherEditor editor) {
+    public void setMatcherEditor(MatcherEditor<E> editor) {
         // cancel the previous editor
         if(currentEditor != null) {
             currentEditor.removeMatcherEditorListener(listener);
@@ -114,15 +114,15 @@ public final class FilterList extends TransformedList {
         if(currentEditor != null) {
             currentEditor.addMatcherEditorListener(listener);
             currentMatcher = currentEditor.getMatcher();
-            listener.changedMatcher(new MatcherEditor.Event(currentEditor, MatcherEditor.Event.CHANGED, currentMatcher));
+            listener.changedMatcher(new MatcherEditor.Event<E>(currentEditor, MatcherEditor.Event.CHANGED, currentMatcher));
         } else {
             currentMatcher = Matchers.trueMatcher();
-            listener.changedMatcher(new MatcherEditor.Event(this, MatcherEditor.Event.CHANGED, currentMatcher));
+            listener.changedMatcher(new MatcherEditor.Event<E>(this, MatcherEditor.Event.CHANGED, currentMatcher));
         }
     }
 
     /** {@inheritDoc} */
-    public final void listChanged(ListEvent listChanges) {
+    public final void listChanged(ListEvent<E> listChanges) {
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
 
@@ -186,8 +186,6 @@ public final class FilterList extends TransformedList {
                 // handle update events
                 } else if(changeType == ListEvent.UPDATE) {
 
-
-
                     // determine if this value was already filtered out or not
                     int filteredIndex = flagList.getBlackIndex(sourceIndex);
                     boolean wasIncluded = filteredIndex != -1;
@@ -220,7 +218,7 @@ public final class FilterList extends TransformedList {
     /**
      * Listens to changes from the current {@link MatcherEditor} and handles them.
      */
-    private class PrivateMatcherEditorListener implements MatcherEditor.Listener {
+    private class PrivateMatcherEditorListener implements MatcherEditor.Listener<E> {
 
         /**
          * This implementation of this method simply delegates the handling of
@@ -231,9 +229,9 @@ public final class FilterList extends TransformedList {
          * @param matcherEvent a MatcherEvent describing the change in the
          *      Matcher produced by the MatcherEditor
          */
-        public void changedMatcher(MatcherEditor.Event matcherEvent) {
-            final MatcherEditor matcherEditor = matcherEvent.getMatcherEditor();
-            final Matcher matcher = matcherEvent.getMatcher();
+        public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
+            final MatcherEditor<E> matcherEditor = matcherEvent.getMatcherEditor();
+            final Matcher<E> matcher = matcherEvent.getMatcher();
 
             switch (matcherEvent.getType()) {
                 case MatcherEditor.Event.CONSTRAINED: this.constrained(matcherEditor, matcher); break;
@@ -249,7 +247,7 @@ public final class FilterList extends TransformedList {
          * values can be matched. That is, the filter list will act as a total
          * filter and not match any of the elements of the wrapped source list.
          */
-        private void matchNone(MatcherEditor editor) {
+        private void matchNone(MatcherEditor<E> editor) {
             getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
@@ -278,7 +276,7 @@ public final class FilterList extends TransformedList {
          * a passthrough and not discriminate any of the elements of the wrapped
          * source list.
          */
-        private void matchAll(MatcherEditor editor) {
+        private void matchAll(MatcherEditor<E> editor) {
             getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
@@ -320,7 +318,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        private void relaxed(MatcherEditor editor, Matcher matcher) {
+        private void relaxed(MatcherEditor<E> editor, Matcher<E> matcher) {
             getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
@@ -354,7 +352,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        private void constrained(MatcherEditor editor, Matcher matcher) {
+        private void constrained(MatcherEditor<E> editor, Matcher<E> matcher) {
             getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers
@@ -389,7 +387,7 @@ public final class FilterList extends TransformedList {
          * thread ready but not thread safe. See {@link EventList} for an example
          * of thread safe code.
          */
-        private void changed(MatcherEditor editor, Matcher matcher) {
+        private void changed(MatcherEditor<E> editor, Matcher<E> matcher) {
             getReadWriteLock().writeLock().lock();
             try {
                 // update my matchers

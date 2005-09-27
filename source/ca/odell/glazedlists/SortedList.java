@@ -5,11 +5,11 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.adt.IndexedTree;
+import ca.odell.glazedlists.impl.adt.IndexedTreeIterator;
 import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
 import ca.odell.glazedlists.impl.sort.ComparableComparator;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.util.concurrent.LockFactory;
 
 import java.util.*;
 
@@ -38,12 +38,12 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SortedList extends TransformedList {
+public final class SortedList<E> extends TransformedList<E,E> {
 
     /** a map from the unsorted index to the sorted index */
-    private IndexedTree unsorted = null;
+    private IndexedTree<IndexedTreeNode> unsorted = null;
     /** a map from the sorted index to the unsorted index */
-    private IndexedTree sorted = null;
+    private IndexedTree<IndexedTreeNode> sorted = null;
 
     /** the comparator that this list uses for sorting */
     private Comparator comparator = null;
@@ -54,7 +54,7 @@ public final class SortedList extends TransformedList {
      * elements in the specified {@link EventList} must implement {@link Comparable}
      * or a {@link ClassCastException} will be thrown.
      */
-    public SortedList(EventList source) {
+    public SortedList(EventList<E> source) {
         this(source, GlazedLists.comparableComparator());
     }
 
@@ -64,7 +64,7 @@ public final class SortedList extends TransformedList {
      * specified {@link Comparator} is <tt>null</tt>, then this list will be
      * unsorted.
      */
-    public SortedList(EventList source, Comparator comparator) {
+    public SortedList(EventList<E> source, Comparator comparator) {
         super(source);
 
         // trees are instansiated when a comparator is set
@@ -74,7 +74,7 @@ public final class SortedList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // This is implemented in four phases. These phases are:
         // 1. Update the unsorted tree for all event types. Update the sorted tree
         //    for delete events by deleting nodes. Fire delete events. Queue unsorted
@@ -108,15 +108,14 @@ public final class SortedList extends TransformedList {
             IndexedTreeNode[] sortedNodes = new IndexedTreeNode[sorted.size()];
             int index = 0;
             for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
-                IndexedTreeNode unsortedNode = (IndexedTreeNode)i.next();
-                IndexedTreeNode sortedNode = (IndexedTreeNode)unsortedNode.getValue();
-                sortedNodes[index] = sortedNode;
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = (IndexedTreeNode<IndexedTreeNode>)i.next();
+                sortedNodes[index] = unsortedNode.getValue();
             }
 
             // set the unsorted nodes to point to the new set of sorted nodes
             index = 0;
             for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
-                IndexedTreeNode unsortedNode = (IndexedTreeNode)i.next();
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = (IndexedTreeNode<IndexedTreeNode>)i.next();
                 unsortedNode.setValue(sortedNodes[reorderMap[index]]);
                 sortedNodes[reorderMap[index]].setValue(unsortedNode);
             }
@@ -129,7 +128,7 @@ public final class SortedList extends TransformedList {
         updates.beginEvent();
 
         // first update the offset tree for all changes, and keep the changed nodes in a list
-        LinkedList insertNodes = new LinkedList();
+        LinkedList<IndexedTreeNode> insertNodes = new LinkedList<IndexedTreeNode>();
 
         // perform the inserts and deletes on the indexed tree
         while(listChanges.next()) {
@@ -140,12 +139,12 @@ public final class SortedList extends TransformedList {
 
             // on insert, insert the index node
             if(changeType == ListEvent.INSERT) {
-                IndexedTreeNode unsortedNode = unsorted.addByNode(unsortedIndex, this);
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.addByNode(unsortedIndex, IndexedTreeNode.EMPTY_NODE);
                 insertNodes.addLast(unsortedNode);
 
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
-                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.getNode(unsortedIndex);
                 unsortedNode.removeFromTree(unsorted);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.addDelete(deleteSortedIndex);
@@ -168,8 +167,8 @@ public final class SortedList extends TransformedList {
 
             // on insert, insert the index node
             if(changeType == ListEvent.UPDATE) {
-                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                IndexedTreeNode sortedNode = (IndexedTreeNode)unsortedNode.getValue();
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.getNode(unsortedIndex);
+                IndexedTreeNode sortedNode = unsortedNode.getValue();
                 int originalIndex = sortedNode.getIndex();
                 indicesPendingDeletion.addPair(new IndexNodePair(originalIndex, unsortedNode));
             }
@@ -211,7 +210,7 @@ public final class SortedList extends TransformedList {
 
         // fire all the insert events
         while(!insertNodes.isEmpty()) {
-            IndexedTreeNode insertNode = (IndexedTreeNode)insertNodes.removeFirst();
+            IndexedTreeNode insertNode = insertNodes.removeFirst();
             int insertedIndex = insertByUnsortedNode(insertNode);
             updates.addInsert(insertedIndex);
         }
@@ -288,14 +287,14 @@ public final class SortedList extends TransformedList {
         Comparator treeComparator = null;
         if(comparator != null) treeComparator = new IndexedTreeNodeComparator(comparator);
         else treeComparator = new IndexedTreeNodeRawOrderComparator();
-        sorted = new IndexedTree(treeComparator);
+        sorted = new IndexedTree<IndexedTreeNode>(treeComparator);
 
         // create a list which knows the offsets of the indexes to initialize this list
         if(previousSorted == null && unsorted == null) {
-            unsorted = new IndexedTree();
+            unsorted = new IndexedTree<IndexedTreeNode>();
             // add all elements in the source list, in order
             for(int i = 0; i < source.size(); i++) {
-                IndexedTreeNode unsortedNode = unsorted.addByNode(i, this);
+                IndexedTreeNode unsortedNode = unsorted.addByNode(i, IndexedTreeNode.EMPTY_NODE);
                 insertByUnsortedNode(unsortedNode);
             }
             // this is the first sort so we're done
@@ -332,8 +331,7 @@ public final class SortedList extends TransformedList {
     protected int getSourceIndex(int mutationIndex) {
         IndexedTreeNode sortedNode = sorted.getNode(mutationIndex);
         IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
-        int unsortedIndex = unsortedNode.getIndex();
-        return unsortedIndex;
+        return unsortedNode.getIndex();
     }
 
     /** {@inheritDoc} */
@@ -492,10 +490,10 @@ public final class SortedList extends TransformedList {
      * A class for managing a list of pending deletes. This class presents deletes
      * in order sorted by the index where they will be reinserted.
      */
-    private static class IndicesPendingDeletion {
+    private class IndicesPendingDeletion {
 
         /** the underlying data storage */
-        SortedSet indexNodePairs = new TreeSet();
+        SortedSet<IndexNodePair> indexNodePairs = new TreeSet<IndexNodePair>();
 
         /**
          * Adds the specified index to the list of indices pending deletion.
@@ -511,8 +509,8 @@ public final class SortedList extends TransformedList {
          * <p>This method can use some optimization.
          */
         public int adjustDeleteAndInsert(int deletedIndex, int insertedIndex) {
-            for(Iterator i = indexNodePairs.iterator(); i.hasNext(); ) {
-                IndexNodePair indexNodePair = (IndexNodePair)i.next();
+            for(Iterator<IndexNodePair> i = indexNodePairs.iterator(); i.hasNext(); ) {
+                IndexNodePair indexNodePair = i.next();
                 // adjust due to the delete
                 if(deletedIndex < indexNodePair.index) {
                     indexNodePair.index--;
@@ -530,7 +528,7 @@ public final class SortedList extends TransformedList {
         /**
          * Gets the Iterator for this set of indices.
          */
-        public Iterator iterator() {
+        public Iterator<IndexNodePair> iterator() {
             return indexNodePairs.iterator();
         }
 
@@ -575,17 +573,17 @@ public final class SortedList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         return new SortedListIterator();
     }
 
     /**
      * The fast iterator for SortedList
      */
-    private class SortedListIterator implements Iterator {
+    private class SortedListIterator implements Iterator<E> {
 
         /** the IndexedTreeIterator to use to move across the tree */
-        private ListIterator treeIterator = sorted.listIterator(0);
+        private IndexedTreeIterator<IndexedTreeNode> treeIterator = sorted.iterator();
 
         /** the last unsorted index to be returned by this iterator */
         private int lastUnsortedIndex = -1;
@@ -600,7 +598,7 @@ public final class SortedList extends TransformedList {
         /**
          * Returns the next value in the iteration.
          */
-        public Object next() {
+        public E next() {
             IndexedTreeNode sortedNode = (IndexedTreeNode)treeIterator.next();
             IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
             lastUnsortedIndex = unsortedNode.getIndex();
@@ -622,7 +620,7 @@ public final class SortedList extends TransformedList {
             // this is the first value so just remove and reset the tree iterator
             } else {
                 source.remove(lastUnsortedIndex);
-                treeIterator = sorted.listIterator(0);
+                treeIterator = sorted.iterator();
             }
             lastUnsortedIndex = -1;
         }

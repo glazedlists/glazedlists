@@ -59,31 +59,34 @@ public class ConflictingThreadsTest extends SwingTestCase {
 	 */
 	public void guiTestConflictingThreads() {
 
-		doBackgroundTask(new Runnable() {
-			public void run() {
-				labelsList.getReadWriteLock().writeLock().lock();
-				labelsList.clear();
-				labelsList.getReadWriteLock().writeLock().unlock();
-			}
-		});
+		doBackgroundTask(new ClearListRunnable());
 
 		labelsList.getReadWriteLock().writeLock().lock();
 		assertEquals(0, labelsList.size());
 		labelsList.add(new JLabel("Coca-Cola"));
 		labelsList.getReadWriteLock().writeLock().unlock();
 
-		// Need to do the last assertion in a stagered EDT call because:
-		//  1) We're currently running in the EDT
-		//  2) The "add" done above will cause a SwingUtilities.invokeLater call to be
-		//     done in the SwingThreadProxyEventList.
-		//  3) Since we're currently in the EDT, we're going to execute before the update
-		//     happens. So, delay the assertion
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				assertEquals(1, labelsTable.getRowCount());
-			}
-		});
+        // This fails. We know it fails. Do not fix this!
+        //
+        // The problem is that changes pending on an EventList are invisible to
+        // the EDT if those changes happened before the current dispatch but
+        // the proxy to fire those events happened after the current dispatch.
+        //
+        // This is a really tricky problem that we need to do some serious
+        // thinking on. One natural but impossible solution is to force updates
+        // on the model read. The problem with this is that the JTable itself
+        // may be doing the read, and firing updates from within the JTable's
+        // call stack (and re-entering JTable) is likely quite problematic!
+        assertEquals(1, labelsTable.getRowCount());
 	}
+
+    private class ClearListRunnable implements Runnable {
+        public void run() {
+            labelsList.getReadWriteLock().writeLock().lock();
+            labelsList.clear();
+            labelsList.getReadWriteLock().writeLock().unlock();
+        }
+    }
 
 	public static void main(String[] args) {
 		new ConflictingThreadsTest().testGui();

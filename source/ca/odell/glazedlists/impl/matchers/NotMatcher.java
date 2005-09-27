@@ -11,18 +11,16 @@ import ca.odell.glazedlists.matchers.Matcher;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class NotMatcher implements Matcher {
-	private Matcher parent;
+public class NotMatcher<E> implements Matcher<E> {
+	private Matcher<E> parent;
 
-	public NotMatcher(Matcher parent) {
-		if (parent == null ) throw new IllegalArgumentException("Parent cannot be null" );
-
+	public NotMatcher(Matcher<E> parent) {
+		if (parent == null ) throw new IllegalArgumentException("parent cannot be null");
 		this.parent = parent;
 	}
 
-
     /** {@inheritDoc} */
-	public boolean matches(Object item) {
+	public boolean matches(E item) {
 		return !parent.matches(item);
 	}
 

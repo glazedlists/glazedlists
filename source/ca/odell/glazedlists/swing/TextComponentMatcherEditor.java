@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import ca.odell.glazedlists.matchers.*;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -33,7 +33,7 @@ import java.awt.event.ActionEvent;
  *
  * @author James Lemieux
  */
-public class TextComponentMatcherEditor extends TextMatcherEditor {
+public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
 
     /** The Document that provides the filter values. */
     private Document document;
@@ -59,7 +59,7 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
      *      <code>null</code> then all filtered objects are expected to
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      */
-    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator textFilterator) {
+    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator<E> textFilterator) {
         this(textComponent, textFilterator, true);
     }
 
@@ -81,7 +81,7 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
      * @throws IllegalArgumentException if the <code>textComponent</code> does
      *      is not a {@link JTextField} and non-live filtering is specified.
      */
-    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator textFilterator, boolean live) {
+    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator<E> textFilterator, boolean live) {
         super(textFilterator);
 
         this.textComponent = textComponent;
@@ -104,7 +104,7 @@ public class TextComponentMatcherEditor extends TextMatcherEditor {
      *      <code>null</code> then all filtered objects are expected to
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      */
-    public TextComponentMatcherEditor(Document document, TextFilterator textFilterator) {
+    public TextComponentMatcherEditor(Document document, TextFilterator<E> textFilterator) {
         super(textFilterator);
         this.document = document;
         registerListeners(true);

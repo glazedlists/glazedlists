@@ -22,13 +22,13 @@ import ca.odell.glazedlists.GlazedLists;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class IndexedTree {
+public final class IndexedTree<V> {
 
     /** a decision maker for ordering elements */
     private Comparator comparator;
 
     /** the root node of the tree, this may be replaced by a delete */
-    IndexedTreeNode root = null;
+    IndexedTreeNode<V> root = null;
 
     /**
      * Creates a new empty tree that uses the specified comparator to sort values.
@@ -48,15 +48,15 @@ public final class IndexedTree {
     /**
      * Gets the value of the sorted tree node with the specified index.
      */
-    public Object get(int index) {
+    public V get(int index) {
         if(index > size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
-        IndexedTreeNode treeNode = root.getNodeWithIndex(index);
+        IndexedTreeNode<V> treeNode = root.getNodeWithIndex(index);
         return treeNode.getValue();
     }
     /**
      * Gets the tree node with the specified index.
      */
-    public IndexedTreeNode getNode(int index) {
+    public IndexedTreeNode<V> getNode(int index) {
         if(index > size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         return root.getNodeWithIndex(index);
     }
@@ -67,7 +67,7 @@ public final class IndexedTree {
      * @return the tree node containing the specified value, or null
      *      if no such node is found.
      */
-    public IndexedTreeNode getNode(Object value) {
+    public IndexedTreeNode<V> getNode(Object value) {
         if(root == null) return null;
         return root.getNodeByValue(comparator, value);
     }
@@ -86,8 +86,8 @@ public final class IndexedTree {
      * This iterator returns {@link IndexedTreeNode}s, so to get the
      * values use the node's {@link IndexedTreeNode#getValue()} method.
      */
-    public Iterator iterator() {
-        return new IndexedTreeIterator(this);
+    public IndexedTreeIterator<V> iterator() {
+        return new IndexedTreeIterator<V>(this);
     }
 
     /**
@@ -96,9 +96,9 @@ public final class IndexedTree {
      * This iterator returns {@link IndexedTreeNode}s, so to get the
      * values use the node's {@link IndexedTreeNode#getValue()} method.
      */
-    public ListIterator listIterator() {
-        return new IndexedTreeIterator(this);
-    }
+//    public ListIterator listIterator() {
+//        return new IndexedTreeIterator(this);
+//    }
 
     /**
      * Gets an iterator for this tree. The iterator moves in sorted order
@@ -106,9 +106,9 @@ public final class IndexedTree {
      * This iterator returns {@link IndexedTreeNode}s, so to get the
      * values use the node's {@link IndexedTreeNode#getValue()} method.
      */
-    public ListIterator listIterator(int index) {
-        return new IndexedTreeIterator(this, index);
-    }
+//    public ListIterator listIterator(int index) {
+//        return new IndexedTreeIterator(this, index);
+//    }
 
     /**
      * Gets the comparator used to sort the nodes in this tree.
@@ -120,7 +120,7 @@ public final class IndexedTree {
     /**
      * Deletes the node with the specified sort-order from the tree.
      */
-    public IndexedTreeNode removeByIndex(int index) {
+    public IndexedTreeNode<V> removeByIndex(int index) {
         if(index > size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         //IndexedTreeNode treeNode = root.getNodeWithIndex(index);
         //treeNode.removeFromTree(this);
@@ -135,8 +135,8 @@ public final class IndexedTree {
      *      useful methods such as getIndex() to get the dynamic
      *      index of the node.
      */
-    public IndexedTreeNode addByNode(Object value) {
-        if(root == null) root = new IndexedTreeNode(null);
+    public IndexedTreeNode<V> addByNode(V value) {
+        if(root == null) root = new IndexedTreeNode<V>(null);
         return root.insert(this, value);
     }
     /**
@@ -146,10 +146,10 @@ public final class IndexedTree {
      *      useful methods such as getIndex() to get the dynamic
      *      index of the node.
      */
-    public IndexedTreeNode addByNode(int index, Object value) {
+    public IndexedTreeNode<V> addByNode(int index, V value) {
         if(index > size()) throw new IndexOutOfBoundsException("cannot insert into tree of size " + size() + " at " + index);
         else if(value == null) throw new NullPointerException("cannot insert a value that is null");
-        else if(root == null && index == 0) root = new IndexedTreeNode(null);
+        else if(root == null && index == 0) root = new IndexedTreeNode<V>(null);
         return root.insert(this, index, value);
     }
 
@@ -218,8 +218,8 @@ public final class IndexedTree {
      * them one at a time.
      */
     void validate() {
-        for(Iterator i = iterator(); i.hasNext();) {
-            IndexedTreeNode node = (IndexedTreeNode)i.next();
+        for(Iterator<IndexedTreeNode<V>> i = (Iterator<IndexedTreeNode<V>>)iterator(); i.hasNext();) {
+            IndexedTreeNode<V> node = i.next();
             node.validate(this);
         }
     }
@@ -237,7 +237,7 @@ public final class IndexedTree {
      * method should not be called by client classes as it is an
      * implementation artifact.
      */
-    void setRootNode(IndexedTreeNode root) {
+    void setRootNode(IndexedTreeNode<V> root) {
         this.root = root;
     }
 
@@ -261,7 +261,7 @@ public final class IndexedTree {
         long start = System.currentTimeMillis();
 
         for(int r = 0; r < repetitions; r++) {
-            IndexedTree tree = new IndexedTree(GlazedLists.comparableComparator());
+            IndexedTree<Integer> tree = new IndexedTree<Integer>(GlazedLists.comparableComparator());
             for(int i = 0; i < operations; i++) {
                 int operation = (int)(random.nextDouble() * 3.0);
 

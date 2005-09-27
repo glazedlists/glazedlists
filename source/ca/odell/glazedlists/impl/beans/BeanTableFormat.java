@@ -14,10 +14,10 @@ import ca.odell.glazedlists.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  * @author <a href="mailto:andrea.aime@aliceposta.it">Andrea Aime</a>
  */
-public class BeanTableFormat implements TableFormat, WritableTableFormat, AdvancedTableFormat {
+public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTableFormat<E> {
 
     /** methods for extracting field values */
-    protected BeanProperty[] beanProperties = null;
+    protected BeanProperty<E>[] beanProperties = null;
 
     /** Java Beans property names */
     protected String[] propertyNames;
@@ -35,9 +35,9 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
     protected Class[] classes;
     
     /** primitive class to object class conversion map */
-    protected static Map primitiveToObjectMap;
+    protected static Map<Class,Class> primitiveToObjectMap;
     static {
-        primitiveToObjectMap = new HashMap();
+        primitiveToObjectMap = new HashMap<Class,Class>();
         primitiveToObjectMap.put(boolean.class, Boolean.class);
         primitiveToObjectMap.put(char.class, Character.class);
         primitiveToObjectMap.put(byte.class, Byte.class);
@@ -53,7 +53,7 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
      * Create a BeanTableFormat that uses the specified column names
      * and the specified field names while offering editable columns.
      */
-    public BeanTableFormat(Class beanClass, String[] propertyNames, String[] columnLabels, boolean[] editable) {
+    public BeanTableFormat(Class<E> beanClass, String[] propertyNames, String[] columnLabels, boolean[] editable) {
         this.propertyNames = propertyNames;
         this.columnLabels = columnLabels;
         this.editable = editable;
@@ -76,7 +76,7 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
                 // class
                 Class rawClass = beanProperties[c].getValueClass();
                 if(primitiveToObjectMap.containsKey(rawClass)) {
-                    classes[c] = (Class)primitiveToObjectMap.get(rawClass);
+                    classes[c] = primitiveToObjectMap.get(rawClass);
                 } else {
                     classes[c] = rawClass;
                 }
@@ -86,7 +86,7 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
             }
         }
     }
-    public BeanTableFormat(Class beanClass, String[] propertyNames, String[] columnLabels) {
+    public BeanTableFormat(Class<E> beanClass, String[] propertyNames, String[] columnLabels) {
         this(beanClass, propertyNames, columnLabels, new boolean[propertyNames.length]);
     }
 
@@ -94,10 +94,10 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
      * Loads the property descriptors which are used to invoke property
      * access methods using the property names.
      */
-    protected void loadPropertyDescriptors(Class beanClass) {
+    protected void loadPropertyDescriptors(Class<E> beanClass) {
         beanProperties = new BeanProperty[propertyNames.length];
         for(int p = 0; p < propertyNames.length; p++) {
-            beanProperties[p] = new BeanProperty(beanClass, propertyNames[p], true, editable[p]);
+            beanProperties[p] = new BeanProperty<E>(beanClass, propertyNames[p], true, editable[p]);
         }
     }
 
@@ -123,11 +123,11 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
      * column. If you have defined a custom renderer, you may choose to return
      * simply the baseObject.
      */
-    public Object getColumnValue(Object baseObject, int column) {
+    public Object getColumnValue(E baseObject, int column) {
         if(baseObject == null) return null;
 
         // load the property descriptors on first request
-        if(beanProperties == null) loadPropertyDescriptors(baseObject.getClass());
+        if(beanProperties == null) loadPropertyDescriptors((Class<E>) baseObject.getClass());
 
         // get the property
         return beanProperties[column].get(baseObject);
@@ -146,7 +146,7 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
      * @return true if the object and column are editable, false otherwise.
      * @since 2004-August-27, as a replacement for isColumnEditable(int).
      */
-    public boolean isEditable(Object baseObject, int column) {
+    public boolean isEditable(E baseObject, int column) {
         return editable[column];
     }
 
@@ -163,11 +163,11 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
      *      If not null, the EventTableModel will set() this revised value in
      *      the list and overwrite the previous value.
      */
-    public Object setColumnValue(Object baseObject, Object editedValue, int column) {
+    public E setColumnValue(E baseObject, Object editedValue, int column) {
         if(baseObject == null) return null;
 
         // load the property descriptors on first request
-        if(beanProperties == null) loadPropertyDescriptors(baseObject.getClass());
+        if(beanProperties == null) loadPropertyDescriptors((Class<E>) baseObject.getClass());
 
         // set the property
         beanProperties[column].set(baseObject, editedValue);
@@ -193,4 +193,3 @@ public class BeanTableFormat implements TableFormat, WritableTableFormat, Advanc
         return comparators[column];
     }
 }
-

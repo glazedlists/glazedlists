@@ -13,18 +13,18 @@ import ca.odell.glazedlists.impl.filter.*;
  * subclasses. This matcher is fully concrete, and may be used directly by
  * headless applications.
  *
- * &lt;p&gt;The {@link TextMatcherEditor} requires that either a
+ * <p>The {@link TextMatcherEditor} requires that either a
  * {@link TextFilterator} be specified in its constructor, or that every Object
  * matched implements the {@link TextFilterable} interface. These
  * are used to specify the {@link String}s to search for each Object.
  *
  * @author James Lemieux
- * @author &lt;a href="mailto:<a href="mailto:jesse@odel.on.ca">jesse@odel.on.ca</a>"&gt;Jesse Wilson&lt;/a&gt;
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TextMatcherEditor extends AbstractMatcherEditor {
+public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
-    private final TextFilterator filterator;
+    private final TextFilterator<E> filterator;
 
     /** the filters list is currently just a list of Substrings to include */
     private String[] filters = new String[0];
@@ -33,7 +33,7 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
      * implement the {@link TextFilterable} interface.
      *
-     * &lt;p&gt;The {@link Matcher}s from this {@link MatcherEditor} will fire a
+     * <p>The {@link Matcher}s from this {@link MatcherEditor} will fire a
      * {@link ClassCastException} when called with an Object that does not implement
      * {@link TextFilterable}.
      */
@@ -42,22 +42,22 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
     }
 
     /**
-     * Get the filterator used to extract Strings from the matched elements.
-     */
-    public TextFilterator getFilterator() {
-        return filterator;
-    }
-
-    /**
      * Creates a {@link TextMatcherEditor} that matches Objects using the
      * specified {@link TextFilterator} to get the {@link String}s to search.
      *
      * @param filterator the object that will extract filter Strings from each
-     *      object in the &lt;code&gt;source&lt;/code&gt;; &lt;code&gt;null&lt;/code&gt; indicates the
+     *      object in the <code>source</code>; <code>null</code> indicates the
      *      list elements implement {@link TextFilterable}
      */
-    public TextMatcherEditor(TextFilterator filterator) {
+    public TextMatcherEditor(TextFilterator<E> filterator) {
         this.filterator = filterator;
+    }
+
+    /**
+     * Get the filterator used to extract Strings from the matched elements.
+     */
+    public TextFilterator getFilterator() {
+        return filterator;
     }
 
     /**
@@ -77,11 +77,11 @@ public class TextMatcherEditor extends AbstractMatcherEditor {
             if(filters.length == 0) {
                 fireMatchAll();
             } else if(TextMatcher.isFilterRelaxed(oldFilters, filters)) {
-                fireRelaxed(new TextMatcher(filters, filterator));
+                fireRelaxed(new TextMatcher<E>(filters, filterator));
             } else if(TextMatcher.isFilterConstrained(oldFilters, filters)) {
-                fireConstrained(new TextMatcher(filters, filterator));
+                fireConstrained(new TextMatcher<E>(filters, filterator));
             } else {
-                fireChanged(new TextMatcher(filters, filterator));
+                fireChanged(new TextMatcher<E>(filters, filterator));
             }
         }
     }

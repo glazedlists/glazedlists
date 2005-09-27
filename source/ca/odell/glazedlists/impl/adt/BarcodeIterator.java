@@ -164,7 +164,7 @@ public class BarcodeIterator implements Iterator {
                 throw new NoSuchElementException();
             }
         }
-        assert(localIndex >= currentNode.whiteSpace);
+        if(localIndex < currentNode.whiteSpace) throw new IllegalStateException();
         return Barcode.BLACK;
     }
 
@@ -215,7 +215,7 @@ public class BarcodeIterator implements Iterator {
                 }
             }
         }
-        assert(localIndex < currentNode.whiteSpace);
+        if(localIndex >= currentNode.whiteSpace) throw new IllegalStateException();
         return Barcode.WHITE;
     }
 

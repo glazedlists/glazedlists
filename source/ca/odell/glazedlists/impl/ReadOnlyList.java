@@ -16,7 +16,7 @@ import ca.odell.glazedlists.event.*;
  * {@link ReadOnlyList} is useful to supply an unknown class read-only access
  * to your {@link EventList}. 
  *
- * <p>The {@link ReadOnlyList} will provides an up-to-date view of its source
+ * <p>The {@link ReadOnlyList} provides an up-to-date view of its source
  * {@link EventList} so changes to the source {@link EventList} will still be
  * reflected. For a static copy of any {@link EventList} it is necessary to copy
  * the contents of that {@link EventList} into an {@link ArrayList}.
@@ -25,23 +25,23 @@ import ca.odell.glazedlists.event.*;
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
  *
- * @see ca.odell.glazedlists.TransformedList
+ * @see TransformedList
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ReadOnlyList extends TransformedList {
+public final class ReadOnlyList<E> extends TransformedList<E,E> {
 
     /**
      * Creates a {@link ReadOnlyList} to provide a view of an {@link EventList}
      * that does not allow write operations.
      */
-    public ReadOnlyList(EventList source) {
+    public ReadOnlyList(EventList<E> source) {
         super(source);
         source.addListEventListener(this);
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
     }

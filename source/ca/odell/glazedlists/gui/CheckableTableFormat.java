@@ -8,15 +8,15 @@ package ca.odell.glazedlists.gui;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public interface CheckableTableFormat extends TableFormat {
+public interface CheckableTableFormat<E> extends TableFormat<E> {
     
     /**
      * Sets the specified object as checked.
      */
-    public void setChecked(Object baseObject, boolean checked);
+    public void setChecked(E baseObject, boolean checked);
     
     /**
      * Gets whether the specified object is checked.
      */
-    public boolean getChecked(Object baseObject);
+    public boolean getChecked(E baseObject);
 }

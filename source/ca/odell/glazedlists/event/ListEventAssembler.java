@@ -20,21 +20,21 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ListEventAssembler {
+public final class ListEventAssembler<E> {
     
     /** the list that this tracks changes for */
-    private EventList sourceList;
+    private EventList<E> sourceList;
     
     /** the current working copy of the atomic change */
-    private List atomicChangeBlocks = null;
+    private List<ListEventBlock> atomicChangeBlocks = null;
     /** the most recent list change; this is the only change we can append to */
     private ListEventBlock atomicLatestBlock = null;
     /** the current reordering array if this change is a reorder */
     private int[] reorderMap = null;
     
     /** the sequences that provide a view on this queue */
-    private List listeners = new ArrayList();
-    private List listenerEvents = new ArrayList();
+    private List<ListEventListener<E>> listeners = new ArrayList<ListEventListener<E>>();
+    private List<ListEvent<E>> listenerEvents = new ArrayList<ListEvent<E>>();
     
     /** the pipeline manages the distribution of events */
     private ListEventPublisher publisher = null;
@@ -49,7 +49,7 @@ public final class ListEventAssembler {
     /**
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
-    public ListEventAssembler(EventList sourceList, ListEventPublisher publisher) {
+    public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
         this.sourceList = sourceList;
         this.publisher = publisher;
     }
@@ -109,7 +109,7 @@ public final class ListEventAssembler {
      * ConcurrentModificationException is thrown.
      */
     private void prepareEvent() {
-        atomicChangeBlocks = new ArrayList();
+        atomicChangeBlocks = new ArrayList<ListEventBlock>();
         atomicLatestBlock = null;
         reorderMap = null;
     }
@@ -199,7 +199,7 @@ public final class ListEventAssembler {
      * reorderings. This means that a reordering is lost if it is combined with
      * any other ListEvent.
      */
-    public void forwardEvent(ListEvent listChanges) {
+    public void forwardEvent(ListEvent<?> listChanges) {
         // if we're not nested, we can fire the event directly
         if(eventLevel == 0) {
             atomicChangeBlocks = listChanges.getBlocks();
@@ -267,8 +267,9 @@ public final class ListEventAssembler {
             // Some listeners (ie. WeakReferenceProxy) remove themselves as listeners
             // from within their listChanged() method. If we don't make protective
             // copies, these lists will change while we're operating on them.
-            List listenersToNotify = new ArrayList(listeners);
-            List listenerEventsToNotify = new ArrayList(listenerEvents);
+            List<ListEventListener> listenersToNotify = new ArrayList<ListEventListener>(listeners);
+            List<ListEvent<E>> listenerEventsToNotify = new ArrayList<ListEvent<E>>(listenerEvents);
+
             // perform the notification on the duplicate list
             publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
 
@@ -287,7 +288,7 @@ public final class ListEventAssembler {
      * @return a List containing the sequence of {@link ListEventBlock}s modelling
      *      the specified change. It is an error to modify this list or its contents.
      */
-    List getBlocks() {
+    List<ListEventBlock> getBlocks() {
         return atomicChangeBlocks;
     }
     
@@ -303,26 +304,26 @@ public final class ListEventAssembler {
      * Registers the specified listener to be notified whenever new changes
      * are appended to this list change sequence.
      *
-     * For each listener, a ListEvent is created, which provides
+     * <p>For each listener, a ListEvent is created, which provides
      * a read-only view to the list changes in the list. The same
      * ListChangeView object is used for all notifications to the specified
      * listener, so if a listener does not process a set of changes, those
      * changes will persist in the next notification.
      */
-    public synchronized void addListEventListener(ListEventListener listChangeListener) {
+    public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
         listeners.add(listChangeListener);
-        listenerEvents.add(new ListEvent(this, sourceList));
+        listenerEvents.add(new ListEvent<E>(this, sourceList));
         publisher.addDependency(sourceList, listChangeListener);
     }
     /**
      * Removes the specified listener from receiving notification when new
      * changes are appended to this list change sequence.
      *
-     * This uses the <code>==</code> identity comparison to find the listener
+     * <p>This uses the <code>==</code> identity comparison to find the listener
      * instead of <code>equals()</code>. This is because multiple Lists may be
      * listening and therefore <code>equals()</code> may be ambiguous.
      */
-    public synchronized void removeListEventListener(ListEventListener listChangeListener) {
+    public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
         // find the listener
         int index = -1;
         for(int i = 0; i < listeners.size(); i++) {

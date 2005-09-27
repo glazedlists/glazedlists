@@ -21,7 +21,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public interface ListEventListener extends EventListener {
+public interface ListEventListener<E> extends EventListener {
 
     /**
      * When the underlying list changes, this notification allows the
@@ -49,5 +49,5 @@ public interface ListEventListener extends EventListener {
      * no writes can occur while the listener is handling this event.
      * It is an error to write to the source list while processing an event.
      */
-    public void listChanged(ListEvent listChanges);
+    public void listChanged(ListEvent<E> listChanges);
 }

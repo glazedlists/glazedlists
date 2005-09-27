@@ -30,10 +30,10 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class PopularityList extends TransformedList {
+public final class PopularityList<E> extends TransformedList<E,E> {
 
     /** the list of distinct elements */
-    private UniqueList uniqueList;
+    private UniqueList<E> uniqueList;
 
     /**
      * Creates a new {@link PopularityList} that provides frequency-ranking for the
@@ -41,29 +41,29 @@ public final class PopularityList extends TransformedList {
      *
      * @param uniqueComparator The {@link Comparator} used to determine equality.
      */
-    public PopularityList(EventList source, Comparator uniqueComparator) {
-        this(source, new UniqueList(source, uniqueComparator));
+    public PopularityList(EventList<E> source, Comparator<E> uniqueComparator) {
+        this(new UniqueList<E>(source, uniqueComparator));
     }
 
     /**
      * Creates a new {@link PopularityList} that provides frequency-ranking for the
      * specified {@link EventList}.
      */
-    public PopularityList(EventList source) {
-        this(source, new UniqueList(source));
+    public PopularityList(EventList<E> source) {
+        this(new UniqueList<E>(source));
     }
 
     /**
      * Private constructor is used as a Java-language hack to allow us to save
      * a reference to the specified {@link UniqueList}.
      */
-    private PopularityList(EventList source, UniqueList uniqueList) {
-        super(new SortedList(uniqueList, new PopularityComparator(uniqueList)));
+    private PopularityList(UniqueList<E> uniqueList) {
+        super(new SortedList<E>(uniqueList, new PopularityComparator<E>(uniqueList)));
         this.uniqueList = uniqueList;
         uniqueList.setFireCountChangeEvents(true);
 
         // listen for changes to the source list
-        ((SortedList)super.source).addListEventListener(this);
+        ((SortedList<E>)super.source).addListEventListener(this);
     }
 
     /** {@inheritDoc} */
@@ -72,7 +72,7 @@ public final class PopularityList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         updates.forwardEvent(listChanges);
     }
 
@@ -87,12 +87,12 @@ public final class PopularityList extends TransformedList {
     /**
      * Compares objects by their popularity.
      */
-    private static class PopularityComparator implements Comparator {
-        private UniqueList target;
-        public PopularityComparator(UniqueList target) {
+    private static class PopularityComparator<E> implements Comparator<E> {
+        private UniqueList<E> target;
+        public PopularityComparator(UniqueList<E> target) {
             this.target = target;
         }
-        public int compare(Object a, Object b) {
+        public int compare(E a, E b) {
             int aCount = target.getCount(a);
             int bCount = target.getCount(b);
             return bCount - aCount;

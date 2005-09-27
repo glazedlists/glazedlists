@@ -8,15 +8,14 @@ import ca.odell.glazedlists.GlazedLists;
 
 import java.util.Comparator;
 
-
 /**
  * A {@link MatcherEditor} that filters elements based on whether they are greater than or
  * less than a threshold. The implementation is based on elements implementing {@link
- * Comparable} unless the constructor specifies a {@link java.util.Comparator}.
+ * Comparable} unless the constructor specifies a {@link Comparator}.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class ThresholdMatcherEditor extends AbstractMatcherEditor {
+public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
 	public static final MatchOperation GREATER_THAN = new MatchOperation(1, false);
 	public static final MatchOperation GREATER_THAN_OR_EQUAL = new MatchOperation(1, true);
@@ -27,9 +26,9 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 
     private MatchOperation currentMatcher = null;
 
-    private Comparator comparator = null;
+    private Comparator<E> comparator = null;
     private MatchOperation operation = null;
-    private Object threshold = null;
+    private E threshold = null;
 
 	/**
 	 * Construct an instance that will require elements to be greater than the threshold
@@ -47,7 +46,7 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	 *
 	 * @param threshold The initial threshold, or null if none.
 	 */
-	public ThresholdMatcherEditor(Comparable threshold) {
+	public ThresholdMatcherEditor(E threshold) {
 		this(threshold, null, null);
 	}
 
@@ -61,7 +60,7 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	 *                  the threshold in order to match (i.e., be visible). Specifying null
 	 *                  will use {@link #GREATER_THAN}.
 	 */
-	public ThresholdMatcherEditor(Comparable threshold, MatchOperation operation) {
+	public ThresholdMatcherEditor(E threshold, MatchOperation operation) {
 		this(threshold, operation, null);
 	}
 
@@ -75,10 +74,10 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	 * @param comparator Determines how objects compare. If null, the threshold object and
 	 *                   list elements must implement {@link Comparable}.
 	 */
-	public ThresholdMatcherEditor(Object threshold, MatchOperation operation, Comparator comparator) {
+	public ThresholdMatcherEditor(E threshold, MatchOperation operation, Comparator<E> comparator) {
 		// Defaults
 		if (operation == null) operation = GREATER_THAN;
-		if (comparator == null) comparator = GlazedLists.comparableComparator();
+		if (comparator == null) comparator = (Comparator<E>) GlazedLists.comparableComparator();
 
 		this.operation = operation;
 		this.comparator = comparator;
@@ -96,14 +95,14 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	 *
 	 * @param threshold		The threshold, or null to match everything.
 	 */
-	public synchronized void setThreshold(Object threshold) {
+	public synchronized void setThreshold(E threshold) {
         this.threshold = threshold;
         rebuildMatcher();
 	}
 	/**
 	 * See {@link #getThreshold()}.
 	 */
-	public Object getThreshold() {
+	public E getThreshold() {
 		return threshold;
 	}
 
@@ -130,7 +129,7 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	/**
 	 * See {@link #setMatchOperation}.
 	 */
-	public Object getMatchOperation() {
+	public MatchOperation getMatchOperation() {
 		return operation;
 	}
 
@@ -139,8 +138,8 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	 * Update the comparator. Setting to null will require that thresholds and elements in
 	 * the list implement {@link Comparable}.
 	 */
-	public synchronized void setComparator(Comparator comparator) {
-		if (comparator == null) comparator = GlazedLists.comparableComparator();
+	public synchronized void setComparator(Comparator<E> comparator) {
+		if (comparator == null) comparator = (Comparator<E>) GlazedLists.comparableComparator();
 
 		this.comparator = comparator;
         rebuildMatcher();
@@ -148,7 +147,7 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
 	/**
 	 * See {@link #setComparator}.
 	 */
-	public Comparator getComparator() {
+	public Comparator<E> getComparator() {
 		return comparator;
 	}
 
@@ -163,7 +162,7 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
         boolean moreStrict = newMatcher.isMoreStrict(currentMatcher);
         boolean lessStrict = currentMatcher.isMoreStrict(newMatcher);
 
-        // if they're equal we're done and we won't change the matcher.
+        // if they're equal we're done and we won't change the matcher
         if(!moreStrict && !lessStrict) {
             return;
         }
@@ -183,7 +182,7 @@ public class ThresholdMatcherEditor extends AbstractMatcherEditor {
      * A {@link MatchOperation} serves as both a {@link Matcher} in and of itself
      * and as an enumerated type representing its type as an operation.
      */
-    public static class MatchOperation implements Matcher {
+    private static class MatchOperation implements Matcher {
 
         /** the comparator to compare values against */
         protected final Comparator comparator;

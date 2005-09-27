@@ -285,9 +285,9 @@ public class TextFilterPerformance {
     /**
      * A TextFilterator for collections of Strings.
      */
-    static class CollectionTextFilterator implements TextFilterator {
-        public void getFilterStrings(List baseList, Object element) {
-            baseList.addAll((Collection)element);
+    static class CollectionTextFilterator implements TextFilterator<Collection<String>> {
+        public void getFilterStrings(List<String> baseList, Collection<String> element) {
+            baseList.addAll(element);
         }
     }
 }

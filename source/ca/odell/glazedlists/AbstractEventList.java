@@ -11,6 +11,7 @@ import ca.odell.glazedlists.impl.*;
 import ca.odell.glazedlists.util.concurrent.*;
 // for iterators
 import java.util.*;
+import java.lang.reflect.Array;
 
 /**
  * A convenience class that implements common functionality for all {@link EventList}s.
@@ -23,10 +24,10 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class AbstractEventList implements EventList {
+public abstract class AbstractEventList<E> implements EventList<E> {
 
     /** the change event and notification system */
-    protected ListEventAssembler updates = null;
+    protected ListEventAssembler<E> updates = null;
 
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock = null;
@@ -45,7 +46,7 @@ public abstract class AbstractEventList implements EventList {
     protected AbstractEventList(ListEventPublisher publisher) {
         if(publisher == null) publisher = new ListEventPublisher();
         this.publisher = publisher;
-        updates = new ListEventAssembler(this, publisher);
+        updates = new ListEventAssembler<E>(this, publisher);
     }
 
     /** {@inheritDoc} */
@@ -59,12 +60,12 @@ public abstract class AbstractEventList implements EventList {
     }
 
     /** {@inheritDoc} */
-    public void addListEventListener(ListEventListener listChangeListener) {
+    public void addListEventListener(ListEventListener<E> listChangeListener) {
         updates.addListEventListener(listChangeListener);
     }
 
     /** {@inheritDoc} */
-    public void removeListEventListener(ListEventListener listChangeListener) {
+    public void removeListEventListener(ListEventListener<E> listChangeListener) {
         updates.removeListEventListener(listChangeListener);
     }
 
@@ -120,8 +121,8 @@ public abstract class AbstractEventList implements EventList {
      *
      * @return an iterator over the elements in this list in proper sequence.
      */
-    public Iterator iterator() {
-        return size() == 0 ? Collections.EMPTY_LIST.iterator() : new SimpleIterator(this);
+    public Iterator<E> iterator() {
+        return size() == 0 ? (Iterator<E>) Collections.EMPTY_LIST.iterator() : new SimpleIterator<E>(this);
     }
 
     /**
@@ -160,18 +161,18 @@ public abstract class AbstractEventList implements EventList {
      *        this list.
      * @throws NullPointerException if the specified array is <tt>null</tt>.
      */
-    public Object[] toArray(Object[] array) {
+    public <T> T[] toArray(T[] array) {
         // create an array of the same type as the array passed
         if (array.length < size()) {
-            array = (Object[])java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), size());
+            array = (T[]) Array.newInstance(array.getClass().getComponentType(), size());
         } else if(array.length > size()) {
             array[size()] = null;
         }
 
         // copy values into the array
         int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            array[index] = i.next();
+        for(Iterator<E> i = iterator(); i.hasNext(); ) {
+            array[index] = (T) i.next();
             index++;
         }
         return array;
@@ -201,7 +202,7 @@ public abstract class AbstractEventList implements EventList {
      * @throws IllegalArgumentException if some aspect of this element
      *            prevents it from being added to this list.
      */
-    public boolean add(Object value) {
+    public boolean add(E value) {
         add(size(), value);
         return true;
     }
@@ -246,7 +247,7 @@ public abstract class AbstractEventList implements EventList {
      *         <tt>null</tt>.
      * @see #contains(Object)
      */
-    public boolean containsAll(Collection values) {
+    public boolean containsAll(Collection<?> values) {
         // look for something that is missing
         for(Iterator i = values.iterator(); i.hasNext(); ) {
             Object a = i.next();
@@ -279,7 +280,7 @@ public abstract class AbstractEventList implements EventList {
      *         list.
      * @see #add(Object)
      */
-    public boolean addAll(Collection values) {
+    public boolean addAll(Collection<? extends E> values) {
         return addAll(size(), values);
     }
 
@@ -313,13 +314,13 @@ public abstract class AbstractEventList implements EventList {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *        &lt; 0 || index &gt; size()).
      */
-    public boolean addAll(int index, Collection values) {
+    public boolean addAll(int index, Collection<? extends E> values) {
         // don't do an add of an empty set
         if(values.size() == 0) return false;
 
         if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
         int count = 0;
-        for(Iterator i = values.iterator(); i.hasNext(); ) {
+        for(Iterator<? extends E> i = values.iterator(); i.hasNext(); ) {
             add(index + count, i.next());
             count++;
         }
@@ -347,7 +348,7 @@ public abstract class AbstractEventList implements EventList {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    public boolean removeAll(Collection values) {
+    public boolean removeAll(Collection<?> values) {
         boolean overallChanged = false;
         for(Iterator i = values.iterator(); i.hasNext(); ) {
             boolean removeChanged = remove(i.next());
@@ -380,7 +381,7 @@ public abstract class AbstractEventList implements EventList {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    public boolean retainAll(Collection values) {
+    public boolean retainAll(Collection<?> values) {
         boolean changed = false;
         for(Iterator i = iterator(); i.hasNext(); ) {
             if(!values.contains(i.next())) {
@@ -463,8 +464,8 @@ public abstract class AbstractEventList implements EventList {
      */
     public int hashCode() {
         int hashCode = 1;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            Object a = i.next();
+        for(Iterator<E> i = iterator(); i.hasNext(); ) {
+            E a = i.next();
             hashCode = 31 * hashCode + (a == null ? 0 : a.hashCode());
         }
         return hashCode;
@@ -479,7 +480,7 @@ public abstract class AbstractEventList implements EventList {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *        &lt; 0 || index &gt;= size()).
      */
-    public abstract Object get(int index);
+    public abstract E get(int index);
 
     /**
      * Replaces the element at the specified position in this list with the
@@ -500,7 +501,7 @@ public abstract class AbstractEventList implements EventList {
      * @throws    IndexOutOfBoundsException if the index is out of range
      *        (index &lt; 0 || index &gt;= size()).
      */
-    public Object set(int index, Object value) {
+    public E set(int index, E value) {
         throw new IllegalStateException("this list does not support set()");
     }
 
@@ -524,7 +525,7 @@ public abstract class AbstractEventList implements EventList {
      * @throws    IndexOutOfBoundsException if the index is out of range
      *        (index &lt; 0 || index &gt; size()).
      */
-    public void add(int index, Object value) {
+    public void add(int index, E value) {
         throw new IllegalStateException("this list does not support add()");
     }
 
@@ -542,7 +543,7 @@ public abstract class AbstractEventList implements EventList {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *            &lt; 0 || index &gt;= size()).
      */
-    public Object remove(int index) {
+    public E remove(int index) {
         throw new IllegalStateException("this list does not support remove()");
     }
 
@@ -564,7 +565,7 @@ public abstract class AbstractEventList implements EventList {
     public int indexOf(Object object) {
         // for through this, looking for the lucky object
         int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
+        for(Iterator<E> i = iterator(); i.hasNext(); ) {
             if(GlazedListsImpl.equal(object, i.next())) return index;
             else index++;
         }
@@ -609,7 +610,7 @@ public abstract class AbstractEventList implements EventList {
      * @return a list iterator of the elements in this list (in proper
      *         sequence).
      */
-    public ListIterator listIterator() {
+    public ListIterator<E> listIterator() {
         return listIterator(0);
     }
 
@@ -634,8 +635,8 @@ public abstract class AbstractEventList implements EventList {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *         &lt; 0 || index &gt; size()).
      */
-    public ListIterator listIterator(int index) {
-        return new EventListIterator(this, index);
+    public ListIterator<E> listIterator(int index) {
+        return new EventListIterator<E>(this, index);
     }
 
     /**
@@ -643,7 +644,7 @@ public abstract class AbstractEventList implements EventList {
      * <tt>fromIndex</tt>, inclusive, and <tt>toIndex</tt>, exclusive.  (If
      * <tt>fromIndex</tt> and <tt>toIndex</tt> are equal, the returned list is
      * empty.)  
-     
+
      * <p>Unlike the standard {@link List#subList(int,int) List.subList()}
      * method, the {@link List} returned by this method will continue to be 
      * consistent even if the {@link EventList} it views is modified, 
@@ -671,8 +672,8 @@ public abstract class AbstractEventList implements EventList {
      * @throws IndexOutOfBoundsException for an illegal endpoint index value
      *     (fromIndex &lt; 0 || toIndex &gt; size || fromIndex &gt; toIndex).
      */
-    public List subList(int fromIndex, int toIndex) {
-        return new SubEventList(this, fromIndex, toIndex, true);
+    public List<E> subList(int fromIndex, int toIndex) {
+        return new SubEventList<E>(this, fromIndex, toIndex, true);
     }
 
     /**

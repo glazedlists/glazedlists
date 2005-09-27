@@ -18,7 +18,6 @@ import javax.swing.event.*;
 // for keeping lists of comparators
 import java.util.*;
 
-
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking
  * on the table's headers. It requires that the ListTable has a SortedList as
@@ -44,7 +43,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TableComparatorChooser extends AbstractTableComparatorChooser {
+public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E> {
 
     /**
      * the header renderer which decorates an underlying renderer
@@ -75,14 +74,14 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      *      sorting by multiple columns is more powerful, the user interface is
      *      not as simple and this strategy should only be used where necessary.
      */
-    public TableComparatorChooser(JTable table, SortedList sortedList, boolean multipleColumnSort) {
+    public TableComparatorChooser(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
         super(sortedList, ((EventTableModel)table.getModel()).getTableFormat(), multipleColumnSort);
         
         // save the Swing-specific state
         this.table = table;
 
         // build and set the table header renderer which decorates the existing renderer with sort arrows
-        sortArrowHeaderRenderer = new SortArrowHeaderRenderer();
+        sortArrowHeaderRenderer = new SortArrowHeaderRenderer(table.getTableHeader().getDefaultRenderer());
         table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer);
 
         // listen for events on the specified table
@@ -113,7 +112,7 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.
      */
-    protected void redetectComparator(Comparator currentComparator) {
+    protected void redetectComparator(Comparator<E> currentComparator) {
         super.redetectComparator(currentComparator);
 
         // force the table header to redraw itself
@@ -248,8 +247,8 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
      * direction. This eliminates the hassle of setting the border and
      * background colours.
      *
-     * <p>This class fails to add indicator arrows on tables where the
-     * renderer does not extend DefaultTableCellRenderer.
+     * <p>This class fails to add indicator arrows on table headers where the
+     * default renderer does not return a JLabel
      */
     class SortArrowHeaderRenderer implements TableCellRenderer {
 
@@ -258,11 +257,11 @@ public class TableComparatorChooser extends AbstractTableComparatorChooser {
 
         /**
          * Creates a new SortArrowHeaderRenderer that delegates most drawing
-         * to the tables current header renderer.
+         * to the given delegate renderer.
          */
-        public SortArrowHeaderRenderer() {
+        public SortArrowHeaderRenderer(TableCellRenderer delegateRenderer) {
             // find the delegate
-            this.delegateRenderer = table.getTableHeader().getDefaultRenderer();
+            this.delegateRenderer = delegateRenderer;
         }
 
         /**

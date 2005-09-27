@@ -20,7 +20,7 @@ import javax.swing.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class EventComboBoxModel extends EventListModel implements ComboBoxModel {
+public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBoxModel {
 
     /** the currently selected item, should belong to the source list */
     private Object selected;
@@ -29,7 +29,7 @@ public class EventComboBoxModel extends EventListModel implements ComboBoxModel 
      * Creates a new combo box model that displays the specified source list
      * in the combo box.
      */
-    public EventComboBoxModel(EventList source) {
+    public EventComboBoxModel(EventList<E> source) {
         super(source);
     }
     

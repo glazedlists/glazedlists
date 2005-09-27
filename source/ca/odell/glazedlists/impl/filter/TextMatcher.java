@@ -15,7 +15,7 @@ import ca.odell.glazedlists.matchers.*;
  * @author James Lemieux
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class TextMatcher implements Matcher {
+public class TextMatcher<E> implements Matcher<E> {
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator filterator;
@@ -24,11 +24,11 @@ public class TextMatcher implements Matcher {
     private final TextSearchStrategy[] filterStrategies;
 
     /** a heavily recycled list of filter Strings, call clear() before use */
-    private final List filterStrings = new ArrayList();
+    private final List<String> filterStrings = new ArrayList<String>();
 
     /**
      * @param filters an array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings.
+     *      filter Strings
      * @param filterator the object that will extract filter Strings from each
      *      object in the <code>source</code>; <code>null</code> indicates the
      *      list elements implement {@link TextFilterable}
@@ -36,7 +36,7 @@ public class TextMatcher implements Matcher {
     public TextMatcher(String[] filters, TextFilterator filterator) {
         this.filterator = filterator;
 
-        // build the filter -> TextSearchStrategy map for the new filters
+        // build the parallel list of TextSearchStrategies for the new filters
         filterStrategies = new TextSearchStrategy[filters.length];
         for(int i = 0; i < filters.length; i++) {
             filterStrategies[i] = selectTextSearchStrategy(filters[i]);
@@ -44,7 +44,7 @@ public class TextMatcher implements Matcher {
     }
 
     /** {@inheritDoc} */
-    public boolean matches(Object element) {
+    public boolean matches(E element) {
         // populate the strings for this object
         filterStrings.clear();
         if(filterator == null) {
@@ -61,8 +61,8 @@ public class TextMatcher implements Matcher {
 
             // search through all fields for the current filter
             for(int c = 0; c < filterStrings.size(); c++) {
-                Object filterString = filterStrings.get(c);
-                if(filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1) {
+                String filterString = filterStrings.get(c);
+                if(filterString != null && textSearchStrategy.indexOf(filterString) != -1) {
                     continue filters;
                 }
             }

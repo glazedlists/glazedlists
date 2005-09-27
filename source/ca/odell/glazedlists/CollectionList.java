@@ -34,25 +34,28 @@ import ca.odell.glazedlists.impl.adt.*;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CollectionList extends TransformedList implements ListEventListener {
-    
+public class CollectionList<E,S> extends TransformedList<E,S> implements ListEventListener<S> {
+
+    /** This is a hack - we need a temporary value when inserting into IndexedTrees, and this is the one we use. */
+    private final ChildElement<E> EMPTY_CHILD_ELEMENT = new SimpleChildElement(Collections.EMPTY_LIST, null);
+
     /** used to extract children */
-    private final Model model;
+    private final Model<S,E> model;
 
     /**
      * Barcode containing the node mappings. There is a black node for each parent
      * followed by a white node for each of its children.
      */
     private final Barcode barcode = new Barcode();
-    
+
     /** the Lists and EventLists that this is composed of */
-    private final IndexedTree childElements = new IndexedTree();
-    
+    private final IndexedTree<ChildElement<E>> childElements = new IndexedTree<ChildElement<E>>();
+
     /**
      * Create a {@link CollectionList} that's contents will be the children of the
      * elements in the specified source {@link EventList}.
      */
-    public CollectionList(EventList source, Model model) {
+    public CollectionList(EventList<S> source, Model<S,E> model) {
         super(source);
         if(model == null) throw new IllegalArgumentException("Collection map cannot be null");
 
@@ -60,12 +63,12 @@ public class CollectionList extends TransformedList implements ListEventListener
 
         // Sync the current size and indexes
         for(int i = 0; i < source.size(); i++) {
-            List children = model.getChildren(source.get(i));
+            List<E> children = model.getChildren(source.get(i));
 
             // update the list of child lists
-            IndexedTreeNode node = childElements.addByNode(i, this);
+            IndexedTreeNode<ChildElement<E>> node = childElements.addByNode(i, EMPTY_CHILD_ELEMENT);
             node.setValue(createChildElementForList(children, node));
-            
+
             // update the barcode
             barcode.addBlack(barcode.size(), 1);
             if(!children.isEmpty()) barcode.addWhite(barcode.size(), children.size());
@@ -74,7 +77,7 @@ public class CollectionList extends TransformedList implements ListEventListener
         // Listen for events
         source.addListEventListener(this);
     }
-    
+
     /** {@inheritDoc} */
     public int size() {
         // Size of the child nodes only
@@ -82,30 +85,30 @@ public class CollectionList extends TransformedList implements ListEventListener
     }
 
     /** {@inheritDoc} */
-    public Object get(int index) {
+    public E get(int index) {
         // get the child
-        ChildElement childElement = getChildElement(index);
+        ChildElement<E> childElement = getChildElement(index);
         int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.get(childIndexInParent);
     }
 
 
     /** {@inheritDoc} */
-    public Object set(int index, Object value) {
+    public E set(int index, E value) {
         // set on the child
-        ChildElement childElement = getChildElement(index);
+        ChildElement<E> childElement = getChildElement(index);
         int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.set(childIndexInParent, value);
     }
 
     /** {@inheritDoc} */
-    public Object remove(int index) {
+    public E remove(int index) {
         // remove from the child
-        ChildElement childElement = getChildElement(index);
+        ChildElement<E> childElement = getChildElement(index);
         int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.remove(childIndexInParent);
     }
-    
+
     /**
      * Return the index of the first child in the CollectionList for the given parent
      * index. This can be very useful for things like selecting the children in a
@@ -121,7 +124,7 @@ public class CollectionList extends TransformedList implements ListEventListener
         // Find the index of the black node with that index
         int parentFullIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
         int childFullIndex = parentFullIndex + 1;
-        
+
         // If this node has no children, the next node index will be past the size or black
         if(childFullIndex >= barcode.size()) return -1;
         if(barcode.get(childFullIndex) != Barcode.WHITE) return -1;
@@ -160,7 +163,7 @@ public class CollectionList extends TransformedList implements ListEventListener
     /**
      * Handle changes in the parent list. We'll need to update our node list sizes.
      */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<S> listChanges) {
         // Need to process the changes so that our size caches are up to date.
         updates.beginEvent();
         while(listChanges.next()) {
@@ -192,24 +195,24 @@ public class CollectionList extends TransformedList implements ListEventListener
         int absoluteIndex = getAbsoluteIndex(parentIndex);
 
         // Find the size of the new node and add it to the total
-        Object parent = source.get(parentIndex);
-        List children = model.getChildren(parent);
+        S parent = source.get(parentIndex);
+        List<E> children = model.getChildren(parent);
 
         // update the list of child lists
-        IndexedTreeNode node = childElements.addByNode(parentIndex, this);
+        IndexedTreeNode<ChildElement<E>> node = childElements.addByNode(parentIndex, EMPTY_CHILD_ELEMENT);
         node.setValue(createChildElementForList(children, node));
-        
+
         // update the barcode
         barcode.addBlack(absoluteIndex, 1);
         if(!children.isEmpty()) barcode.addWhite(absoluteIndex + 1, children.size());
-        
+
         // add events
         if(!children.isEmpty()) {
             int childIndex = absoluteIndex - parentIndex;
             updates.addInsert(childIndex, childIndex + children.size() - 1);
         }
     }
-    
+
     /**
      * Helper for {@link #listChanged(ListEvent)} when deleting.
      */
@@ -217,9 +220,9 @@ public class CollectionList extends TransformedList implements ListEventListener
         // Find the index of the black node with that index
         int parentIndex = getAbsoluteIndex(sourceIndex);
         int nextParentIndex = getAbsoluteIndex(sourceIndex + 1);
-        
+
         // update the list of child lists
-        ChildElement removedChildElement = (ChildElement)childElements.removeByIndex(sourceIndex).getValue();
+        ChildElement<E> removedChildElement = childElements.removeByIndex(sourceIndex).getValue();
         removedChildElement.dispose();
         
         // update the barcode
@@ -237,20 +240,20 @@ public class CollectionList extends TransformedList implements ListEventListener
     /**
      * Get the child element for the specified child index.
      */
-    private ChildElement getChildElement(int childIndex) {
+    private ChildElement<E> getChildElement(int childIndex) {
         if(childIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + childIndex);
         if(childIndex >= size()) throw new IndexOutOfBoundsException("Index: " + childIndex + ", Size: " + size());
         
         // get the child element
         int parentIndex = barcode.getBlackBeforeWhite(childIndex);
-        return (ChildElement)childElements.getNode(parentIndex).getValue();
+        return childElements.getNode(parentIndex).getValue();
     }
     
     /**
      * Create a {@link ChildElement} for the specified List.
      */
-    private ChildElement createChildElementForList(List children, IndexedTreeNode node) {
-        if(children instanceof EventList) return new EventChildElement((EventList)children, node);
+    private ChildElement<E> createChildElementForList(List<E> children, IndexedTreeNode<ChildElement<E>> node) {
+        if(children instanceof EventList) return new EventChildElement((EventList<E>)children, node);
         else return new SimpleChildElement(children, node);
     }
 
@@ -272,10 +275,10 @@ public class CollectionList extends TransformedList implements ListEventListener
     /**
      * Models a list held by the CollectionList.
      */
-    private interface ChildElement {
-        public Object get(int index);
-        public Object remove(int index);
-        public Object set(int index, Object element);
+    private interface ChildElement<E> {
+        public E get(int index);
+        public E remove(int index);
+        public E set(int index, E element);
         public void dispose();
     }
 
@@ -289,7 +292,7 @@ public class CollectionList extends TransformedList implements ListEventListener
      * @see CollectionList
      * @see GlazedLists#listCollectionListModel()
      */
-    public interface Model {
+    public interface Model<E,S> {
 
         /**
          * Return a list of the child nodes for a parent node.
@@ -297,7 +300,7 @@ public class CollectionList extends TransformedList implements ListEventListener
          * @param parent The parent node.
          * @return A List containing the child nodes.
          */
-        public List getChildren(Object parent);
+        public List<S> getChildren(E parent);
     }
 
 
@@ -305,18 +308,18 @@ public class CollectionList extends TransformedList implements ListEventListener
     /**
      * Manages a standard List that does not implement {@link EventList}.
      */
-    private class SimpleChildElement implements ChildElement {
-        private List children;
+    private class SimpleChildElement implements ChildElement<E> {
+        private List<E> children;
         private IndexedTreeNode node;
-        public SimpleChildElement(List children, IndexedTreeNode node) {
+        public SimpleChildElement(List<E> children, IndexedTreeNode node) {
             this.children = children;
             this.node = node;
         }
-        public Object get(int index) {
+        public E get(int index) {
             return children.get(index);
         }
-        public Object remove(int index) {
-            Object removed = children.remove(index);
+        public E remove(int index) {
+            E removed = children.remove(index);
             
             // update the barcode
             int parentIndex = node.getIndex();
@@ -333,8 +336,8 @@ public class CollectionList extends TransformedList implements ListEventListener
             // all done
             return removed;
         }
-        public Object set(int index, Object element) {
-            Object replaced = children.set(index, element);
+        public E set(int index, E element) {
+            E replaced = children.set(index, element);
             
             // forward the offset event
             int parentIndex = node.getIndex();
@@ -356,26 +359,26 @@ public class CollectionList extends TransformedList implements ListEventListener
      * Monitors changes to a member EventList and forwards changes to all listeners
      * of the CollectionList.
      */
-    private class EventChildElement implements ChildElement, ListEventListener {
-        private EventList children;
-        private IndexedTreeNode node;
-        public EventChildElement(EventList children, IndexedTreeNode node) {
+    private class EventChildElement implements ChildElement<E>, ListEventListener<E> {
+        private EventList<E> children;
+        private IndexedTreeNode<ChildElement<E>> node;
+        public EventChildElement(EventList<E> children, IndexedTreeNode<ChildElement<E>> node) {
             this.children = children;
             this.node = node;
             children.addListEventListener(this);
         }
-        public Object get(int index) {
+        public E get(int index) {
             return children.get(index);
         }
-        public Object remove(int index) {
+        public E remove(int index) {
             // events will be fired from this call
             return children.remove(index);
         }
-        public Object set(int index, Object element) {
+        public E set(int index, E element) {
             // events will be fired from this call
             return children.set(index, element);
         }
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<E> listChanges) {
             int parentIndex = node.getIndex();
             int absoluteIndex = getAbsoluteIndex(parentIndex);
             int nextNodeIndex = getAbsoluteIndex(parentIndex+1);

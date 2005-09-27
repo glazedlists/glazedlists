@@ -34,10 +34,10 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class UniqueList extends TransformedList {
+public final class UniqueList<E> extends TransformedList<E,E> {
 
     /** the comparator used to determine equality */
-    private Comparator comparator;
+    private Comparator<E> comparator;
 
     /** the sparse list tracks which elements are duplicates */
     private Barcode duplicatesList = new Barcode();
@@ -67,7 +67,7 @@ public final class UniqueList extends TransformedList {
      * @param source The {@link EventList} containing duplicates to remove.
      * @param comparator The {@link Comparator} used to determine equality.
      */
-    public UniqueList(EventList source, Comparator comparator) {
+    public UniqueList(EventList<E> source, Comparator<E> comparator) {
         // <p>As such, this list is explicitly sorted via the provided Comparator or by
         // requiring all elements in the list to implement {@link Comparable}. This
         // allows the provision of uniquness without the need for exhaustive searches.
@@ -85,8 +85,8 @@ public final class UniqueList extends TransformedList {
         // UniqueList.  It has been implemented this way because forwarding events when
         // an underlying Object is changed in the UniqueList (with no change in
         // uniqueness) would have non-deterministic results.
-        super(new SortedList(source, comparator));
-        SortedList sortedSource = (SortedList)super.source;
+        super(new SortedList<E>(source, comparator));
+        SortedList<E> sortedSource = (SortedList<E>) super.source;
         this.comparator = comparator;
 
         populateDuplicatesList();
@@ -98,8 +98,8 @@ public final class UniqueList extends TransformedList {
      * {@link Comparable} interface. All elements of the source {@link EventList}
      * must impelement {@link Comparable}.
      */
-    public UniqueList(EventList source) {
-        this(source, GlazedLists.comparableComparator());
+    public UniqueList(EventList<E> source) {
+        this(source, (Comparator<E>) GlazedLists.comparableComparator());
     }
 
     /** {@inheritDoc} */
@@ -118,7 +118,7 @@ public final class UniqueList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // When the list is changed the change may create new duplicates or remove
         // duplicates.  The list is then altered to restore uniqeness and the events
         // describing the alteration of the unique view are forwarded on.
@@ -390,7 +390,7 @@ public final class UniqueList extends TransformedList {
     /**
      * Gets the number of duplicates of the specified value.
      */
-    public int getCount(Object value) {
+    public int getCount(E value) {
         int index = indexOf(value);
         if(index == -1) return 0;
         return getCount(index);
@@ -404,7 +404,7 @@ public final class UniqueList extends TransformedList {
      * multiple threads, it is necessary to have aquired the {@link ReadWriteLock}
      * while accessing the returned {@link List}.
      */
-    public List getAll(int index) {
+    public List<E> getAll(int index) {
         // if this is before the end, its everything up to the first different element
         if(index < size() - 1) {
             return source.subList(duplicatesList.getIndex(index, Barcode.BLACK), duplicatesList.getIndex(index + 1, Barcode.BLACK));
@@ -422,7 +422,7 @@ public final class UniqueList extends TransformedList {
      * multiple threads, it is necessary to have aquired the {@link ReadWriteLock}
      * while accessing the returned {@link List}.
      */
-    public List getAll(Object value) {
+    public List<E> getAll(E value) {
         int index = indexOf(value);
         if(index == -1) return Collections.EMPTY_LIST;
         return getAll(index);
@@ -460,12 +460,12 @@ public final class UniqueList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public Object remove(int index) {
+    public E remove(int index) {
         if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
         // keep the removed object to return
-        Object removed = get(index);
+        E removed = get(index);
 
         // calculate the start (inclusive) and end (exclusive) of the range to remove
         int removeStart = getSourceIndex(index);
@@ -490,12 +490,12 @@ public final class UniqueList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public Object set(int index, Object value) {
+    public E set(int index, E value) {
         if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
 
         // save the replaced value
-        Object replaced = get(index);
+        E replaced = get(index);
 
         // wrap this update in a nested change set
         updates.beginEvent(true);
@@ -527,7 +527,7 @@ public final class UniqueList extends TransformedList {
      * thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public void replaceAll(SortedSet revision) {
+    public void replaceAll(SortedSet<E> revision) {
 
         // skip these results if the set is null
         if(revision == null) return;
@@ -544,11 +544,11 @@ public final class UniqueList extends TransformedList {
 
         // set up the current objects to examine
         int originalIndex = 0;
-        Object originalElement = getOrNull(this, originalIndex);
+        E originalElement = getOrNull(this, originalIndex);
 
         // for all elements in the revised set
-        for(Iterator revisionIterator = revision.iterator(); revisionIterator.hasNext(); ) {
-            Object revisionElement = revisionIterator.next();
+        for(Iterator<E> revisionIterator = revision.iterator(); revisionIterator.hasNext(); ) {
+            E revisionElement = revisionIterator.next();
 
             // when the before list holds items smaller than the after list item,
             // the before list items are out-of-date and must be deleted
@@ -589,7 +589,7 @@ public final class UniqueList extends TransformedList {
      * Gets the element at the specified index of the specified list
      * or null if the list is too small.
      */
-    private Object getOrNull(List source, int index) {
+    private E getOrNull(List<E> source, int index) {
         if(index < source.size()) return source.get(index);
         else return null;
     }

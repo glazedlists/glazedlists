@@ -1,15 +1,17 @@
 <!--
- ! Glazed Lists
- ! Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.
+   Glazed Lists
+   Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.
 -->
 
 <project name="glazedlists" default="jar" basedir=".">
 
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	   BUILD ADMINISTRATION
-	   Create build directories and set up necessary paths.
-	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <property name="java.target.version" value="1.5"/>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       BUILD ADMINISTRATION
+       Create build directories and set up necessary paths.
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<target name="init">
 	</target>
@@ -18,6 +20,8 @@
 		description="Clean up generated files, forcing them to be rebuilt.">
 		<!-- Delete the directories where generated files fall -->
 		<delete dir="classes"/>
+		<!-- Delete the Java 1.4 build directory -->
+		<delete dir="java14_glazedlists"/>
 		<!-- Delete the documentation directories -->
 		<delete dir="docs/api"/>
 		<delete dir="docs/impl"/>
@@ -47,13 +51,13 @@
 		</tstamp>
 		<!-- document all the source -->
 		<javadoc
-			destdir="docs/api" author="true" use="true" windowtitle="Glazed Lists" source="1.4">
+			destdir="docs/api" author="true" use="true" windowtitle="Glazed Lists" source="${java.target.version}">
 			<packageset dir="source">
 				<exclude name="**/impl/**"/>
 			</packageset>
 			<doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 publicobject.com, O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
-			<link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
+			<link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
 			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
 		</javadoc>
 	</target>
@@ -102,9 +106,7 @@
 
 	<target name="core" depends="init">
 		<mkdir dir="classes"/>
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
-            <!-- migrationkit -->
-			<exclude name="**/migrationkit/**"/>
+		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
             <!-- swing -->
 			<exclude name="**/swing/**"/>
             <!-- swt -->
@@ -119,13 +121,13 @@
 	</target>
 
     <target name="migrationkit" depends="core">
-        <javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+        <javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
             <include name="**/migrationkit/**"/>
         </javac>
     </target>
 
 	<target name="swing" depends="core">
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
 			<include name="**/swing/**"/>
 			<exclude name="**/migrationkit/**"/>
 		</javac>
@@ -136,14 +138,14 @@
 		<available classname="org.eclipse.swt.SWT" property="swt.present"/>
 		<fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>
 		<!-- Compile the java code from source/ into classes/ -->
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4">
+		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}">
 			<include name="**/swt/**"/>
             <exclude name="**/migrationkit/**"/>
 		</javac>
 	</target>
 
 	<target name="io" depends="core">
-		<javac destdir="classes" srcdir="source" debug="on" source="1.4" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
 			<include name="**/ctp/**"/>
 			<include name="**/io/**"/>
 			<include name="**/nio/**"/>
@@ -161,7 +163,10 @@
         <mkdir dir="classes"/>
         <javac destdir="classes" srcdir="source" debug="on" source="1.3" target="1.3" deprecation="on">
             <include name="**/event/**"/>
-            <include name="**/FilterList.java"/>
+            <include name="**/BasicEventList.java"/>
+            <include name="**/ObservableElementList.java"/>
+            <include name="**/JavaBeanEventListConnector.java"/>
+            <include name="**/AbstractFilterList.java"/>
             <include name="**/EventList.java"/>
             <include name="**/SubEventList.java"/>
             <include name="**/EventListIterator.java"/>
@@ -184,6 +189,54 @@
                 <attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
             </manifest>
         </jar>
+    </target>
+
+    <target name="java14" depends="init,compile" description="Compile Glazed Lists for deployment on a J2SE 1.4">
+        <property environment="env"/>
+        <echo message="using JAVA HOME = ${env.JAVA_HOME}"/>
+        <echo message="using tools = ${env.JAVA_HOME}/lib/tools.jar"/>
+
+        <!-- clean the java14 directory -->
+        <delete dir="java14_glazedlists"/>
+        <mkdir dir="java14_glazedlists/source"/>
+        <mkdir dir="java14_glazedlists/test"/>
+
+        <!-- Declaw the source code to the java14 directory. -->
+        <java classname="ca.odell.glazedlists.impl.java15.Declawer">
+            <classpath>
+                <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
+                <pathelement path="classes"/>
+            </classpath>
+            <arg value="source"/>
+            <arg value="${ant.home}/lib/junit.jar"/>
+            <arg value="java14_glazedlists/source"/>
+        </java>
+
+        <!-- Declaw the tests to the java14 directory. -->
+        <java classname="ca.odell.glazedlists.impl.java15.Declawer">
+            <classpath>
+                <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
+                <pathelement path="classes"/>
+                <pathelement path="${ant.home}/lib/junit.jar"/>
+            </classpath>
+            <arg value="test"/>
+            <arg value="classes;${ant.home}/lib/junit.jar"/>
+            <arg value="java14_glazedlists/test"/>
+        </java>
+
+        <!-- Copy all of the resources (non-source files) to the java14 directory. -->
+        <copy todir="java14_glazedlists">
+            <fileset dir=".">
+                <exclude name="java14_glazedlists/**"/>
+                <exclude name="source/**"/>
+                <exclude name="test/**"/>
+                <exclude name="classes/**"/>
+                <exclude name="docs/**"/>
+            </fileset>
+        </copy>
+
+        <!-- Alter the target platform in the java14 build.xml file from 1.5 to 1.4. -->
+        <replace file="java14_glazedlists/build.xml" token="&lt;property name=&quot;java.target.version&quot; value=&quot;1.5&quot;/&gt;" value="&lt;property name=&quot;java.target.version&quot; value=&quot;1.4&quot;/&gt;"/>
     </target>
 
 

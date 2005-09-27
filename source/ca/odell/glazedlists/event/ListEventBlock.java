@@ -134,7 +134,7 @@ final class ListEventBlock {
      *      delete, an update that is wiped away with a delete, or an insert that
      *      is later updated.
      */
-    static void sortListEventBlocks(List changes, boolean allowContradictingEvents) {
+    static void sortListEventBlocks(List<ListEventBlock> changes, boolean allowContradictingEvents) {
         // bubblesort the changes
         while(true) {
             // count the number of swaps made on this repetition
@@ -142,8 +142,8 @@ final class ListEventBlock {
             // for each adjacent pair, make any swaps necessary
             int j = 0;
             while(j < changes.size() - 1) {
-                ListEventBlock first = (ListEventBlock)changes.get(j);
-                ListEventBlock second = (ListEventBlock)changes.get(j+1);
+                ListEventBlock first = changes.get(j);
+                ListEventBlock second = changes.get(j+1);
                 
                 if(blocksContradict(first, second)) {
                     if(!allowContradictingEvents) throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
@@ -201,10 +201,10 @@ final class ListEventBlock {
     /**
      * Removes the contradiction contained within the specified list of two blocks.
      */
-    private static void simplifyContradiction(List contradictingPair) {
+    private static void simplifyContradiction(List<ListEventBlock> contradictingPair) {
         if(contradictingPair.size() != 2) throw new IllegalStateException();
-        ListEventBlock first = (ListEventBlock)contradictingPair.get(0);
-        ListEventBlock second = (ListEventBlock)contradictingPair.get(1);
+        ListEventBlock first = contradictingPair.get(0);
+        ListEventBlock second = contradictingPair.get(1);
         
         // get the overlap range
         int commonStart = Math.max(first.startIndex, second.startIndex);

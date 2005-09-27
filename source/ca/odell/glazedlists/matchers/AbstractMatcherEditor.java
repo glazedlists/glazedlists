@@ -23,26 +23,26 @@ import javax.swing.event.EventListenerList;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public abstract class AbstractMatcherEditor implements MatcherEditor {
-    
+public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
+
     /** listenerList for this Editor */
     private EventListenerList listenerList = new EventListenerList(); // normally only one listener
 
 	/** the current Matcher in effect */
-	protected Matcher currentMatcher = Matchers.trueMatcher();
+	protected Matcher<E> currentMatcher = Matchers.trueMatcher();
 
 	/** {@inheritDoc} */
-	public Matcher getMatcher() {
+	public Matcher<E> getMatcher() {
 		return currentMatcher;
 	}
 
 	/** {@inheritDoc} */
-    public final void addMatcherEditorListener(Listener listener) {
+    public final void addMatcherEditorListener(MatcherEditor.Listener<E> listener) {
         listenerList.add(MatcherEditor.Listener.class, listener);
     }
 
     /** {@inheritDoc} */
-    public final void removeMatcherEditorListener(Listener listener) {
+    public final void removeMatcherEditorListener(MatcherEditor.Listener<E> listener) {
         listenerList.remove(Listener.class, listener);
     }
 
@@ -51,53 +51,53 @@ public abstract class AbstractMatcherEditor implements MatcherEditor {
      */
     protected final void fireMatchAll() {
 		this.currentMatcher = Matchers.trueMatcher();
-        this.fireChangedMatcher(new Event(this, Event.MATCH_ALL, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_ALL, this.currentMatcher));
     }
 
     /**
      * Indicates that the filter has changed in an inditerminate way.
      */
-    protected final void fireChanged(Matcher matcher) {
+    protected final void fireChanged(Matcher<E> matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new Event(this, Event.CHANGED, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.CHANGED, this.currentMatcher));
     }
 
     /**
      * Indicates that the filter has changed to be more restrictive. This should only be
      * called if all currently filtered items will remain filtered.
      */
-    protected final void fireConstrained(Matcher matcher) {
+    protected final void fireConstrained(Matcher<E> matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new Event(this, Event.CONSTRAINED, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.CONSTRAINED, this.currentMatcher));
     }
 
     /**
      * Indicates that the filter has changed to be less restrictive. This should only be
      * called if all currently unfiltered items will remain unfiltered.
      */
-    protected final void fireRelaxed(Matcher matcher) {
+    protected final void fireRelaxed(Matcher<E> matcher) {
 		if(matcher == null) throw new NullPointerException();
 		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new Event(this, Event.RELAXED, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.RELAXED, this.currentMatcher));
     }
-    
+
     /**
      * Indicates that the filter matches none.
      */
     protected final void fireMatchNone() {
 		this.currentMatcher = Matchers.falseMatcher();
-        this.fireChangedMatcher(new Event(this, Event.MATCH_NONE, this.currentMatcher));
+        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_NONE, this.currentMatcher));
     }
 
-    protected final void fireChangedMatcher(Event event) {
+    protected final void fireChangedMatcher(MatcherEditor.Event<E> event) {
         // Guaranteed to return a non-null array
         final Object[] listeners = this.listenerList.getListenerList();
 
         // Process the listenerList last to first, notifying
         // those that are interested in this event
         for (int i = listeners.length-2; i>=0; i-=2)
-            ((Listener) listeners[i+1]).changedMatcher(event);
+            ((Listener<E>) listeners[i+1]).changedMatcher(event);
     }
 }

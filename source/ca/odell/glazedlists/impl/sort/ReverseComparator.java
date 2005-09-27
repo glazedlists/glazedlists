@@ -6,36 +6,35 @@ package ca.odell.glazedlists.impl.sort;
 // for specifying a sorting algorithm
 import java.util.Comparator;
 
-
 /**
  * A comparator that reverses the sequence of a source comparator.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ReverseComparator implements Comparator {
+public final class ReverseComparator<T> implements Comparator<T> {
 
     /** the normal comparator to flip */
-    private Comparator source;
+    private Comparator<T> source;
 
     /**
      * Create a new reverse comparator that reverses the sequence
      * of the specified comparator.
      */
-    public ReverseComparator(Comparator source) {
+    public ReverseComparator(Comparator<T> source) {
         this.source = source;
     }
 
     /**
      * Compares the specified objects and flips the result.
      */
-    public int compare(Object alpha, Object beta) {
+    public int compare(T alpha, T beta) {
         return source.compare(beta, alpha);
     }
 
     /**
      * Retrieves the source {@link Comparator} for this ReverseComparator
      */
-    public Comparator getSourceComparator() {
+    public Comparator<T> getSourceComparator() {
         return source;
     }
 

@@ -6,29 +6,18 @@ package ca.odell.glazedlists.util.concurrent;
 
 /**
  * This factory provides an implementation of {@link Lock} that is optimized
- * for the current platform.
- *
- * <p>To override the default {@link Lock} implementation used by this class,
- * set the <code>glazedlists.lockfactory</code> system property to the fully
- * qualified classname of a class that extends {@link LockFactory}. This can
- * be used to exercise <code>java.util.concurrent</code> when that package
- * is available (ie. Java 5 or better).
+ * for the current Java Virtual Machine.
  *
  * @author <a "mailto:rob@starlight-systems.com">Rob Eden</a>
+ * @author James Lemieux
  */
 public interface LockFactory {
 
-	/** System property key */
-	public static final String LOCKING_PROPERTY = "glazedlists.lockfactory";
-
-    /** the current Lock factory */
-	public static final LockFactory DEFAULT = SimpleLockFactory.createDefaultLockFactory();
+    /** The Lock factory for this JVM. */
+    public static final LockFactory DEFAULT = new DelegateLockFactory();
 
     /**
      * Create a {@link ReadWriteLock}.
-     *
-     * <p>The default implementation returns an implementation that has been
-     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
      */
     public ReadWriteLock createReadWriteLock();
 
@@ -36,59 +25,38 @@ public interface LockFactory {
      * Create a {@link Lock}.
      */
     public Lock createLock();
-
 }
 
 /**
- * A simple implementation of {@link LockFactory} that has been
- * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
+ * An implementation of {@link LockFactory} that detects and delegates to
+ * a JVM specific LockFactory implementation optimized for the current JVM.
  */
-class SimpleLockFactory implements LockFactory {
+class DelegateLockFactory implements LockFactory {
 
-    /**
-     * Determine which LockFactory implementation to delegate to at
-     * class initialization time.
-     */
-    public static LockFactory createDefaultLockFactory() {
+    /** The true JVM specific LockFactory to which we delegate. */
+    private LockFactory delegate;
 
-        // if the user has specified their own LockFactory, use that
-        String userLockFactoryClassname = "";
+    DelegateLockFactory() {
         try {
-            userLockFactoryClassname = System.getProperty(LOCKING_PROPERTY, null);
-            if (userLockFactoryClassname != null) {
-                return (LockFactory)Class.forName(userLockFactoryClassname).newInstance();
-            }
-        } catch(SecurityException e) {
-            // accessing the System property failed! Just use the default lock.
-        } catch(Exception e) {
-            System.err.println("Unable to load user-defined lock factory, \"" + userLockFactoryClassname + "\", default will be used.");
-            e.printStackTrace();
-        } catch (NoClassDefFoundError e) {
-            System.err.println("Unable to load user-defined lock factory, \"" + userLockFactoryClassname + "\", default will be used.");
-            e.printStackTrace();
+            // if the J2SE 5.0 ReadWriteLock class can be loaded
+            Class.forName("java.util.concurrent.locks.ReadWriteLock");
+
+            // and if we can load our J2SE 5.0 LockFactory implementation
+            // (i.e. it's not a Glazed Lists 1.4 implementation running on a JDK 1.5 VM)
+            // then use the J2SE 5.0 LockFactory implementation
+            this.delegate = (LockFactory) Class.forName("ca.odell.glazedlists.impl.java15.J2SE50LockFactory").newInstance();
+
+        } catch (Exception e) {
+            // otherwise fall back to a J2SE 1.2 LockFactory
+            this.delegate = new J2SE12LockFactory();
         }
-
-        // use the default implementation if we couldn't find a better one
-        return new SimpleLockFactory();
     }
 
-    /**
-     * Create a {@link ReadWriteLock}.
-     *
-     * <p>The default implementation returns an implementation that has been
-     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
-     */
     public ReadWriteLock createReadWriteLock() {
-        return new J2SE12ReadWriteLock();
+        return this.delegate.createReadWriteLock();
     }
 
-    /**
-     * Create a {@link Lock}.
-     *
-     * <p>The default implementation returns an implementation that has been
-     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
-     */
     public Lock createLock() {
-        return new J2SE12ReadWriteLock().writeLock();
+        return this.delegate.createLock();
     }
 }

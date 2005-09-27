@@ -4,16 +4,9 @@
 package ca.odell.glazedlists;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.util.concurrent.Lock;
-import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * An {@link EventList} composed of multiple source {@link EventList}s. This list
@@ -27,16 +20,16 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CompositeList extends CollectionList {
+public class CompositeList<E> extends CollectionList<E,EventList<E>> {
 
     public CompositeList() {
-        super(new BasicEventList(), GlazedLists.listCollectionListModel());
+        super(new BasicEventList<EventList<E>>(), (Model)GlazedLists.listCollectionListModel());
     }
     
     /**
      * Adds the specified {@link EventList} as a source to this {@link CompositeList}.
      */
-    public void addMemberList(EventList list) {
+    public void addMemberList(EventList<E> list) {
         source.add(list);
     }
     
@@ -48,16 +41,16 @@ public class CompositeList extends CollectionList {
      * <p>Note that the created {@link EventList} must be explicitly added as a member
      * to this {@link CompositeList} using {@link #addMemberList(EventList)}.
      */
-    public EventList createMemberList() {
-        return new BasicEventList(getReadWriteLock());
+    public EventList<E> createMemberList() {
+        return new BasicEventList<E>(getReadWriteLock());
     }
     
     /**
      * Removes the specified {@link EventList} as a source {@link EventList}
      * to this {@link CompositeList}.
      */
-    public void removeMemberList(EventList list) {
-        for(Iterator i = source.iterator(); i.hasNext(); ) {
+    public void removeMemberList(EventList<E> list) {
+        for(Iterator<EventList<E>> i = source.iterator(); i.hasNext(); ) {
             if(i.next() == list) {
                 i.remove();
                 return;
@@ -66,5 +59,4 @@ public class CompositeList extends CollectionList {
         throw new IllegalArgumentException("Cannot remove list " + list + " which is not in this CompositeList");
     }
 }
-
 

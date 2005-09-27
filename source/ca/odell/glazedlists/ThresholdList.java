@@ -45,7 +45,7 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThresholdList extends TransformedList {
+public final class ThresholdList<E> extends TransformedList<E,E> {
 
     /** the index in the list which corresponds to the lower bound for this list */
     private int lowerThresholdIndex = 0;
@@ -63,22 +63,22 @@ public final class ThresholdList extends TransformedList {
     private int sourceSize = 0;
 
     /** the evaluator to use to compare Objects against the threshold */
-    private Evaluator evaluator = null;
+    private Evaluator<E> evaluator = null;
 
     /**
      * Creates a {@link ThresholdList} that provides range-filtering based on the
      * specified {@link EventList} based on the specified integer JavaBean property.
      */
-    public ThresholdList(EventList source, String propertyName) {
-        this(source, GlazedLists.thresholdEvaluator(propertyName));
+    public ThresholdList(EventList<E> source, String propertyName) {
+        this(source, (Evaluator<E>) GlazedLists.thresholdEvaluator(propertyName));
     }
 
     /**
      * Creates a {@link ThresholdList} that provides range-filtering on the
      * specified {@link EventList} using the specified {@link Evaluator}.
      */
-    public ThresholdList(EventList source, Evaluator evaluator) {
-        super(new SortedList(source, new ThresholdComparator(evaluator)));
+    public ThresholdList(EventList<E> source, Evaluator<E> evaluator) {
+        super(new SortedList<E>(source, new ThresholdComparator<E>(evaluator)));
         this.source.addListEventListener(this);
         this.evaluator = evaluator;
         sourceSize = source.size();
@@ -89,7 +89,7 @@ public final class ThresholdList extends TransformedList {
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
 
         // recache the source size
         sourceSize = source.size();
@@ -232,7 +232,7 @@ public final class ThresholdList extends TransformedList {
      * thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public void setLowerThreshold(Object object) {
+    public void setLowerThreshold(E object) {
         setLowerThreshold(evaluator.evaluate(object));
     }
 
@@ -263,7 +263,7 @@ public final class ThresholdList extends TransformedList {
 
         // Threshold is changed
         } else {
-            newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold));
+            newListIndex = ((SortedList<E>)source).indexOfSimulated(new Integer(threshold));
             // return -1 if the value is before the list
             if(newListIndex == 0) newListIndex = source.indexOf(new Integer(threshold));
         }
@@ -348,7 +348,7 @@ public final class ThresholdList extends TransformedList {
      * thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public void setUpperThreshold(Object object) {
+    public void setUpperThreshold(E object) {
         setUpperThreshold(evaluator.evaluate(object));
     }
 
@@ -451,7 +451,7 @@ public final class ThresholdList extends TransformedList {
      * A convenience method to allow access to the {@link Evaluator}
      * that was provided on construction.
      */
-    public Evaluator getEvaluator() {
+    public Evaluator<E> getEvaluator() {
         return evaluator;
     }
 
@@ -473,8 +473,10 @@ public final class ThresholdList extends TransformedList {
 
     /** {@inheritDoc} */
     public boolean contains(Object object) {
+        // Note: this technically breaks the contract for contains.
+        // evaluator.evaluate(object) may throw a ClassCastException
+        int objectEvaluation = evaluator.evaluate((E) object);
         // Fast fail if the object isn't within the thresholds
-        int objectEvaluation = evaluator.evaluate(object);
         if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
             return false;
         }
@@ -483,8 +485,10 @@ public final class ThresholdList extends TransformedList {
 
     /** {@inheritDoc} */
     public int indexOf(Object object) {
+        // Note: this technically breaks the contract for indexOf.
+        // evaluator.evaluate(object) may throw a ClassCastException
+        int objectEvaluation = evaluator.evaluate((E) object);
         // Fast fail if the object isn't within the thresholds
-        int objectEvaluation = evaluator.evaluate(object);
         if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
             return -1;
         }
@@ -493,8 +497,10 @@ public final class ThresholdList extends TransformedList {
 
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
+        // Note: this technically breaks the contract for lastIndexOf.
+        // evaluator.evaluate(object) may throw a ClassCastException
+        int objectEvaluation = evaluator.evaluate((E) object);
         // Fast fail if the object isn't within the thresholds
-        int objectEvaluation = evaluator.evaluate(object);
         if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
             return -1;
         }
@@ -512,14 +518,14 @@ public final class ThresholdList extends TransformedList {
      * Provide an integer value for a given {@link Object} in a
      * {@link ThresholdList}.
      */
-    public interface Evaluator {
-    
+    public interface Evaluator<E> {
+
         /**
          * Returns an integer value for an {@link Object} to be used to
          * compare that object against a threshold.  This value is
          * not relative to any other object unlike a {@link java.util.Comparator}.
          */
-        public int evaluate(Object object);
+        public int evaluate(E object);
     }
 
 
@@ -528,15 +534,15 @@ public final class ThresholdList extends TransformedList {
      * an {@link Evaluator} with a <code>Comparator</code> to
      * be used for sorting of the <code>ThresholdList</code>.
      */
-    private static final class ThresholdComparator implements Comparator {
+    private static final class ThresholdComparator<E> implements Comparator<E> {
 
         /** the underlying evaluator **/
-        private Evaluator evaluator = null;
+        private Evaluator<E> evaluator = null;
 
         /**
          * Creates a new ThresholdComparator
          */
-        ThresholdComparator(Evaluator evaluator) {
+        ThresholdComparator(Evaluator<E> evaluator) {
             this.evaluator = evaluator;
         }
 
@@ -553,7 +559,7 @@ public final class ThresholdList extends TransformedList {
          * if the underlying {@link Evaluator} were to return the negation
          * of an <code>Integer</code>.
          */
-        public int compare(Object alpha, Object beta) {
+        public int compare(E alpha, E beta) {
             int alphaValue = 0;
             if(alpha instanceof Integer) alphaValue = ((Integer)alpha).intValue();
             else alphaValue = evaluator.evaluate(alpha);
@@ -572,8 +578,8 @@ public final class ThresholdList extends TransformedList {
          * the same underlying {@link Evaluator}.
          */
         public boolean equals(Object object) {
-            if(object == null || !(object instanceof ThresholdComparator)) {
-            return false;
+            if(!(object instanceof ThresholdComparator)) {
+                return false;
             }
             ThresholdComparator other = (ThresholdComparator)object;
             return this.evaluator == other.evaluator;
