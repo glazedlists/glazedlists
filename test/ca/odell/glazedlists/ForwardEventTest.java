@@ -18,21 +18,21 @@ import java.util.*;
 public class ForwardEventTest extends TestCase {
 
     /** the origin of all events */
-    private EventList source;
+    private EventList<String> source;
     
     /** gossipy list that forwards everything it hears */
-    private ForwardingList forwarding;
+    private ForwardingList<String> forwarding;
     
     /** listens to anything the forwarding list will say, and validates it */
-    private ConsistencyTestList test;
+    private ListConsistencyListener test;
 
     /**
      * Prepare for the test.
      */
     public void setUp() {
-        source = new BasicEventList();
-        forwarding = new ForwardingList(source);
-        test = new ConsistencyTestList(forwarding, "forwarding");
+        source = new BasicEventList<String>();
+        forwarding = new ForwardingList<String>(source);
+        test = new ListConsistencyListener(forwarding, "forwarding");
         forwarding.addListEventListener(test);
     }
 
@@ -81,12 +81,12 @@ public class ForwardEventTest extends TestCase {
     /**
      * Simple TransformationList that forwards events.
      */
-    static class ForwardingList extends TransformedList {
-        public ForwardingList(EventList source) {
+    static class ForwardingList<E> extends TransformedList<E,E> {
+        public ForwardingList(EventList<E> source) {
             super(source);
             source.addListEventListener(this);
         }
-        public void listChanged(ListEvent e) {
+        public void listChanged(ListEvent<E> e) {
             updates.forwardEvent(e);
         }
         public void beginEvent() {

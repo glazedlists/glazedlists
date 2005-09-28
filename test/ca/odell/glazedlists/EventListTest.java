@@ -36,22 +36,22 @@ public class EventListTest extends TestCase {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=169">Bug 169</a>
      */
     public void testRemoveAll() {
-        List jesse = new ArrayList(); jesse.addAll(Arrays.asList(new Character[] { new Character('J'), new Character('E'), new Character('S'), new Character('S'), new Character('E') }));
-        List wilson = Arrays.asList(new Character[] { new Character('W'), new Character('I'), new Character('L'), new Character('S'), new Character('O'), new Character('N') });
+        List<Character> jesse = GlazedListsTests.stringToList("JESSE");
+        List<Character> wilson = GlazedListsTests.stringToList("WILSON");
 
         // create the reference list
-        List jesseArrayList = new ArrayList();
+        List<Character> jesseArrayList = new ArrayList<Character>();
         jesseArrayList.addAll(jesse);
         jesseArrayList.removeAll(wilson);
 
         // test the BasicEventList list
-        List jesseBasicEventList = new BasicEventList();
+        List<Character> jesseBasicEventList = new BasicEventList<Character>();
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
 
         // test the SortedList list
-        List jesseSortedList = new SortedList(new BasicEventList(), null);
+        List<Character> jesseSortedList = new SortedList<Character>(new BasicEventList<Character>(), null);
         jesseSortedList.addAll(jesse);
         jesseSortedList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);
@@ -61,22 +61,22 @@ public class EventListTest extends TestCase {
      * Validates that retainAll() works.
      */
     public void testRetainAll() {
-        List jesse = new ArrayList(); jesse.addAll(Arrays.asList(new Character[] { new Character('J'), new Character('E'), new Character('S'), new Character('S'), new Character('E') }));
-        List wilson = Arrays.asList(new Character[] { new Character('W'), new Character('I'), new Character('L'), new Character('S'), new Character('O'), new Character('N') });
+        List<Character> jesse = GlazedListsTests.stringToList("JESSE");
+        List<Character> wilson = GlazedListsTests.stringToList("WILSON");
 
         // create the reference list
-        List jesseArrayList = new ArrayList();
+        List<Character> jesseArrayList = new ArrayList<Character>();
         jesseArrayList.addAll(jesse);
         jesseArrayList.retainAll(wilson);
 
         // test the BasicEventList list
-        List jesseBasicEventList = new BasicEventList();
+        List<Character> jesseBasicEventList = new BasicEventList<Character>();
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
 
         // test the SortedList list
-        List jesseSortedList = new SortedList(new BasicEventList(), null);
+        List<Character> jesseSortedList = new SortedList<Character>(new BasicEventList<Character>(), null);
         jesseSortedList.addAll(jesse);
         jesseSortedList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);
@@ -87,14 +87,14 @@ public class EventListTest extends TestCase {
      */
     public void testContainsNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -116,14 +116,14 @@ public class EventListTest extends TestCase {
      */
     public void testContainsAllNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -147,14 +147,14 @@ public class EventListTest extends TestCase {
      */
     public void testIndexOfNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -178,14 +178,14 @@ public class EventListTest extends TestCase {
      */
     public void testLastIndexOfNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -207,14 +207,14 @@ public class EventListTest extends TestCase {
      */
     public void testRemoveNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -236,14 +236,14 @@ public class EventListTest extends TestCase {
      */
     public void testRemoveAllNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -265,14 +265,14 @@ public class EventListTest extends TestCase {
      */
     public void testRetainAllNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -294,15 +294,15 @@ public class EventListTest extends TestCase {
      */
     public void testHashCodeNull() {
         // get all different list types
-        List listTypes = new ArrayList();
-        listTypes.add(new ArrayList());
-        listTypes.add(new BasicEventList());
-        listTypes.add(new SortedList(new BasicEventList()));
+        List<List<String>> listTypes = new ArrayList<List<String>>();
+        listTypes.add(new ArrayList<String>());
+        listTypes.add(new BasicEventList<String>());
+        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator i = listTypes.iterator(); i.hasNext(); ) {
-            List list = (List)i.next();
-            List copy = new ArrayList();
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+            List<String> list = i.next();
+            List<String> copy = new ArrayList<String>();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -334,8 +334,8 @@ public class EventListTest extends TestCase {
      */
     public void testGlazedListsEventList() {
         // make sure they have different backing stores
-        List list = new ArrayList();
-        EventList eventList = GlazedLists.eventList(list);
+        List<String> list = new ArrayList<String>();
+        EventList<String> eventList = GlazedLists.eventList(list);
         assertEquals(list, eventList);
 
         list.add("A");
@@ -345,7 +345,7 @@ public class EventListTest extends TestCase {
         assertTrue(!list.equals(eventList));
 
         // make sure null is supported
-        EventList empty = GlazedLists.eventList(null);
+        EventList<String> empty = GlazedLists.eventList(null);
         assertEquals(Collections.EMPTY_LIST, empty);
     }
 
@@ -355,13 +355,13 @@ public class EventListTest extends TestCase {
      * factory method.
      */
     public void testGlazedListsSync() {
-        EventList source = new BasicEventList();
+        EventList<String> source = new BasicEventList<String>();
         source.add("McCallum");
         source.add("Keith");
-        List target = new ArrayList();
+        List<String> target = new ArrayList<String>();
         target.add("Greene");
 
-        ListEventListener listener = GlazedLists.syncEventListToList(source, target);
+        ListEventListener<String> listener = GlazedLists.syncEventListToList(source, target);
         assertEquals(source, target);
 
         source.add("Szakra");
@@ -388,7 +388,7 @@ public class EventListTest extends TestCase {
     }
 
     public void testEventListLock() {
-        final EventList source = new BasicEventList();
+        final EventList<String> source = new BasicEventList<String>();
 
         // asymmetric unlocking of the readlock should fail-fast
         try {
@@ -411,12 +411,20 @@ public class EventListTest extends TestCase {
         source.getReadWriteLock().writeLock().unlock();
     }
 
+
+    /**
+     * This test case was generated from a problem that we received in the field.
+     * It occured when a crazy amount of list events were being combined into one,
+     * and we failed to create a simpler test case that still demonstrated the
+     * problematic behaviour. This is probably due to the way that we sort list
+     * events while processing them.
+     */
     public void testCombineEvents() {
-        TransactionalEventList list = new TransactionalEventList(new BasicEventList());
+        TransactionalEventList<Object> list = new TransactionalEventList<Object>(new BasicEventList<Object>());
         for (int i = 0; i < 16; i++)
              list.add(new Integer(0));
 
-        list.addListEventListener(new ConsistencyTestList(list, "transactional", true));
+        list.addListEventListener(new ListConsistencyListener(list, "transactional", true));
 
         list.beginEvent();
 
@@ -517,13 +525,13 @@ public class EventListTest extends TestCase {
         list.commitEvent();
     }
 
-    private static class TransactionalEventList extends TransformedList {
-        public TransactionalEventList(EventList source) {
+    private static class TransactionalEventList<E> extends TransformedList<E,E> {
+        public TransactionalEventList(EventList<E> source) {
             super(source);
             source.addListEventListener(this);
         }
 
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<E> listChanges) {
             updates.forwardEvent(listChanges);
         }
 

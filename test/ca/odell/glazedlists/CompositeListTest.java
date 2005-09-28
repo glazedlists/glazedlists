@@ -32,14 +32,14 @@ public class CompositeListTest extends TestCase {
      * Verifies that the a single source works.
      */
     public void testSingleSource() {
-        BasicEventList wendys = new BasicEventList();
+        EventList<String> wendys = new BasicEventList<String>();
         wendys.add("Classic Single");
         wendys.add("Chili");
         wendys.add("Frosty");
         wendys.add("Junior Bacon Cheeseburger");
         
-        CompositeList fastFood = new CompositeList();
-        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
+        CompositeList<String> fastFood = new CompositeList<String>();
+        fastFood.addListEventListener(new ListConsistencyListener(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         
         assertEquals(wendys, fastFood);
@@ -60,26 +60,26 @@ public class CompositeListTest extends TestCase {
      * Verifies that multiple sources work.
      */
     public void testMultipleSources() {
-        List fastFoodVerify = new ArrayList();
+        List<String> fastFoodVerify = new ArrayList<String>();
 
-        BasicEventList wendys = new BasicEventList();
+        EventList<String> wendys = new BasicEventList<String>();
         wendys.add("Classic Single");
         wendys.add("Chili");
         wendys.add("Frosty");
         wendys.add("Junior Bacon Cheeseburger");
         
-        BasicEventList mcDonalds = new BasicEventList();
+        EventList<String> mcDonalds = new BasicEventList<String>();
         mcDonalds.add("McDLT");
         mcDonalds.add("McPizza");
         mcDonalds.add("McSalad Shaker");
         mcDonalds.add("Royal with Cheese");
 
-        BasicEventList tacoBell = new BasicEventList();
+        EventList<String> tacoBell = new BasicEventList<String>();
         tacoBell.add("Fries Supreme");
         tacoBell.add("Bean Burrito");
         
-        CompositeList fastFood = new CompositeList();
-        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
+        CompositeList<String> fastFood = new CompositeList<String>();
+        fastFood.addListEventListener(new ListConsistencyListener(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
         fastFood.addMemberList(tacoBell);
@@ -128,12 +128,12 @@ public class CompositeListTest extends TestCase {
      * Verifies that remove member list does so by reference.
      */
     public void testRemoveByReference() {
-        BasicEventList wendys = new BasicEventList();
-        BasicEventList mcDonalds = new BasicEventList();
-        BasicEventList tacoBell = new BasicEventList();
+        EventList<String> wendys = new BasicEventList<String>();
+        EventList<String> mcDonalds = new BasicEventList<String>();
+        EventList<String> tacoBell = new BasicEventList<String>();
         
-        CompositeList fastFood = new CompositeList();
-        fastFood.addListEventListener(new ConsistencyTestList(fastFood, "fastFood", false));
+        CompositeList<String> fastFood = new CompositeList<String>();
+        fastFood.addListEventListener(new ListConsistencyListener(fastFood, "fastFood", false));
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
         fastFood.addMemberList(tacoBell);
@@ -151,15 +151,15 @@ public class CompositeListTest extends TestCase {
      * Verifies that multiple copies of the same list can  be added.
      */
     public void testMultipleCopies() {
-        List fastFoodVerify = new ArrayList();
+        List<String> fastFoodVerify = new ArrayList<String>();
 
-        BasicEventList wendys = new BasicEventList();
+        EventList<String> wendys = new BasicEventList<String>();
         wendys.add("Spicy Chicken Sandwich");
-        BasicEventList mcDonalds = new BasicEventList();
+        EventList<String> mcDonalds = new BasicEventList<String>();
         mcDonalds.add("Arch Deluxe");
         mcDonalds.add("McLean Deluxe");
         
-        CompositeList fastFood = new CompositeList();
+        CompositeList<String> fastFood = new CompositeList<String>();
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
 
@@ -192,13 +192,13 @@ public class CompositeListTest extends TestCase {
      * is removed.
      */
     public void testSingleElements() {
-        EventList alpha = new BasicEventList();
+        EventList<String> alpha = new BasicEventList<String>();
         alpha.add("A");
-        EventList beta = new BasicEventList();
+        EventList<String> beta = new BasicEventList<String>();
         beta.add("B");
 
-        CompositeList aToB = new CompositeList();
-        aToB.addListEventListener(new ConsistencyTestList(aToB, "AtoB", false));
+        CompositeList<String> aToB = new CompositeList<String>();
+        aToB.addListEventListener(new ListConsistencyListener(aToB, "AtoB", false));
         aToB.addMemberList(alpha);
         aToB.removeMemberList(alpha);
         aToB.addMemberList(beta);

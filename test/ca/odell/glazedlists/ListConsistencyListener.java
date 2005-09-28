@@ -16,7 +16,7 @@ import junit.framework.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ConsistencyTestList implements ListEventListener {
+public class ListConsistencyListener implements ListEventListener {
     
     /** a second copy of the list data */
     private List expected;
@@ -31,12 +31,12 @@ public class ConsistencyTestList implements ListEventListener {
     private boolean verbose = false;
 
     /**
-     * Creates a new ConsistencyTestList that ensures events from the source
+     * Creates a new ListConsistencyListener that ensures events from the source
      * list are consistent.
      *
      * @param verbose whether to print changes to the console as they happne
      */
-    public ConsistencyTestList(EventList source, String name, boolean verbose) {
+    public ListConsistencyListener(EventList source, String name, boolean verbose) {
         this.source = source;
         this.name = name;
         this.verbose = verbose;
@@ -49,10 +49,10 @@ public class ConsistencyTestList implements ListEventListener {
     }
 
     /**
-     * Creates a new ConsistencyTestList that ensures events from the source
+     * Creates a new ListConsistencyListener that ensures events from the source
      * list are consistent.
      */
-    public ConsistencyTestList(EventList source, String name) {
+    public ListConsistencyListener(EventList source, String name) {
         this(source, name, false);
     }
     
@@ -67,6 +67,8 @@ public class ConsistencyTestList implements ListEventListener {
      * For implementing the ListEventListener interface.
      */
     public void listChanged(ListEvent listChanges) {
+        Assert.assertEquals(source, listChanges.getSource());
+
         // print the changes if necessary
         if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size() + ", source: " + source);
         

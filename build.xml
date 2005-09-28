@@ -270,7 +270,7 @@
             <available classname="junit.framework.TestCase" property="junit.present"/>
             <fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
             <!-- Compile the test classes from source/ into classes/ -->
-            <javac destdir="classes" srcdir="test" debug="on" source="1.4">
+            <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" deprecation="on">
                     <classpath path="${ant.home}/lib/junit.jar"/>
             </javac>
             <!-- Execute JUnit tests -->

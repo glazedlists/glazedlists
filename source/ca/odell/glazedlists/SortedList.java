@@ -46,7 +46,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     private IndexedTree<IndexedTreeNode> sorted = null;
 
     /** the comparator that this list uses for sorting */
-    private Comparator comparator = null;
+    private Comparator<E> comparator = null;
 
     /**
      * Creates a {@link SortedList} that sorts the specified {@link EventList}.
@@ -55,7 +55,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * or a {@link ClassCastException} will be thrown.
      */
     public SortedList(EventList<E> source) {
-        this(source, GlazedLists.comparableComparator());
+        this(source, (Comparator<E>)GlazedLists.comparableComparator());
     }
 
     /**
@@ -64,7 +64,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * specified {@link Comparator} is <tt>null</tt>, then this list will be
      * unsorted.
      */
-    public SortedList(EventList<E> source, Comparator comparator) {
+    public SortedList(EventList<E> source, Comparator<E> comparator) {
         super(source);
 
         // trees are instansiated when a comparator is set
@@ -258,7 +258,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      *      elements in natural order, then a {@link ComparableComparator} will
      *      be returned.
      */
-    public Comparator getComparator() {
+    public Comparator<E> getComparator() {
         return comparator;
     }
 
@@ -278,7 +278,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      *      natural order. You may also specify <code>null</code> to put this
      *      {@link SortedList} in unsorted order.
      */
-    public void setComparator(Comparator comparator) {
+    public void setComparator(Comparator<E> comparator) {
         // save this comparator
         this.comparator = comparator;
         // keep the old trees to construct the reordering
@@ -358,10 +358,10 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // otherwise, we must now begin a linear search for the index of an element
         // that .equals() the given object
         for (; index < size(); index++) {
-            Object objectAtIndex = get(index);
+            E objectAtIndex = get(index);
 
             // if the objectAtIndex no longer compares equally with the given object, stop the linear search
-            if (comparator.compare(object, objectAtIndex) != 0) return -1;
+            if (comparator.compare((E)object, objectAtIndex) != 0) return -1;
 
             // if the objectAtIndex and object are equal, return the index
             if (GlazedListsImpl.equal(object, objectAtIndex))
@@ -386,10 +386,10 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // otherwise, we must now begin a linear search for the index of an element
         // that .equals() the given object
         for (; index > -1; index--) {
-            Object objectAtIndex = get(index);
+            E objectAtIndex = get(index);
 
             // if the objectAtIndex no longer compares equally with the given object, stop the linear search
-            if (comparator.compare(object, objectAtIndex) != 0) return -1;
+            if (comparator.compare((E)object, objectAtIndex) != 0) return -1;
 
             // if the objectAtIndex and object are equal, return the index
             if (GlazedListsImpl.equal(object, objectAtIndex))
@@ -563,8 +563,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
         public int compareTo(Object other) {
             IndexNodePair otherIndexNodePair = (IndexNodePair)other;
             if(comparator != null) {
-                Object myObject = source.get(node.getIndex());
-                Object otherObject = source.get(otherIndexNodePair.node.getIndex());
+                E myObject = source.get(node.getIndex());
+                E otherObject = source.get(otherIndexNodePair.node.getIndex());
                 int compareResult = comparator.compare(myObject, otherObject);
                 if(compareResult != 0) return compareResult;
             }

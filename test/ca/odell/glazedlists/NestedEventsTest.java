@@ -31,7 +31,7 @@ public class NestedEventsTest extends TestCase {
         nestingList = new ExternalNestingEventList(source);
         counter = new ListEventCounter();
         nestingList.addListEventListener(counter);
-        nestingList.addListEventListener(new ConsistencyTestList(nestingList, "nesting list", false));
+        nestingList.addListEventListener(new ListConsistencyListener(nestingList, "nesting list", false));
     }
 
     /**

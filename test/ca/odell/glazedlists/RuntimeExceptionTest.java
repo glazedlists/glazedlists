@@ -25,7 +25,7 @@ public class RuntimeExceptionTest extends TestCase {
     private ExceptionThrower exceptionThrower = new ExceptionThrower();
 
     /** listener that validates events are received */
-    private ConsistencyTestList consistencyTestList = new ConsistencyTestList(source, "exceptions");
+    private ListConsistencyListener listConsistencyListener = new ListConsistencyListener(source, "exceptions");
     
     /**
      * Prepare for the test.
@@ -46,13 +46,13 @@ public class RuntimeExceptionTest extends TestCase {
      */
     public void testExceptionRethrown() {
         source.addListEventListener(exceptionThrower);
-        source.addListEventListener(consistencyTestList);
+        source.addListEventListener(listConsistencyListener);
         
         // make sure the plumbing is working
         source.add("Dan");
         source.add("Frank");
         source.add("Larry");
-        consistencyTestList.assertConsistent();
+        listConsistencyListener.assertConsistent();
         
         // throw an exception, make sure its handled gracefully
         exceptionThrower.setNextException(luckyException);
@@ -61,7 +61,7 @@ public class RuntimeExceptionTest extends TestCase {
             fail("this statement shouldn't be reached");
         } catch(RuntimeException e) {
             assertTrue(e == luckyException);
-            consistencyTestList.assertConsistent();
+            listConsistencyListener.assertConsistent();
         }
     }
     
@@ -70,14 +70,14 @@ public class RuntimeExceptionTest extends TestCase {
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
      */
     public void testExceptionRethrownListenerSecond() {
-        source.addListEventListener(consistencyTestList);
+        source.addListEventListener(listConsistencyListener);
         source.addListEventListener(exceptionThrower);
         
         // make sure the plumbing is working
         source.add("Matt");
         source.add("Kevin");
         source.add("Julie");
-        consistencyTestList.assertConsistent();
+        listConsistencyListener.assertConsistent();
         
         // throw an exception, make sure its handled gracefully
         exceptionThrower.setNextException(luckyException);
@@ -86,7 +86,7 @@ public class RuntimeExceptionTest extends TestCase {
             fail("this statement shouldn't be reached");
         } catch(RuntimeException e) {
             assertTrue(e == luckyException);
-            consistencyTestList.assertConsistent();
+            listConsistencyListener.assertConsistent();
         }
     }
     
@@ -95,7 +95,7 @@ public class RuntimeExceptionTest extends TestCase {
      */
     public void testMultipleExceptions() {
         source.addListEventListener(exceptionThrower);
-        source.addListEventListener(consistencyTestList);
+        source.addListEventListener(listConsistencyListener);
         ExceptionThrower exceptionThrower2 = new ExceptionThrower();
         source.addListEventListener(exceptionThrower2);
         
@@ -103,7 +103,7 @@ public class RuntimeExceptionTest extends TestCase {
         source.add("Leanne");
         source.add("Bev");
         source.add("Jesse");
-        consistencyTestList.assertConsistent();
+        listConsistencyListener.assertConsistent();
         
         // throw an exception, make sure its handled gracefully
         exceptionThrower.setNextException(luckyException);
@@ -113,7 +113,7 @@ public class RuntimeExceptionTest extends TestCase {
             fail("this statement shouldn't be reached");
         } catch(RuntimeException e) {
             assertTrue(e == luckyException);
-            consistencyTestList.assertConsistent();
+            listConsistencyListener.assertConsistent();
         }
     }
 

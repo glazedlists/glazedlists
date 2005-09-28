@@ -22,7 +22,7 @@ public class RangeListTest extends TestCase {
         source.addAll(split("J,E,S,S,E"));
 
         RangeList rangeList = new RangeList(source);
-        rangeList.addListEventListener(new ConsistencyTestList(rangeList, "Range List", false));
+        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
 
         rangeList.setRange(0, 5);
         source.set(0, "M");
@@ -77,7 +77,7 @@ public class RangeListTest extends TestCase {
         source.addAll(split("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"));
 
         RangeList rangeList = new RangeList(source);
-        rangeList.addListEventListener(new ConsistencyTestList(rangeList, "Range List", false));
+        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
 
         assertEquals(source, rangeList);
 
@@ -93,7 +93,7 @@ public class RangeListTest extends TestCase {
         source.addAll(split("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"));
 
         RangeList rangeList = new RangeList(source);
-        rangeList.addListEventListener(new ConsistencyTestList(rangeList, "Range List", false));
+        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
 
         assertEquals(source, rangeList);
 

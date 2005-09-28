@@ -35,7 +35,7 @@ public class ThresholdListTest extends TestCase {
         evaluator = new IntegerEvaluator();
         thresholdList = new ThresholdList(source, evaluator);
         // monitor the fired events
-        thresholdList.addListEventListener(new ConsistencyTestList(thresholdList, "thresholdList", false));
+        thresholdList.addListEventListener(new ListConsistencyListener(thresholdList, "thresholdList", false));
     }
 
     /**

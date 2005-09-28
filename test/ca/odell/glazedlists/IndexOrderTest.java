@@ -24,18 +24,6 @@ public class IndexOrderTest extends TestCase {
     private Random random = new Random();
     
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Test to verify that the list changes occur in increasing order.
      *
      * <p>This creates a long chain of lists designed to cause events where the indicies
@@ -44,15 +32,15 @@ public class IndexOrderTest extends TestCase {
      * greater than 50. It has been sorted in increasing order.
      */
     public void testIncreasingOrder() {
-        EventList unsorted = new BasicEventList();
+        EventList<int[]> unsorted = new BasicEventList<int[]>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
-        FilterList filteredOnce = new FilterList(unsorted, matcherEditor);
+        FilterList<int[]> filteredOnce = new FilterList<int[]>(unsorted, matcherEditor);
 
         // add a block of new elements one hundred times
         for(int a = 0; a < 100; a++) {
 
             // create a block of ten elements
-            List currentChange = new ArrayList();
+            List<int[]> currentChange = new ArrayList<int[]>();
             for(int b = 0; b < 10; b++) {
                 currentChange.add(new int[] { random.nextInt(100), random.nextInt(100) });
             }
@@ -75,23 +63,23 @@ public class IndexOrderTest extends TestCase {
      * greater than 50. It has been sorted in increasing order.
      */
     public void testIndexOutOfOrder() {
-        EventList unsorted = new BasicEventList();
-        SortedList sortedOnce = new SortedList(unsorted, new IntegerArrayComparator(0));
+        EventList<int[]> unsorted = new BasicEventList<int[]>();
+        SortedList<int[]> sortedOnce = new SortedList<int[]>(unsorted, new IntegerArrayComparator(0));
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
-        FilterList filteredOnce = new FilterList(sortedOnce, matcherEditor);
-        SortedList sortedTwice = new SortedList(filteredOnce, new IntegerArrayComparator(0));
+        FilterList<int[]> filteredOnce = new FilterList<int[]>(sortedOnce, matcherEditor);
+        SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, new IntegerArrayComparator(0));
         
         unsorted.addListEventListener(new IncreasingChangeIndexListener());
         sortedOnce.addListEventListener(new IncreasingChangeIndexListener());
         filteredOnce.addListEventListener(new IncreasingChangeIndexListener());
         
-        ArrayList controlList = new ArrayList();
+        ArrayList<int[]> controlList = new ArrayList<int[]>();
         
         // add a block of new elements one hundred times
         for(int a = 0; a < 15; a++) {
 
             // create a block of ten elements
-            List currentChange = new ArrayList();
+            List<int[]> currentChange = new ArrayList<int[]>();
             for(int b = 0; b < controlList.size() || b < 10; b++) {
                 currentChange.add(new int[] { random.nextInt(100), random.nextInt(100) });
             }
@@ -102,7 +90,7 @@ public class IndexOrderTest extends TestCase {
             // manually create a replica
             controlList.addAll(currentChange);
             Collections.sort(controlList, sortedTwice.getComparator());
-            for(Iterator i = controlList.iterator(); i.hasNext(); ) {
+            for(Iterator<int[]> i = controlList.iterator(); i.hasNext(); ) {
                 if(matcherEditor.getMatcher().matches(i.next())) continue;
                 i.remove();
             }
@@ -119,12 +107,12 @@ public class IndexOrderTest extends TestCase {
      * If the elements are identical it compares by the opposite index.
      * If those elements are idential it compares by System.identityHashCode.
      */
-    class IntegerArrayComparator implements Comparator {
+    class IntegerArrayComparator implements Comparator<int[]> {
         private int index;
         public IntegerArrayComparator(int index) {
             this.index = index;
         }
-        public int compare(Object alpha, Object beta) {
+        public int compare(int[] alpha, int[] beta) {
             int[] alphaArray = (int[])alpha;
             int[] betaArray = (int[])beta;
             int compared = alphaArray[index] - betaArray[index];
@@ -139,22 +127,21 @@ public class IndexOrderTest extends TestCase {
      * A special filter list that filters out integer arrays that don't have
      * an element lower than a specified thresshold.
      */
-    class IntegerArrayMatcherEditor extends AbstractMatcherEditor {
+    class IntegerArrayMatcherEditor extends AbstractMatcherEditor<int[]> {
         public IntegerArrayMatcherEditor(int index, int threshhold) {
             setFilter(index, threshhold);
         }
         public void setFilter(int index, int threshhold) {
             fireChanged(new IntegerArrayMatcher(index, threshhold));
         }
-        private class IntegerArrayMatcher implements Matcher {
+        private class IntegerArrayMatcher implements Matcher<int[]> {
             private int index;
             private int threshhold;
             public IntegerArrayMatcher(int index, int threshhold) {
                 this.index = index;
                 this.threshhold = threshhold;
             }
-            public boolean matches(Object element) {
-                int[] array = (int[])element;
+            public boolean matches(int[] array) {
                 if(array[index] <= threshhold) return true;
                 return false;
             }
