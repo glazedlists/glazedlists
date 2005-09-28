@@ -191,10 +191,18 @@
         </jar>
     </target>
 
-    <target name="java14" depends="init,compile" description="Compile Glazed Lists for deployment on a J2SE 1.4">
+    <target name="java14" depends="init,compileall,compiletests" description="Compile Glazed Lists for deployment on a J2SE 1.4">
         <property environment="env"/>
+        <path id="declawerPath">
+            <pathelement path="classes"/>
+            <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/><!-- tools on Sun JVMs -->
+            <pathelement path="${env.JAVA_HOME}/../Classes/classes.jar"/><!-- tools on Apple JVMs -->
+        </path>
+        <property name="declawerPathProperty" refid="declawerPath"/>
+
+
         <echo message="using JAVA HOME = ${env.JAVA_HOME}"/>
-        <echo message="using tools = ${env.JAVA_HOME}/lib/tools.jar"/>
+        <echo message="using tools = ${declawerPathProperty}"/>
 
         <!-- clean the java14 directory -->
         <delete dir="java14_glazedlists"/>
@@ -202,25 +210,16 @@
         <mkdir dir="java14_glazedlists/test"/>
 
         <!-- Declaw the source code to the java14 directory. -->
-        <java classname="ca.odell.glazedlists.impl.java15.Declawer">
-            <classpath>
-                <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
-                <pathelement path="classes"/>
-            </classpath>
+        <java classname="ca.odell.glazedlists.impl.java15.Declawer" classpathref="declawerPath">
             <arg value="source"/>
             <arg value="${ant.home}/lib/junit.jar"/>
             <arg value="java14_glazedlists/source"/>
         </java>
 
         <!-- Declaw the tests to the java14 directory. -->
-        <java classname="ca.odell.glazedlists.impl.java15.Declawer">
-            <classpath>
-                <pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
-                <pathelement path="classes"/>
-                <pathelement path="${ant.home}/lib/junit.jar"/>
-            </classpath>
+        <java classname="ca.odell.glazedlists.impl.java15.Declawer" classpathref="declawerPath">
             <arg value="test"/>
-            <arg value="classes;${ant.home}/lib/junit.jar"/>
+            <arg value="classes${path.separator}${ant.home}/lib/junit.jar"/>
             <arg value="java14_glazedlists/test"/>
         </java>
 
@@ -263,16 +262,11 @@
        This task depends on JUnit, available free at http://www.junit.org
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <target name="test" depends="init,compileall"
+    <target name="test" depends="init,compiletests"
             description="Compile unit tests and run them using JUnit.">
-            <mkdir dir="classes"/>
             <!-- Verify that JUnit is available on the classpath -->
             <available classname="junit.framework.TestCase" property="junit.present"/>
             <fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
-            <!-- Compile the test classes from source/ into classes/ -->
-            <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" deprecation="on">
-                    <classpath path="${ant.home}/lib/junit.jar"/>
-            </javac>
             <!-- Execute JUnit tests -->
             <junit printsummary="true" showoutput="false" fork="true"
                     errorProperty="test.failed" failureProperty="test.failed">
@@ -286,6 +280,13 @@
                     </batchtest>
             </junit>
             <fail message="Tests failed. Check test output." if="test.failed"/>
+    </target>
+
+    <target name="compiletests" depends="init,compileall">
+        <!-- Compile the test classes from source/ into classes/ -->
+        <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" deprecation="on">
+                <classpath path="${ant.home}/lib/junit.jar"/>
+        </javac>
     </target>
 
 

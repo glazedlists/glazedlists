@@ -72,11 +72,16 @@ public class GlazedListsTests {
     /**
      * This matcher matches everything greater than its minimum.
      */
-    public static Matcher<Integer> matchAtLeast(final int minimum) {
-        return new Matcher<Integer>() {
-            public boolean matches(Integer value) {
-                return value.intValue() >= minimum;
-            }
-        };
+    public static Matcher<Integer> matchAtLeast(int minimum) {
+        return new AtLeastMatcher(minimum);
+    }
+    private static class AtLeastMatcher implements Matcher<Integer> {
+        private final int minimum;
+        public AtLeastMatcher(int minimum) {
+            this.minimum = minimum;
+        }
+        public boolean matches(Integer value) {
+            return value.intValue() >= minimum;
+        }
     }
 }

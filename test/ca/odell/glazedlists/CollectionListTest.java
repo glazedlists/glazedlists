@@ -219,7 +219,7 @@ public class CollectionListTest extends TestCase {
 	public void testChildModification() {
         // use a list of Lists instead of Strings
 		BasicEventList<List<Character>> characterLists = new BasicEventList<List<Character>>();
-        CollectionList<Character,List<Character>> characters = new CollectionList<Character,List<Character>>(characterLists, GlazedLists.<Character>listCollectionListModel());
+        CollectionList<Character,List<Character>> characters = new CollectionList<Character,List<Character>>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
         characters.addListEventListener(new ListConsistencyListener(characters, "characters", false));
         characterLists.add(GlazedListsTests.stringToList(DEV_ROB));
         characterLists.add(GlazedListsTests.stringToList(DEV_JESSE));

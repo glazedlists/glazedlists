@@ -25,7 +25,7 @@ public class IndexOrderTest extends TestCase {
     
     /**
      * Test to verify that the list changes occur in increasing order.
-     *
+     *GlazedL
      * <p>This creates a long chain of lists designed to cause events where the indicies
      * are out of order. The resultant list is a list of integer arrays of size two.
      * That list has been filtered to not contain any elements where the first index is

@@ -5,7 +5,6 @@ package ca.odell.glazedlists.demo.issuebrowser.swing;
 
 // demo
 import ca.odell.glazedlists.demo.issuebrowser.*;
-import ca.odell.glazedlists.demo.Launcher;
 // swing
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -107,12 +106,6 @@ public class IssuesBrowser extends Applet {
     private void constructStandalone() {
         // create a frame with that panel
         JFrame frame = new JFrame("Issues");
-        if (!Launcher.runningInLauncher()) {
-            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        } else {
-            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        }
-
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.getContentPane().setLayout(new GridBagLayout());
@@ -141,11 +134,6 @@ public class IssuesBrowser extends Applet {
 
         // issues table
         issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
-        issuesSortedList.addListEventListener(new ListEventListener() {
-            public void listChanged(ListEvent listChanges) {
-                issueCounter.setIssueCount(issuesSortedList.size());
-            }
-        });
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel(issuesSortedList);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
@@ -199,7 +187,7 @@ public class IssuesBrowser extends Applet {
         projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project..."));
 
         // build a label to display the number of issues in the issue table
-        issueCounter = new IssueCounterLabel();
+        issueCounter = new IssueCounterLabel(issuesSortedList);
         issueCounter.setHorizontalAlignment(SwingConstants.CENTER);
         issueCounter.setForeground(Color.WHITE);
 
@@ -333,18 +321,21 @@ public class IssuesBrowser extends Applet {
      * table. Use {@link #setIssueCount(int)} to update the text of the label
      * to reflect a new issue count.
      */
-    private static class IssueCounterLabel extends JLabel {
+    private static class IssueCounterLabel extends JLabel implements ListEventListener {
         private int issueCount = -1;
 
-        {
-            this.setIssueCount(0);
+        public IssueCounterLabel(EventList source) {
+            source.addListEventListener(this);
+            this.setIssueCount(source.size());
         }
 
         public void setIssueCount(int issueCount) {
-            if (this.issueCount != issueCount) {
-                this.issueCount = issueCount;
-                this.setText(MessageFormat.format("{0} {0,choice,0#issues|1#issue|1<issues}", new Object[] {new Integer(issueCount)}));
-            }
+            if (this.issueCount == issueCount) return;
+            this.issueCount = issueCount;
+            this.setText(MessageFormat.format("{0} {0,choice,0#issues|1#issue|1<issues}", new Object[] {new Integer(issueCount)}));
+        }
+        public void listChanged(ListEvent listChanges) {
+            setIssueCount(listChanges.getSourceList().size());
         }
     }
 

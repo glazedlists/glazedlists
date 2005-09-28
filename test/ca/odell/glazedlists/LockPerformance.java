@@ -48,17 +48,21 @@ public class LockPerformance {
             writerThreads.add(new Thread(wr));
         }
 
-        for (Thread thread : readerThreads)
-            thread.start();
+        for(Iterator i = readerThreads.iterator(); i.hasNext(); ) {
+            ((Thread)i.next()).start();
+        }
 
-        for (Thread thread : writerThreads)
-            thread.start();
+        for(Iterator i = writerThreads.iterator(); i.hasNext(); ) {
+            ((Thread)i.next()).start();
+        }
 
-        for (Thread thread : readerThreads)
-            thread.join();
+        for(Iterator i = readerThreads.iterator(); i.hasNext(); ) {
+            ((Thread)i.next()).join();
+        }
 
-        for (Thread thread : writerThreads)
-            thread.join();
+        for(Iterator i = writerThreads.iterator(); i.hasNext(); ) {
+            ((Thread)i.next()).join();
+        }
 
         System.out.println("totalReadDelay = " + totalReadDelay + "ms (" + elapsedTime(totalReadDelay) + ")");
         System.out.println("totalWriteDelay = " + totalWriteDelay + "ms (" + elapsedTime(totalWriteDelay) + ")");
