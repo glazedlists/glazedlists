@@ -19,7 +19,7 @@ public class CollectionListTest extends TestCase {
 	private static final String DEV_JAMES = "James Lemieux";
 	private static final String DEV_EMPTY = "";
 
-	private CollectionList<Character,String> collectionList;
+	private CollectionList<String,String> collectionList;
 	private BasicEventList<String> parentList;
 
 
@@ -28,7 +28,7 @@ public class CollectionListTest extends TestCase {
 	 */
 	public void setUp() {
 		parentList = new BasicEventList<String>();
-		collectionList = new CollectionList<Character,String>(parentList, new StringDecomposerModel());
+		collectionList = new CollectionList<String,String>(parentList, new StringDecomposerModel());
         collectionList.addListEventListener(new ListConsistencyListener(collectionList, "collection list", false));
 		parentList.add(DEV_ROB);
 		parentList.add(DEV_JESSE);
@@ -218,8 +218,8 @@ public class CollectionListTest extends TestCase {
 	 */
 	public void testChildModification() {
         // use a list of Lists instead of Strings
-		BasicEventList<List<Character>> characterLists = new BasicEventList<List<Character>>();
-        CollectionList<Character,List<Character>> characters = new CollectionList<Character,List<Character>>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
+		BasicEventList<List<String>> characterLists = new BasicEventList<List<String>>();
+        CollectionList<String,List<String>> characters = new CollectionList<String,List<String>>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
         characters.addListEventListener(new ListConsistencyListener(characters, "characters", false));
         characterLists.add(GlazedListsTests.stringToList(DEV_ROB));
         characterLists.add(GlazedListsTests.stringToList(DEV_JESSE));
@@ -243,14 +243,14 @@ public class CollectionListTest extends TestCase {
         DEV_KEVIN_MODIFIED.setCharAt(2, 'r');
         DEV_KEVIN_MODIFIED.setCharAt(1, 'a');
         DEV_KEVIN_MODIFIED.setCharAt(3, 'e');
-        characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 2, new Character('r'));
-        characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 1, new Character('a'));
-        characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 3, new Character('e'));
+        characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 2, "r");
+        characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 1, "a");
+        characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 3, "e");
 		assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
 
         // set a few more elements
         DEV_ROB_MODIFIED.setCharAt(1, '.');
-        characters.set(1, new Character('.'));
+        characters.set(1, ".");
 		assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
 
         // remove a few more elements
@@ -272,8 +272,8 @@ public class CollectionListTest extends TestCase {
 	/**
 	 * Model that breaks a String into a list of characters.
 	 */
-	private class StringDecomposerModel implements CollectionList.Model<String,Character> {
-		public List<Character> getChildren(String parent) {
+	private class StringDecomposerModel implements CollectionList.Model<String,String> {
+		public List<String> getChildren(String parent) {
 			return GlazedListsTests.stringToList(parent);
         }
 	}

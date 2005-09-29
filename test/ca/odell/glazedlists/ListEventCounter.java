@@ -13,15 +13,15 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListEventCounter implements ListEventListener {
+public class ListEventCounter<E> implements ListEventListener<E> {
     
     /** count the number of changes per event */
-    private List changeCounts = new ArrayList();
+    private List<Integer> changeCounts = new ArrayList<Integer>();
 
     /**
      * When an event occurs, count that.
      */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         int changesForEvent = 0;
         while(listChanges.next()) {
             changesForEvent++;
@@ -40,6 +40,6 @@ public class ListEventCounter implements ListEventListener {
      * Gets the number of changes for the specified event.
      */
     public int getChangeCount(int event) {
-        return ((Integer)changeCounts.get(event)).intValue();
+        return changeCounts.get(event).intValue();
     }
 }

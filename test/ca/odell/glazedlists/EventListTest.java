@@ -36,22 +36,22 @@ public class EventListTest extends TestCase {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=169">Bug 169</a>
      */
     public void testRemoveAll() {
-        List<Character> jesse = GlazedListsTests.stringToList("JESSE");
-        List<Character> wilson = GlazedListsTests.stringToList("WILSON");
+        List<String> jesse = GlazedListsTests.stringToList("JESSE");
+        List<String> wilson = GlazedListsTests.stringToList("WILSON");
 
         // create the reference list
-        List<Character> jesseArrayList = new ArrayList<Character>();
+        List<String> jesseArrayList = new ArrayList<String>();
         jesseArrayList.addAll(jesse);
         jesseArrayList.removeAll(wilson);
 
         // test the BasicEventList list
-        List<Character> jesseBasicEventList = new BasicEventList<Character>();
+        List<String> jesseBasicEventList = new BasicEventList<String>();
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
 
         // test the SortedList list
-        List<Character> jesseSortedList = new SortedList<Character>(new BasicEventList<Character>(), null);
+        List<String> jesseSortedList = new SortedList<String>(new BasicEventList<String>(), null);
         jesseSortedList.addAll(jesse);
         jesseSortedList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);
@@ -61,22 +61,22 @@ public class EventListTest extends TestCase {
      * Validates that retainAll() works.
      */
     public void testRetainAll() {
-        List<Character> jesse = GlazedListsTests.stringToList("JESSE");
-        List<Character> wilson = GlazedListsTests.stringToList("WILSON");
+        List<String> jesse = GlazedListsTests.stringToList("JESSE");
+        List<String> wilson = GlazedListsTests.stringToList("WILSON");
 
         // create the reference list
-        List<Character> jesseArrayList = new ArrayList<Character>();
+        List<String> jesseArrayList = new ArrayList<String>();
         jesseArrayList.addAll(jesse);
         jesseArrayList.retainAll(wilson);
 
         // test the BasicEventList list
-        List<Character> jesseBasicEventList = new BasicEventList<Character>();
+        List<String> jesseBasicEventList = new BasicEventList<String>();
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
 
         // test the SortedList list
-        List<Character> jesseSortedList = new SortedList<Character>(new BasicEventList<Character>(), null);
+        List<String> jesseSortedList = new SortedList<String>(new BasicEventList<String>(), null);
         jesseSortedList.addAll(jesse);
         jesseSortedList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);

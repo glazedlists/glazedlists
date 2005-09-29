@@ -33,7 +33,7 @@ public class MultipleEventsTest extends TestCase {
      */
     public void testFilterList() {
         // create a list
-        EventList source = new BasicEventList();
+        EventList<int[]> source = new BasicEventList<int[]>();
         source.add(new int[] { 1 });
         source.add(new int[] { 0 });
         source.add(new int[] { 1 });
@@ -42,10 +42,10 @@ public class MultipleEventsTest extends TestCase {
         // prepare a filter list
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         matcherEditor.setFilter(0, 1);
-        FilterList filterList = new FilterList(source, matcherEditor);
+        FilterList<int[]> filterList = new FilterList<int[]>(source, matcherEditor);
 
         // listen to changes on the filter list
-        ListEventCounter counter = new ListEventCounter();
+        ListEventCounter<int[]> counter = new ListEventCounter<int[]>();
         filterList.addListEventListener(counter);
 
         // clear the filter list
@@ -61,17 +61,17 @@ public class MultipleEventsTest extends TestCase {
      */
     public void testSubList() {
         // create a list
-        EventList source = new BasicEventList();
+        EventList<String> source = new BasicEventList<String>();
         source.add("A");
         source.add("B");
         source.add("C");
         source.add("D");
         
         // prepare a sub list
-        EventList subList = (EventList)source.subList(1, 3);
+        EventList<String> subList = (EventList<String>)source.subList(1, 3);
         
         // listen to changes on the sub list
-        ListEventCounter counter = new ListEventCounter();
+        ListEventCounter<String> counter = new ListEventCounter<String>();
         subList.addListEventListener(counter);
 
         // clear the sub list
@@ -87,17 +87,17 @@ public class MultipleEventsTest extends TestCase {
      */
     public void testUniqueList() {
         // create a list
-        EventList source = new BasicEventList();
+        EventList<String> source = new BasicEventList<String>();
         source.add("A");
         source.add("B");
         source.add("B");
         source.add("C");
         
         // prepare a unique list
-        EventList uniqueList = new UniqueList(source);
+        EventList<String> uniqueList = new UniqueList<String>(source);
         
         // listen to changes on the unique list
-        ListEventCounter counter = new ListEventCounter();
+        ListEventCounter<String> counter = new ListEventCounter<String>();
         uniqueList.addListEventListener(counter);
 
         // clear the unique list

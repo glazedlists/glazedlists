@@ -27,10 +27,10 @@ public class GlazedListsTests {
     /**
      * Convert the characters of the specified String to a list.
      */
-    public static List<Character> stringToList(CharSequence chars) {
-        List<Character> result = new ArrayList<Character>(chars.length());
+    public static List<String> stringToList(CharSequence chars) {
+        List<String> result = new ArrayList<String>(chars.length());
         for (int i = 0; i < chars.length(); i++) {
-            result.add(new Character(chars.charAt(i)));
+            result.add(chars.subSequence(i, i+1).toString());
         }
         return result;
     }
@@ -38,8 +38,8 @@ public class GlazedListsTests {
     /**
      * Convert an array of Strings into a List of characters.
      */
-    public static List<Character> stringsToList(CharSequence[] data) {
-        List<Character> result = new ArrayList<Character>();
+    public static List<String> stringsToList(CharSequence[] data) {
+        List<String> result = new ArrayList<String>();
         for(int s = 0; s < data.length; s++) {
             result.addAll(stringToList(data[s]));
         }

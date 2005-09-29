@@ -27,7 +27,7 @@ public class ListModificationTest extends TestCase {
      * side effects on the original list.
      */
     public void testSubListClear() {
-        List alphabet = new BasicEventList();
+        List<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -35,7 +35,7 @@ public class ListModificationTest extends TestCase {
         alphabet.add("E");
         alphabet.add("F");
 
-        List controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         controlList.addAll(alphabet);
 
         alphabet.subList(1, 3).clear();
@@ -54,7 +54,7 @@ public class ListModificationTest extends TestCase {
      * side effects on the original list.
      */
     public void testFilterListClear() {
-        EventList alphabet = new BasicEventList();
+        EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -62,10 +62,10 @@ public class ListModificationTest extends TestCase {
         alphabet.add("E");
         alphabet.add("F");
 
-        List controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         controlList.addAll(alphabet);
 
-        List vowels = new FilterList(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
         vowels.clear();
         controlList.remove(0);
         controlList.remove(3);
@@ -78,7 +78,7 @@ public class ListModificationTest extends TestCase {
      * side effects on the original list.
      */
     public void testRemove() {
-        EventList alphabet = new BasicEventList();
+        EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -86,10 +86,10 @@ public class ListModificationTest extends TestCase {
         alphabet.add("E");
         alphabet.add("F");
 
-        List controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         controlList.addAll(alphabet);
 
-        List vowels = new FilterList(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList(alphabet, new VowelMatcher());
         vowels.remove("C");
         vowels.remove("A");
         controlList.remove("A");
@@ -102,7 +102,7 @@ public class ListModificationTest extends TestCase {
      * side effects on the original list.
      */
     public void testRemoveAll() {
-        EventList alphabet = new BasicEventList();
+        EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -110,12 +110,12 @@ public class ListModificationTest extends TestCase {
         alphabet.add("E");
         alphabet.add("F");
 
-        List controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         controlList.addAll(alphabet);
 
-        List vowels = new FilterList(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList(alphabet, new VowelMatcher());
 
-        List toRemove = new ArrayList();
+        List<String> toRemove = new ArrayList<String>();
         toRemove.add("C");
         toRemove.add("A");
         vowels.removeAll(toRemove);
@@ -129,7 +129,7 @@ public class ListModificationTest extends TestCase {
      * side effects on the original list.
      */
     public void testRetainAll() {
-        EventList alphabet = new BasicEventList();
+        EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -137,12 +137,12 @@ public class ListModificationTest extends TestCase {
         alphabet.add("E");
         alphabet.add("F");
 
-        List controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         controlList.addAll(alphabet);
 
-        List vowels = new FilterList(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
 
-        List toRetain = new ArrayList();
+        List<String> toRetain = new ArrayList<String>();
         toRetain.add("C");
         toRetain.add("E");
         vowels.retainAll(toRetain);
@@ -154,9 +154,8 @@ public class ListModificationTest extends TestCase {
     /**
      * A simple filter that filters out anything that is not a vowel.
      */
-    class VowelMatcher implements Matcher {
-        public boolean matches(Object element) {
-            String letter = (String)element;
+    class VowelMatcher implements Matcher<String> {
+        public boolean matches(String letter) {
             if(letter.length() != 1) return false;
             return ("AEIOUaeiou".indexOf(letter) != -1);
         }

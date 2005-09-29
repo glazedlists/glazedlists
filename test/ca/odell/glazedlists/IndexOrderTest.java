@@ -64,10 +64,10 @@ public class IndexOrderTest extends TestCase {
      */
     public void testIndexOutOfOrder() {
         EventList<int[]> unsorted = new BasicEventList<int[]>();
-        SortedList<int[]> sortedOnce = new SortedList<int[]>(unsorted, new IntegerArrayComparator(0));
+        SortedList<int[]> sortedOnce = new SortedList<int[]>(unsorted, new IntArrayComparator(0));
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
         FilterList<int[]> filteredOnce = new FilterList<int[]>(sortedOnce, matcherEditor);
-        SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, new IntegerArrayComparator(0));
+        SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, new IntArrayComparator(0));
         
         unsorted.addListEventListener(new IncreasingChangeIndexListener());
         sortedOnce.addListEventListener(new IncreasingChangeIndexListener());
@@ -97,54 +97,6 @@ public class IndexOrderTest extends TestCase {
             
             // verify the replica matches
             assertEquals(controlList, filteredOnce);
-        }
-    }
-    
-    /**
-     * A special comparator that compares two integer arrays by the element
-     * at a specified index.
-     *
-     * If the elements are identical it compares by the opposite index.
-     * If those elements are idential it compares by System.identityHashCode.
-     */
-    class IntegerArrayComparator implements Comparator<int[]> {
-        private int index;
-        public IntegerArrayComparator(int index) {
-            this.index = index;
-        }
-        public int compare(int[] alpha, int[] beta) {
-            int[] alphaArray = (int[])alpha;
-            int[] betaArray = (int[])beta;
-            int compared = alphaArray[index] - betaArray[index];
-            if(compared != 0) return compared;
-            compared = alphaArray[1 - index] - betaArray[1 - index];
-            if(compared != 0) return compared;
-            return System.identityHashCode(alpha) - System.identityHashCode(beta);
-        }
-    }
-
-    /**
-     * A special filter list that filters out integer arrays that don't have
-     * an element lower than a specified thresshold.
-     */
-    class IntegerArrayMatcherEditor extends AbstractMatcherEditor<int[]> {
-        public IntegerArrayMatcherEditor(int index, int threshhold) {
-            setFilter(index, threshhold);
-        }
-        public void setFilter(int index, int threshhold) {
-            fireChanged(new IntegerArrayMatcher(index, threshhold));
-        }
-        private class IntegerArrayMatcher implements Matcher<int[]> {
-            private int index;
-            private int threshhold;
-            public IntegerArrayMatcher(int index, int threshhold) {
-                this.index = index;
-                this.threshhold = threshhold;
-            }
-            public boolean matches(int[] array) {
-                if(array[index] <= threshhold) return true;
-                return false;
-            }
         }
     }
     

@@ -12,14 +12,12 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class IntArrayComparator implements Comparator {
+public class IntArrayComparator implements Comparator<int[]> {
     public int index;
     public IntArrayComparator(int index) {
         this.index = index;
     }
-    public int compare(Object a, Object b) {
-        int[] aArray = (int[])a;
-        int[] bArray = (int[])b;
-        return aArray[index] - bArray[index];
+    public int compare(int[] a, int[] b) {
+        return a[index] - b[index];
     }
 }

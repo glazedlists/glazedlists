@@ -220,7 +220,7 @@ public class NestedEventsTest extends TestCase {
     public void testFullyUpdatedUpdates() {
         boolean contradictionsAllowed = true;
         nestingList.beginEvent(false);
-        source.addAll(Arrays.asList(new String[] { "A", "B", "C", "D", "E", "F", "G" }));
+        source.addAll(GlazedListsTests.stringToList("ABCDEFG"));
         nestingList.commitEvent();
         
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
@@ -235,7 +235,7 @@ public class NestedEventsTest extends TestCase {
         nestingList.commitEvent();
         
         // net change is: replacing C, D, E with c, d, e and add H
-        assertEquals(nestingList, Arrays.asList(new String[] { "A", "B", "c", "d", "e", "F", "G", "H" }));
+        assertEquals(nestingList, GlazedListsTests.stringToList("ABcdeFGH"));
         assertEquals(2, counter.getEventCount());
         assertEquals(4, counter.getChangeCount(1));
     }
