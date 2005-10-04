@@ -21,10 +21,9 @@ import java.io.Serializable;
  *
  * <p>Unlike most {@link EventList}s, this class is {@link Serializable}. When
  * {@link BasicEventList} is serialized, all of its elements are serialized
- * <i>and</i> all of its listeners which implement {@link Serializable}. Upon
+ * <i>and</i> all of its listeners that implement {@link Serializable}. Upon
  * deserialization, the new copy uses a different {@link #getReadWriteLock() lock}
- * than its source {@link BasicEventList}. Most {@link TransformedList}s will
- * <strong>not</strong> be serialized.
+ * than its source {@link BasicEventList}.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
