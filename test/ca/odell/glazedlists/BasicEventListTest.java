@@ -168,6 +168,4 @@ public class BasicEventListTest extends TestCase {
             return lastSource;
         }
     }
-
-
 }

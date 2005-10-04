@@ -19,6 +19,13 @@ import java.io.Serializable;
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
  * or {@link LinkedList}.
  *
+ * <p>Unlike most {@link EventList}s, this class is {@link Serializable}. When
+ * {@link BasicEventList} is serialized, all of its elements are serialized
+ * <i>and</i> all of its listeners which implement {@link Serializable}. Upon
+ * deserialization, the new copy uses a different {@link #getReadWriteLock() lock}
+ * than its source {@link BasicEventList}. Most {@link TransformedList}s will
+ * <strong>not</strong> be serialized.
+ *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
