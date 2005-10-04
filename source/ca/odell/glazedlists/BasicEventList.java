@@ -5,8 +5,15 @@ package ca.odell.glazedlists;
 
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.event.ListEventPublisher;
 // Java collections are used for underlying data storage
 import java.util.*;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 
 /**
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
@@ -24,7 +31,10 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class BasicEventList<E> extends AbstractEventList<E> {
+public final class BasicEventList<E> extends AbstractEventList<E> implements Serializable {
+
+    /** For versioning as a {@link Serializable} */
+    private static final long serialVersionUID = 4883958173323072345L;
 
     /** the underlying data list */
     private List<E> data;
@@ -65,7 +75,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> {
         data = list;
         readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
     }
-    
+
     /** {@inheritDoc} */
     public void add(int index, E element) {
         // create the change event
@@ -197,5 +207,62 @@ public final class BasicEventList<E> extends AbstractEventList<E> {
         }
         updates.commitEvent();
         return changed;
+    }
+
+    /**
+     * Although {@link EventList}s do not in general, {@link BasicEventList} is
+     * {@link Serializable}. All of the {@link ListEventListener}s that are themselves
+     * {@link Serializable} will be serialized, but others will not. Note that there
+     * is <strong>no</strong> easy way to access the {@link ListEventListener}s of
+     * an {@link EventList}, particularly after it has been serialized.
+     *
+     * <p>As of October 3, 2005, this is the wire format of serialized
+     * {@link BasicEventList}s:
+     * <li>An {@link Object[]} containing each of the list's elements
+     * <li>An {@link ListEventListener[]} containing <strong>only</strong> the
+     *     listeners that themselves implement {@link Serializable}. Those that
+     *     do not will not be serialized. Note that {@link TransformedList}s
+     *     such as {@link FilterList} are not {@link Serializable} and will not
+     *     be serialized.
+     */
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        // 1. The elements to write
+        E[] elements = (E[])data.toArray(new Object[size()]);
+
+        // 2. The Listeners to write
+        List<ListEventListener<E>> serializableListeners = new ArrayList<ListEventListener<E>>(1);
+        for(Iterator<ListEventListener<E>> i = updates.getListEventListeners().iterator(); i.hasNext(); ) {
+            ListEventListener<E> listener = i.next();
+            if(!(listener instanceof Serializable)) continue;
+            serializableListeners.add(listener);
+        }
+        ListEventListener[] listeners = serializableListeners.toArray(new ListEventListener[serializableListeners.size()]);
+
+        // 3. Write the listeners and elements
+        out.writeObject(elements);
+        out.writeObject(listeners);
+    }
+
+    /**
+     * Peer method to {@link #writeObject(ObjectOutputStream)}. Note that this
+     * is functionally equivalent to a constructor and should validate that
+     * everything is in place including locks, etc.
+     */
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // 1. Prepare the EventList helper members
+        this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
+
+        // 2. Read in the elements
+        E[] elements = (E[])in.readObject();
+        ListEventListener<E>[] listeners = (ListEventListener<E>[])in.readObject();
+
+        // 3. Populate the EventList data
+        this.data = new ArrayList<E>();
+        this.data.addAll(Arrays.asList(elements));
+
+        // 4. Populate the listeners
+        for(int i = 0; i < listeners.length; i++) {
+            this.updates.addListEventListener(listeners[i]);
+        }
     }
 }

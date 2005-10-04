@@ -344,4 +344,11 @@ public final class ListEventAssembler<E> {
         // remove the publisher's dependency
         publisher.removeDependency(sourceList, listChangeListener);
     }
+
+    /**
+     * Get all {@link ListEventListener}s observing the {@link EventList}.
+     */
+    public List<ListEventListener<E>> getListEventListeners() {
+        return Collections.unmodifiableList(listeners);
+    }
 }

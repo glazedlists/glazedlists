@@ -49,6 +49,14 @@ public abstract class AbstractEventList<E> implements EventList<E> {
         updates = new ListEventAssembler<E>(this, publisher);
     }
 
+    /**
+     * Create an {@link AbstractEventList} that sends events with the default
+     * {@link ListEventPublisher}.
+     */
+    protected AbstractEventList() {
+        this(null);
+    }
+
     /** {@inheritDoc} */
     public ListEventPublisher getPublisher() {
         return publisher;
