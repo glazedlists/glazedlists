@@ -148,6 +148,46 @@ public class IndexSnapshotTest extends TestCase {
         assertEquals(-1, indexSnapshot.snapshotToCurrent(5));
     }
 
+    public void testInsertedBeyondSnapshot() {
+        IndexSnapshot indexSnapshot = new IndexSnapshot();
+        indexSnapshot.reset(2);
+        indexSnapshot.add(2);
+        indexSnapshot.add(3);
+
+        assertEquals(2, indexSnapshot.snapshotToCurrent(2));
+        assertEquals(2, indexSnapshot.currentToSnapshot(2));
+        assertEquals(3, indexSnapshot.snapshotToCurrent(3));
+        assertEquals(3, indexSnapshot.currentToSnapshot(3));
+
+        indexSnapshot.add(2);
+        indexSnapshot.add(3);
+
+        assertEquals(2, indexSnapshot.snapshotToCurrent(2));
+        assertEquals(2, indexSnapshot.currentToSnapshot(2));
+        assertEquals(5, indexSnapshot.snapshotToCurrent(5));
+        assertEquals(5, indexSnapshot.currentToSnapshot(5));
+
+        indexSnapshot.remove(3);
+        indexSnapshot.remove(3);
+
+        assertEquals(2, indexSnapshot.snapshotToCurrent(2));
+        assertEquals(2, indexSnapshot.currentToSnapshot(2));
+        assertEquals(3, indexSnapshot.snapshotToCurrent(3));
+        assertEquals(3, indexSnapshot.currentToSnapshot(3));
+
+        indexSnapshot.remove(1);
+        indexSnapshot.remove(0);
+
+        assertEquals(2, indexSnapshot.currentSize());
+
+        assertEquals(-1, indexSnapshot.snapshotToCurrent(0));
+        assertEquals(2, indexSnapshot.currentToSnapshot(0));
+        assertEquals(-1, indexSnapshot.snapshotToCurrent(1));
+        assertEquals(3, indexSnapshot.currentToSnapshot(1));
+        assertEquals(0, indexSnapshot.snapshotToCurrent(2));
+        assertEquals(1, indexSnapshot.snapshotToCurrent(3));
+    }
+
 
     public void testIndexBoundsExceptions() {
 
@@ -182,7 +222,7 @@ public class IndexSnapshotTest extends TestCase {
 
         indexSnapshot.snapshotToCurrent(1);
         try {
-            indexSnapshot.snapshotToCurrent(2);
+            indexSnapshot.snapshotToCurrent(4);
             fail();
         } catch(IndexOutOfBoundsException e) {
             // expected

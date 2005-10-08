@@ -77,29 +77,44 @@ public class ListConsistencyListener implements ListEventListener {
         
         // keep track of the highest change index so far
         int highestChangeIndex = 0;
+
+        // handle sorting events
+        if(listChanges.isReordering()) {
+            int[] reorderMap = listChanges.getReorderMap();
+            Assert.assertEquals(expected.size(), reorderMap.length);
+            List newExpectedValues = new ArrayList(expected.size());
+            for(int i = 0; i < reorderMap.length; i++) {
+                newExpectedValues.add(i, expected.get(reorderMap[i]));
+                changedIndices.add(new Integer(i));
+            }
+            this.expected = newExpectedValues;
+
+        // handle regular events
+        } else {
         
-        // for all changes, one index at a time
-        while(listChanges.next()) {
-            
-            // get the current change info
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-            
-            // save this index for validation later
-            changedIndices.add(new Integer(changeIndex));
-            
-            // make sure the change indicies are positive and not descreasing
-            Assert.assertTrue(changeIndex >= 0);
-            Assert.assertTrue(changeIndex >= highestChangeIndex);
-            highestChangeIndex = changeIndex;
-                
-            // verify the index is small enough, and adjust the size
-            if(changeType == ListEvent.INSERT) {
-                expected.add(changeIndex, source.get(changeIndex));
-            } else if(changeType == ListEvent.DELETE) {
-                expected.remove(changeIndex);
-            } else if(changeType == ListEvent.UPDATE) {
-                expected.set(changeIndex, source.get(changeIndex));
+            // for all changes, one index at a time
+            while(listChanges.next()) {
+
+                // get the current change info
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+
+                // save this index for validation later
+                changedIndices.add(new Integer(changeIndex));
+
+                // make sure the change indicies are positive and not descreasing
+                Assert.assertTrue(changeIndex >= 0);
+                Assert.assertTrue(changeIndex >= highestChangeIndex);
+                highestChangeIndex = changeIndex;
+
+                // verify the index is small enough, and adjust the size
+                if(changeType == ListEvent.INSERT) {
+                    expected.add(changeIndex, source.get(changeIndex));
+                } else if(changeType == ListEvent.DELETE) {
+                    expected.remove(changeIndex);
+                } else if(changeType == ListEvent.UPDATE) {
+                    expected.set(changeIndex, source.get(changeIndex));
+                }
             }
         }
         

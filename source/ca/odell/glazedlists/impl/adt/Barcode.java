@@ -507,4 +507,12 @@ public final class Barcode {
     public BarcodeIterator iterator() {
         return new BarcodeIterator(this);
     }
+
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        for(BarcodeIterator bi = iterator(); bi.hasNext(); ) {
+            result.append(bi.next() == Barcode.BLACK ? "X" : "_");
+        }
+        return result.toString();
+    }
 }
