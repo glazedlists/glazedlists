@@ -157,7 +157,7 @@ public class SortedListTest extends TestCase {
         BasicEventList source = new BasicEventList();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source);
-        SortedList sorted = new SortedList(filterList, new IntArrayComparator(0));
+        SortedList sorted = new SortedList(filterList, GlazedListsTests.intArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {
@@ -175,7 +175,7 @@ public class SortedListTest extends TestCase {
             // construct the control list
             ArrayList controlList = new ArrayList();
             controlList.addAll(filterList);
-            Collections.sort(controlList, new IntArrayComparator(0));
+            Collections.sort(controlList, GlazedListsTests.intArrayComparator(0));
 
             // verify that the control and sorted list are the same
             assertEquals(sorted.size(), controlList.size());
@@ -453,8 +453,8 @@ public class SortedListTest extends TestCase {
      */
     public void testUpdateEventsFiredWithDuplicates() {
         // create comparators for zero and one
-        Comparator intCompareAt0 = new IntArrayComparator(0);
-        Comparator intCompareAt1 = new IntArrayComparator(1);
+        Comparator intCompareAt0 = GlazedListsTests.intArrayComparator(0);
+        Comparator intCompareAt1 = GlazedListsTests.intArrayComparator(1);
 
         // prepare a unique list with simple data
         UniqueList uniqueSource = new UniqueList(new BasicEventList(), intCompareAt0);

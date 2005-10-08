@@ -4,26 +4,35 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.impl.adt.Barcode;
 
 import java.util.Comparator;
 import java.util.Arrays;
 
 /**
+ * This sorting implementation puts elements in sorted order only on demand.
+ * Other elements that are added after this sorting show up at
+ * the end of the sorted ones.
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SortedList2<E> extends TransformedList<E,E> {
+public class PassiveSorting<E> implements SortedList.SortingStrategy<E> {
 
 
-    private Comparator comparator;
+    private Comparator<E> comparator;
     private final IndexSnapshot sourceToSnapshotDeltas = new IndexSnapshot();
     private final IndexSnapshot viewToSnapshotDeltas = new IndexSnapshot();
     private int[] sourceToViewSnapshotReordering;
     private int[] viewToSourceSnapshotReordering;
 
 
-    public SortedList2(EventList<E> source) {
-        super(source);
+    private final ListEventAssembler updates;
+    private final EventList<E> source;
+
+    public PassiveSorting(ListEventAssembler updates, EventList<E> source) {
+        this.updates = updates;
+        this.source = source;
 
         // prepare initial values of data structures
         this.sourceToSnapshotDeltas.reset(source.size());
@@ -34,8 +43,6 @@ public class SortedList2<E> extends TransformedList<E,E> {
             this.sourceToViewSnapshotReordering[i] = i;
             this.viewToSourceSnapshotReordering[i] = i;
         }
-
-        source.addListEventListener(this);
     }
 
     public void listChanged(ListEvent<E> listChanges) {
@@ -70,7 +77,8 @@ public class SortedList2<E> extends TransformedList<E,E> {
         updates.commitEvent();
     }
 
-    protected int getSourceIndex(int viewIndex) {
+    /** {@inheritDoc} */
+    public int getSourceIndex(int viewIndex) {
         int viewSnapshotIndex = viewToSnapshotDeltas.currentToSnapshot(viewIndex);
         int sourceSnapshotIndex = viewSnapshotIndex >= viewToSourceSnapshotReordering.length ? viewSnapshotIndex : viewToSourceSnapshotReordering[viewSnapshotIndex];
         int sourceIndex = sourceToSnapshotDeltas.snapshotToCurrent(sourceSnapshotIndex);
@@ -83,6 +91,13 @@ public class SortedList2<E> extends TransformedList<E,E> {
         int viewIndex = viewToSnapshotDeltas.snapshotToCurrent(viewSnapshotIndex);
         return viewIndex;
     }
+
+
+    /** {@inheritDoc} */
+    protected boolean isWritable() {
+        return true;
+    }
+
 
     public void setComparator(Comparator<E> comparator) {
         this.comparator = comparator;

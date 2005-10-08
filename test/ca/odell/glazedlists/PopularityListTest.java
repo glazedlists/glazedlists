@@ -116,8 +116,8 @@ public class PopularityListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        SortedList sortedList = new SortedList(source, new IntArrayComparator(0));
-        PopularityList popularityList = new PopularityList(filterList, new IntArrayComparator(0));
+        SortedList sortedList = new SortedList(source, GlazedListsTests.intArrayComparator(0));
+        PopularityList popularityList = new PopularityList(filterList, GlazedListsTests.intArrayComparator(0));
         new PopularityListValidator(popularityList, sortedList);
 
         matcherEditor.setFilter(1, 1);

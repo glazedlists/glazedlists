@@ -8,6 +8,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Comparator;
 
 /**
  * A factory class useful for testing!
@@ -84,4 +85,22 @@ public class GlazedListsTests {
             return value.intValue() >= minimum;
         }
     }
+
+    /**
+     * A comparator for comparing integer arrays, which are particularly well
+     * suited to sorting and filtering tests.
+     */
+    public static Comparator intArrayComparator(int index) {
+        return new IntArrayComparator(index);
+    }
+    private static class IntArrayComparator implements Comparator<int[]> {
+        public int index;
+        public IntArrayComparator(int index) {
+            this.index = index;
+        }
+        public int compare(int[] a, int[] b) {
+            return a[index] - b[index];
+        }
+    }
+
 }

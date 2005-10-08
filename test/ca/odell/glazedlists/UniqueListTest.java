@@ -23,7 +23,7 @@ public class UniqueListTest extends TestCase {
      */
     public void setUp() {
         source = new BasicEventList();
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
     }
 
     /**
@@ -90,7 +90,7 @@ public class UniqueListTest extends TestCase {
     public void testSimpleNonEmptySource() {
         unique = null;
         source.add("A");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         assertEquals(1, unique.size());
         assertEquals("A", (String)unique.get(0));
     }
@@ -100,7 +100,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         assertEquals(3, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("B", (String)unique.get(1));
@@ -112,7 +112,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("A");
         source.add("B");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         assertEquals(3, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("B", (String)unique.get(1));
@@ -124,7 +124,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         assertEquals(1, unique.size());
         assertEquals("A", (String)unique.get(0));
     }
@@ -137,7 +137,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         assertEquals(2, unique.size());
         assertEquals("A", (String)unique.get(0));
         assertEquals("C", (String)unique.get(1));
@@ -148,7 +148,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         source.add("D");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -162,7 +162,7 @@ public class UniqueListTest extends TestCase {
         source.add("B");
         source.add("C");
         source.add("D");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         source.add("A");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -176,7 +176,7 @@ public class UniqueListTest extends TestCase {
         source.add("D");
         source.add("A");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         source.add("B");
         assertEquals(4, unique.size());
         assertEquals("A", (String)unique.get(0));
@@ -190,7 +190,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         source.add("C");
         source.add("C");
         source.add("C");
@@ -207,7 +207,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         source.add("D");
         source.add("D");
         source.add("D");
@@ -266,7 +266,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         LinkedList duplicates = new LinkedList();
         duplicates.add("A");
         duplicates.add("B");
@@ -287,7 +287,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         source.addAll(duplicates);
@@ -305,7 +305,7 @@ public class UniqueListTest extends TestCase {
         source.add("A");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         duplicates.add("B");
@@ -328,7 +328,7 @@ public class UniqueListTest extends TestCase {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList(source, GlazedLists.comparableComparator());
+        unique = new UniqueList(source);
         LinkedList duplicates = new LinkedList();
         duplicates.add("B");
         duplicates.add("B");
@@ -501,7 +501,7 @@ public class UniqueListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(2, 1);
         matcherEditor.setFilter(1, 1);
@@ -521,7 +521,7 @@ public class UniqueListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -544,7 +544,7 @@ public class UniqueListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -568,7 +568,7 @@ public class UniqueListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -598,7 +598,7 @@ public class UniqueListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -628,7 +628,7 @@ public class UniqueListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -652,7 +652,7 @@ public class UniqueListTest extends TestCase {
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -674,7 +674,7 @@ public class UniqueListTest extends TestCase {
         source = new BasicEventList();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, new IntArrayComparator(0));
+        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {
@@ -690,11 +690,11 @@ public class UniqueListTest extends TestCase {
             matcherEditor.setFilter(filterColumn + 1, 1);
 
             // construct the control list
-            SortedSet controlSet = new TreeSet(new IntArrayComparator(0));
+            SortedSet controlSet = new TreeSet(GlazedListsTests.intArrayComparator(0));
             controlSet.addAll(filterList);
             ArrayList controlList = new ArrayList();
             controlList.addAll(controlSet);
-            Collections.sort(controlList, new IntArrayComparator(0));
+            Collections.sort(controlList, GlazedListsTests.intArrayComparator(0));
 
             // verify that the control and unique list are the same
             assertEquals(unique.size(), controlList.size());
@@ -983,7 +983,7 @@ public class UniqueListTest extends TestCase {
      */
     public void testIndexOf() {
         BasicEventList source = new BasicEventList();
-        UniqueList unique = new UniqueList(source, new IntegerComparator());
+        UniqueList unique = new UniqueList(source);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -1026,7 +1026,7 @@ public class UniqueListTest extends TestCase {
      */
     public void testLastIndexOf() {
         BasicEventList source = new BasicEventList();
-        UniqueList unique = new UniqueList(source, new IntegerComparator());
+        UniqueList unique = new UniqueList(source);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -1069,7 +1069,7 @@ public class UniqueListTest extends TestCase {
      */
     public void testContains() {
         BasicEventList source = new BasicEventList();
-        UniqueList unique = new UniqueList(source, new IntegerComparator());
+        UniqueList unique = new UniqueList(source);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -1143,8 +1143,8 @@ public class UniqueListTest extends TestCase {
      * unique list.
      */
     public void testSourceUpdateAll() {
-        IntArrayComparator compareAtZero = new IntArrayComparator(0);
-        IntArrayComparator compareAtOne = new IntArrayComparator(1);
+        Comparator compareAtZero = GlazedListsTests.intArrayComparator(0);
+        Comparator compareAtOne = GlazedListsTests.intArrayComparator(1);
 
         UniqueList uniqueListZero = new UniqueList(new BasicEventList(), compareAtZero);
         uniqueListZero.addListEventListener(new ListConsistencyListener(uniqueListZero, "uniquezero"));
@@ -1376,17 +1376,5 @@ public class UniqueListTest extends TestCase {
 
         // in sorted order changes
         source.set(1, "Chevy");    // C C F
-    }
-
-    /**
-     * Explicit comparator for Kevin's sanity!
-     */
-    class IntegerComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            int number1 = ((Integer)a).intValue();
-            int number2 = ((Integer)b).intValue();
-
-            return number1 - number2;
-        }
     }
 }

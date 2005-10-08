@@ -170,7 +170,7 @@ public abstract class TransformedList<E,S> extends AbstractEventList<E> implemen
 
     /** {@inheritDoc} */
     public E set(int index, E value) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(!isWritable()) throw new IllegalStateException("List " + this.getClass().getName() + " cannot be modified in the current state");
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
         return (E) source.set(getSourceIndex(index), (S) value);
     }

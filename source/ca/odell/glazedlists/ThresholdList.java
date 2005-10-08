@@ -456,6 +456,11 @@ public final class ThresholdList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    protected boolean isWritable() {
+        return true;
+    }
+
+    /** {@inheritDoc} */
     public int size() {
         // Check for the exclusionary edge condition
         if(lowerThresholdIndex == upperThresholdIndex) {

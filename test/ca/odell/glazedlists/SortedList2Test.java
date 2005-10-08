@@ -6,7 +6,6 @@ package ca.odell.glazedlists;
 import junit.framework.TestCase;
 
 import java.util.Comparator;
-import java.util.Collection;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -14,12 +13,12 @@ import java.util.Collection;
 public class SortedList2Test extends TestCase {
 
     /**
-     * Test that {@link SortedList2} handles it's source changing
+     * Test that {@link PassiveSorting} handles it's source changing
      * underneath it.
      */
     public void testSourceChanges() {
         EventList<String> source = new BasicEventList<String>();
-        SortedList2<String> sorted = new SortedList2<String>(source);
+        SortedList<String> sorted = new SortedList<String>(source, false);
         sorted.addListEventListener(new ListConsistencyListener(sorted, "sorted", false));
 
         source.add("J");
@@ -37,13 +36,13 @@ public class SortedList2Test extends TestCase {
     }
 
     /**
-     * Test that {@link SortedList2} handles it's source changing
+     * Test that {@link PassiveSorting} handles it's source changing
      * underneath it.
      */
     public void testSourceChangesMore() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("JESSE"));
-        SortedList2<String> sorted = new SortedList2<String>(source);
+        SortedList<String> sorted = new SortedList<String>(source, false);
         sorted.addListEventListener(new ListConsistencyListener(sorted, "sorted", false));
 
         source.add("N");
@@ -62,13 +61,13 @@ public class SortedList2Test extends TestCase {
     }
 
     /**
-     * Test that {@link SortedList2} handles it's source changing
+     * Test that {@link PassiveSorting} handles it's source changing
      * underneath it.
      */
     public void testSorting() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("FCDABE"));
-        SortedList2<String> sorted = new SortedList2<String>(source);
+        SortedList<String> sorted = new SortedList<String>(source, false);
         sorted.addListEventListener(new ListConsistencyListener(sorted, "sorted", false));
 
         sorted.setComparator((Comparator)GlazedLists.comparableComparator());
@@ -99,13 +98,13 @@ public class SortedList2Test extends TestCase {
     }
 
     /**
-     * Test that {@link SortedList2} handles it's source changing
+     * Test that {@link PassiveSorting} handles it's source changing
      * underneath it.
      */
     public void testInsertInMiddle() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("ABCDEF"));
-        SortedList2<String> sorted = new SortedList2<String>(source);
+        SortedList<String> sorted = new SortedList<String>(source, false);
         sorted.addListEventListener(new ListConsistencyListener(sorted, "sorted", false));
 
         assertEquals(GlazedListsTests.stringToList("ABCDEF"), sorted);
@@ -134,7 +133,7 @@ public class SortedList2Test extends TestCase {
     public void testCompoundEvents() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("FDACEB"));
-        SortedList2<String> sorted = new SortedList2<String>(source);
+        SortedList<String> sorted = new SortedList<String>(source, false);
         sorted.addListEventListener(new ListConsistencyListener(sorted, "sorted", false));
 
         sorted.setComparator((Comparator)GlazedLists.comparableComparator());
@@ -147,10 +146,5 @@ public class SortedList2Test extends TestCase {
         source.retainAll(GlazedListsTests.stringToList("ABEHI"));
         assertEquals(GlazedListsTests.stringToList("HIAEB"), source);
         assertEquals(GlazedListsTests.stringToList("ABEHI"), sorted);
-
-
-
-
-
     }
 }

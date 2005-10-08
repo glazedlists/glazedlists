@@ -61,8 +61,8 @@ public class TextMatcher<E> implements Matcher<E> {
 
             // search through all fields for the current filter
             for(int c = 0; c < filterStrings.size(); c++) {
-                String filterString = filterStrings.get(c);
-                if(filterString != null && textSearchStrategy.indexOf(filterString) != -1) {
+                Object filterString = filterStrings.get(c);
+                if(filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1) {
                     continue filters;
                 }
             }

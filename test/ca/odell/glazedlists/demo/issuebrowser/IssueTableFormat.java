@@ -11,7 +11,7 @@ import ca.odell.glazedlists.GlazedLists;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class IssueTableFormat implements AdvancedTableFormat {
+public class IssueTableFormat implements AdvancedTableFormat, WritableTableFormat {
 
 	public int getColumnCount() {
 		return 6;
@@ -34,7 +34,29 @@ public class IssueTableFormat implements AdvancedTableFormat {
 		return null;
 	}
 
-	public Class getColumnClass(int column) {
+
+    public boolean isEditable(Object baseObject, int column) {
+        if(column == 1 || column == 4 || column == 5) return true;
+        return false;
+    }
+
+    public Object setColumnValue(Object baseObject, Object editedValue, int column) {
+        Issue issue = (Issue)baseObject;
+        if(column == 1) {
+            issue.setIssueType((String)editedValue);
+            return issue;
+        } else if(column == 4) {
+            issue.setResolution((String)editedValue);
+            return issue;
+        } else if(column == 5) {
+            issue.setShortDescription((String)editedValue);
+            return issue;
+        }
+
+        return null;
+    }
+
+    public Class getColumnClass(int column) {
 		switch(column) {
 			case 0:
 				return Integer.class;

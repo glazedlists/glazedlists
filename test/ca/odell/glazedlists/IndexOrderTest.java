@@ -64,10 +64,10 @@ public class IndexOrderTest extends TestCase {
      */
     public void testIndexOutOfOrder() {
         EventList<int[]> unsorted = new BasicEventList<int[]>();
-        SortedList<int[]> sortedOnce = new SortedList<int[]>(unsorted, new IntArrayComparator(0));
+        SortedList<int[]> sortedOnce = new SortedList<int[]>(unsorted, GlazedListsTests.intArrayComparator(0));
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
         FilterList<int[]> filteredOnce = new FilterList<int[]>(sortedOnce, matcherEditor);
-        SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, new IntArrayComparator(0));
+        SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, GlazedListsTests.intArrayComparator(0));
         
         unsorted.addListEventListener(new IncreasingChangeIndexListener());
         sortedOnce.addListEventListener(new IncreasingChangeIndexListener());

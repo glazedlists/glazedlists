@@ -8,9 +8,6 @@ import ca.odell.glazedlists.demo.issuebrowser.*;
 // swing
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.border.Border;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.applet.*;
@@ -130,7 +127,7 @@ public class IssuesBrowser extends Applet {
         FilterList issuesStateFiltered = new FilterList(issuesUserFiltered, stateMatcherEditor);
         FilterList issuesTextFiltered = new FilterList(issuesStateFiltered, textFilterMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-        final SortedList issuesSortedList = new SortedList(priorityList);
+        final SortedList issuesSortedList = new SortedList(priorityList, false);
 
         // issues table
         issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
