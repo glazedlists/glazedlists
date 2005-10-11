@@ -71,15 +71,15 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
             // create an array with the sorted nodes
             IndexedTreeNode[] sortedNodes = new IndexedTreeNode[sorted.size()];
             int index = 0;
-            for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
-                IndexedTreeNode<IndexedTreeNode> unsortedNode = (IndexedTreeNode<IndexedTreeNode>)i.next();
+            for(IndexedTreeIterator<IndexedTreeNode> i = unsorted.iterator(0); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = i.next();
                 sortedNodes[index] = unsortedNode.getValue();
             }
 
             // set the unsorted nodes to point to the new set of sorted nodes
             index = 0;
-            for(Iterator i = unsorted.iterator(); i.hasNext(); index++) {
-                IndexedTreeNode<IndexedTreeNode> unsortedNode = (IndexedTreeNode<IndexedTreeNode>)i.next();
+            for(IndexedTreeIterator<IndexedTreeNode> i = unsorted.iterator(0); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = i.next();
                 unsortedNode.setValue(sortedNodes[reorderMap[index]]);
                 sortedNodes[reorderMap[index]].setValue(unsortedNode);
             }
@@ -93,8 +93,10 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
 
         // first update the offset tree for all changes, and keep the changed nodes in a list
         LinkedList<IndexedTreeNode> insertNodes = new LinkedList<IndexedTreeNode>();
+        List<IndexedTreeNode<IndexedTreeNode>> updateNodes = new ArrayList<IndexedTreeNode<IndexedTreeNode>>();
 
-        // perform the inserts and deletes on the indexed tree
+        // Update the indexed tree so it matches the source.
+        // Save the nodes to be inserted and updated as well
         while(listChanges.next()) {
 
             // get the current change info
@@ -106,6 +108,13 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
                 IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.addByNode(unsortedIndex, IndexedTreeNode.EMPTY_NODE);
                 insertNodes.addLast(unsortedNode);
 
+            // on update, mark the updated node as unsorted and save it so it can be moved
+            } else if(changeType == ListEvent.UPDATE) {
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.getNode(unsortedIndex);
+                IndexedTreeNode sortedNode = unsortedNode.getValue();
+                sortedNode.setSorted(false);
+                updateNodes.add(sortedNode);
+
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
                 IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.getNode(unsortedIndex);
@@ -113,61 +122,21 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.addDelete(deleteSortedIndex);
 
-            } else if(changeType == ListEvent.UPDATE) {
-                // do not handle these till the next pass
-            }
-        }
-
-        // update indices which are all deleted and then inserted
-        IndicesPendingDeletion indicesPendingDeletion = new IndicesPendingDeletion();
-
-        // record the original indices of the nodes for update
-        listChanges.reset();
-        while(listChanges.next()) {
-
-            // get the current change info
-            int unsortedIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-
-            // on insert, insert the index node
-            if(changeType == ListEvent.UPDATE) {
-                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.getNode(unsortedIndex);
-                IndexedTreeNode sortedNode = unsortedNode.getValue();
-                int originalIndex = sortedNode.getIndex();
-                indicesPendingDeletion.addPair(new IndexNodePair(originalIndex, unsortedNode));
-            }
-        }
-
-        // delete the indices of the updated nodes
-        listChanges.reset();
-        while(listChanges.next()) {
-
-            // get the current change info
-            int unsortedIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-
-            // on insert, insert the index node
-            if(changeType == ListEvent.UPDATE) {
-                IndexedTreeNode unsortedNode = unsorted.getNode(unsortedIndex);
-                deleteByUnsortedNode(unsortedNode);
             }
         }
 
         // fire all the update events
-        for(Iterator i = indicesPendingDeletion.iterator(); i.hasNext(); ) {
-            IndexNodePair indexNodePair = (IndexNodePair)i.next();
-            i.remove();
+        for(Iterator<IndexedTreeNode<IndexedTreeNode>> i = updateNodes.iterator(); i.hasNext(); ) {
+            IndexedTreeNode<IndexedTreeNode> sortedNode = i.next();
 
-            int insertedIndex = insertByUnsortedNode(indexNodePair.node);
-            int deletedIndex = indexNodePair.index;
-            // adjust the out of order insert with respect to the delete list
-            insertedIndex = indicesPendingDeletion.adjustDeleteAndInsert(deletedIndex, insertedIndex);
-
-            // fire the events
-            if(deletedIndex == insertedIndex) {
-                updates.addUpdate(insertedIndex);
+            int deletedIndex = sortedNode.getIndex();
+            if(isNodeInSortedOrder(sortedNode)) {
+                sortedNode.setSorted(true);
+                updates.addUpdate(deletedIndex);
             } else {
+                sortedNode.removeFromTree(sorted);
                 updates.addDelete(deletedIndex);
+                int insertedIndex = insertByUnsortedNode(sortedNode.getValue());
                 updates.addInsert(insertedIndex);
             }
         }
@@ -181,6 +150,31 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
 
         // commit the changes and notify listeners
         updates.commitEvent();
+    }
+
+    /**
+     * Whether this node is greater or equal to its neighbour on the left and
+     * less than or equal to its neighbour on the right.
+     *
+     * <p>This method skips unsorted nodes, whose value should not be compared
+     * against when determining tree ordering.
+     */
+    private boolean isNodeInSortedOrder(IndexedTreeNode sortedNode) {
+        // first ensure this node is greater than its predecessors
+        for(IndexedTreeNode leftNeighbour = sortedNode.previous(); leftNeighbour != null; leftNeighbour = leftNeighbour.previous()) {
+            if(!leftNeighbour.isSorted()) continue;
+            if(sorted.getComparator().compare(leftNeighbour.getValue(), sortedNode.getValue()) > 0) return false;
+            break;
+        }
+
+        // then ensure this node is less than its followers
+        for(IndexedTreeNode rightNeighbour = sortedNode.next(); rightNeighbour != null; rightNeighbour = rightNeighbour.next()) {
+            if(!rightNeighbour.isSorted()) continue;
+            if(sorted.getComparator().compare(sortedNode.getValue(), rightNeighbour.getValue()) > 0) return false;
+            break;
+        }
+
+        return true;
     }
 
     /**
@@ -254,16 +248,16 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
         if(source.size() == 0) return;
 
         // rebuild the sorted tree to reflect the new Comparator
-        for(Iterator i = unsorted.iterator();i.hasNext(); ) {
-            IndexedTreeNode unsortedNode = (IndexedTreeNode)i.next();
+        for(IndexedTreeIterator i = unsorted.iterator(0); i.hasNext(); ) {
+            IndexedTreeNode unsortedNode = i.next();
             insertByUnsortedNode(unsortedNode);
         }
 
         // construct the reorder map
         int[] reorderMap = new int[size()];
         int oldSortedIndex = 0;
-        for(Iterator i = previousSorted.iterator();i.hasNext();oldSortedIndex++) {
-            IndexedTreeNode oldSortedNode = (IndexedTreeNode)i.next();
+        for(IndexedTreeIterator i = previousSorted.iterator(0); i.hasNext(); oldSortedIndex++) {
+            IndexedTreeNode oldSortedNode = i.next();
             IndexedTreeNode unsortedNode = (IndexedTreeNode)oldSortedNode.getValue();
             IndexedTreeNode newSortedNode = (IndexedTreeNode)unsortedNode.getValue();
             int newSortedIndex = newSortedNode.getIndex();
@@ -324,14 +318,14 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
 
         // otherwise, we must now begin a linear search for the index of an element
         // that .equals() the given object
-        for (; index > -1; index--) {
+        for(; index > -1; index--) {
             E objectAtIndex = get(index);
 
             // if the objectAtIndex no longer compares equally with the given object, stop the linear search
-            if (comparator.compare((E)object, objectAtIndex) != 0) return -1;
+            if(comparator.compare((E)object, objectAtIndex) != 0) return -1;
 
             // if the objectAtIndex and object are equal, return the index
-            if (GlazedListsImpl.equal(object, objectAtIndex))
+            if(GlazedListsImpl.equal(object, objectAtIndex))
                 return index;
         }
 
@@ -416,92 +410,6 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
         }
     }
 
-    /**
-     * A class for managing a list of pending deletes. This class presents deletes
-     * in order sorted by the index where they will be reinserted.
-     */
-    private class IndicesPendingDeletion {
-
-        /** the underlying data storage */
-        SortedSet<IndexNodePair> indexNodePairs = new TreeSet<IndexNodePair>();
-
-        /**
-         * Adds the specified index to the list of indices pending deletion.
-         */
-        public void addPair(IndexNodePair nodePair) {
-            indexNodePairs.add(nodePair);
-        }
-
-        /**
-         * Adjusts the indices for a delete and an insert at the specified indices. This is
-         * necessary if an event is forwarded before this list of delete events is forwarded.
-         *
-         * <p>This method can use some optimization.
-         */
-        public int adjustDeleteAndInsert(int deletedIndex, int insertedIndex) {
-            for(Iterator<IndexNodePair> i = indexNodePairs.iterator(); i.hasNext(); ) {
-                IndexNodePair indexNodePair = i.next();
-                // adjust due to the delete
-                if(deletedIndex < indexNodePair.index) {
-                    indexNodePair.index--;
-                }
-                // adjust due to the insert
-                if(insertedIndex <= indexNodePair.index) {
-                    indexNodePair.index++;
-                } else {
-                    insertedIndex++;
-                }
-            }
-            return insertedIndex;
-        }
-
-        /**
-         * Gets the Iterator for this set of indices.
-         */
-        public Iterator<IndexNodePair> iterator() {
-            return indexNodePairs.iterator();
-        }
-
-        /**
-         * Gets this as a String for debugging.
-         */
-        public String toString() {
-            return "" + indexNodePairs;
-        }
-    }
-
-    /**
-     * An IndexNodePair is simply a node and an index. This is useful for
-     * keeping track of pending deletes.
-     */
-    private class IndexNodePair implements Comparable {
-        private int index;
-        private IndexedTreeNode node;
-
-        public IndexNodePair(int index, IndexedTreeNode node) {
-            this.index = index;
-            this.node = node;
-        }
-
-        public String toString() {
-            return "" + index + "(" + source.get(node.getIndex()) + ")";
-        }
-        /**
-         * Index node pairs are compared first by their Object's values, and then
-         * by their indices.
-         */
-        public int compareTo(Object other) {
-            IndexNodePair otherIndexNodePair = (IndexNodePair)other;
-            if(comparator != null) {
-                E myObject = source.get(node.getIndex());
-                E otherObject = source.get(otherIndexNodePair.node.getIndex());
-                int compareResult = comparator.compare(myObject, otherObject);
-                if(compareResult != 0) return compareResult;
-            }
-            return index - otherIndexNodePair.index;
-        }
-    }
-
     /** {@inheritDoc} */
     public Iterator<E> iterator() {
         return new SortedListIterator();
@@ -513,10 +421,7 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
     private class SortedListIterator implements Iterator<E> {
 
         /** the IndexedTreeIterator to use to move across the tree */
-        private IndexedTreeIterator<IndexedTreeNode> treeIterator = sorted.iterator();
-
-        /** the last unsorted index to be returned by this iterator */
-        private int lastUnsortedIndex = -1;
+        private IndexedTreeIterator<IndexedTreeNode> treeIterator = sorted.iterator(0);
 
         /**
          * Returns true iff there are more value to iterate on by caling next()
@@ -531,28 +436,16 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
         public E next() {
             IndexedTreeNode sortedNode = (IndexedTreeNode)treeIterator.next();
             IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
-            lastUnsortedIndex = unsortedNode.getIndex();
-            return source.get(lastUnsortedIndex);
+            return source.get(unsortedNode.getIndex());
         }
 
         /**
          * Removes the last value returned by this iterator.
          */
         public void remove() {
-            // fast fail if next hasn't been called
-            if(lastUnsortedIndex == -1) throw new NoSuchElementException("Cannot remove before next is called");
-
-            // this isn't the first value so just step the iterator back one and remove
-            if(treeIterator.hasPrevious()) {
-                treeIterator.previous();
-                source.remove(lastUnsortedIndex);
-
-            // this is the first value so just remove and reset the tree iterator
-            } else {
-                source.remove(lastUnsortedIndex);
-                treeIterator = sorted.iterator();
-            }
-            lastUnsortedIndex = -1;
+            int indexToRemove = treeIterator.previousIndex();
+            ActiveSorting.this.source.remove(getSourceIndex(indexToRemove));
+            treeIterator = sorted.iterator(indexToRemove);
         }
     }
 }

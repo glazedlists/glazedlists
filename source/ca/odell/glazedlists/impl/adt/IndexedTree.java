@@ -64,12 +64,12 @@ public final class IndexedTree<V> {
     /**
      * Gets the tree node with the specified value.
      *
-     * @return the tree node containing the specified value, or null
+     * @return the tree node containing the specified value, or <code>null</code>
      *      if no such node is found.
      */
     public IndexedTreeNode<V> getNode(Object value) {
         if(root == null) return null;
-        return root.getNodeByValue(comparator, value);
+        return root.getShallowestNodeWithValue(comparator, value, false);
     }
 
     /**
@@ -86,29 +86,9 @@ public final class IndexedTree<V> {
      * This iterator returns {@link IndexedTreeNode}s, so to get the
      * values use the node's {@link IndexedTreeNode#getValue()} method.
      */
-    public IndexedTreeIterator<V> iterator() {
-        return new IndexedTreeIterator<V>(this);
+    public IndexedTreeIterator<V> iterator(int index) {
+        return new IndexedTreeIterator<V>(this, index);
     }
-
-    /**
-     * Gets an iterator for this tree. The iterator moves in sorted order
-     * for sorted trees and order of increasing index for indexed trees.
-     * This iterator returns {@link IndexedTreeNode}s, so to get the
-     * values use the node's {@link IndexedTreeNode#getValue()} method.
-     */
-//    public ListIterator listIterator() {
-//        return new IndexedTreeIterator(this);
-//    }
-
-    /**
-     * Gets an iterator for this tree. The iterator moves in sorted order
-     * for sorted trees and order of increasing index for indexed trees.
-     * This iterator returns {@link IndexedTreeNode}s, so to get the
-     * values use the node's {@link IndexedTreeNode#getValue()} method.
-     */
-//    public ListIterator listIterator(int index) {
-//        return new IndexedTreeIterator(this, index);
-//    }
 
     /**
      * Gets the comparator used to sort the nodes in this tree.
@@ -136,9 +116,18 @@ public final class IndexedTree<V> {
      *      index of the node.
      */
     public IndexedTreeNode<V> addByNode(V value) {
-        if(root == null) root = new IndexedTreeNode<V>(null);
-        return root.insert(this, value);
+        try {
+            if(root == null) {
+                root = new IndexedTreeNode<V>(null, value);
+                return root;
+            } else {
+                return root.insert(this, value);
+            }
+        } finally {
+//            validate(); // DEBUG!
+        }
     }
+
     /**
      * Inserts the specified object into the tree with the specified index.
      *
@@ -147,36 +136,20 @@ public final class IndexedTree<V> {
      *      index of the node.
      */
     public IndexedTreeNode<V> addByNode(int index, V value) {
-        if(index > size()) throw new IndexOutOfBoundsException("cannot insert into tree of size " + size() + " at " + index);
-        else if(value == null) throw new NullPointerException("cannot insert a value that is null");
-        else if(root == null && index == 0) root = new IndexedTreeNode<V>(null);
-        return root.insert(this, index, value);
+        try {
+            if(index > size()) throw new IndexOutOfBoundsException("cannot insert into tree of size " + size() + " at " + index);
+            if(value == null) throw new NullPointerException("cannot insert a value that is null");
+
+            if(root == null) {
+                root = new IndexedTreeNode<V>(null, value);
+                return root;
+            } else {
+                return root.insert(this, index, value);
+            }
+        } finally {
+//            validate(); // DEBUG!
+        }
     }
-
-    /**
-     * Returns true if this list contains the specified element.
-     *
-     * commented out 08/13/2005 as SortedList no longer uses it, and thus no clients have need of it
-     */
-//    public boolean contains(Object object) {
-//        if(root == null) return false;
-//        return root.contains(comparator, object);
-//    }
-
-    /**
-     * Returns true if this list contains all of the elements of the specified collection.
-     * 
-     * commented out 08/13/2005 as SortedList no longer uses it, and thus no clients have need of it
-     */
-//    public boolean containsAll(Collection collection) {
-//        // look for something that is missing
-//        for(Iterator i = collection.iterator(); i.hasNext(); ) {
-//            Object a = i.next();
-//            if(!contains(a)) return false;
-//        }
-//        // contained everything we looked for
-//        return true;
-//    }
 
     /**
      * Returns the index in this list of the first occurrence of the specified
@@ -184,16 +157,21 @@ public final class IndexedTree<V> {
      */
     public int indexOf(Object object) {
         if(root == null) return -1;
-        return root.indexOf(comparator, object, false);
-    }
 
-    /**
-     * Returns the index in this list of the last occurrence of the specified
-     * element, or -1 if this list does not contain this element.
-     */
-    public int lastIndexOf(Object object) {
-        if(root == null) return -1;
-        return root.lastIndexOf(comparator, object);
+        // find any node with this value
+        IndexedTreeNode<V> shallowestNodeWithValue = root.getShallowestNodeWithValue(comparator, object, false);
+        if(shallowestNodeWithValue == null) return -1;
+
+        // iterate to the first node with this value
+        IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+        while(iterator.hasPrevious()) {
+            IndexedTreeNode<V> node = iterator.previous();
+            if(comparator.compare(node.getValue(), object) == 0) continue;
+            else return iterator.nextIndex() + 1;
+        }
+
+        // we ran out of values
+        return 0;
     }
 
     /**
@@ -203,7 +181,57 @@ public final class IndexedTree<V> {
      */
     public int indexOfSimulated(Object object) {
         if(root == null) return 0;
-        return root.indexOf(comparator, object, true);
+
+        // find any node with this value
+        IndexedTreeNode<V> shallowestNodeWithValue = root.getShallowestNodeWithValue(comparator, object, true);
+        if(shallowestNodeWithValue == null) throw new IllegalStateException();
+        int compareResult = comparator.compare(shallowestNodeWithValue.getValue(), object);
+
+        // the result is before our target, increment until that result changes
+        if(compareResult < 0) {
+            IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+            while(iterator.hasNext()) {
+                IndexedTreeNode<V> node = iterator.next();
+                if(comparator.compare(node.getValue(), object) < 0) continue;
+                else return iterator.previousIndex();
+            }
+            // we ran out of values
+            return size();
+
+        // the result is equal to or after our value, decrement until that result changes
+        } else {
+            IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+            while(iterator.hasPrevious()) {
+                IndexedTreeNode<V> node = iterator.previous();
+                if(comparator.compare(node.getValue(), object) >= 0) continue;
+                else return iterator.nextIndex() + 1;
+            }
+            // we ran out of values
+            return 0;
+        }
+    }
+
+    /**
+     * Returns the index in this list of the last occurrence of the specified
+     * element, or -1 if this list does not contain this element.
+     */
+    public int lastIndexOf(Object object) {
+        if(root == null) return -1;
+
+        // find any node with this value
+        IndexedTreeNode<V> shallowestNodeWithValue = root.getShallowestNodeWithValue(comparator, object, false);
+        if(shallowestNodeWithValue == null) return -1;
+
+        // iterate to the last node with this value
+        IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+        while(iterator.hasNext()) {
+            IndexedTreeNode<V> node = iterator.next();
+            if(comparator.compare(node.getValue(), object) == 0) continue;
+            else return iterator.previousIndex() - 1;
+        }
+
+        // we ran out of values
+        return size() - 1;
     }
 
     /**
@@ -218,7 +246,7 @@ public final class IndexedTree<V> {
      * them one at a time.
      */
     void validate() {
-        for(Iterator<IndexedTreeNode<V>> i = (Iterator<IndexedTreeNode<V>>)iterator(); i.hasNext();) {
+        for(Iterator<IndexedTreeNode<V>> i = (Iterator<IndexedTreeNode<V>>)iterator(0); i.hasNext();) {
             IndexedTreeNode<V> node = i.next();
             node.validate(this);
         }

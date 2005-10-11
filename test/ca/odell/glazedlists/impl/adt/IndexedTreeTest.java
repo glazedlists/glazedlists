@@ -57,8 +57,8 @@ public class IndexedTreeTest extends TestCase {
 
         // create a list from the elements of the IndexedTree
         List indexedTreeList = new ArrayList();
-        for(Iterator i = indexedTree.iterator(); i.hasNext(); ) {
-            IndexedTreeNode node = (IndexedTreeNode)i.next();
+        for(IndexedTreeIterator i = indexedTree.iterator(0); i.hasNext(); ) {
+            IndexedTreeNode node = i.next();
             indexedTreeList.add(node.getValue());
         }
 
@@ -121,13 +121,95 @@ public class IndexedTreeTest extends TestCase {
         }
 
         // verify the list contains only the original 100 Bs and 100 Ds
-        for(Iterator i = indexedTree.iterator(); i.hasNext(); ) {
-            IndexedTreeNode node = (IndexedTreeNode)i.next();
+        for(IndexedTreeIterator i = indexedTree.iterator(0); i.hasNext(); ) {
+            IndexedTreeNode node = i.next();
             if(node.getValue().equals("B")) BCount--;
             else if(node.getValue().equals("D")) DCount--;
             else fail();
         }
         assertEquals(BCount, 0);
         assertEquals(DCount, 0);
+    }
+
+    public void testIterators() {
+        IndexedTree<String> tree = new IndexedTree<String>();
+        tree.addByNode(0, "A");
+        tree.addByNode(1, "B");
+        tree.addByNode(2, "C");
+
+        IndexedTreeIterator<String> iterator = new IndexedTreeIterator<String>(tree, 0);
+
+        assertEquals(true, iterator.hasNext());
+        assertEquals(0, iterator.nextIndex());
+        assertEquals("A", iterator.next().getValue());
+        assertEquals(true, iterator.hasNext());
+        assertEquals(1, iterator.nextIndex());
+        assertEquals("B", iterator.next().getValue());
+        assertEquals(true, iterator.hasNext());
+        assertEquals(2, iterator.nextIndex());
+        assertEquals("C", iterator.next().getValue());
+        assertEquals(false, iterator.hasNext());
+
+        assertEquals(true, iterator.hasPrevious());
+        assertEquals(2, iterator.previousIndex());
+        assertEquals("C", iterator.previous().getValue());
+        assertEquals(true, iterator.hasPrevious());
+        assertEquals(1, iterator.previousIndex());
+        assertEquals("B", iterator.previous().getValue());
+        assertEquals(true, iterator.hasPrevious());
+        assertEquals(0, iterator.previousIndex());
+        assertEquals("A", iterator.previous().getValue());
+        assertEquals(false, iterator.hasPrevious());
+
+        assertEquals(true, iterator.hasNext());
+        assertEquals(0, iterator.nextIndex());
+        assertEquals("A", iterator.next().getValue());
+        iterator.remove();
+        assertEquals(true, iterator.hasNext());
+        assertEquals(0, iterator.nextIndex());
+        assertEquals("B", iterator.next().getValue());
+        iterator.remove();
+        assertEquals(true, iterator.hasNext());
+        assertEquals(0, iterator.nextIndex());
+        assertEquals("C", iterator.next().getValue());
+        iterator.remove();
+        assertEquals(0, tree.size());
+        assertEquals(false, iterator.hasNext());
+        assertEquals(false, iterator.hasPrevious());
+    }
+
+    public void testIndexOfEtc() {
+        IndexedTree<String> tree = new IndexedTree<String>(GlazedLists.comparableComparator());
+        tree.addByNode("B");
+        tree.addByNode("B");
+        tree.addByNode("B");
+        tree.addByNode("D");
+        tree.addByNode("D");
+        tree.addByNode("E");
+
+        assertEquals(0, tree.indexOf("B"));
+        assertEquals(2, tree.lastIndexOf("B"));
+        assertEquals(0, tree.indexOfSimulated("B"));
+
+        assertEquals(3, tree.indexOf("D"));
+        assertEquals(4, tree.lastIndexOf("D"));
+        assertEquals(3, tree.indexOfSimulated("D"));
+
+        assertEquals(5, tree.indexOf("E"));
+        assertEquals(5, tree.lastIndexOf("E"));
+        assertEquals(5, tree.indexOfSimulated("E"));
+
+        assertEquals(-1, tree.indexOf("A"));
+        assertEquals(-1, tree.lastIndexOf("A"));
+        assertEquals(0, tree.indexOfSimulated("A"));
+
+        assertEquals(-1, tree.indexOf("C"));
+        assertEquals(-1, tree.lastIndexOf("C"));
+        assertEquals(3, tree.indexOfSimulated("C"));
+
+        assertEquals(-1, tree.indexOf("F"));
+        assertEquals(-1, tree.lastIndexOf("F"));
+        assertEquals(6, tree.indexOfSimulated("F"));
+
     }
 }

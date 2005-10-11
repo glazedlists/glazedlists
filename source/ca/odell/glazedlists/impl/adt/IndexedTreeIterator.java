@@ -7,113 +7,92 @@ package ca.odell.glazedlists.impl.adt;
 import java.util.*;
 
 /**
- * A simple {@link ListIterator} for the {@link IndexedTree}.
+ * A simple itertor of the nodes in an {@link IndexedTree}.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class IndexedTreeIterator<V> implements Iterator<V> {
-
-    /** the index of the current node */
-    private int currentIndex = 0;
+public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
 
     /** the host tree */
     private IndexedTree<V> host = null;
 
-    /** the last tree node returned by this iterator */
-    private IndexedTreeNode currentNode = null;
-
-    /** the direction of iteration */
-    private boolean goingForward = true;
-
     /**
-     * Creates an iterator that iterates the tree starting at the specified
-     * node.
+     * The node for the next call to next(), or null if there are no nodes
+     * left (because we've iterated to the end of the tree.
      */
-    public IndexedTreeIterator(IndexedTree<V> host) {
-        this(host, 0);
-    }
+    private IndexedTreeNode<V> nextNode = null;
+
+    /** cache the index of the next node */
+    private int nextIndex = 0;
+
+    /** the most recent node returned from {@link #next} or {@link #previous}. */
+    private IndexedTreeNode last = null;
 
     /**
-     * Creates an iterator that iterates the tree starting at the specified
-     * node.
+     * Creates an iterator that iterates the tree starting at the specified index.
      *
      * @param index the value at index will be the value returned by the
      *              first call to next().
      */
     public IndexedTreeIterator(IndexedTree<V> host, int index) {
+        if(index < 0 || index > host.size()) throw new IndexOutOfBoundsException();
+
         this.host = host;
-        this.currentIndex = index - 1;
+        this.nextIndex = index;
+        this.nextNode = nextIndex == host.size() ? null : host.root.getNodeWithIndex(nextIndex);
+    }
 
-        // the tree is empty
-        if(host.root == null) {
-            currentNode = null;
+    /**
+     * Creates an iterator that iterates the tree starting at the specified node.
+     */
+    public IndexedTreeIterator(IndexedTree<V> host, IndexedTreeNode<V> nextNode) {
+        if(host == null || nextNode == null) throw new IllegalArgumentException();
 
-        // starting in the middle
-        } else if(currentIndex > -1) {
-            currentNode = host.getNode(currentIndex);
-
-        // starting at the very beginning
-        } else {
-            currentNode = host.root.getSmallestChildNode();
-        }
+        this.host = host;
+        this.nextNode = nextNode;
+        this.nextIndex = this.nextNode.getIndex();
     }
 
     /**
      * Returns true if the iteration forward has more elements.
      */
     public boolean hasNext() {
-        return currentIndex < host.size() - 1;
+        return nextIndex < host.size();
     }
 
     /**
      * Returns the index of the value last returned by this Iterator.
      */
     public int nextIndex() {
-        return currentIndex + 1;
+        if(!hasNext()) throw new NoSuchElementException();
+        return nextIndex;
     }
 
     /**
      * Returns the next element in the iteration.
      */
-    public V next() {
-        // handle the empty tree and end of tree cases
-        if(currentNode == null || currentIndex >= host.size() - 1) {
-            throw new NoSuchElementException();
+    public IndexedTreeNode<V> next() {
+        if(!hasNext()) throw new NoSuchElementException();
 
-        // at the very beginning
-        } else if(currentIndex == -1) {
-            currentIndex = 0;
-            goingForward = true;
-            return (V)currentNode;
-
-        // anywhere else in the tree is the same
-        } else {
-            // already iterating forwards
-            if(goingForward) {
-                currentIndex++;
-                findNextNode();
-                return (V)currentNode;
-
-            // switching iteration directions
-            } else {
-                goingForward = true;
-                return (V)currentNode;
-            }
-        }
+        this.last = this.nextNode;
+        incrementNextNode();
+        return this.last;
     }
 
     /**
      * Returns true if the iteration backwards has more elements.
      */
     public boolean hasPrevious() {
-        return currentIndex > 0;
+        return nextIndex > 0;
     }
 
     /**
      * Returns the index of the value last returned by this Iterator.
      */
     public int previousIndex() {
-        return currentIndex;
+        if(!hasPrevious()) throw new NoSuchElementException();
+        return nextIndex - 1;
     }
 
     /**
@@ -121,149 +100,47 @@ public class IndexedTreeIterator<V> implements Iterator<V> {
      */
     public IndexedTreeNode<V> previous() {
         // handle the empty tree and start of tree cases
-        if(currentNode == null || currentIndex < 0) {
-            throw new NoSuchElementException();
+        if(!hasPrevious()) throw new NoSuchElementException();
 
-        // at the beginning of the tree
-        } else if(currentIndex == 0) {
-            currentIndex = -1;
-            goingForward = false;
-            return currentNode;
-
-        // anywhere else in the tree
-        } else {
-            // already iterating backwards
-            if(!goingForward) {
-                currentIndex--;
-                findPreviousNode();
-                return currentNode;
-
-            // switching iteration directions
-            } else {
-                goingForward = false;
-                return currentNode;
-            }
-        }
+        decrementNextNode();
+        this.last = this.nextNode;
+        return this.last;
     }
 
     /**
-     * Removes from IndexedTree the last node returned by the iterator.
+     * Remove the element most recently returned from {@link #next()} or
+     * {@link #previous()}.
      */
     public void remove() {
-        // empty tree case
-        if(currentNode == null || currentIndex == -1) {
-            throw new NoSuchElementException();
+        if(this.last == null) throw new NoSuchElementException();
 
-        // last one in the tree
-        } else if(host.size() == 1) {
-            currentIndex = -1;
-            currentNode = null;
+        // remove the most recently requested element
+        this.last.removeFromTree(host);
 
-        // first node in a significantly sized tree
-        } else if(currentIndex == 0) {
-            currentIndex = -1;
-            IndexedTreeNode<V> nodeToRemove = currentNode;
-            findNextNode();
-            nodeToRemove.removeFromTree(host);
-
-        // anywhere else in the tree
-        } else {
-            currentIndex--;
-            IndexedTreeNode<V> nodeToRemove = currentNode;
-            findPreviousNode();
-            nodeToRemove.removeFromTree(host);
-        }
+        // adjust indices
+        this.last = null;
+        this.nextIndex = (nextNode == null) ? host.size() : nextNode.getIndex();
     }
 
     /**
-     * Adds a value into a new IndexedTreeNode after the last node returned.
-     * <strong>Warning: this method should not be used if the tree is sorted.</strong>
+     * Increment {@link nextNode} to its follower.
      */
-    public void addValue(V value) {
-        // empty tree case
-        if(currentNode == null || currentIndex == -1) {
-            host.addByNode(0, value);
-
-        // otherwise insert just after the current value
-        } else {
-            currentNode.insert(host, 1, value);
-            currentIndex++;
-            findNextNode();
-        }
+    private void incrementNextNode() {
+        nextNode = nextNode.next();
+        nextIndex++;
     }
 
     /**
-     * Sets the value on the last IndexedTreeNode that was returned.
-     * <strong>Warning: this method should not be used if the tree is sorted.</strong>
+     * Increment {@link nextNode} to its predecessor.
      */
-    public void setValue(V value) {
-        // empty tree case
-        if(currentNode == null || currentIndex == -1) {
-            throw new NoSuchElementException();
-
-        // otherwise just set the value
+    private void decrementNextNode() {
+        // we've incremented past the end of the tree
+        if(nextNode == null) {
+            nextNode = host.getNode(nextIndex - 1);
         } else {
-            currentNode.setValue(value);
+            nextNode = nextNode.previous();
         }
-    }
-
-    /**
-     * Finds the next node in the tree.
-     */
-    private void findNextNode() {
-        //  go into the right subtree for the next node
-        if(currentNode.right != null) {
-            currentNode = currentNode.right;
-            while(currentNode.left != null) {
-                currentNode = currentNode.left;
-            }
-
-        // go to the parent for the next node
-        } else if(currentNode.parent.left == currentNode) {
-            currentNode = currentNode.parent;
-
-        // get out of the right subtree
-        } else if(currentNode.parent.right == currentNode) {
-            // move to the top of the current subtree
-            while(currentNode.parent.right == currentNode) {
-                currentNode = currentNode.parent;
-            }
-            // Move up one more node to leave the subtree
-            currentNode = currentNode.parent;
-
-        // the iterator is out of state
-        } else {
-            throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Finds the previous node in the tree.
-     */
-    private void findPreviousNode() {
-        //  go into the left subtree for the previous node
-        if(currentNode.left != null) {
-            currentNode = currentNode.left;
-            while(currentNode.right != null) {
-                currentNode = currentNode.right;
-            }
-
-        // go to the parent for the next node
-        } else if(currentNode.parent.right == currentNode) {
-            currentNode = currentNode.parent;
-
-        // get out of the left subtree
-        } else if(currentNode.parent.left == currentNode) {
-            // move to the top of the current subtree
-            while(currentNode.parent.left == currentNode) {
-                currentNode = currentNode.parent;
-            }
-            // Move up one more node to leave the subtree
-            currentNode = currentNode.parent;
-
-        // the iterator is out of state
-        } else {
-            throw new IllegalStateException();
-        }
+        
+        nextIndex--;
     }
 }

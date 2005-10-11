@@ -87,8 +87,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
      * list in the forward direction.
      */
     public boolean hasNext() {
-        if(nextIndex < source.size()) return true;
-        return false;
+        return nextIndex < source.size();
     }
 
     /**
@@ -119,8 +118,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
      * list in the reverse direction.
      */
     public boolean hasPrevious() {
-        if(nextIndex > 0) return true;
-        return false;
+        return nextIndex > 0;
     }
 
     /**

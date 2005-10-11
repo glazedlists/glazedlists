@@ -40,6 +40,56 @@ public class SortedListTest extends TestCase {
         sortedList = null;
     }
 
+    public void testSimpleMoves() {
+        unsortedList = new BasicEventList();
+        sortedList = new SortedList(unsortedList);
+        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", true));
+
+        unsortedList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
+
+        assertEquals(GlazedListsTests.stringToList("ABCDEFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABCDEFG"), sortedList);
+
+        unsortedList.set(3, "H");
+        assertEquals(GlazedListsTests.stringToList("ABCHEFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABCEFGH"), sortedList);
+    }
+
+    /**
+     * Test that updates, inserts and deletes all in one even are handled succesfully.
+     */
+    public void testComplexEvents() {
+        unsortedList = new BasicEventList();
+        ExternalNestingEventList nestableList = new ExternalNestingEventList(unsortedList);
+        sortedList = new SortedList(nestableList);
+        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", true));
+
+        nestableList.beginEvent(false);
+        nestableList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
+        nestableList.commitEvent();
+
+        assertEquals(GlazedListsTests.stringToList("ABCDEFG"), nestableList);
+        assertEquals(GlazedListsTests.stringToList("ABCDEFG"), sortedList);
+
+        nestableList.beginEvent(false);
+        nestableList.set(3, "H"); // ABCHEFG
+        nestableList.add(0, "A"); // AABCHEFG
+        nestableList.commitEvent();
+
+        assertEquals(GlazedListsTests.stringToList("AABCHEFG"), nestableList);
+        assertEquals(GlazedListsTests.stringToList("AABCEFGH"), sortedList);
+
+        nestableList.beginEvent(false);
+        nestableList.add(0, "I"); // IAABCHEFG
+        nestableList.add(1, "A"); // IAAABCHEFG
+        nestableList.set(5, "J"); // IAAABJHEFG
+        nestableList.set(9, "K"); // IAAABJHEFK
+        nestableList.commitEvent();
+
+        assertEquals(GlazedListsTests.stringToList("IAAABJHEFK"), nestableList);
+        assertEquals(GlazedListsTests.stringToList("AAABEFHIJK"), sortedList);
+    }
+
     /**
      * Test that the indexOf() and lastIndexOf() methods work if the SortedList
      * is not actually sorted.
@@ -190,7 +240,7 @@ public class SortedListTest extends TestCase {
      */
     public void testIndexOf() {
         BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source, new IntegerComparator());
+        SortedList sorted = new SortedList(source);
 
         // Test containment of a 10 on an empty list
         Integer ten = new Integer(10);
@@ -265,7 +315,7 @@ public class SortedListTest extends TestCase {
      */
     public void testLastIndexOf() {
         BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source, new IntegerComparator());
+        SortedList sorted = new SortedList(source);
 
         // Test containment of a 10 on an empty list
         Integer ten = new Integer(10);
@@ -348,7 +398,7 @@ public class SortedListTest extends TestCase {
      */
     public void testContains() {
         BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source, new IntegerComparator());
+        SortedList sorted = new SortedList(source);
 
         // Test containment of a 10 on an empty list
         Integer ten = new Integer(10);
@@ -485,28 +535,28 @@ public class SortedListTest extends TestCase {
     public void testRemoveWithNoComparator() {
         EventList basic = new BasicEventList();
         SortedList sorted = new SortedList(basic, null);
-        basic.addAll(charsToList("JamesLemieux"));
+        basic.addAll(GlazedListsTests.stringToList("JamesLemieux"));
         sorted.remove("e");
-        assertEquals(charsToList("JamsLemieux"), sorted);
-        assertEquals(charsToList("JamsLemieux"), basic);
+        assertEquals(GlazedListsTests.stringToList("JamsLemieux"), sorted);
+        assertEquals(GlazedListsTests.stringToList("JamsLemieux"), basic);
         sorted.remove("e");
-        assertEquals(charsToList("JamsLmieux"), sorted);
-        assertEquals(charsToList("JamsLmieux"), basic);
+        assertEquals(GlazedListsTests.stringToList("JamsLmieux"), sorted);
+        assertEquals(GlazedListsTests.stringToList("JamsLmieux"), basic);
         sorted.remove("e");
-        assertEquals(charsToList("JamsLmiux"), sorted);
-        assertEquals(charsToList("JamsLmiux"), basic);
+        assertEquals(GlazedListsTests.stringToList("JamsLmiux"), sorted);
+        assertEquals(GlazedListsTests.stringToList("JamsLmiux"), basic);
         sorted.remove("e");
-        assertEquals(charsToList("JamsLmiux"), sorted);
-        assertEquals(charsToList("JamsLmiux"), basic);
+        assertEquals(GlazedListsTests.stringToList("JamsLmiux"), sorted);
+        assertEquals(GlazedListsTests.stringToList("JamsLmiux"), basic);
         sorted.remove("m");
-        assertEquals(charsToList("JasLmiux"), sorted);
-        assertEquals(charsToList("JasLmiux"), basic);
+        assertEquals(GlazedListsTests.stringToList("JasLmiux"), sorted);
+        assertEquals(GlazedListsTests.stringToList("JasLmiux"), basic);
         sorted.remove("m");
-        assertEquals(charsToList("JasLiux"), sorted);
-        assertEquals(charsToList("JasLiux"), basic);
+        assertEquals(GlazedListsTests.stringToList("JasLiux"), sorted);
+        assertEquals(GlazedListsTests.stringToList("JasLiux"), basic);
         sorted.remove("m");
-        assertEquals(charsToList("JasLiux"), sorted);
-        assertEquals(charsToList("JasLiux"), basic);
+        assertEquals(GlazedListsTests.stringToList("JasLiux"), sorted);
+        assertEquals(GlazedListsTests.stringToList("JasLiux"), basic);
     }
 
     /**
@@ -516,55 +566,55 @@ public class SortedListTest extends TestCase {
     public void testRemoveWithWeakComparator() {
         EventList basic = new BasicEventList();
         SortedList sorted = new SortedList(basic, GlazedLists.caseInsensitiveComparator());
-        basic.addAll(charsToList("aAaBbBcCC"));
+        basic.addAll(GlazedListsTests.stringToList("aAaBbBcCC"));
         sorted.remove("A");
-        assertEquals(charsToList("aaBbBcCC"), sorted);
-        assertEquals(charsToList("aaBbBcCC"), basic);
+        assertEquals(GlazedListsTests.stringToList("aaBbBcCC"), sorted);
+        assertEquals(GlazedListsTests.stringToList("aaBbBcCC"), basic);
         sorted.remove("B");
-        assertEquals(charsToList("aabBcCC"), sorted);
-        assertEquals(charsToList("aabBcCC"), basic);
+        assertEquals(GlazedListsTests.stringToList("aabBcCC"), sorted);
+        assertEquals(GlazedListsTests.stringToList("aabBcCC"), basic);
         sorted.remove("C");
-        assertEquals(charsToList("aabBcC"), sorted);
-        assertEquals(charsToList("aabBcC"), basic);
+        assertEquals(GlazedListsTests.stringToList("aabBcC"), sorted);
+        assertEquals(GlazedListsTests.stringToList("aabBcC"), basic);
         sorted.remove("C");
-        assertEquals(charsToList("aabBc"), sorted);
-        assertEquals(charsToList("aabBc"), basic);
+        assertEquals(GlazedListsTests.stringToList("aabBc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("aabBc"), basic);
         sorted.remove("a");
-        assertEquals(charsToList("abBc"), sorted);
-        assertEquals(charsToList("abBc"), basic);
+        assertEquals(GlazedListsTests.stringToList("abBc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("abBc"), basic);
         sorted.remove("d");
-        assertEquals(charsToList("abBc"), sorted);
-        assertEquals(charsToList("abBc"), basic);
+        assertEquals(GlazedListsTests.stringToList("abBc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("abBc"), basic);
         sorted.remove("B");
-        assertEquals(charsToList("abc"), sorted);
-        assertEquals(charsToList("abc"), basic);
+        assertEquals(GlazedListsTests.stringToList("abc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("abc"), basic);
         sorted.remove("B");
-        assertEquals(charsToList("abc"), sorted);
-        assertEquals(charsToList("abc"), basic);
+        assertEquals(GlazedListsTests.stringToList("abc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("abc"), basic);
         sorted.remove("A");
-        assertEquals(charsToList("abc"), sorted);
-        assertEquals(charsToList("abc"), basic);
+        assertEquals(GlazedListsTests.stringToList("abc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("abc"), basic);
         sorted.remove("C");
-        assertEquals(charsToList("abc"), sorted);
-        assertEquals(charsToList("abc"), basic);
+        assertEquals(GlazedListsTests.stringToList("abc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("abc"), basic);
         sorted.remove("a");
-        assertEquals(charsToList("bc"), sorted);
-        assertEquals(charsToList("bc"), basic);
+        assertEquals(GlazedListsTests.stringToList("bc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("bc"), basic);
         sorted.remove("c");
-        assertEquals(charsToList("b"), sorted);
-        assertEquals(charsToList("b"), basic);
+        assertEquals(GlazedListsTests.stringToList("b"), sorted);
+        assertEquals(GlazedListsTests.stringToList("b"), basic);
         sorted.remove("c");
-        assertEquals(charsToList("b"), sorted);
-        assertEquals(charsToList("b"), basic);
+        assertEquals(GlazedListsTests.stringToList("b"), sorted);
+        assertEquals(GlazedListsTests.stringToList("b"), basic);
         sorted.remove("B");
-        assertEquals(charsToList("b"), sorted);
-        assertEquals(charsToList("b"), basic);
+        assertEquals(GlazedListsTests.stringToList("b"), sorted);
+        assertEquals(GlazedListsTests.stringToList("b"), basic);
         sorted.remove("b");
-        assertEquals(charsToList(""), sorted);
-        assertEquals(charsToList(""), basic);
+        assertEquals(GlazedListsTests.stringToList(""), sorted);
+        assertEquals(GlazedListsTests.stringToList(""), basic);
         sorted.remove("b");
-        assertEquals(charsToList(""), sorted);
-        assertEquals(charsToList(""), basic);
+        assertEquals(GlazedListsTests.stringToList(""), sorted);
+        assertEquals(GlazedListsTests.stringToList(""), basic);
     }
 
     /**
@@ -574,52 +624,40 @@ public class SortedListTest extends TestCase {
     public void testRemoveWithComparator() {
         EventList basic = new BasicEventList();
         SortedList sorted = new SortedList(basic, GlazedLists.comparableComparator());
-        basic.addAll(charsToList("ABBCaabcc"));
+        basic.addAll(GlazedListsTests.stringToList("ABBCaabcc"));
         sorted.remove("a");
-        assertEquals(charsToList("ABBCabcc"), basic);
-        assertEquals(charsToList("ABBCabcc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("ABBCabcc"), basic);
+        assertEquals(GlazedListsTests.stringToList("ABBCabcc"), sorted);
         sorted.remove("B");
-        assertEquals(charsToList("ABCabcc"), basic);
-        assertEquals(charsToList("ABCabcc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("ABCabcc"), basic);
+        assertEquals(GlazedListsTests.stringToList("ABCabcc"), sorted);
         sorted.remove("c");
-        assertEquals(charsToList("ABCabc"), basic);
-        assertEquals(charsToList("ABCabc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("ABCabc"), basic);
+        assertEquals(GlazedListsTests.stringToList("ABCabc"), sorted);
         sorted.remove("d");
-        assertEquals(charsToList("ABCabc"), basic);
-        assertEquals(charsToList("ABCabc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("ABCabc"), basic);
+        assertEquals(GlazedListsTests.stringToList("ABCabc"), sorted);
         sorted.remove("C");
-        assertEquals(charsToList("ABabc"), basic);
-        assertEquals(charsToList("ABabc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("ABabc"), basic);
+        assertEquals(GlazedListsTests.stringToList("ABabc"), sorted);
         sorted.remove("B");
-        assertEquals(charsToList("Aabc"), basic);
-        assertEquals(charsToList("Aabc"), sorted);
+        assertEquals(GlazedListsTests.stringToList("Aabc"), basic);
+        assertEquals(GlazedListsTests.stringToList("Aabc"), sorted);
         sorted.remove("b");
-        assertEquals(charsToList("Aac"), basic);
-        assertEquals(charsToList("Aac"), sorted);
+        assertEquals(GlazedListsTests.stringToList("Aac"), basic);
+        assertEquals(GlazedListsTests.stringToList("Aac"), sorted);
         sorted.remove("A");
-        assertEquals(charsToList("ac"), basic);
-        assertEquals(charsToList("ac"), sorted);
+        assertEquals(GlazedListsTests.stringToList("ac"), basic);
+        assertEquals(GlazedListsTests.stringToList("ac"), sorted);
         sorted.remove("a");
-        assertEquals(charsToList("c"), basic);
-        assertEquals(charsToList("c"), sorted);
+        assertEquals(GlazedListsTests.stringToList("c"), basic);
+        assertEquals(GlazedListsTests.stringToList("c"), sorted);
         sorted.remove("a");
-        assertEquals(charsToList("c"), basic);
-        assertEquals(charsToList("c"), sorted);
+        assertEquals(GlazedListsTests.stringToList("c"), basic);
+        assertEquals(GlazedListsTests.stringToList("c"), sorted);
         sorted.remove("c");
-        assertEquals(charsToList(""), basic);
-        assertEquals(charsToList(""), sorted);
-    }
-
-
-    /**
-     * Convert a String into a List of characters. For example, "Cat" becomes
-     * [ 'C', 'a', 't' ].
-     */
-    private List charsToList(String string) {
-        char[] characters = string.toCharArray();
-        List result = new ArrayList(characters.length);
-        for(int c = 0; c < characters.length; c++) result.add("" + characters[c]);
-        return result;
+        assertEquals(GlazedListsTests.stringToList(""), basic);
+        assertEquals(GlazedListsTests.stringToList(""), sorted);
     }
 
     /**
@@ -859,9 +897,6 @@ public class SortedListTest extends TestCase {
 
         } catch(NoSuchElementException e) {
             // test passes
-
-        } catch(Exception e) {
-            fail("The following Exception was not expected:\n" + e);
         }
 
 
@@ -875,9 +910,6 @@ public class SortedListTest extends TestCase {
 
             } catch(NoSuchElementException e) {
                 // test passes
-
-            } catch(Exception e) {
-                fail("The following Exception was not expected:\n" + e);
             }
         }
 
@@ -891,9 +923,6 @@ public class SortedListTest extends TestCase {
 
         } catch(NoSuchElementException e) {
             // test passes
-
-        } catch(Exception e) {
-            fail("The following Exception was not expected:\n" + e);
         }
     }
 
@@ -925,7 +954,8 @@ public class SortedListTest extends TestCase {
     }
 
     /**
-     * Simple class that sorts in the same order as its position value.
+     * Simple class that sorts in the same order as its position value. Like an
+     * {@link Integer}, but mutable.
      */
     static class Position implements Comparable {
         private int position;
@@ -945,23 +975,9 @@ public class SortedListTest extends TestCase {
     /**
      * Compares Strings by their length.
      */
-    class StringLengthComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            String stringA = (String)a;
-            String stringB = (String)b;
-            return stringA.length() - stringB.length();
-        }
-    }
-
-    /**
-     * Explicit comparator for Kevin's sanity!
-     */
-    class IntegerComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            int number1 = ((Integer)a).intValue();
-            int number2 = ((Integer)b).intValue();
-
-            return number1 - number2;
+    class StringLengthComparator implements Comparator<String> {
+        public int compare(String a, String b) {
+            return a.length() - b.length();
         }
     }
 
@@ -969,13 +985,11 @@ public class SortedListTest extends TestCase {
      * A Comparator that compares strings from end to beginning rather than
      * normally.
      */
-    private static class ReverseStringComparator implements Comparator {
-        public Comparator delegate = GlazedLists.comparableComparator();
+    private static class ReverseStringComparator implements Comparator<String> {
+        public Comparator<String> delegate = (Comparator)GlazedLists.comparableComparator();
 
-        public int compare(Object a, Object b) {
-            String aString = (String)a;
-            String bString = (String)b;
-            return delegate.compare(flip(aString), flip(bString));
+        public int compare(String a, String b) {
+            return delegate.compare(flip(a), flip(b));
         }
 
         public String flip(String original) {

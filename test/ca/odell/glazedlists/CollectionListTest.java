@@ -64,8 +64,8 @@ public class CollectionListTest extends TestCase {
         
         assertEquals(parentList.get(0), DEV_ROB);
         assertEquals(parentList.get(1), DEV_JESSE);
-        assertEquals(collectionList.get(0), new Character('R'));
-        assertEquals(collectionList.get(8), new Character('J'));
+        assertEquals(collectionList.get(0), "R");
+        assertEquals(collectionList.get(8), "J");
     }
 
 
