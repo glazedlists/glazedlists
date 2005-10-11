@@ -31,38 +31,18 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
     private final ListEventAssembler updates;
     private final EventList<E> source;
 
-    public ActiveSorting(ListEventAssembler updates, EventList<E> source) {
+    /** whether this list enforces sort order, even if it causes update events to be replaced by moves */
+    private final boolean sortOrderEnforced;
+
+    public ActiveSorting(ListEventAssembler updates, EventList<E> source, boolean sortOrderEnforced) {
         this.updates = updates;
         this.source = source;
+        this.sortOrderEnforced = sortOrderEnforced;
     }
 
 
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
-        // This is implemented in four phases. These phases are:
-        // 1. Update the unsorted tree for all event types. Update the sorted tree
-        //    for delete events by deleting nodes. Fire delete events. Queue unsorted
-        //    nodes for inserts in a list.
-        // 2. Update the sorted tree for update events by deleting nodes. Queue the
-        //    unsorted nodes for updates in a list.
-        // 3. Update the sorted tree for updates by inserting nodes. Fire insert
-        //    events.
-        // 4. Process queue of unsorted nodes for inserts. Fire insert events.
-
-        // This cycle is rather complex but necessarily so. The reason is that for
-        // the two-tree SortedList to function properly, there is a very strict order
-        // for how trees can be modified. The unsorted tree must be brought completely
-        // up-to-date before any access is made to the sorted tree. This ensures that
-        // the unsorted nodes can discover their indices properly. The sorted tree must
-        // have all deleted and updated nodes removed before any nodes are inserted.
-        // This is because a deleted node may have a changed value that violates the
-        // sorted order in the tree. An insert in this case may compare against a violating
-        // node and result in inconsistency, even if the other node is eventually
-        // deleted. Therefore the order of operations above is essentially update
-        // the unsorted tree, delete from the sorted tree and finally insert into the
-        // sorted tree. The last two insert steps are split to simplify finding updates
-        // where the index does not change.
-
         // handle reordering events
         if(listChanges.isReordering()) {
             // the reorder map tells us what moved where
@@ -87,6 +67,28 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
             // we have handled the reordering!
             return;
         }
+
+        // This is implemented in three phases. These phases are:
+        // 1. Update the unsorted tree for all event types. Update the sorted tree
+        //    for delete events by deleting nodes. Fire delete events. Queue unsorted
+        //    nodes for inserts and deletes in a list.
+        // 2. Fire update events by going through the updated nodes and testing
+        //    whether they're still in sort order or if they need to be moved
+        // 3. Process queue of unsorted nodes for inserts. Fire insert events.
+
+        // This cycle is rather complex but necessarily so. The reason is that for
+        // the two-tree SortedList to function properly, there is a very strict order
+        // for how trees can be modified. The unsorted tree must be brought completely
+        // up-to-date before any access is made to the sorted tree. This ensures that
+        // the unsorted nodes can discover their indices properly. The sorted tree must
+        // have all deleted notes removed and updated nodes marked as unsorted
+        // before any nodes are inserted. This is because a deleted node may
+        // have a changed value that violates the sorted order in the tree. An
+        // insert in this case may compare against a violating node and result
+        // in inconsistency, even if the other node is eventually deleted.
+        // Therefore the order of operations above is essentially update
+        // the unsorted tree, delete from the sorted tree and finally insert into the
+        // sorted tree.
 
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
@@ -125,23 +127,31 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
             }
         }
 
-        // fire all the update events
+        // fire update events
         for(Iterator<IndexedTreeNode<IndexedTreeNode>> i = updateNodes.iterator(); i.hasNext(); ) {
             IndexedTreeNode<IndexedTreeNode> sortedNode = i.next();
+            int originalIndex = sortedNode.getIndex();
 
-            int deletedIndex = sortedNode.getIndex();
+            // the element is still in sorted order, forward the update event
             if(isNodeInSortedOrder(sortedNode)) {
                 sortedNode.setSorted(true);
-                updates.addUpdate(deletedIndex);
+                updates.addUpdate(originalIndex);
+
+            // sort order is not enforced so we lose perfect sorting order
+            // but we don't need to move elements around
+            } else if(!sortOrderEnforced) {
+                updates.addUpdate(originalIndex);
+
+            // sort order is enforced so move the element to its new location
             } else {
                 sortedNode.removeFromTree(sorted);
-                updates.addDelete(deletedIndex);
+                updates.addDelete(originalIndex);
                 int insertedIndex = insertByUnsortedNode(sortedNode.getValue());
                 updates.addInsert(insertedIndex);
             }
         }
 
-        // fire all the insert events
+        // fire insert events
         while(!insertNodes.isEmpty()) {
             IndexedTreeNode insertNode = insertNodes.removeFirst();
             int insertedIndex = insertByUnsortedNode(insertNode);
@@ -279,7 +289,7 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
 
     /** {@inheritDoc} */
     public int indexOf(Object object) {
-        if(comparator == null) return source.indexOf(object);
+        if(!sortOrderEnforced || comparator == null) return source.indexOf(object);
 
         // use the fact that we have sorted data to quickly locate a position
         // at which we can begin a linear search for an object that .equals(object)
@@ -307,7 +317,7 @@ public class ActiveSorting<E> implements SortedList.AdvancedSortingStrategy<E>{
 
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
-        if(comparator == null) return source.lastIndexOf(object);
+        if(!sortOrderEnforced || comparator == null) return source.lastIndexOf(object);
 
         // use the fact that we have sorted data to quickly locate a position
         // at which we can begin a linear search for an object that .equals(object)

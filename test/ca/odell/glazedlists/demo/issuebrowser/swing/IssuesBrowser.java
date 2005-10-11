@@ -127,7 +127,7 @@ public class IssuesBrowser extends Applet {
         FilterList issuesStateFiltered = new FilterList(issuesUserFiltered, stateMatcherEditor);
         FilterList issuesTextFiltered = new FilterList(issuesStateFiltered, textFilterMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-        final SortedList issuesSortedList = new SortedList(priorityList, false);
+        final SortedList issuesSortedList = new SortedList(priorityList, null, false);
 
         // issues table
         issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());

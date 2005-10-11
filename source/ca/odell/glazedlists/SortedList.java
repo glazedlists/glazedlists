@@ -54,22 +54,26 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * unsorted.
      */
     public SortedList(EventList<E> source, Comparator<E> comparator) {
-        super(source);
-
-        this.sortingStrategy = new ActiveSorting<E>(updates, source);
-        setComparator(comparator);
-
-        source.addListEventListener(this);
+        this(source, comparator, true);
     }
 
     /**
-     * Creates a {@link SortedList} that sorts passively, only on
-     * explicit calls to {@link #setComparator(Comparator)}
+     * Creates a {@link SortedList} that sorts the specified {@link EventList}
+     * using the specified {@link Comparator} to determine sort order. If the
+     * specified {@link Comparator} is <code>null</code>, then this {@link List}
+     * will be unsorted.
+     *
+     * @param sortOrderEnforced whether the sort order is enforced. If it is
+     *      enforced, any element that is updated may be moved to a new
+     *      index if the sort order has changed. If it is not enforced, updated
+     *      elements will not be moved. All other elements will continue to
+     *      be in sorted order.
      */
-    public SortedList(EventList<E> source, boolean passive) {
+    public SortedList(EventList<E> source, Comparator<E> comparator, boolean sortOrderEnforced) {
         super(source);
 
-        this.sortingStrategy = new PassiveSorting<E>(updates, source);
+        this.sortingStrategy = new ActiveSorting<E>(updates, source, sortOrderEnforced);
+        setComparator(comparator);
 
         source.addListEventListener(this);
     }

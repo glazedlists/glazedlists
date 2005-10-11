@@ -40,10 +40,80 @@ public class SortedListTest extends TestCase {
         sortedList = null;
     }
 
+    /**
+     * Tests that elements are properly moved when value changes require that
+     * if sort order is not enforced on the list.
+     */
+    public void testSimpleMovesSortNotEnforced() {
+        unsortedList = new BasicEventList();
+        sortedList = new SortedList(unsortedList, GlazedLists.comparableComparator(), false);
+        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", false));
+
+        unsortedList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
+
+        assertEquals(GlazedListsTests.stringToList("ABCDEFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABCDEFG"), sortedList);
+
+        unsortedList.set(3, "H");
+        assertEquals(GlazedListsTests.stringToList("ABCHEFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABCHEFG"), sortedList);
+
+        unsortedList.addAll(3, GlazedListsTests.stringToList("IJKLMNO"));
+        assertEquals(GlazedListsTests.stringToList("ABCIJKLMNOHEFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABCHEFGIJKLMNO"), sortedList);
+
+        unsortedList.removeAll(GlazedListsTests.stringToList("AEIO"));
+        assertEquals(GlazedListsTests.stringToList("BCJKLMNHFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("BCHFGJKLMN"), sortedList);
+
+        unsortedList.addAll(8, GlazedListsTests.stringToList("AEIO"));
+        assertEquals(GlazedListsTests.stringToList("BCJKLMNHAEIOFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABCEHFGIJKLMNO"), sortedList);
+
+        unsortedList.set(0, "Z");
+        assertEquals(GlazedListsTests.stringToList("ZCJKLMNHAEIOFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("AZCEHFGIJKLMNO"), sortedList);
+
+        unsortedList.set(7, "F");
+        assertEquals(GlazedListsTests.stringToList("ZCJKLMNFAEIOFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("AZCEFFGIJKLMNO"), sortedList);
+
+        unsortedList.addAll(0, GlazedListsTests.stringToList("EEFF"));
+        assertEquals(GlazedListsTests.stringToList("EEFFZCJKLMNFAEIOFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("AZCEEEFFFFGIJKLMNO"), sortedList);
+
+        unsortedList.addAll(5, GlazedListsTests.stringToList("WXYZ"));
+        assertEquals(GlazedListsTests.stringToList("EEFFZWXYZCJKLMNFAEIOFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("AZCEEEFFFFGIJKLMNOWXYZ"), sortedList);
+
+        sortedList.set(1, "B");
+        assertEquals(GlazedListsTests.stringToList("EEFFBWXYZCJKLMNFAEIOFG"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABCEEEFFFFGIJKLMNOWXYZ"), sortedList);
+
+        sortedList.clear();
+        assertEquals(Collections.EMPTY_LIST, unsortedList);
+        assertEquals(Collections.EMPTY_LIST, sortedList);
+
+        sortedList.addAll(GlazedListsTests.stringToList("ABC"));
+        assertEquals(GlazedListsTests.stringToList("ABC"), unsortedList);
+
+        sortedList.set(0, "C");
+        sortedList.set(2, "A");
+        assertEquals(GlazedListsTests.stringToList("CBA"), sortedList);
+
+        sortedList.add("A");
+        assertEquals(GlazedListsTests.stringToList("ACBA"), sortedList);
+        sortedList.add("C");
+        assertEquals(GlazedListsTests.stringToList("ACBCA"), sortedList);
+    }
+
+    /**
+     * Tests that elements are properly moved when value changes require that.
+     */
     public void testSimpleMoves() {
         unsortedList = new BasicEventList();
         sortedList = new SortedList(unsortedList);
-        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", true));
+        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", false));
 
         unsortedList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
 
