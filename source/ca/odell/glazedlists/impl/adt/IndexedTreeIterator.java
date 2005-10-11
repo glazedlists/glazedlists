@@ -12,7 +12,7 @@ import java.util.*;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class IndexedTreeIterator<V> implements Iterator<IndexedTreeNode<V>> {
+public class IndexedTreeIterator<V> {
 
     /** the host tree */
     private IndexedTree<V> host = null;
