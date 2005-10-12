@@ -127,7 +127,8 @@ public class IssuesBrowser extends Applet {
         FilterList issuesStateFiltered = new FilterList(issuesUserFiltered, stateMatcherEditor);
         FilterList issuesTextFiltered = new FilterList(issuesStateFiltered, textFilterMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-        final SortedList issuesSortedList = new SortedList(priorityList, null, false);
+        final SortedList issuesSortedList = new SortedList(priorityList, null);
+        issuesSortedList.setMode(SortedList.AVOID_MOVING_ELEMENTS); // temp hack for playing with the new sorting mode
 
         // issues table
         issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());

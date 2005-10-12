@@ -46,7 +46,8 @@ public class SortedListTest extends TestCase {
      */
     public void testSimpleMovesSortNotEnforced() {
         unsortedList = new BasicEventList();
-        sortedList = new SortedList(unsortedList, GlazedLists.comparableComparator(), false);
+        sortedList = new SortedList(unsortedList);
+        sortedList.setMode(SortedList.AVOID_MOVING_ELEMENTS);
         sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", false));
 
         unsortedList.addAll(GlazedListsTests.stringToList("ABCDEFG"));

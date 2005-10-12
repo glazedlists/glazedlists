@@ -1,15 +1,17 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.impl;
 
 import junit.framework.TestCase;
 
 import java.util.List;
 import java.util.ArrayList;
 
+import ca.odell.glazedlists.GlazedListsTests;
+
 /**
- * Validate that the {@link IndexSnapshot} class works as expected.
+ * Validate that the {@link ca.odell.glazedlists.impl.IndexSnapshot} class works as expected.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -18,7 +20,7 @@ public class IndexSnapshotTest extends TestCase {
     public void testNaturalOrder() {
         List original = new ArrayList(GlazedListsTests.stringToList("FILTER"));
 
-        IndexSnapshot indexSnapshot = new IndexSnapshot();
+        ca.odell.glazedlists.impl.IndexSnapshot indexSnapshot = new ca.odell.glazedlists.impl.IndexSnapshot();
 
         indexSnapshot.reset(original.size());
         List copy = new ArrayList(original);
@@ -149,7 +151,7 @@ public class IndexSnapshotTest extends TestCase {
     }
 
     public void testInsertedBeyondSnapshot() {
-        IndexSnapshot indexSnapshot = new IndexSnapshot();
+        ca.odell.glazedlists.impl.IndexSnapshot indexSnapshot = new ca.odell.glazedlists.impl.IndexSnapshot();
         indexSnapshot.reset(2);
         indexSnapshot.add(2);
         indexSnapshot.add(3);
@@ -191,7 +193,7 @@ public class IndexSnapshotTest extends TestCase {
 
     public void testIndexBoundsExceptions() {
 
-        IndexSnapshot indexSnapshot = new IndexSnapshot();
+        ca.odell.glazedlists.impl.IndexSnapshot indexSnapshot = new ca.odell.glazedlists.impl.IndexSnapshot();
         indexSnapshot.reset(2);
         indexSnapshot.add(1);
         indexSnapshot.add(1);
