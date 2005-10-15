@@ -13,29 +13,29 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class SelectionListTest extends TestCase {
+public class ListSelectionTest extends TestCase {
 
     /** to generate some random values */
     private Random dice = new Random(167);
 
     /** the target list */
-    private EventList source = null;
+    private EventList<Integer> source = null;
 
     /** the list selection */
-    private ListSelection listSelection = null;
+    private ListSelection<Integer> listSelection = null;
 
     /** the list of selected elements */
-    private EventList selectedList = null;
+    private EventList<Integer> selectedList = null;
 
     /** the list of deselected elements */
-    private EventList deselectedList = null;
+    private EventList<Integer> deselectedList = null;
 
     /**
      * Prepare for the test.
      */
     public void setUp() {
-        source = new BasicEventList();
-        listSelection = new ListSelection(source);
+        source = new BasicEventList<Integer>();
+        listSelection = new ListSelection<Integer>(source);
         selectedList = listSelection.getSelected();
         deselectedList = listSelection.getDeselected();
         source.addListEventListener(new ListConsistencyListener(source, "source: ", false));
@@ -451,6 +451,52 @@ public class SelectionListTest extends TestCase {
         for(int i = 0; i < 20; i += 2) {
             assertEquals(true, listSelection.isSelected(i));
         }
-
     }
+
+    /**
+     * Test that the selection list supports change operations.
+     */
+    public void testChangeOperations() {
+        for(int i = 0; i < 20; i++) {
+            source.add(new Integer(i));
+        }
+
+        listSelection.select(1, 3);
+        selectedList.set(2, new Integer(30));
+        assertEquals(new Integer(30), source.get(3));
+        assertFalse(listSelection.isSelected(5));
+        assertTrue(listSelection.isSelected(1));
+        assertTrue(listSelection.isSelected(2));
+        assertTrue(listSelection.isSelected(3));
+        assertFalse(listSelection.isSelected(4));
+
+        deselectedList.set(2, new Integer(50));
+        assertEquals(new Integer(50), source.get(5));
+        assertFalse(listSelection.isSelected(0));
+        assertTrue(listSelection.isSelected(1));
+        assertTrue(listSelection.isSelected(2));
+        assertTrue(listSelection.isSelected(3));
+        assertFalse(listSelection.isSelected(4));
+        assertFalse(listSelection.isSelected(5));
+        assertFalse(listSelection.isSelected(6));
+
+        selectedList.clear();
+        assertEquals(17, source.size());
+        assertEquals(17, deselectedList.size());
+        assertEquals(0, selectedList.size());
+        assertEquals(new Integer(0), source.get(0));
+        assertEquals(new Integer(4), source.get(1));
+        assertEquals(new Integer(50), source.get(2));
+        assertEquals(new Integer(19), source.get(16));
+
+        listSelection.select(14, 16);
+        deselectedList.clear();
+        assertEquals(3, source.size());
+        assertEquals(0, deselectedList.size());
+        assertEquals(3, selectedList.size());
+        assertEquals(new Integer(17), source.get(0));
+        assertEquals(new Integer(18), source.get(1));
+        assertEquals(new Integer(19), source.get(2));
+    }
+
 }

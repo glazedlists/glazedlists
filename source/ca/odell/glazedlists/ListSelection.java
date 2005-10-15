@@ -1013,9 +1013,15 @@ public class ListSelection<E> {
             return updates;
         }
 
+        /** {@inheritDoc} */
+        protected boolean isWritable() {
+            return true;
+        }
+
         /**
          * A no-op dispose method to prevent the user from shooting themselves
-         * in the foot.
+         * in the foot. To dispose a {@link ListSelection}, call
+         * {@link ListSelection#dispose()} on that class directly.
          */
         public void dispose() {
             // Do Nothing
@@ -1058,9 +1064,15 @@ public class ListSelection<E> {
             return updates;
         }
 
+        /** {@inheritDoc} */
+        protected boolean isWritable() {
+            return true;
+        }
+
         /**
          * A no-op dispose method to prevent the user from shooting themselves
-         * in the foot.
+         * in the foot. To dispose a {@link ListSelection}, call
+         * {@link ListSelection#dispose()} on that class directly.
          */
         public void dispose() {
             // Do Nothing
