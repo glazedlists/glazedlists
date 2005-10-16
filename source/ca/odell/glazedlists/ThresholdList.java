@@ -45,25 +45,19 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThresholdList<E> extends TransformedList<E,E> {
-
-    /** the index in the list which corresponds to the lower bound for this list */
-    private int lowerThresholdIndex = 0;
-
-    /** the index in the list which corresponds to the upper bound for this list */
-    private int upperThresholdIndex = 0;
+public final class ThresholdList<E> extends RangeList<E> {
 
     /** the lower bound to use to define list containment */
-    private int lowerThreshold = 0;
+    private Object lowerThreshold = new Integer(Integer.MIN_VALUE);
 
     /** the upper bound to use to define list containment */
-    private int upperThreshold = 0;
-
-    /** a local cache of the size of the source list to improve performance */
-    private int sourceSize = 0;
+    private Object upperThreshold = new Integer(Integer.MAX_VALUE);
 
     /** the evaluator to use to compare Objects against the threshold */
     private Evaluator<E> evaluator = null;
+
+    /** a sorted view of the source makes threshold operations really fast */
+    private final SortedList<E> sortedSource;
 
     /**
      * Creates a {@link ThresholdList} that provides range-filtering based on the
@@ -78,146 +72,13 @@ public final class ThresholdList<E> extends TransformedList<E,E> {
      * specified {@link EventList} using the specified {@link Evaluator}.
      */
     public ThresholdList(EventList<E> source, Evaluator<E> evaluator) {
-        super(new SortedList<E>(source, new ThresholdComparator<E>(evaluator)));
-        this.source.addListEventListener(this);
-        this.evaluator = evaluator;
-        sourceSize = source.size();
-
-        // Include all possible elements by default
-        setUpperThreshold(Integer.MAX_VALUE);
-        setLowerThreshold(Integer.MIN_VALUE);
+        this(new SortedList<E>(source, new ThresholdComparator<E>(evaluator)), evaluator);
     }
 
-    /** {@inheritDoc} */
-    public void listChanged(ListEvent<E> listChanges) {
-
-        // recache the source size
-        sourceSize = source.size();
-
-        // Make all of the changes happen atomically
-        updates.beginEvent();
-
-        while(listChanges.next()) {
-            int sortedIndex = listChanges.getIndex();
-            int type = listChanges.getType();
-
-            int value = Integer.MIN_VALUE;
-
-            if(type != ListEvent.DELETE && sourceSize > 0) {
-                value = evaluator.evaluate(source.get(sortedIndex));
-            }
-
-            // The index is below the lower threshold and is not an edge case
-            if(sortedIndex < lowerThresholdIndex - 1) {
-                if(type == ListEvent.INSERT) {
-                    lowerThresholdIndex ++;
-                    upperThresholdIndex ++;
-                } else if(type == ListEvent.DELETE) {
-                    lowerThresholdIndex --;
-                    upperThresholdIndex --;
-                } else if(type == ListEvent.UPDATE) {
-                    // Do Nothing
-                }
-
-            // The index could result in a lower threshold edge case
-            } else if(sortedIndex == lowerThresholdIndex - 1) {
-                int transformedIndex = sortedIndex - Math.max(lowerThresholdIndex, 0);
-                if(type == ListEvent.INSERT) {
-                    if(value < lowerThreshold) {
-                        lowerThresholdIndex ++;
-                        upperThresholdIndex++;
-
-                    } else if(value > upperThreshold) {
-                        // Do nothing
-
-                    } else {
-                        upperThresholdIndex ++;
-                        updates.addInsert(transformedIndex);
-                    }
-
-                // Handle DELETE for the edge condition
-                } else if(type == ListEvent.DELETE) {
-                    lowerThresholdIndex --;
-                    upperThresholdIndex --;
-
-                // Handle UPDATE for the edge condition
-                } else if(type == ListEvent.UPDATE) {
-                    if(value >= lowerThreshold) {
-                        lowerThresholdIndex --;
-                        updates.addInsert(0);
-                    }
-                }
-
-            // The index affects the current view of the list
-            } else if(sortedIndex >= lowerThresholdIndex && sortedIndex <= upperThresholdIndex) {
-                int transformedIndex = sortedIndex - Math.max(lowerThresholdIndex, 0);
-                if(type == ListEvent.INSERT) {
-                    upperThresholdIndex ++;
-                    // The value is beyond the threshold so ignore it
-                    if(value < lowerThreshold) {
-                        lowerThresholdIndex ++;
-
-                    } else if(value > upperThreshold) {
-                        throw new IllegalStateException();
-
-                    // The value is below the threshold so forward an insert
-                    } else {
-                        updates.addInsert(transformedIndex);
-                    }
-
-                // Just forward deletes
-                } else if(type == ListEvent.DELETE) {
-                    upperThresholdIndex --;
-                    updates.addDelete(transformedIndex);
-
-                // Inspect the updated value to see what kind of event to forward
-                } else if(type == ListEvent.UPDATE) {
-                    // The value is beyond the lower threshold so delete
-                    if(value < lowerThreshold) {
-                        lowerThresholdIndex ++;
-                        updates.addDelete(transformedIndex);
-
-                    // The value is beyond the upper threshold so delete
-                    } else if(value > upperThreshold) {
-                        upperThresholdIndex --;
-                        updates.addDelete(transformedIndex);
-
-                    // The value is still below the threshold so forward an update
-                    } else {
-                        updates.addUpdate(transformedIndex);
-                    }
-                }
-
-            // The index could result in an upper threshold edge case
-            } else if(sortedIndex == upperThresholdIndex + 1) {
-                int transformedIndex = sortedIndex - Math.max(lowerThresholdIndex, 0);
-                if(type == ListEvent.INSERT) {
-                    if(value >= lowerThreshold && value <= upperThreshold) {
-                        upperThresholdIndex ++;
-                        updates.addInsert(transformedIndex);
-                    } else if(sortedIndex == lowerThresholdIndex && value <= upperThreshold) {
-                        lowerThresholdIndex ++;
-                        upperThresholdIndex ++;
-                    }
-                } else if(type == ListEvent.DELETE) {
-                    // Do Nothing
-                } else if(type == ListEvent.UPDATE) {
-                    if(value <= upperThreshold) {
-                        upperThresholdIndex ++;
-                        updates.addInsert(transformedIndex);
-                    }
-                }
-
-            // The index is above the upper threshold and is not and edge case
-            } else if(sortedIndex > upperThresholdIndex + 1) {
-                // Do nothing
-            } else {
-                throw new IllegalStateException();
-            }
-        }
-
-        updates.commitEvent();
-
+    private ThresholdList(SortedList<E> sortedSource, Evaluator<E> evaluator) {
+        super(sortedSource);
+        this.sortedSource = sortedSource;
+        this.evaluator = evaluator;
     }
 
     /**
@@ -247,93 +108,16 @@ public final class ThresholdList<E> extends TransformedList<E,E> {
      * thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public void setLowerThreshold(int threshold) {
-        // the index at the new threshold
-        int newListIndex = 0;
-
-        // Threshold change is irrelevant
-        if(sourceSize == 0) {
-            lowerThreshold = threshold;
-            lowerThresholdIndex = 0;
-            return;
-
-        // Threshold is unchanged
-        } else if(threshold == lowerThreshold) {
-            return;
-
-        // Threshold is changed
-        } else {
-            newListIndex = ((SortedList<E>)source).indexOfSimulated(new Integer(threshold));
-            // return -1 if the value is before the list
-            if(newListIndex == 0) newListIndex = source.indexOf(new Integer(threshold));
-        }
-
-        // update the threshold
-        lowerThreshold = threshold;
-
-        // the index at the threshold has not changed
-        if(newListIndex == lowerThresholdIndex) {
-            return;
-        }
-
-        // the index at the threshold has changed but no event should be thrown
-        if((newListIndex == -1 && lowerThresholdIndex == 0) ||
-            (newListIndex == 0 && lowerThresholdIndex == -1)) {
-
-            lowerThresholdIndex = newListIndex;
-            return;
-        }
-
-        // Changes are necessary so prepare an event
-        updates.beginEvent();
-
-        // The threshold is lower
-        if(newListIndex < lowerThresholdIndex) {
-            // The list was empty and stays that way
-            if(newListIndex > upperThresholdIndex) {
-                // definite no-op
-
-            // The list was empty and should now contain values
-            } else if(lowerThresholdIndex > upperThresholdIndex) {
-                // make sure that it should contain new values
-                if(!(newListIndex == -1 && upperThresholdIndex == -1)) {
-                    updates.addInsert(0, upperThresholdIndex - Math.max(newListIndex, 0));
-                }
-
-            // The list contains more values
-            } else {
-                updates.addInsert(0, lowerThresholdIndex - Math.max(newListIndex, 0) - 1);
-            }
-
-        // The threshold is higher
-        } else if(newListIndex > lowerThresholdIndex) {
-            // The list was empty and stays that way
-            if(lowerThresholdIndex > upperThresholdIndex) {
-                // definite no-op
-
-            // The list contained values and should now be empty
-            } else if(newListIndex > upperThresholdIndex) {
-                // make sure the list contained values
-                if(!(lowerThresholdIndex == -1 && upperThresholdIndex == -1)) {
-                    updates.addDelete(0, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
-                }
-
-            // The list contains fewer values
-            } else {
-                updates.addDelete(0, newListIndex - Math.max(lowerThresholdIndex, 0) - 1);
-            }
-        }
-
-        // Update the lowerThresholdIndex and fire the event
-        lowerThresholdIndex = newListIndex;
-        updates.commitEvent();
+    public void setLowerThreshold(int lowerThreshold) {
+        this.lowerThreshold = new Integer(lowerThreshold);
+        adjustRange();
     }
 
     /**
      * Gets the lower threshold for this list
      */
     public int getLowerThreshold() {
-        return lowerThreshold;
+        return ((Integer)lowerThreshold).intValue();
     }
 
     /**
@@ -359,92 +143,16 @@ public final class ThresholdList<E> extends TransformedList<E,E> {
      * thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public void setUpperThreshold(int threshold) {
-
-        // the index at the new threshold
-        int newListIndex = 0;
-
-        // Threshold change is irrelevant
-        if(sourceSize == 0) {
-            upperThreshold = threshold;
-            upperThresholdIndex = -1;
-            return;
-
-        // Threshold is unchanged
-        } else if(threshold == upperThreshold) {
-            return;
-
-        // Threshold is changed
-        } else {
-            if(threshold == Integer.MAX_VALUE) {
-                newListIndex = sourceSize - 1;
-            } else {
-                newListIndex = ((SortedList)source).indexOfSimulated(new Integer(threshold+1)) - 1;
-            }
-        }
-
-        // update the threshold
-        upperThreshold = threshold;
-
-        // the index at the threshold has not changed
-        if(newListIndex == upperThresholdIndex) {
-            return;
-        }
-
-        // the index at the threshold has changed but no event should be thrown
-        if((newListIndex == sourceSize && upperThresholdIndex == sourceSize - 1) ||
-           (newListIndex == sourceSize - 1 && upperThresholdIndex == sourceSize)) {
-            upperThresholdIndex = newListIndex;
-            return;
-        }
-
-        // Changes are necessary so prepare an event
-        updates.beginEvent();
-
-        // The threshold is lower
-        if(newListIndex < upperThresholdIndex) {
-            // The list was empty and stays that way
-            if(upperThresholdIndex < lowerThresholdIndex) {
-                // definite no-op
-
-            // The list contained values and should now be empty
-            } else if(newListIndex < lowerThresholdIndex) {
-                // make sure the list contained values
-                if(!(lowerThresholdIndex == sourceSize && upperThresholdIndex == sourceSize)) {
-                    updates.addDelete(0, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
-                }
-
-            // The list contains fewer values
-            } else {
-                updates.addDelete(newListIndex + 1, upperThresholdIndex - Math.max(lowerThresholdIndex, 0));
-            }
-
-        // The threshold is higher
-        } else if(newListIndex > upperThresholdIndex) {
-            // The list was empty and stays that way
-            if(newListIndex < lowerThresholdIndex) {
-                // definite no-op
-
-            // The list was empty and should now contain values
-            } else if(upperThresholdIndex < lowerThresholdIndex) {
-                updates.addInsert(0, newListIndex - Math.max(lowerThresholdIndex, 0));
-
-            // The list contains more values
-            } else {
-                updates.addInsert(upperThresholdIndex - Math.max(lowerThresholdIndex, 0) + 1, newListIndex);
-            }
-        }
-
-        // Update the upperThresholdIndex and fire the event
-        upperThresholdIndex = newListIndex;
-        updates.commitEvent();
+    public void setUpperThreshold(int upperThreshold) {
+        this.upperThreshold = new Integer(upperThreshold);
+        adjustRange();
     }
 
     /**
      * Gets the upper threshold for this list
      */
     public int getUpperThreshold() {
-        return upperThreshold;
+        return ((Integer)upperThreshold).intValue();
     }
 
     /**
@@ -456,60 +164,84 @@ public final class ThresholdList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
-    protected boolean isWritable() {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    public int size() {
-        // Check for the exclusionary edge condition
-        if(lowerThresholdIndex == upperThresholdIndex) {
-            if(lowerThresholdIndex == -1 || upperThresholdIndex == sourceSize) {
-                return 0;
-            }
-        }
-        return Math.min(upperThresholdIndex, sourceSize - 1) - Math.max(lowerThresholdIndex, 0) + 1;
-    }
-
-    /** {@inheritDoc} */
-    protected int getSourceIndex(int transformationIndex) {
-        return transformationIndex + Math.max(lowerThresholdIndex, 0);
-    }
-
-    /** {@inheritDoc} */
     public boolean contains(Object object) {
+        // Fast fail if the object isn't within the thresholds
         // Note: this technically breaks the contract for contains.
         // evaluator.evaluate(object) may throw a ClassCastException
-        int objectEvaluation = evaluator.evaluate((E) object);
-        // Fast fail if the object isn't within the thresholds
-        if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
-            return false;
-        }
+        if(!withinRange((E)object)) return false;
         return source.contains(object);
     }
 
     /** {@inheritDoc} */
     public int indexOf(Object object) {
+        // Fast fail if the object isn't within the thresholds
         // Note: this technically breaks the contract for indexOf.
         // evaluator.evaluate(object) may throw a ClassCastException
-        int objectEvaluation = evaluator.evaluate((E) object);
-        // Fast fail if the object isn't within the thresholds
-        if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
-            return -1;
-        }
+        if(!withinRange((E)object)) return -1;
         return source.indexOf(object);
     }
 
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
+        // Fast fail if the object isn't within the thresholds
         // Note: this technically breaks the contract for lastIndexOf.
         // evaluator.evaluate(object) may throw a ClassCastException
-        int objectEvaluation = evaluator.evaluate((E) object);
-        // Fast fail if the object isn't within the thresholds
-        if(objectEvaluation > upperThreshold || objectEvaluation < lowerThreshold) {
-            return -1;
-        }
+        if(!withinRange((E)object)) return -1;
         return source.lastIndexOf(object);
+    }
+
+    /**
+     * Test if the specified object is within the range of this {@link ThresholdList}.
+     */
+    private boolean withinRange(E object) {
+        int objectEvaluation = evaluator.evaluate(object);
+        return objectEvaluation >= ((Integer)lowerThreshold).intValue() && objectEvaluation <= ((Integer)upperThreshold).intValue();
+    }
+
+    /** {@inheritDoc} */
+    public void setRange(int startIndex, int endIndex) {
+        // this implementation is slightly inconsistent with the superclass
+        // because the super treats endIndex as exclusive wheras we treat
+        // endIndex as inclusive
+        this.lowerThreshold = new Integer(sourceIndexToThreshold(startIndex));
+        this.upperThreshold = new Integer(sourceIndexToThreshold(endIndex));
+        adjustRange();
+    }
+
+    /** {@inheritDoc} */
+    public void setTailRange(int startIndex, int endIndex) {
+        // this implementation is slightly inconsistent with the superclass
+        // because the super treats endIndex as exclusive wheras we treat
+        // endIndex as inclusive
+        this.lowerThreshold = new Integer(sourceIndexToThreshold(source.size() - startIndex));
+        this.upperThreshold = new Integer(sourceIndexToThreshold(source.size() - endIndex));
+        adjustRange();
+    }
+
+    /**
+     * Given an index into the source {@link EventList}, get the
+     * threshold value for that index.
+     */
+    private int sourceIndexToThreshold(int sourceIndex) {
+        if(sourceIndex < 0) {
+            return Integer.MIN_VALUE;
+        } else  if(sourceIndex < source.size()) {
+            return evaluator.evaluate(source.get(sourceIndex));
+        } else {
+            return Integer.MIN_VALUE;
+        }
+    }
+
+    /** {@inheritDoc} */
+    public int getStartIndex() {
+        return sortedSource.indexOfSimulated(lowerThreshold);
+    }
+
+    /** {@inheritDoc} */
+    public int getEndIndex() {
+        int endIndex = Math.max(sortedSource.indexOfSimulated(upperThreshold), sortedSource.lastIndexOf(upperThreshold) + 1);
+        int startIndex = getStartIndex();
+        return Math.max(startIndex, endIndex);
     }
 
     /** {@inheritDoc} */

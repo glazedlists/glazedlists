@@ -50,7 +50,7 @@ final class ListEventBlock {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.type = type;
-        if(startIndex < 0 || endIndex < startIndex) throw new IllegalArgumentException();
+        if(startIndex < 0 || endIndex < startIndex) throw new IndexOutOfBoundsException("Illegal range: " + startIndex + ", " + endIndex);
         if(type != ListEvent.INSERT && type != ListEvent.UPDATE && type != ListEvent.DELETE) throw new IllegalArgumentException();
     }
     
