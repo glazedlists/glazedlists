@@ -399,7 +399,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * </table>
      *
      * <p>More formally, the grammar for this String representation is as follows:
-     * <br><code>&lt;COLUMN&gt; = column &lt;COLUMN INDEX&gt; (reversed)? (comparator &lt;COMPARATOR INDEX&gt;)?</code>
+     * <br><code>&lt;COLUMN&gt; = column &lt;COLUMN INDEX&gt; (comparator &lt;COMPARATOR INDEX&gt;)? (reversed)?</code>
      * <br><code>&lt;COMPARATOR SPEC&gt; = ( &lt;COLUMN&gt; (, &lt;COLUMN&gt;)* )?</code>
      */
     public void fromString(String stringEncoded) {
