@@ -87,7 +87,7 @@ public class FilterListTest extends TestCase {
 
 		AllOrNothingMatcherEditor matcher = new AllOrNothingMatcherEditor();
 		FilterList<Integer> filterList = new FilterList<Integer>(baseList,matcher);
-		filterList.addListEventListener(new ListConsistencyListener(filterList, "Filter List"));
+		filterList.addListEventListener(new ListConsistencyListener(filterList, "Filter List", true));
 
 		// Test initial size
 		assertEquals(5, filterList.size());
@@ -96,7 +96,15 @@ public class FilterListTest extends TestCase {
 		matcher.showAll(false);
 		assertEquals(0, filterList.size());
 
+		// Clear it again
+		matcher.showAll(false);
+		assertEquals(0, filterList.size());
+
 		// Put it back
+		matcher.showAll(true);
+		assertEquals(5, filterList.size());
+
+		// Put it back again
 		matcher.showAll(true);
 		assertEquals(5, filterList.size());
 	}
@@ -129,16 +137,10 @@ class MinimumValueMatcherEditor extends AbstractMatcherEditor<Integer> {
  * Matcher that allows testing matchAll() and matchNone().
  */
 class AllOrNothingMatcherEditor extends AbstractMatcherEditor {
-    // otherwise nothin'
-    private boolean showAll = true;
-
     /**
      * @param state True show everything, otherwise show nothing
      */
     public void showAll(boolean state) {
-        if (state == showAll) return;
-
-        showAll = state;
         if (state) fireMatchAll();
         else fireMatchNone();
     }

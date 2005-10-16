@@ -258,7 +258,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
                 updates.beginEvent();
 
                 // filter out all remaining items in this list
-                updates.addDelete(0, size() - 1);
+                if(size() > 0) updates.addDelete(0, size() - 1);
 
                 // reset the flaglist to all white (which matches nothing)
                 flagList.clear();
