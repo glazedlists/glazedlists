@@ -459,6 +459,29 @@ public class EventListTest extends TestCase {
         assertEquals(Arrays.asList(new Integer[] { new Integer(20), new Integer(30), new Integer(40) }), original);
     }
 
+    public void testAddAllOnSelf() {
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("ABCDE"));
+        original.addAll(original);
+        assertEquals(GlazedListsTests.stringToList("ABCDEABCDE"), original);
+    }
+
+    public void testAddAllFromView() {
+        EventList<Integer> original = new BasicEventList<Integer>();
+        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
+        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
+        original.addAll(filtered);
+        assertEquals(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40), new Integer(20), new Integer(30), new Integer(40) }), original);
+    }
+
+    public void testAddAllOnView() {
+        EventList<Integer> original = new BasicEventList<Integer>();
+        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
+        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
+        filtered.addAll(filtered);
+        assertEquals(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40), new Integer(20), new Integer(30), new Integer(40) }), original);
+    }
+
 
     /**
      * This test case was generated from a problem that we received in the field.
