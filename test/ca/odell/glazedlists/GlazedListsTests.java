@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Comparator;
+import java.io.*;
 
 /**
  * A factory class useful for testing!
@@ -76,6 +77,39 @@ public class GlazedListsTests {
     public static Matcher<Integer> matchAtLeast(int minimum) {
         return new AtLeastMatcher(minimum);
     }
+
+    /**
+     * Serialize the specified object to bytes, then deserialize it back.
+     */
+    public static <T> T serialize(T object) throws IOException, ClassNotFoundException {
+        return (T)fromBytes(toBytes(object));
+    }
+
+    public static byte[] toBytes(Object object) throws IOException {
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        ObjectOutputStream objectsOut = new ObjectOutputStream(bytesOut);
+        objectsOut.writeObject(object);
+        return bytesOut.toByteArray();
+    }
+
+    public static Object fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytes);
+        ObjectInputStream objectsIn = new ObjectInputStream(bytesIn);
+        return objectsIn.readObject();
+    }
+
+    public static String toString(byte[] bytes) {
+        StringBuffer result = new StringBuffer();
+        for(int b = 0; b < bytes.length; b++) {
+            result.append(bytes[b] < 0 ? "-" : " ");
+            String hexString = Integer.toString(Math.abs(bytes[b]), 16);
+            while(hexString.length() < 2) hexString = "0" + hexString;
+            result.append("0x").append(hexString).append(", ");
+            if(b % 16 == 15) result.append("\n");
+        }
+        return result.toString();
+    }
+
     private static class AtLeastMatcher implements Matcher<Integer> {
         private final int minimum;
         public AtLeastMatcher(int minimum) {

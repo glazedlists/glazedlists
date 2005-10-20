@@ -10,6 +10,8 @@ import java.util.*;
 
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
 
 /**
  * Verifies that EventList matches the List API.
@@ -411,6 +413,52 @@ public class EventListTest extends TestCase {
         source.getReadWriteLock().writeLock().unlock();
     }
 
+    public void testRemoveAllOnSelf() {
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("ABCDE"));
+        original.removeAll(original);
+        assertEquals(Collections.EMPTY_LIST, original);
+    }
+
+    public void testRemoveAllFromView() {
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("ABCDE"));
+        FilterList<String> filtered = new FilterList<String>(original, (Matcher) Matchers.trueMatcher());
+        original.removeAll(filtered);
+        assertEquals(Collections.EMPTY_LIST, original);
+    }
+
+    public void testRemoveAllOnView() {
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("ABCDE"));
+        FilterList<String> filtered = new FilterList<String>(original, (Matcher)Matchers.trueMatcher());
+        filtered.removeAll(filtered);
+        assertEquals(Collections.EMPTY_LIST, original);
+    }
+
+    public void testRetainAllOnSelf() {
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("ABCDE"));
+        original.retainAll(original);
+        assertEquals(GlazedListsTests.stringToList("ABCDE"), original);
+    }
+
+    public void testRetainAllFromView() {
+        EventList<Integer> original = new BasicEventList<Integer>();
+        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
+        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
+        original.retainAll(filtered);
+        assertEquals(Arrays.asList(new Integer[] { new Integer(20), new Integer(30), new Integer(40) }), original);
+    }
+
+    public void testRetainAllOnView() {
+        EventList<Integer> original = new BasicEventList<Integer>();
+        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
+        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
+        filtered.retainAll(filtered);
+        assertEquals(Arrays.asList(new Integer[] { new Integer(20), new Integer(30), new Integer(40) }), original);
+    }
+
 
     /**
      * This test case was generated from a problem that we received in the field.
@@ -420,13 +468,13 @@ public class EventListTest extends TestCase {
      * events while processing them.
      */
     public void testCombineEvents() {
-        TransactionalEventList<Object> list = new TransactionalEventList<Object>(new BasicEventList<Object>());
+        ExternalNestingEventList<Object> list = new ExternalNestingEventList<Object>(new BasicEventList<Object>(), true);
         for (int i = 0; i < 16; i++)
              list.add(new Integer(0));
 
         list.addListEventListener(new ListConsistencyListener(list, "transactional", true));
 
-        list.beginEvent();
+        list.beginEvent(true);
 
         for(int i = 0; i < 4; i++) list.add(8, new Object());
         for(int j = 7; j >= 0; j--) {
@@ -523,28 +571,5 @@ public class EventListTest extends TestCase {
         for(int i = 0; i < 2; i++) list.remove(0);
 
         list.commitEvent();
-    }
-
-    private static class TransactionalEventList<E> extends TransformedList<E,E> {
-        public TransactionalEventList(EventList<E> source) {
-            super(source);
-            source.addListEventListener(this);
-        }
-
-        public void listChanged(ListEvent<E> listChanges) {
-            updates.forwardEvent(listChanges);
-        }
-
-        public void beginEvent() {
-            updates.beginEvent(true);
-        }
-
-        public void commitEvent() {
-            updates.commitEvent();
-        }
-
-        protected boolean isWritable() {
-            return true;
-        }
     }
 }

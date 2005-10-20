@@ -6,12 +6,15 @@ package ca.odell.glazedlists;
 import junit.framework.TestCase;
 
 import java.io.*;
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Arrays;
 
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * Makes sure that {@link BasicEventList} works above and beyond its duties as
@@ -21,11 +24,10 @@ import ca.odell.glazedlists.event.ListEvent;
  */
 public class BasicEventListTest extends TestCase {
 
-
     public void testSimpleSerialization() throws IOException, ClassNotFoundException {
         EventList serializableList = new BasicEventList();
         serializableList.addAll(GlazedListsTests.stringToList("Saskatchewan Roughriders"));
-        EventList serializedCopy = serialize(serializableList);
+        EventList serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
 
         serializedCopy.addAll(GlazedListsTests.stringToList("Hamilton Tiger-Cats"));
@@ -34,7 +36,7 @@ public class BasicEventListTest extends TestCase {
 
     public void testSerializeEmpty() throws IOException, ClassNotFoundException {
         EventList serializableList = new BasicEventList();
-        EventList serializedCopy = serialize(serializableList);
+        EventList serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
     }
 
@@ -46,7 +48,7 @@ public class BasicEventListTest extends TestCase {
         serializableList.addAll(GlazedListsTests.stringToList("Szarka"));
         assertEquals(serializableList, SerializableListener.getLastSource());
 
-        EventList serializedCopy = serialize(serializableList);
+        EventList serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
 
         assertEquals(serializableList, SerializableListener.getLastSource());
@@ -62,7 +64,7 @@ public class BasicEventListTest extends TestCase {
         serializableList.addAll(GlazedListsTests.stringToList("Keith"));
         assertEquals(serializableList, UnserializableListener.getLastSource());
 
-        EventList serializedCopy = serialize(serializableList);
+        EventList serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
 
         assertEquals(serializableList, UnserializableListener.getLastSource());
@@ -102,43 +104,11 @@ public class BasicEventListTest extends TestCase {
         List expected = new ArrayList();
         expected.addAll(GlazedListsTests.stringToList("October 10, 2005"));
 
-        Object deserialized = fromBytes(serializedBytes);
+        Object deserialized = GlazedListsTests.fromBytes(serializedBytes);
         assertEquals(expected, deserialized);
         assertEquals("[O, c, t, o, b, e, r,  , 1, 0, ,,  , 2, 0, 0, 5]", deserialized.toString());
     }
 
-
-    /**
-     * Serialize the specified object to bytes, then deserialize it back.
-     */
-    private static <T> T serialize(T object) throws IOException, ClassNotFoundException {
-        return (T)fromBytes(toBytes(object));
-    }
-
-    private static byte[] toBytes(Object object) throws IOException {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        ObjectOutputStream objectsOut = new ObjectOutputStream(bytesOut);
-        objectsOut.writeObject(object);
-        return bytesOut.toByteArray();
-    }
-
-    private static Object fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytes);
-        ObjectInputStream objectsIn = new ObjectInputStream(bytesIn);
-        return objectsIn.readObject();
-    }
-
-    private static String toString(byte[] bytes) {
-        StringBuffer result = new StringBuffer();
-        for(int b = 0; b < bytes.length; b++) {
-            result.append(bytes[b] < 0 ? "-" : " ");
-            String hexString = Integer.toString(Math.abs(bytes[b]), 16);
-            while(hexString.length() < 2) hexString = "0" + hexString;
-            result.append("0x").append(hexString).append(", ");
-            if(b % 16 == 15) result.append("\n");
-        }
-        return result.toString();
-    }
 
     /**
      * This listener invokes a static method each time it's target {@link EventList} is changed.
