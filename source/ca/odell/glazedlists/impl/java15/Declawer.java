@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Remove Java 5 language features from a source file.
@@ -31,7 +33,10 @@ public class Declawer {
         options.put("-d", outdir);
         options.put("-classpath", classpath);
         JavaCompiler javaCompiler = JavaCompiler.instance(context);
-        List<String> files = List.make(listFilesAsStringsFromPath(inpath));
+
+        List<String> files = List.of(null);
+        files.clear();
+        files.addAll(listFilesAsStringsFromPath(inpath));
         javaCompiler.compile(files);
     }
 
@@ -47,7 +52,7 @@ public class Declawer {
             target.add(file);
         }
     }
-    private static String[] listFilesAsStringsFromPath(String path) {
+    private static Collection<String> listFilesAsStringsFromPath(String path) {
         try {
             // populate an arraylist of files
             final ArrayList<File> files = new ArrayList<File>();
@@ -61,7 +66,7 @@ public class Declawer {
             for(int f = 0; f < files.size(); f++) {
                 result[f] = files.get(f).getCanonicalPath();
             }
-            return result;
+            return Arrays.asList(result);
         } catch(IOException e) {
             throw new RuntimeException("Failed to fetch full path from file");
         }
