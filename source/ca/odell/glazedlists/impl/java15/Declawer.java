@@ -37,7 +37,7 @@ public class Declawer {
 
         List<String> files = List.nil();
         for (Iterator<String> iter = listFilesAsStringsFromPath(inpath).iterator(); iter.hasNext();) {
-            files.append(iter.next());
+            files = files.append(iter.next());
         }
         javaCompiler.compile(files);
     }
