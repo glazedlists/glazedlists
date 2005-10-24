@@ -35,7 +35,7 @@ public class Declawer {
         JavaCompiler javaCompiler = JavaCompiler.instance(context);
 
         List<String> files = List.of(null);
-        files.clear();
+        files.remove(null);
         files.addAll(listFilesAsStringsFromPath(inpath));
         javaCompiler.compile(files);
     }
