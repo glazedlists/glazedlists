@@ -11,6 +11,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Remove Java 5 language features from a source file.
@@ -35,7 +36,9 @@ public class Declawer {
         JavaCompiler javaCompiler = JavaCompiler.instance(context);
 
         List<String> files = List.nil();
-        files.addAll(listFilesAsStringsFromPath(inpath));
+        for (Iterator<String> iter = listFilesAsStringsFromPath(inpath).iterator(); iter.hasNext();) {
+            files.append(iter.next());
+        }
         javaCompiler.compile(files);
     }
 
