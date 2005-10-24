@@ -34,8 +34,7 @@ public class Declawer {
         options.put("-classpath", classpath);
         JavaCompiler javaCompiler = JavaCompiler.instance(context);
 
-        List<String> files = List.of(null);
-        files.remove(null);
+        List<String> files = List.nil();
         files.addAll(listFilesAsStringsFromPath(inpath));
         javaCompiler.compile(files);
     }
