@@ -92,7 +92,7 @@ public class BeanProperty<T> {
             currentClass = currentClass.getSuperclass();
         }
 
-        throw new IllegalArgumentException("Failed to find getter for property \"" + property + "\" of class " + targetClass);
+        throw new IllegalArgumentException("Failed to find getter for property \"" + property + "\" of " + targetClass);
     }
 
     /**
@@ -116,7 +116,7 @@ public class BeanProperty<T> {
             currentClass = currentClass.getSuperclass();
         }
 
-        throw new IllegalArgumentException("Failed to find setter for property \"" + property + "\" of class " + targetClass);
+        throw new IllegalArgumentException("Failed to find setter for property \"" + property + "\" of " + targetClass);
     }
 
     /**
@@ -129,7 +129,7 @@ public class BeanProperty<T> {
         }
 
         if(Void.TYPE.equals(method.getReturnType())) {
-            throw new IllegalArgumentException("Getter \"" + method + "\" is void");
+            throw new IllegalArgumentException("Getter \"" + method + "\" returns void");
         }
     }
 
