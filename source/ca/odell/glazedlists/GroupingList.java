@@ -11,13 +11,16 @@ import ca.odell.glazedlists.impl.adt.*;
 import java.util.*;
 
 /**
- * A grouping list contains elements which are themselves readonly Lists. Those readonly Lists are
- * infact elements of the source list which have been grouped together. The logic of how to group
- * the source elements into groups is specified via a Comparator. Elements for which the Comparator
- * returns 0 are guaranteed to be contained within the same groups within this GroupingList.
+ * A grouping list contains elements which are themselves Lists. Those Lists
+ * are infact elements of the source list which have been grouped together into
+ * a List. The logic of how to group the source elements into groups is specified
+ * via a Comparator. Elements for which the Comparator returns 0 are guaranteed
+ * to be contained within the same group within this GroupingList. This implies
+ * that source elements may only participate in a single group within this
+ * GroupingList.
  *
- * <p> Further transformations may be layered on top of this GroupingList to transform the group lists
- * into any other desirable form.
+ * <p> Further transformations may be layered on top of this GroupingList to
+ * transform the group lists into any other desirable form.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
@@ -54,7 +57,7 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
     private static final Object UNIQUE = Barcode.BLACK;
     private static final Object DUPLICATE = Barcode.WHITE;
 
-    /** Used only temporarily to flag deleting of the FIRST group element when more elements exist. */
+    /** Used only in temporary data structures to flag deleting of the FIRST group element when more elements exist. */
     private static final Object UNIQUE_WITH_DUPLICATE = null;
 
     /** The index of an update event that has not yet been added to the ListEvent being assembled. */
@@ -479,22 +482,28 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
         source.addAll(value);
     }
 
+    /**
+     * This is the List implementation used to store groups created by this
+     * GroupingList. It defines all mutator methods by mapping them to mutations
+     * on the source list of GroupList. Thus, writes to this GroupList effect
+     * all Lists sitting under GroupList.
+     */
     private class GroupList extends AbstractList<E> {
 
-        /** The node within {@link groupLists} that records the index of this GroupList. */
+        /** The node within {@link groupLists} that records the index of this GroupList within the GroupingList. */
         private IndexedTreeNode<GroupList> treeNode;
 
-        private IndexedTreeNode<GroupList> getTreeNode() {
-            return this.treeNode;
-        }
-
+        /**
+         * Attach the IndexedTreeNode that tracks this GroupLists position to the
+         * GroupList itself so it can look up its own position.
+         */
         private void setTreeNode(IndexedTreeNode<GroupList> treeNode) {
             this.treeNode = treeNode;
         }
 
         /**
          * Returns the inclusive index of the start of this {@link GroupList}
-         * within the larger {@link SortedList}.
+         * within the source {@link SortedList}.
          */
         private int getStartIndex() {
             final int groupIndex = this.treeNode.getIndex();
@@ -503,7 +512,7 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
 
         /**
          * Returns the exclusive index of the end of this {@link GroupList}
-         * within the larger {@link SortedList}.
+         * within the source {@link SortedList}.
          */
         private int getEndIndex() {
             final int groupIndex = this.treeNode.getIndex();
