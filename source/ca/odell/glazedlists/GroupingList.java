@@ -481,13 +481,14 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
 
     private class GroupList extends AbstractList<E> {
 
+        /** The node within {@link groupLists} that records the index of this GroupList. */
         private IndexedTreeNode<GroupList> treeNode;
 
-        public IndexedTreeNode<GroupList> getTreeNode() {
+        private IndexedTreeNode<GroupList> getTreeNode() {
             return this.treeNode;
         }
 
-        public void setTreeNode(IndexedTreeNode<GroupList> treeNode) {
+        private void setTreeNode(IndexedTreeNode<GroupList> treeNode) {
             this.treeNode = treeNode;
         }
 
@@ -495,7 +496,7 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
          * Returns the inclusive index of the start of this {@link GroupList}
          * within the larger {@link SortedList}.
          */
-        public int getStartIndex() {
+        private int getStartIndex() {
             final int groupIndex = this.treeNode.getIndex();
             return GroupingList.this.getSourceIndex(groupIndex);
         }
@@ -504,7 +505,7 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
          * Returns the exclusive index of the end of this {@link GroupList}
          * within the larger {@link SortedList}.
          */
-        public int getEndIndex() {
+        private int getEndIndex() {
             final int groupIndex = this.treeNode.getIndex();
 
             // if this is before the end, its everything up to the first different element
