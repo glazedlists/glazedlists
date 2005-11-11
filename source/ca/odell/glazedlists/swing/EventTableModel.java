@@ -107,12 +107,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     public E getElementAt(int index) {
         swingThreadSource.getReadWriteLock().readLock().lock();
         try {
-            // ensure that this value still exists before retrieval
-            if(index < swingThreadSource.size()) {
-                return swingThreadSource.get(index);
-            } else {
-                return null;
-            }
+            return swingThreadSource.get(index);
         } finally {
             swingThreadSource.getReadWriteLock().readLock().unlock();
         }
@@ -204,12 +199,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     public Object getValueAt(int row, int column) {
         swingThreadSource.getReadWriteLock().readLock().lock();
         try {
-            // ensure that this value still exists before retrieval
-            if(row < getRowCount()) {
-                return tableFormat.getColumnValue(swingThreadSource.get(row), column);
-            } else {
-                return null;
-            }
+            return tableFormat.getColumnValue(swingThreadSource.get(row), column);
         } finally {
             swingThreadSource.getReadWriteLock().readLock().unlock();
         }

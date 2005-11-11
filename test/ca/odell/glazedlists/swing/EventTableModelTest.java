@@ -20,16 +20,9 @@ import ca.odell.glazedlists.gui.TableFormat;
 public class EventTableModelTest extends SwingTestCase {
 
     /**
-     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
+     * Verifies that the new getElementAt() method of EventTableModel works.
      */
-    public void testGui() {
-        super.testGui();
-    }
-
-    /**
-     * Verifies that the new elementAt() method of EventTableModel works.
-     */
-    public void guiTestElementAt() {
+    public void guiTestGetElementAt() {
         EventList colors = new BasicEventList();
         colors.add(Color.red);
         colors.add(Color.green);
@@ -41,5 +34,42 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals(Color.red, tableModel.getElementAt(0));
         assertEquals(Color.green, tableModel.getElementAt(1));
         assertEquals(Color.blue, tableModel.getElementAt(2));
+
+        try {
+            tableModel.getElementAt(100);
+            fail("failed to receive IndexOutOfBoundsException for invalid index");
+        } catch (IndexOutOfBoundsException e) { }
+
+        try {
+            tableModel.getElementAt(-1);
+            fail("failed to receive IndexOutOfBoundsException for invalid index");
+        } catch (IndexOutOfBoundsException e) { }
+    }
+
+    /**
+     * Verifies that the getValueAt() method of EventTableModel works.
+     */
+    public void guiTestGetValueAt() {
+        EventList colors = new BasicEventList();
+        colors.add(Color.red);
+        colors.add(Color.green);
+        colors.add(Color.blue);
+
+        TableFormat colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        EventTableModel tableModel = new EventTableModel(colors, colorTableFormat);
+
+        assertEquals(Color.red.getRed(), tableModel.getValueAt(0, 0));
+        assertEquals(Color.green.getGreen(), tableModel.getValueAt(1, 1));
+        assertEquals(Color.blue.getBlue(), tableModel.getValueAt(2, 2));
+
+        try {
+            tableModel.getValueAt(100, 0);
+            fail("failed to receive IndexOutOfBoundsException for invalid index");
+        } catch (IndexOutOfBoundsException e) { }
+
+        try {
+            tableModel.getValueAt(-1, 0);
+            fail("failed to receive IndexOutOfBoundsException for invalid index");
+        } catch (IndexOutOfBoundsException e) { }
     }
 }

@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.demo.issuebrowser.swt;
+package ca.odell.glazedlists.demo.issuebrowser;
 
 import java.util.*;
 // glazed lists
@@ -9,9 +9,6 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.event.*;
-// the public demo
-import ca.odell.glazedlists.demo.issuebrowser.Issue;
-import ca.odell.glazedlists.demo.issuebrowser.IssueUserator;
 
 /**
  * An UsersMatcherEditor is a matcher editor that filters based on the selected

@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.demo.issuebrowser.swing;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.demo.issuebrowser.swt.UsersMatcherEditor;
+import ca.odell.glazedlists.demo.issuebrowser.UsersMatcherEditor;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 

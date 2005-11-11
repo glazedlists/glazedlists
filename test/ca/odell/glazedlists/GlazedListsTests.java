@@ -38,6 +38,19 @@ public class GlazedListsTests {
     }
 
     /**
+     * Convert a String like "AA,BB,CDE" into three Lists:
+     * { [ A A ], [ B B ], [ C D E ] }
+     */
+    public static List<List<String>> stringToLists(CharSequence chars) {
+        List<List<String>> result = new ArrayList<List<String>>();
+        String[] strings = chars.toString().split(",");
+        for(int i = 0; i < strings.length; i++) {
+            result.add(stringToList(strings[i]));
+        }
+        return result;
+    }
+
+    /**
      * Convert an array of Strings into a List of characters.
      */
     public static List<String> stringsToList(CharSequence[] data) {

@@ -1377,4 +1377,17 @@ public class UniqueListTest extends TestCase {
         // in sorted order changes
         source.set(1, "Chevy");    // C C F
     }
+
+    public void testRemoveAPair() {
+        EventList source = new BasicEventList<String>();
+        UniqueList<String> uniqueList = new UniqueList<String>(source);
+        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "UniqueList"));
+
+        source.addAll(GlazedListsTests.stringToList("AABBBD"));
+        assertEquals(GlazedListsTests.stringToList("ABD"), uniqueList);
+
+        source.remove(0);
+        source.remove(0);
+        assertEquals(GlazedListsTests.stringToList("BD"), uniqueList);
+    }
 }

@@ -5,6 +5,7 @@ package ca.odell.glazedlists.demo.issuebrowser.swt;
 
 // demo
 import ca.odell.glazedlists.demo.issuebrowser.*;
+import ca.odell.glazedlists.demo.issuebrowser.UsersMatcherEditor;
 // swt
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.*;

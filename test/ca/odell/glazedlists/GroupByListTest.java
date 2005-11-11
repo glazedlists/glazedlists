@@ -105,17 +105,17 @@ public class GroupByListTest extends TestCase {
         assertEquals("6 Kevin", groups.get(1));
     }
 
-    private static class StringCountGrouper implements GroupByList.Grouper<String, String> {
+    private static class StringCountGrouper implements GroupByList.Grouper {
         public Comparator<String> getComparator() {
             return String.CASE_INSENSITIVE_ORDER;
         }
 
-        public String group(List<String> elements) {
+        public Object group(List elements) {
             return elements.size() + " " + elements.get(0);
         }
 
-        public List<String> ungroup(String group) {
-            final String[] strings = group.split(" ");
+        public List ungroup(Object group) {
+            final String[] strings = ((String) group).split(" ");
             final int numCopies = new Integer(strings[0]);
 
             List<String> elements = new ArrayList<String>(numCopies);

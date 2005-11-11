@@ -100,12 +100,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
     public Object getElementAt(int index) {
         swingSource.getReadWriteLock().readLock().lock();
         try {
-            // ensure that this value still exists before retrieval
-            if(index < swingSource.size()) {
-                return swingSource.get(index);
-            } else {
-                return null;
-            }
+            return swingSource.get(index);
         } finally {
             swingSource.getReadWriteLock().readLock().unlock();
         }
