@@ -252,7 +252,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      */
     class SortArrowHeaderRenderer implements TableCellRenderer {
 
-        /** the renderer to delegate */
+        /** the renderer to which we delegate */
         private TableCellRenderer delegateRenderer;
 
         /**
@@ -274,15 +274,28 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         /**
          * Renders the header in the default way but with the addition of an icon.
          */
-        public Component getTableCellRendererComponent(JTable table, Object value,
-        boolean isSelected, boolean hasFocus, int row, int column) {
-            final Component rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            final Icon iconToUse = icons[getSortingStyle(column)];
+            final Component rendered;
 
-            if(rendered instanceof JLabel) {
-                final JLabel label = (JLabel) rendered;
-                final Icon iconToUse = icons[getSortingStyle(column)];
-                label.setIcon(iconToUse);
-                label.setHorizontalTextPosition(SwingConstants.LEADING);
+            // 1. look for our custom SortableRenderer interface
+            if (delegateRenderer instanceof SortableRenderer) {
+                ((SortableRenderer) delegateRenderer).setSortIcon(iconToUse);
+                rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            // 2. if it's a DefaultTableCellRenderer that returned itself then customize it directly with
+            //    the sorting icon after the fact (this is the case of the default header renderer)
+            } else if (delegateRenderer instanceof DefaultTableCellRenderer) {
+                rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (rendered == delegateRenderer) {
+                    final DefaultTableCellRenderer label = (DefaultTableCellRenderer) rendered;
+                    label.setIcon(iconToUse);
+                    label.setHorizontalTextPosition(SwingConstants.LEADING);
+                }
+
+            // 3. We are unable to inject an icon into the rendered component
+            } else {
+                rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             }
 
             return rendered;

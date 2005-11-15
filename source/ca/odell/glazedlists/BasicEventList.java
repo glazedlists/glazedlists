@@ -6,8 +6,6 @@ package ca.odell.glazedlists;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ListEventAssembler;
-import ca.odell.glazedlists.event.ListEventPublisher;
 // Java collections are used for underlying data storage
 import java.util.*;
 import java.io.IOException;
@@ -78,8 +76,8 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      */
     public BasicEventList(List<E> list) {
         super(null);
-        data = list;
-        readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
+        this.data = list;
+        this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
     }
 
     /** {@inheritDoc} */
@@ -216,7 +214,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /**
-     * Although {@link EventList}s do not in general, {@link BasicEventList} is
+     * Although {@link EventList}s are not in general, {@link BasicEventList} is
      * {@link Serializable}. All of the {@link ListEventListener}s that are themselves
      * {@link Serializable} will be serialized, but others will not. Note that there
      * is <strong>no</strong> easy way to access the {@link ListEventListener}s of
@@ -225,7 +223,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      * <p>As of October 3, 2005, this is the wire format of serialized
      * {@link BasicEventList}s:
      * <li>An {@link Object[]} containing each of the list's elements
-     * <li>An {@link ListEventListener[]} containing <strong>only</strong> the
+     * <li>A {@link ListEventListener[]} containing <strong>only</strong> the
      *     listeners that themselves implement {@link Serializable}. Those that
      *     do not will not be serialized. Note that {@link TransformedList}s
      *     such as {@link FilterList} are not {@link Serializable} and will not

@@ -235,7 +235,7 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
         }
 
         // second pass, handle toDoList, update groupLists, and fire events
-        updates.beginEvent();
+        updates.beginEvent(true);
         listChanges.reset();
         while (listChanges.next()) {
             final int changeIndex = listChanges.getIndex();
@@ -248,9 +248,9 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
                 if (tryJoinExistingGroup(changeIndex, toDoList) == NO_GROUP) {
                     final int groupIndex = barcode.getColourIndex(changeIndex, UNIQUE);
                     insertGroupList(groupIndex);
-                    enqueueEvent(ListEvent.INSERT, groupIndex);
+                    updates.addInsert(groupIndex);
                 } else {
-                    enqueueEvent(ListEvent.UPDATE, barcode.getColourIndex(changeIndex, true, UNIQUE));
+                    updates.addUpdate(barcode.getColourIndex(changeIndex, true, UNIQUE));
                 }
 
             // updates can result in INSERT, UPDATE and DELETE events
@@ -271,41 +271,41 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
                 // we're the first element in a new group
                 if (newGroup == NO_GROUP) {
                     if (oldGroup == NO_GROUP) {
-                        enqueueEvent(ListEvent.UPDATE, groupIndex);
+                        updates.addUpdate(groupIndex);
                     } else if (oldGroup == LEFT_GROUP) {
-                        enqueueEvent(ListEvent.UPDATE, groupIndex-1);
+                        updates.addUpdate(groupIndex-1);
                         insertGroupList(groupIndex);
-                        enqueueEvent(ListEvent.INSERT, groupIndex);
+                        updates.addInsert(groupIndex);
                     } else if (oldGroup == RIGHT_GROUP) {
                         insertGroupList(groupIndex);
-                        enqueueEvent(ListEvent.INSERT, groupIndex);
-                        enqueueEvent(ListEvent.UPDATE, groupIndex+1);
+                        updates.addInsert(groupIndex);
+                        updates.addUpdate(groupIndex+1);
                     }
 
                 // we are joining an existing group to our left
                 } else if (newGroup == LEFT_GROUP) {
                     if (oldGroup == NO_GROUP) {
-                        enqueueEvent(ListEvent.UPDATE, groupIndex);
+                        updates.addUpdate(groupIndex);
                         removeGroupList(groupIndex+1);
-                        enqueueEvent(ListEvent.DELETE, groupIndex+1);
+                        updates.addDelete(groupIndex+1);
                     } else if (oldGroup == LEFT_GROUP) {
-                        enqueueEvent(ListEvent.UPDATE, groupIndex);
+                        updates.addUpdate(groupIndex);
                     } else if (oldGroup == RIGHT_GROUP) {
-                        enqueueEvent(ListEvent.UPDATE, groupIndex);
-                        if (groupIndex+1 < barcode.blackSize()) enqueueEvent(ListEvent.UPDATE, groupIndex+1);
+                        updates.addUpdate(groupIndex);
+                        if (groupIndex+1 < barcode.blackSize()) updates.addUpdate(groupIndex+1);
                     }
 
                 // we are joining an existing group to our right
                 } else if (newGroup == RIGHT_GROUP) {
                     if (oldGroup == NO_GROUP) {
                         removeGroupList(groupIndex);
-                        enqueueEvent(ListEvent.DELETE, groupIndex);
-                        enqueueEvent(ListEvent.UPDATE, groupIndex);
+                        updates.addDelete(groupIndex);
+                        updates.addUpdate(groupIndex);
                     } else if (oldGroup == LEFT_GROUP) {
-                        if(groupIndex-1 >= 0) enqueueEvent(ListEvent.UPDATE, groupIndex-1);
-                        enqueueEvent(ListEvent.UPDATE, groupIndex);
+                        if(groupIndex-1 >= 0) updates.addUpdate(groupIndex-1);
+                        updates.addUpdate(groupIndex);
                     } else if (oldGroup == RIGHT_GROUP) {
-                        enqueueEvent(ListEvent.UPDATE, groupIndex);
+                        updates.addUpdate(groupIndex);
                     }
                 }
 
@@ -324,14 +324,12 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
                 if (deleted == UNIQUE) {
                     // if we removed a UNIQUE element then it was the last one and we must remove the group
                     removeGroupList(groupDeletedIndex);
-                    enqueueEvent(ListEvent.DELETE, groupDeletedIndex);
+                    updates.addDelete(groupDeletedIndex);
                 } else {
-                    enqueueEvent(ListEvent.UPDATE, groupDeletedIndex);
+                    updates.addUpdate(groupDeletedIndex);
                 }
             }
         }
-        
-        flushEnqueuedEvents();
         updates.commitEvent();
     }
 
@@ -375,50 +373,6 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
                 return NO_GROUP;
             }
         }
-    }
-
-    /**
-     * Appends a change to the ListEventAssembler. If the change is an UPDATE,
-     * the index is queued and not added to the change event immediately. This
-     * allows UPDATE events to be discarded if they intersect with an INSERT or
-     * REMOVE event. Because of this queueing, it is always necessary to call
-     * {@link #flushEnqueuedEvents()} before {@link ListEventAssembler#commitEvent()}
-     * to guarantee that all UPDATE events have been sent.
-     *
-     * @param type The type of this change
-     * @param index The index of the change
-     */
-    private void enqueueEvent(int type, int index) {
-        // fire queued update events if necessary
-        if(pendingUpdateIndex != -1 && pendingUpdateIndex != index) {
-            updates.addChange(ListEvent.UPDATE, pendingUpdateIndex);
-        }
-        pendingUpdateIndex = -1;
-
-        // queue update events
-        if(type == ListEvent.UPDATE && index != lastInsertIndex) {
-            pendingUpdateIndex = index;
-
-        // fire insert events immediately and save the inserted index
-        } else if(type == ListEvent.INSERT) {
-            lastInsertIndex = index;
-            updates.addChange(type, index);
-
-        // fire remove events immediately
-        } else if(type == ListEvent.DELETE) {
-            updates.addChange(type, index);
-        }
-    }
-
-    /**
-     * Flush any events that were not fired immediately.
-     */
-    private void flushEnqueuedEvents() {
-        if(pendingUpdateIndex != -1) {
-            updates.addChange(ListEvent.UPDATE, pendingUpdateIndex);
-        }
-        pendingUpdateIndex = -1;
-        lastInsertIndex = -1;
     }
 
     public List<E> get(int index) {

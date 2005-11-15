@@ -41,8 +41,10 @@ public class UniqueListPerformance {
                 counter = 0;
 
             } else {
-                entryValues[counter] = line;
-                counter++;
+                if (counter < entryValues.length) {
+                    entryValues[counter] = line;
+                    counter++;
+                }
             }
         }
 

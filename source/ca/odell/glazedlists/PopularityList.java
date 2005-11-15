@@ -60,7 +60,7 @@ public final class PopularityList<E> extends TransformedList<E,E> {
     private PopularityList(UniqueList<E> uniqueList) {
         super(new SortedList<E>(uniqueList, new PopularityComparator<E>(uniqueList)));
         this.uniqueList = uniqueList;
-        uniqueList.setFireCountChangeEvents(true);
+//        uniqueList.setFireCountChangeEvents(true);
 
         // listen for changes to the source list
         ((SortedList<E>)super.source).addListEventListener(this);

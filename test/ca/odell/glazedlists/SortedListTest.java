@@ -544,60 +544,60 @@ public class SortedListTest extends TestCase {
      * Test if the SortedList fires update events rather than delete/insert
      * pairs.
      */
-    public void testUpdateEventsFired() {
-        // prepare a unique list with simple data
-        UniqueList uniqueSource = new UniqueList(unsortedList, GlazedLists.reverseComparator());
-        sortedList = new SortedList(uniqueSource);
-        SortedSet data = new TreeSet(GlazedLists.reverseComparator());
-        data.add("A");
-        data.add("B");
-        data.add("C");
-        data.add("D");
-        uniqueSource.replaceAll(data);
-
-        // listen to changes on the sorted list
-        ListEventCounter counter = new ListEventCounter();
-        sortedList.addListEventListener(counter);
-
-        // replace the data with an identical copy
-        uniqueSource.replaceAll(data);
-
-        // verify that only one event has occured
-        assertEquals(1, counter.getEventCount());
-        assertEquals(4, counter.getChangeCount(0));
-    }
+//    public void testUpdateEventsFired() {
+//        // prepare a unique list with simple data
+//        UniqueList uniqueSource = new UniqueList(unsortedList, GlazedLists.reverseComparator());
+//        sortedList = new SortedList(uniqueSource);
+//        SortedSet data = new TreeSet(GlazedLists.reverseComparator());
+//        data.add("A");
+//        data.add("B");
+//        data.add("C");
+//        data.add("D");
+//        uniqueSource.replaceAll(data);
+//
+//        // listen to changes on the sorted list
+//        ListEventCounter counter = new ListEventCounter();
+//        sortedList.addListEventListener(counter);
+//
+//        // replace the data with an identical copy
+//        uniqueSource.replaceAll(data);
+//
+//        // verify that only one event has occured
+//        assertEquals(1, counter.getEventCount());
+//        assertEquals(4, counter.getChangeCount(0));
+//    }
 
 
     /**
      * Test if the SortedList fires update events rather than delete/insert
      * pairs, even if there are duplicate copies of the same value.
      */
-    public void testUpdateEventsFiredWithDuplicates() {
-        // create comparators for zero and one
-        Comparator intCompareAt0 = GlazedListsTests.intArrayComparator(0);
-        Comparator intCompareAt1 = GlazedListsTests.intArrayComparator(1);
-
-        // prepare a unique list with simple data
-        UniqueList uniqueSource = new UniqueList(new BasicEventList(), intCompareAt0);
-        sortedList = new SortedList(uniqueSource, intCompareAt1);
-        SortedSet data = new TreeSet(intCompareAt0);
-        data.add(new int[] { 0, 0 });
-        data.add(new int[] { 1, 0 });
-        data.add(new int[] { 2, 0 });
-        data.add(new int[] { 3, 0 });
-        uniqueSource.replaceAll(data);
-
-        // listen to changes on the sorted list
-        ListEventCounter counter = new ListEventCounter();
-        sortedList.addListEventListener(counter);
-
-        // replace the data with an identical copy
-        uniqueSource.replaceAll(data);
-
-        // verify that only one event has occured
-        assertEquals(1, counter.getEventCount());
-        assertEquals(4, counter.getChangeCount(0));
-    }
+//    public void testUpdateEventsFiredWithDuplicates() {
+//        // create comparators for zero and one
+//        Comparator intCompareAt0 = GlazedListsTests.intArrayComparator(0);
+//        Comparator intCompareAt1 = GlazedListsTests.intArrayComparator(1);
+//
+//        // prepare a unique list with simple data
+//        UniqueList uniqueSource = new UniqueList(new BasicEventList(), intCompareAt0);
+//        sortedList = new SortedList(uniqueSource, intCompareAt1);
+//        SortedSet data = new TreeSet(intCompareAt0);
+//        data.add(new int[] { 0, 0 });
+//        data.add(new int[] { 1, 0 });
+//        data.add(new int[] { 2, 0 });
+//        data.add(new int[] { 3, 0 });
+//        uniqueSource.replaceAll(data);
+//
+//        // listen to changes on the sorted list
+//        ListEventCounter counter = new ListEventCounter();
+//        sortedList.addListEventListener(counter);
+//
+//        // replace the data with an identical copy
+//        uniqueSource.replaceAll(data);
+//
+//        // verify that only one event has occured
+//        assertEquals(1, counter.getEventCount());
+//        assertEquals(4, counter.getChangeCount(0));
+//    }
 
     /**
      * Tests that remove() works, removing the first instance of an element that
@@ -738,50 +738,50 @@ public class SortedListTest extends TestCase {
      * <p>The source list uses a totally different comparator than the sorted list
      * in order to guarantee the indicies have no pattern.
      */
-    public void testUpdateEventsFiredRigorous() {
-        // prepare a unique list with simple data
-        Comparator uniqueComparator = new ReverseStringComparator();
-        UniqueList uniqueSource = new UniqueList(unsortedList, uniqueComparator);
-        sortedList = new SortedList(uniqueSource);
-
-        // populate a unique source with some random elements
-        for(int i = 0; i < 500; i++) {
-            uniqueSource.add("" + random.nextInt(200));
-        }
-
-        // populate a replacement set with some more random elements
-        SortedSet data = new TreeSet(uniqueComparator);
-        for(int i = 0; i < 500; i++) {
-            data.add("" + random.nextInt(200));
-        }
-
-        // calculate the number of changes expected
-        List intersection = new ArrayList();
-        intersection.addAll(uniqueSource);
-        intersection.retainAll(data);
-        int expectedUpdateCount = intersection.size();
-        int expectedDeleteCount = uniqueSource.size() - expectedUpdateCount;
-        int expectedInsertCount = data.size() - expectedUpdateCount;
-        int expectedChangeCount = expectedUpdateCount + expectedDeleteCount + expectedInsertCount;
-
-        // count the number of changes performed
-        ListEventCounter uniqueCounter = new ListEventCounter();
-        uniqueSource.addListEventListener(uniqueCounter);
-        ListEventCounter sortedCounter = new ListEventCounter();
-        sortedList.addListEventListener(sortedCounter);
-        //sortedList.debug = true;
-
-        // perform the change
-        uniqueSource.addListEventListener(new ListConsistencyListener(uniqueSource, "unique", false));
-        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", false));
-        uniqueSource.replaceAll(data);
-
-        // verify our guess on the change count is correct
-        assertEquals(1, uniqueCounter.getEventCount());
-        assertEquals(1, sortedCounter.getEventCount());
-        assertEquals(expectedChangeCount, uniqueCounter.getChangeCount(0));
-        assertEquals(expectedChangeCount, sortedCounter.getChangeCount(0));
-    }
+//    public void testUpdateEventsFiredRigorous() {
+//        // prepare a unique list with simple data
+//        Comparator uniqueComparator = new ReverseStringComparator();
+//        UniqueList uniqueSource = new UniqueList(unsortedList, uniqueComparator);
+//        sortedList = new SortedList(uniqueSource);
+//
+//        // populate a unique source with some random elements
+//        for(int i = 0; i < 500; i++) {
+//            uniqueSource.add("" + random.nextInt(200));
+//        }
+//
+//        // populate a replacement set with some more random elements
+//        SortedSet data = new TreeSet(uniqueComparator);
+//        for(int i = 0; i < 500; i++) {
+//            data.add("" + random.nextInt(200));
+//        }
+//
+//        // calculate the number of changes expected
+//        List intersection = new ArrayList();
+//        intersection.addAll(uniqueSource);
+//        intersection.retainAll(data);
+//        int expectedUpdateCount = intersection.size();
+//        int expectedDeleteCount = uniqueSource.size() - expectedUpdateCount;
+//        int expectedInsertCount = data.size() - expectedUpdateCount;
+//        int expectedChangeCount = expectedUpdateCount + expectedDeleteCount + expectedInsertCount;
+//
+//        // count the number of changes performed
+//        ListEventCounter uniqueCounter = new ListEventCounter();
+//        uniqueSource.addListEventListener(uniqueCounter);
+//        ListEventCounter sortedCounter = new ListEventCounter();
+//        sortedList.addListEventListener(sortedCounter);
+//        //sortedList.debug = true;
+//
+//        // perform the change
+//        uniqueSource.addListEventListener(new ListConsistencyListener(uniqueSource, "unique", false));
+//        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", false));
+//        uniqueSource.replaceAll(data);
+//
+//        // verify our guess on the change count is correct
+//        assertEquals(1, uniqueCounter.getEventCount());
+//        assertEquals(1, sortedCounter.getEventCount());
+//        assertEquals(expectedChangeCount, uniqueCounter.getChangeCount(0));
+//        assertEquals(expectedChangeCount, sortedCounter.getChangeCount(0));
+//    }
 
 
     /**

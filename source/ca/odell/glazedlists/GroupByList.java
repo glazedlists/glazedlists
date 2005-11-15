@@ -60,7 +60,7 @@ public class GroupByList<E,S> extends TransformedList<E,S> {
 		// don't use UniqueList for its intended purpose. Instead, we
 		// violently abuse it to perform our grouping functionality for us.
 		// In the future, refactoring would be nice to avoid this hackery.
-		this.uniqueSource.setFireCountChangeEvents(true);
+//		this.uniqueSource.setFireCountChangeEvents(true);
 		this.source.addListEventListener(this);
 	}
 
