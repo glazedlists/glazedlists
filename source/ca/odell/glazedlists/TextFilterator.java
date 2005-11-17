@@ -9,8 +9,7 @@ import java.util.List;
  * An utility class that can get a list of Strings for a given object
  * for testing whether a filter matches.
  *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
- * Lists Tutorial</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  * @see GlazedLists#textFilterator(String[])
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

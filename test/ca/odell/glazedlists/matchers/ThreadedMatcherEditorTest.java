@@ -3,7 +3,6 @@ package ca.odell.glazedlists.matchers;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
@@ -49,7 +48,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         matchRelaxed = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.RELAXED, threadedMatcherEditor.getMatcher());
         matchConstrained = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.CONSTRAINED, threadedMatcherEditor.getMatcher());
         matchChanged = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.CHANGED, threadedMatcherEditor.getMatcher());
-	}
+    }
 
     /**
      * Clean up after the test.
@@ -114,7 +113,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     private void runCoalescingMatchChangedTest(MatcherEditor.Event[] events, int expectedType) {
-        final MatcherEditor.Event coalescedMatcherEvent = threadedMatcherEditor.coalesceMatcherEvents(events);
+        final MatcherEditor.Event coalescedMatcherEvent = coalesceMatcherEvents(threadedMatcherEditor, events);
         // ensure the expectedType is received
         assertEquals(expectedType, coalescedMatcherEvent.getType());
 
@@ -126,6 +125,11 @@ public class ThreadedMatcherEditorTest extends TestCase {
         // ensure the Matcher returned is == to the last MatcherEvent's Matcher
         assertTrue(events[events.length-1].getMatcher() == coalescedMatcherEvent.getMatcher());
     }
+
+    protected <E> MatcherEditor.Event<E> coalesceMatcherEvents(ThreadedMatcherEditor<E> threadedMatcherEditor, MatcherEditor.Event<E>[] matcherEvents) {
+        return threadedMatcherEditor.coalesceMatcherEvents(Arrays.asList(matcherEvents));
+    }
+
 
     public void testFiltering() throws InterruptedException {
         filterList.addAll(Arrays.asList(new Object[] {"Andy", "Barry", "Colin", "James", "Jesse", "Jesus", "Trevor", "Ursula", "Vanessa", "Zack"}));
@@ -142,7 +146,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
     public void testQueuingConstraints() throws InterruptedException {
         final CountingMatcherEditorListener counter =
-			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"J"});
@@ -162,7 +166,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
     public void testQueuingRelaxations() throws InterruptedException {
         final CountingMatcherEditorListener counter =
-			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -182,7 +186,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
     public void testQueuingMatchAll() throws InterruptedException {
         final CountingMatcherEditorListener counter =
-			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -200,7 +204,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
     public void testQueuingChanged() throws InterruptedException {
         final CountingMatcherEditorListener counter =
-			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -218,7 +222,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
     public void testQueuingAllSorts_WithPause() throws InterruptedException {
         final CountingMatcherEditorListener counter =
-			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -250,7 +254,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
     public void testQueuingAllSorts_WithoutPause() throws InterruptedException {
         final CountingMatcherEditorListener counter =
-			new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});

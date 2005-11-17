@@ -16,8 +16,7 @@ import java.util.*;
  * directly. Instead use a EventThreadProxy, which receives
  * events on the list thread and then fires them on the Swing thread.
  *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
- * Lists Tutorial</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

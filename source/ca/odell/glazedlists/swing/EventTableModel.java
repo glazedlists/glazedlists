@@ -21,8 +21,7 @@ import javax.swing.table.*;
  * noted, all methods are only safe to be called from the event dispatch thread.
  * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)}.
  *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
- * Lists Tutorial</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
  * @see SwingUtilities#invokeAndWait(Runnable)
  *

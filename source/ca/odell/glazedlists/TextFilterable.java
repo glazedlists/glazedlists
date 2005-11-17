@@ -8,8 +8,7 @@ import java.util.List;
 /**
  * An item that can be compared to a list of filters to see if it matches.
  *
- * @see <a href="http://publicobject.com/glazedlists/tutorial-0.9.1/">Glazed
- * Lists Tutorial</a>
+ * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

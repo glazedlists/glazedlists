@@ -1,8 +1,6 @@
 package ca.odell.glazedlists.matchers;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * A MatcherEditor which decorates a source MatcherEditor with functionality.
@@ -23,7 +21,7 @@ import java.util.List;
  *        drain the queue of MatcherEvents. Subclasses may override to
  *        customize which Thread is used.
  *
- *   <li> {@link #coalesceMatcherEvents(MatcherEditor.Event[])} is used to compress
+ *   <li> {@link #coalesceMatcherEvents(List<Event<E>>)} is used to compress
  *        many enqueued MatcherEvents into a single representative
  *        MatcherEvent. This implies a contract between all registered
  *        MatcherEditorListeners and this {@link ThreadedMatcherEditor} that
@@ -51,13 +49,13 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * the queue, and take care to ensure iteration occurs over copies of the queue data and not
      * the queue itself so as to avoid concurrent modification problems.
      */
-    private final List<MatcherEditor.Event> matcherEventQueue = Collections.synchronizedList(new LinkedList<MatcherEditor.Event>());
+    private final List<MatcherEditor.Event<E>> matcherEventQueue = new LinkedList<MatcherEditor.Event<E>>();
 
     /**
      * The MatcherEditorListener which reacts to MatcherEvents from the {@link #source}
      * by enqueuing them for firing on another Thread at some later time.
      */
-    private MatcherEditor.Listener<E> queuingMatcherEditorListener = new QueuingMatcherEditorListener<E>();
+    private MatcherEditor.Listener<E> queuingMatcherEditorListener = new QueuingMatcherEditorListener();
 
     /**
      * <tt>true</tt> indicates a Thread is currently executing the
@@ -143,12 +141,12 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
      *      same state as if all <code>matcherEvents</code> had been fired
      *      sequentially
      */
-    protected Event<E> coalesceMatcherEvents(Event<E>[] matcherEvents) {
+    protected Event<E> coalesceMatcherEvents(List<Event<E>> matcherEvents) {
         boolean changeType = false;
 
         // fetch the last matcher event - it is the basis of the MatcherEvent which must be returned
         // all that remains is to determine the type of the MatcherEvent to return
-        final Event<E> lastMatcherEvent = matcherEvents[matcherEvents.length-1];
+        final Event<E> lastMatcherEvent = matcherEvents.get(matcherEvents.size()-1);
         final int lastMatcherEventType = lastMatcherEvent.getType();
 
         // if the last MatcherEvent is a MATCH_ALL or MATCH_NONE type, we can safely return it immediately
@@ -157,8 +155,8 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
             boolean constrained = false;
             boolean relaxed = false;
 
-            for (int i = 0; i < matcherEvents.length; i++) {
-                switch (matcherEvents[i].getType()) {
+            for (Iterator<Event<E>> i = matcherEvents.iterator(); i.hasNext(); ) {
+                switch (i.next().getType()) {
                     case Event.MATCH_ALL: relaxed = true; break;
                     case Event.MATCH_NONE: constrained = true; break;
                     case Event.RELAXED: relaxed = true; break;
@@ -190,35 +188,21 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
     }
 
     /**
-     * This convenience method synchronously decides whether or not to execute
-     * the {@link #drainMatcherEventQueueRunnable} to drain the
-     * {@link #matcherEventQueue} based on whether the
-     * {@link #drainMatcherEventQueueRunnable} is currently being executed in a
-     * Thread. Only one Thread is allowed to be using the
-     * {@link #drainMatcherEventQueueRunnable} to drain the
-     * {@link #matcherEventQueue} at any time.
-     */
-    private void drainQueue() {
-        // acquire the monitor that guards assigning the drainMatcherEventQueueRunnable
-        // to a processing Thread as well as exiting the drainMatcherEventQueueRunnable
-        synchronized (this.matcherEventQueue) {
-            // if no Thread is currently draining the matcherEventQueue, start one
-            if (!this.isDrainingQueue) {
-                this.executeMatcherEventQueueRunnable(this.drainMatcherEventQueueRunnable);
-                this.isDrainingQueue = true;
-            }
-        }
-    }
-
-    /**
      * This MatcherEditorListener enqueues each MatcherEvent it receives in the
      * order it is received and then schedules a Runnable to drain the queue of
      * MatcherEvents as soon as possible.
      */
-    private class QueuingMatcherEditorListener<E> implements MatcherEditor.Listener<E> {
-        public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
-            matcherEventQueue.add(matcherEvent);
-            drainQueue();
+    private class QueuingMatcherEditorListener implements MatcherEditor.Listener<E> {
+        public void changedMatcher(Event<E> matcherEvent) {
+            synchronized(matcherEventQueue) {
+                matcherEventQueue.add(matcherEvent);
+
+                // if necessary, start a Thread to drain the queue
+                if (!isDrainingQueue) {
+                    isDrainingQueue = true;
+                    executeMatcherEventQueueRunnable(drainMatcherEventQueueRunnable);
+                }
+            }
         }
     }
 
@@ -234,34 +218,36 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     private class DrainMatcherEventQueueRunnable implements Runnable {
         public void run() {
-            try {
-                while (true) {
-                    // acquire the monitor that guards assigning the drainMatcherEventQueueRunnable
-                    // to a processing Thread as well as exiting the drainMatcherEventQueueRunnable
-                    synchronized (matcherEventQueue) {
-                        // if no work exists in the queue, exit the Runnable
-                        if (matcherEventQueue.isEmpty())
-                            return;
+            while (true) {
+                // acquire the monitor that guards assigning the drainMatcherEventQueueRunnable
+                // to a processing Thread as well as exiting the drainMatcherEventQueueRunnable
+                final Event<E> matcherEvent;
+                synchronized (matcherEventQueue) {
+                    // if no work exists in the queue, exit the Runnable
+                    if (matcherEventQueue.isEmpty()) {
+                        // no matter the circumstance for us exiting the Runnable,
+                        // ensure we indicate we are no longer draining the queue
+                        isDrainingQueue = false;
+                        return;
                     }
 
                     // fetch a copy of all MatcherEvents currently in the queue
-                    final Event<E>[] matcherEvents = matcherEventQueue.toArray(new Event[matcherEventQueue.size()]);
-
-                    // coalesce all of the current MatcherEvents to a single representative MatcherEvent
-                    final Event<E> coalescedMatcherEvent = coalesceMatcherEvents(matcherEvents);
-
-                    // fire the single coalesced MatcherEvent
-                    fireChangedMatcher(coalescedMatcherEvent);
-
-                    // we can now safely remove the MatcherEvents from the queue
-                    // NOTE: this is the only destructive operation we perform on the matcherEventQueue
-                    for (int i = 0; i < matcherEvents.length; i++)
-                        matcherEventQueue.remove(0);
+                    matcherEvent = coalesceMatcherEvents(matcherEventQueue);
+                    matcherEventQueue.clear();
                 }
-            } finally {
-                // no matter the circumstance for us exiting the Runnable,
-                // ensure we indicate we are no longer draining the queue
-                isDrainingQueue = false;
+
+                try {
+                    // coalesce all of the current MatcherEvents to a single representative MatcherEvent
+                    // and fire the single coalesced MatcherEvent
+                    fireChangedMatcher(matcherEvent);
+
+                } catch(Error e) {
+                    synchronized(matcherEventQueue) { isDrainingQueue = false; }
+                    throw e;
+                } catch(RuntimeException e) {
+                    synchronized(matcherEventQueue) { isDrainingQueue = false; }
+                    throw e;
+                }
             }
         }
     }
