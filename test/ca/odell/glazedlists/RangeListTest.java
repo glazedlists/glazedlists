@@ -16,6 +16,16 @@ import java.util.Collections;
  */
 public class RangeListTest extends TestCase {
 
+    public void testAddAll() {
+        EventList source = new BasicEventList();
+        RangeList rangeList = new RangeList(source);
+        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
+
+        assertEquals(0, rangeList.size());
+
+        rangeList.addAll(split("J,E,S,S,E"));
+        assertEquals(5, rangeList.size());
+    }
 
     public void testChangeSource() {
         EventList source = new BasicEventList();

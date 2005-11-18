@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the core Glazed Lists package
-import ca.odell.glazedlists.event.*;
 // to use standard collections
 import java.util.*;
 

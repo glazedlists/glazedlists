@@ -17,15 +17,11 @@ import java.net.URL;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
-import java.util.Set;
-import java.util.HashSet;
 import java.text.MessageFormat;
 
 /**
@@ -119,13 +115,13 @@ public class IssuesBrowser extends Applet {
         final MatcherEditor textFilterMatcherEditor = new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterTextField, null));
 
         // create a MatcherEditor which edits the state filter
-        StateMatcherEditor stateMatcherEditor = new StateMatcherEditor();
+        StatusMatcherEditor statusMatcherEditor = new StatusMatcherEditor(issuesEventList);
 
         // create the pipeline of glazed lists
         SwingUsersMatcherEditor userMatcherEditor = new SwingUsersMatcherEditor(issuesEventList);
         FilterList issuesUserFiltered = new FilterList(issuesEventList, userMatcherEditor);
-        FilterList issuesStateFiltered = new FilterList(issuesUserFiltered, stateMatcherEditor);
-        FilterList issuesTextFiltered = new FilterList(issuesStateFiltered, textFilterMatcherEditor);
+        FilterList issuesStatusFiltered = new FilterList(issuesUserFiltered, statusMatcherEditor);
+        FilterList issuesTextFiltered = new FilterList(issuesStatusFiltered, textFilterMatcherEditor);
         ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
         final SortedList issuesSortedList = new SortedList(priorityList, null);
         issuesSortedList.setMode(SortedList.AVOID_MOVING_ELEMENTS); // temp hack for playing with the new sorting mode
@@ -222,7 +218,7 @@ public class IssuesBrowser extends Applet {
         filtersPanel.add(textFilterLabel,                    new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
         filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
         filtersPanel.add(stateLabel,                         new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(stateMatcherEditor.getComponent(),  new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
+        filtersPanel.add(statusMatcherEditor.getComponent(), new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
         filtersPanel.add(priorityLabel,                      new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
         filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 5, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
         filtersPanel.add(userLabel,                          new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
@@ -320,6 +316,8 @@ public class IssuesBrowser extends Applet {
      * to reflect a new issue count.
      */
     private static class IssueCounterLabel extends JLabel implements ListEventListener {
+        private static final MessageFormat issueCountFormat = new MessageFormat("{0} {0,choice,0#issues|1#issue|1<issues}");
+
         private int issueCount = -1;
 
         public IssueCounterLabel(EventList source) {
@@ -330,110 +328,10 @@ public class IssuesBrowser extends Applet {
         public void setIssueCount(int issueCount) {
             if (this.issueCount == issueCount) return;
             this.issueCount = issueCount;
-            this.setText(MessageFormat.format("{0} {0,choice,0#issues|1#issue|1<issues}", new Object[] {new Integer(issueCount)}));
+            this.setText(issueCountFormat.format(new Object[] {new Integer(issueCount)}));
         }
         public void listChanged(ListEvent listChanges) {
             setIssueCount(listChanges.getSourceList().size());
-        }
-    }
-
-    /**
-     * A MatcherEditor that produces Matchers that filter the issues based on the selected states.
-     */
-    private static class StateMatcherEditor extends AbstractMatcherEditor implements ActionListener {
-        /** A panel housing a checkbox for each state. */
-        private JPanel checkBoxPanel = new JPanel(new GridLayout(2, 2));
-
-        /** A checkbox for each possible state. */
-        private final JCheckBox[] stateCheckBoxes;
-
-        public StateMatcherEditor() {
-            final JCheckBox newStateCheckBox = buildCheckBox("New");
-            final JCheckBox resolvedStateCheckBox = buildCheckBox("Resolved");
-            final JCheckBox startedStateCheckBox = buildCheckBox("Started");
-            final JCheckBox closeStateCheckBox = buildCheckBox("Closed");
-
-            this.stateCheckBoxes = new JCheckBox[] {newStateCheckBox, resolvedStateCheckBox, startedStateCheckBox, closeStateCheckBox};
-
-            this.checkBoxPanel.setOpaque(false);
-
-            // add each checkbox to the panel and start listening to selections
-            for (int i = 0; i < this.stateCheckBoxes.length; i++) {
-                this.stateCheckBoxes[i].addActionListener(this);
-                this.checkBoxPanel.add(this.stateCheckBoxes[i]);
-            }
-        }
-
-        /**
-         * Returns the component responsible for editing the state filter
-         */
-        public Component getComponent() {
-            return this.checkBoxPanel;
-        }
-
-        /**
-         * A convenience method to build a state checkbox with the given name.
-         */
-        private static JCheckBox buildCheckBox(String name) {
-            final JCheckBox checkBox = new JCheckBox(name, true);
-            checkBox.setOpaque(false);
-            checkBox.setFocusable(false);
-            checkBox.setMargin(new Insets(0, 0, 0, 0));
-            return checkBox;
-        }
-
-        /**
-         * Returns a StateMatcher which matches Issues if their state is one
-         * of the selected states.
-         */
-        private StateMatcher buildMatcher() {
-            final Set allowedStates = new HashSet();
-            for (int i = 0; i < this.stateCheckBoxes.length; i++) {
-                if (this.stateCheckBoxes[i].isSelected())
-                    allowedStates.add(this.stateCheckBoxes[i].getText().toUpperCase().intern());
-            }
-
-            return new StateMatcher(allowedStates);
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            // determine if the checkbox that generated this ActionEvent is freshly checked or freshly unchecked
-            // - we'll use that information to determine whether this is a constrainment or relaxation of the matcher
-            final boolean isCheckBoxSelected = ((JCheckBox) e.getSource()).isSelected();
-
-            // build a StateMatcher
-            final StateMatcher stateMatcher = this.buildMatcher();
-
-            // fire a MatcherEvent of the appropriate type
-            if (stateMatcher.getStateCount() == 0)
-                this.fireMatchNone();
-            else if (stateMatcher.getStateCount() == this.stateCheckBoxes.length)
-                this.fireMatchAll();
-            else if (isCheckBoxSelected)
-                this.fireRelaxed(stateMatcher);
-            else
-                this.fireConstrained(stateMatcher);
-        }
-
-        /**
-         * A StateMatcher returns <tt>true</tt> if the state of the Issue is
-         * one of the viewable states selected by the user.
-         */
-        private static class StateMatcher implements Matcher {
-            private final Set allowedStates;
-
-            public StateMatcher(Set allowedStates) {
-                this.allowedStates = allowedStates;
-            }
-
-            public int getStateCount() {
-                return this.allowedStates.size();
-            }
-
-            public boolean matches(Object item) {
-                final Issue issue = (Issue) item;
-                return this.allowedStates.contains(issue.getStatus());
-            }
         }
     }
 
