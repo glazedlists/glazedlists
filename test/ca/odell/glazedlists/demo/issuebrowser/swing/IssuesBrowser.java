@@ -37,7 +37,7 @@ public class IssuesBrowser extends Applet {
     private static final Color GLAZED_LISTS_LIGHT_BROWN = new Color(246, 237, 220);
 
     /** an event list to host the issues */
-    private UniqueList issuesEventList = new UniqueList(new BasicEventList());
+    private EventList issuesEventList = new BasicEventList();
 
     /** the currently selected issues */
     private EventSelectionModel issuesSelectionModel = null;
