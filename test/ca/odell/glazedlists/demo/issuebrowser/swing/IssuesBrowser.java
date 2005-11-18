@@ -155,7 +155,7 @@ public class IssuesBrowser extends Applet {
 
         // priority slider
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
-        priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
+        priorityRangeModel.setRangeProperties(0, 0, 0, 101, false);
         JSlider prioritySlider = new JSlider(priorityRangeModel);
         Hashtable prioritySliderLabels = new Hashtable();
         prioritySliderLabels.put(new Integer(0), new JLabel("Low"));
