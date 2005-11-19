@@ -33,6 +33,8 @@ public final class UniqueList<E> extends TransformedList<E,E> {
 
     private final GroupingList<E> groupingList;
 
+    private final Comparator<E> comparator;
+
     /**
      * Creates a {@link UniqueList} that determines uniqueness via the
      * {@link Comparable} interface. All elements of the source {@link EventList}
@@ -52,7 +54,7 @@ public final class UniqueList<E> extends TransformedList<E,E> {
      * @param comparator the {@link Comparator} used to determine equality
      */
     public UniqueList(EventList<E> source, Comparator<E> comparator) {
-        this(new GroupingList<E>(source, comparator));
+        this(new GroupingList<E>(source, comparator), comparator);
     }
 
     /**
@@ -75,12 +77,37 @@ public final class UniqueList<E> extends TransformedList<E,E> {
      * @param groupingList the GroupingList that is installed around the
      *      original source EventList
      */
-    private UniqueList(GroupingList<E> groupingList) {
+    private UniqueList(GroupingList<E> groupingList, Comparator<E> comparator) {
         super(new FunctionList<E, List<E>>(groupingList, new ListElementZeroFunction<E>(), new WrapInListFunction<E>()));
 
         this.groupingList = groupingList;
+        this.comparator = comparator;
 
         source.addListEventListener(this);
+    }
+
+    /**
+     * Returns the index in this list of the first occurrence of the specified
+     * <code>element</code>, or -1 if this list does not contain this
+     * <code>element</code>. More formally, returns the lowest index <tt>i</tt>
+     * such that <tt>uniqueListComparator.compare(get(i), element) == 0</tt>,
+     * or -1 if there is no such index.
+     *
+     * <p>Note: This is a departure from the contract for {@link List#indexOf}
+     * since it does not guarantee that <tt>element.equals(get(i))</tt> where i
+     * is a positive index returned from this method.
+     *
+     * @param element the element to search for.
+     * @return the index in this list of the first occurrence of the specified
+     *         element, or -1 if this list does not contain this element
+     * @throws ClassCastException if the type of the specified element
+     *         is incompatible with this list
+     */
+    public int indexOf(Object element) {
+        final int index = Collections.binarySearch(source, (E) element, this.comparator);
+
+        // if the element is not found (index is negative) then return -1 to indicate the list does not contain it
+        return index < 0 ? -1 : index;
     }
 
     /** {@inheritDoc} */

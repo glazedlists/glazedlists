@@ -19,6 +19,9 @@ import ca.odell.glazedlists.event.ListEvent;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  * @author James Lemieux
+ * @deprecated As of 2005/11/19, this class is deprecated in favour of the two
+ *     lists: GroupingList and FunctionList. Those two lists can be composed to
+ *     create the same effect that GroupByList has, but they are more modular.
  */
 public class GroupByList<E,S> extends TransformedList<E,S> {
 
