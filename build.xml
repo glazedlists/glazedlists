@@ -33,6 +33,8 @@
 		</delete>
 		<!-- Delete the generated .jar -->
 		<delete file="glazedlists.jar"/>
+		<!-- Delete the generated demo .jar -->
+		<delete file="glazedlists-demo.jar"/>
 		<!-- Delete the generated source -->
 		<delete file="glazedlists-source.zip"/>
 	</target>
@@ -303,6 +305,9 @@
         </javac>
         <jar destfile="glazedlists-demo.jar" update="true" index="true">
             <fileset dir="classes"/>
+            <fileset dir=".">
+                <include name ="**/resources/**"/>
+            </fileset>
             <fileset dir="test">
                 <include name ="**/demo/*.gif"/>
             </fileset>
