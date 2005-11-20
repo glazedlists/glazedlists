@@ -60,12 +60,6 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
     /** Used only in temporary data structures to flag deleting of the FIRST group element when more elements exist. */
     private static final Object UNIQUE_WITH_DUPLICATE = null;
 
-    /** The index of an update event that has not yet been added to the ListEvent being assembled. */
-    private int pendingUpdateIndex = -1;
-
-    /** The index of the add event that was most recently added to the ListEvent being assembled. */
-    private int lastInsertIndex = -1;
-
     /** For reporting which side of an element its group is located. */
     private static final int LEFT_GROUP = -1;
     private static final int NO_GROUP = 0;
@@ -399,7 +393,7 @@ public final class GroupingList<E> extends TransformedList<List<E>,E> {
     public List<E> remove(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
-        final List<E> removed = get(index);
+        final List<E> removed = this.get(index);
 
         // make a copy of the list to return
         final List<E> result = new ArrayList<E>(removed);
