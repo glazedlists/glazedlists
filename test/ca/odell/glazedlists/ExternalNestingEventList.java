@@ -17,7 +17,7 @@ public class ExternalNestingEventList<E> extends TransformedList<E,E> {
     }
     public ExternalNestingEventList(EventList<E> source, boolean forward) {
         super(source);
-        this.forward = true;
+        this.forward = forward;
         source.addListEventListener(this);
     }
     public void beginEvent(boolean allowNested) {
