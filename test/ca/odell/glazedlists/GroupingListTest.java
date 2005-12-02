@@ -253,12 +253,12 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        groupList.get(0).add("A");
+        ((List<String>)groupList.get(0)).add("A");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        groupList.get(0).add("D");
+        ((List<String>)groupList.get(0)).add("D");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
@@ -274,16 +274,16 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        groupList.get(1).remove("B");
+        ((List<String>)groupList.get(1)).remove("B");
         assertEquals(GlazedListsTests.stringToList("A"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("B"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        groupList.get(1).remove("B");
+        ((List<String>)groupList.get(1)).remove("B");
         assertEquals(GlazedListsTests.stringToList("A"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(1));
 
-        groupList.get(0).remove("X");
+        ((List<String>)groupList.get(0)).remove("X");
         assertEquals(GlazedListsTests.stringToList("A"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(1));
     }
@@ -297,12 +297,12 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        groupList.get(1).set(0, "A");
+        ((List<String>)groupList.get(1)).set(0, "A");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("B"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        groupList.get(1).set(0, "C");
+        ((List<String>)groupList.get(1)).set(0, "C");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("CCCC"), groupList.get(1));
     }
@@ -316,13 +316,13 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        assertEquals(groupList.get(0).size(), 1);
-        assertEquals(groupList.get(1).size(), 2);
-        assertEquals(groupList.get(2).size(), 3);
+        assertEquals(((List)groupList.get(0)).size(), 1);
+        assertEquals(((List)groupList.get(1)).size(), 2);
+        assertEquals(((List)groupList.get(2)).size(), 3);
 
-        assertEquals(groupList.get(0).get(0), "A");
-        assertEquals(groupList.get(1).get(0), "B");
-        assertEquals(groupList.get(2).get(0), "C");
+        assertEquals(((List)groupList.get(0)).get(0), "A");
+        assertEquals(((List)groupList.get(1)).get(0), "B");
+        assertEquals(((List)groupList.get(2)).get(0), "C");
     }
 
     public void testGroupListClear() {
@@ -334,18 +334,18 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        assertEquals(groupList.get(0).size(), 1);
-        assertEquals(groupList.get(1).size(), 2);
-        assertEquals(groupList.get(2).size(), 3);
+        assertEquals(((List)groupList.get(0)).size(), 1);
+        assertEquals(((List)groupList.get(1)).size(), 2);
+        assertEquals(((List)groupList.get(2)).size(), 3);
 
-        groupList.get(2).clear();
-        assertEquals(groupList.get(0).size(), 1);
-        assertEquals(groupList.get(1).size(), 2);
+        ((List<String>)groupList.get(2)).clear();
+        assertEquals(((List)groupList.get(0)).size(), 1);
+        assertEquals(((List)groupList.get(1)).size(), 2);
 
-        groupList.get(0).clear();
-        assertEquals(groupList.get(0).size(), 2);
+        ((List<String>)groupList.get(0)).clear();
+        assertEquals(((List)groupList.get(0)).size(), 2);
 
-        groupList.get(0).clear();
+        ((List<String>)groupList.get(0)).clear();
         assertEquals(groupList.size(), 0);
     }
 }

@@ -140,7 +140,7 @@ public final class UniqueList<E> extends TransformedList<E,E> {
      * given <code>index</code> within this {@link UniqueList}.
      */
     public List<E> getAll(int index) {
-        return this.groupingList.get(index);
+        return (List<E>)this.groupingList.get(index);
     }
 
     /**
