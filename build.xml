@@ -134,7 +134,7 @@
 		</javac>
 	</target>
 
-	<target name="swt" depends="core">
+	<target name="old_swt" depends="core">
 		<!-- Verify that SWT is available on the classpath -->
 		<available classname="org.eclipse.swt.SWT" property="swt.present"/>
 		<fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>
@@ -154,6 +154,38 @@
 			<include name="**/rbp/**"/>
 		</javac>
 	</target>
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       EXTENSIONS
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <target name="swt" depends="core">
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/25145/swt-api.jar"/>
+            <arg value="extensions/swt/lib/swt-api.jar"/>
+        </java>
+        <javac destdir="classes" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="extensions/swt/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="ktable" depends="core,swt">
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/24419/ktable.jar"/>
+            <arg value="extensions/ktable/lib/ktable.jar"/>
+        </java>
+        <javac destdir="classes" srcdir="extensions/ktable/source" debug="on" source="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="extensions/ktable/lib/" includes="*.jar"/>
+                <fileset dir="extensions/swt/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
 
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
