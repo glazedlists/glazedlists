@@ -108,16 +108,14 @@
 	<target name="core" depends="init">
 		<mkdir dir="classes"/>
 		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
-            <!-- swing -->
-			<exclude name="**/swing/**"/>
-            <!-- swt -->
-			<exclude name="**/swt/**"/>
-            <!-- io -->
-			<exclude name="**/ctp/**"/>
-			<exclude name="**/io/**"/>
-			<exclude name="**/nio/**"/>
-			<exclude name="**/pmap/**"/>
-			<exclude name="**/rbp/**"/>
+                        <!-- swing -->
+                        <exclude name="**/swing/**"/>
+                        <!-- io -->
+                        <exclude name="**/ctp/**"/>
+                        <exclude name="**/io/**"/>
+                        <exclude name="**/nio/**"/>
+                        <exclude name="**/pmap/**"/>
+                        <exclude name="**/rbp/**"/>
 		</javac>
 	</target>
 
@@ -131,17 +129,6 @@
 		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
 			<include name="**/swing/**"/>
 			<exclude name="**/migrationkit/**"/>
-		</javac>
-	</target>
-
-	<target name="old_swt" depends="core">
-		<!-- Verify that SWT is available on the classpath -->
-		<available classname="org.eclipse.swt.SWT" property="swt.present"/>
-		<fail unless="swt.present" message="To run this task, add swt.jar to your CLASSPATH. SWT is available free at http://www.eclipse.org"/>
-		<!-- Compile the java code from source/ into classes/ -->
-		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}">
-			<include name="**/swt/**"/>
-            <exclude name="**/migrationkit/**"/>
 		</javac>
 	</target>
 
