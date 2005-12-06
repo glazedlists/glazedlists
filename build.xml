@@ -328,9 +328,4 @@
         </jar>
 	</target>
 
-    <target name="testdl">
-        <get src="https://glazedlists.dev.java.net/files/documents/1073/24419/ktable.jar" dest="ktable.jar" username="jplemieux" password="Lexus01"/>
-        <!--<get src="http://www.google.com/" dest="google.html"/>-->
-    </target>
-
 </project>
