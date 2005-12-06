@@ -101,21 +101,21 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,swt,io"
+	<target name="compileall" depends="core,migrationkit,swing,swt,ktable,io"
 		description="Compile all components of the source.">
 	</target>
 
 	<target name="core" depends="init">
 		<mkdir dir="classes"/>
 		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
-                        <!-- swing -->
-                        <exclude name="**/swing/**"/>
-                        <!-- io -->
-                        <exclude name="**/ctp/**"/>
-                        <exclude name="**/io/**"/>
-                        <exclude name="**/nio/**"/>
-                        <exclude name="**/pmap/**"/>
-                        <exclude name="**/rbp/**"/>
+                <!-- swing -->
+                <exclude name="**/swing/**"/>
+                <!-- io -->
+                <exclude name="**/ctp/**"/>
+                <exclude name="**/io/**"/>
+                <exclude name="**/nio/**"/>
+                <exclude name="**/pmap/**"/>
+                <exclude name="**/rbp/**"/>
 		</javac>
 	</target>
 
@@ -148,6 +148,7 @@
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <target name="swt" depends="core">
+        <mkdir dir="${basedir}/extensions/swt/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="classes"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/25145/swt-api.jar"/>
@@ -161,6 +162,7 @@
     </target>
 
     <target name="ktable" depends="core,swt">
+        <mkdir dir="${basedir}/extensions/ktable/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="classes"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/24419/ktable.jar"/>
@@ -251,7 +253,6 @@
     </target>
 
 
-
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	   REDISTRIBUTING THE SOURCE
 	   Package the entire Glazed Lists source tree in a .zip file.
@@ -326,5 +327,10 @@
             </manifest>
         </jar>
 	</target>
+
+    <target name="testdl">
+        <get src="https://glazedlists.dev.java.net/files/documents/1073/24419/ktable.jar" dest="ktable.jar" username="jplemieux" password="Lexus01"/>
+        <!--<get src="http://www.google.com/" dest="google.html"/>-->
+    </target>
 
 </project>
