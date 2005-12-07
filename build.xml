@@ -257,7 +257,7 @@
             toFile="/latest_build/glazedlists-source_${java.target.version.fileFriendlyName}.zip"
             fromFile="glazedlists-source_${java.target.version.fileFriendlyName}.zip"
             fileDescription="Snapshot build by ${user.name} at ${jar.datestamp}"
-            overwrite="no"
+            overwrite="yes"
             fileStatus="Draft"/>
 	</target>
 
