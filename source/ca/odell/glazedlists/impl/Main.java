@@ -62,6 +62,8 @@ public class Main {
         builtHtml.append(attributes.get(new Attributes.Name("Built-By")));
         builtHtml.append("<br>");
         builtHtml.append(attributes.get(new Attributes.Name("Built-At")));
+        builtHtml.append("<br>");
+        builtHtml.append("Source: ").append(attributes.get(new Attributes.Name("Source-Version")));
 
         // the contributors
         String contributorsHtml = (String)attributes.get(new Attributes.Name("Contributors"));
