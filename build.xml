@@ -226,7 +226,7 @@
 
         <!-- Alter the target platform in the java14 build.xml file from 1.5 to 1.4. -->
         <replace file="java14_glazedlists/build.xml" token="&lt;property name=&quot;java.target.version&quot; value=&quot;1.5&quot;/&gt;" value="&lt;property name=&quot;java.target.version&quot; value=&quot;1.4&quot;/&gt;"/>
-        <replace file="java14_glazedlists/build.xml" token="&lt;property name=&quot;java.target.version.fileFriendlyName&quot; value=&quot;1.5&quot;/&gt;" value="&lt;property name=&quot;java.target.version.fileFriendlyName&quot; value=&quot;java14&quot;/&gt;"/>
+        <replace file="java14_glazedlists/build.xml" token="&lt;property name=&quot;java.target.version.fileFriendlyName&quot; value=&quot;java15&quot;/&gt;" value="&lt;property name=&quot;java.target.version.fileFriendlyName&quot; value=&quot;java14&quot;/&gt;"/>
     </target>
 
 
