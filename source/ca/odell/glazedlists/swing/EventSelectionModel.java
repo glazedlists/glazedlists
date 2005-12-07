@@ -39,7 +39,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     private ListSelection<E> listSelection;
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E,E> swingThreadSource;
+    private TransformedList<E, E> swingThreadSource;
 
     /** whether the user can modify the selection */
     private boolean enabled = true;

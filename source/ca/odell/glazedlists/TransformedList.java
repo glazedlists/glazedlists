@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class TransformedList<E,S> extends AbstractEventList<E> implements ListEventListener<S> {
+public abstract class TransformedList<S, E> extends AbstractEventList<E> implements ListEventListener<S> {
 
     /** the event list to transform */
     protected EventList<S> source;

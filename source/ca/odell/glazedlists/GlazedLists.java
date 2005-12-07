@@ -270,7 +270,7 @@ public final class GlazedLists {
      * is thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public static <E> TransformedList<E,E> readOnlyList(EventList<E> source) {
+    public static <E> TransformedList<E, E> readOnlyList(EventList<E> source) {
         return new ReadOnlyList<E>(source);
     }
 
@@ -303,7 +303,7 @@ public final class GlazedLists {
      *
      * @see ca.odell.glazedlists.util.concurrent
      */
-    public static <E> TransformedList<E,E> threadSafeList(EventList<E> source) {
+    public static <E> TransformedList<E, E> threadSafeList(EventList<E> source) {
         return new ThreadSafeList<E>(source);
     }
 

@@ -12,7 +12,7 @@ import ca.odell.glazedlists.event.ListEvent;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class RangeList<E> extends TransformedList<E,E> {
+public class RangeList<E> extends TransformedList<E, E> {
 
     /** the user-specified range of the source list to include */
     private int desiredStart = 0;

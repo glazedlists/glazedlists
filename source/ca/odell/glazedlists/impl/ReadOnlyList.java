@@ -29,7 +29,7 @@ import ca.odell.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class ReadOnlyList<E> extends TransformedList<E,E> {
+public final class ReadOnlyList<E> extends TransformedList<E, E> {
 
     /**
      * Creates a {@link ReadOnlyList} to provide a view of an {@link EventList}

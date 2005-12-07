@@ -39,7 +39,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class ThreadSafeList<E> extends TransformedList<E,E> {
+public final class ThreadSafeList<E> extends TransformedList<E, E> {
 
     /**
      * Creates a {@link ThreadSafeList} that provides thread safe access to all

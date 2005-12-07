@@ -47,7 +47,7 @@ import ca.odell.glazedlists.event.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class ThreadProxyEventList<E> extends TransformedList<E,E> {
+public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     
     /** a local cache of the source list */
     private List<E> localCache = new ArrayList<E>();

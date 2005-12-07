@@ -14,7 +14,7 @@ public class FunctionListTest extends TestCase {
         new FunctionList(new BasicEventList(), new IntegerToString(), null);
 
         BasicEventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<String,Integer> intsToStrings = new FunctionList<String,Integer>(source, new IntegerToString(), new StringToInteger());
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
         source.add(new Integer(0));
         source.add(new Integer(1));
         source.add(new Integer(2));
@@ -26,7 +26,7 @@ public class FunctionListTest extends TestCase {
 
     public void testAdd() {
         BasicEventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<String,Integer> intsToStrings = new FunctionList<String,Integer>(source, new IntegerToString(), new StringToInteger());
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
         source.add(new Integer(0));
         source.add(new Integer(1));
         source.add(new Integer(2));
@@ -47,7 +47,7 @@ public class FunctionListTest extends TestCase {
         assertEquals("8", intsToStrings.get(0));
 
         source = new BasicEventList<Integer>();
-        intsToStrings = new FunctionList<String,Integer>(source, new IntegerToString());
+        intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString());
         source.add(new Integer(0));
 
         assertEquals("0", intsToStrings.get(0));
@@ -65,7 +65,7 @@ public class FunctionListTest extends TestCase {
 
     public void testSet() {
         BasicEventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<String,Integer> intsToStrings = new FunctionList<String,Integer>(source, new IntegerToString(), new StringToInteger());
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
         source.add(new Integer(0));
         source.add(new Integer(1));
         source.add(new Integer(2));
@@ -74,7 +74,7 @@ public class FunctionListTest extends TestCase {
         assertEquals("8", intsToStrings.get(0));
 
         source = new BasicEventList<Integer>();
-        intsToStrings = new FunctionList<String,Integer>(source, new IntegerToString());
+        intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString());
         source.add(new Integer(0));
 
         try {
@@ -88,7 +88,7 @@ public class FunctionListTest extends TestCase {
 
     public void testRemove() {
         BasicEventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<String,Integer> intsToStrings = new FunctionList<String,Integer>(source, new IntegerToString(), new StringToInteger());
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
         source.add(new Integer(0));
         source.add(new Integer(1));
         source.add(new Integer(2));

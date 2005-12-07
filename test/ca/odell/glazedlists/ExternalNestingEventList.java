@@ -10,7 +10,7 @@ import ca.odell.glazedlists.event.ListEvent;
  * in testing handling of sophisticated events, because it allows big events
  * to be composed from simpler ones.
  */
-public class ExternalNestingEventList<E> extends TransformedList<E,E> {
+public class ExternalNestingEventList<E> extends TransformedList<E, E> {
     final boolean forward;
     public ExternalNestingEventList(EventList<E> source) {
         this(source, false);

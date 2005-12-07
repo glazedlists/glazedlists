@@ -81,7 +81,7 @@ public class ForwardEventTest extends TestCase {
     /**
      * Simple TransformationList that forwards events.
      */
-    static class ForwardingList<E> extends TransformedList<E,E> {
+    static class ForwardingList<E> extends TransformedList<E, E> {
         public ForwardingList(EventList<E> source) {
             super(source);
             source.addListEventListener(this);

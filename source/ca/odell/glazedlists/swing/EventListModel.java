@@ -29,7 +29,7 @@ import java.util.*;
 public class EventListModel<E> implements ListEventListener<E>, ListModel {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E,E> swingSource = null;
+    private TransformedList<E, E> swingSource = null;
 
     /** whom to notify of data changes */
     private List<ListDataListener> listeners = new ArrayList<ListDataListener>();

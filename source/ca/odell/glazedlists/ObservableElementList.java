@@ -39,7 +39,7 @@ import java.util.Iterator;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author James Lemieux
  */
-public class ObservableElementList<E> extends TransformedList<E,E> {
+public class ObservableElementList<E> extends TransformedList<E, E> {
 
     /**
      * A list of the observed elements. It is necessary to track the observed

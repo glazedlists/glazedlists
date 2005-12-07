@@ -20,7 +20,7 @@ import java.util.Iterator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CompositeList<E> extends CollectionList<E,EventList<E>> {
+public class CompositeList<E> extends CollectionList<EventList<E>, E> {
 
     public CompositeList() {
         super(new BasicEventList<EventList<E>>(), (Model)GlazedLists.listCollectionListModel());

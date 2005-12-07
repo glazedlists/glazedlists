@@ -51,7 +51,7 @@ import java.util.Iterator;
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  */
-public final class FunctionList<E,S> extends TransformedList<E,S> {
+public final class FunctionList<S, E> extends TransformedList<S, E> {
 
     /** A list of the Objects produced by running the source elements through the {@link forward} Function. */
     private final List<E> mappedElements;

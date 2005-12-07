@@ -29,7 +29,7 @@ import java.util.*;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author James Lemieux
  */
-public final class UniqueList<E> extends TransformedList<E,E> {
+public final class UniqueList<E> extends TransformedList<E, E> {
 
     private final GroupingList<E> groupingList;
 
@@ -78,7 +78,7 @@ public final class UniqueList<E> extends TransformedList<E,E> {
      *      original source EventList
      */
     private UniqueList(GroupingList<E> groupingList, Comparator<E> comparator) {
-        super(new FunctionList<E, List<E>>(groupingList, new ListElementZeroFunction<E>(), new WrapInListFunction<E>()));
+        super(new FunctionList<List<E>, E>(groupingList, new ListElementZeroFunction<E>(), new WrapInListFunction<E>()));
 
         this.groupingList = groupingList;
         this.comparator = comparator;

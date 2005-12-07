@@ -34,7 +34,7 @@ import ca.odell.glazedlists.impl.adt.*;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class CollectionList<E,S> extends TransformedList<E,S> implements ListEventListener<S> {
+public class CollectionList<S, E> extends TransformedList<S, E> implements ListEventListener<S> {
 
     /** This is a hack - we need a temporary value when inserting into IndexedTrees, and this is the one we use. */
     private final ChildElement<E> EMPTY_CHILD_ELEMENT = new SimpleChildElement(Collections.EMPTY_LIST, null);

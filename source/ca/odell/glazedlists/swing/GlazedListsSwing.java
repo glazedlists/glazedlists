@@ -28,7 +28,7 @@ public final class GlazedListsSwing {
      * Wraps the source in an {@link EventList} that fires all of its update events
      * from the Swing event dispatch thread.
      */
-    public static <E> TransformedList<E,E> swingThreadProxyList(EventList<E> source) {
+    public static <E> TransformedList<E, E> swingThreadProxyList(EventList<E> source) {
         return new SwingThreadProxyEventList<E>(source);
     }
 

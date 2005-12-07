@@ -30,7 +30,7 @@ import javax.swing.table.*;
 public class EventTableModel<E> extends AbstractTableModel implements ListEventListener<E> {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E,E> swingThreadSource = null;
+    private TransformedList<E, E> swingThreadSource = null;
 
     /** Specifies how to render table headers and sort */
     private TableFormat<E> tableFormat;

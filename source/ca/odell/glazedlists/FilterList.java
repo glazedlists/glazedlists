@@ -9,7 +9,6 @@ import ca.odell.glazedlists.matchers.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 
 /**
  * An {@link EventList} that shows a subset of the elements of a source
@@ -35,7 +34,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class FilterList<E> extends TransformedList<E,E> {
+public final class FilterList<E> extends TransformedList<E, E> {
 
     /** the flag list contains Barcode.BLACK for items that match the current filter and Barcode.WHITE for others */
     private Barcode flagList = new Barcode();

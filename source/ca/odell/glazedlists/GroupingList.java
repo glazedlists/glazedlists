@@ -32,7 +32,7 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  */
-public final class GroupingList<E> extends TransformedList<List<E>,E> {
+public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /**
      * A temporary barcode data structure is created when processing ListEvents in this GroupingList.

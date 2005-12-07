@@ -19,7 +19,7 @@ public class CollectionListTest extends TestCase {
 	private static final String DEV_JAMES = "James Lemieux";
 	private static final String DEV_EMPTY = "";
 
-	private CollectionList<String,String> collectionList;
+	private CollectionList<String, String> collectionList;
 	private BasicEventList<String> parentList;
 
 
@@ -28,7 +28,7 @@ public class CollectionListTest extends TestCase {
 	 */
 	public void setUp() {
 		parentList = new BasicEventList<String>();
-		collectionList = new CollectionList<String,String>(parentList, new StringDecomposerModel());
+		collectionList = new CollectionList<String, String>(parentList, new StringDecomposerModel());
         collectionList.addListEventListener(new ListConsistencyListener(collectionList, "collection list", false));
 		parentList.add(DEV_ROB);
 		parentList.add(DEV_JESSE);
@@ -219,7 +219,7 @@ public class CollectionListTest extends TestCase {
 	public void testChildModification() {
         // use a list of Lists instead of Strings
 		BasicEventList<List<String>> characterLists = new BasicEventList<List<String>>();
-        CollectionList<String,List<String>> characters = new CollectionList<String,List<String>>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
+        CollectionList<List<String>, String> characters = new CollectionList<List<String>, String>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
         characters.addListEventListener(new ListConsistencyListener(characters, "characters", false));
         characterLists.add(GlazedListsTests.stringToList(DEV_ROB));
         characterLists.add(GlazedListsTests.stringToList(DEV_JESSE));

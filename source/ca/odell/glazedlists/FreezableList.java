@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class FreezableList<E> extends TransformedList<E,E> {
+public final class FreezableList<E> extends TransformedList<E, E> {
 
     /** the state of the freezable list */
     private boolean frozen = false;

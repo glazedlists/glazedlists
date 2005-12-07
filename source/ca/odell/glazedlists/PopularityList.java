@@ -30,7 +30,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class PopularityList<E> extends TransformedList<E,E> {
+public final class PopularityList<E> extends TransformedList<E, E> {
 
     /** the list of distinct elements */
     private UniqueList<E> uniqueList;

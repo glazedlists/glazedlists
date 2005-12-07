@@ -37,7 +37,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SortedList<E> extends TransformedList<E,E> {
+public final class SortedList<E> extends TransformedList<E, E> {
 
     /**
      * Sorting mode where elements are always in sorted order, even if this

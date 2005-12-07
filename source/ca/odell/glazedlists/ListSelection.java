@@ -981,7 +981,7 @@ public class ListSelection<E> {
      * The {@link EventList} that contains only values that are not currently
      * selected.
      */
-    private final class SelectedList<E> extends TransformedList<E,E> {
+    private final class SelectedList<E> extends TransformedList<E, E> {
 
         /**
          * Creates an {@link EventList} that provides a view of the
@@ -1032,7 +1032,7 @@ public class ListSelection<E> {
      * The {@link EventList} that contains only values that are not currently
      * selected.
      */
-    private final class DeselectedList<E> extends TransformedList<E,E> {
+    private final class DeselectedList<E> extends TransformedList<E, E> {
 
         /**
          * Creates an {@link EventList} that provides a view of the
