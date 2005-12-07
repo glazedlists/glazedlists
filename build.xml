@@ -6,6 +6,7 @@
 <project name="glazedlists" default="jar" basedir=".">
 
     <property name="java.target.version" value="1.5"/>
+    <property name="java.target.version.fileFriendlyName" value="java15"/>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        BUILD ADMINISTRATION
@@ -35,7 +36,7 @@
 		<!-- Delete the generated demo .jar -->
 		<delete file="glazedlists-demo.jar"/>
 		<!-- Delete the generated source -->
-		<delete file="glazedlists-source.zip"/>
+		<delete file="glazedlists-source_*.zip"/>
 	</target>
 
 
@@ -70,11 +71,11 @@
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<target name="jar" depends="init,compile"
-		description="Creates glazedlists.jar file containing all UI libraries.">
+		description="Creates glazedlists jar file containing all UI libraries.">
 		<tstamp prefix="jar">
 			<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
 		</tstamp>
-		<jar destfile="glazedlists.jar" update="true" index="true">
+		<jar destfile="glazedlists_${java.target.version.fileFriendlyName}.jar" update="true" index="true">
 			<fileset dir="classes"/>
 			<fileset dir=".">
 				<include name="resources/**"/>
@@ -88,6 +89,7 @@
 				<attribute name="Implementation-Title" value="Glazed Lists"/>
 				<attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
 				<attribute name="Contributors" value="Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden"/>
+                <attribute name="Source-Version" value="JDK ${java.target.version}"/>
 			</manifest>
 		</jar>
 	</target>
@@ -148,7 +150,7 @@
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <target name="swt" depends="core">
-        <mkdir dir="${basedir}/extensions/swt/lib"/>
+        <mkdir dir="extensions/swt/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="classes"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/25145/swt-api.jar"/>
@@ -162,7 +164,7 @@
     </target>
 
     <target name="ktable" depends="core,swt">
-        <mkdir dir="${basedir}/extensions/ktable/lib"/>
+        <mkdir dir="extensions/ktable/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="classes"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/24419/ktable.jar"/>
@@ -181,47 +183,23 @@
        SPECIAL TARGETS
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <target name="java13" depends="init" description="Compile a limited subset of Glazed Lists for deployment on a J2SE 1.3">
-        <mkdir dir="classes"/>
-        <javac destdir="classes" srcdir="source" debug="on" source="1.3" target="1.3" deprecation="on">
-            <include name="**/event/**"/>
-            <include name="**/BasicEventList.java"/>
-            <include name="**/ObservableElementList.java"/>
-            <include name="**/JavaBeanEventListConnector.java"/>
-            <include name="**/AbstractFilterList.java"/>
-            <include name="**/EventList.java"/>
-            <include name="**/SubEventList.java"/>
-            <include name="**/EventListIterator.java"/>
-            <include name="**/SimpleIterator.java"/>
-            <include name="**/concurrent/**"/>
-            <include name="**/BasicEventList.java"/>
-            <include name="**/ObservableElement.java"/>
-            <include name="**/JavaBeanEventListConnector.java"/>
-        </javac>
-        <tstamp prefix="jar">
-            <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
-        </tstamp>
-        <jar destfile="glazedlists_java13.jar" update="true" index="true">
-            <fileset dir="classes"/>
-            <manifest>
-                <attribute name="Sealed" value="true"/>
-                <attribute name="Built-By" value="${user.name}"/>
-                <attribute name="Implementation-Version" value="${jar.datestamp}"/>
-                <attribute name="Implementation-Title" value="Glazed Lists for Java 1.3"/>
-                <attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
-            </manifest>
-        </jar>
-    </target>
-
     <target name="java14" depends="init,compileall,compiletests" description="Compile Glazed Lists for deployment on a J2SE 1.4">
         <!-- clean the java14 directory -->
         <delete dir="java14_glazedlists"/>
         <mkdir dir="java14_glazedlists/source"/>
         <mkdir dir="java14_glazedlists/test"/>
 
+        <!-- download the declawer build tool -->
+        <mkdir dir="tools"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/25249/declawer.jar"/>
+            <arg value="tools/declawer.jar"/>
+        </java>
+
         <!-- Declaw the source code to the java14 directory. -->
         <java classname="com.publicobject.declawer.Declawer">
-            <classpath path="declawer.jar"/>
+            <classpath path="tools/declawer.jar"/>
 
             <arg value="source"/>
             <arg value="${ant.home}/lib/junit.jar"/>
@@ -230,7 +208,7 @@
 
         <!-- Declaw the tests to the java14 directory. -->
         <java classname="com.publicobject.declawer.Declawer">
-            <classpath path="declawer.jar"/>
+            <classpath path="tools/declawer.jar"/>
 
             <arg value="test"/>
             <arg value="classes${path.separator}${ant.home}/lib/junit.jar"/>
@@ -250,6 +228,7 @@
 
         <!-- Alter the target platform in the java14 build.xml file from 1.5 to 1.4. -->
         <replace file="java14_glazedlists/build.xml" token="&lt;property name=&quot;java.target.version&quot; value=&quot;1.5&quot;/&gt;" value="&lt;property name=&quot;java.target.version&quot; value=&quot;1.4&quot;/&gt;"/>
+        <replace file="java14_glazedlists/build.xml" token="&lt;property name=&quot;java.target.version.fileFriendlyName&quot; value=&quot;1.5&quot;/&gt;" value="&lt;property name=&quot;java.target.version.fileFriendlyName&quot; value=&quot;java14&quot;/&gt;"/>
     </target>
 
 
@@ -260,14 +239,28 @@
 
 	<target name="dist" depends="init,clean"
 		description="Create a .zip file of the source for backup or distribution.">
-		<zip destfile="glazedlists-source.zip" basedir=".">
+		<zip destfile="glazedlists-source_${java.target.version.fileFriendlyName}.zip" basedir=".">
 			<exclude name="classes/**"/>
 			<exclude name="docs/**"/>
-			<exclude name="glazedlists-source.zip"/>
+			<exclude name="tools/**"/>
+			<exclude name="glazedlists-source_*.zip"/>
 			<exclude name="www/**"/>
 		</zip>
 	</target>
 
+    <target name="upload" depends="dist"
+        description="Upload binaries to java.net">
+        <taskdef resource="org/kohsuke/javanettasks.properties" />
+        <tstamp prefix="jar">
+            <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
+        </tstamp>
+        <javaNetUpload projectName="glazedlists"
+            toFile="/latest_build/glazedlists-source_${java.target.version.fileFriendlyName}.zip"
+            fromFile="glazedlists-source_${java.target.version.fileFriendlyName}.zip"
+            fileDescription="Snapshot build by ${user.name} at ${jar.datestamp}"
+            overwrite="no"
+            fileStatus="Draft"/>
+	</target>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        TEST
@@ -297,8 +290,12 @@
 
     <target name="compiletests" depends="init,compileall">
         <!-- Compile the test classes from source/ into classes/ -->
+        <echo>${ant.home}</echo>
         <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" deprecation="on">
-                <classpath path="${ant.home}/lib/junit.jar"/>
+            <classpath>
+                <fileset dir="extensions" includes="**/*.jar"/>
+                <fileset file="${ant.home}/lib/junit.jar"/>
+            </classpath>
         </javac>
     </target>
 
