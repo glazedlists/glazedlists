@@ -242,6 +242,7 @@
 			<exclude name="docs/**"/>
 			<exclude name="tools/**"/>
 			<exclude name="glazedlists-source_*.zip"/>
+			<exclude name="extensions/**/lib/**"/>
 			<exclude name="www/**"/>
 		</zip>
 	</target>
