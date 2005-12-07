@@ -68,7 +68,7 @@
 	   Construct the .jar file for use in a library.
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="jar" depends="init,compile"
+	<target name="jar" depends="init,compileall"
 		description="Creates glazedlists jar file containing all UI libraries.">
 		<tstamp prefix="jar">
 			<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
