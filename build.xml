@@ -25,18 +25,16 @@
 		<!-- Delete the documentation directories -->
 		<delete dir="docs/api"/>
 		<delete dir="docs/impl"/>
-		<!-- Delete temporary files from JEdit -->
 		<delete>
 			<fileset dir="${basedir}" defaultexcludes="no">
+                <!-- Delete temporary files from JEdit -->
 				<include name="**/*~"/>
+                <!-- Delete the generated .jar and demo jar -->
+				<include name="glazedlists*.jar"/>
+                <!-- Delete the generated source -->
+				<include name="glazedlists*.zip"/>
 			</fileset>
 		</delete>
-		<!-- Delete the generated .jar -->
-		<delete file="glazedlists.jar"/>
-		<!-- Delete the generated demo .jar -->
-		<delete file="glazedlists-demo.jar"/>
-		<!-- Delete the generated source -->
-		<delete file="glazedlists-source_*.zip"/>
 	</target>
 
 
