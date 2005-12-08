@@ -5,17 +5,14 @@ package ca.odell.glazedlists.swt;
 
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.internal.Platform;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
-import de.kupzog.ktable.SWTX;
-import de.kupzog.ktable.KTableCellResizeListener;
-import de.kupzog.ktable.KTable;
-import de.kupzog.ktable.KTableCellSelectionListener;
-import de.kupzog.examples.TextModelExample;
+import de.kupzog.ktable.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.demo.issuebrowser.Issue;
+import ca.odell.glazedlists.demo.issuebrowser.IssueLoader;
+import ca.odell.glazedlists.demo.issuebrowser.Throbber;
+import ca.odell.glazedlists.demo.issuebrowser.Project;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -27,12 +24,9 @@ public class KTableDemo {
         Display display = new Display();
         Shell shell = new Shell(display);
         shell.setLayout(new FillLayout());
-        shell.setText("KTable examples");
+        shell.setText("Issues");
 
-        // put a tab folder in it...
-        TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
-
-        createTextTable(tabFolder);
+        createIssuesTable(shell);
 
         // display the shell...
         shell.setSize(600,600);
@@ -44,92 +38,64 @@ public class KTableDemo {
         display.dispose();
     }
 
-    private static void createTextTable(TabFolder tabFolder) {
-        TabItem item1 = new TabItem(tabFolder, SWT.NONE);
-        item1.setText("Text Table");
-        Composite comp1 = new Composite(tabFolder, SWT.NONE);
-        item1.setControl(comp1);
+    private static void createIssuesTable(Shell shell) {
+
+        BasicEventList issuesEventList = new BasicEventList();
+
+        Composite comp1 = new Composite(shell, SWT.NONE);
         comp1.setLayout(new FillLayout());
+
         final KTable table = new KTable(comp1, SWT.FULL_SELECTION | SWT.MULTI | SWT.V_SCROLL
                 | SWT.H_SCROLL | SWTX.FILL_WITH_LASTCOL | SWTX.EDIT_ON_KEY);
-        table.setModel(new TextModelExample());
-        table.addCellSelectionListener(
-            new KTableCellSelectionListener() {
-                public void cellSelected(int col, int row, int statemask) {
-                    System.out.println("Cell ["+col+";"+row+"] selected.");
-                }
-                public void fixedCellSelected(int col, int row, int statemask) {
-                    System.out.println("Header ["+col+";"+row+"] selected.");
-                }
+
+        EventKTableModel tableModel = new EventKTableModel(table, issuesEventList, new IssuesTableFormat());
+        table.setModel(tableModel);
+
+        // loads issues
+        final IssueLoader issueLoader = new IssueLoader(issuesEventList, new SimpleThrobber());
+        issueLoader.start();
+        issueLoader.setProject((Project)Project.getProjects().get(0));
+    }
+
+    private static class SimpleThrobber implements Throbber {
+        public void setOn() {
+            System.out.println("Throb on");
+        }
+
+        public void setOff() {
+            System.out.println("Throb off");
+        }
+    }
+
+    private static final class IssuesTableFormat implements TableFormat {
+
+        public int getColumnCount() {
+            return 6;
+        }
+
+        public String getColumnName(int column) {
+            switch(column) {
+                case 0: return "ID";
+                case 1: return "Type";
+                case 2: return "Priority";
+                case 3: return "State";
+                case 4: return "Result";
+                case 5: return "Summary";
             }
-        );
+            throw new IllegalStateException();
+        }
 
-        table.addCellResizeListener(
-            new KTableCellResizeListener() {
-                public void columnResized(int col, int newWidth) {
-                    System.out.println("Column "+col+" resized to "+newWidth);
-                }
-                public void rowResized(int row, int newHeight) {
-                    System.out.println("Row "+row+" resized to "+newHeight);
-                }
+        public Object getColumnValue(Object baseObject, int column) {
+            Issue issue = (Issue)baseObject;
+            switch(column) {
+                case 0: return issue.getId();
+                case 1: return issue.getIssueType();
+                case 2: return issue.getPriority();
+                case 3: return issue.getStatus();
+                case 4: return issue.getResolution();
+                case 5: return issue.getShortDescription();
             }
-        );
-
-        /**
-         *  Set Excel-like table cursors
-         */
-
-        String platform = Platform.PLATFORM;
-
-        if(platform.equals("win32")) {
-            Image crossCursor = SWTX.loadImageResource(table.getDisplay(), "/icons/cross_win32.gif");
-            Image row_resizeCursor = SWTX.loadImageResource(table.getDisplay(), "/icons/row_resize_win32.gif");
-            Image column_resizeCursor  = SWTX.loadImageResource(table.getDisplay(), "/icons/column_resize_win32.gif");
-
-            // we set the hotspot to the center, so calculate the number of pixels from hotspot to lower border:
-            Rectangle crossBound        = crossCursor.getBounds();
-            Rectangle rowresizeBound    = row_resizeCursor.getBounds();
-            Rectangle columnresizeBound = column_resizeCursor.getBounds();
-
-            Point crossSize        = new Point(crossBound.width/2, crossBound.height/2);
-            Point rowresizeSize    = new Point(rowresizeBound.width/2, rowresizeBound.height/2);
-            Point columnresizeSize = new Point(columnresizeBound.width/2, columnresizeBound.height/2);
-
-            table.setDefaultCursor(new Cursor(table.getDisplay(), crossCursor.getImageData(), crossSize.x, crossSize.y), crossSize);
-            table.setDefaultRowResizeCursor(new Cursor(table.getDisplay(), row_resizeCursor.getImageData(), rowresizeSize.x, rowresizeSize.y));
-            table.setDefaultColumnResizeCursor(new Cursor(table.getDisplay(), column_resizeCursor.getImageData(), columnresizeSize.x, columnresizeSize.y));
-
-        } else {
-
-            // Cross
-
-            Image crossCursor      = SWTX.loadImageResource(table.getDisplay(), "/icons/cross.gif");
-            Image crossCursor_mask = SWTX.loadImageResource(table.getDisplay(), "/icons/cross_mask.gif");
-
-            // Row Resize
-
-            Image row_resizeCursor      = SWTX.loadImageResource(table.getDisplay(), "/icons/row_resize.gif");
-            Image row_resizeCursor_mask = SWTX.loadImageResource(table.getDisplay(), "/icons/row_resize_mask.gif");
-
-            // Column Resize
-
-            Image column_resizeCursor      = SWTX.loadImageResource(table.getDisplay(), "/icons/column_resize.gif");
-            Image column_resizeCursor_mask = SWTX.loadImageResource(table.getDisplay(), "/icons/column_resize_mask.gif");
-
-            // we set the hotspot to the center, so calculate the number of pixels from hotspot to lower border:
-
-            Rectangle crossBound        = crossCursor.getBounds();
-            Rectangle rowresizeBound    = row_resizeCursor.getBounds();
-            Rectangle columnresizeBound = column_resizeCursor.getBounds();
-
-            Point crossSize        = new Point(crossBound.width/2, crossBound.height/2);
-            Point rowresizeSize    = new Point(rowresizeBound.width/2, rowresizeBound.height/2);
-            Point columnresizeSize = new Point(columnresizeBound.width/2, columnresizeBound.height/2);
-
-            table.setDefaultCursor(new Cursor(table.getDisplay(), crossCursor_mask.getImageData(), crossCursor.getImageData(), crossSize.x, crossSize.y), crossSize);
-            table.setDefaultRowResizeCursor(new Cursor(table.getDisplay(), row_resizeCursor_mask.getImageData(), row_resizeCursor.getImageData(), rowresizeSize.x, rowresizeSize.y));
-            table.setDefaultColumnResizeCursor(new Cursor(table.getDisplay(), column_resizeCursor_mask.getImageData(), column_resizeCursor.getImageData(), columnresizeSize.x, columnresizeSize.y));
-
+            throw new IllegalStateException();
         }
     }
 }
