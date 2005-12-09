@@ -243,12 +243,14 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
     /**
      * The SortArrowHeaderRenderer simply delegates most of the rendering
-     * to the previous renderer, and adds an icon to indicate sorting
-     * direction. This eliminates the hassle of setting the border and
-     * background colours.
+     * to a given delegate renderer, and adds an icon to indicate sorting
+     * direction. This allows TableComparatorChooser to work equally well
+     * with any custom TableCellRenderers that are used as the default
+     * table header renderer.
      *
      * <p>This class fails to add indicator arrows on table headers where the
-     * default renderer does not return a JLabel
+     * default table header render is not a DefaultTableCellRenderer or does
+     * not implement {@link SortableRenderer}.
      */
     class SortArrowHeaderRenderer implements TableCellRenderer {
 
@@ -256,11 +258,10 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         private TableCellRenderer delegateRenderer;
 
         /**
-         * Creates a new SortArrowHeaderRenderer that delegates most drawing
-         * to the given delegate renderer.
+         * Creates a new SortArrowHeaderRenderer that attempts to decorate the
+         * given <code>delegateRenderer</code> which a sorting icon.
          */
         public SortArrowHeaderRenderer(TableCellRenderer delegateRenderer) {
-            // find the delegate
             this.delegateRenderer = delegateRenderer;
         }
 
@@ -275,12 +276,12 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * Renders the header in the default way but with the addition of an icon.
          */
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            final Icon iconToUse = icons[getSortingStyle(column)];
+            final Icon sortIcon = icons[getSortingStyle(column)];
             final Component rendered;
 
             // 1. look for our custom SortableRenderer interface
             if (delegateRenderer instanceof SortableRenderer) {
-                ((SortableRenderer) delegateRenderer).setSortIcon(iconToUse);
+                ((SortableRenderer) delegateRenderer).setSortIcon(sortIcon);
                 rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             // 2. if it's a DefaultTableCellRenderer that returned itself then customize it directly with
@@ -289,7 +290,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
                 rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (rendered == delegateRenderer) {
                     final DefaultTableCellRenderer label = (DefaultTableCellRenderer) rendered;
-                    label.setIcon(iconToUse);
+                    label.setIcon(sortIcon);
                     label.setHorizontalTextPosition(SwingConstants.LEADING);
                 }
 
