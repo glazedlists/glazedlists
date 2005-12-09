@@ -4,25 +4,29 @@
 package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.gui.TableFormat;
-import de.kupzog.ktable.KTableCellEditor;
-import de.kupzog.ktable.KTableCellRenderer;
+import de.kupzog.ktable.*;
 
 /**
+ * Specify how to split row objects into cells for use with {@link KTable}.
+ *
+ * <p>To take full advantage of {@link KTable} over the regular SWT
+ * <code>Table</code> class, the {@link KTableFormat} interface should
+ * be preferred over the simpler {@link TableFormat} class.
+ *
+ * <p>In times where advanced features of {@link KTable} are not needed,
+ * the simpler {@link TableFormat} can be used.
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public interface KTableFormat {
+public interface KTableFormat extends TableFormat {
 
     /**
-     * @see de.kupzog.ktable.KTableModel#getContentAt
-     */
-    public Object getColumnValue(Object baseObject, int column);
-
-    /**
-     * @see de.kupzog.ktable.KTableModel#setContentAt
-     */
-    public Object setColumnValue(Object baseObject, Object value, int column);
-
-    /**
+     * Provide a value for the specified header row and column. Unlike
+     * simple {@link TableFormat}, the {@link KTableFormat} supports
+     * multiple header rows per table. Therefore this method is the
+     * preferred way to define the header values for {@link EventKTableModel}.
+     *
+     * @see TableFormat#getColumnName(int)
      * @see de.kupzog.ktable.KTableModel#getContentAt
      */
     public Object getColumnHeaderValue(int headerRow, int column);
@@ -61,11 +65,6 @@ public interface KTableFormat {
      * @see de.kupzog.ktable.KTableModel#getFixedSelectableColumnCount
      */
     public int getFixedSelectableColumnCount();
-
-    /**
-     * @see de.kupzog.ktable.KTableModel#getColumnCount
-     */
-    public int getColumnCount();
 
     /**
      * @see de.kupzog.ktable.KTableModel#getColumnWidth
