@@ -15,7 +15,11 @@ import java.util.Iterator;
  * source list to an element stored at the same index in this FunctionList.
  * The logic of precisely how to tranform the source elements is contained
  * within a {@link Function} that must be supplied at the time of construction
- * and can never be changed.
+ * and can never be changed. This {@link Function} is called the forward
+ * function because it creates elements in this {@link FunctionList} from
+ * elements that have been added or mutated within the source list. The forward
+ * function may be an implementation of either {@link Function} or
+ * {@link AdvancedFunction}.
  *
  * <p>An optional reverse {@link Function} which is capable of mapping the
  * elements of this FunctionList back to the corresponding source element may
@@ -31,7 +35,8 @@ import java.util.Iterator;
  * methods will receive an {@link IllegalStateException} explaining that those
  * operations are not available without the reverse {@link Function}.
  *
- * <p>If specified, the reverse {@link Function} must maintain the invariant:
+ * <p>If specified, the reverse {@link Function} should do its best to
+ * maintain the invariant:
  *
  * <p> <strong>o.equals(reverseFunction.evaluate(forwardFunction.evaluate(o)))</strong>
  * for any o that is non-null.
@@ -83,6 +88,11 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * {@link #add(int, Object)} and {@link #set(int, Object)} will execute
      * correctly.
      *
+     * <p> Note: a {@link AdvancedFunction} can be specified for the forward
+     * {@link Function} which allows the implementor a chance to examine the
+     * prior value that was mapped to a source element when it must be remapped
+     * due to a modification (from a call to {@link List#set}).
+     *
      * @param source the EventList to decorate with a function transformation
      * @param forward the function to execute on each source element
      * @param forward the function to map elements of FunctionList back to
@@ -115,6 +125,22 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      */
     private E forward(S s) {
         return this.getForwardFunction().evaluate(s);
+    }
+
+    /**
+     * A convenience method to remap a source element to a {@link FunctionList}
+     * element using the forward {@link Function}.
+     *
+     * @param e the last prior result of transforming the source element
+     * @param s the source element to be transformed
+     * @return the result of transforming the source element
+     */
+    private E forward(E e, S s) {
+        final Function<S,E> forwardFunction = this.getForwardFunction();
+        if (forwardFunction instanceof AdvancedFunction)
+            return ((AdvancedFunction<S,E>) forwardFunction).reevaluate(e, s);
+        else
+            return forwardFunction.evaluate(s);
     }
 
     /**
@@ -162,7 +188,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
                 this.mappedElements.add(changeIndex, this.forward(source.get(changeIndex)));
 
             } else if (changeType == ListEvent.UPDATE) {
-                this.mappedElements.set(changeIndex, this.forward(source.get(changeIndex)));
+                this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), source.get(changeIndex)));
 
             } else if (changeType == ListEvent.DELETE) {
                 this.mappedElements.remove(changeIndex);
@@ -213,8 +239,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * A Function encapsulates the logic for transforming a list element into
      * any kind of Object. Implementations should typically create and return
      * new objects, though it is permissible to return the original value
-     * unchanged (i.e. the Identity Function). It is, however, typically not a
-     * good idea to mutate and return the given value.
+     * unchanged (i.e. the Identity Function).
      */
     public interface Function<A,B> {
 
@@ -225,5 +250,30 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
          * @return the transformed version of the object
          */
         public B evaluate(A value);
+    }
+
+    /**
+     * A Function which defines a separate method, {@link #reevaluate}, for
+     * transforming values that have been transformed in the past. This allows
+     * the implementation a chance to reuse aspects of the previous value produced
+     * by the AdvancedFunction. If the old value need not be considered, when
+     * evaluating the forward Function, then an implementation of the simpler
+     * {@link Function} interface will suffice.
+     */
+    public interface AdvancedFunction<A,B> extends Function<A,B> {
+
+        /**
+         * Evaluate the <code>newValue</code> newly added to the source of the
+         * FunctionList to produce the corresponding value in FunctionList. The
+         * <code>oldValue</code> is provided as a reference when evaluating a
+         * value that has previously been evaluated (for example, to service a
+         * {@link List#set} method).
+         *
+         * @param oldValue the Object produced by this function the last time
+         *      it evaluated <code>newValue</code>
+         * @param newValue the Object to transform
+         * @return the transformed version of the object
+         */
+        public B reevaluate(B oldValue, A newValue);
     }
 }

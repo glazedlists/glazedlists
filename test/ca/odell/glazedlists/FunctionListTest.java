@@ -101,6 +101,28 @@ public class FunctionListTest extends TestCase {
         assertEquals("2", intsToStrings.get(0));
     }
 
+    public void testAdvancedFunction() {
+        // establish a control for this test case with the normal Function
+        BasicEventList<Integer> source = new BasicEventList<Integer>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        source.add(new Integer(0));
+
+        String firstElement = intsToStrings.get(0);
+        assertTrue(firstElement == intsToStrings.get(0));
+        source.set(0, new Integer(0));
+        assertFalse(firstElement == intsToStrings.get(0)); // <== note the simple Function doesn't preserve identity
+
+
+        // now change the Function to our AdvancedFunction and note the different behaviour
+        intsToStrings = new FunctionList<Integer, String>(source, new AdvancedIntegerToString(), new StringToInteger());
+        source.add(new Integer(0));
+
+        firstElement = intsToStrings.get(0);
+        assertTrue(firstElement == intsToStrings.get(0));
+        source.set(0, new Integer(0));
+        assertTrue(firstElement == intsToStrings.get(0)); // <== note the AdvancedFunction preserves identity
+    }
+
     private static class StringToInteger implements FunctionList.Function<String,Integer> {
         public Integer evaluate(String value) {
             return new Integer(value);
@@ -110,6 +132,20 @@ public class FunctionListTest extends TestCase {
     private static class IntegerToString implements FunctionList.Function<Integer,String> {
         public String evaluate(Integer value) {
             return value.toString();
+        }
+    }
+
+    private static class AdvancedIntegerToString implements FunctionList.AdvancedFunction<Integer,String> {
+        public String evaluate(Integer value) {
+            return value.toString();
+        }
+
+        public String reevaluate(String oldValue, Integer newValue) {
+            // if the value hasn't really changed, preserve the IDENTITY of the String we return
+            if (oldValue.equals(newValue.toString()))
+                return oldValue;
+            else
+                return this.evaluate(newValue);
         }
     }
 }
