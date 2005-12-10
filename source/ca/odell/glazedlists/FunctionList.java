@@ -58,6 +58,8 @@ import java.util.Iterator;
  */
 public final class FunctionList<S, E> extends TransformedList<S, E> {
 
+    private final List<S> sourceElements;
+
     /** A list of the Objects produced by running the source elements through the {@link forward} Function. */
     private final List<E> mappedElements;
 
@@ -107,6 +109,9 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
         this.forward = forward;
         this.reverse = reverse;
 
+        // save a reference to the source elements
+        this.sourceElements = new ArrayList<S>(source);
+
         // map all of the elements within source
         this.mappedElements = new ArrayList<E>(source.size());
         for (Iterator<S> iter = source.iterator(); iter.hasNext();) {
@@ -138,7 +143,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     private E forward(E e, S s) {
         final Function<S,E> forwardFunction = this.getForwardFunction();
         if (forwardFunction instanceof AdvancedFunction)
-            return ((AdvancedFunction<S,E>) forwardFunction).reevaluate(e, s);
+            return ((AdvancedFunction<S,E>) forwardFunction).reevaluate(s, e);
         else
             return forwardFunction.evaluate(s);
     }
@@ -185,13 +190,30 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
             final int changeType = listChanges.getType();
 
             if (changeType == ListEvent.INSERT) {
-                this.mappedElements.add(changeIndex, this.forward(source.get(changeIndex)));
+                final S inserted = source.get(changeIndex);
+                this.sourceElements.add(changeIndex, inserted);
+                this.mappedElements.add(changeIndex, this.forward(inserted));
 
             } else if (changeType == ListEvent.UPDATE) {
-                this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), source.get(changeIndex)));
+                final S updated = source.get(changeIndex);
+                final S previousValue = this.sourceElements.get(changeIndex);
+
+                // if the identity of the element did not change due to the update
+                if (previousValue == updated) {
+                    // then provide the previous transformed value to the forward function
+                    this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), updated));
+                } else {
+                    // otherwise we are replacing the value at the index with a new one
+                    this.sourceElements.set(changeIndex, updated);
+                    this.mappedElements.set(changeIndex, this.forward(updated));
+                }
 
             } else if (changeType == ListEvent.DELETE) {
-                this.mappedElements.remove(changeIndex);
+                final S deletedSource = this.sourceElements.remove(changeIndex);
+                final E deletedTransform = this.mappedElements.remove(changeIndex);
+
+                if (this.forward instanceof AdvancedFunction)
+                    ((AdvancedFunction<S,E>) this.forward).dispose(deletedSource, deletedTransform);
             }
         }
 
@@ -244,36 +266,61 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     public interface Function<A,B> {
 
         /**
-         * Transform the given <code>value</code> into any kind of Object.
+         * Transform the given <code>sourceValue</code> into any kind of Object.
          *
-         * @param value the Object to transform
+         * @param sourceValue the Object to transform
          * @return the transformed version of the object
          */
-        public B evaluate(A value);
+        public B evaluate(A sourceValue);
     }
 
     /**
-     * A Function which defines a separate method, {@link #reevaluate}, for
-     * transforming values that have been transformed in the past. This allows
-     * the implementation a chance to reuse aspects of the previous value produced
-     * by the AdvancedFunction. If the old value need not be considered, when
-     * evaluating the forward Function, then an implementation of the simpler
-     * {@link Function} interface will suffice.
+     * An AdvancedFunction is an extension of the simple Function interface
+     * which provides more hooks in the lifecycle of the transformation of a
+     * source element. Specifically, it includes:
+     *
+     * <ul>
+     *   <li> {@link #reevaluate} which is called when an element is mutated
+     *        in place and thus run through this mapping function again. It
+     *        provides access to the previous value returned from this function
+     *        in case it is of use when remapping the same element.
+     *
+     *   <li> {@link #dispose} which is called when an element is removed from
+     *        the FunctionList and is meant to be location that cleans up any
+     *        resource the Function may have allocated. (like Listeners for
+     *        example)
+     * </ul>
+     *
+     * If neither of these extensions to FunctionList are useful, users are
+     * encouraged to implement only the Function interface for their forward
+     * function.
      */
     public interface AdvancedFunction<A,B> extends Function<A,B> {
 
         /**
-         * Evaluate the <code>newValue</code> newly added to the source of the
-         * FunctionList to produce the corresponding value in FunctionList. The
-         * <code>oldValue</code> is provided as a reference when evaluating a
-         * value that has previously been evaluated (for example, to service a
-         * {@link List#set} method).
+         * Evaluate the <code>sourceValue</code> again to produce the
+         * corresponding value in the FunctionList. The last
+         * <code>transformedValue</code> is provided as a reference when
+         * evaluating a <code>sourceValue</code> that has previously been
+         * evaluated.
          *
-         * @param oldValue the Object produced by this function the last time
-         *      it evaluated <code>newValue</code>
-         * @param newValue the Object to transform
-         * @return the transformed version of the object
+         * @param sourceValue the Object to transform (again)
+         * @param transformedValue the Object produced by this function the
+         *      last time it evaluated <code>sourceValue</code>
+         * @return the transformed version of the sourceValue
          */
-        public B reevaluate(B oldValue, A newValue);
+        public B reevaluate(A sourceValue, B transformedValue);
+
+        /**
+         * Perform any necessary resource cleanup on the given
+         * <code>sourceValue</code> and <code>transformedValue</code> as they
+         * are removed from the FunctionList. For example, an installed
+         * listeners
+         *
+         * @param sourceValue the Object that was transformed
+         * @param transformedValue the Object that resulted from the last
+         *      transformation
+         */
+        public void dispose(A sourceValue, B transformedValue);
     }
 }

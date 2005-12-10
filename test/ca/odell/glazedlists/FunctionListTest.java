@@ -104,23 +104,23 @@ public class FunctionListTest extends TestCase {
     public void testAdvancedFunction() {
         // establish a control for this test case with the normal Function
         BasicEventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new AdvancedIntegerToString(), new StringToInteger());
         source.add(new Integer(0));
 
-        String firstElement = intsToStrings.get(0);
-        assertTrue(firstElement == intsToStrings.get(0));
+        // ensure that reevaluate is called when we update elements IN PLACE
+        assertEquals(0, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getReevaluateCount());
+        source.set(0, source.get(0));
+        assertEquals(1, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getReevaluateCount());
+
+        // ensure that reevaluate is NOT called when we set brand new elements into the List
+        assertEquals(1, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getReevaluateCount());
         source.set(0, new Integer(0));
-        assertFalse(firstElement == intsToStrings.get(0)); // <== note the simple Function doesn't preserve identity
+        assertEquals(1, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getReevaluateCount());
 
-
-        // now change the Function to our AdvancedFunction and note the different behaviour
-        intsToStrings = new FunctionList<Integer, String>(source, new AdvancedIntegerToString(), new StringToInteger());
-        source.add(new Integer(0));
-
-        firstElement = intsToStrings.get(0);
-        assertTrue(firstElement == intsToStrings.get(0));
-        source.set(0, new Integer(0));
-        assertTrue(firstElement == intsToStrings.get(0)); // <== note the AdvancedFunction preserves identity
+        // ensure that dispose is called when we remove elements
+        assertEquals(0, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getDisposeCount());
+        source.remove(0);
+        assertEquals(1, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getDisposeCount());
     }
 
     private static class StringToInteger implements FunctionList.Function<String,Integer> {
@@ -135,17 +135,25 @@ public class FunctionListTest extends TestCase {
         }
     }
 
-    private static class AdvancedIntegerToString implements FunctionList.AdvancedFunction<Integer,String> {
-        public String evaluate(Integer value) {
-            return value.toString();
+    private static class AdvancedIntegerToString extends IntegerToString implements FunctionList.AdvancedFunction<Integer,String> {
+        private int reevaluateCount = 0;
+        private int disposeCount = 0;
+
+        public String reevaluate(Integer value, String oldValue) {
+            this.reevaluateCount++;
+            return this.evaluate(value);
         }
 
-        public String reevaluate(String oldValue, Integer newValue) {
-            // if the value hasn't really changed, preserve the IDENTITY of the String we return
-            if (oldValue.equals(newValue.toString()))
-                return oldValue;
-            else
-                return this.evaluate(newValue);
+        public void dispose(Integer sourceValue, String transformedValue) {
+            this.disposeCount++;
+        }
+
+        public int getReevaluateCount() {
+            return reevaluateCount;
+        }
+
+        public int getDisposeCount() {
+            return this.disposeCount;
         }
     }
 }
