@@ -26,20 +26,6 @@ public class RuntimeExceptionTest extends TestCase {
 
     /** listener that validates events are received */
     private ListConsistencyListener listConsistencyListener = new ListConsistencyListener(source, "exceptions");
-    
-    /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-        // do nothing
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-        // do nothing
-    }
 
     /**
      * Verifies that an Exception thrown by a ListEventListener is rethrown.

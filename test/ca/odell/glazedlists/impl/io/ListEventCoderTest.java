@@ -9,7 +9,6 @@ import ca.odell.glazedlists.io.*;
 import java.io.*;
 // for being a JUnit test case
 import junit.framework.*;
-import ca.odell.glazedlists.*;
 
 /**
  * Tests the ListEventCoder.
@@ -21,18 +20,6 @@ public class ListEventCoderTest extends TestCase {
     /** encodes java.lang.Integer */
     private ByteCoder intCoder = new IntegerCoder();
 
-    /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-    
     /**
      * Tests that a list event can be encoded and decoded.
      */

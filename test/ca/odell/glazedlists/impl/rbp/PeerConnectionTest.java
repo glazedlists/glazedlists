@@ -91,11 +91,4 @@ public class PeerConnectionTest extends TestCase {
             e.printStackTrace();
         }
     }
-    
-    public static void main(String[] args) {
-        PeerConnectionTest test = new PeerConnectionTest();
-        test.setUp();
-        test.testPeerConnection();
-        test.tearDown();
-    }
 }

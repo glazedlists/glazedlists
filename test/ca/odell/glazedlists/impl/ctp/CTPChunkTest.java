@@ -156,27 +156,4 @@ public class CTPChunkTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
-    
-    public static void main(String[] args) {
-        CTPChunkTest test = new CTPChunkTest();
-        while(true) {
-            test.setUp();
-            test.testServerSendChunk();
-            test.tearDown();
-            System.out.print("\n\n\n\n");
-            test.setUp();
-            test.testClientSendChunk();
-            test.tearDown();
-            System.out.print("\n\n\n\n");
-            test.setUp();
-            test.testSendLargeString();
-            test.tearDown();
-            System.out.print("\n\n\n\n");
-            test.setUp();
-            test.testManyStrings();
-            test.tearDown();
-            System.out.print("\n\n\n\n");
-        }
-    }
 }

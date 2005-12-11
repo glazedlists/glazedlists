@@ -23,18 +23,6 @@ public class MultipleListenersTest extends TestCase {
     private Random random = new Random();
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * The multiple listeners test creates a single BasicEventList and a
      * set of listeners on it. The basic event list is changed and each
      * listener is changed in sequence to verify that the listeners all

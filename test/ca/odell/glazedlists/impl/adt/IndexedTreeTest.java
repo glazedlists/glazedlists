@@ -21,18 +21,6 @@ public class IndexedTreeTest extends TestCase {
     private Random random = new Random();
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Tests to verify that the IndexedTree is consistent after a long
      * series of list operations.
      */
@@ -210,6 +198,5 @@ public class IndexedTreeTest extends TestCase {
         assertEquals(-1, tree.indexOf("F"));
         assertEquals(-1, tree.lastIndexOf("F"));
         assertEquals(6, tree.indexOfSimulated("F"));
-
     }
 }

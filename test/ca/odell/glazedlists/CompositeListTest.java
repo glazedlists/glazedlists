@@ -15,20 +15,6 @@ import junit.framework.*;
 public class CompositeListTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-        // do nothing
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-        // do nothing
-    }
-
-    /**
      * Verifies that the a single source works.
      */
     public void testSingleSource() {

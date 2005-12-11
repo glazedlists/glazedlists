@@ -19,18 +19,6 @@ import ca.odell.glazedlists.matchers.Matchers;
 public class ToStringTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Validate that toString() is consistent with ArrayList on all lists.
      */
     public void testToStringConsistency() {
@@ -54,7 +42,6 @@ public class ToStringTest extends TestCase {
         assertEquals(controlList.toString(), sortedList.toString());
 
         // Test On Lists With Multiple Elements
-
         controlList.add("Banana");
         controlList.add("Cherry");
         controlList.add("Donut");
@@ -65,7 +52,5 @@ public class ToStringTest extends TestCase {
         assertEquals(controlList.toString(), basicEventList.toString());
         assertEquals(controlList.toString(), filterList.toString());
         assertEquals(controlList.toString(), sortedList.toString());
-
     }
-
 }

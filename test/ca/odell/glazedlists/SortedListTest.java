@@ -135,7 +135,7 @@ public class SortedListTest extends TestCase {
         sortedList = new SortedList(nestableList);
         sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", true));
 
-        nestableList.beginEvent(false);
+        nestableList.beginEvent(true);
         nestableList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
         nestableList.commitEvent();
 
@@ -995,14 +995,6 @@ public class SortedListTest extends TestCase {
         } catch(NoSuchElementException e) {
             // test passes
         }
-    }
-
-    public static void main(String[] args) {
-
-        SortedListTest test = new SortedListTest();
-        test.setUp();
-        test.testHalfNullComparator();
-        test.tearDown();
     }
 
     /**

@@ -18,18 +18,6 @@ import java.util.*;
 public class SubListTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Tests to verify that the SubList views a segment of a list.
      */
     public void testSubList() {

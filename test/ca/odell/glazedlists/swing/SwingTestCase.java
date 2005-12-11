@@ -40,20 +40,6 @@ public abstract class SwingTestCase extends TestCase {
     /** useful empty arrays */
     private static final Class[] DECLARE_NO_PARAMETERS = new Class[0];
     private static final Object[] SEND_NO_PARAMETERS = new Class[0];
-    
-    /**
-     * Prepare for the test.
-     */
-    public final void setUp() {
-        // do nothing
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public final void tearDown() {
-        // do nothing
-    }
 
     /**
      * Run all methods from the specified test class that start with the prefix

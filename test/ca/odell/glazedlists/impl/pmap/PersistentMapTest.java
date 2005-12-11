@@ -19,18 +19,6 @@ import java.awt.Color;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class PersistentMapTest extends TestCase {
-    
-    /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
 
     /**
      * Creates a map file, reads a key and writes a key. The written value is double

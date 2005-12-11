@@ -14,18 +14,6 @@ import java.io.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class FileListTest extends TestCase {
-    
-    /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
 
     /**
      * Creates a file list, writes a value and reads a value. The written value

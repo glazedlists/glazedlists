@@ -115,7 +115,7 @@ public class FunctionListTest extends TestCase {
         // ensure that reevaluate is NOT called when we set brand new elements into the List
         assertEquals(1, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getReevaluateCount());
         source.set(0, new Integer(0));
-        assertEquals(1, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getReevaluateCount());
+        assertEquals(2, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getReevaluateCount());
 
         // ensure that dispose is called when we remove elements
         assertEquals(0, ((AdvancedIntegerToString) intsToStrings.getForwardFunction()).getDisposeCount());

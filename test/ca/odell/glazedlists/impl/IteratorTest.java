@@ -21,18 +21,6 @@ public class IteratorTest extends TestCase {
     private Random random = new Random();
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Tests to verify that the Iterator can iterate through the list both
      * forwards and backwards.
      */
@@ -97,7 +85,6 @@ public class IteratorTest extends TestCase {
         assertEquals(originalList, iteratedElements);
         assertFalse(iterator.hasNext());
     }
-
 
     /**
      * Tests to verify that the EventListIterator and the SimpleIterator
@@ -167,22 +154,12 @@ public class IteratorTest extends TestCase {
     }
 
     /**
-     * Tests that the Iterator returned on an empty list is as expected.
-     * It is satisfactory to know that Collections.EMPTY_LIST.iterator
-     * is the one returned that way everything else is up to Sun to test.
-     */
-    public void testEmptyListIterator() {
-        BasicEventList testList = new BasicEventList();
-        assertEquals(Collections.EMPTY_LIST.iterator().getClass(), testList.iterator().getClass());
-    }
-
-    /**
      * Tests that changing the underlying list externally to the ListIterator
      * doesn't break the expectation of the remove operation.
      */
     public void testRemoveAfterInsertAtCursor() {
         BasicEventList testList = new BasicEventList();
-        String helo = "Hello, world.";
+        String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(bye);
@@ -191,7 +168,7 @@ public class IteratorTest extends TestCase {
 
         // move iterator to bye
         iterator.next();
-        testList.add(0, helo);
+        testList.add(0, hello);
         iterator.remove();
         assertEquals(false, testList.contains(bye));
     }
@@ -202,7 +179,7 @@ public class IteratorTest extends TestCase {
      */
     public void testRemoveAfterInsertAtNext() {
         BasicEventList testList = new BasicEventList();
-        String helo = "Hello, world.";
+        String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(bye);
@@ -211,7 +188,7 @@ public class IteratorTest extends TestCase {
 
         // move iterator to bye
         iterator.next();
-        testList.add(1, helo);
+        testList.add(1, hello);
         iterator.remove();
         assertEquals(false, testList.contains(bye));
     }
@@ -222,7 +199,7 @@ public class IteratorTest extends TestCase {
      */
     public void testRemoveAfterInsertAtCursorReverse() {
         BasicEventList testList = new BasicEventList();
-        String helo = "Hello, world.";
+        String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(end);
@@ -231,7 +208,7 @@ public class IteratorTest extends TestCase {
 
         // move iterator to bye
         iterator.previous();
-        testList.add(1, helo);
+        testList.add(1, hello);
         iterator.remove();
         assertEquals(false, testList.contains(bye));
     }
@@ -242,7 +219,7 @@ public class IteratorTest extends TestCase {
      */
     public void testRemoveAfterInsertAtPrevious() {
         BasicEventList testList = new BasicEventList();
-        String helo = "Hello, world.";
+        String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(end);
@@ -251,7 +228,7 @@ public class IteratorTest extends TestCase {
 
         // move iterator to bye
         iterator.previous();
-        testList.add(0, helo);
+        testList.add(0, hello);
         iterator.remove();
         assertEquals(false, testList.contains(bye));
     }

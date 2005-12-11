@@ -16,18 +16,6 @@ import junit.framework.*;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BeanXMLByteCoderTest extends TestCase {
-    
-    /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
 
     /**
      * Tests that the XML encoding works.

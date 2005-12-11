@@ -14,18 +14,6 @@ import java.text.ParseException;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BufferloTest extends TestCase {
-    
-    /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
 
     /**
      * Tests that the streams work.
@@ -276,9 +264,5 @@ public class BufferloTest extends TestCase {
         writer.write(contents);
         writer.flush();
         return bufferlo;
-    }
-    
-    public static void main(String[] args) throws IOException {
-        new BufferloTest().testAllByteValues();
     }
 }

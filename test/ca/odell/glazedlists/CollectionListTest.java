@@ -34,7 +34,6 @@ public class CollectionListTest extends TestCase {
 		parentList.add(DEV_JESSE);
 		parentList.add(DEV_KEVIN);
 		parentList.add(DEV_JAMES);
-
 	}
 
 	/**

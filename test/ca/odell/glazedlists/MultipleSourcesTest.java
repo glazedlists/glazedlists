@@ -23,18 +23,6 @@ import java.util.*;
 public class MultipleSourcesTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Tests whether an EventList can depend upon multiple sources simultaneously.
      * This test populates a source list and two transformation lists that depend
      * upon it. There is also a listener that 'depends' upon both of these

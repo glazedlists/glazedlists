@@ -16,18 +16,6 @@ import junit.framework.*;
 public class MultipleEventsTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Tests that clearing the filter list does not fire multiple
      * events on the original list.
      */

@@ -41,7 +41,8 @@ public class BeanTableFormatTest extends TestCase {
      * Clean up after the test.
      */
     public void tearDown() {
-        // do nothing
+        footballFormat = null;
+        classedFootballFormat = null;
     }
     
     /**
@@ -155,4 +156,3 @@ class FootballTeam {
     public boolean isYearWinner() { return yearWinner; }
     public void setYearWinner(boolean yearWinner) { this.yearWinner = yearWinner; }
 }
-

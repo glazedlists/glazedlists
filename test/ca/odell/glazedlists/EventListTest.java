@@ -20,18 +20,6 @@ import ca.odell.glazedlists.matchers.Matchers;
 public class EventListTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Validates that removeAll() works.
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=169">Bug 169</a>
@@ -56,6 +44,10 @@ public class EventListTest extends TestCase {
         jesseSortedList.addAll(jesse);
         jesseSortedList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);
+
+        List<String> removeMultipleTestList = GlazedListsTests.stringToList("booblah");
+        removeMultipleTestList.removeAll(GlazedListsTests.stringToList("bo"));
+        assertEquals(GlazedListsTests.stringToList("lah"), removeMultipleTestList);
     }
 
     /**

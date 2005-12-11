@@ -18,18 +18,6 @@ import java.util.*;
 public class PopularityListTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Test that the Popularity List works with simple data.
      */
     public void testSimpleData() {

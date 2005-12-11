@@ -15,18 +15,6 @@ import java.io.*;
 public class CTPConnectionTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-    
-    /**
      * Verifies that an Exception is thrown if there is a bind failure.
      */
     public void testRepeatedBind() {
@@ -98,15 +86,5 @@ public class CTPConnectionTest extends TestCase {
         
         connectionManager.stop();
         */
-    }
-    
-    public static void main(String[] args) {
-        CTPConnectionTest test = new CTPConnectionTest();
-        while(true) {
-            test.setUp();
-            test.testRepeatedBind();
-            test.tearDown();
-            System.out.print("\n\n\n\n");
-        }
     }
 }

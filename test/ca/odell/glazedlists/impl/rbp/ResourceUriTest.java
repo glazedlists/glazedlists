@@ -14,18 +14,6 @@ import junit.framework.*;
 public class ResourceUriTest extends TestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void setUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void tearDown() {
-    }
-
-    /**
      * Verifies that ResourceUri is sound.
      */
     public void testUris() {
