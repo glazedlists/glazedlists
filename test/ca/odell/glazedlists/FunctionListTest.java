@@ -2,6 +2,9 @@ package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
 
+import java.util.List;
+import java.util.ArrayList;
+
 public class FunctionListTest extends TestCase {
 
     public void testConstructor() {
@@ -61,6 +64,22 @@ public class FunctionListTest extends TestCase {
             intsToStrings.add(2, "3");
             fail("failed to receive an IllegalStateException for a call to add with no reverse function specified");
         } catch (IllegalStateException e) {}
+    }
+
+    public void testAddAll() {
+        BasicEventList<Integer> source = new BasicEventList<Integer>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+
+        List<Integer> toAdd = new ArrayList<Integer>();
+        toAdd.add(new Integer(0));
+        toAdd.add(new Integer(1));
+        toAdd.add(new Integer(2));
+
+        source.addAll(toAdd);
+
+        assertEquals("0", intsToStrings.get(0));
+        assertEquals("1", intsToStrings.get(1));
+        assertEquals("2", intsToStrings.get(2));
     }
 
     public void testSet() {
