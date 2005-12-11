@@ -167,7 +167,7 @@ public class IssuesBrowser extends Applet {
         prioritySlider.setPaintTicks(true);
         prioritySlider.setForeground(UIManager.getColor("Label.foreground"));
         prioritySlider.setMajorTickSpacing(25);
-        prioritySlider.setForeground(Color.white);
+        prioritySlider.setForeground(Color.BLACK);
 
         // projects
         EventList projects = Project.getProjects();
