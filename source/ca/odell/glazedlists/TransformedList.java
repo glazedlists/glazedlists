@@ -36,7 +36,7 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
     /**
      * Creates a {@link TransformedList} to transform the specified {@link EventList}.
      *
-     * @param source the {@link EventList} to transform.
+     * @param source the {@link EventList} to transform
      */
     protected TransformedList(EventList<S> source) {
         super(source.getPublisher());
@@ -68,46 +68,33 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
     public abstract void listChanged(ListEvent<S> listChanges);
 
     /** {@inheritDoc} */
-    public boolean add(E value) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-        return source.add((S) value);
-    }
-
-    /** {@inheritDoc} */
     public void add(int index, E value) {
         if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
         if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
-        int sourceIndex = 0;
-        if(index < size()) sourceIndex = getSourceIndex(index);
-        else sourceIndex = source.size();
+        final int sourceIndex = index < size() ? getSourceIndex(index) : source.size();
         source.add(sourceIndex, (S) value);
     }
 
     /** {@inheritDoc} */
     public boolean addAll(int index, Collection<? extends E> values) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-        if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
-        int sourceIndex = 0;
-        if(index < size()) sourceIndex = getSourceIndex(index);
-        else sourceIndex = source.size();
-        return source.addAll(sourceIndex, (Collection<? extends S>) values);
-    }
-
-    /** {@inheritDoc} */
-    public boolean addAll(Collection<? extends E> values) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-        return source.addAll((Collection<? extends S>) values);
+        // nest changes and let the other methods compose the event
+        updates.beginEvent(true);
+        try {
+            return super.addAll(index, values);
+        } finally {
+            updates.commitEvent();
+        }
     }
 
     /** {@inheritDoc} */
     public void clear() {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
         // nest changes and let the other methods compose the event
         updates.beginEvent(true);
-        while(!isEmpty()) {
-            remove(0);
+        try {
+            super.clear();
+        } finally {
+            updates.commitEvent();
         }
-        updates.commitEvent();
     }
 
     /** {@inheritDoc} */
@@ -124,48 +111,25 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
     }
 
     /** {@inheritDoc} */
-    public boolean remove(Object toRemove) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-        int index = indexOf(toRemove);
-        if(index == -1) return false;
-        source.remove(getSourceIndex(index));
-        return true;
-    }
-
-    /** {@inheritDoc} */
     public boolean removeAll(Collection<?> collection) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
-        boolean changed = false;
         // nest changes and let the other methods compose the event
         updates.beginEvent(true);
-        for(Iterator i = collection.iterator(); i.hasNext(); ) {
-            Object value = i.next();
-            int index = -1;
-            while((index = indexOf(value)) != -1) {
-                remove(index);
-                changed = true;
-            }
+        try {
+            return super.removeAll(collection);
+        } finally {
+            updates.commitEvent();
         }
-        updates.commitEvent();
-        return changed;
     }
 
     /** {@inheritDoc} */
     public boolean retainAll(Collection<?> values) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
         // nest changes and let the other methods compose the event
         updates.beginEvent(true);
-        boolean changed = false;
-        for(int i = 0; i < size(); ) {
-            if(!values.contains(get(i))) {
-                remove(i);
-                changed = true;
-            } else {
-                i++;
-            }
+        try {
+            return super.retainAll(values);
+        } finally {
+            updates.commitEvent();
         }
-        updates.commitEvent();
-        return changed;
     }
 
     /** {@inheritDoc} */
