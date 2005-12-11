@@ -7,8 +7,8 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This List is meant to simplify the task of transforming each element of a
@@ -64,7 +64,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     private final List<E> mappedElements;
 
     /** The Function that maps source elements to FunctionList elements. */
-    private final Function<S,E> forward;
+    private final AdvancedFunction<S,E> forward;
 
     /** The Function that maps FunctionList elements back to source elements. It may be null. */
     private final Function<E,S> reverse;
@@ -106,7 +106,11 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
         if (forward == null)
             throw new IllegalArgumentException("forward Function may not be null");
 
-        this.forward = forward;
+        // wrap the forward function in an adapter to the AdvancedFunction interface it is isn't yet
+        if (forward instanceof AdvancedFunction)
+            this.forward = (AdvancedFunction<S,E>) forward;
+        else
+            this.forward = new AdvancedFunctionAdapter<S,E>(forward);
         this.reverse = reverse;
 
         // save a reference to the source elements
@@ -129,7 +133,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * @return the result of transforming the source element
      */
     private E forward(S s) {
-        return this.getForwardFunction().evaluate(s);
+        return this.forward.evaluate(s);
     }
 
     /**
@@ -141,11 +145,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * @return the result of transforming the source element
      */
     private E forward(E e, S s) {
-        final Function<S,E> forwardFunction = this.getForwardFunction();
-        if (forwardFunction instanceof AdvancedFunction)
-            return ((AdvancedFunction<S,E>) forwardFunction).reevaluate(s, e);
-        else
-            return forwardFunction.evaluate(s);
+        return this.forward.reevaluate(s, e);
     }
 
     /**
@@ -156,7 +156,10 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * @return the result of transforming the {@link FunctionList} element
      */
     private S reverse(E e) {
-        return this.getReverseFunction().evaluate(e);
+        if (this.reverse == null)
+            throw new IllegalStateException("A reverse mapping function must be specified to support this List operation");
+
+        return this.reverse.evaluate(e);
     }
 
     /**
@@ -165,7 +168,11 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * guaranteed to be non-null.
      */
     public Function<S,E> getForwardFunction() {
-        return this.forward;
+        // unwrap the forward function from a
+        if (this.forward instanceof AdvancedFunctionAdapter)
+            return ((AdvancedFunctionAdapter) this.forward).getDelegate();
+        else
+            return this.forward;
     }
 
     /**
@@ -196,24 +203,15 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
 
             } else if (changeType == ListEvent.UPDATE) {
                 final S updated = source.get(changeIndex);
-                final S previousValue = this.sourceElements.get(changeIndex);
 
-                // if the identity of the element did not change due to the update
-                if (previousValue == updated) {
-                    // then provide the previous transformed value to the forward function
-                    this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), updated));
-                } else {
-                    // otherwise we are replacing the value at the index with a new one
-                    this.sourceElements.set(changeIndex, updated);
-                    this.mappedElements.set(changeIndex, this.forward(updated));
-                }
+                this.sourceElements.set(changeIndex, updated);
+                this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), updated));
 
             } else if (changeType == ListEvent.DELETE) {
                 final S deletedSource = this.sourceElements.remove(changeIndex);
                 final E deletedTransform = this.mappedElements.remove(changeIndex);
 
-                if (this.forward instanceof AdvancedFunction)
-                    ((AdvancedFunction<S,E>) this.forward).dispose(deletedSource, deletedTransform);
+                this.forward.dispose(deletedSource, deletedTransform);
             }
         }
 
@@ -235,25 +233,13 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
 
     /** {@inheritDoc} */
     public E set(int index, E value) {
-        if (this.reverse == null)
-            throw new IllegalStateException("A reverse mapping function must be specified to support this List operation");
-
         final E updated = this.get(index);
         source.set(index, this.reverse(value));
         return updated;
     }
 
     /** {@inheritDoc} */
-    public boolean add(E value) {
-        this.add(this.size(), value);
-        return true;
-    }
-
-    /** {@inheritDoc} */
     public void add(int index, E value) {
-        if (this.reverse == null)
-            throw new IllegalStateException("A reverse mapping function must be specified to support this List operation");
-
         source.add(index, this.reverse(value));
     }
 
@@ -322,5 +308,45 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
          *      transformation
          */
         public void dispose(A sourceValue, B transformedValue);
+    }
+
+    /**
+     * This class adapts an implementation of the simple {@link Function}
+     * interface to the {@link AdvancedFunction} interface. This is purely to
+     * ease the implementation of FunctionList since it can treat all forward
+     * functions as though they are AdvancedFunctions which means less casting.
+     */
+    private static final class AdvancedFunctionAdapter<A,B> implements AdvancedFunction<A,B> {
+        private final Function<A,B> delegate;
+
+        /**
+         * Adapt the given <code>delegate</code> to the
+         * {@link AdvancedFunction} interface.
+         */
+        public AdvancedFunctionAdapter(Function<A,B> delegate) {
+            this.delegate = delegate;
+        }
+
+        /**
+         * Defers to the delegate.
+         */
+        public B evaluate(A sourceValue) {
+            return this.delegate.evaluate(sourceValue);
+        }
+
+        /**
+         * Defers to the delegate's {@link Function#evaluate} method.
+         */
+        public B reevaluate(A sourceValue, B transformedValue) {
+            return this.evaluate(sourceValue);
+        }
+
+        public void dispose(A sourceValue, B transformedValue) {
+            // do nothing
+        }
+
+        public Function getDelegate() {
+            return this.delegate;
+        }
     }
 }
