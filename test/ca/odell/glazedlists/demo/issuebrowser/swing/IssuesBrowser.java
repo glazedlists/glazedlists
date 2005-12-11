@@ -155,7 +155,7 @@ public class IssuesBrowser extends Applet {
 
         // priority slider
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
-        priorityRangeModel.setRangeProperties(0, 0, 0, 101, false);
+        priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
         JSlider prioritySlider = new JSlider(priorityRangeModel);
         Hashtable prioritySliderLabels = new Hashtable();
         prioritySliderLabels.put(new Integer(0), new JLabel("Low"));
@@ -281,7 +281,6 @@ public class IssuesBrowser extends Applet {
         }
     }
 
-
     /**
      * Toggles the throbber on and off.
      */
@@ -359,7 +358,7 @@ public class IssuesBrowser extends Applet {
 
     /**
      * A convenience method to paint a gradient between <code>gradientStartColor</code>
-     * and <code>gradientEndColor</code> over <code>height</code> pixels.
+     * and <code>gradientEndColor</code> over <code>length</code> pixels.
      */
     private static void paintGradient(Graphics2D g2d, Color gradientStartColor, Color gradientEndColor, int length, boolean vertical) {
         final Paint oldPainter = g2d.getPaint();
