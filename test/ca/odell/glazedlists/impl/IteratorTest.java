@@ -300,11 +300,11 @@ public class IteratorTest extends TestCase {
         assertEquals(false, iterator.hasNext());
 
         // add one element to validate the iterator responds accordingly
-        String helo = "hello, world";
-        testList.add(helo);
+        String hello = "hello, world";
+        testList.add(hello);
         assertEquals(true, iterator.hasPrevious());
         assertEquals(false, iterator.hasNext());
-        assertEquals(helo, iterator.previous());
+        assertEquals(hello, iterator.previous());
         assertEquals(false, iterator.hasPrevious());
         assertEquals(true, iterator.hasNext());
     }
