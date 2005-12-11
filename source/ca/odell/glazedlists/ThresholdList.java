@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * An {@link EventList} that shows a range of the elements of the source
  * {@link EventList}. Each element in the source {@link EventList} is assigned
- * an integer value via a {@link Evaluator}. This integer is used
+ * an integer value via an {@link Evaluator}. This integer is used
  * to determine whether the element fits in the {@link ThresholdList}s range.
  *
  * <p>By modifying the upper and lower thresholds in the range, the list can
@@ -46,10 +46,10 @@ import java.util.*;
 public final class ThresholdList<E> extends RangeList<E> {
 
     /** the lower bound to use to define list containment */
-    private Object lowerThreshold = new Integer(Integer.MIN_VALUE);
+    private int lowerThreshold = Integer.MIN_VALUE;
 
     /** the upper bound to use to define list containment */
-    private Object upperThreshold = new Integer(Integer.MAX_VALUE);
+    private int upperThreshold = Integer.MAX_VALUE;
 
     /** the evaluator to use to compare Objects against the threshold */
     private Evaluator<E> evaluator = null;
@@ -107,7 +107,7 @@ public final class ThresholdList<E> extends RangeList<E> {
      * of thread safe code.
      */
     public void setLowerThreshold(int lowerThreshold) {
-        this.lowerThreshold = new Integer(lowerThreshold);
+        this.lowerThreshold = lowerThreshold;
         adjustRange();
     }
 
@@ -115,7 +115,7 @@ public final class ThresholdList<E> extends RangeList<E> {
      * Gets the lower threshold for this list
      */
     public int getLowerThreshold() {
-        return ((Integer)lowerThreshold).intValue();
+        return lowerThreshold;
     }
 
     /**
@@ -142,7 +142,7 @@ public final class ThresholdList<E> extends RangeList<E> {
      * of thread safe code.
      */
     public void setUpperThreshold(int upperThreshold) {
-        this.upperThreshold = new Integer(upperThreshold);
+        this.upperThreshold = upperThreshold;
         adjustRange();
     }
 
@@ -150,7 +150,7 @@ public final class ThresholdList<E> extends RangeList<E> {
      * Gets the upper threshold for this list
      */
     public int getUpperThreshold() {
-        return ((Integer)upperThreshold).intValue();
+        return upperThreshold;
     }
 
     /**
@@ -193,7 +193,7 @@ public final class ThresholdList<E> extends RangeList<E> {
      */
     private boolean withinRange(E object) {
         int objectEvaluation = evaluator.evaluate(object);
-        return objectEvaluation >= ((Integer)lowerThreshold).intValue() && objectEvaluation <= ((Integer)upperThreshold).intValue();
+        return objectEvaluation >= lowerThreshold && objectEvaluation <= upperThreshold;
     }
 
     /** {@inheritDoc} */
@@ -201,8 +201,8 @@ public final class ThresholdList<E> extends RangeList<E> {
         // this implementation is slightly inconsistent with the superclass
         // because the super treats endIndex as exclusive wheras we treat
         // endIndex as inclusive
-        this.lowerThreshold = new Integer(sourceIndexToThreshold(startIndex));
-        this.upperThreshold = new Integer(sourceIndexToThreshold(endIndex));
+        this.lowerThreshold = sourceIndexToThreshold(startIndex);
+        this.upperThreshold = sourceIndexToThreshold(endIndex);
         adjustRange();
     }
 
@@ -211,8 +211,8 @@ public final class ThresholdList<E> extends RangeList<E> {
         // this implementation is slightly inconsistent with the superclass
         // because the super treats endIndex as exclusive wheras we treat
         // endIndex as inclusive
-        this.lowerThreshold = new Integer(sourceIndexToThreshold(source.size() - startIndex));
-        this.upperThreshold = new Integer(sourceIndexToThreshold(source.size() - endIndex));
+        this.lowerThreshold = sourceIndexToThreshold(source.size() - startIndex);
+        this.upperThreshold = sourceIndexToThreshold(source.size() - endIndex);
         adjustRange();
     }
 
@@ -223,7 +223,7 @@ public final class ThresholdList<E> extends RangeList<E> {
     private int sourceIndexToThreshold(int sourceIndex) {
         if(sourceIndex < 0) {
             return Integer.MIN_VALUE;
-        } else  if(sourceIndex < source.size()) {
+        } else if(sourceIndex < source.size()) {
             return evaluator.evaluate(source.get(sourceIndex));
         } else {
             return Integer.MIN_VALUE;
@@ -232,21 +232,20 @@ public final class ThresholdList<E> extends RangeList<E> {
 
     /** {@inheritDoc} */
     public int getStartIndex() {
-        return sortedSource.indexOfSimulated(lowerThreshold);
+        return sortedSource.indexOfSimulated(new Integer(lowerThreshold));
     }
 
     /** {@inheritDoc} */
     public int getEndIndex() {
-        int endIndex = Math.max(sortedSource.indexOfSimulated(upperThreshold), sortedSource.lastIndexOf(upperThreshold) + 1);
+        int endIndex = Math.max(sortedSource.indexOfSimulated(upperThreshold), sortedSource.lastIndexOf(new Integer(upperThreshold)) + 1);
         int startIndex = getStartIndex();
         return Math.max(startIndex, endIndex);
     }
 
     /** {@inheritDoc} */
     public void dispose() {
-        SortedList sortedSource = (SortedList)source;
-        super.dispose();
         sortedSource.dispose();
+        super.dispose();
     }
 
     /**
@@ -254,15 +253,13 @@ public final class ThresholdList<E> extends RangeList<E> {
      * {@link ThresholdList}.
      */
     public interface Evaluator<E> {
-
         /**
          * Returns an integer value for an {@link Object} to be used to
          * compare that object against a threshold.  This value is
-         * not relative to any other object unlike a {@link java.util.Comparator}.
+         * not relative to any other object unlike a {@link Comparator}.
          */
         public int evaluate(E object);
     }
-
 
     /**
      * A ThresholdComparator is a simple helper class that wraps
@@ -295,11 +292,11 @@ public final class ThresholdList<E> extends RangeList<E> {
          * of an <code>Integer</code>.
          */
         public int compare(E alpha, E beta) {
-            int alphaValue = 0;
+            int alphaValue;
             if(alpha instanceof Integer) alphaValue = ((Integer)alpha).intValue();
             else alphaValue = evaluator.evaluate(alpha);
 
-            int betaValue = 0;
+            int betaValue;
             if(beta instanceof Integer) betaValue = ((Integer)beta).intValue();
             else betaValue = evaluator.evaluate(beta);
 
