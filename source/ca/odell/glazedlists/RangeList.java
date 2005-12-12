@@ -121,6 +121,13 @@ public class RangeList<E> extends TransformedList<E, E> {
         int desiredStartIndex = getStartIndex();
         int desiredEndIndex = getEndIndex();
 
+        // normalize the range so start index is the smallest index and end index is the largest
+        if (desiredEndIndex < desiredStartIndex) {
+            int temp = desiredEndIndex;
+            desiredEndIndex = desiredStartIndex;
+            desiredStartIndex = temp;
+        }
+
         // insert before the beginning
         if(desiredStartIndex < currentStartIndex) {
             updates.addInsert(0, currentStartIndex - desiredStartIndex - 1);
