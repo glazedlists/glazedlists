@@ -269,7 +269,7 @@ public final class SortedList<E> extends TransformedList<E, E> {
      * Inserts the specified unsorted node as the value in the sorted tree
      * and returns the sorted order.
      *
-     * @return the sortedIndex of the inserted object.
+     * @return the sortIndex of the inserted object.
      */
     private int insertByUnsortedNode(IndexedTreeNode unsortedNode) {
         // add the object to the sorted set
@@ -283,7 +283,7 @@ public final class SortedList<E> extends TransformedList<E, E> {
      * Deletes the node in the sorted tree based on the value of the specified
      * unsorted tree node.
      *
-     * @return the sortedIndex of the deleted object.
+     * @return the sortIndex of the deleted object.
      */
     private int deleteByUnsortedNode(IndexedTreeNode unsortedNode) {
         // get the sorted node
@@ -442,6 +442,46 @@ public final class SortedList<E> extends TransformedList<E, E> {
     }
 
     /**
+     * Returns the first index of the <code>object</code>'s sort location or
+     * the first index at which the <code>object</code> could be positioned if
+     * inserted.
+     *
+     * <p>Unlike {@link #indexOf} this method does not guarantee the given
+     * <code>object</code> {@link Object#equals(Object) equals} the element at
+     * the returned index. Instead, they are indistinguishable according to the
+     * sorting {@link Comparator}.
+     *
+     * @return a value in <tt>[0, size()]</tt> inclusive
+     */
+    public int sortIndex(Object object) {
+        if (comparator == null)
+            throw new IllegalStateException("No Comparator exists to perform this operation");
+
+        final int sortIndex = sorted.indexOf(object);
+        return sortIndex == -1 ? sorted.indexOfSimulated(object) : sortIndex;
+    }
+
+    /**
+     * Returns the last index of the <code>object</code>'s sort location or
+     * the last index at which the <code>object</code> could be positioned if
+     * inserted.
+     *
+     * <p>Unlike {@link #lastIndexOf} this method does not guarantee the given
+     * <code>object</code> {@link Object#equals(Object) equals} the element at
+     * the returned index. Instead, they are indistinguishable according to the
+     * sorting {@link Comparator}.
+     *
+     * @return a value in <tt>[0, size()]</tt> inclusive
+     */
+    public int lastSortIndex(Object object) {
+        if (comparator == null)
+            throw new IllegalStateException("No Comparator exists to perform this operation");
+
+        final int lastSortIndex = sorted.lastIndexOf(object);
+        return lastSortIndex == -1 ? sorted.indexOfSimulated(object) : lastSortIndex;
+    }
+
+    /**
      * Returns the index in this list of the first occurrence of the specified
      * element, or the index where that element would be in the list if it were
      * inserted.
@@ -450,6 +490,9 @@ public final class SortedList<E> extends TransformedList<E, E> {
      *      element, or the index where that element would be in the list if it
      *      were inserted. This will return a value in <tt>[0, size()]</tt>,
      *      inclusive.
+     *
+     * @deprecated Deprecated as of 12/11/2005. Replaced with {@link #sortIndex(Object)}
+     *      which has cleaner semantics.
      */
     public int indexOfSimulated(Object object) {
         return comparator != null ? sorted.indexOfSimulated(object) : size();

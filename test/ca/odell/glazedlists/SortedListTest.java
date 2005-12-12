@@ -997,6 +997,45 @@ public class SortedListTest extends TestCase {
         }
     }
 
+    public void testSortIndex() {
+        sortedList.addAll(GlazedListsTests.stringToList("ac"));
+        assertEquals(1, sortedList.sortIndex("b"));
+        assertEquals(1, sortedList.lastSortIndex("b"));
+
+        sortedList.clear();
+        sortedList.addAll(GlazedListsTests.stringToList("abbbc"));
+        assertEquals(1, sortedList.sortIndex("b"));
+        assertEquals(3, sortedList.lastSortIndex("b"));
+
+        assertEquals(0, sortedList.sortIndex("3"));
+        assertEquals(0, sortedList.lastSortIndex("3"));
+
+        assertEquals(5, sortedList.sortIndex("d"));
+        assertEquals(5, sortedList.lastSortIndex("d"));
+    }
+
+    public void testComparatorAndEqualsMethodDontAgree() {
+        sortedList.dispose();
+        sortedList = new SortedList(unsortedList, String.CASE_INSENSITIVE_ORDER);
+        sortedList.addAll(GlazedListsTests.stringToList("ac"));
+        assertEquals(1, sortedList.sortIndex("b"));
+        assertEquals(1, sortedList.lastSortIndex("b"));
+        assertEquals(-1, sortedList.indexOf("b"));
+        assertEquals(-1, sortedList.lastIndexOf("b"));
+
+        sortedList.clear();
+        sortedList.addAll(GlazedListsTests.stringToList("abbbc"));
+        assertEquals(1, sortedList.sortIndex("b"));
+        assertEquals(3, sortedList.lastSortIndex("b"));
+        assertEquals(1, sortedList.indexOf("b"));
+        assertEquals(3, sortedList.lastIndexOf("b"));
+
+        assertEquals(1, sortedList.sortIndex("B"));
+        assertEquals(3, sortedList.lastSortIndex("B"));
+        assertEquals(-1, sortedList.indexOf("B"));
+        assertEquals(-1, sortedList.lastIndexOf("B"));
+    }
+
     /**
      * Compares two objects to be equal.
      */
