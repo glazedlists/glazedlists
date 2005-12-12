@@ -333,6 +333,7 @@ public class ThresholdListTest extends TestCase {
         // set the threshold to be the middle value
         thresholdList.setUpperThreshold(1);
         int originalSize = thresholdList.size();
+
         // add 5 more 1's which are at the threshold for this list
         for(int i = 0; i < 5; i ++) {
             source.add(i, new Integer(1));
@@ -1117,6 +1118,39 @@ public class ThresholdListTest extends TestCase {
         assertEquals(500, thresholdList.size());
     }
 
+    public void testBoundaryConditions() {
+        source.add(new Integer(0));
+        source.add(new Integer(25));
+        source.add(new Integer(50));
+        source.add(new Integer(75));
+        source.add(new Integer(100));
+
+        thresholdList.setLowerThreshold(0);
+        thresholdList.setUpperThreshold(100);
+        assertEquals(5, thresholdList.size());
+
+        thresholdList.setLowerThreshold(100);
+        assertEquals(1, thresholdList.size());
+    }
+
+    public void testNonIntegers() {
+        thresholdList.dispose();
+        thresholdList = new ThresholdList(source, new IntegerAsStringEvaluator());
+
+        source.add("0");
+        source.add("25");
+        source.add("50");
+        source.add("75");
+        source.add("100");
+
+        thresholdList.setLowerThreshold(0);
+        thresholdList.setUpperThreshold(100);
+        assertEquals(5, thresholdList.size());
+
+        thresholdList.setLowerThreshold(100);
+        assertEquals(1, thresholdList.size());
+    }
+
     /**
      * A helper method to compare two lists for equality
      */
@@ -1145,10 +1179,10 @@ public class ThresholdListTest extends TestCase {
         }
     }
 
+    /**
+     * Returns an integer value which represents the object.
+     */
     private class IntegerEvaluator implements ThresholdList.Evaluator {
-        /**
-         * Returns an integer value which represents the object.
-         */
         public int evaluate(Object object) {
             if(object == null) {
                 return Integer.MIN_VALUE;
@@ -1160,6 +1194,15 @@ public class ThresholdListTest extends TestCase {
                 return integer.intValue();
             }
 
+        }
+    }
+
+    /**
+     * Expects strings like "100" and "50" and returns their integer values.
+     */
+    private class IntegerAsStringEvaluator implements ThresholdList.Evaluator {
+        public int evaluate(Object object) {
+            return Integer.valueOf((String)object);
         }
     }
 

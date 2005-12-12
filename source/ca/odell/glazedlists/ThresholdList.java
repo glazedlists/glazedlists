@@ -232,18 +232,19 @@ public final class ThresholdList<E> extends RangeList<E> {
 
     /** {@inheritDoc} */
     public int getStartIndex() {
-        return sortedSource.indexOfSimulated(new Integer(lowerThreshold));
+        return sortedSource.sortIndex(new Integer(lowerThreshold));
     }
 
     /** {@inheritDoc} */
     public int getEndIndex() {
         // search for the upperThreshold value
-        final int lastIndexOfUpperThreshold = sortedSource.lastIndexOf(new Integer(upperThreshold));
-        if (lastIndexOfUpperThreshold != -1)
-            return lastIndexOfUpperThreshold + 1;
+        int index = sortedSource.lastSortIndex(new Integer(upperThreshold));
 
-        // we couldn't find it, so return its theoretical position (insertion point)
-        return sortedSource.indexOfSimulated(new Integer(upperThreshold));
+        // if the upperThreshold exists in the sortedSource, convert the exclusive index to an inclusive index
+        if (index < sortedSource.size() && evaluator.evaluate(sortedSource.get(index)) == upperThreshold)
+            index++;
+
+        return index;
     }
 
     /** {@inheritDoc} */
