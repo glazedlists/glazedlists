@@ -237,17 +237,13 @@ public final class ThresholdList<E> extends RangeList<E> {
 
     /** {@inheritDoc} */
     public int getEndIndex() {
-        // look up the index that is either the FIRST index of the upperThreshold
-        // or the location of the insertion point for the upperThreshold
-        int endIndex = sortedSource.indexOfSimulated(new Integer(upperThreshold));
+        // search for the upperThreshold value
+        final int lastIndexOfUpperThreshold = sortedSource.lastIndexOf(new Integer(upperThreshold));
+        if (lastIndexOfUpperThreshold != -1)
+            return lastIndexOfUpperThreshold + 1;
 
-        // we must find the LAST index at which the upperThreshold value can be
-        // found and move 1 position past that to play nice with the super class logic
-        // (i.e. ThresholdList's endIndex is inclusive but RangleList's endIndex is exclusive)
-        while (endIndex < sortedSource.size() && sourceIndexToThreshold(endIndex) == upperThreshold)
-            endIndex++;
-
-        return Math.max(getStartIndex(), endIndex);
+        // we couldn't find it, so return its theoretical position (insertion point)
+        return sortedSource.indexOfSimulated(new Integer(upperThreshold));
     }
 
     /** {@inheritDoc} */
