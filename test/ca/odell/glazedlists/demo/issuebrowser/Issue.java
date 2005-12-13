@@ -4,11 +4,11 @@ import java.util.*;
 // glazed lists
 import ca.odell.glazedlists.*;
 
-
 /**
  * An issue models a work effort either due to an existing problem or a desired
  * enhancement.
  *
+ * @author James Lemieux
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class Issue implements TextFilterable, Comparable {
@@ -37,42 +37,41 @@ public class Issue implements TextFilterable, Comparable {
     private String shortDescription = null;
     private PeerIssue isDuplicate = null;
     // optional fields
-    private List keywords = new ArrayList();
-    private List blocks = new ArrayList();
-    private List cc = new ArrayList();
+    private List<String> keywords = new ArrayList<String>();
+    private List<PeerIssue> blocks = new ArrayList<PeerIssue>();
+    private List<String> cc = new ArrayList<String>();
     // issue rich fields
-    private List descriptions = new ArrayList();
-    private List attachments = new ArrayList();
-    private List activities = new ArrayList();
-    private List duplicates = new ArrayList();
-    private List dependsOn = new ArrayList();
+    private List<Description> descriptions = new ArrayList<Description>();
+    private List<Attachment> attachments = new ArrayList<Attachment>();
+    private List<Activity> activities = new ArrayList<Activity>();
+    private List<PeerIssue> duplicates = new ArrayList<PeerIssue>();
+    private List<PeerIssue> dependsOn = new ArrayList<PeerIssue>();
     
-    private List allUsers = null;
+    private List<String> allUsers = null;
+
+    /**
+     * Gets all users related to this issue.
+     */
+    public List<String> getAllUsers() {
+        // init the users list if necessary
+        if(allUsers == null) {
+            allUsers = new ArrayList<String>();
+            if(assignedTo != null) allUsers.add(assignedTo);
+            if(reporter != null) allUsers.add(reporter);
+            if(qaContact != null) allUsers.add(qaContact);
+            for(Iterator<Description> d = descriptions.iterator(); d.hasNext(); ) {
+                allUsers.add(d.next().getWho());
+            }
+        }
+        
+        return allUsers;
+    }
 
     /**
      * Creates a new empty issue.
      */
     public Issue() {
         // do nothing
-    }
-    
-    /**
-     * Gets all users related to this issue.
-     */
-    public List getAllUsers() {
-        // init the users list if necessary
-        if(allUsers == null) {
-            allUsers = new ArrayList();
-            if(assignedTo != null) allUsers.add(assignedTo);
-            if(reporter != null) allUsers.add(reporter);
-            if(qaContact != null) allUsers.add(qaContact);
-            for(Iterator d = descriptions.iterator(); d.hasNext(); ) {
-                Description description = (Description)d.next();
-                allUsers.add(description.getWho());
-            }
-        }
-        
-        return allUsers;
     }
 
     /**
@@ -111,302 +110,176 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * ID of this issue (unique key).
      */
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     /**
      * Status code of this issue (load status).
      */
-    public Integer getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(Integer statusCode) {
-        this.statusCode = statusCode;
-    }
+    public Integer getStatusCode() { return statusCode; }
+    public void setStatusCode(Integer statusCode) { this.statusCode = statusCode; }
 
     /**
      * Current status of this issue.
      */
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     /**
      * Priority (severity) assigned to issue.
      */
-    public Priority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Priority priority) {
-        this.priority = priority;
-    }
+    public Priority getPriority() { return priority; }
+    public void setPriority(Priority priority) { this.priority = priority; }
 
     /**
      * The issue's resolution, if any
      */
-    public String getResolution() {
-        return resolution;
-    }
-
-    public void setResolution(String resolution) {
-        this.resolution = resolution;
-    }
+    public String getResolution() { return resolution; }
+    public void setResolution(String resolution) { this.resolution = resolution; }
 
     /**
      * Product against which issue is reported.
      */
-    public String getComponent() {
-        return component;
-    }
-
-    public void setComponent(String component) {
-        this.component = component;
-    }
+    public String getComponent() { return component; }
+    public void setComponent(String component) { this.component = component; }
 
     /**
      * Version associated with component.
      */
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
+    public String getVersion() { return version; }
+    public void setVersion(String version) { this.version = version; }
 
     /**
      * Platform that the issue was reported against.
      */
-    public String getRepPlatform() {
-        return repPlatform;
-    }
-
-    public void setRepPlatform(String repPlatform) {
-        this.repPlatform = repPlatform;
-    }
+    public String getRepPlatform() { return repPlatform; }
+    public void setRepPlatform(String repPlatform) { this.repPlatform = repPlatform; }
 
     /**
      * Email of person issue currently assigned to.
      */
-    public String getAssignedTo() {
-        return assignedTo;
-    }
-
-    public void setAssignedTo(String assignedTo) {
-        this.assignedTo = assignedTo;
-    }
+    public String getAssignedTo() { return assignedTo; }
+    public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
 
     /**
      * Last modified timestamp ('yyyy-mm-dd hh:mm:ss').
      */
-    public Date getDeltaTimestamp() {
-        return deltaTimestamp;
-    }
-
-    public void setDeltaTimestamp(Date deltaTimestamp) {
-        this.deltaTimestamp = deltaTimestamp;
-    }
+    public Date getDeltaTimestamp() { return deltaTimestamp; }
+    public void setDeltaTimestamp(Date deltaTimestamp) { this.deltaTimestamp = deltaTimestamp; }
 
     /**
      * Component of component issue reported against.
      */
-    public String getSubcomponent() {
-        return subcomponent;
-    }
-
-    public void setSubcomponent(String subcomponent) {
-        this.subcomponent = subcomponent;
-    }
+    public String getSubcomponent() { return subcomponent; }
+    public void setSubcomponent(String subcomponent) { this.subcomponent = subcomponent; }
 
     /**
      * Email of initial issue reporter.
      */
-    public String getReporter() {
-        return reporter;
-    }
-
-    public void setReporter(String reporter) {
-        this.reporter = reporter;
-    }
+    public String getReporter() { return reporter; }
+    public void setReporter(String reporter) { this.reporter = reporter; }
 
     /**
      * Milestone for this issue's resolution.
      */
-    public String getTargetMilestone() {
-        return targetMilestone;
-    }
-
-    public void setTargetMilestone(String targetMilestone) {
-        this.targetMilestone = targetMilestone;
-    }
+    public String getTargetMilestone() { return targetMilestone; }
+    public void setTargetMilestone(String targetMilestone) { this.targetMilestone = targetMilestone; }
 
     /**
      * Nature of issue.  This refers to whether the issue is a defect, task,
      * enhancement, etc.
      */
-    public String getIssueType() {
-        return issueType;
-    }
-
-    public void setIssueType(String issueType) {
-        this.issueType = issueType;
-    }
+    public String getIssueType() { return issueType; }
+    public void setIssueType(String issueType) { this.issueType = issueType; }
 
     /**
      * Issue creation timestamp ('yyyy-mm-dd hh:mm:ss').
      */
-    public Date getCreationTimestamp() {
-        return creationTimestamp;
-    }
-
-    public void setCreationTimestamp(Date creationTimestamp) {
-        this.creationTimestamp = creationTimestamp;
-    }
+    public Date getCreationTimestamp() { return creationTimestamp; }
+    public void setCreationTimestamp(Date creationTimestamp) { this.creationTimestamp = creationTimestamp; }
 
     /**
      * Email of the QA contact for this issue.
      */
-    public String getQAContact() {
-        return qaContact;
-    }
-
-    public void setQAContact(String qaContact) {
-        this.qaContact = qaContact;
-    }
+    public String getQAContact() { return qaContact; }
+    public void setQAContact(String qaContact) { this.qaContact = qaContact; }
 
     /**
      * Free text 'whiteboard' for issue comments.
      */
-    public String getStatusWhiteboard() {
-        return statusWhiteboard;
-    }
-
-    public void setStatusWhiteboard(String statusWhiteboard) {
-        this.statusWhiteboard = statusWhiteboard;
-    }
+    public String getStatusWhiteboard() { return statusWhiteboard; }
+    public void setStatusWhiteboard(String statusWhiteboard) { this.statusWhiteboard = statusWhiteboard; }
 
     /**
      * current votes for issue.
      */
-    public String getVotes() {
-        return votes;
-    }
-
-    public void setVotes(String votes) {
-        this.votes = votes;
-    }
+    public String getVotes() { return votes; }
+    public void setVotes(String votes) { this.votes = votes; }
 
     /**
      * URL related to issue
      */
-    public String getFileLocation() {
-        return fileLocation;
-    }
-
-    public void setFileLocation(String fileLocation) {
-        this.fileLocation = fileLocation;
-    }
-
+    public String getFileLocation() { return fileLocation; }
+    public void setFileLocation(String fileLocation) { this.fileLocation = fileLocation; }
 
     /**
      * Operating system issue reported against.
      */
-    public String getOperatingSystem() {
-        return operatingSystem;
-    }
-
-    public void setOperatingSystem(String operatingSystem) {
-        this.operatingSystem = operatingSystem;
-    }
+    public String getOperatingSystem() { return operatingSystem; }
+    public void setOperatingSystem(String operatingSystem) { this.operatingSystem = operatingSystem; }
 
     /**
      * Short description of issue.
      */
-    public String getShortDescription() {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
+    public String getShortDescription() { return shortDescription; }
+    public void setShortDescription(String shortDescription) { this.shortDescription = shortDescription; }
 
     /**
      * List of keywords for this issue.
      */
-    public List getKeywords() {
-        return keywords;
-    }
+    public List<String> getKeywords() { return keywords; }
 
     /**
-     * List of email addresses of interested parties.s
+     * List of email addresses of interested parties.
      */
-    public List getCC() {
-        return cc;
-    }
+    public List<String> getCC() { return cc; }
 
     /**
-     * Data from the longdescs table for this issue id.  Essentially
+     * Data from the longdescs table for this issue id. Essentially
      * the log of additional comments.
      */
-    public List getDescriptions() {
-        return descriptions;
-    }
+    public List<Description> getDescriptions() { return descriptions; }
 
     /**
      * Get the attachments to this issue.
      */
-    public List getAttachments() {
-        return attachments;
-    }
+    public List<Attachment> getAttachments() { return attachments; }
 
     /**
      * Get the activity upon this issue.
      */
-    public List getActivities() {
-        return activities;
-    }
+    public List<Activity> getActivities() { return activities; }
 
     /**
      * Other issues which were closed as a duplicate of this issue.
      */
-    public List getDuplicates() {
-        return duplicates;
-    }
+    public List<PeerIssue> getDuplicates() { return duplicates; }
 
     /**
      * List of local issue IDs that depend on this one.
      */
-    public List getDependsOn() {
-        return dependsOn;
-    }
+    public List<PeerIssue> getDependsOn() { return dependsOn; }
 
     /**
      * List of local issue IDs blocked by this one.
      */
-    public List getBlocks() {
-        return blocks;
-    }
+    public List<PeerIssue> getBlocks() { return blocks; }
 
     /**
      * The issue which this issue was closed as a duplicate of.
      */
-    public PeerIssue getDuplicate() {
-        return isDuplicate;
-    }
-    public void setDuplicate(PeerIssue peerIssue) {
-        this.isDuplicate = isDuplicate;
-    }
+    public PeerIssue getDuplicate() { return isDuplicate; }
+    public void setDuplicate(PeerIssue isDuplicate) { this.isDuplicate = isDuplicate; }
 
     /**
      * Write this issue for debugging.
@@ -427,9 +300,9 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * Gets the strings to filter this issue by.
      */
-    public void getFilterStrings(List baseList) {
+    public void getFilterStrings(List<String> baseList) {
         // the displayed strings
-        baseList.add(id);
+        baseList.add(id.toString());
         baseList.add(issueType);
         baseList.add(priority.toString());
         baseList.add(status);
@@ -442,7 +315,7 @@ public class Issue implements TextFilterable, Comparable {
 
         // recursively get filter strings from the descriptions
         for (int d = 0; d < getDescriptions().size(); d++) {
-            Description description = (Description) getDescriptions().get(d);
+            Description description = getDescriptions().get(d);
             description.getFilterStrings(baseList);
         }
     }
@@ -462,70 +335,39 @@ class Activity {
     /**
      * user who performed the action
      */
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
+    public String getUser() { return user; }
+    public void setUser(String user) { this.user = user; }
 
     /**
      * date the described change was made
      */
-    public Date getWhen() {
-        return when;
-    }
-
-    public void setWhen(Date when) {
-        this.when = when;
-    }
+    public Date getWhen() { return when; }
+    public void setWhen(Date when) { this.when = when; }
 
     /**
      * name of db field (in fielddefs)
      */
-    public String getField() {
-        return field;
-    }
-
-    public void setField(String field) {
-        this.field = field;
-    }
+    public String getField() { return field; }
+    public void setField(String field) { this.field = field; }
 
     /**
      * description of the database field
      */
-    public String getFieldDescription() {
-        return fieldDescription;
-    }
-
-    public void setFieldDescription(String fieldDescription) {
-        this.fieldDescription = fieldDescription;
-    }
+    public String getFieldDescription() { return fieldDescription; }
+    public void setFieldDescription(String fieldDescription) { this.fieldDescription = fieldDescription; }
 
     /**
      * value changed from
      */
-    public String getOldValue() {
-        return oldValue;
-    }
-
-    public void setOldValue(String oldValue) {
-        this.oldValue = oldValue;
-    }
+    public String getOldValue() { return oldValue; }
+    public void setOldValue(String oldValue) { this.oldValue = oldValue; }
 
     /**
      * value changed to
      */
-    public String getNewValue() {
-        return newValue;
-    }
-
-    public void setNewValue(String newValue) {
-        this.newValue = newValue;
-    }
+    public String getNewValue() { return newValue; }
+    public void setNewValue(String newValue) { this.newValue = newValue; }
 }
-
 
 /**
  * Reference to this issue's duplicate.
@@ -538,37 +380,21 @@ class PeerIssue {
     /**
      * user who created the duplicate.
      */
-    public String getWho() {
-        return who;
-    }
-
-    public void setWho(String who) {
-        this.who = who;
-    }
+    public String getWho() { return who; }
+    public void setWho(String who) { this.who = who; }
 
     /**
      * date the described change was made
      */
-    public Date getWhen() {
-        return when;
-    }
-
-    public void setWhen(Date when) {
-        this.when = when;
-    }
+    public Date getWhen() { return when; }
+    public void setWhen(Date when) { this.when = when; }
 
     /**
      * ID of the duplicate.
      */
-    public String getIssueId() {
-        return issueId;
-    }
-
-    public void setIssueId(String issueId) {
-        this.issueId = issueId;
-    }
+    public String getIssueId() { return issueId; }
+    public void setIssueId(String issueId) { this.issueId = issueId; }
 }
-
 
 /**
  * Data pertaining to attachments.  NOTE - some of these fields
@@ -589,110 +415,60 @@ class Attachment {
     /**
      * Mime type for the attachment.
      */
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }
+    public String getMimeType() { return mimeType; }
+    public void setMimeType(String mimeType) { this.mimeType = mimeType; }
 
     /**
      * A unique id for this attachment.
      */
-    public String getAttachId() {
-        return attachId;
-    }
-
-    public void setAttachId(String attachId) {
-        this.attachId = attachId;
-    }
+    public String getAttachId() { return attachId; }
+    public void setAttachId(String attachId) { this.attachId = attachId; }
 
     /**
      * Timestamp of when added 'yyyy-mm-dd hh:mm'
      */
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
+    public Date getDate() { return date; }
+    public void setDate(Date date) { this.date = date; }
 
     /**
      * Short description for attachment.
      */
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     /**
      * Whether attachment is a patch file.
      */
-    public String getIsPatch() {
-        return isPatch;
-    }
-
-    public void setIsPatch(String isPatch) {
-        this.isPatch = isPatch;
-    }
+    public String getIsPatch() { return isPatch; }
+    public void setIsPatch(String isPatch) { this.isPatch = isPatch; }
 
     /**
      * Filename of attachment.
      */
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
+    public String getFilename() { return filename; }
+    public void setFilename(String filename) { this.filename = filename; }
 
     /**
      * Issuezilla ID of attachement submitter.
      */
-    public String getSubmitterId() {
-        return submitterId;
-    }
-
-    public void setSubmitterId(String submitterId) {
-        this.submitterId = submitterId;
-    }
+    public String getSubmitterId() { return submitterId; }
+    public void setSubmitterId(String submitterId) { this.submitterId = submitterId; }
 
     /**
      * username of attachement submitter.
      */
-    public String getSubmitterUsername() {
-        return submitterUsername;
-    }
-
-    public void setSubmitterUsername(String submitterUsername) {
-        this.submitterUsername = submitterUsername;
-    }
+    public String getSubmitterUsername() { return submitterUsername; }
+    public void setSubmitterUsername(String submitterUsername) { this.submitterUsername = submitterUsername; }
 
     /**
      * Encoded attachment.
      */
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
+    public String getData() { return data; }
+    public void setData(String data) { this.data = data; }
 
     /**
      * URL to attachment in iz.
      */
-    public String getAttachmentIzUrl() {
-        return attachmentIzUrl;
-    }
-
-    public void setAttachmentIzUrl(String attachmentIzUrl) {
-        this.attachmentIzUrl = attachmentIzUrl;
-    }
+    public String getAttachmentIzUrl() { return attachmentIzUrl; }
+    public void setAttachmentIzUrl(String attachmentIzUrl) { this.attachmentIzUrl = attachmentIzUrl; }
 }

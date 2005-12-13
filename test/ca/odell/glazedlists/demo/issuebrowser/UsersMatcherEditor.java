@@ -17,27 +17,27 @@ import ca.odell.glazedlists.event.*;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class UsersMatcherEditor extends AbstractMatcherEditor {
+public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
 
     /** a list of users */
-    private EventList allUsers = null;
+    private EventList<String> allUsers = null;
 
     /** a list that maintains selection */
-    private EventList selectedUsers = null;
+    private EventList<String> selectedUsers = null;
 
     /**
      * Create a filter list that filters the specified source list, which
      * must contain only Issue objects.
      */
-    public UsersMatcherEditor(EventList source) {
+    public UsersMatcherEditor(EventList<Issue> source) {
         // create a unique users list from the source issues list
-        allUsers = new UniqueList(new CollectionList(source, new IssueUserator()));
+        allUsers = new UniqueList<String>(new CollectionList<Issue, String>(source, new IssueUserator()));
     }
 
     /**
      * Sets the selection driven EventList which triggers filter changes.
      */
-    public void setSelectionList(EventList usersSelectedList) {
+    public void setSelectionList(EventList<String> usersSelectedList) {
         this.selectedUsers = usersSelectedList;
         usersSelectedList.addListEventListener(new SelectionChangeEventList());
     }
@@ -45,17 +45,17 @@ public class UsersMatcherEditor extends AbstractMatcherEditor {
     /**
      * Allow access to the unique list of users
      */
-    public EventList getUsersList() {
+    public EventList<String> getUsersList() {
         return allUsers;
     }
 
     /**
      * An EventList to respond to changes in selection from the ListEventViewer.
      */
-    private final class SelectionChangeEventList implements ListEventListener {
+    private final class SelectionChangeEventList implements ListEventListener<String> {
 
         /** {@inheritDoc} */
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<String> listChanges) {
             // if we have all or no users selected, match all users
             if(selectedUsers.isEmpty() || selectedUsers.size() == allUsers.size()) {
                 fireMatchAll();
@@ -68,7 +68,7 @@ public class UsersMatcherEditor extends AbstractMatcherEditor {
             // get the previous matcher. If it wasn't a user matcher, it must
             // have been an 'everything' matcher, so the new matcher must be
             // a constrainment of that
-            final Matcher previousMatcher = getMatcher();
+            final Matcher<Issue> previousMatcher = getMatcher();
             if(!(previousMatcher instanceof UserMatcher)) {
                 fireConstrained(newUserMatcher);
                 return;
@@ -81,32 +81,31 @@ public class UsersMatcherEditor extends AbstractMatcherEditor {
             boolean relaxed = newUserMatcher.isRelaxationOf(previousMatcher);
             boolean constrained = previousUserMatcher.isRelaxationOf(newUserMatcher);
             if(relaxed && constrained) return;
-            else if(relaxed) fireRelaxed(newUserMatcher);
+
+            if(relaxed) fireRelaxed(newUserMatcher);
             else if(constrained) fireConstrained(newUserMatcher);
             else fireChanged(newUserMatcher);
         }
     }
 
-
-
     /**
      * If the set of users for this matcher contains any of an
      * issue's users, that issue matches.
      */
-    private static class UserMatcher implements Matcher {
-        private Set users;
+    private static class UserMatcher implements Matcher<Issue> {
+        private final Set<String> users;
 
         /**
          * Create a new {@link UserMatcher}, creating a private copy
          * of the specified {@link Collection} to match against. A private
          * copy is made because {@link Matcher}s must be immutable.
          */
-        public UserMatcher(Collection users) {
-            this.users = new HashSet(users);
+        public UserMatcher(Collection<String> users) {
+            this.users = new HashSet<String>(users);
         }
 
         /**
-         * @return true if this matches every {@link Issue} that other matches.
+         * @return true if this matches every {@link Issue} the other matches.
          */
         public boolean isRelaxationOf(Matcher other) {
             if(!(other instanceof UserMatcher)) return false;
@@ -118,9 +117,8 @@ public class UsersMatcherEditor extends AbstractMatcherEditor {
          * Test whether to include or not include the specified issue based
          * on whether or not their user is selected.
          */
-        public boolean matches(Object element) {
-            Issue issue = (Issue)element;
-            for(Iterator i = issue.getAllUsers().iterator(); i.hasNext(); ) {
+        public boolean matches(Issue issue) {
+            for (Iterator<String> i = issue.getAllUsers().iterator(); i.hasNext(); ) {
                 if(this.users.contains(i.next())) return true;
             }
             return false;
