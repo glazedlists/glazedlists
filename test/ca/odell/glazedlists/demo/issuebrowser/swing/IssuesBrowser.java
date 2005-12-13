@@ -91,14 +91,11 @@ public class IssuesBrowser extends Applet {
                 }
                 public void handle(Exception e) {
                     // explain how to configure a Proxy Server for Java on Windows
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            final String message = "If connecting to the Internet via a proxy server,\n" +
-                                                   "ensure you have configured Java correctly in\n" +
-                                                   "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
-                            JOptionPane.showMessageDialog(IssuesBrowser.this, message, "Unable to connect to the Internet", JOptionPane.WARNING_MESSAGE);
-                        }
-                    });
+                    final String title = "Unable to connect to the Internet";
+                    final String message = "If connecting to the Internet via a proxy server,\n" +
+                                           "ensure you have configured Java correctly in\n" +
+                                           "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
+                    SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
                 }
             });
         }
@@ -391,6 +388,23 @@ public class IssuesBrowser extends Applet {
             g2d.fill(g2d.getClip());
         } finally {
             g2d.setPaint(oldPainter);
+        }
+    }
+
+    /**
+     * A convenience class to show a message dialog to the user.
+     */
+    private class ShowMessageDialogRunnable implements Runnable {
+        private final String title;
+        private final String message;
+
+        public ShowMessageDialogRunnable(String title, String message) {
+            this.title = title;
+            this.message = message;
+        }
+
+        public void run() {
+            JOptionPane.showMessageDialog(IssuesBrowser.this, message, title, JOptionPane.WARNING_MESSAGE);
         }
     }
 }
