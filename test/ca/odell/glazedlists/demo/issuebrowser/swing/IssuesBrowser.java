@@ -85,19 +85,7 @@ public class IssuesBrowser extends Applet {
         // if this is running on Windows, we have advice for the user when we cannot lookup a hostname
         final String osname = System.getProperty("os.name");
         if (osname != null && osname.toLowerCase().contains("windows")) {
-            Exceptions.getInstance().addHandler(new Exceptions.Handler() {
-                public boolean recognize(Exception e) {
-                    return e instanceof UnknownHostException;
-                }
-                public void handle(Exception e) {
-                    // explain how to configure a Proxy Server for Java on Windows
-                    final String title = "Unable to connect to the Internet";
-                    final String message = "If connecting to the Internet via a proxy server,\n" +
-                                           "ensure you have configured Java correctly in\n" +
-                                           "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
-                    SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
-                }
-            });
+            Exceptions.getInstance().addHandler(new WindowsUnknownHostExceptionHandler());
         }
 
         // start loading the issues
@@ -388,6 +376,26 @@ public class IssuesBrowser extends Applet {
             g2d.fill(g2d.getClip());
         } finally {
             g2d.setPaint(oldPainter);
+        }
+    }
+
+    /**
+     * An Exceptions.Handler for UnknownHostExceptions that displays an
+     * informative message stating how to configure Java to use a proxy
+     * server.
+     */
+    private class WindowsUnknownHostExceptionHandler implements Exceptions.Handler {
+        public boolean recognize(Exception e) {
+            return e instanceof UnknownHostException;
+        }
+
+        public void handle(Exception e) {
+            // explain how to configure a Proxy Server for Java on Windows
+            final String title = "Unable to connect to the Internet";
+            final String message = "If connecting to the Internet via a proxy server,\n" +
+                                   "ensure you have configured Java correctly in\n" +
+                                   "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
+            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
         }
     }
 
