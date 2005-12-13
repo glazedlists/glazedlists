@@ -218,7 +218,7 @@
             <fileset dir=".">
                 <exclude name="java14_glazedlists/**"/>
                 <exclude name="source/**"/>
-                <exclude name="test/**"/>
+                <exclude name="test/**/*.java"/> <!-- copy resource (like the Throbber) embedded within test -->
                 <exclude name="classes/**"/>
                 <exclude name="docs/**"/>
             </fileset>
