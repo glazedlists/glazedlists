@@ -85,11 +85,11 @@ public class IssuesBrowser extends Applet {
         }
 
         // if this is running on Windows, we have advice for the user when we cannot lookup a hostname
-        final String osname = System.getProperty("os.name");
-        if (osname != null && osname.toLowerCase().contains("windows")) {
+//        final String osname = System.getProperty("os.name");
+//        if (osname != null && osname.toLowerCase().contains("windows")) {
             Exceptions.getInstance().addHandler(new WindowsUnknownHostExceptionHandler());
             Exceptions.getInstance().addHandler(new WindowsNoRouteToHostExceptionHandler());
-        }
+//        }
 
         // start loading the issues
         issueLoader.start();
