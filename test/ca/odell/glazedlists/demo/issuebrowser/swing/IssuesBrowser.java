@@ -14,6 +14,7 @@ import java.applet.*;
 import java.awt.*;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.net.NoRouteToHostException;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
@@ -24,6 +25,7 @@ import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
 import java.text.MessageFormat;
+import java.io.IOException;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -86,6 +88,7 @@ public class IssuesBrowser extends Applet {
         final String osname = System.getProperty("os.name");
         if (osname != null && osname.toLowerCase().contains("windows")) {
             Exceptions.getInstance().addHandler(new WindowsUnknownHostExceptionHandler());
+            Exceptions.getInstance().addHandler(new WindowsNoRouteToHostExceptionHandler());
         }
 
         // start loading the issues
@@ -393,6 +396,28 @@ public class IssuesBrowser extends Applet {
             // explain how to configure a Proxy Server for Java on Windows
             final String title = "Unable to connect to the Internet";
             final String message = "If connecting to the Internet via a proxy server,\n" +
+                                   "ensure you have configured Java correctly in\n" +
+                                   "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
+            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
+        }
+    }
+
+    /**
+     * An Exceptions.Handler for NoRouteToHostException that displays an
+     * informative message stating the probably cause and how to configure
+     * Java to use a proxy server.
+     */
+    private class WindowsNoRouteToHostExceptionHandler implements Exceptions.Handler {
+        public boolean recognize(Exception e) {
+            return e instanceof NoRouteToHostException;
+        }
+
+        public void handle(Exception e) {
+            // explain how to configure a Proxy Server for Java on Windows
+            final String title = "Unable to find a route to the Host";
+            final String message = "Typically, the remote host cannot be reached because of an\n" +
+                                   "intervening firewall, or if an intermediate router is down.\n\n" +
+                                   "If connecting to the Internet via a proxy server,\n" +
                                    "ensure you have configured Java correctly in\n" +
                                    "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
             SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));

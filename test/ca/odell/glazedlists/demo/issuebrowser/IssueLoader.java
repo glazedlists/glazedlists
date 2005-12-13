@@ -5,6 +5,7 @@ import ca.odell.glazedlists.*;
 // Loading problems
 import java.io.*;
 import java.net.UnknownHostException;
+import java.net.NoRouteToHostException;
 
 /**
  * This loads issues by project as they are requested. When a new project is
@@ -70,6 +71,9 @@ public class IssueLoader implements Runnable {
 
             // handling interruptions is really gross
             } catch (UnknownHostException e) {
+                Exceptions.getInstance().handle(e);
+
+            } catch (NoRouteToHostException e) {
                 Exceptions.getInstance().handle(e);
 
             } catch (IOException e) {
