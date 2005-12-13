@@ -4,6 +4,7 @@ package ca.odell.glazedlists.demo.issuebrowser;
 import ca.odell.glazedlists.*;
 // Loading problems
 import java.io.*;
+import java.net.UnknownHostException;
 
 /**
  * This loads issues by project as they are requested. When a new project is
@@ -16,12 +17,12 @@ import java.io.*;
  * @author <a href="jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class IssueLoader implements Runnable {
-    
+
     private Project project = null;
     private Throbber throbber = null;
     private Thread issueLoaderThread = null;
     private EventList issuesList = null;
-    
+
     public IssueLoader(EventList issuesList, Throbber throbber) {
         this.issuesList = GlazedLists.threadSafeList(issuesList);
         this.throbber = throbber;
@@ -34,7 +35,7 @@ public class IssueLoader implements Runnable {
             notify();
         }
     }
-    
+
     public void start() {
         issueLoaderThread = new Thread(this);
         // ensure the loader thread doesn't compete too aggressively with the EDT
@@ -67,11 +68,11 @@ public class IssueLoader implements Runnable {
                 issuesList.clear();
                 IssuezillaXMLParser.loadIssues(issuesList, currentProject.getXMLUri());
 
-                // stop the progress bar
-                throbber.setOff();
-
             // handling interruptions is really gross
-            } catch(IOException e) {
+            } catch (UnknownHostException e) {
+                Exceptions.getInstance().handle(e);
+
+            } catch (IOException e) {
                 if(e.getCause() instanceof InterruptedException) {
                     // do nothing, we were just interrupted as expected
                 } else if(e.getMessage().equals("Parsing failed java.lang.InterruptedException")) {
@@ -79,7 +80,7 @@ public class IssueLoader implements Runnable {
                 } else {
                     e.printStackTrace();
                 }
-            } catch(RuntimeException e) {
+            } catch (RuntimeException e) {
                 if(e.getCause() instanceof InterruptedException) {
                     // do nothing, we were just interrupted as expected
                 } else if(e.getCause() instanceof IOException && e.getCause().getMessage().equals("Parsing failed Lock interrupted")) {
@@ -89,6 +90,9 @@ public class IssueLoader implements Runnable {
                 }
             } catch(InterruptedException e) {
                 // do nothing, we were just interrupted as expected
+            } finally {
+                // stop the progress bar no matter what
+                throbber.setOff();
             }
         }
     }
