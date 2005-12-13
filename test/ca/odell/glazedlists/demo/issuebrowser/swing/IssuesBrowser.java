@@ -13,6 +13,7 @@ import java.awt.event.*;
 import java.applet.*;
 import java.awt.*;
 import java.net.URL;
+import java.net.UnknownHostException;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
@@ -81,6 +82,27 @@ public class IssuesBrowser extends Applet {
             new Exception("thread has been interrupted").printStackTrace();
         }
 
+        // if this is running on Windows, we have advice for the user when we cannot lookup a hostname
+        final String osname = System.getProperty("os.name");
+        if (osname != null && osname.toLowerCase().contains("windows")) {
+            Exceptions.getInstance().addHandler(new Exceptions.Handler() {
+                public boolean recognize(Exception e) {
+                    return e instanceof UnknownHostException;
+                }
+                public void handle(Exception e) {
+                    // explain how to configure a Proxy Server for Java on Windows
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            final String message = "If connecting to the Internet via a proxy server,\n" +
+                                                   "ensure you have configured Java correctly in\n" +
+                                                   "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
+                            JOptionPane.showMessageDialog(IssuesBrowser.this, message, "Unable to connect to the Internet", JOptionPane.WARNING_MESSAGE);
+                        }
+                    });
+                }
+            });
+        }
+
         // start loading the issues
         issueLoader.start();
     }
@@ -99,6 +121,7 @@ public class IssuesBrowser extends Applet {
     private void constructStandalone() {
         // create a frame with that panel
         JFrame frame = new JFrame("Issues");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.getContentPane().setLayout(new GridBagLayout());
@@ -262,8 +285,8 @@ public class IssuesBrowser extends Applet {
      */
     class ProjectChangeListener implements ItemListener {
         public void itemStateChanged(ItemEvent e) {
-            Project selected = (Project) e.getItem();
-            if(selected.isValid()) issueLoader.setProject((Project) selected);
+            Project selectedProject = (Project) e.getItem();
+            if(selectedProject.isValid()) issueLoader.setProject(selectedProject);
         }
     }
 
