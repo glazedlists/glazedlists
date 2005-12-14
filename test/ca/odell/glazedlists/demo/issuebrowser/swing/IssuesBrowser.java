@@ -511,6 +511,8 @@ class IssueDetailsComponent {
     }
 
     public void setIssue(Issue issue) {
+        this.issue = issue;
+
         // update the document
         clear(descriptionsTextPane.getStyledDocument());
         if(issue != null) {
