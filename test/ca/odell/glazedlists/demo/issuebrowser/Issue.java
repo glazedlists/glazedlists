@@ -76,13 +76,14 @@ public class Issue implements TextFilterable, Comparable {
      * Creates a new empty issue.
      */
     public Issue(Project owner) {
-        // do nothing
+        this.owner = owner;
     }
 
     /**
      * Creates a new issue that uses the specified issue as a template.
      */
     public Issue(Project owner, Issue template) {
+        this.owner = owner;
         id = template.id;
         statusCode = template.statusCode;
         status = template.status;

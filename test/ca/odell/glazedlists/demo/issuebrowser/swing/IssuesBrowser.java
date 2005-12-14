@@ -494,7 +494,7 @@ class IssueDetailsComponent {
 
     private class LinkAction extends AbstractAction {
         public LinkAction() {
-            super("View Bug");
+            super("View Issue");
         }
         public void actionPerformed(ActionEvent event) {
             try {
