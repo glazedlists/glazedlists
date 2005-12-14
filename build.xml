@@ -295,6 +295,7 @@
             <classpath>
                 <fileset dir="extensions" includes="**/*.jar"/>
                 <fileset file="${ant.home}/lib/junit.jar"/>
+                <fileset file="${env.JAVA_HOME}/jre/lib/javaws.jar"/>
             </classpath>
         </javac>
     </target>
