@@ -28,24 +28,26 @@ public class Project {
     
     private String projectName = null;
     private String projectTitle = null;
-    private String url = null;
 
     public Project(String projectName, String projectTitle) {
-        this(projectName, projectTitle, "https://" + projectName + ".dev.java.net/issues/xml.cgi");
-    }
-    
-    public Project(String projectName, String projectTitle, String url) {
         this.projectName = projectName;
         this.projectTitle = projectTitle;
-        this.url = url;
+    }
+
+    public String getName() {
+        return projectName;
+    }
+
+    public String getBaseUri() {
+        return "https://" + projectName + ".dev.java.net";
+    }
+
+    public String getXMLUri() {
+        return getBaseUri() + "/issues/xml.cgi";
     }
 
     public boolean isValid() {
         return (projectName != null);
-    }
-
-    public String getXMLUri() {
-        return url;
     }
 
     public String toString() {

@@ -106,14 +106,14 @@ public class IssuezillaXMLParser {
         }
 
         BasicEventList issuesList = new BasicEventList();
-        loadIssues(issuesList, new FileInputStream(args[0]));
+        loadIssues(issuesList, new FileInputStream(args[0]), new Project(null, null));
         System.out.println(issuesList);
     }
 
     /**
      * Loads issues from the specified URL.
      */
-    public static void loadIssues(EventList target, String baseUrl) throws IOException {
+    public static void loadIssues(EventList target, String baseUrl, Project owner) throws IOException {
         int issuesPerRequest = 100;
 
         // continuously load issues until there's no more
@@ -134,7 +134,7 @@ public class IssuezillaXMLParser {
             InputStream issuesInStream = issuesUrl.openStream();
 
             // parse
-            loadIssues(target, issuesInStream);
+            loadIssues(target, issuesInStream, owner);
 
             // if we couldn't load everything, we've consumed everything
             if (target.size() < nextTotal) return;
@@ -147,14 +147,14 @@ public class IssuezillaXMLParser {
      * commands to reproduce a lightweight version of this list. This is useful
      * to load the issues as code rather than XML.
      */
-    public static void loadIssues(EventList target, InputStream source) throws IOException {
+    public static void loadIssues(EventList target, InputStream source, Project owner) throws IOException {
         try {
             // configure a SAX parser
             XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
             IssuezillaParserSidekick parserSidekick = new IssuezillaParserSidekick();
             xmlReader.setEntityResolver(parserSidekick);
             xmlReader.setErrorHandler(parserSidekick);
-            xmlReader.setContentHandler(new IssueHandler(target));
+            xmlReader.setContentHandler(new IssueHandler(target, owner));
             
             // parse away
             xmlReader.parse(new InputSource(source));
@@ -210,9 +210,11 @@ public class IssuezillaXMLParser {
         private EventList issues = null;
         private Issue currentIssue;
         private AbstractSimpleElementHandler simpleElementHandler = null;
+        private Project owner;
 
-        public IssueHandler(EventList issues) {
+        public IssueHandler(EventList issues, Project owner) {
             super(null, "issue", ISSUE_SIMPLE_FIELDS);
+            this.owner = owner;
             this.issues = issues;
             parent = this;
         }
@@ -232,7 +234,7 @@ public class IssuezillaXMLParser {
             // create a new issue
             } else if(currentIssue == null) {
                 if(qName.equals("issue")) {
-                    currentIssue = new Issue();
+                    currentIssue = new Issue(owner);
 
                     // save the status code
                     String statusCode = attributes.getValue("status_code");
