@@ -107,7 +107,7 @@
 
 	<target name="core" depends="init">
 		<mkdir dir="classes"/>
-		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
                 <!-- swing -->
                 <exclude name="**/swing/**"/>
                 <!-- io -->
@@ -120,20 +120,20 @@
 	</target>
 
     <target name="migrationkit" depends="core">
-        <javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
+        <javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <include name="**/migrationkit/**"/>
         </javac>
     </target>
 
 	<target name="swing" depends="core">
-		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
 			<include name="**/swing/**"/>
 			<exclude name="**/migrationkit/**"/>
 		</javac>
 	</target>
 
 	<target name="io" depends="core">
-		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" deprecation="on">
+		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
 			<include name="**/ctp/**"/>
 			<include name="**/io/**"/>
 			<include name="**/nio/**"/>
@@ -154,7 +154,7 @@
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/25145/swt-api.jar"/>
             <arg value="extensions/swt/lib/swt-api.jar"/>
         </java>
-        <javac destdir="classes" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" deprecation="on">
+        <javac destdir="classes" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
             </classpath>
@@ -168,7 +168,7 @@
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/24419/ktable.jar"/>
             <arg value="extensions/ktable/lib/ktable.jar"/>
         </java>
-        <javac destdir="classes" srcdir="extensions/ktable/source" debug="on" source="${java.target.version}" deprecation="on">
+        <javac destdir="classes" srcdir="extensions/ktable/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions/ktable/lib/" includes="*.jar"/>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
@@ -290,7 +290,7 @@
     <target name="compiletests" depends="init,compileall">
         <!-- Compile the test classes from source/ into classes/ -->
         <echo>${ant.home}</echo>
-        <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" deprecation="on">
+        <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions" includes="**/*.jar"/>
                 <fileset file="${ant.home}/lib/junit.jar"/>
@@ -306,7 +306,7 @@
 
     <target name="demojar" depends="init,clean,core,swing"
         description="Create a .jar file with a demo application.">
-        <javac destdir="classes" srcdir="test" deprecation="on">
+        <javac destdir="classes" srcdir="test" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <include name="**/demo/**"/>
             <exclude name="**/swt/**"/>
         </javac>
