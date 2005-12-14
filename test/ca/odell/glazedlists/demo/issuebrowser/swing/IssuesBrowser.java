@@ -25,7 +25,6 @@ import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
 import java.text.MessageFormat;
-import java.io.IOException;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -84,12 +83,9 @@ public class IssuesBrowser extends Applet {
             new Exception("thread has been interrupted").printStackTrace();
         }
 
-        // if this is running on Windows, we have advice for the user when we cannot lookup a hostname
-//        final String osname = System.getProperty("os.name");
-//        if (osname != null && osname.toLowerCase().contains("windows")) {
-            Exceptions.getInstance().addHandler(new WindowsUnknownHostExceptionHandler());
-            Exceptions.getInstance().addHandler(new WindowsNoRouteToHostExceptionHandler());
-//        }
+        // we have advice for the user when we cannot connect to a host
+        Exceptions.getInstance().addHandler(new UnknownHostExceptionHandler());
+        Exceptions.getInstance().addHandler(new NoRouteToHostExceptionHandler());
 
         // start loading the issues
         issueLoader.start();
@@ -273,7 +269,9 @@ public class IssuesBrowser extends Applet {
      */
     class ProjectChangeListener implements ItemListener {
         public void itemStateChanged(ItemEvent e) {
-            Project selectedProject = (Project) e.getItem();
+            if (e.getStateChange() != ItemEvent.SELECTED) return;
+
+            final Project selectedProject = (Project) e.getItem();
             if(selectedProject.isValid()) issueLoader.setProject(selectedProject);
         }
     }
@@ -387,17 +385,26 @@ public class IssuesBrowser extends Applet {
      * informative message stating how to configure Java to use a proxy
      * server.
      */
-    private class WindowsUnknownHostExceptionHandler implements Exceptions.Handler {
+    private class UnknownHostExceptionHandler implements Exceptions.Handler {
         public boolean recognize(Exception e) {
             return e instanceof UnknownHostException;
         }
 
         public void handle(Exception e) {
-            // explain how to configure a Proxy Server for Java on Windows
             final String title = "Unable to connect to the Internet";
-            final String message = "If connecting to the Internet via a proxy server,\n" +
-                                   "ensure you have configured Java correctly in\n" +
-                                   "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
+
+            final String message;
+            final String osname = System.getProperty("os.name");
+            if (osname != null && osname.toLowerCase().contains("windows")) {
+                // explain how to configure a Proxy Server for Java on Windows
+                message = "If connecting to the Internet via a proxy server,\n" +
+                          "ensure you have configured Java correctly in\n" +
+                          "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
+                          "You must restart this application if you adjust the settings.";
+            } else {
+                message = "Please check your internet connection settings.";
+            }
+
             SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
         }
     }
@@ -407,19 +414,29 @@ public class IssuesBrowser extends Applet {
      * informative message stating the probably cause and how to configure
      * Java to use a proxy server.
      */
-    private class WindowsNoRouteToHostExceptionHandler implements Exceptions.Handler {
+    private class NoRouteToHostExceptionHandler implements Exceptions.Handler {
         public boolean recognize(Exception e) {
             return e instanceof NoRouteToHostException;
         }
 
         public void handle(Exception e) {
-            // explain how to configure a Proxy Server for Java on Windows
             final String title = "Unable to find a route to the Host";
-            final String message = "Typically, the remote host cannot be reached because of an\n" +
-                                   "intervening firewall, or if an intermediate router is down.\n\n" +
-                                   "If connecting to the Internet via a proxy server,\n" +
-                                   "ensure you have configured Java correctly in\n" +
-                                   "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...";
+
+            final String message;
+            final String osname = System.getProperty("os.name");
+            if (osname != null && osname.toLowerCase().contains("windows")) {
+                // explain how to configure a Proxy Server for Java on Windows
+                message = "Typically, the remote host cannot be reached because of an\n" +
+                          "intervening firewall, or if an intermediate router is down.\n\n" +
+                          "If connecting to the Internet via a proxy server,\n" +
+                          "ensure you have configured Java correctly in\n" +
+                          "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
+                          "You must restart this application if you adjust the settings.";
+            } else {
+                message = "Please check your internet connection settings.";
+            }
+
+            // explain how to configure a Proxy Server for Java on Windows
             SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
         }
     }
