@@ -456,6 +456,8 @@ public class IssuesBrowser extends Applet {
         private final Matcher messageMatcher = Pattern.compile(".*access denied \\p{Punct}java.net.SocketPermission (.*) resolve\\p{Punct}").matcher("");
 
         public boolean recognize(Exception e) {
+            System.out.println("checking message: " + e.getMessage());
+            System.out.println("matched? " + messageMatcher.reset(e.getMessage()).matches());
             return e instanceof AccessControlException && messageMatcher.reset(e.getMessage()).matches();
         }
 
