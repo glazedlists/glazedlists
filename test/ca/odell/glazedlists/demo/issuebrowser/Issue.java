@@ -1,6 +1,8 @@
 package ca.odell.glazedlists.demo.issuebrowser;
 
 import java.util.*;
+import java.net.URL;
+import java.net.MalformedURLException;
 // glazed lists
 import ca.odell.glazedlists.*;
 
@@ -12,6 +14,9 @@ import ca.odell.glazedlists.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class Issue implements TextFilterable, Comparable {
+
+    // the project that this issue is attached to
+    private Project owner;
 
     // mandatory issue fields
     private Integer id = null;
@@ -70,14 +75,14 @@ public class Issue implements TextFilterable, Comparable {
     /**
      * Creates a new empty issue.
      */
-    public Issue() {
+    public Issue(Project owner) {
         // do nothing
     }
 
     /**
      * Creates a new issue that uses the specified issue as a template.
      */
-    public Issue(Issue template) {
+    public Issue(Project owner, Issue template) {
         id = template.id;
         statusCode = template.statusCode;
         status = template.status;
@@ -112,6 +117,17 @@ public class Issue implements TextFilterable, Comparable {
      */
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
+
+    /**
+     * Get the web address of this issue for use with a browser like IE or Firefox.
+     */
+    public URL getURL() {
+        try {
+            return new URL(owner.getBaseUri() + "/issues/show_bug.cgi?id=" + getId());
+        } catch(MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Status code of this issue (load status).
@@ -314,9 +330,8 @@ public class Issue implements TextFilterable, Comparable {
         baseList.add(subcomponent);
 
         // recursively get filter strings from the descriptions
-        for (int d = 0; d < getDescriptions().size(); d++) {
-            Description description = getDescriptions().get(d);
-            description.getFilterStrings(baseList);
+        for(Iterator<Description> d = descriptions.iterator(); d.hasNext(); ) {
+            d.next().getFilterStrings(baseList);
         }
     }
 }

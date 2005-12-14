@@ -7,14 +7,19 @@ package ca.odell.glazedlists.demo.issuebrowser.swing;
 import ca.odell.glazedlists.demo.issuebrowser.*;
 // swing
 import javax.swing.*;
+import javax.swing.text.*;
 import javax.swing.table.TableModel;
 import javax.swing.event.*;
+import javax.jnlp.BasicService;
+import javax.jnlp.ServiceManager;
+import javax.jnlp.UnavailableServiceException;
 import java.awt.event.*;
 import java.applet.*;
 import java.awt.*;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.net.NoRouteToHostException;
+import java.net.MalformedURLException;
 // glazed lists
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
@@ -24,7 +29,10 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.*;
 // for setting up the bounded range model
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Arrays;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -38,6 +46,9 @@ public class IssuesBrowser extends Applet {
     private static final Color GLAZED_LISTS_MEDIUM_BROWN = new Color(69, 64, 56);
     private static final Color GLAZED_LISTS_LIGHT_BROWN = new Color(246, 237, 220);
 
+    /** for displaying dates */
+    static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
+
     /** an event list to host the issues */
     private EventList issuesEventList = new BasicEventList();
 
@@ -47,8 +58,8 @@ public class IssuesBrowser extends Applet {
     private TableModel issuesTableModel = null;
 
     private Issue descriptionIssue = null;
-    /** an event list to host the descriptions */
-    private EventList descriptions = new BasicEventList();
+
+    private IssueDetailsComponent issueDetails;
 
     /** monitor loading the issues */
     private JLabel throbber = null;
@@ -153,12 +164,7 @@ public class IssuesBrowser extends Applet {
         // users table
         JScrollPane usersListScrollPane = new JScrollPane(userMatcherEditor.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        // descriptions
-        EventTableModel descriptionsTableModel = new EventTableModel(descriptions, new DescriptionTableFormat());
-        JTable descriptionsTable = new JTable(descriptionsTableModel);
-        descriptionsTable.setRowSelectionAllowed(false);
-        descriptionsTable.getColumnModel().getColumn(0).setCellRenderer(new DescriptionRenderer());
-        JScrollPane descriptionsTableScrollPane = new JScrollPane(descriptionsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        issueDetails = new IssueDetailsComponent();
 
         // priority slider
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
@@ -222,20 +228,22 @@ public class IssuesBrowser extends Applet {
         JPanel filtersPanel = new JPanel();
         filtersPanel.setBackground(GLAZED_LISTS_LIGHT_BROWN);
         filtersPanel.setLayout(new GridBagLayout());
-        filtersPanel.add(textFilterLabel,                    new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
-        filtersPanel.add(stateLabel,                         new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(statusMatcherEditor.getComponent(), new GridBagConstraints(0, 3, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
-        filtersPanel.add(priorityLabel,                      new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 5, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
-        filtersPanel.add(userLabel,                          new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 7, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 0, 0, 0), 0, 0));
+        // add a strut so the app resizes less, this is a workaround 'cause Grid Bag sucks!
+        filtersPanel.add(Box.createHorizontalStrut(200),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        filtersPanel.add(textFilterLabel,                    new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
+        filtersPanel.add(stateLabel,                         new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(statusMatcherEditor.getComponent(), new GridBagConstraints(0, 4, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
+        filtersPanel.add(priorityLabel,                      new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 6, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
+        filtersPanel.add(userLabel,                          new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
+        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 8, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 0, 0, 0), 0, 0));
 
         // assemble all data components on a common panel
         JPanel dataPanel = new JPanel();
-        dataPanel.setLayout(new GridBagLayout());
-        dataPanel.add(issuesTableScrollPane,       new GridBagConstraints(0, 0, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        dataPanel.add(descriptionsTableScrollPane, new GridBagConstraints(0, 1, 1, 1, 1.0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        dataPanel.setLayout(new GridLayout(2, 1));
+        dataPanel.add(issuesTableScrollPane);
+        dataPanel.add(issueDetails.getComponent());
 
         // the outermost panel to layout the icon bar with the other panels
         JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -258,8 +266,7 @@ public class IssuesBrowser extends Applet {
             // update the description issue
             if(selected == descriptionIssue) return;
             descriptionIssue = selected;
-            descriptions.clear();
-            if(descriptionIssue != null) descriptions.addAll(descriptionIssue.getDescriptions());
+            issueDetails.setIssue(descriptionIssue);
         }
     }
 
@@ -282,12 +289,6 @@ public class IssuesBrowser extends Applet {
     public static void main(String[] args) {
         // load the issues and display the browser
         IssuesBrowser browser = new IssuesBrowser(false);
-
-        // load the initial project, if requested
-        if(args.length == 1) {
-            Project initialProject = new Project("url", "Url", args[0]);
-            browser.issueLoader.setProject(initialProject);
-        }
     }
 
     /**
@@ -455,6 +456,116 @@ public class IssuesBrowser extends Applet {
 
         public void run() {
             JOptionPane.showMessageDialog(IssuesBrowser.this, message, title, JOptionPane.WARNING_MESSAGE);
+        }
+    }
+}
+
+class IssueDetailsComponent {
+
+    private JPanel toolbarAndDescription;
+    private JScrollPane scrollPane;
+    private JPanel toolBar = new JPanel();
+    private JTextPane descriptionsTextPane = new JTextPane();
+    private Style plainStyle;
+    private Style whoStyle;
+    private LinkAction linkAction;
+    private Issue issue = null;
+
+    public IssueDetailsComponent() {
+        descriptionsTextPane = new JTextPane();
+        descriptionsTextPane.setEditable(false);
+        plainStyle = descriptionsTextPane.getStyledDocument().addStyle("plain", null);
+        whoStyle = descriptionsTextPane.getStyledDocument().addStyle("boldItalicRed", null);
+        StyleConstants.setBold(whoStyle, true);
+        StyleConstants.setFontSize(whoStyle, 14);
+        scrollPane = new JScrollPane(descriptionsTextPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        linkAction = new LinkAction();
+        toolBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        toolBar.add(new JButton(linkAction));
+
+        toolbarAndDescription = new JPanel(new BorderLayout());
+        toolbarAndDescription.add(toolBar, BorderLayout.NORTH);
+        toolbarAndDescription.add(scrollPane, BorderLayout.CENTER);
+
+        // prepare the initial state
+        setIssue(null);
+    }
+
+    private class LinkAction extends AbstractAction {
+        public LinkAction() {
+            super("View Bug");
+        }
+        public void actionPerformed(ActionEvent event) {
+            try {
+                BasicService basicService = (BasicService)ServiceManager.lookup("javax.jnlp.BasicService");
+                basicService.showDocument(issue.getURL());
+            } catch (UnavailableServiceException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public JComponent getComponent() {
+        return toolbarAndDescription;
+    }
+
+    public void setIssue(Issue issue) {
+        // update the document
+        clear(descriptionsTextPane.getStyledDocument());
+        if(issue != null) {
+            for(Iterator<Description> d = issue.getDescriptions().iterator(); d.hasNext(); ) {
+                Description description = d.next();
+                writeDescription(descriptionsTextPane.getStyledDocument(), description);
+                if(d.hasNext()) append(descriptionsTextPane.getStyledDocument(), "\n\n", plainStyle);
+            }
+        }
+        descriptionsTextPane.setCaretPosition(0);
+
+        // update the link
+        linkAction.setEnabled(issue != null);
+    }
+
+    /**
+     * Clears the styled document.
+     */
+    protected void clear(StyledDocument doc) {
+        try {
+            doc.remove(0, doc.getLength());
+        } catch(BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Write a document to a styled document.
+     */
+    public void writeDescription(StyledDocument doc, Description description) {
+        // write who
+        append(doc, description.getWho(), whoStyle);
+        append(doc, " - ", whoStyle);
+        append(doc, IssuesBrowser.DATE_FORMAT.format(description.getWhen()), whoStyle);
+        append(doc, "\n", whoStyle);
+
+        // write the body
+        append(doc, description.getText(), plainStyle);
+    }
+
+    /**
+     * Convenience method for appending the specified text to the specified document.
+     *
+     * @param text   The text to append. The characters "\n" and "\t" are
+     *               useful for creating newlines.
+     * @param format The format to render text in. This class comes with
+     *               a small set of predefined formats accessible only to extending
+     *               classes via protected members.
+     */
+    public static void append(StyledDocument targetDocument, String text, Style format) {
+        try {
+            int offset = targetDocument.getLength();
+            targetDocument.insertString(offset, text, format);
+        } catch(BadLocationException e) {
+            throw new RuntimeException(e);
         }
     }
 }

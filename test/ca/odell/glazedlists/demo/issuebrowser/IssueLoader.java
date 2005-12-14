@@ -67,7 +67,7 @@ public class IssueLoader implements Runnable {
 
                 // load the issues
                 issuesList.clear();
-                IssuezillaXMLParser.loadIssues(issuesList, currentProject.getXMLUri());
+                IssuezillaXMLParser.loadIssues(issuesList, currentProject.getXMLUri(), currentProject);
 
             // handling interruptions is really gross
             } catch (UnknownHostException e) {

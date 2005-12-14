@@ -306,7 +306,9 @@
 
     <target name="demojar" depends="init,clean,core,swing"
         description="Create a .jar file with a demo application.">
+        <property environment="env"/>
         <javac destdir="classes" srcdir="test" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+            <classpath><fileset file="${env.JAVA_HOME}/jre/lib/javaws.jar"/></classpath>
             <include name="**/demo/**"/>
             <exclude name="**/swt/**"/>
         </javac>
