@@ -31,8 +31,11 @@ import ca.odell.glazedlists.swing.*;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Arrays;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.security.AccessControlException;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -97,6 +100,7 @@ public class IssuesBrowser extends Applet {
         // we have advice for the user when we cannot connect to a host
         Exceptions.getInstance().addHandler(new UnknownHostExceptionHandler());
         Exceptions.getInstance().addHandler(new NoRouteToHostExceptionHandler());
+        Exceptions.getInstance().addHandler(new AccessControlExceptionHandler());
 
         // start loading the issues
         issueLoader.start();
@@ -403,7 +407,7 @@ public class IssuesBrowser extends Applet {
                           "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
                           "You must restart this application if you adjust the settings.";
             } else {
-                message = "Please check your internet connection settings.";
+                message = "Please check your Internet connection settings.";
             }
 
             SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
@@ -412,7 +416,7 @@ public class IssuesBrowser extends Applet {
 
     /**
      * An Exceptions.Handler for NoRouteToHostException that displays an
-     * informative message stating the probably cause and how to configure
+     * informative message stating the probable cause and how to configure
      * Java to use a proxy server.
      */
     private class NoRouteToHostExceptionHandler implements Exceptions.Handler {
@@ -434,7 +438,40 @@ public class IssuesBrowser extends Applet {
                           "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
                           "You must restart this application if you adjust the settings.";
             } else {
-                message = "Please check your internet connection settings.";
+                message = "Please check your Internet connection settings.";
+            }
+
+            // explain how to configure a Proxy Server for Java on Windows
+            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
+        }
+    }
+
+    /**
+     * An Exceptions.Handler for an AccessControlException when attempting to resolve
+     * a hostname to an IP address that displays an informative message stating the
+     * probable cause and how to configure Java to use a proxy server.
+     */
+    private class AccessControlExceptionHandler implements Exceptions.Handler {
+        // sample message: "access denied (java.net.SocketPermission javacc.dev.java.net resolve)"
+        private final Matcher messageMatcher = Pattern.compile(".*access denied \\p{Punct}java.net.SocketPermission (.*) resolve\\p{Punct}").matcher("");
+
+        public boolean recognize(Exception e) {
+            return e instanceof AccessControlException && messageMatcher.reset(e.getMessage()).matches();
+        }
+
+        public void handle(Exception e) {
+            final String title = "Unable to resolve the address of the Host";
+
+            final String message;
+            final String osname = System.getProperty("os.name");
+            if (osname != null && osname.toLowerCase().contains("windows")) {
+                // explain how to configure a Proxy Server for Java on Windows
+                message = "If connecting to the Internet via a proxy server,\n" +
+                          "ensure you have configured Java correctly in\n" +
+                          "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
+                          "You must restart this application if you adjust the settings.";
+            } else {
+                message = "Please check your Internet connection settings.";
             }
 
             // explain how to configure a Proxy Server for Java on Windows
