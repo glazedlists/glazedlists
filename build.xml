@@ -7,6 +7,7 @@
 
     <property name="java.target.version" value="1.5"/>
     <property name="java.target.version.fileFriendlyName" value="java15"/>
+    <property environment="env"/>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        BUILD ADMINISTRATION
@@ -209,7 +210,7 @@
             <classpath path="tools/declawer.jar"/>
 
             <arg value="test"/>
-            <arg value="classes${path.separator}${ant.home}/lib/junit.jar"/>
+            <arg value="classes:${ant.home}/lib/junit.jar:${env.JAVA_HOME}/jre/lib/javaws.jar"/>
             <arg value="java14_glazedlists/test"/>
         </java>
 
@@ -306,7 +307,6 @@
 
     <target name="demojar" depends="init,clean,core,swing"
         description="Create a .jar file with a demo application.">
-        <property environment="env"/>
         <javac destdir="classes" srcdir="test" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath><fileset file="${env.JAVA_HOME}/jre/lib/javaws.jar"/></classpath>
             <include name="**/demo/**"/>
