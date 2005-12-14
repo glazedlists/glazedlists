@@ -210,7 +210,7 @@
             <classpath path="tools/declawer.jar"/>
 
             <arg value="test"/>
-            <arg value="classes:${ant.home}/lib/junit.jar:${env.JAVA_HOME}/jre/lib/javaws.jar"/>
+            <arg value="classes${path.separator}${ant.home}/lib/junit.jar${path.separator}${env.JAVA_HOME}/jre/lib/javaws.jar"/>
             <arg value="java14_glazedlists/test"/>
         </java>
 
