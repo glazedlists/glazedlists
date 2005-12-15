@@ -168,7 +168,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * guaranteed to be non-null.
      */
     public Function<S,E> getForwardFunction() {
-        // unwrap the forward function from a
+        // unwrap the forward function from an AdvancedFunctionAdapter if necessary
         if (this.forward instanceof AdvancedFunctionAdapter)
             return ((AdvancedFunctionAdapter) this.forward).getDelegate();
         else
