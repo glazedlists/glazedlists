@@ -31,6 +31,8 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>GroupingListTest</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
+ *
+ * @author James Lemieux
  */
 public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
@@ -428,6 +430,12 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      */
     public void add(int index, List<E> value) {
         source.addAll(value);
+    }
+
+    /** {@inheritDoc} */
+    public void dispose() {
+        ((SortedList) this.source).dispose();
+        super.dispose();
     }
 
     /**

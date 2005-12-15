@@ -348,4 +348,15 @@ public class GroupingListTest extends TestCase {
         ((List<String>)groupList.get(0)).clear();
         assertEquals(groupList.size(), 0);
     }
+
+    public void testDispose() {
+        final BasicEventList source = new BasicEventList();
+        final GroupingList groupingList = new GroupingList(source);
+
+        assertEquals(1, source.updates.getListEventListeners().size());
+
+        // disposing of the GroupingList should leave nothing listening to the source list
+        groupingList.dispose();
+        assertEquals(0, source.updates.getListEventListeners().size());
+    }
 }

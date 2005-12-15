@@ -1391,4 +1391,12 @@ public class UniqueListTest extends TestCase {
         source.remove(0);
         assertEquals(GlazedListsTests.stringToList("BD"), uniqueList);
     }
+
+    public void testDispose() {
+        assertEquals(1, source.updates.getListEventListeners().size());
+        
+        // disposing of the UniqueList should leave nothing listening to the source list
+        unique.dispose();
+        assertEquals(0, source.updates.getListEventListeners().size());
+    }
 }

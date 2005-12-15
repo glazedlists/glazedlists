@@ -152,6 +152,13 @@ public final class UniqueList<E> extends TransformedList<E, E> {
         return index == -1 ? (List<E>) Collections.EMPTY_LIST : this.getAll(index);
     }
 
+    /** {@inheritDoc} */
+    public void dispose() {
+        this.groupingList.dispose();
+        ((FunctionList) this.source).dispose();
+        super.dispose();
+    }
+
     /**
      * This Function maps each List produced by the source GroupingList to its
      * first element.
