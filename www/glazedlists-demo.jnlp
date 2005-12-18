@@ -19,5 +19,5 @@
 		<j2se version="1.4+"/>
 		<jar href="/glazedlists-demo.jar"/>
 	</resources>
-	<application-desc main-class="ca.odell.glazedlists.demo.issuebrowser.swing.IssuesBrowser"/>
+	<application-desc main-class="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
 </jnlp>
