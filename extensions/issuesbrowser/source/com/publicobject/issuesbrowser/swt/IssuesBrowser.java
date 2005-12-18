@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicboject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.demo.issuebrowser.swt;
+package com.publicobject.issuesbrowser.swt;
 
 // demo
 import ca.odell.glazedlists.demo.issuebrowser.*;

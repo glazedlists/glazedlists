@@ -177,7 +177,7 @@
         </javac>
     </target>
 
-    <target name="issuesbrowser" depends="core,swing">
+    <target name="issuesbrowser" depends="core,swing,swt">
         <javac destdir="classes" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on"/>
     </target>
 
@@ -205,8 +205,6 @@
     <target name="java14" depends="init,compileall,compiletests" description="Compile Glazed Lists for deployment on a J2SE 1.4">
         <!-- clean the java14 directory -->
         <delete dir="java14_glazedlists"/>
-        <mkdir dir="java14_glazedlists/source"/>
-        <mkdir dir="java14_glazedlists/test"/>
 
         <!-- download the declawer build tool -->
         <mkdir dir="tools"/>
@@ -216,32 +214,45 @@
             <arg value="tools/declawer.jar"/>
         </java>
 
-        <!-- Declaw the source code to the java14 directory. -->
-        <java classname="com.publicobject.declawer.Declawer">
-            <classpath path="tools/declawer.jar"/>
-
+        <!-- Declaw source/ -->
+        <mkdir dir="java14_glazedlists/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="source"/>
             <arg value="${ant.home}/lib/junit.jar"/>
             <arg value="java14_glazedlists/source"/>
         </java>
 
-        <!-- Declaw the tests to the java14 directory. -->
-        <java classname="com.publicobject.declawer.Declawer">
-            <classpath path="tools/declawer.jar"/>
-
+        <!-- Declaw test/ -->
+        <mkdir dir="java14_glazedlists/test"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="test"/>
-            <arg value="classes${path.separator}${ant.home}/lib/junit.jar${path.separator}${env.JAVA_HOME}/jre/lib/javaws.jar"/>
+            <arg value="classes${path.separator}${ant.home}/lib/junit.jar"/>
             <arg value="java14_glazedlists/test"/>
+        </java>
+
+        <!-- Declaw swt/ -->
+        <mkdir dir="java14_glazedlists/extensions/swt/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/swt/source"/>
+            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar"/>
+            <arg value="java14_glazedlists/extensions/swt/source"/>
+        </java>
+
+        <!-- Declaw issuesbrowser/ -->
+        <mkdir dir="java14_glazedlists/extensions/issuesbrowser/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/issuesbrowser/source"/>
+            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar"/>
+            <arg value="java14_glazedlists/extensions/issuesbrowser/source"/>
         </java>
 
         <!-- Copy all of the resources (non-source files) to the java14 directory. -->
         <copy todir="java14_glazedlists">
             <fileset dir=".">
                 <exclude name="java14_glazedlists/**"/>
-                <exclude name="source/**"/>
-                <exclude name="test/**/*.java"/> <!-- copy resource (like the Throbber) embedded within test -->
-                <exclude name="classes/**"/>
                 <exclude name="docs/**"/>
+                <exclude name="**/*.java"/>
+                <exclude name="**/*.class"/>
             </fileset>
         </copy>
 
@@ -315,7 +326,6 @@
             <classpath>
                 <fileset dir="extensions" includes="**/*.jar"/>
                 <fileset file="${ant.home}/lib/junit.jar"/>
-                <fileset file="${env.JAVA_HOME}/jre/lib/javaws.jar"/>
             </classpath>
         </javac>
     </target>
