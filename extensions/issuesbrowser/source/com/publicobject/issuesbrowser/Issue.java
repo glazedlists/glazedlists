@@ -1,10 +1,15 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
 
-import java.util.*;
-import java.net.URL;
+import ca.odell.glazedlists.TextFilterable;
 import java.net.MalformedURLException;
-// glazed lists
-import ca.odell.glazedlists.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An issue models a work effort either due to an existing problem or a desired
@@ -51,7 +56,7 @@ public class Issue implements TextFilterable, Comparable {
     private List<Activity> activities = new ArrayList<Activity>();
     private List<PeerIssue> duplicates = new ArrayList<PeerIssue>();
     private List<PeerIssue> dependsOn = new ArrayList<PeerIssue>();
-    
+
     private List<String> allUsers = null;
 
     /**
@@ -68,7 +73,7 @@ public class Issue implements TextFilterable, Comparable {
                 allUsers.add(d.next().getWho());
             }
         }
-        
+
         return allUsers;
     }
 

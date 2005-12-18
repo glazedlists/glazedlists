@@ -1,4 +1,7 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
 
 /**
  * Enumeration class that provides available priorities.

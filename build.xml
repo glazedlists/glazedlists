@@ -177,6 +177,26 @@
         </javac>
     </target>
 
+    <target name="issuesbrowser" depends="core,swing">
+        <javac destdir="classes" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on"/>
+    </target>
+
+    <target name="demojar" depends="init,clean,issuesbrowser"
+        description="Create a .jar file with a demo application.">
+        <jar destfile="glazedlists-demo.jar" update="true" index="true">
+            <fileset dir="classes"/>
+            <fileset dir=".">
+                <include name ="resources/**"/>
+            </fileset>
+            <fileset dir="extensions/issuesbrowser">
+                <include name ="resources/**"/>
+            </fileset>
+            <manifest>
+                <attribute name="Main-Class" value="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
+            </manifest>
+        </jar>
+	</target>
+
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        SPECIAL TARGETS
@@ -299,32 +319,5 @@
             </classpath>
         </javac>
     </target>
-
-
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-       DEMO JAR
-       Currently the demo classes are stored in the test directory
-     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-    <target name="demojar" depends="init,clean,core,swing"
-        description="Create a .jar file with a demo application.">
-        <javac destdir="classes" srcdir="test" source="${java.target.version}" target="${java.target.version}" deprecation="on">
-            <classpath><fileset file="${env.JAVA_HOME}/jre/lib/javaws.jar"/></classpath>
-            <include name="**/demo/**"/>
-            <exclude name="**/swt/**"/>
-        </javac>
-        <jar destfile="glazedlists-demo.jar" update="true" index="true">
-            <fileset dir="classes"/>
-            <fileset dir=".">
-                <include name ="**/resources/**"/>
-            </fileset>
-            <fileset dir="test">
-                <include name ="**/demo/*.gif"/>
-            </fileset>
-            <manifest>
-                <attribute name="Main-Class" value="ca.odell.glazedlists.demo.issuebrowser.swing.IssuesBrowser"/>
-            </manifest>
-        </jar>
-	</target>
 
 </project>

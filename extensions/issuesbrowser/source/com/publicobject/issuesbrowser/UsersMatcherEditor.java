@@ -1,14 +1,20 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.demo.issuebrowser;
+package com.publicobject.issuesbrowser;
 
-import java.util.*;
-// glazed lists
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.CollectionList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.matchers.Matcher;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * An UsersMatcherEditor is a matcher editor that filters based on the selected

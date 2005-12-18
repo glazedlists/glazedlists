@@ -1,7 +1,11 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
 
 // GlazedLists
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 /**
  * Models a project on Java.net.
@@ -25,7 +29,7 @@ public class Project {
 		projects.add(new Project("jdic", "JavaDesktop Integration Components"));
 		projects.add(new Project("jdnc", "JavaDesktop Network Components"));
     }
-    
+
     private String projectName = null;
     private String projectTitle = null;
 
@@ -53,7 +57,7 @@ public class Project {
     public String toString() {
         return projectTitle;
     }
-    
+
     /**
      * Get a list of all projects.
      */

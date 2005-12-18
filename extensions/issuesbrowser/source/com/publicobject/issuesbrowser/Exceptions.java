@@ -1,8 +1,11 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class contains a repository of strategies for dealing with Exceptions

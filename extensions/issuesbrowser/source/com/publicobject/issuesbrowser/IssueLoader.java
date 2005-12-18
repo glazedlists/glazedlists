@@ -1,11 +1,15 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
 
 // GlazedLists
-import ca.odell.glazedlists.*;
-// Loading problems
-import java.io.*;
-import java.net.UnknownHostException;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+
+import java.io.IOException;
 import java.net.NoRouteToHostException;
+import java.net.UnknownHostException;
 import java.security.AccessControlException;
 
 /**

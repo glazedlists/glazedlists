@@ -1,21 +1,25 @@
-package ca.odell.glazedlists.demo.issuebrowser.swing;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser.swing;
 
-import ca.odell.glazedlists.demo.issuebrowser.Issue;
-import ca.odell.glazedlists.demo.issuebrowser.IssueStatusComparator;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GroupingList;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueStatusComparator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
-import java.text.MessageFormat;
 
 /**
  * A MatcherEditor that produces Matchers that filter the issues based on the selected statuses.
@@ -34,7 +38,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
     private final Map<String, String> statusLabels = new HashMap<String, String>();
 
     /** Issues grouped together by status. */
-    private final GroupingList<Issue> issuesByStatus;
+    private final EventList<List<Issue>> issuesByStatus;
 
     /**
      * A cache of the list of statuses that mirrors the statuses of the issuesByStatus List.
@@ -44,7 +48,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
 
     public StatusMatcherEditor(EventList<Issue> issues) {
         // group the issues according to their status
-        this.issuesByStatus = new GroupingList<Issue>(issues, new IssueStatusComparator());
+        this.issuesByStatus = GlazedListsSwing.swingThreadProxyList(new GroupingList<Issue>(issues, new IssueStatusComparator()));
         this.issuesByStatus.addListEventListener(this);
 
         this.statusCheckBoxes.put("NEW", buildCheckBox("New"));

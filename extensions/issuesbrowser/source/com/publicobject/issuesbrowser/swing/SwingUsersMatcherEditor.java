@@ -1,12 +1,12 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.demo.issuebrowser.swing;
+package com.publicobject.issuesbrowser.swing;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.demo.issuebrowser.UsersMatcherEditor;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
+import com.publicobject.issuesbrowser.UsersMatcherEditor;
 
 import javax.swing.*;
 

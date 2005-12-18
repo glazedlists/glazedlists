@@ -1,16 +1,23 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
 
-import java.util.*;
-import java.io.*;
-import java.net.URL;
-// parse XML using SAX
-import javax.xml.parsers.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-// parse dates
-import java.text.*;
-// glazed lists
-import ca.odell.glazedlists.*;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Parses IssueZilla issue as described by their XML.
@@ -24,7 +31,7 @@ import ca.odell.glazedlists.*;
  * @see <a href="https://glazedlists.dev.java.net/issues/issuezilla.dtd">Issuezilla DTD</a>
  */
 public class IssuezillaXMLParser {
-    
+
     /** the date format is supposed to be 'yyyy-MM-dd HH:mm' but is actually 'yyyy-MM-dd HH:mm:ss' */
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     // hardcode the servers in California
@@ -94,7 +101,7 @@ public class IssuezillaXMLParser {
         RELATIONSHIP_SIMPLE_FIELDS.add("who");
         RELATIONSHIP_SIMPLE_FIELDS.add("when");
     }
-    
+
     /**
      * When executed, this opens a file specified on the command line, parses
      * it for Issuezilla XML and writes the issues to the command line.
@@ -155,7 +162,7 @@ public class IssuezillaXMLParser {
             xmlReader.setEntityResolver(parserSidekick);
             xmlReader.setErrorHandler(parserSidekick);
             xmlReader.setContentHandler(new IssueHandler(target, owner));
-            
+
             // parse away
             xmlReader.parse(new InputSource(source));
         } catch(SAXException e) {
@@ -166,7 +173,7 @@ public class IssuezillaXMLParser {
             throw new IOException("Parsing failed " + e.getMessage());
         }
     }
-    
+
     /**
      * ParserSidekick performs various services for the SaxParser.
      * It doesn't print exceptions caused by InterruptedException since this parser
@@ -201,7 +208,7 @@ public class IssuezillaXMLParser {
             exception.printStackTrace();
         }
     }
-        
+
 
     /**
      * The IssueHandler does the real parsing.
@@ -373,7 +380,7 @@ public class IssuezillaXMLParser {
             new Exception(message).printStackTrace();
         }
     }
-    
+
     /**
      * Parse the specified date.
      */

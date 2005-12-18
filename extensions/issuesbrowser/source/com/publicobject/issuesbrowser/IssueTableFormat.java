@@ -1,9 +1,12 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
+
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 import java.util.Comparator;
-// glazed lists
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.GlazedLists;
 
 /**
  * The IssueTableFormat specifies how an issue is displayed in a table.

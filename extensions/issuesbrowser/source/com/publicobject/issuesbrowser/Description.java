@@ -1,10 +1,13 @@
-package ca.odell.glazedlists.demo.issuebrowser;
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.issuesbrowser;
 
 // GlazedLists
+import ca.odell.glazedlists.TextFilterable;
 
-import ca.odell.glazedlists.*;
-// For dates and lists
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 
 /**
