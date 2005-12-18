@@ -46,18 +46,15 @@
 
 	<target name="docs" depends=""
 		description="Scan the source code to generate the Javadoc API.">
-		<mkdir dir="docs"/>
-		<tstamp prefix="javadoc">
-			<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
-		</tstamp>
 		<!-- document all the source -->
+        <mkdir dir="docs"/>
 		<javadoc
 			destdir="docs/api" author="true" use="true" windowtitle="Glazed Lists" source="${java.target.version}">
 			<packageset dir="source">
 				<exclude name="**/impl/**"/>
 			</packageset>
 			<doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 O'Dell Engineering.<br>Generated ${javadoc.datestamp}]]></bottom>
+			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
 			<link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
 			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
 		</javadoc>
