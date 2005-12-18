@@ -499,4 +499,74 @@ public class ListSelectionTest extends TestCase {
         assertEquals(new Integer(19), source.get(2));
     }
 
+    /**
+     * See feature request,
+     * <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=250">Issue 250</a>
+     */
+    public void testSelectByValue() {
+        int result;
+        boolean changed;
+        source.add(new Integer(0));
+        source.add(new Integer(1));
+        source.add(new Integer(2));
+        source.add(new Integer(3));
+        source.add(new Integer(4));
+        source.add(new Integer(5));
+
+        result = listSelection.select(new Integer(4));
+        assertEquals(4, result);
+        assertEquals(1, selectedList.size());
+        assertEquals(5, deselectedList.size());
+        assertEquals(4, listSelection.getMinSelectionIndex());
+        assertEquals(4, listSelection.getMaxSelectionIndex());
+
+        listSelection.deselectAll();
+        assertEquals(0, selectedList.size());
+        assertEquals(6, deselectedList.size());
+
+        result = listSelection.select(new Integer(8));
+        assertEquals(-1, result);
+        assertEquals(0, selectedList.size());
+        assertEquals(6, deselectedList.size());
+
+        result = listSelection.select(new Integer(2));
+        assertEquals(2, result);
+        result = listSelection.select(new Integer(4));
+        assertEquals(4, result);
+        assertEquals(2, selectedList.size());
+        assertEquals(4, deselectedList.size());
+        assertEquals(2, listSelection.getMinSelectionIndex());
+        assertEquals(4, listSelection.getMaxSelectionIndex());
+
+        listSelection.deselectAll();
+        assertEquals(0, selectedList.size());
+        assertEquals(6, deselectedList.size());
+
+        List<Integer> toSelect = new ArrayList<Integer>();
+        changed = listSelection.select(toSelect);
+        assertEquals(false, changed);
+        assertEquals(0, selectedList.size());
+        assertEquals(6, deselectedList.size());
+
+        toSelect.add(new Integer(2));
+        changed = listSelection.select(toSelect);
+        assertEquals(true, changed);
+        assertEquals(1, selectedList.size());
+        assertEquals(5, deselectedList.size());
+        assertEquals(2, listSelection.getMinSelectionIndex());
+        assertEquals(2, listSelection.getMaxSelectionIndex());
+
+        listSelection.deselectAll();
+        assertEquals(0, selectedList.size());
+        assertEquals(6, deselectedList.size());
+
+        toSelect.add(0, new Integer(5));
+        toSelect.add(1, new Integer(7));
+        changed = listSelection.select(toSelect);
+        assertEquals(true, changed);
+        assertEquals(2, selectedList.size());
+        assertEquals(4, deselectedList.size());
+        assertEquals(2, listSelection.getMinSelectionIndex());
+        assertEquals(5, listSelection.getMaxSelectionIndex());
+    }
 }

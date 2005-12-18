@@ -552,6 +552,54 @@ public class ListSelection<E> {
     }
 
     /**
+     * Select the specified element, if it exists.
+     *
+     * @return the index of the newly selected element, or -1 if no
+     *     element was found.
+     */
+    public int select(E value) {
+        int index = source.indexOf(value);
+        if(index != -1) select(index);
+        return index;
+    }
+
+    /**
+     * Select all of the specified values.
+     *
+     * @return <code>true</code> if the selection changed as a result of the call.
+     */
+    public boolean select(Collection<E> values) {
+        // This implementation leaves a lot to be desired. It's inefficient and
+        // awkward. If possible, we should clean up the entire SelectionList so
+        // we don't need to worry as much about the deselection list.
+
+        // 1. Convert our Collection of values into a SortedSet of indices
+        SortedSet<Integer> indicesToSelect = new TreeSet<Integer>();
+        for(Iterator<E> v = values.iterator(); v.hasNext(); ) {
+            E value = v.next();
+            int index = source.indexOf(value);
+            if(index == -1) continue;
+            indicesToSelect.add(new Integer(index));
+        }
+        if(indicesToSelect.isEmpty()) return false;
+
+        // 2. convert the sorted set of Integers into an int[]
+        int[] indicesToSelectAsInts = new int[indicesToSelect.size()];
+        int arrayIndex = 0;
+        for(Iterator<Integer> i = indicesToSelect.iterator(); i.hasNext(); ) {
+            Integer selectIndex = i.next();
+            indicesToSelectAsInts[arrayIndex] = selectIndex.intValue();
+            arrayIndex++;
+        }
+
+        // 3. Delegate to the other method, and return true if the selection grew
+        int selectionSizeBefore = getSelected().size();
+        select(indicesToSelectAsInts);
+        int selectionSizeAfter = getSelected().size();
+        return selectionSizeAfter > selectionSizeBefore;
+    }
+
+    /**
      * Selects all elements.
      */
     public void selectAll() {
