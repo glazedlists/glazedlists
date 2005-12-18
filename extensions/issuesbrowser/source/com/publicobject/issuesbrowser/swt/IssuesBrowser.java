@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swt;
 
-// demo
-import ca.odell.glazedlists.demo.issuebrowser.*;
-import ca.odell.glazedlists.demo.issuebrowser.UsersMatcherEditor;
 // swt
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.*;
@@ -17,6 +14,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.swt.*;
 import ca.odell.glazedlists.matchers.*;
+import com.publicobject.issuesbrowser.*;
 
 
 /**
@@ -126,7 +124,7 @@ public class IssuesBrowser {
 
         // Start the demo
         issueLoader.start();
-        issueLoader.setProject((Project)Project.getProjects().get(0));
+        issueLoader.setProject((Project) Project.getProjects().get(0));
     }
 
     private Text createFilterText(Composite parent) {
