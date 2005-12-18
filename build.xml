@@ -13,6 +13,9 @@
     <property name="java.target.version" value="1.5"/>
     <property name="java.target.version.fileFriendlyName" value="java15"/>
     <property environment="env"/>
+    <tstamp prefix="datestamp">
+        <format property="dateAndTime" pattern="yyyy-MM-dd H:mm"/>
+    </tstamp>
 
 	<target name="clean"
 		description="Clean up generated files, forcing them to be rebuilt.">
@@ -68,9 +71,6 @@
 
 	<target name="jar" depends="compileall"
 		description="Creates glazedlists jar file containing all UI libraries.">
-		<tstamp prefix="jar">
-			<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
-		</tstamp>
 		<jar destfile="glazedlists_${java.target.version.fileFriendlyName}.jar" update="true" index="true">
 			<fileset dir="classes"/>
 			<fileset dir=".">
@@ -80,8 +80,8 @@
 				<attribute name="Main-Class" value="ca.odell.glazedlists.impl.Main"/>
 				<attribute name="Sealed" value="true"/>
 				<attribute name="Built-By" value="${user.name}"/>
-				<attribute name="Built-At" value="${jar.datestamp}"/>
-				<attribute name="Implementation-Version" value="${jar.datestamp}"/>
+				<attribute name="Built-At" value="${datestamp.dateAndTime}"/>
+				<attribute name="Implementation-Version" value="${datestamp.dateAndTime}"/>
 				<attribute name="Implementation-Title" value="Glazed Lists"/>
 				<attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
 				<attribute name="Contributors" value="Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden"/>
@@ -295,15 +295,12 @@
 
         <!-- prepare the javaNetUpload task -->
         <taskdef resource="org/kohsuke/javanettasks.properties" classpath="tools/javanettasks.jar"/>
-        <tstamp prefix="jar">
-            <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
-        </tstamp>
 
         <!-- upload source -->
         <javaNetUpload projectName="glazedlists"
             toFile="/latest_build/glazedlists-source_${java.target.version.fileFriendlyName}.zip"
             fromFile="glazedlists-source_${java.target.version.fileFriendlyName}.zip"
-            fileDescription="Source build by ${user.name} at ${jar.datestamp}"
+            fileDescription="Source build by ${user.name} at ${datestamp.dateAndTime}"
             overwrite="yes"
             fileStatus="Draft"/>
 
@@ -311,7 +308,7 @@
         <javaNetUpload projectName="glazedlists"
             toFile="/latest_build/glazedlists_${java.target.version.fileFriendlyName}.jar"
             fromFile="glazedlists_${java.target.version.fileFriendlyName}.jar"
-            fileDescription="Binary build by ${user.name} at ${jar.datestamp}"
+            fileDescription="Binary build by ${user.name} at ${datestamp.dateAndTime}"
             overwrite="yes"
             fileStatus="Draft"/>
 	</target>
