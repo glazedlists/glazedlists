@@ -5,17 +5,14 @@
 
 <project name="glazedlists" default="jar" basedir=".">
 
-    <property name="java.target.version" value="1.5"/>
-    <property name="java.target.version.fileFriendlyName" value="java15"/>
-    <property environment="env"/>
-
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        BUILD ADMINISTRATION
        Create build directories and set up necessary paths.
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="init">
-	</target>
+    <property name="java.target.version" value="1.5"/>
+    <property name="java.target.version.fileFriendlyName" value="java15"/>
+    <property environment="env"/>
 
 	<target name="clean"
 		description="Clean up generated files, forcing them to be rebuilt.">
@@ -44,7 +41,7 @@
 	   Construct a browsable API.
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="docs" depends="init"
+	<target name="docs" depends=""
 		description="Scan the source code to generate the Javadoc API.">
 		<mkdir dir="docs"/>
 		<tstamp prefix="javadoc">
@@ -69,7 +66,7 @@
 	   Construct the .jar file for use in a library.
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="jar" depends="init,compileall"
+	<target name="jar" depends="compileall"
 		description="Creates glazedlists jar file containing all UI libraries.">
 		<tstamp prefix="jar">
 			<format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
@@ -106,7 +103,7 @@
 		description="Compile all components of the source.">
 	</target>
 
-	<target name="core" depends="init">
+	<target name="core" depends="">
 		<mkdir dir="classes"/>
 		<javac destdir="classes" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
                 <!-- swing -->
@@ -185,8 +182,8 @@
         </javac>
     </target>
 
-    <target name="demojar" depends="init,clean,issuesbrowser"
-        description="Create a .jar file with a demo application.">
+    <target name="demojar" depends="clean,issuesbrowser"
+        description="Create a .jar file with the Issues Browser demo application.">
         <jar destfile="glazedlists-demo.jar" update="true" index="true">
             <fileset dir="classes"/>
             <fileset dir=".">
@@ -203,10 +200,12 @@
 
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-       SPECIAL TARGETS
+	   CREATE JAVA 1.4-COMPATIBLE PROJECT
+	   Create a new project folder java14_glazedlists/ that can be used to
+	   build and develop Glazed Lists on J2SE 1.4.
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <target name="java14" depends="init,compileall,compiletests" description="Compile Glazed Lists for deployment on a J2SE 1.4">
+    <target name="java14" depends="compileall,compiletests" description="Compile Glazed Lists for deployment on a J2SE 1.4">
         <!-- clean the java14 directory -->
         <delete dir="java14_glazedlists"/>
 
@@ -271,7 +270,7 @@
 	   Package the entire Glazed Lists source tree in a .zip file.
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="dist" depends="init,clean"
+	<target name="dist" depends="clean"
 		description="Create a .zip file of the source for backup or distribution.">
 		<zip destfile="glazedlists-source_${java.target.version.fileFriendlyName}.zip" basedir=".">
 			<exclude name="classes/**"/>
@@ -283,16 +282,36 @@
 		</zip>
 	</target>
 
-    <target name="upload" depends="dist"
-        description="Upload binaries to java.net">
-        <taskdef resource="org/kohsuke/javanettasks.properties" />
+    <target name="upload" depends="dist,jar"
+        description="Upload binaries to java.net, see http://javanettasks.dev.java.net/">
+
+        <!-- download the declawer build tool -->
+        <mkdir dir="tools"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/25945/javanettasks.jar"/>
+            <arg value="tools/javanettasks.jar"/>
+        </java>
+
+        <!-- prepare the javaNetUpload task -->
+        <taskdef resource="org/kohsuke/javanettasks.properties" classpath="tools/javanettasks.jar"/>
         <tstamp prefix="jar">
             <format property="datestamp" pattern="yyyy-MM-dd H:mm"/>
         </tstamp>
+
+        <!-- upload source -->
         <javaNetUpload projectName="glazedlists"
             toFile="/latest_build/glazedlists-source_${java.target.version.fileFriendlyName}.zip"
             fromFile="glazedlists-source_${java.target.version.fileFriendlyName}.zip"
-            fileDescription="Snapshot build by ${user.name} at ${jar.datestamp}"
+            fileDescription="Source build by ${user.name} at ${jar.datestamp}"
+            overwrite="yes"
+            fileStatus="Draft"/>
+
+        <!-- upload binary -->
+        <javaNetUpload projectName="glazedlists"
+            toFile="/latest_build/glazedlists_${java.target.version.fileFriendlyName}.jar"
+            fromFile="glazedlists_${java.target.version.fileFriendlyName}.jar"
+            fileDescription="Binary build by ${user.name} at ${jar.datestamp}"
             overwrite="yes"
             fileStatus="Draft"/>
 	</target>
@@ -303,7 +322,7 @@
        This task depends on JUnit, available free at http://www.junit.org
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <target name="test" depends="init,compiletests"
+    <target name="test" depends="compiletests"
             description="Compile unit tests and run them using JUnit.">
             <!-- Verify that JUnit is available on the classpath -->
             <available classname="junit.framework.TestCase" property="junit.present"/>
@@ -323,7 +342,7 @@
             <fail message="Tests failed. Check test output." if="test.failed"/>
     </target>
 
-    <target name="compiletests" depends="init,compileall">
+    <target name="compiletests" depends="compileall">
         <!-- Compile the test classes from source/ into classes/ -->
         <echo>${ant.home}</echo>
         <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
