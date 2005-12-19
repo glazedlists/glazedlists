@@ -15,9 +15,9 @@ import ca.odell.glazedlists.EventList;
 public class Project {
 
     /** the sample projects */
-    private static EventList projects;
+    private static EventList<Project> projects;
     static {
-		projects = new BasicEventList();
+		projects = new BasicEventList<Project>();
 		projects.add(new Project("glazedlists", "Glazed Lists"));
 		projects.add(new Project("lg3d-core", "Project Looking Glass Core"));
 		projects.add(new Project("java-net", "Java.net Watercooler"));
@@ -61,7 +61,7 @@ public class Project {
     /**
      * Get a list of all projects.
      */
-    public static EventList getProjects() {
+    public static EventList<Project> getProjects() {
         return projects;
     }
 }

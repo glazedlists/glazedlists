@@ -86,16 +86,16 @@ public final class SortingState {
                 comparators.add(comparator);
             }
 
-            return (Comparator) GlazedLists.chainComparators(comparators);
+            return GlazedLists.chainComparators(comparators);
         }
     }
 
     /**
      * @return the indices of the columns currently being sorted.
      */
-    public List<Integer> getSortingColumns() {
+    public List<Integer> getSortingColumnIndexes() {
         final List<Integer> sortingColumns = new ArrayList<Integer>();
-        List<SortingState.SortingColumn> recentlyClickedColumns = getRecentlyClickedColumns();
+        final List<SortingState.SortingColumn> recentlyClickedColumns = getRecentlyClickedColumns();
         for(int c = 0; c < recentlyClickedColumns.size(); c++) {
             SortingState.SortingColumn clickedColumn = recentlyClickedColumns.get(c);
             sortingColumns.add(new Integer(clickedColumn.getColumn()));
@@ -129,7 +129,7 @@ public final class SortingState {
             ComparatorChain chain = (ComparatorChain)foreignComparator;
             comparatorsList = chain.getComparators();
         } else {
-            comparatorsList = Collections.singletonList((Comparator)foreignComparator);
+            comparatorsList = Collections.singletonList(foreignComparator);
         }
 
         // walk through the list of Comparators and assign click counts
@@ -193,28 +193,30 @@ public final class SortingState {
     }
 
     public String toString() {
-        StringBuffer result = new StringBuffer();
-        List sortingColumns = getSortingColumns();
-        for(int c = 0; c < sortingColumns.size(); c++) {
-            int columnIndex = ((Integer)sortingColumns.get(c)).intValue();
-
-            // add a comma for every column but the first
-            if(c != 0) result.append(", ");
+        final StringBuffer result = new StringBuffer();
+        for(Iterator<Integer> i = getSortingColumnIndexes().iterator(); i.hasNext();) {
+            final int columnIndex = i.next().intValue();
+            final SortingState.SortingColumn sortingColumn = getColumns().get(columnIndex);
 
             // write the column index
             result.append("column ");
             result.append(columnIndex);
 
             // write the comparator index
-            int comparatorIndex = getColumns().get(columnIndex).getComparatorIndex();
+            final int comparatorIndex = sortingColumn.getComparatorIndex();
             if(comparatorIndex != 0) {
                 result.append(" comparator ");
                 result.append(comparatorIndex);
             }
 
             // write reversed
-            if(getColumns().get(columnIndex).isReverse()) {
+            if(sortingColumn.isReverse()) {
                 result.append(" reversed");
+            }
+
+            // add a comma if more columns exist
+            if (i.hasNext()) {
+                result.append(", ");
             }
         }
         return result.toString();

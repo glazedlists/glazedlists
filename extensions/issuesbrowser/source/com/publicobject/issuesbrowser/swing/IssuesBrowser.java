@@ -15,7 +15,6 @@ import com.publicobject.issuesbrowser.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
-import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.NoRouteToHostException;
@@ -25,7 +24,6 @@ import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +43,7 @@ public class IssuesBrowser implements Runnable {
     static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 
     /** an event list to host the issues */
-    private EventList issuesEventList = new BasicEventList();
+    private EventList<Issue> issuesEventList = new BasicEventList<Issue>();
 
     /** the currently selected issues */
     private EventSelectionModel issuesSelectionModel = null;
@@ -110,24 +108,24 @@ public class IssuesBrowser implements Runnable {
     private JPanel constructView() {
         // create a MatcherEditor which edits the filter text
         final JTextField filterTextField = new JTextField();
-        final MatcherEditor textFilterMatcherEditor = new ThreadedMatcherEditor(new TextComponentMatcherEditor(filterTextField, null));
+        final MatcherEditor<Issue> textFilterMatcherEditor = new ThreadedMatcherEditor<Issue>(new TextComponentMatcherEditor<Issue>(filterTextField, null));
 
         // create a MatcherEditor which edits the state filter
         StatusMatcherEditor statusMatcherEditor = new StatusMatcherEditor(issuesEventList);
 
         // create the pipeline of glazed lists
         SwingUsersMatcherEditor userMatcherEditor = new SwingUsersMatcherEditor(issuesEventList);
-        FilterList issuesUserFiltered = new FilterList(issuesEventList, userMatcherEditor);
-        FilterList issuesStatusFiltered = new FilterList(issuesUserFiltered, statusMatcherEditor);
-        FilterList issuesTextFiltered = new FilterList(issuesStatusFiltered, textFilterMatcherEditor);
-        ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-        final SortedList issuesSortedList = new SortedList(priorityList, null);
+        FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, userMatcherEditor);
+        FilterList<Issue> issuesStatusFiltered = new FilterList<Issue>(issuesUserFiltered, statusMatcherEditor);
+        FilterList<Issue> issuesTextFiltered = new FilterList<Issue>(issuesStatusFiltered, textFilterMatcherEditor);
+        ThresholdList<Issue> priorityList = new ThresholdList<Issue>(issuesTextFiltered, "priority.rating");
+        final SortedList<Issue> issuesSortedList = new SortedList<Issue>(priorityList, null);
         issuesSortedList.setMode(SortedList.AVOID_MOVING_ELEMENTS); // temp hack for playing with the new sorting mode
 
         // issues table
-        issuesTableModel = new EventTableModel(issuesSortedList, new IssueTableFormat());
+        issuesTableModel = new EventTableModel<Issue>(issuesSortedList, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
-        issuesSelectionModel = new EventSelectionModel(issuesSortedList);
+        issuesSelectionModel = new EventSelectionModel<Issue>(issuesSortedList);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
@@ -138,7 +136,7 @@ public class IssuesBrowser implements Runnable {
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
         issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
-        new TableComparatorChooser(issuesJTable, issuesSortedList, TableComparatorChooser.STRATEGY_KEYBOARD_MODIFIERS);
+        new TableComparatorChooser<Issue>(issuesJTable, issuesSortedList, TableComparatorChooser.STRATEGY_KEYBOARD_MODIFIERS);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // users table
@@ -150,7 +148,7 @@ public class IssuesBrowser implements Runnable {
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
         priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
         JSlider prioritySlider = new JSlider(priorityRangeModel);
-        Hashtable prioritySliderLabels = new Hashtable();
+        Hashtable<Integer, JLabel> prioritySliderLabels = new Hashtable<Integer, JLabel>();
         prioritySliderLabels.put(new Integer(0), new JLabel("Low"));
         prioritySliderLabels.put(new Integer(100), new JLabel("High"));
         prioritySlider.setOpaque(false);
@@ -163,10 +161,10 @@ public class IssuesBrowser implements Runnable {
         prioritySlider.setForeground(Color.BLACK);
 
         // projects
-        EventList projects = Project.getProjects();
+        EventList<Project> projects = Project.getProjects();
 
         // project select combobox
-        EventComboBoxModel projectsComboModel = new EventComboBoxModel(projects);
+        EventComboBoxModel projectsComboModel = new EventComboBoxModel<Project>(projects);
         JComboBox projectsCombo = new JComboBox(projectsComboModel);
         projectsCombo.setEditable(false);
         projectsCombo.setOpaque(false);
@@ -305,12 +303,12 @@ public class IssuesBrowser implements Runnable {
      * table. Use {@link #setIssueCount(int)} to update the text of the label
      * to reflect a new issue count.
      */
-    private static class IssueCounterLabel extends JLabel implements ListEventListener {
+    private static class IssueCounterLabel extends JLabel implements ListEventListener<Issue> {
         private static final MessageFormat issueCountFormat = new MessageFormat("{0} {0,choice,0#issues|1#issue|1<issues}");
 
         private int issueCount = -1;
 
-        public IssueCounterLabel(EventList source) {
+        public IssueCounterLabel(EventList<Issue> source) {
             source.addListEventListener(this);
             this.setIssueCount(source.size());
         }
@@ -320,7 +318,7 @@ public class IssuesBrowser implements Runnable {
             this.issueCount = issueCount;
             this.setText(issueCountFormat.format(new Object[] {new Integer(issueCount)}));
         }
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<Issue> listChanges) {
             setIssueCount(listChanges.getSourceList().size());
         }
     }

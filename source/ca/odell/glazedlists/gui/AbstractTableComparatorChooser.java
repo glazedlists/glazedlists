@@ -120,7 +120,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      *      the second is the secondary, etc. This list may be empty but never null.
      */
     public List<Integer> getSortingColumns() {
-        return sortingState.getSortingColumns();
+        return sortingState.getSortingColumnIndexes();
     }
 
     /**
