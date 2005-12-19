@@ -138,7 +138,7 @@ public class IssuesBrowser implements Runnable {
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
         issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
-        new TableComparatorChooser(issuesJTable, issuesSortedList, true);
+        new TableComparatorChooser(issuesJTable, issuesSortedList, TableComparatorChooser.STRATEGY_KEYBOARD_MODIFIERS);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // users table

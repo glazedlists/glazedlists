@@ -8,6 +8,10 @@ import ca.odell.glazedlists.*;
 // the Glazed Lists util and impl packages include default comparators
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.SortIconFactory;
+import ca.odell.glazedlists.impl.gui.SortingStrategy;
+import ca.odell.glazedlists.impl.gui.ClickDoubleClickSortingStrategy;
+import ca.odell.glazedlists.impl.gui.SortingState;
+import ca.odell.glazedlists.impl.gui.KeyboardModifiersSortingStrategy;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import javax.swing.table.*;
@@ -52,7 +56,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     private final SortArrowHeaderRenderer sortArrowHeaderRenderer;
 
     /** listen for table and mouse events */
-    private final Listener listener = new Listener();
+    private final TableModelHandler tableModelHandler = new TableModelHandler();
 
     /** the table being sorted */
     private JTable table = null;
@@ -62,6 +66,10 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
     /** the sort icons to use */
     private static Icon[] icons = SortIconFactory.loadIcons();
+
+    public static final Object STRATEGY_ALTERNATE = new Object();
+    public static final Object STRATEGY_ALTERNATE_MULTICOLUMN = new Object();
+    public static final Object STRATEGY_KEYBOARD_MODIFIERS = new Object();
 
     /**
      * Creates a new TableComparatorChooser that responds to clicks
@@ -75,8 +83,13 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *      not as simple and this strategy should only be used where necessary.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
-        super(sortedList, ((EventTableModel)table.getModel()).getTableFormat(), multipleColumnSort);
-        
+        this(table, sortedList, multipleColumnSort ? STRATEGY_ALTERNATE_MULTICOLUMN : STRATEGY_ALTERNATE);
+    }
+
+
+    public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
+        super(sortedList, ((EventTableModel)table.getModel()).getTableFormat());
+
         // save the Swing-specific state
         this.table = table;
 
@@ -86,9 +99,18 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
         // listen for events on the specified table
         table.setColumnSelectionAllowed(false);
-        table.getTableHeader().addMouseListener(listener);
-        table.getModel().addTableModelListener(listener);
+        table.getModel().addTableModelListener(tableModelHandler);
+
+        // install the sorting strategy to interpret clicks
+        final SortingStrategy sortingStrategy;
+        if(strategy == STRATEGY_ALTERNATE) sortingStrategy = new SwingCycleSortingStrategy(table, false);
+        else if(strategy == STRATEGY_ALTERNATE_MULTICOLUMN) sortingStrategy = new SwingCycleSortingStrategy(table, true);
+        else if(strategy == STRATEGY_KEYBOARD_MODIFIERS) sortingStrategy = new SwingKeyboardModifiersSortingStrategy(table);
+        else throw new IllegalArgumentException("Unrecognized strategy, " + strategy);
+        super.setStrategy(sortingStrategy);
     }
+
+
 
     /**
      * Registers the specified {@link ActionListener} to receive notification whenever
@@ -152,48 +174,18 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     }
 
     /**
-     * Nested Listener class handles table events and mouse events.
+     * Set all {@link TableComparatorChooser}s to use the icons from the directory
+     * specified. The folder should contain the following eight icon files:
+     * <li>primary_sorted.png                      <li>secondary_sorted.png
+     * <li>primary_sorted_alternate.png            <li>secondary_sorted_alternate.png
+     * <li>primary_sorted_alternate_reverse.png    <li>secondary_sorted_alternate_reverse.png
+     * <li>primary_sorted_reverse.png              <li>secondary_sorted_reverse.png
+     *
+     * <p>Note that this path must be on the system classpath. It may be within a
+     * jar file.
      */
-    private class Listener extends MouseAdapter implements TableModelListener {
-
-        /**
-         * When the mouse is clicked, this selects the next comparator in
-         * sequence for the specified table. This will re-sort the table
-         * by a new criterea.
-         *
-         * This code is based on the Java Tutorial's TableSorter
-         * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html#sorting">The Java Tutorial</a>
-         */
-        public void mouseClicked(MouseEvent e) {
-            if(!isSortingMouseEvent(e)) return;
-
-            TableColumnModel columnModel = table.getColumnModel();
-            int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-            int column = table.convertColumnIndexToModel(viewColumn);
-            int clicks = e.getClickCount();
-            if(clicks >= 1 && column != -1) {
-                columnClicked(column, clicks);
-            }
-        }
-
-        /**
-         * When the number of columns changes in the table, we need to
-         * clear the comparators and columns.
-         */
-        public void tableChanged(TableModelEvent event) {
-            if(event.getFirstRow() == TableModelEvent.HEADER_ROW &&
-               event.getColumn() == TableModelEvent.ALL_COLUMNS) {
-                // the table structure may have changed due to a change in the
-                // table format so we conservatively reset the TableFormat
-                setTableFormat(((EventTableModel)table.getModel()).getTableFormat());
-            }
-
-            // if the comparator has changed
-            Comparator currentComparator = sortedList.getComparator();
-            if(currentComparator != sortedListComparator) {
-                redetectComparator(currentComparator);
-            }
-        }
+    public static void setIconPath(String path) {
+        icons = SortIconFactory.loadIcons(path);
     }
 
     /**
@@ -219,26 +211,35 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer.getDelegateRenderer());
 
         // remove our listeners from the table's header and model
-        table.getTableHeader().removeMouseListener(listener);
-        table.getModel().removeTableModelListener(listener);
+        table.getModel().removeTableModelListener(tableModelHandler);
 
         // null out our table reference for safety's sake
         table = null;
     }
-    
+
     /**
-     * Set all {@link TableComparatorChooser}s to use the icons from the directory
-     * specified. The folder should contain the following eight icon files:
-     * <li>primary_sorted.png                      <li>secondary_sorted.png
-     * <li>primary_sorted_alternate.png            <li>secondary_sorted_alternate.png
-     * <li>primary_sorted_alternate_reverse.png    <li>secondary_sorted_alternate_reverse.png
-     * <li>primary_sorted_reverse.png              <li>secondary_sorted_reverse.png
-     *
-     * <p>Note that this path must be on the system classpath. It may be within a
-     * jar file.
+     * Nested Listener class handles table events and mouse events.
      */
-    public static void setIconPath(String path) {
-        icons = SortIconFactory.loadIcons(path);
+    private class TableModelHandler implements TableModelListener {
+
+        /**
+         * When the number of columns changes in the table, we need to
+         * clear the comparators and columns.
+         */
+        public void tableChanged(TableModelEvent event) {
+            if(event.getFirstRow() == TableModelEvent.HEADER_ROW &&
+               event.getColumn() == TableModelEvent.ALL_COLUMNS) {
+                // the table structure may have changed due to a change in the
+                // table format so we conservatively reset the TableFormat
+                setTableFormat(((EventTableModel)table.getModel()).getTableFormat());
+            }
+
+            // if the comparator has changed
+            Comparator currentComparator = sortedList.getComparator();
+            if(currentComparator != sortedListComparator) {
+                redetectComparator(currentComparator);
+            }
+        }
     }
 
     /**
@@ -302,4 +303,86 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             return rendered;
         }
     }
+
+    /**
+     * Handle clicks to the column's header in cycles.
+     */
+    private class SwingCycleSortingStrategy extends MouseAdapter implements SortingStrategy {
+        private JTable table;
+        private final ClickDoubleClickSortingStrategy delegate;
+        public SwingCycleSortingStrategy(JTable table, boolean multipleColumnSort) {
+            this.table = table;
+            this.delegate = new ClickDoubleClickSortingStrategy(multipleColumnSort);
+
+            table.getTableHeader().addMouseListener(this);
+        }
+
+        /**
+         * When the mouse is clicked, this selects the next comparator in
+         * sequence for the specified table. This will re-sort the table
+         * by a new criterea.
+         *
+         * This code is based on the Java Tutorial's TableSorter
+         * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html#sorting">The Java Tutorial</a>
+         */
+        public void mouseClicked(MouseEvent e) {
+            if(!isSortingMouseEvent(e)) return;
+
+            TableColumnModel columnModel = table.getColumnModel();
+            int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+            int column = table.convertColumnIndexToModel(viewColumn);
+            int clicks = e.getClickCount();
+            if(clicks >= 1 && column != -1) {
+                delegate.columnClicked(column, clicks);
+            }
+        }
+
+        /** {@inheritDoc} */
+        public void setSortingState(SortingState sortingState) {
+            delegate.setSortingState(sortingState);
+        }
+
+        /** {@inheritDoc} */
+        public void dispose() {
+            table.getTableHeader().removeMouseListener(this);
+            delegate.dispose();
+        }
+    }
+
+    private class SwingKeyboardModifiersSortingStrategy extends MouseAdapter implements SortingStrategy {
+        private JTable table;
+        private KeyboardModifiersSortingStrategy delegate = new KeyboardModifiersSortingStrategy();
+
+        public SwingKeyboardModifiersSortingStrategy(JTable table) {
+            this.table = table;
+            table.getTableHeader().addMouseListener(this);
+        }
+
+        public void mouseClicked(MouseEvent e) {
+            if(!isSortingMouseEvent(e)) return;
+
+            boolean shift = e.isShiftDown();
+            boolean control = e.isControlDown();
+
+            TableColumnModel columnModel = table.getColumnModel();
+            int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+            int column = table.convertColumnIndexToModel(viewColumn);
+            int clicks = e.getClickCount();
+            if(clicks >= 1 && column != -1) {
+                delegate.columnClicked(column, shift, control);
+            }
+        }
+
+        /** {@inheritDoc} */
+        public void setSortingState(SortingState sortingState) {
+            delegate.setSortingState(sortingState);
+        }
+
+        /** {@inheritDoc} */
+        public void dispose() {
+            table.getTableHeader().removeMouseListener(this);
+            delegate.dispose();
+        }
+    }
+
 }

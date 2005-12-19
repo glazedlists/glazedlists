@@ -18,7 +18,7 @@ public class TableComparatorTest extends TestCase {
 
     /** a table comparator choosers to test with */
     private SortedList sortedList = new SortedList(new BasicEventList());
-    private AbstractTableComparatorChooser tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10, true);
+    private AbstractTableComparatorChooser tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
 
     protected void setUp() throws Exception {
         // add some comparators to column 3
@@ -96,8 +96,8 @@ public class TableComparatorTest extends TestCase {
     }
 
     private static class TestTableComparatorChooser extends AbstractTableComparatorChooser {
-        protected TestTableComparatorChooser(SortedList sortedList, int columns, boolean multipleColumnSort) {
-            super(sortedList, new TestTableFormat(columns), true);
+        protected TestTableComparatorChooser(SortedList sortedList, int columns) {
+            super(sortedList, new TestTableFormat(columns));
         }
     }
     private static class TestTableFormat implements TableFormat {
