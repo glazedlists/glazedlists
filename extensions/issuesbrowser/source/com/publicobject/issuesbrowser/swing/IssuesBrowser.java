@@ -13,8 +13,10 @@ import ca.odell.glazedlists.swing.*;
 import com.publicobject.issuesbrowser.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.*;
 import javax.swing.table.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.NoRouteToHostException;
@@ -24,6 +26,7 @@ import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -135,9 +138,13 @@ public class IssuesBrowser implements Runnable {
         issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
-        issuesJTable.setDefaultRenderer(Priority.class, new PriorityTableCellRenderer());
+        // turn off cell focus painting
+        issuesJTable.setDefaultRenderer(String.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(String.class)));
+        issuesJTable.setDefaultRenderer(Integer.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(Integer.class)));
+        issuesJTable.setDefaultRenderer(Priority.class, new NoFocusRenderer(new PriorityTableCellRenderer()));
         new TableComparatorChooser<Issue>(issuesJTable, issuesSortedList, TableComparatorChooser.STRATEGY_KEYBOARD_MODIFIERS);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        issuesTableScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         // users table
         JScrollPane usersListScrollPane = new JScrollPane(userMatcherEditor.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -205,6 +212,9 @@ public class IssuesBrowser implements Runnable {
 
         JPanel filtersPanel = new JPanel();
         filtersPanel.setBackground(GLAZED_LISTS_LIGHT_BROWN);
+        filtersPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, GLAZED_LISTS_DARK_BROWN));
+        usersListScrollPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
+
         filtersPanel.setLayout(new GridBagLayout());
         // add a strut so the app resizes less, this is a workaround 'cause Grid Bag sucks!
         filtersPanel.add(Box.createHorizontalStrut(200),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -219,9 +229,11 @@ public class IssuesBrowser implements Runnable {
 
         // assemble all data components on a common panel
         JPanel dataPanel = new JPanel();
+        JComponent issueDetailsComponent = issueDetails.getComponent();
+        issueDetailsComponent.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
         dataPanel.setLayout(new GridLayout(2, 1));
         dataPanel.add(issuesTableScrollPane);
-        dataPanel.add(issueDetails.getComponent());
+        dataPanel.add(issueDetailsComponent);
 
         // the outermost panel to layout the icon bar with the other panels
         JPanel mainPanel = new JPanel(new GridBagLayout());

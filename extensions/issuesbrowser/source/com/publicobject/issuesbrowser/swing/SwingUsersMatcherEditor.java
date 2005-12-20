@@ -30,6 +30,8 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor {
         EventList allUsers = getUsersList();
         EventListModel usersListModel = new EventListModel(allUsers);
         userSelect = new JList(usersListModel);
+        // turn off cell focus painting
+        userSelect.setCellRenderer(new NoFocusRenderer(userSelect.getCellRenderer()));
 
         // create an EventList containing the JList's selection
         EventSelectionModel userSelectionModel = new EventSelectionModel(allUsers);

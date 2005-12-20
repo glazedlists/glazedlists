@@ -54,7 +54,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      *      not as simple and this strategy should only be used where necessary.
      */
     public TableComparatorChooser(EventTableViewer eventTableViewer, SortedList sortedList, boolean multipleColumnSort) {
-        super(sortedList, eventTableViewer.getTableFormat(), multipleColumnSort);
+        super(sortedList, eventTableViewer.getTableFormat());
 
         // save the SWT-specific state
         this.table = eventTableViewer.getTable();
@@ -63,6 +63,8 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
         for(int c = 0; c < table.getColumnCount(); c++) {
             table.getColumn(c).addSelectionListener(columnListener);
         }
+
+        throw new IllegalStateException("Sorting strategy not installed, this class is mid-refactoring");
     }
 
     /**
