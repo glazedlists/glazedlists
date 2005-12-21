@@ -13,10 +13,8 @@ import ca.odell.glazedlists.swing.*;
 import com.publicobject.issuesbrowser.*;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.event.*;
 import javax.swing.table.*;
-import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.NoRouteToHostException;
@@ -26,7 +24,6 @@ import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -142,7 +139,7 @@ public class IssuesBrowser implements Runnable {
         issuesJTable.setDefaultRenderer(String.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(String.class)));
         issuesJTable.setDefaultRenderer(Integer.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(Integer.class)));
         issuesJTable.setDefaultRenderer(Priority.class, new NoFocusRenderer(new PriorityTableCellRenderer()));
-        new TableComparatorChooser<Issue>(issuesJTable, issuesSortedList, TableComparatorChooser.STRATEGY_KEYBOARD_MODIFIERS);
+        new TableComparatorChooser<Issue>(issuesJTable, issuesSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         issuesTableScrollPane.setBorder(BorderFactory.createEmptyBorder());
 

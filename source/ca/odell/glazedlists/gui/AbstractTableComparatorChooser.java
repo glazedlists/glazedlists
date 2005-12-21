@@ -12,8 +12,6 @@ import java.beans.PropertyChangeEvent;
 // For Comparators
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.gui.SortingState;
-import ca.odell.glazedlists.impl.gui.ClickDoubleClickSortingStrategy;
-import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a table
@@ -23,6 +21,61 @@ import ca.odell.glazedlists.impl.gui.SortingStrategy;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
 public abstract class AbstractTableComparatorChooser<E> {
+
+    /**
+     * Emulate the sorting behaviour of Windows Explorer and Mac OS X Finder.
+     *
+     * <p>Single clicks toggles between forward and reverse. If multiple comparators
+     * are available for a particular column, they will be cycled in order.
+     *
+     * <p>At most one column can be sorted at a time.
+     */
+    public static final SortingStrategy SINGLE_COLUMN = new MouseOnlySortingStrategy(false);
+
+    /**
+     * Sort multiple columns without use of the keyboard.  Single clicks cycle
+     * through comparators, double clicks clear them.
+     *
+     * <p>This is the original sorting strategy provided by Glazed Lists, with a
+     * limitation that it is impossible to clear a sort order that is  already in
+     * place. It's designed to be used with multiple columns and multiple comparators
+     * per column.
+     *
+     * <p>The overall behaviour is as follows:
+     *
+     * <li>Click: sort this column. If it's already sorted, reverse the sort order.
+     * If its already reversed, sort using the column's next comparator in forward
+     * order. If there are no more comparators, go to the first comparator. If there
+     * are multiple columns, sort this column after those columns.
+     *
+     * <li>Double click: like a single click, but clear all sorting columns first.
+     */
+    public static final SortingStrategy MULTIPLE_COLUMN_MOUSE = new MouseOnlySortingStrategy(true);
+
+    /**
+     * Emulate the sorting behaviour of TableSorter, by Philip Milne et. al.
+     *
+     * <p>This is not a direct adaptation since we choose to support potentially
+     * many Comparators per column, wheras TableSorter is limited to one.
+     *
+     * <p>For reverence, this is TableSorter's behaviour, copied shamelessly
+     * from that project's source file:
+     *
+     * <li>Mouse-click: Clears the sorting gui of all other columns and advances
+     * the sorting gui of that column through three values:
+     * {NOT_SORTED, ASCENDING, DESCENDING} (then back to NOT_SORTED again).
+     *
+     * <li>SHIFT-mouse-click: Clears the sorting gui of all other columns and
+     * cycles the sorting gui of the column through the same three values,
+     * in the opposite order: {NOT_SORTED, DESCENDING, ASCENDING}.
+     *
+     * <li>CONTROL-mouse-click and CONTROL-SHIFT-mouse-click: as above except that the
+     * changes to the column do not cancel the statuses of columns that are
+     * already sorting - giving a way to initiate a compound sort.
+     *
+     * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">Table tutorial</a>
+     */
+    public static final SortingStrategy MULTIPLE_COLUMN_KEYBOARD = new MouseKeyboardSortingStrategy();
 
     /** the sorted list to choose the comparators for */
     protected SortedList<E> sortedList;
@@ -34,10 +87,7 @@ public abstract class AbstractTableComparatorChooser<E> {
     protected Comparator<E> sortedListComparator = null;
 
     /** manage which columns are sorted and in which order */
-    private final SortingState sortingState = new SortingState(this);
-
-    /** the sorting strategy handles clicks and knows what to do with them. */
-    private SortingStrategy sortingStrategy = null;
+    protected final SortingState sortingState = new SortingState(this);
 
     /**
      * Create a {@link AbstractTableComparatorChooser} that sorts the specified
@@ -48,22 +98,6 @@ public abstract class AbstractTableComparatorChooser<E> {
         this.setTableFormat(tableFormat);
 
         this.sortingState.addPropertyChangeListener(new SortingStateListener());
-    }
-
-    /**
-     * Set the sorting strategy that this class uses to handle mouse clicks.
-     */
-    protected void setStrategy(SortingStrategy sortingStrategy) {
-        // clean up the old sorting strategy
-        if(this.sortingStrategy != null) {
-            this.sortingStrategy.dispose();
-        }
-
-        // set up the new sorting strategy
-        this.sortingStrategy = sortingStrategy;
-        if(this.sortingStrategy != null) {
-            this.sortingStrategy.setSortingState(sortingState);
-        }
     }
 
     /**
@@ -181,14 +215,6 @@ public abstract class AbstractTableComparatorChooser<E> {
     }
 
     /**
-     * Handle a column being clicked by sorting that column.
-     */
-    protected void columnClicked(int column, int clicks) {
-        ((ClickDoubleClickSortingStrategy)sortingStrategy).columnClicked(column, clicks);
-        sortingState.fireSortingChanged();
-    }
-
-    /**
      * Examines the current {@link Comparator} of the SortedList and
      * adds icons to the table header renderers in response.
      *
@@ -260,6 +286,141 @@ public abstract class AbstractTableComparatorChooser<E> {
         this.sortedList = null;
         this.tableFormat = null;
         this.sortedListComparator = null;
-        this.sortingStrategy.dispose();
+    }
+
+
+    /**
+     * Behaviour that defines how to interpret a mouse click on a table's header.
+     *
+     * <p>This interface is intentionally stateless so that a single
+     * instance can be shared between multiple <code>TableComparatorChooser</code>s.
+     *
+     * <p>This interface is <strong>not</strong> designed to be implemented by
+     * users of <code>TableComparatorChooser</code>. Instead, use the predefined
+     * constant values.
+     */
+    public interface SortingStrategy {
+        public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control);
+    }
+
+    /**
+     * @see SINGLE_COLUMN
+     * @see MULTIPLE_COLUMN_MOUSE
+     */
+    private static final class MouseOnlySortingStrategy implements SortingStrategy {
+
+        /** if false, other sorting columns will be cleared before a click takes effect */
+        private final boolean multipleColumnSort;
+
+        /**
+         * Create a new {@link MouseOnlySortingStrategy}, sorting multiple
+         * columns or not as specified.
+         */
+        private MouseOnlySortingStrategy(boolean multipleColumnSort) {
+            this.multipleColumnSort = multipleColumnSort;
+        }
+
+        /**
+         * Adjust the sorting state based on receiving the specified clicks.
+         */
+        public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control) {
+            SortingState.SortingColumn clickedColumn = sortingState.getColumns().get(column);
+            if(clickedColumn.getComparators().isEmpty()) return;
+
+            List<SortingState.SortingColumn> recentlyClickedColumns = sortingState.getRecentlyClickedColumns();
+
+            // on a double click, clear all click counts
+            if(clicks == 2) {
+                for(Iterator<SortingState.SortingColumn> i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
+                    SortingState.SortingColumn sortingColumn = i.next();
+                    sortingColumn.clear();
+                }
+                recentlyClickedColumns.clear();
+
+            // if we're only sorting one column at a time, clear other columns
+            } else if(!multipleColumnSort) {
+                for(Iterator<SortingState.SortingColumn> i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
+                    SortingState.SortingColumn sortingColumn = i.next();
+                    if(sortingColumn != clickedColumn) {
+                        sortingColumn.clear();
+                    }
+                }
+                recentlyClickedColumns.clear();
+            }
+
+            // add a click to the newly clicked column if it has any comparators
+            int netClicks = 1 + clickedColumn.getComparatorIndex() * 2 + (clickedColumn.isReverse() ? 1 : 0);
+            clickedColumn.setComparatorIndex((netClicks / 2) % clickedColumn.getComparators().size());
+            clickedColumn.setReverse(netClicks % 2 == 1);
+            if(!recentlyClickedColumns.contains(clickedColumn)) {
+                recentlyClickedColumns.add(clickedColumn);
+            }
+
+            // rebuild the sorting state
+            sortingState.fireSortingChanged();
+        }
+    }
+
+    /**
+     * @see MULTIPLE_COLUMN_KEYBOARD
+     */
+    private static class MouseKeyboardSortingStrategy implements SortingStrategy {
+
+        /** a column is sorted in forward, reverse or not at all */
+        private static final int NONE = 0;
+        private static final int FORWARD = 1;
+        private static final int REVERSE = 2;
+
+        /**
+         * Adjust the sorting state based on receiving the specified click event.
+         */
+        public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control) {
+            SortingState.SortingColumn sortingColumn = sortingState.getColumns().get(column);
+            if(sortingColumn.getComparators().isEmpty()) return;
+            List<SortingState.SortingColumn> recentlyClickedColumns = sortingState.getRecentlyClickedColumns();
+
+            // figure out which comparator and reverse state we were on before
+            int comparatorIndexBefore = sortingColumn.getComparatorIndex();
+            final int forwardReverseNoneBefore;
+            if(comparatorIndexBefore == -1) forwardReverseNoneBefore = NONE;
+            else forwardReverseNoneBefore = sortingColumn.isReverse() ? REVERSE : FORWARD;
+
+            // figure out which comparator and reverse state we shall go to
+            int forwardReverseNoneAfter;
+            int comparatorIndexAfter;
+            boolean moreComparators = comparatorIndexBefore + 1 < sortingColumn.getComparators().size();
+            boolean lastDirective = shift ? forwardReverseNoneBefore == FORWARD : forwardReverseNoneBefore == REVERSE;
+
+            // if we're on the last mode of this comparator, go to the next comparator
+            if(moreComparators && lastDirective) {
+                comparatorIndexAfter = (comparatorIndexBefore + 1) % sortingColumn.getComparators().size();
+                forwardReverseNoneAfter = forwardReverseNoneBefore == FORWARD ? REVERSE : FORWARD;
+
+            // otherwise merely toggle forward/reverse/none
+            } else {
+                comparatorIndexAfter = comparatorIndexBefore != -1 ? comparatorIndexBefore : 0;
+                forwardReverseNoneAfter = (shift ? forwardReverseNoneBefore + 2 : forwardReverseNoneBefore + 1) % 3;
+            }
+
+            // clean up if necessary
+            if(!control) {
+                sortingState.clearComparators();
+            }
+
+            // prepare the latest column
+            if(forwardReverseNoneAfter == NONE) {
+                sortingColumn.clear();
+                recentlyClickedColumns.remove(sortingColumn);
+            } else {
+                sortingColumn.setComparatorIndex(comparatorIndexAfter);
+                sortingColumn.setReverse(forwardReverseNoneAfter == REVERSE);
+                if(!recentlyClickedColumns.contains(sortingColumn)) {
+                    recentlyClickedColumns.add(sortingColumn);
+                }
+            }
+
+            // rebuild the sorting state
+            sortingState.fireSortingChanged();
+        }
     }
 }

@@ -8,10 +8,6 @@ import ca.odell.glazedlists.*;
 // the Glazed Lists util and impl packages include default comparators
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.SortIconFactory;
-import ca.odell.glazedlists.impl.gui.SortingStrategy;
-import ca.odell.glazedlists.impl.gui.ClickDoubleClickSortingStrategy;
-import ca.odell.glazedlists.impl.gui.SortingState;
-import ca.odell.glazedlists.impl.gui.KeyboardModifiersSortingStrategy;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import javax.swing.table.*;
@@ -67,9 +63,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     /** the sort icons to use */
     private static Icon[] icons = SortIconFactory.loadIcons();
 
-    public static final Object STRATEGY_ALTERNATE = new Object();
-    public static final Object STRATEGY_ALTERNATE_MULTICOLUMN = new Object();
-    public static final Object STRATEGY_KEYBOARD_MODIFIERS = new Object();
+    /** when somebody clicks on the header, update the sorting state */
+    private final HeaderClickHandler headerClickHandler;
 
     /**
      * Creates a new TableComparatorChooser that responds to clicks
@@ -83,11 +78,11 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *      not as simple and this strategy should only be used where necessary.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
-        this(table, sortedList, multipleColumnSort ? STRATEGY_ALTERNATE_MULTICOLUMN : STRATEGY_ALTERNATE);
+        this(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
     }
 
 
-    public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
+    public TableComparatorChooser(JTable table, SortedList<E> sortedList, SortingStrategy strategy) {
         super(sortedList, ((EventTableModel)table.getModel()).getTableFormat());
 
         // save the Swing-specific state
@@ -102,15 +97,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         table.getModel().addTableModelListener(tableModelHandler);
 
         // install the sorting strategy to interpret clicks
-        final SortingStrategy sortingStrategy;
-        if(strategy == STRATEGY_ALTERNATE) sortingStrategy = new SwingCycleSortingStrategy(table, false);
-        else if(strategy == STRATEGY_ALTERNATE_MULTICOLUMN) sortingStrategy = new SwingCycleSortingStrategy(table, true);
-        else if(strategy == STRATEGY_KEYBOARD_MODIFIERS) sortingStrategy = new SwingKeyboardModifiersSortingStrategy(table);
-        else throw new IllegalArgumentException("Unrecognized strategy, " + strategy);
-        super.setStrategy(sortingStrategy);
+        this.headerClickHandler = new HeaderClickHandler(table, strategy);
     }
-
-
 
     /**
      * Registers the specified {@link ActionListener} to receive notification whenever
@@ -168,9 +156,17 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * {@link TableComparatorChooser}. The default implementation handles only clicks
      * with the left mouse button. Extending classes can customize which mouse
      * events the table comparator chooser responds to by overriding this method.
+     *
+     * <p>As of 2005/12/20, that this method is no longer called when the
+     * corresponding mouse press event was a popup trigger. In effect, if this
+     * is a right-click on Windows or a 'control-click' on the Mac.
      */
     protected boolean isSortingMouseEvent(MouseEvent e) {
-        return (e.getButton() == MouseEvent.BUTTON1);
+        // skip the sort if it's not button 1
+        if(e.getButton() != MouseEvent.BUTTON1) return false;
+
+        // we have no reason to dislike this mouse event!
+        return true;
     }
 
     /**
@@ -204,6 +200,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      */
     public void dispose() {
         super.dispose();
+        headerClickHandler.dispose();
 
         // if the default renderer within the table header is our sort arrow renderer,
         // uninstall it by restoring the table header's original default renderer
@@ -305,60 +302,21 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     }
 
     /**
-     * Handle clicks to the column's header in cycles.
+     * Handle clicks to the table's header by adjusting the sorrting state.
      */
-    private class SwingCycleSortingStrategy extends MouseAdapter implements SortingStrategy {
-        private JTable table;
-        private final ClickDoubleClickSortingStrategy delegate;
-        public SwingCycleSortingStrategy(JTable table, boolean multipleColumnSort) {
+    private class HeaderClickHandler extends MouseAdapter {
+        private final JTable table;
+        private final SortingStrategy delegate;
+        private boolean mouseEventIsPerformingPopupTrigger = false;
+
+        public HeaderClickHandler(JTable table, SortingStrategy delegate) {
             this.table = table;
-            this.delegate = new ClickDoubleClickSortingStrategy(multipleColumnSort);
-
-            table.getTableHeader().addMouseListener(this);
-        }
-
-        /**
-         * When the mouse is clicked, this selects the next comparator in
-         * sequence for the specified table. This will re-sort the table
-         * by a new criterea.
-         *
-         * This code is based on the Java Tutorial's TableSorter
-         * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html#sorting">The Java Tutorial</a>
-         */
-        public void mouseClicked(MouseEvent e) {
-            if(!isSortingMouseEvent(e)) return;
-
-            TableColumnModel columnModel = table.getColumnModel();
-            int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-            int column = table.convertColumnIndexToModel(viewColumn);
-            int clicks = e.getClickCount();
-            if(clicks >= 1 && column != -1) {
-                delegate.columnClicked(column, clicks);
-            }
-        }
-
-        /** {@inheritDoc} */
-        public void setSortingState(SortingState sortingState) {
-            delegate.setSortingState(sortingState);
-        }
-
-        /** {@inheritDoc} */
-        public void dispose() {
-            table.getTableHeader().removeMouseListener(this);
-            delegate.dispose();
-        }
-    }
-
-    private class SwingKeyboardModifiersSortingStrategy extends MouseAdapter implements SortingStrategy {
-        private JTable table;
-        private KeyboardModifiersSortingStrategy delegate = new KeyboardModifiersSortingStrategy();
-
-        public SwingKeyboardModifiersSortingStrategy(JTable table) {
-            this.table = table;
+            this.delegate = delegate;
             table.getTableHeader().addMouseListener(this);
         }
 
         public void mouseClicked(MouseEvent e) {
+            if(mouseEventIsPerformingPopupTrigger) return;
             if(!isSortingMouseEvent(e)) return;
 
             boolean shift = e.isShiftDown();
@@ -369,20 +327,21 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             int column = table.convertColumnIndexToModel(viewColumn);
             int clicks = e.getClickCount();
             if(clicks >= 1 && column != -1) {
-                delegate.columnClicked(column, shift, control);
+                delegate.columnClicked(sortingState, column, clicks, shift, control);
             }
         }
 
-        /** {@inheritDoc} */
-        public void setSortingState(SortingState sortingState) {
-            delegate.setSortingState(sortingState);
+        /**
+         * Keep track of whether the mouse is triggering a popup, so we
+         * can avoid sorting the table when the poor user just wants to show
+         * a context menu.
+         */
+        public void mousePressed(MouseEvent mouseEvent) {
+            this.mouseEventIsPerformingPopupTrigger = mouseEvent.isPopupTrigger();
         }
 
-        /** {@inheritDoc} */
         public void dispose() {
             table.getTableHeader().removeMouseListener(this);
-            delegate.dispose();
         }
     }
-
 }
