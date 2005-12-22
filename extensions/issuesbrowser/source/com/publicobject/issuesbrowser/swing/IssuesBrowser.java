@@ -72,6 +72,12 @@ public class IssuesBrowser implements Runnable {
      * Loads the issues browser as standalone application.
      */
     public void run() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            // do nothing - fall back to default look and feel
+        }
+
         constructStandalone();
 
         // debug a problem where the thread is getting interrupted
@@ -141,6 +147,7 @@ public class IssuesBrowser implements Runnable {
         issuesJTable.setDefaultRenderer(Priority.class, new NoFocusRenderer(new PriorityTableCellRenderer()));
         new TableComparatorChooser<Issue>(issuesJTable, issuesSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
         JScrollPane issuesTableScrollPane = new JScrollPane(issuesJTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        issuesTableScrollPane.getViewport().setBackground(UIManager.getColor("EditorPane.background"));
         issuesTableScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         // users table
