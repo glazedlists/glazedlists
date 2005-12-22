@@ -8,6 +8,8 @@ import ca.odell.glazedlists.*;
 // the Glazed Lists util and volatile packages for default comparators
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.sort.*;
+import ca.odell.glazedlists.impl.gui.SortingStrategy;
+import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 // for keeping lists of comparators
@@ -32,6 +34,8 @@ import org.eclipse.swt.events.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class TableComparatorChooser extends AbstractTableComparatorChooser {
+
+    private final SortingStrategy sortingStrategy;
 
     /** the table being sorted */
     private Table table;
@@ -64,7 +68,8 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
             table.getColumn(c).addSelectionListener(columnListener);
         }
 
-        throw new IllegalStateException("Sorting strategy not installed, this class is mid-refactoring");
+        // sort using the specified approach
+        sortingStrategy = new MouseOnlySortingStrategy(multipleColumnSort);
     }
 
     /**
@@ -95,7 +100,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
             TableColumn column = (TableColumn)e.widget;
             Table table = column.getParent();
             int columnIndex = table.indexOf(column);
-            columnClicked(columnIndex, 1);
+            sortingStrategy.columnClicked(sortingState, columnIndex, 1, false, false);
         }
         public void widgetDefaultSelected(SelectionEvent e) {
             // Do Nothing

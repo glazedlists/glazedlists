@@ -9,10 +9,10 @@ import org.eclipse.swt.layout.FillLayout;
 import de.kupzog.ktable.*;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.demo.issuebrowser.Issue;
-import ca.odell.glazedlists.demo.issuebrowser.IssueLoader;
-import ca.odell.glazedlists.demo.issuebrowser.Throbber;
-import ca.odell.glazedlists.demo.issuebrowser.Project;
+import com.publicobject.issuesbrowser.IssueLoader;
+import com.publicobject.issuesbrowser.Project;
+import com.publicobject.issuesbrowser.Throbber;
+import com.publicobject.issuesbrowser.Issue;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -54,7 +54,7 @@ public class KTableDemo {
         // loads issues
         final IssueLoader issueLoader = new IssueLoader(issuesEventList, new SimpleThrobber());
         issueLoader.start();
-        issueLoader.setProject((Project)Project.getProjects().get(0));
+        issueLoader.setProject((Project) Project.getProjects().get(0));
     }
 
     private static class SimpleThrobber implements Throbber {
