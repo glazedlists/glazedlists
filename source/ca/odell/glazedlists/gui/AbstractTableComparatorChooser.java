@@ -12,6 +12,9 @@ import java.beans.PropertyChangeEvent;
 // For Comparators
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.gui.SortingState;
+import ca.odell.glazedlists.impl.gui.MouseKeyboardSortingStrategy;
+import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
+import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a table
@@ -30,7 +33,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      *
      * <p>At most one column can be sorted at a time.
      */
-    public static final SortingStrategy SINGLE_COLUMN = new MouseOnlySortingStrategy(false);
+    public static final Object SINGLE_COLUMN = new MouseOnlySortingStrategy(false);
 
     /**
      * Sort multiple columns without use of the keyboard.  Single clicks cycle
@@ -50,7 +53,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      *
      * <li>Double click: like a single click, but clear all sorting columns first.
      */
-    public static final SortingStrategy MULTIPLE_COLUMN_MOUSE = new MouseOnlySortingStrategy(true);
+    public static final Object MULTIPLE_COLUMN_MOUSE = new MouseOnlySortingStrategy(true);
 
     /**
      * Emulate the sorting behaviour of TableSorter, by Philip Milne et. al.
@@ -75,7 +78,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      *
      * @see <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">Table tutorial</a>
      */
-    public static final SortingStrategy MULTIPLE_COLUMN_KEYBOARD = new MouseKeyboardSortingStrategy();
+    public static final Object MULTIPLE_COLUMN_KEYBOARD = new MouseKeyboardSortingStrategy();
 
     /** the sorted list to choose the comparators for */
     protected SortedList<E> sortedList;
@@ -289,138 +292,4 @@ public abstract class AbstractTableComparatorChooser<E> {
     }
 
 
-    /**
-     * Behaviour that defines how to interpret a mouse click on a table's header.
-     *
-     * <p>This interface is intentionally stateless so that a single
-     * instance can be shared between multiple <code>TableComparatorChooser</code>s.
-     *
-     * <p>This interface is <strong>not</strong> designed to be implemented by
-     * users of <code>TableComparatorChooser</code>. Instead, use the predefined
-     * constant values.
-     */
-    public interface SortingStrategy {
-        public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control);
-    }
-
-    /**
-     * @see SINGLE_COLUMN
-     * @see MULTIPLE_COLUMN_MOUSE
-     */
-    private static final class MouseOnlySortingStrategy implements SortingStrategy {
-
-        /** if false, other sorting columns will be cleared before a click takes effect */
-        private final boolean multipleColumnSort;
-
-        /**
-         * Create a new {@link MouseOnlySortingStrategy}, sorting multiple
-         * columns or not as specified.
-         */
-        private MouseOnlySortingStrategy(boolean multipleColumnSort) {
-            this.multipleColumnSort = multipleColumnSort;
-        }
-
-        /**
-         * Adjust the sorting state based on receiving the specified clicks.
-         */
-        public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control) {
-            SortingState.SortingColumn clickedColumn = sortingState.getColumns().get(column);
-            if(clickedColumn.getComparators().isEmpty()) return;
-
-            List<SortingState.SortingColumn> recentlyClickedColumns = sortingState.getRecentlyClickedColumns();
-
-            // on a double click, clear all click counts
-            if(clicks == 2) {
-                for(Iterator<SortingState.SortingColumn> i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
-                    SortingState.SortingColumn sortingColumn = i.next();
-                    sortingColumn.clear();
-                }
-                recentlyClickedColumns.clear();
-
-            // if we're only sorting one column at a time, clear other columns
-            } else if(!multipleColumnSort) {
-                for(Iterator<SortingState.SortingColumn> i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
-                    SortingState.SortingColumn sortingColumn = i.next();
-                    if(sortingColumn != clickedColumn) {
-                        sortingColumn.clear();
-                    }
-                }
-                recentlyClickedColumns.clear();
-            }
-
-            // add a click to the newly clicked column if it has any comparators
-            int netClicks = 1 + clickedColumn.getComparatorIndex() * 2 + (clickedColumn.isReverse() ? 1 : 0);
-            clickedColumn.setComparatorIndex((netClicks / 2) % clickedColumn.getComparators().size());
-            clickedColumn.setReverse(netClicks % 2 == 1);
-            if(!recentlyClickedColumns.contains(clickedColumn)) {
-                recentlyClickedColumns.add(clickedColumn);
-            }
-
-            // rebuild the sorting state
-            sortingState.fireSortingChanged();
-        }
-    }
-
-    /**
-     * @see MULTIPLE_COLUMN_KEYBOARD
-     */
-    private static class MouseKeyboardSortingStrategy implements SortingStrategy {
-
-        /** a column is sorted in forward, reverse or not at all */
-        private static final int NONE = 0;
-        private static final int FORWARD = 1;
-        private static final int REVERSE = 2;
-
-        /**
-         * Adjust the sorting state based on receiving the specified click event.
-         */
-        public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control) {
-            SortingState.SortingColumn sortingColumn = sortingState.getColumns().get(column);
-            if(sortingColumn.getComparators().isEmpty()) return;
-            List<SortingState.SortingColumn> recentlyClickedColumns = sortingState.getRecentlyClickedColumns();
-
-            // figure out which comparator and reverse state we were on before
-            int comparatorIndexBefore = sortingColumn.getComparatorIndex();
-            final int forwardReverseNoneBefore;
-            if(comparatorIndexBefore == -1) forwardReverseNoneBefore = NONE;
-            else forwardReverseNoneBefore = sortingColumn.isReverse() ? REVERSE : FORWARD;
-
-            // figure out which comparator and reverse state we shall go to
-            int forwardReverseNoneAfter;
-            int comparatorIndexAfter;
-            boolean moreComparators = comparatorIndexBefore + 1 < sortingColumn.getComparators().size();
-            boolean lastDirective = shift ? forwardReverseNoneBefore == FORWARD : forwardReverseNoneBefore == REVERSE;
-
-            // if we're on the last mode of this comparator, go to the next comparator
-            if(moreComparators && lastDirective) {
-                comparatorIndexAfter = (comparatorIndexBefore + 1) % sortingColumn.getComparators().size();
-                forwardReverseNoneAfter = forwardReverseNoneBefore == FORWARD ? REVERSE : FORWARD;
-
-            // otherwise merely toggle forward/reverse/none
-            } else {
-                comparatorIndexAfter = comparatorIndexBefore != -1 ? comparatorIndexBefore : 0;
-                forwardReverseNoneAfter = (shift ? forwardReverseNoneBefore + 2 : forwardReverseNoneBefore + 1) % 3;
-            }
-
-            // clean up if necessary
-            if(!control) {
-                sortingState.clearComparators();
-            }
-
-            // prepare the latest column
-            if(forwardReverseNoneAfter == NONE) {
-                sortingColumn.clear();
-                recentlyClickedColumns.remove(sortingColumn);
-            } else {
-                sortingColumn.setComparatorIndex(comparatorIndexAfter);
-                sortingColumn.setReverse(forwardReverseNoneAfter == REVERSE);
-                if(!recentlyClickedColumns.contains(sortingColumn)) {
-                    recentlyClickedColumns.add(sortingColumn);
-                }
-            }
-
-            // rebuild the sorting state
-            sortingState.fireSortingChanged();
-        }
-    }
 }

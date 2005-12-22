@@ -26,7 +26,12 @@ import ca.odell.glazedlists.impl.adt.*;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>96 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=96">96</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=162">162</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=257">257</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=265">265</a>
+ * </td></tr>
  * </table>
  *
  * @see CollectionList.Model

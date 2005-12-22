@@ -24,6 +24,9 @@ import javax.swing.table.*;
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
  * @see SwingUtilities#invokeAndWait(Runnable)
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=112">Bug 112</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=146">Bug 146</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=177">Bug 177</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

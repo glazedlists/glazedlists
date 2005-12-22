@@ -31,6 +31,14 @@ import java.util.*;
  * become selected. To set this mode, use
  * {@link #setSelectionMode(int) setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE)}.
  *
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=39">Bug 39</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=61">Bug 61</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=76">Bug 76</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=108">Bug 108</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=110">Bug 110</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=112">Bug 112</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=222">Bug 222</a>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class EventSelectionModel<E> implements ListSelectionModel {

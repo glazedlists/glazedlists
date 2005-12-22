@@ -27,6 +27,8 @@ import java.util.List;
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>frozen: 4 bytes per element, thawed: 0 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ * </td></tr>
  * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

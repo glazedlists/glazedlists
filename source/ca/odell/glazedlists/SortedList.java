@@ -32,7 +32,20 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N), change comparator O(N log N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>72 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=39">39</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=40">40</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=58">58</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=60">60</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=62">62</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=66">66</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=161">161</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=170">170</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=206">206</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=239">239</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=255">255</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=261">261</a>
+ * </td></tr>
  * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
@@ -49,7 +62,7 @@ public final class SortedList<E> extends TransformedList<E, E> {
     /**
      * Sorting mode where elements aren't moved when their value is changed,
      * even if this means they are no longer in perfect sorted order. This mode
-     * is useful in editable list and tables because it is annoying
+     * is useful in editable lists and tables because it is annoying
      * for the current element to move if its value changes.
      */
     public static final int AVOID_MOVING_ELEMENTS = 1;

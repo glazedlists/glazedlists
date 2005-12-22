@@ -22,6 +22,9 @@ import java.util.*;
  * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)}.
  * 
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=14">Bug 14</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=146">Bug 146</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=177">Bug 177</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=228">Bug 228</a>
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>

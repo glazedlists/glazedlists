@@ -53,7 +53,9 @@ import java.util.List;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(1), writes O(1) amortized</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td></td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>FunctionList</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=282">282</a>
+ * </td></tr>
  * </table>
  */
 public final class FunctionList<S, E> extends TransformedList<S, E> {

@@ -26,22 +26,6 @@ public interface ListEventListener<E> extends EventListener {
      * When the underlying list changes, this notification allows the
      * object to repaint itself or update itself as necessary.
      *
-     * <p>The receiving class must iterate through all of the changes in
-     * the list change event or else the change objects will remain
-     * in memory indefinitely. The easiest way to iterate through the
-     * changes is in a while loop like this:
-     *
-     * <tt><pre><code>
-     * while(listChanges.next()) {
-     *    
-     *     // get the current change info
-     *    int unsortedIndex = listChanges.getIndex();
-     *    int changeType = listChanges.getType();
-     *
-     *    // handle change with the specified index and type
-     * }
-     * </code></pre></tt>
-     *
      * <p>It is mandatory that the calling thread has obtained the write lock
      * on the source list. This is because the calling thread will have written
      * to the source list to cause this event. This condition guarantees that

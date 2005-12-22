@@ -29,7 +29,9 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td></td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>GroupingListTest</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=281">281</a>
+ * </td></tr>
  * </table>
  *
  * @author James Lemieux

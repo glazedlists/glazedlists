@@ -23,7 +23,16 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td></td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>N/A</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=27">27</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=34">34</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=35">35</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=45">45</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=46">46</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=55">55</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=58">58</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=114">114</a>
+ * </td></tr>
  * </table>
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>

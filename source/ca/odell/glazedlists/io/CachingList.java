@@ -33,8 +33,15 @@ import ca.odell.glazedlists.EventList;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=22">22</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=32">32</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=43">43</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=262">262</a>
+ * </td></tr>
  * </table>
+ *
+ *
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */

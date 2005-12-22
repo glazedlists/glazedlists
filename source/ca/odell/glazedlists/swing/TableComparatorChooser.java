@@ -8,6 +8,7 @@ import ca.odell.glazedlists.*;
 // the Glazed Lists util and impl packages include default comparators
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.impl.SortIconFactory;
+import ca.odell.glazedlists.impl.gui.SortingStrategy;
 // Swing toolkit stuff for displaying widgets
 import javax.swing.*;
 import javax.swing.table.*;
@@ -20,28 +21,32 @@ import java.util.*;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking
- * on the table's headers. It requires that the ListTable has a SortedList as
- * a source as the sorting on that list is used.
+ * on the table's headers. It requires that the {@link JTable}s model is an
+ * {@link EventTableModel} with a {@link SortedList} as a source.
  *
- * <p>The TableComparatorChooser includes custom arrow icons that indicate the sort
+ * <p>This class includes custom arrow icons that indicate the sort
  * order. The icons used are chosen based on the current Swing look and feel.
  * Icons are available for the following look and feels: Mac OS X, Metal, Windows.
  *
- * <p>The TableComparatorChooser supports multiple sort strategies for each
+ * <p>This class supports multiple sort strategies for each
  * column, specified by having muliple comparators for each column. This may
  * be useful when you want to sort a single column in either of two ways. For
  * example, when sorting movie names, "The Phantom Menace" may be sorted under
  * "T" for "The", or "P" for "Phantom".
  *
- * <p>The TableComparatorChooser supports sorting multiple columns simultaneously.
+ * <p>This class supports sorting multiple columns simultaneously.
  * In this mode, the user clicks a first column to sort by, and then the user
  * clicks subsequent columns. The list is sorted by the first column and ties
  * are broken by the second column.
  *
+ * <p>If the {@link EventTableModel} uses a {@link AdvancedTableFormat}, its
+ * {@link AdvancedTableFormat#getColumnComparator} method will be used to
+ * populate the initial column {@link Comparator}s.
+ *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=4">Bug 4</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=31">Bug 31</a>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E> {
 
@@ -82,8 +87,11 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     }
 
 
-    public TableComparatorChooser(JTable table, SortedList<E> sortedList, SortingStrategy strategy) {
+    public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
         super(sortedList, ((EventTableModel)table.getModel()).getTableFormat());
+        if(!(strategy instanceof SortingStrategy)) {
+            throw new IllegalArgumentException("Unrecognized sorting strategy, \"" + strategy + "\", use one of AbstractTableComparatorChooser.SINGLE_COLUMN, AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE, or AbstractTableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD");
+        }
 
         // save the Swing-specific state
         this.table = table;
@@ -97,7 +105,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         table.getModel().addTableModelListener(tableModelHandler);
 
         // install the sorting strategy to interpret clicks
-        this.headerClickHandler = new HeaderClickHandler(table, strategy);
+        this.headerClickHandler = new HeaderClickHandler(table, (SortingStrategy)strategy);
     }
 
     /**
@@ -320,7 +328,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             if(!isSortingMouseEvent(e)) return;
 
             boolean shift = e.isShiftDown();
-            boolean control = e.isControlDown();
+            boolean control = e.isControlDown() || e.isMetaDown();
 
             TableColumnModel columnModel = table.getColumnModel();
             int viewColumn = columnModel.getColumnIndexAtX(e.getX());

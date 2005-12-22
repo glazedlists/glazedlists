@@ -18,6 +18,21 @@ import java.util.Iterator;
  * {@link CompositeList}, use {@link #createMemberList()} or
  * {@link BasicEventList#BasicEventList(ReadWriteLock) new BasicEventList(CompositeList.getReadWriteLock())}
  *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>only {@link #set(int,Object)} and {@link #remove(int)}</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td><strong>not thread safe</strong></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>96 bytes per element</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=25">25</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=93">93</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=96">96</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=162">162</a>
+ * </td></tr>
+ * </table>
+ *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class CompositeList<E> extends CollectionList<EventList<E>, E> {

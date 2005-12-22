@@ -38,7 +38,14 @@ import java.util.*;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N), change threshold O(log N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>72 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=47">47</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=137">137</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=217">217</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=218">218</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=246">246</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=277">277</a>
+ * </td></tr>
  * </table>
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>

@@ -29,7 +29,14 @@ import ca.odell.glazedlists.impl.adt.*;
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N), filter changes O(N)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>0 to 26 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=1">1</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=2">2</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=7">7</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=46">46</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=187">187</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=254">254</a>
+ * </td></tr>
  * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
