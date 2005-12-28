@@ -14,7 +14,6 @@ import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.gui.SortingState;
 import ca.odell.glazedlists.impl.gui.MouseKeyboardSortingStrategy;
 import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
-import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a table
@@ -40,7 +39,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * through comparators, double clicks clear them.
      *
      * <p>This is the original sorting strategy provided by Glazed Lists, with a
-     * limitation that it is impossible to clear a sort order that is  already in
+     * limitation that it is impossible to clear a sort order that is already in
      * place. It's designed to be used with multiple columns and multiple comparators
      * per column.
      *
@@ -49,14 +48,14 @@ public abstract class AbstractTableComparatorChooser<E> {
      * <li>Click: sort this column. If it's already sorted, reverse the sort order.
      * If its already reversed, sort using the column's next comparator in forward
      * order. If there are no more comparators, go to the first comparator. If there
-     * are multiple columns, sort this column after those columns.
+     * are multiple sort columns, sort this column after those columns.
      *
      * <li>Double click: like a single click, but clear all sorting columns first.
      */
     public static final Object MULTIPLE_COLUMN_MOUSE = new MouseOnlySortingStrategy(true);
 
     /**
-     * Emulate the sorting behaviour of TableSorter, by Philip Milne et. al.
+     * Emulate the sorting behaviour of SUN's TableSorter, by Philip Milne et. al.
      *
      * <p>This is not a direct adaptation since we choose to support potentially
      * many Comparators per column, wheras TableSorter is limited to one.

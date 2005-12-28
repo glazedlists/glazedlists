@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.gui;
 
-import ca.odell.glazedlists.impl.gui.SortingState;
-
 import java.util.List;
 import java.util.Iterator;
 
@@ -14,7 +12,7 @@ import java.util.Iterator;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class MouseOnlySortingStrategy implements ca.odell.glazedlists.impl.gui.SortingStrategy {
+public final class MouseOnlySortingStrategy implements SortingStrategy {
 
     /** if false, other sorting columns will be cleared before a click takes effect */
     private final boolean multipleColumnSort;
