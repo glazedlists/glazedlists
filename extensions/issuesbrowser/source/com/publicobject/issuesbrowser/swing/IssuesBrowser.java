@@ -20,6 +20,7 @@ import java.awt.event.*;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.net.ConnectException;
 import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -87,6 +88,7 @@ public class IssuesBrowser implements Runnable {
 
         // we have advice for the user when we cannot connect to a host
         Exceptions.getInstance().addHandler(new UnknownHostExceptionHandler());
+        Exceptions.getInstance().addHandler(new ConnectExceptionHandler());
         Exceptions.getInstance().addHandler(new NoRouteToHostExceptionHandler());
         Exceptions.getInstance().addHandler(new AccessControlExceptionHandler());
 
@@ -153,7 +155,7 @@ public class IssuesBrowser implements Runnable {
         // users table
         JScrollPane usersListScrollPane = new JScrollPane(userMatcherEditor.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        issueDetails = new IssueDetailsComponent();
+        issueDetails = new IssueDetailsComponent(priorityList);
 
         // priority slider
         BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
@@ -233,7 +235,7 @@ public class IssuesBrowser implements Runnable {
 
         // assemble all data components on a common panel
         JPanel dataPanel = new JPanel();
-        JComponent issueDetailsComponent = issueDetails.getComponent();
+        JComponent issueDetailsComponent = issueDetails;
         issueDetailsComponent.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
         dataPanel.setLayout(new GridLayout(2, 1));
         dataPanel.add(issuesTableScrollPane);
@@ -255,7 +257,8 @@ public class IssuesBrowser implements Runnable {
         public void valueChanged(ListSelectionEvent e) {
             // get the newly selected issue
             Issue selected = null;
-            if(issuesSelectionModel.getSelected().size() > 0) selected = (Issue)issuesSelectionModel.getSelected().get(0);
+            if(issuesSelectionModel.getSelected().size() > 0)
+                selected = (Issue)issuesSelectionModel.getSelected().get(0);
 
             // update the description issue
             if(selected == descriptionIssue) return;
@@ -377,15 +380,12 @@ public class IssuesBrowser implements Runnable {
     }
 
     /**
-     * An Exceptions.Handler for UnknownHostExceptions that displays an
+     * An abstract Exceptions.Handler for all types of Exceptions that indicate
+     * a connection to the internet could not be establishedd. It displays an
      * informative message stating how to configure Java to use a proxy
      * server.
      */
-    private class UnknownHostExceptionHandler implements Exceptions.Handler {
-        public boolean recognize(Exception e) {
-            return e instanceof UnknownHostException;
-        }
-
+    private abstract class AbstractCannotConnectExceptionHandler implements Exceptions.Handler {
         public void handle(Exception e) {
             final String title = "Unable to connect to the Internet";
 
@@ -402,6 +402,28 @@ public class IssuesBrowser implements Runnable {
             }
 
             SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
+        }
+    }
+
+    /**
+     * An Exceptions.Handler for UnknownHostExceptions that displays an
+     * informative message stating how to configure Java to use a proxy
+     * server.
+     */
+    private class UnknownHostExceptionHandler extends AbstractCannotConnectExceptionHandler {
+        public boolean recognize(Exception e) {
+            return e instanceof UnknownHostException;
+        }
+    }
+
+    /**
+     * An Exceptions.Handler for ConnectExceptions that displays an
+     * informative message stating how to configure Java to use a proxy
+     * server.
+     */
+    private class ConnectExceptionHandler extends AbstractCannotConnectExceptionHandler {
+        public boolean recognize(Exception e) {
+            return e instanceof ConnectException;
         }
     }
 
