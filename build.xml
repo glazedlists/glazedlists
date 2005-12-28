@@ -98,7 +98,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,swt,io"
+	<target name="compileall" depends="core,migrationkit,swing,io,swt,jfreechart,issuesbrowser"
 		description="Compile all components of the source.">
 	</target>
 
@@ -285,11 +285,19 @@
             <arg value="java14_glazedlists/extensions/swt/source"/>
         </java>
 
+        <!-- Declaw jfreechart/ -->
+        <mkdir dir="java14_glazedlists/extensions/jfreechart/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/jfreechart/source"/>
+            <arg value="classes${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar"/>
+            <arg value="java14_glazedlists/extensions/jfreechart/source"/>
+        </java>
+
         <!-- Declaw issuesbrowser/ -->
         <mkdir dir="java14_glazedlists/extensions/issuesbrowser/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/issuesbrowser/source"/>
-            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar"/>
+            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar"/>
             <arg value="java14_glazedlists/extensions/issuesbrowser/source"/>
         </java>
 
