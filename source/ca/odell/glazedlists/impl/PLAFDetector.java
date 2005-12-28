@@ -7,6 +7,7 @@ package ca.odell.glazedlists.impl;
 import javax.swing.UIManager;
 import javax.swing.plaf.metal.*;
 import java.lang.reflect.*;
+import java.security.AccessControlException;
 
 /**
  * A PLAFDetector provides a means to discover which versions of themes
@@ -57,7 +58,13 @@ public final class PLAFDetector {
 
         // no "swing.noxp" system property
         String noXPProperty = "swing.noxp";
-        if(System.getProperty(noXPProperty) != null) return classic;
+        try {
+            if(System.getProperty(noXPProperty) != null) return classic;
+        } catch (AccessControlException e) {
+            // in WebStart, it is possible to receive this exception when
+            // querying for the swing.noxp property - in which case we don't
+            // want to acknowledge the security violation
+        }
 
         // l&f class must not be "WindowsClassicLookAndFeel"
         String classicLnF = "com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel";
