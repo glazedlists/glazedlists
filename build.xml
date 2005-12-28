@@ -21,7 +21,9 @@
 		description="Clean up generated files, forcing them to be rebuilt.">
 		<!-- Delete the directories where generated files fall -->
 		<delete dir="classes"/>
-		<!-- Delete the Java 1.4 build directory -->
+        <!-- Delete the temporary directories created for building the demo jar -->
+        <delete dir="demojar"/>
+        <!-- Delete the Java 1.4 build directory -->
 		<delete dir="java14_glazedlists"/>
 		<!-- Delete the documentation directories -->
 		<delete dir="docs/api"/>
@@ -171,28 +173,73 @@
         </javac>
     </target>
 
-    <target name="issuesbrowser" depends="core,swing,swt">
+    <target name="jfreechart" depends="swing">
+        <mkdir dir="extensions/jfreechart/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/26197/jcommon.jar"/>
+            <arg value="extensions/jfreechart/lib/jcommon.jar"/>
+        </java>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/26198/jfreechart.jar"/>
+            <arg value="extensions/jfreechart/lib/jfreechart.jar"/>
+        </java>
+        <javac destdir="classes" srcdir="extensions/jfreechart/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="issuesbrowser" depends="core,swing,swt,jfreechart">
         <javac destdir="classes" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
+                <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
             </classpath>
         </javac>
     </target>
 
     <target name="demojar" depends="clean,issuesbrowser"
         description="Create a .jar file with the Issues Browser demo application.">
-        <jar destfile="glazedlists-demo.jar" update="true" index="true">
+
+        <!-- make a temporary folder for assembling the demojar -->
+        <mkdir dir="demojar"/>
+
+        <!-- copy the classes into the demojar folder -->
+        <copy todir="demojar">
             <fileset dir="classes"/>
+        </copy>
+
+        <!-- unjar the jfreechart classes into the demojar folder -->
+        <unjar src="extensions/jfreechart/lib/jcommon.jar" dest="demojar"/>
+        <unjar src="extensions/jfreechart/lib/jfreechart.jar" dest="demojar"/>
+
+        <!-- create a *minimal* set of classes required to execute the swing demo -->
+        <classfileset id="demoClasses" dir="demojar" rootclass="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
+
+        <!-- create the actual demo jar -->
+        <jar destfile="glazedlists-demo.jar" update="true" index="true">
+            <fileset refid="demoClasses"/>
+            <fileset dir="demojar">
+                <include name="**/LocalizationBundle*.properties"/>
+                <include name="org/jfree/chart/resources/JFreeChartResources.class"/>
+                <include name="org/jfree/resources/JCommonResources.class"/>
+            </fileset>
             <fileset dir=".">
-                <include name ="resources/**"/>
+                <include name="resources/**"/>
             </fileset>
             <fileset dir="extensions/issuesbrowser">
-                <include name ="resources/**"/>
+                <include name="resources/**"/>
             </fileset>
             <manifest>
                 <attribute name="Main-Class" value="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
             </manifest>
         </jar>
+
+        <!-- clean up the demojar folder -->
+        <delete dir="demojar"/>
 	</target>
 
 
@@ -309,6 +356,7 @@
             overwrite="yes"
             fileStatus="Draft"/>
 	</target>
+
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        TEST
