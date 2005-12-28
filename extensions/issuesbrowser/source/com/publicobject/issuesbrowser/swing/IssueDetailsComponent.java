@@ -3,153 +3,67 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import ca.odell.glazedlists.EventList;
 import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.issuesbrowser.Description;
 
 import javax.swing.*;
-import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.util.Iterator;
 
 /**
- * The details for a particular issue listed out. This also includes a link
- * component, to view the issue in a webbrowser using webstart's
- * BasicService.
+ * This component simply delegates between two other subcomponents. When
+ * no issues are selected, summary charts are shown in the details section.
+ * When a selection does exist, the details of the selected Issue are shown
+ * in the details section.
  *
- * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ * @author James Lemieux
  */
-class IssueDetailsComponent {
+class IssueDetailsComponent extends JComponent {
 
-    private JScrollPane scrollPane;
-    private JTextPane descriptionsTextPane = new JTextPane();
-    private Style plainStyle;
-    private Style whoStyle;
-    private Style buttonStyle;
-    private LinkAction linkAction;
-    private Issue issue = null;
+    /** Shown when an Issue is selected. */
+    private final IssueDetailComponent issueDetailComponent;
 
-    public IssueDetailsComponent() {
-        descriptionsTextPane = new JTextPane();
-        descriptionsTextPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        descriptionsTextPane.setEditable(false);
-        plainStyle = descriptionsTextPane.getStyledDocument().addStyle("plain", null);
-        whoStyle = descriptionsTextPane.getStyledDocument().addStyle("boldItalicRed", null);
-        StyleConstants.setBold(whoStyle, true);
-        StyleConstants.setFontSize(whoStyle, 14);
-
-        linkAction = new LinkAction();
-        JButton linkButton = new JButton(linkAction);
-        linkButton.setOpaque(false);
-
-        buttonStyle = descriptionsTextPane.getStyledDocument().addStyle("linkAction", null);
-        StyleConstants.setComponent(buttonStyle, linkButton);
-
-        scrollPane = new JScrollPane(descriptionsTextPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        MacCornerScrollPaneLayoutManager.install(scrollPane);
-
-        // prepare the initial state
-        setIssue(null);
-    }
-
-    private class LinkAction extends AbstractAction {
-        public LinkAction() {
-            super("View Issue");
-        }
-        public void actionPerformed(ActionEvent event) {
-            WebStart webStart = WebStart.tryCreate();
-            if(webStart == null) return;
-            webStart.openUrl(issue.getURL());
-        }
-    }
-
-    public JComponent getComponent() {
-        return scrollPane;
-    }
-
-    public void setIssue(Issue issue) {
-        this.issue = issue;
-
-        // update the document
-        clear(descriptionsTextPane.getStyledDocument());
-        if(issue != null) {
-            append(descriptionsTextPane.getStyledDocument(), "*", buttonStyle);
-            append(descriptionsTextPane.getStyledDocument(), "\n\n", plainStyle);
-            for(Iterator<Description> d = issue.getDescriptions().iterator(); d.hasNext(); ) {
-                Description description = d.next();
-                writeDescription(descriptionsTextPane.getStyledDocument(), description);
-                if(d.hasNext()) append(descriptionsTextPane.getStyledDocument(), "\n\n", plainStyle);
-            }
-        }
-        descriptionsTextPane.setCaretPosition(0);
-
-        // update the link
-        linkAction.setEnabled(issue != null);
-    }
+    /** Shown when no Issue is selected. */
+    private final IssueSummaryChartsComponent issueSummaryChartsComponent;
 
     /**
-     * Clears the styled document.
+     * Display details for the given <code>issuesList</code>.
      */
-    protected void clear(StyledDocument doc) {
-        try {
-            doc.remove(0, doc.getLength());
-        } catch(BadLocationException e) {
-            throw new RuntimeException(e);
-        }
+    public IssueDetailsComponent(EventList<Issue> issuesList) {
+        this.issueDetailComponent = new IssueDetailComponent();
+        this.issueSummaryChartsComponent = new IssueSummaryChartsComponent(issuesList);
+
+        this.setLayout(new BorderLayout());
+        // initially there is no selection so show the chart component
+        this.showDetailComponent(this.issueSummaryChartsComponent.getComponent());
     }
 
     /**
-     * Write a document to a styled document.
-     */
-    public void writeDescription(StyledDocument doc, Description description) {
-        // write who
-        append(doc, description.getWho(), whoStyle);
-        append(doc, " - ", whoStyle);
-        append(doc, IssuesBrowser.DATE_FORMAT.format(description.getWhen()), whoStyle);
-        append(doc, "\n", whoStyle);
-
-        // write the body
-        append(doc, description.getText(), plainStyle);
-    }
-
-    /**
-     * Convenience method for appending the specified text to the specified document.
+     * If <code>issue</code> is <tt>null</tt> then summary charts are displayed
+     * summarizing the current list of Issues. Otherwise, details of the given
+     * <code>issue</code> are displayed.
      *
-     * @param text   The text to append. The characters "\n" and "\t" are
-     *               useful for creating newlines.
-     * @param format The format to render text in. This class comes with
-     *               a small set of predefined formats accessible only to extending
-     *               classes via protected members.
+     * @param issue the newly selected <code>Issue</code> or <code>null</code>
+     *      if the issue selection was cleared
      */
-    public static void append(StyledDocument targetDocument, String text, Style format) {
-        try {
-            int offset = targetDocument.getLength();
-            targetDocument.insertString(offset, text, format);
-        } catch(BadLocationException e) {
-            throw new RuntimeException(e);
+    public void setIssue(Issue issue) {
+        if (issue != null) {
+            this.showDetailComponent(this.issueDetailComponent.getComponent());
+            this.issueDetailComponent.setIssue(issue);
+        } else {
+            this.showDetailComponent(this.issueSummaryChartsComponent.getComponent());
         }
     }
 
-
     /**
-     * A scrollpane layout that handles the resize box in the bottom right corner.
-     * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+     * A helper method to display a given <code>detailComponent</code> within
+     * this component.
      */
-    public static class MacCornerScrollPaneLayoutManager extends ScrollPaneLayout {
-        private static final int CORNER_HEIGHT = 14;
-        public static void install(JScrollPane scrollPane) {
-            if(System.getProperty("os.name").startsWith("Mac")) {
-                scrollPane.setLayout(new MacCornerScrollPaneLayoutManager());
-            }
-        }
-        public void layoutContainer(Container container) {
-            super.layoutContainer(container);
-            if(!hsb.isVisible() && vsb != null) {
-                Rectangle bounds = new Rectangle(vsb.getBounds());
-                bounds.height = Math.max(0, bounds.height - CORNER_HEIGHT);
-                vsb.setBounds(bounds);
-            }
+    private void showDetailComponent(JComponent detailComponent) {
+        if (this.getComponentCount() == 0 || this.getComponent(0) != detailComponent) {
+            this.removeAll();
+            this.add(detailComponent, BorderLayout.CENTER);
+            this.validate();
+            this.repaint();
         }
     }
 }
