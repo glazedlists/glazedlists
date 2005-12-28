@@ -29,13 +29,10 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
     private static final MessageFormat checkboxFormat = new MessageFormat("{0} {1,choice,0#|0<({1})}");
 
     /** A panel housing a checkbox for each status. */
-    private JPanel checkBoxPanel = new JPanel(new GridLayout(2, 2));
+    private JPanel checkBoxPanel = new JPanel(new GridLayout(4, 2));
 
     /** A checkbox for each displayed status. */
     private final Map<String, JCheckBox> statusCheckBoxes = new LinkedHashMap<String, JCheckBox>();
-
-    /** A user friendly String for each displayed status. */
-    private final Map<String, String> statusLabels = new HashMap<String, String>();
 
     /** Issues grouped together by status. */
     private final EventList<List<Issue>> issuesByStatus;
@@ -52,14 +49,12 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
         this.issuesByStatus.addListEventListener(this);
 
         this.statusCheckBoxes.put("NEW", buildCheckBox("New"));
-        this.statusCheckBoxes.put("RESOLVED", buildCheckBox("Resolved"));
+        this.statusCheckBoxes.put("UNCONFIRMED", buildCheckBox("Unconfirmed"));
         this.statusCheckBoxes.put("STARTED", buildCheckBox("Started"));
+        this.statusCheckBoxes.put("REOPENED", buildCheckBox("Reopened"));
         this.statusCheckBoxes.put("CLOSED", buildCheckBox("Closed"));
-
-        this.statusLabels.put("NEW", "New");
-        this.statusLabels.put("RESOLVED", "Resolved");
-        this.statusLabels.put("STARTED", "Started");
-        this.statusLabels.put("CLOSED", "Closed");
+        this.statusCheckBoxes.put("VERIFIED", buildCheckBox("Verified"));
+        this.statusCheckBoxes.put("RESOLVED", buildCheckBox("Resolved"));
 
         this.checkBoxPanel.setOpaque(false);
 
@@ -83,6 +78,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
      */
     private static JCheckBox buildCheckBox(String name) {
         final JCheckBox checkBox = new JCheckBox(name, true);
+        checkBox.setName(name);
         checkBox.setOpaque(false);
         checkBox.setFocusable(false);
         checkBox.setMargin(new Insets(0, 0, 0, 0));
@@ -136,7 +132,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
             if (checkBox == null) continue;
 
             // update the text of the checkbox to reflect the new bug count for that status
-            checkBox.setText(checkboxFormat.format(new Object[] { statusLabels.get(status), new Integer(count)}));
+            checkBox.setText(checkboxFormat.format(new Object[] { checkBox.getName(), new Integer(count)}));
         }
     }
 
