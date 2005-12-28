@@ -99,7 +99,7 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * @throws org.jfree.data.UnknownKeyException if the key is not recognised
      */
     public Number getValue(Comparable key) {
-        final List group = this.groupingList.get(this.getIndex(key));
+        final List group = (List) this.groupingList.get(this.getIndex(key));
         return new Integer(group.size());
     }
 
@@ -117,7 +117,7 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * @return the value
      */
     public Number getValue(int index) {
-        final List group = this.groupingList.get(index);
+        final List group = (List) this.groupingList.get(index);
         return new Integer(group.size());
     }
 
