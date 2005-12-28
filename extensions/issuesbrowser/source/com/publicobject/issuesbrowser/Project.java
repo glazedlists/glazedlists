@@ -20,7 +20,6 @@ public class Project {
 		projects = new BasicEventList<Project>();
 		projects.add(new Project("glazedlists", "Glazed Lists"));
 		projects.add(new Project("lg3d-core", "Project Looking Glass Core"));
-		projects.add(new Project("java-net", "Java.net Watercooler"));
 		projects.add(new Project("javacc", "Java Compiler Compiler"));
 		projects.add(new Project("sqlexplorer", "SQLExplorer Eclipse Database Plugin"));
 		projects.add(new Project("ofbiz", "Open For Business"));
@@ -28,6 +27,7 @@ public class Project {
 		projects.add(new Project("sip-communicator", "SIP Communicator"));
 		projects.add(new Project("jdic", "JavaDesktop Integration Components"));
 		projects.add(new Project("jdnc", "JavaDesktop Network Components"));
+		projects.add(new Project("javanettasks", "Java.Net Tasks"));
     }
 
     private String projectName = null;
