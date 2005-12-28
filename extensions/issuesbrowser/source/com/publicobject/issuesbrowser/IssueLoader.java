@@ -10,6 +10,7 @@ import ca.odell.glazedlists.GlazedLists;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
+import java.net.ConnectException;
 import java.security.AccessControlException;
 
 /**
@@ -90,7 +91,7 @@ public class IssueLoader implements Runnable {
                 } else if(e.getMessage().equals("Parsing failed java.lang.InterruptedException")) {
                     // do nothing, we were just interrupted as expected
                 } else {
-                    e.printStackTrace();
+                    Exceptions.getInstance().handle(e);
                 }
             } catch (RuntimeException e) {
                 if(e.getCause() instanceof InterruptedException) {
