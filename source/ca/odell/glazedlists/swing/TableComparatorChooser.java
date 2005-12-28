@@ -75,8 +75,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * Creates a new TableComparatorChooser that responds to clicks
      * on the specified table and uses them to sort the specified list.
      *
-     * @param table the table with headers that can be clicked on.
-     * @param sortedList the sorted list to update.
+     * @param table the table with headers that can be clicked on
+     * @param sortedList the sorted list to update
      * @param multipleColumnSort <code>true</code> to sort by multiple columns
      *      at a time, or <code>false</code> to sort by a single column. Although
      *      sorting by multiple columns is more powerful, the user interface is
@@ -86,12 +86,23 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         this(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
     }
 
-
+    /**
+     * Creates a new TableComparatorChooser that responds to clicks
+     * on the specified table and uses them to sort the specified list by
+     * delegating to the given <code>strategy</code>.
+     *
+     * @param table the table with headers that can be clicked on
+     * @param sortedList the sorted list to update
+     * @param strategy one of
+     *      <ul>
+     *          <li> {@link AbstractTableComparatorChooser#SINGLE_COLUMN}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
+     *      </ul>
+     */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
-        super(sortedList, ((EventTableModel)table.getModel()).getTableFormat());
-        if(!(strategy instanceof SortingStrategy)) {
-            throw new IllegalArgumentException("Unrecognized sorting strategy, \"" + strategy + "\", use one of AbstractTableComparatorChooser.SINGLE_COLUMN, AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE, or AbstractTableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD");
-        }
+        super(sortedList, ((EventTableModel<E>)table.getModel()).getTableFormat());
+        validateSortingStrategy(strategy);
 
         // save the Swing-specific state
         this.table = table;
@@ -106,6 +117,19 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
         // install the sorting strategy to interpret clicks
         this.headerClickHandler = new HeaderClickHandler(table, (SortingStrategy)strategy);
+    }
+
+    /**
+     * Ensures the given <code>strategy</code> is an accepted value.
+     *
+     * @throws IllegalArgumentException if <code>strategy</code> is not an
+     *      accepted value
+     */
+    private static void validateSortingStrategy(Object strategy) {
+        if (strategy != AbstractTableComparatorChooser.SINGLE_COLUMN &&
+            strategy != AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE &&
+            strategy != AbstractTableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD)
+            throw new IllegalArgumentException("Unrecognized sorting strategy, \"" + strategy + "\", use one of AbstractTableComparatorChooser.SINGLE_COLUMN, AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE, or AbstractTableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD");
     }
 
     /**
@@ -236,11 +260,11 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
                event.getColumn() == TableModelEvent.ALL_COLUMNS) {
                 // the table structure may have changed due to a change in the
                 // table format so we conservatively reset the TableFormat
-                setTableFormat(((EventTableModel)table.getModel()).getTableFormat());
+                setTableFormat(((EventTableModel<E>)table.getModel()).getTableFormat());
             }
 
             // if the comparator has changed
-            Comparator currentComparator = sortedList.getComparator();
+            final Comparator<E> currentComparator = sortedList.getComparator();
             if(currentComparator != sortedListComparator) {
                 redetectComparator(currentComparator);
             }
