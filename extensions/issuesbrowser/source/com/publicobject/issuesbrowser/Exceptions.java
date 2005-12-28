@@ -9,10 +9,10 @@ import java.util.List;
 
 /**
  * This class contains a repository of strategies for dealing with Exceptions
- * which occur any where in the application. Clients may register Exception
+ * which occur anywhere in the application. Clients may register Exception
  * handlers to deal with these exception in any way they see fit. If no
  * registered Exception handler recognizes an exception that has been raised
- * it is ignored by default.
+ * it is printed to {@link System#err} but otherwise ignored.
  *
  * @author James Lemieux
  */
@@ -25,7 +25,7 @@ public final class Exceptions {
      */
     public interface Handler {
         /**
-         * Return <tt>true</tt> if this Handler can work with the given
+         * Return <tt>true</tt> if this Handler can handle the given
          * Exception; <tt>false</tt> otherwise.
          */
         public boolean recognize(Exception e);
@@ -72,7 +72,9 @@ public final class Exceptions {
     /**
      * Attempt to locate a {@link Handler} which
      * {@link Handler#recognize recognizes} the given Exception and give it a
-     * chance to {@link Handler#handle handle} it.
+     * chance to {@link Handler#handle handle} it. If no appropriate
+     * {@link Handler} can be found, the Exception is printed to
+     * {@link System#err}.
      */
     public void handle(Exception e) {
         for (Iterator<Handler> i = handlers.iterator(); i.hasNext();) {
@@ -82,5 +84,8 @@ public final class Exceptions {
                 return;
             }
         }
+
+        System.err.println("Exception was not recognized by any Exception Handler: " + e);
+        e.printStackTrace(System.err);
     }
 }
