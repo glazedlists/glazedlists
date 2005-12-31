@@ -133,6 +133,7 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      */
     public void dispose() {
         this.functionList.dispose();
+        this.groupingList.removeListEventListener(this.datasetEventListener);
         this.groupingList.dispose();
     }
 
