@@ -37,7 +37,7 @@ public class IssuezillaXMLParser {
     // hardcode the servers in California
     static { dateFormat.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles")); }
 
-    private static SortedSet ISSUE_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> ISSUE_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         ISSUE_SIMPLE_FIELDS.add("issue_id");
         ISSUE_SIMPLE_FIELDS.add("issue_status");
@@ -64,14 +64,14 @@ public class IssuezillaXMLParser {
         ISSUE_SIMPLE_FIELDS.add("cc");
     }
 
-    private static SortedSet DESCRIPTION_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> DESCRIPTION_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         DESCRIPTION_SIMPLE_FIELDS.add("who");
         DESCRIPTION_SIMPLE_FIELDS.add("issue_when");
         DESCRIPTION_SIMPLE_FIELDS.add("thetext");
     }
 
-    private static SortedSet ATTACHMENT_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> ATTACHMENT_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         ATTACHMENT_SIMPLE_FIELDS.add("mimetype");
         ATTACHMENT_SIMPLE_FIELDS.add("attachid");
@@ -85,7 +85,7 @@ public class IssuezillaXMLParser {
         ATTACHMENT_SIMPLE_FIELDS.add("attachment_iz_url");
     }
 
-    private static SortedSet ACTIVITY_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> ACTIVITY_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         ACTIVITY_SIMPLE_FIELDS.add("user");
         ACTIVITY_SIMPLE_FIELDS.add("when");
@@ -95,7 +95,7 @@ public class IssuezillaXMLParser {
         ACTIVITY_SIMPLE_FIELDS.add("newvalue");
     }
 
-    private static SortedSet RELATIONSHIP_SIMPLE_FIELDS = new TreeSet();
+    private static SortedSet<String> RELATIONSHIP_SIMPLE_FIELDS = new TreeSet<String>();
     static {
         RELATIONSHIP_SIMPLE_FIELDS.add("issue_id");
         RELATIONSHIP_SIMPLE_FIELDS.add("who");
@@ -214,12 +214,12 @@ public class IssuezillaXMLParser {
      * The IssueHandler does the real parsing.
      */
     static class IssueHandler extends AbstractSimpleElementHandler {
-        private EventList issues = null;
+        private EventList<Issue> issues = null;
         private Issue currentIssue;
         private AbstractSimpleElementHandler simpleElementHandler = null;
         private Project owner;
 
-        public IssueHandler(EventList issues, Project owner) {
+        public IssueHandler(EventList<Issue> issues, Project owner) {
             super(null, "issue", ISSUE_SIMPLE_FIELDS);
             this.owner = owner;
             this.issues = issues;
