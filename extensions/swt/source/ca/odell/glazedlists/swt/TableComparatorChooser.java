@@ -7,11 +7,8 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.*;
 // the Glazed Lists util and volatile packages for default comparators
 import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 // for keeping lists of comparators
 import java.util.*;
 // SWT toolkit stuff for displaying widgets
@@ -41,7 +38,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
     private Table table;
 
     /** listeners to sort change events */
-    private List sortListeners = new ArrayList();
+    private List<Listener> sortListeners = new ArrayList<Listener>();
 
     /** listeners for column headers */
     private ColumnListener columnListener = new ColumnListener();
@@ -83,13 +80,13 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      * Deregisters the specified {@link Listener} to no longer receive events.
      */
     public void removeSortActionListener(final Listener sortListener) {
-        for(Iterator i = sortListeners.iterator(); i.hasNext(); ) {
+        for(Iterator<Listener> i = sortListeners.iterator(); i.hasNext(); ) {
             if(sortListener == i.next()) {
                 i.remove();
                 return;
             }
         }
-        throw new IllegalArgumentException("Cannot remove nonexistant listener " + sortListener);
+        throw new IllegalArgumentException("Cannot remove nonexistent listener " + sortListener);
     }
 
     /**
@@ -116,9 +113,8 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
         // notify interested listeners that the sorting has changed
         Event sortEvent = new Event();
         sortEvent.widget = table;
-        for(Iterator i = sortListeners.iterator(); i.hasNext(); ) {
-            Listener listener = (Listener)i.next();
-            listener.handleEvent(sortEvent);
+        for(Iterator<Listener> i = sortListeners.iterator(); i.hasNext(); ) {
+            i.next().handleEvent(sortEvent);
         }
     }
 
