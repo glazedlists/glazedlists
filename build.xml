@@ -71,10 +71,11 @@
 	<target name="jar" depends="compileall"
 		description="Creates glazedlists jar file containing all UI libraries.">
 		<jar destfile="glazedlists_${java.target.version.fileFriendlyName}.jar" update="true" index="true">
-			<fileset dir="classes"/>
-			<fileset dir=".">
-				<include name="resources/**"/>
+			<fileset dir="classes">
                 <exclude name="com/publicobject/**"/> <!-- IssuesBrowser -->
+            </fileset>
+            <fileset dir=".">
+				<include name="resources/**"/>
             </fileset>
 			<manifest>
 				<attribute name="Main-Class" value="ca.odell.glazedlists.impl.Main"/>
