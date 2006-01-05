@@ -314,19 +314,17 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
                 ((SortableRenderer) delegateRenderer).setSortIcon(sortIcon);
                 rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            // 2. if it's a DefaultTableCellRenderer that returned itself then customize it directly with
-            //    the sorting icon after the fact (this is the case of the default header renderer)
-            } else if (delegateRenderer instanceof DefaultTableCellRenderer) {
+            // 2. Otherwise check whether the rendered component is a JLabel (this is the case of the default header renderer)
+            } else {
                 rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (rendered == delegateRenderer) {
-                    final DefaultTableCellRenderer label = (DefaultTableCellRenderer) rendered;
+
+                // we check for a JLabel rather than a DefaultTableCellRenderer to support WinLAF,
+                // which installs a decorator over the DefaultTableCellRenderer
+                if (rendered instanceof JLabel) {
+                    final JLabel label = (JLabel) rendered;
                     label.setIcon(sortIcon);
                     label.setHorizontalTextPosition(SwingConstants.LEADING);
                 }
-
-            // 3. We are unable to inject an icon into the rendered component
-            } else {
-                rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             }
 
             return rendered;
