@@ -74,7 +74,8 @@
 			<fileset dir="classes"/>
 			<fileset dir=".">
 				<include name="resources/**"/>
-			</fileset>
+                <exclude name="com/publicobject/**"/> <!-- IssuesBrowser -->
+            </fileset>
 			<manifest>
 				<attribute name="Main-Class" value="ca.odell.glazedlists.impl.Main"/>
 				<attribute name="Sealed" value="true"/>
