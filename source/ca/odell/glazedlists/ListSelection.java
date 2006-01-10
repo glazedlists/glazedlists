@@ -1026,14 +1026,14 @@ public class ListSelection<E> {
     }
 
     /**
-     * The {@link EventList} that contains only values that are not currently
+     * The {@link EventList} that contains only values that are currently
      * selected.
      */
     private final class SelectedList<E> extends TransformedList<E, E> {
 
         /**
          * Creates an {@link EventList} that provides a view of the
-         * deselected items in a ListSelection.
+         * selected items in a ListSelection.
          */
         SelectedList(EventList<E> source) {
             super(source);
