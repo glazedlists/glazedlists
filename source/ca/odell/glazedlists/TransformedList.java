@@ -69,7 +69,7 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
 
     /** {@inheritDoc} */
     public void add(int index, E value) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(!isWritable()) throw new IllegalStateException("Non-writable List cannot be modified");
         if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
         final int sourceIndex = index < size() ? getSourceIndex(index) : source.size();
         source.add(sourceIndex, (S) value);
@@ -105,7 +105,7 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
 
     /** {@inheritDoc} */
     public E remove(int index) {
-        if(!isWritable()) throw new IllegalStateException("List cannot be modified in the current state");
+        if(!isWritable()) throw new IllegalStateException("Non-writable List cannot be modified");
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
         return (E) source.remove(getSourceIndex(index));
     }
