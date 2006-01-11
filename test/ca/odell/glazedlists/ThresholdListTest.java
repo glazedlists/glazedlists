@@ -1202,7 +1202,7 @@ public class ThresholdListTest extends TestCase {
      */
     private class IntegerAsStringEvaluator implements ThresholdList.Evaluator {
         public int evaluate(Object object) {
-            return Integer.valueOf((String)object);
+            return Integer.valueOf((String)object).intValue();
         }
     }
 
