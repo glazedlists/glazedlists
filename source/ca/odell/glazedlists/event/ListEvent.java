@@ -134,7 +134,7 @@ public final class ListEvent<E> extends EventObject {
 
         // we have more blocks left
         } else {
-            currentBlock = (ListEventBlock)getBlocks().get(blockCount);
+            currentBlock = getBlocks().get(blockCount);
             blockCount++;
             rowIndex = currentBlock.getStartIndex();
             return true;
@@ -170,14 +170,16 @@ public final class ListEvent<E> extends EventObject {
      * will always return the startIndex of the current list change.
      */
     public int getIndex() {
-        if(currentBlock.getType() == DELETE) return currentBlock.getStartIndex();
-        return rowIndex;
+        return getType() == DELETE ? getBlockStartIndex() : rowIndex;
     }
 
     /**
      * Gets the first row of the current block of changes. Inclusive.
      */
     public int getBlockStartIndex() {
+        if (currentBlock == null)
+            throw new IllegalStateException("The ListEvent is not currently in a state to return a block start index");
+
         return currentBlock.getStartIndex();
     }
 
@@ -185,6 +187,9 @@ public final class ListEvent<E> extends EventObject {
      * Gets the last row of the current block of changes. Inclusive.
      */
     public int getBlockEndIndex() {
+        if (currentBlock == null)
+            throw new IllegalStateException("The ListEvent is not currently in a state to return a block end index");
+
         return currentBlock.getEndIndex();
     }
 
@@ -193,6 +198,9 @@ public final class ListEvent<E> extends EventObject {
      * ListEvent.INSERT, UPDATE, or DELETE.
      */
     public int getType() {
+        if (currentBlock == null)
+            throw new IllegalStateException("The ListEvent is not currently in a state to return a type");
+
         return currentBlock.getType();
     }
     

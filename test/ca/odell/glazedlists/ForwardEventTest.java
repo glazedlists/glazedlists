@@ -58,8 +58,7 @@ public class ForwardEventTest extends TestCase {
         source.retainAll(Arrays.asList(new String[] { "Pepsi", "7-up", "RC" }));
         test.assertConsistent();
     }
-    
-    
+
     /**
      * Tests that forwardEvent works.
      */
@@ -77,7 +76,67 @@ public class ForwardEventTest extends TestCase {
         forwarding.commitEvent();
         test.assertConsistent();
     }
-    
+
+    public void testBadListEventHandler() {
+        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getType(); }
+        });
+        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
+        });
+        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
+        });
+        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getIndex(); }
+        });
+
+        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getType(); }
+        });
+        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
+        });
+        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
+        });
+        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
+            protected void breakListEvent(ListEvent l) { l.getIndex(); }
+        });
+    }
+
+    private static void assertIllegalStateExceptionIsThrown(EventList list, ListEventListener listener) {
+        list.addListEventListener(listener);
+        try {
+            list.add("this should throw an IllegalStateException");
+            fail("failed to throw an expected IllegalStateException for a bad ListEventListener implementation");
+        } catch (IllegalStateException ise) {
+
+        }
+        list.removeListEventListener(listener);
+    }
+
+    static class DoNotStartIteratingListEventListener implements ListEventListener {
+        public void listChanged(ListEvent listChanges) {
+            breakListEvent(listChanges);
+        }
+
+        // override me to do bad things
+        protected void breakListEvent(ListEvent l) { }
+    }
+
+    static class IterateTooFarListEventListener implements ListEventListener {
+        public void listChanged(ListEvent listChanges) {
+            while (listChanges.next());
+
+            // now try breaking the ListEvent
+            breakListEvent(listChanges);
+        }
+
+        // override me to do bad things
+        protected void breakListEvent(ListEvent l) { }
+    }
+
     /**
      * Simple TransformationList that forwards events.
      */
