@@ -43,7 +43,7 @@ public class JEventListPanelTest {
             } else if(component == 1) {
                 return new JSlider();
             } else if(component == 2) {
-                return new JProgressBar();
+                return new JTextField();
             } else {
                 throw new IllegalStateException();
             }
