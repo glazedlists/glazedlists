@@ -10,6 +10,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueStatusComparator;
 
@@ -22,9 +23,10 @@ import java.util.*;
 import java.util.List;
 
 /**
- * A MatcherEditor that produces Matchers that filter the issues based on the selected statuses.
+ * A MatcherEditor that produces Matchers that filter the issues based on the
+ * selected statuses.
  */
-class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEventListener<List<Issue>>, ActionListener {
+class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEventListener<List<Issue>>, ActionListener, FilterComponent<Issue> {
     /** A MessageFormat to generate pretty names for our CheckBoxes which include the number of bugs with that status. */
     private static final MessageFormat checkboxFormat = new MessageFormat("{0} {1,choice,0#|0<({1})}");
 
@@ -69,8 +71,16 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
     /**
      * Returns the component responsible for editing the status filter.
      */
-    public Component getComponent() {
+    public JComponent getComponent() {
         return this.checkBoxPanel;
+    }
+
+    public String getName() {
+        return "Status";
+    }
+
+    public MatcherEditor<Issue> getMatcherEditor() {
+        return this;
     }
 
     /**

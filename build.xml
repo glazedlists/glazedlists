@@ -175,6 +175,20 @@
         </javac>
     </target>
 
+    <target name="jgoodiesforms" depends="core,swing">
+        <mkdir dir="extensions/forms/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/27334/forms.jar"/>
+            <arg value="extensions/jgoodiesforms/lib/forms.jar"/>
+        </java>
+        <javac destdir="classes" srcdir="extensions/jgoodiesforms/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="extensions/jgoodiesforms/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
     <target name="jfreechart" depends="swing">
         <mkdir dir="extensions/jfreechart/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">

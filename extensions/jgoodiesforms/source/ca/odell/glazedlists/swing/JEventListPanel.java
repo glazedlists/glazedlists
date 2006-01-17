@@ -15,6 +15,19 @@ import ca.odell.glazedlists.event.*;
 /**
  * A panel that shows the contents of an EventList containing JComponents.
  *
+ * <p>To use {@link JEventListPanel}:
+ * <ol>
+ *   <li>Create an {@link EventList} of {@link JComponent}s, or an {@link EventList}
+ *       of objects which each reference a set of {@link JComponent}s.
+ *   <li>Implement {@link JEventListPanel.Format} for the object's in your
+ *       {@link EventList}. This interface defines how a single cell is layed out.
+ *       Once the layout for a single cell is known, all cells can be tiled to
+ *       show all of the {@link JComponent}s in your {@link EventList}.
+ *   <li>Create an {@link JEventListPanel} and add it in your application somewhere.
+ *       If the number of elements in the {@link EventList} may grow unbounded,
+ *       consider wrapping {@link JEventListPanel} in a {@link JScrollPane}.
+ * </ol>
+ *
  * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
  */
 public class JEventListPanel<E> extends JPanel implements ListEventListener {
@@ -104,6 +117,8 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         for(int c = 0; c < elementComponents.length; c++) {
             elementComponents[c] = format.getComponent(element, c);
         }
+
+        // remember these components
         components.add(index, elementComponents);
 
         // make room on the variable axis
@@ -111,7 +126,7 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         int baseColumn = baseLayoutColumn(index);
         if(vertical) {
             // insert the gap for all rows but the first
-            if(index != 0 && gapRow != null) {
+            if(components.size() > 1 && gapRow != null) {
                 if(baseRow == layout.getRowCount()) layout.appendRow(gapRow);
                 else layout.insertRow(baseRow + 1, gapRow);
                 baseRow += 1;
@@ -123,7 +138,7 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
             }
         } else {
             // insert the gap for all columns but the first
-            if(index != 0 && gapColumn != null) {
+            if(components.size() > 1 && gapColumn != null) {
                 if(baseColumn == layout.getColumnCount()) layout.appendColumn(gapColumn);
                 else layout.insertColumn(baseColumn + 1, gapColumn);
                 baseColumn += 1;
@@ -160,15 +175,16 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         // remove the space from the variable axis
         if(vertical) {
             int baseRow = baseLayoutRow(index);
-            if(index != 0 && gapRow != null) {
+            if(components.size() > 1 && gapRow != null) {
                 layout.removeRow(baseRow + 1);
             }
             for(int r = 0; r < rowSpecs.length; r++) {
                 layout.removeRow(baseRow + 1);
             }
+
         } else {
             int baseColumn = baseLayoutColumn(index);
-            if(index != 0 && gapColumn != null) {
+            if(components.size() > 1 && gapColumn != null) {
                 layout.removeColumn(baseColumn + 1);
             }
             for(int c = 0; c < columnSpecs.length; c++) {
@@ -398,10 +414,10 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
             }
         }
         public BeanFormat(Class<E> beanClass, boolean vertical, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints, String[] properties) {
-            this(beanClass, vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), new RowSpec(gapRow), new ColumnSpec(gapColumn), cellConstraints, properties);
+            this(beanClass, vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), cellConstraints, properties);
         }
         public BeanFormat(Class<E> beanClass, boolean vertical, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints, String[] properties) {
-            this(beanClass, vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), new RowSpec(gapRow), new ColumnSpec(gapColumn), decode(cellConstraints), properties);
+            this(beanClass, vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), decode(cellConstraints), properties);
         }
 
         /** {@inheritDoc} */

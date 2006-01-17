@@ -7,8 +7,6 @@ package com.publicobject.issuesbrowser.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.swing.*;
 import com.publicobject.issuesbrowser.*;
 
@@ -24,7 +22,6 @@ import java.net.ConnectException;
 import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,15 +33,19 @@ import java.util.regex.Pattern;
 public class IssuesBrowser implements Runnable {
 
     /** these don't belong here at all */
-    private static final Color GLAZED_LISTS_DARK_BROWN = new Color(36, 23, 10);
-    private static final Color GLAZED_LISTS_MEDIUM_BROWN = new Color(69, 64, 56);
-    private static final Color GLAZED_LISTS_LIGHT_BROWN = new Color(246, 237, 220);
+    public static final Color GLAZED_LISTS_DARK_BROWN = new Color(36, 23, 10);
+    public static final Color GLAZED_LISTS_MEDIUM_BROWN = new Color(69, 64, 56);
+    public static final Color GLAZED_LISTS_MEDIUM_LIGHT_BROWN = new Color(150, 140, 130);
+    public static final Color GLAZED_LISTS_LIGHT_BROWN = new Color(246, 237, 220);
 
     /** for displaying dates */
     static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 
     /** an event list to host the issues */
     private EventList<Issue> issuesEventList = new BasicEventList<Issue>();
+
+    /** all the filters currently applied to the issues list */
+    private FilterPanel filterPanel = new FilterPanel(issuesEventList);
 
     /** the currently selected issues */
     private EventSelectionModel issuesSelectionModel = null;
@@ -114,23 +115,14 @@ public class IssuesBrowser implements Runnable {
      * Display a frame for browsing issues.
      */
     private JPanel constructView() {
-        // create a MatcherEditor which edits the filter text
-        final JTextField filterTextField = new JTextField();
-        final MatcherEditor<Issue> textFilterMatcherEditor = new ThreadedMatcherEditor<Issue>(new TextComponentMatcherEditor<Issue>(filterTextField, null));
 
-        // create a MatcherEditor which edits the state filter
-        StatusMatcherEditor statusMatcherEditor = new StatusMatcherEditor(issuesEventList);
+        // filter the original issues list
+        FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesEventList, filterPanel.getMatcherEditor());
 
-        // create the pipeline of glazed lists
-        SwingUsersMatcherEditor userMatcherEditor = new SwingUsersMatcherEditor(issuesEventList);
-        FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, userMatcherEditor);
-        FilterList<Issue> issuesStatusFiltered = new FilterList<Issue>(issuesUserFiltered, statusMatcherEditor);
-        FilterList<Issue> issuesTextFiltered = new FilterList<Issue>(issuesStatusFiltered, textFilterMatcherEditor);
-        ThresholdList<Issue> priorityList = new ThresholdList<Issue>(issuesTextFiltered, "priority.rating");
-        final SortedList<Issue> issuesSortedList = new SortedList<Issue>(priorityList, null);
-        issuesSortedList.setMode(SortedList.AVOID_MOVING_ELEMENTS); // temp hack for playing with the new sorting mode
+        // sort the filtered issues
+        final SortedList<Issue> issuesSortedList = new SortedList<Issue>(filteredIssues, null);
 
-        // issues table
+        // build the issues table
         issuesTableModel = new EventTableModel<Issue>(issuesSortedList, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
         issuesSelectionModel = new EventSelectionModel<Issue>(issuesSortedList);
@@ -152,26 +144,7 @@ public class IssuesBrowser implements Runnable {
         issuesTableScrollPane.getViewport().setBackground(UIManager.getColor("EditorPane.background"));
         issuesTableScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // users table
-        JScrollPane usersListScrollPane = new JScrollPane(userMatcherEditor.getUserSelect(), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        issueDetails = new IssueDetailsComponent(priorityList);
-
-        // priority slider
-        BoundedRangeModel priorityRangeModel = GlazedListsSwing.lowerRangeModel(priorityList);
-        priorityRangeModel.setRangeProperties(0, 0, 0, 100, false);
-        JSlider prioritySlider = new JSlider(priorityRangeModel);
-        Hashtable<Integer, JLabel> prioritySliderLabels = new Hashtable<Integer, JLabel>();
-        prioritySliderLabels.put(new Integer(0), new JLabel("Low"));
-        prioritySliderLabels.put(new Integer(100), new JLabel("High"));
-        prioritySlider.setOpaque(false);
-        prioritySlider.setLabelTable(prioritySliderLabels);
-        prioritySlider.setSnapToTicks(true);
-        prioritySlider.setPaintLabels(true);
-        prioritySlider.setPaintTicks(true);
-        prioritySlider.setForeground(UIManager.getColor("Label.foreground"));
-        prioritySlider.setMajorTickSpacing(25);
-        prioritySlider.setForeground(Color.BLACK);
+        issueDetails = new IssueDetailsComponent(issuesEventList);
 
         // projects
         EventList<Project> projects = Project.getProjects();
@@ -206,46 +179,24 @@ public class IssuesBrowser implements Runnable {
         iconBar.add(throbber);
         iconBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // create the filters panel
-        JLabel textFilterLabel = new JLabel("Filter");
-        textFilterLabel.setFont(textFilterLabel.getFont().deriveFont(11.0f));
-        JLabel priorityLabel = new JLabel("Priority");
-        priorityLabel.setFont(priorityLabel.getFont().deriveFont(11.0f));
-        JLabel stateLabel = new JLabel("State");
-        stateLabel.setFont(stateLabel.getFont().deriveFont(11.0f));
-        JLabel userLabel = new JLabel("User");
-        userLabel.setFont(userLabel.getFont().deriveFont(11.0f));
-
-        JPanel filtersPanel = new JPanel();
-        filtersPanel.setBackground(GLAZED_LISTS_LIGHT_BROWN);
-        filtersPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, GLAZED_LISTS_DARK_BROWN));
-        usersListScrollPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
-
-        filtersPanel.setLayout(new GridBagLayout());
-        // add a strut so the app resizes less, this is a workaround 'cause Grid Bag sucks!
-        filtersPanel.add(Box.createHorizontalStrut(200),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        filtersPanel.add(textFilterLabel,                    new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(filterTextField,                    new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
-        filtersPanel.add(stateLabel,                         new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(statusMatcherEditor.getComponent(), new GridBagConstraints(0, 4, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
-        filtersPanel.add(priorityLabel,                      new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(prioritySlider,                     new GridBagConstraints(0, 6, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(2, 5, 10, 5), 0, 0));
-        filtersPanel.add(userLabel,                          new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 5), 0, 0));
-        filtersPanel.add(usersListScrollPane,                new GridBagConstraints(0, 8, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(2, 0, 0, 0), 0, 0));
-
         // assemble all data components on a common panel
         JPanel dataPanel = new JPanel();
         JComponent issueDetailsComponent = issueDetails;
-        issueDetailsComponent.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
         dataPanel.setLayout(new GridLayout(2, 1));
         dataPanel.add(issuesTableScrollPane);
         dataPanel.add(issueDetailsComponent);
 
+        // draw lines between components
+        JComponent filtersPanel = filterPanel.getComponent();
+        filtersPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, IssuesBrowser.GLAZED_LISTS_DARK_BROWN));
+        issueDetailsComponent.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
+
         // the outermost panel to layout the icon bar with the other panels
         JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.add(iconBar,                     new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        mainPanel.add(filtersPanel,                new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        mainPanel.add(dataPanel,                   new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(iconBar,                        new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(filtersPanel,                   new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(Box.createHorizontalStrut(250), new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(dataPanel,                      new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
         return mainPanel;
     }
@@ -317,6 +268,7 @@ public class IssuesBrowser implements Runnable {
         }
     }
 
+
     /**
      * A custom label designed for displaying the number of issues in the issue
      * table. Use {@link #setIssueCount(int)} to update the text of the label
@@ -347,7 +299,7 @@ public class IssuesBrowser implements Runnable {
      * rather than a single color. The start and end colors of the gradient
      * are specified via the constructor.
      */
-    private static class GradientPanel extends JPanel {
+    public static class GradientPanel extends JPanel {
         private Color gradientStartColor;
         private Color gradientEndColor;
         private boolean vertical;
