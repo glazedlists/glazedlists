@@ -380,6 +380,47 @@ public class EventListTest extends TestCase {
         assertFalse(source.equals(target));
     }
 
+    public void testEventListTypeSafety() {
+        EventList source = new BasicEventList();
+        final Set acceptedTypes = new HashSet();
+        acceptedTypes.add(null);
+        acceptedTypes.add(Integer.class);
+        acceptedTypes.add(String.class);
+        ListEventListener typeSafetyListener = GlazedLists.typeSafetyListener(source, acceptedTypes);
+
+        source.add(null);
+        source.add(new Integer(0));
+        source.add("Testing");
+
+        try {
+            source.add(new Long(23));
+            fail("Expected an IllegalArgumentException for disallowed type");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        // the source list is in an inconsistent state so we rebuild the list
+        source = new BasicEventList();
+        typeSafetyListener = GlazedLists.typeSafetyListener(source, acceptedTypes);
+        source.add(null);
+
+        try {
+            source.set(0, new Long(23));
+            fail("Expected an IllegalArgumentException for disallowed type");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        // recover from the exception
+        source.clear();
+
+        source.removeListEventListener(typeSafetyListener);
+
+        // these should now succeed now that we're not using the type safety checker any longer
+        source.add(new Long(23));
+        source.set(0, new Long(23));
+    }
+
     public void testEventListLock() {
         final EventList<String> source = new BasicEventList<String>();
 
@@ -455,6 +496,19 @@ public class EventListTest extends TestCase {
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
         original.addAll(original);
         assertEquals(GlazedListsTests.stringToList("ABCDEABCDE"), original);
+    }
+
+    public void testSublistClear() {
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("ABCDE"));
+
+        Iterator<String> iterator = original.subList(2, 4).iterator();
+        iterator.next();
+        iterator.remove();
+        iterator.next();
+        iterator.remove();
+
+        assertEquals(GlazedListsTests.stringToList("ABE"), original);
     }
 
     public void testAddAllFromView() {

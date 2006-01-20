@@ -39,7 +39,7 @@ public final class ListEvent<E> extends EventObject {
     private EventList<E> sourceList;
     /** the master sequence that this is a view of */
     private ListEventAssembler<E> masterSequence;
-    
+
     /**
      * Create a new list change sequence that uses the source master list
      * for the source of changes.
@@ -94,12 +94,12 @@ public final class ListEvent<E> extends EventObject {
      */
     public boolean next() {
         // we need to get a new change block from the queue
-        if(currentBlock == null || rowIndex == currentBlock.getEndIndex()) {
+        if(currentBlock == null || rowIndex == getBlockEndIndex()) {
             return nextBlock();
             
         // we can just increment the row on the current change
         } else {
-            if(rowIndex >= currentBlock.getEndIndex()) throw new IllegalStateException();
+            if(rowIndex >= getBlockEndIndex()) throw new IllegalStateException();
             rowIndex++;
             return true;
         }
@@ -112,7 +112,7 @@ public final class ListEvent<E> extends EventObject {
      */
     public boolean hasNext() {
         // we are at the end of the current block
-        if(currentBlock == null || rowIndex == currentBlock.getEndIndex()) {
+        if(currentBlock == null || rowIndex == getBlockEndIndex()) {
             return blockCount < getBlocks().size();
 
         // there is another change in the current block
@@ -136,7 +136,7 @@ public final class ListEvent<E> extends EventObject {
         } else {
             currentBlock = getBlocks().get(blockCount);
             blockCount++;
-            rowIndex = currentBlock.getStartIndex();
+            rowIndex = getBlockStartIndex();
             return true;
         }
     }
@@ -216,7 +216,7 @@ public final class ListEvent<E> extends EventObject {
      */
     public int getBlocksRemaining() {
         // if we're not at the end of the current block, add one for that
-        if(currentBlock != null && rowIndex < currentBlock.getEndIndex()) {
+        if(currentBlock != null && rowIndex < getBlockEndIndex()) {
             return getBlocks().size() - blockCount + 1;
         } else {
             return getBlocks().size() - blockCount;
