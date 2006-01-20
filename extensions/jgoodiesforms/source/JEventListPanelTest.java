@@ -1,15 +1,13 @@
-/* O'Dell Swing Extensions                                                    */
-/* COPYRIGHT 2005 O'DELL ENGINEERING LTD.                                     */
-package ca.odell.glazedlists.swing;
-
-// user interface
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 // JGoodies is industrial layout
-import com.jgoodies.forms.layout.*;
 // observable lists are used to store rules
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.swing.JEventListPanel;
 
 /**
  * A panel that shows the contents of an EventList containing JComponents.
@@ -23,7 +21,7 @@ public class JEventListPanelTest {
     public class SillyObjectFormat extends JEventListPanel.AbstractFormat {
 
         public SillyObjectFormat() {
-            super(true, "3dlu, pref, 3dlu, pref, 3dlu", "3dlu, pref, 3dlu, fill:pref:grow, 3dlu", "15dlu", "15dlu", new String[] { "2,2,1,3", "4,2", "4,4" });
+            super(false, "0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", "15dlu", "15dlu", new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
         }
 
         public int getComponentsPerElement() {

@@ -1,5 +1,6 @@
-/* O'Dell Swing Extensions                                                    */
-/* COPYRIGHT 2005 O'DELL ENGINEERING LTD.                                     */
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
 import java.util.*;
@@ -70,11 +71,11 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         // create the fixed axis
         if(vertical) {
             for(int c = 0; c < columnSpecs.length; c++) {
-                layout.appendColumn(columnSpecs[c]);
+                insertColumn(c, columnSpecs[c]);
             }
         } else {
             for(int r = 0; r < rowSpecs.length; r++) {
-                layout.appendRow(rowSpecs[r]);
+                insertRow(r, rowSpecs[r]);
             }
         }
 
@@ -127,26 +128,22 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         if(vertical) {
             // insert the gap for all rows but the first
             if(components.size() > 1 && gapRow != null) {
-                if(baseRow == layout.getRowCount()) layout.appendRow(gapRow);
-                else layout.insertRow(baseRow + 1, gapRow);
+                insertRow(baseRow, gapRow);
                 baseRow += 1;
             }
             // insert the element rows
             for(int r = 0; r < rowSpecs.length; r++) {
-                if(baseRow + r == layout.getRowCount()) layout.appendRow(rowSpecs[r]);
-                else layout.insertRow(baseRow + r + 1, rowSpecs[r]);
+                insertRow(baseRow + r, rowSpecs[r]);
             }
         } else {
             // insert the gap for all columns but the first
             if(components.size() > 1 && gapColumn != null) {
-                if(baseColumn == layout.getColumnCount()) layout.appendColumn(gapColumn);
-                else layout.insertColumn(baseColumn + 1, gapColumn);
+                insertColumn(baseColumn, gapColumn);
                 baseColumn += 1;
             }
             // insert the element columns
             for(int c = 0; c < columnSpecs.length; c++) {
-                if(baseColumn + c == layout.getColumnCount()) layout.appendColumn(columnSpecs[c]);
-                else layout.insertColumn(baseColumn + c + 1, columnSpecs[c]);
+                insertColumn(baseColumn + c, columnSpecs[c]);
             }
         }
 
@@ -159,6 +156,24 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
             constraints.gridY += baseRow;
             add(elementComponents[c], constraints);
         }
+    }
+
+    /**
+     * Insert the specified row into the layout. This accomodates
+     * for the appendColumn/insertColumn API weakness in FormLayout.
+     */
+    private void insertRow(int index, RowSpec rowSpec) {
+        if(index == layout.getRowCount()) layout.appendRow(rowSpec);
+        else layout.insertRow(index + 1, rowSpec);
+    }
+
+    /**
+     * Insert the specified column into the layout. This accomodates
+     * for the appendRow/insertRow API weakness in FormLayout.
+     */
+    private void insertColumn(int index, ColumnSpec columnSpec) {
+        if(index == layout.getColumnCount()) layout.appendColumn(columnSpec);
+        else layout.insertColumn(index + 1, columnSpec);
     }
 
     /**
