@@ -16,14 +16,17 @@ import java.util.*;
 public class ReadOnlyListTest extends TestCase {
 
     /** attempt to modify this list */
+    private EventList readOnlyData = null;
+
+    /** attempt to modify this list */
     private List readOnly = null;
-    
+
     /**
      * Prepare for the test.
      */
     public void setUp() {
         // create a list of data
-        BasicEventList readOnlyData = new BasicEventList();
+        readOnlyData = new BasicEventList();
         readOnlyData.add("A");
         readOnlyData.add("B");
         readOnlyData.add("C");
@@ -36,6 +39,7 @@ public class ReadOnlyListTest extends TestCase {
      * Clean up after the test.
      */
     public void tearDown() {
+        readOnlyData = null;
         readOnly = null;
     }
 
@@ -46,9 +50,11 @@ public class ReadOnlyListTest extends TestCase {
         try {
             readOnly.subList(0, 3).clear();
             fail();
-        } catch(IllegalStateException e) {
+        } catch(UnsupportedOperationException e) {
             // read failed as expected
         }
+
+        readOnlyData.subList(0, 3).clear();
     }
 
     /**
@@ -60,8 +66,98 @@ public class ReadOnlyListTest extends TestCase {
             i.next();
             i.remove();
             fail();
-        } catch(IllegalStateException e) {
+        } catch(UnsupportedOperationException e) {
             // read failed as expected
+        }
+
+        Iterator i = readOnlyData.iterator();
+        i.next();
+        i.remove();
+    }
+
+    public void testReadMethods() {
+        readOnlyData.clear();
+        readOnlyData.addAll(GlazedListsTests.stringToList("ABCDEFGB"));
+
+        assertEquals("A", readOnly.get(0));
+        assertTrue(readOnly.contains("E"));
+        assertEquals(readOnly, Arrays.asList(readOnly.toArray()));
+        assertEquals(readOnly, Arrays.asList(readOnly.toArray(new String[0])));
+        assertTrue(readOnly.containsAll(Collections.singletonList("B")));
+        assertEquals(3, readOnly.indexOf("D"));
+        assertEquals(readOnly.size()-1, readOnly.lastIndexOf("B"));
+        assertEquals(GlazedListsTests.stringToList("CDE"), readOnly.subList(2, 5));
+    }
+
+    public void testWriteMethods() {
+        try {
+            readOnly.add(null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.add(0, null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.addAll(null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.addAll(0, null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.clear();
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.remove(null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.remove(0);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.removeAll(null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.retainAll(null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.set(0, null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
         }
     }
 }
