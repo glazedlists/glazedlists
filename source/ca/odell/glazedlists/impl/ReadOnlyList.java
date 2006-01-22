@@ -50,14 +50,9 @@ public final class ReadOnlyList<E> extends TransformedList<E, E> {
     }
 
     //
-    // All accessor methods must call directly to the source list so as not to
+    // All accessor methods must call to the source list so as not to
     // disturb the performance characteristics of the source list algorithms.
     //
-
-    /** {@inheritDoc} */
-    public E get(int index) {
-        return source.get(index);
-    }
 
     /** {@inheritDoc} */
     public boolean contains(Object object) {
