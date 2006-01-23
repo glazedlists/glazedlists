@@ -7,6 +7,7 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.Grouper;
 // Java collections are used for underlying data storage
 import java.util.*;
 
@@ -38,36 +39,11 @@ import java.util.*;
  */
 public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
-    /**
-     * A temporary barcode data structure is created when processing ListEvents in this GroupingList.
-     * These constants identify which indexes remain to be processed.
-     */
-    private static final Object TODO = Barcode.BLACK;
-    private static final Object DONE = Barcode.WHITE;
-
-    /** The comparator used to determine the groups. */
-    private Comparator<E> comparator;
-
     /** The GroupLists defined by the comparator. They are stored in an IndexedTree so their indices can be quickly updated. */
     private IndexedTree<GroupList> groupLists = new IndexedTree<GroupList>();
 
-    /**
-     * The data structure which tracks which source elements are considered UNIQUE
-     * (the first element of a group) and which are DUPLICATE (any group element NOT the first).
-     */
-    private Barcode barcode = new Barcode();
-
-    /** Entries in barcode are one of these constants to indicate if the element at an index is a UNIQUE or DUPLICATE. */
-    private static final Object UNIQUE = Barcode.BLACK;
-    private static final Object DUPLICATE = Barcode.WHITE;
-
-    /** Used only in temporary data structures to flag deleting of the FIRST group element when more elements exist. */
-    private static final Object UNIQUE_WITH_DUPLICATE = null;
-
-    /** For reporting which side of an element its group is located. */
-    private static final int LEFT_GROUP = -1;
-    private static final int NO_GROUP = 0;
-    private static final int RIGHT_GROUP = 1;
+    /** the grouping service manages creating and deleting groups */
+    private final Grouper<E> grouper;
 
     /**
      * Creates a {@link GroupingList} that determines groupings via the
@@ -98,61 +74,70 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      */
     private GroupingList(SortedList<E> source, Comparator<E> comparator) {
         super(source);
-        this.comparator = comparator;
 
-        this.buildDataStructures();
+        // the grouper handles changes to the SortedList
+        GrouperClient grouperClient = new GrouperClient();
+        this.grouper = new Grouper<E>(source, grouperClient);
+
+        // initialize the tree of GroupLists
+        for (int i = 0; i < grouper.getBarcode().colourSize(Grouper.UNIQUE); i++) {
+            grouperClient.insertGroupList(i);
+        }
 
         source.addListEventListener(this);
     }
 
     /**
-     * Populates the internal data structures of GroupingList by examining
-     * adjacent entries within the source SortedList to check if they belong
-     * to the same group.
+     * Handle changes to the grouping list groups.
      */
-    private void buildDataStructures() {
-        if (!barcode.isEmpty()) throw new IllegalStateException("Attempted to build internal data structures twice.");
+    private class GrouperClient implements Grouper.Client {
+        public void groupChanged(int index, int groupIndex, int groupChangeType) {
+            if(groupChangeType == ListEvent.INSERT) {
+                insertGroupList(groupIndex);
+                updates.addInsert(groupIndex);
+            } else if(groupChangeType == ListEvent.DELETE) {
+                removeGroupList(groupIndex);
+                updates.addDelete(groupIndex);
+            } else if(groupChangeType == ListEvent.UPDATE) {
+                updates.addUpdate(groupIndex);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
 
-        // initialize the barcode
-        for (int i = 0; i < source.size(); i++)
-            barcode.add(i, groupTogether(i, i-1) ? DUPLICATE : UNIQUE, 1);
+        /**
+         * Creates and inserts a new GroupList at the specified
+         * <code>index</code>.
+         *
+         * @param index the location at which to insert an empty GroupList
+         */
+        private void insertGroupList(int index) {
+            final GroupList groupList = new GroupList();
+            final IndexedTreeNode<GroupList> indexedTreeNode = groupLists.addByNode(index, groupList);
+            groupList.setTreeNode(indexedTreeNode);
+        }
 
-        // initialize the tree of GroupLists
-        for (int i = 0; i < barcode.colourSize(UNIQUE); i++)
-            this.insertGroupList(i);
-    }
+        /**
+         * Removes the GroupList at the given <code>index</code>.
+         *
+         * @param index the location at which to remove a GroupList
+         */
+        private void removeGroupList(int index) {
+            final IndexedTreeNode<GroupList> indexedTreeNode = groupLists.removeByIndex(index);
 
-    /**
-     * Creates and inserts a new GroupList at the specified <code>index</code>.
-     *
-     * @param index the location at which to insert an empty GroupList
-     */
-    private void insertGroupList(int index) {
-        final GroupList groupList = new GroupList();
-        final IndexedTreeNode<GroupList> indexedTreeNode = this.groupLists.addByNode(index, groupList);
-        groupList.setTreeNode(indexedTreeNode);
-    }
-
-    /**
-     * Removes the GroupList at the given <code>index</code>.
-     *
-     * @param index the location at which to remove a GroupList
-     */
-    private void removeGroupList(int index) {
-        final IndexedTreeNode<GroupList> indexedTreeNode = this.groupLists.removeByIndex(index);
-
-        // for safety, null out the GroupList's reference to its now defunct indexedTreeNode
-        indexedTreeNode.getValue().setTreeNode(null);
+            // for safety, null out the GroupList's reference to its now defunct indexedTreeNode
+            indexedTreeNode.getValue().setTreeNode(null);
+        }
     }
 
     /** {@inheritDoc} */
     public int size() {
-        return barcode.blackSize();
+        return grouper.getBarcode().blackSize();
     }
 
     /** {@inheritDoc} */
     protected int getSourceIndex(int index) {
-        return barcode.getIndex(index, UNIQUE);
+        return grouper.getBarcode().getIndex(index, Grouper.UNIQUE);
     }
 
     /** {@inheritDoc} */
@@ -162,235 +147,13 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
-        // The approach to handling list changes in GroupingList uses two passes
-        // through the list of change events.
-        //
-        // In the first pass, the barcode is updated to reflect the changes but
-        // no events are fired. Deleted and updated original barcode values are
-        // stored in a temporary LinkedList. Updated values' barcode entries are
-        // set to UNIQUE.
-        //
-        // In pass 2, the change events are reviewed again. During this second pass
-        // we bring the IndexedTree of GroupLists up to date and also fire ListEvents.
-        //
-        // a) Inserted elements are tested to see if they were simply added to
-        // existing GroupLists (in which case an update event should be fired
-        // rather than an insert)
-        //
-        // b) For update events the value is tested for group membership with
-        // adjacent values, and the result may be a combination of DELETE, INSERT
-        // or UPDATE events.
-        //
-        // c) Deleted events may be forwarded with a resultant DELETE or UPDATE
-        // event, depending on whether the deleted value was the last member of
-        // its group.
-
-        // a Barcode to track values that must be revisited to determine if they are UNIQUE or DUPLICATE
-        final Barcode toDoList = new Barcode();
-        toDoList.addWhite(0, barcode.size());
-
-        // first pass -> update the barcode and accumulate the type of values removed (UNIQUE or DUPLICATE or UNIQUE_WITH_DUPLICATE)
-        final LinkedList removedValues = new LinkedList();
-        while (listChanges.next()) {
-            final int changeIndex = listChanges.getIndex();
-            final int changeType = listChanges.getType();
-
-            if (changeType == ListEvent.INSERT) {
-                // assume the inserted element is unique until we determine otherwise
-                barcode.add(changeIndex, UNIQUE, 1);
-                // indicate we must revisit this index later to determine its uniqueness
-                toDoList.add(changeIndex, TODO, 1);
-
-            } else if (changeType == ListEvent.UPDATE) {
-                // case: AACCC -> AABCC
-                // if the updated index is a UNIQUE index, we MAY have just created a
-                // new group (by modifying an element in place). Consequently, we must
-                // mark the NEXT element as UNIQUE and revisit it later to determine
-                // if it really is
-                if (barcode.get(changeIndex) == UNIQUE) {
-                    if (changeIndex+1 < barcode.size() && barcode.get(changeIndex+1) == DUPLICATE) {
-                        barcode.set(changeIndex, UNIQUE, 2);
-                        toDoList.set(changeIndex, TODO, 1);
-                    }
-                }
-
-            } else if (changeType == ListEvent.DELETE) {
-                Object deleted = barcode.get(changeIndex);
-                barcode.remove(changeIndex, 1);
-                toDoList.remove(changeIndex, 1);
-
-                if (deleted == UNIQUE) {
-                    // if the deleted UNIQUE value has a DUPLICATE, promote the DUPLICATE to be the new UNIQUE
-                    if (changeIndex < barcode.size() && barcode.get(changeIndex) == DUPLICATE) {
-                        // case: AABB -> AAB
-                        barcode.set(changeIndex, UNIQUE, 1);
-                        deleted = UNIQUE_WITH_DUPLICATE;
-                    }
-                }
-
-                removedValues.addLast(deleted);
-            }
-        }
-
-        // second pass, handle toDoList, update groupLists, and fire events
         updates.beginEvent(true);
-        listChanges.reset();
-        while (listChanges.next()) {
-            final int changeIndex = listChanges.getIndex();
-            final int changeType = listChanges.getType();
-
-            // inserts can result in UPDATE or INSERT events
-            if (changeType == ListEvent.INSERT) {
-
-                // if no group already exists to join, create a new group
-                if (tryJoinExistingGroup(changeIndex, toDoList) == NO_GROUP) {
-                    final int groupIndex = barcode.getColourIndex(changeIndex, UNIQUE);
-                    insertGroupList(groupIndex);
-                    updates.addInsert(groupIndex);
-                } else {
-                    updates.addUpdate(barcode.getColourIndex(changeIndex, true, UNIQUE));
-                }
-
-            // updates can result in INSERT, UPDATE and DELETE events
-            } else if (changeType == ListEvent.UPDATE) {
-
-                // get the location of the group before the update occurred
-                int oldGroup = 0;
-                if (toDoList.get(changeIndex) == TODO) oldGroup = RIGHT_GROUP;
-                else if (barcode.get(changeIndex) == DUPLICATE) oldGroup = LEFT_GROUP;
-                else if (barcode.get(changeIndex) == UNIQUE) oldGroup = NO_GROUP;
-
-                // get the new group location
-                int newGroup = tryJoinExistingGroup(changeIndex, toDoList);
-
-                // the index of the GroupList being updated (it may or may not exist yet)
-                int groupIndex = barcode.getColourIndex(changeIndex, true, UNIQUE);
-
-                // we're the first element in a new group
-                if (newGroup == NO_GROUP) {
-                    if (oldGroup == NO_GROUP) {
-                        updates.addUpdate(groupIndex);
-                    } else if (oldGroup == LEFT_GROUP) {
-                        updates.addUpdate(groupIndex-1);
-                        insertGroupList(groupIndex);
-                        updates.addInsert(groupIndex);
-                    } else if (oldGroup == RIGHT_GROUP) {
-                        insertGroupList(groupIndex);
-                        updates.addInsert(groupIndex);
-                        updates.addUpdate(groupIndex+1);
-                    }
-
-                // we are joining an existing group to our left
-                } else if (newGroup == LEFT_GROUP) {
-                    if (oldGroup == NO_GROUP) {
-                        updates.addUpdate(groupIndex);
-                        removeGroupList(groupIndex+1);
-                        updates.addDelete(groupIndex+1);
-                    } else if (oldGroup == LEFT_GROUP) {
-                        updates.addUpdate(groupIndex);
-                    } else if (oldGroup == RIGHT_GROUP) {
-                        updates.addUpdate(groupIndex);
-                        if (groupIndex+1 < barcode.blackSize()) updates.addUpdate(groupIndex+1);
-                    }
-
-                // we are joining an existing group to our right
-                } else if (newGroup == RIGHT_GROUP) {
-                    if (oldGroup == NO_GROUP) {
-                        removeGroupList(groupIndex);
-                        updates.addDelete(groupIndex);
-                        updates.addUpdate(groupIndex);
-                    } else if (oldGroup == LEFT_GROUP) {
-                        if(groupIndex-1 >= 0) updates.addUpdate(groupIndex-1);
-                        updates.addUpdate(groupIndex);
-                    } else if (oldGroup == RIGHT_GROUP) {
-                        updates.addUpdate(groupIndex);
-                    }
-                }
-
-            // deletes can result in UPDATE or DELETE events
-            } else if (changeType == ListEvent.DELETE) {
-                // figure out if we deleted a UNIQUE or DUPLICATE or UNIQUE_WITH_DUPLICATE
-                final Object deleted = removedValues.removeFirst();
-
-                // get the index of the element removed from the source list
-                final int sourceDeletedIndex = deleted == DUPLICATE ? changeIndex - 1 : changeIndex;
-
-                // determine the index of the GroupList the removal effects
-                final int groupDeletedIndex = sourceDeletedIndex < barcode.size() ? barcode.getBlackIndex(sourceDeletedIndex, true) : barcode.blackSize();
-
-                // fire the change event
-                if (deleted == UNIQUE) {
-                    // if we removed a UNIQUE element then it was the last one and we must remove the group
-                    removeGroupList(groupDeletedIndex);
-                    updates.addDelete(groupDeletedIndex);
-                } else {
-                    updates.addUpdate(groupDeletedIndex);
-                }
-            }
-        }
+        grouper.listChanged(listChanges);
         updates.commitEvent();
-    }
-
-    /**
-     * Handles whether this change index has a neighbour that existed prior
-     * to a current change and that the values are equal. This adjusts the
-     * duplicates list a found pair of such changes if they exist.
-     *
-     * @return NO_GROUP if no neighbour was found. In this case the value at the specified
-     *      index will be marked as unique, but not temporarily so. Returns LEFT_GROUP if
-     *      a neighbour was found on the left, and RIGHT_GROUP if a neighbour was found on the
-     *      right. In non-zero cases the duplicates list is updated.
-     */
-    private int tryJoinExistingGroup(int changeIndex, Barcode toDoList) {
-        // test if values at changeIndex and its predecessor should be grouped
-        int predecessorIndex = changeIndex - 1;
-        if (groupTogether(predecessorIndex, changeIndex)) {
-            barcode.set(changeIndex, DUPLICATE, 1);
-            return LEFT_GROUP;
-        }
-
-        // search for an OLD successor that should be in the same group as changeIndex
-        int successorIndex = changeIndex + 1;
-        while (true) {
-            // we have found a successor that belongs in the same group
-            if (groupTogether(changeIndex, successorIndex)) {
-                // if the successor is OLD, have changeIndex join the existing group
-                if (toDoList.get(successorIndex) == DONE) {
-                    barcode.set(changeIndex, UNIQUE, 1);
-                    barcode.set(successorIndex, DUPLICATE, 1);
-                    return RIGHT_GROUP;
-
-                // this successor is NEW, not OLD, so skip it
-                } else {
-                    successorIndex++;
-                }
-
-            // we have no more successors that belong in the same group
-            } else {
-                barcode.set(changeIndex, UNIQUE, 1);
-                return NO_GROUP;
-            }
-        }
     }
 
     public List<E> get(int index) {
         return this.groupLists.get(index);
-    }
-
-    /**
-     * Tests if the specified values should be grouped together.
-     *
-     * @param sourceIndex0 the first index of the source list to test
-     * @param sourceIndex1 the second index of the source list to test
-     *
-     * @return true iff the values at the specified index are equal according
-     *      to the Comparator which defines the grouping logic; false if
-     *      either index is out of range or the values shall not be grouped
-     */
-    private boolean groupTogether(int sourceIndex0, int sourceIndex1) {
-        if(sourceIndex0 < 0 || sourceIndex0 >= source.size()) return false;
-        if(sourceIndex1 < 0 || sourceIndex1 >= source.size()) return false;
-        return comparator.compare(source.get(sourceIndex0), source.get(sourceIndex1)) == 0;
     }
 
     /** {@inheritDoc} */
@@ -476,11 +239,11 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
             final int groupIndex = this.treeNode.getIndex();
 
             // if this is before the end, its everything up to the first different element
-            if(groupIndex < barcode.blackSize() - 1) {
-                return barcode.getIndex(groupIndex + 1, UNIQUE);
+            if(groupIndex < grouper.getBarcode().blackSize() - 1) {
+                return grouper.getBarcode().getIndex(groupIndex + 1, Grouper.UNIQUE);
             // if this is at the end, its everything after
             } else {
-                return barcode.size();
+                return grouper.getBarcode().size();
             }
         }
 
@@ -518,4 +281,5 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
             source.add(this.getSourceIndex(index), element);
         }
     }
+
 }
