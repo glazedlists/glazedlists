@@ -39,18 +39,8 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
     /** the components of the panel */
     private List<JComponent[]> components = new ArrayList<JComponent[]>();
 
-    /** the display */
-    private FormLayout layout = new FormLayout("");
-
-    /** the row and column styles */
-    private Format format;
-    private boolean vertical;
-    private RowSpec[] rowSpecs;
-    private ColumnSpec[] columnSpecs;
-
-    /** spacers between element columns */
-    private RowSpec gapRow;
-    private ColumnSpec gapColumn;
+    private final ListLayout listLayout;
+    private final Format format;
 
     /**
      * Creates a new {@link JEventListPanel} hosting the
@@ -58,26 +48,10 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
      */
     public JEventListPanel(EventList<E> source, Format<E> format) {
         this.swingSource = GlazedListsSwing.swingThreadProxyList(source);
+        this.listLayout = new ListLayout(this, format);
         this.format = format;
 
-        // prepare the empty panel
-        this.vertical = format.isVertical();
-        this.columnSpecs = format.getElementColumns();
-        this.rowSpecs = format.getElementRows();
-        this.gapRow = format.getGapRow();
-        this.gapColumn = format.getGapColumn();
-        this.setLayout(layout);
-
-        // create the fixed axis
-        if(vertical) {
-            for(int c = 0; c < columnSpecs.length; c++) {
-                insertColumn(c, columnSpecs[c]);
-            }
-        } else {
-            for(int r = 0; r < rowSpecs.length; r++) {
-                insertRow(r, rowSpecs[r]);
-            }
-        }
+        this.setLayout(listLayout);
 
         // populate the initial elements
         for(int i = 0; i < swingSource.size(); i++) {
@@ -86,26 +60,6 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
 
         // listen for changes to the source
         swingSource.addListEventListener(this);
-    }
-
-    /**
-     * @return the row that the preceding gap for this row should be shown on,
-     *      or the row that the element rows should be on if this is the first row.
-     */
-    private int baseLayoutRow(int row) {
-        if(!vertical) return 0;
-        if(row == 0) return 0;
-        else return (row * rowSpecs.length) + (gapRow == null ? 0 : row - 1);
-    }
-
-    /**
-     * @return the column that the preceding gap for this column should be shown on,
-     *      or the column that the element columns should be on if this is the first column.
-     */
-    private int baseLayoutColumn(int column) {
-        if(vertical) return 0;
-        if(column == 0) return 0;
-        else return (column * columnSpecs.length) + (gapColumn == null ? 0 : column - 1);
     }
 
     /**
@@ -122,58 +76,13 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         // remember these components
         components.add(index, elementComponents);
 
-        // make room on the variable axis
-        int baseRow = baseLayoutRow(index);
-        int baseColumn = baseLayoutColumn(index);
-        if(vertical) {
-            // insert the gap for all rows but the first
-            if(components.size() > 1 && gapRow != null) {
-                insertRow(baseRow, gapRow);
-                baseRow += 1;
-            }
-            // insert the element rows
-            for(int r = 0; r < rowSpecs.length; r++) {
-                insertRow(baseRow + r, rowSpecs[r]);
-            }
-        } else {
-            // insert the gap for all columns but the first
-            if(components.size() > 1 && gapColumn != null) {
-                insertColumn(baseColumn, gapColumn);
-                baseColumn += 1;
-            }
-            // insert the element columns
-            for(int c = 0; c < columnSpecs.length; c++) {
-                insertColumn(baseColumn + c, columnSpecs[c]);
-            }
-        }
+        listLayout.insertIndex(index);
 
         // insert the components
         for(int c = 0; c < elementComponents.length; c++) {
             if(elementComponents[c] == null) continue;
-            CellConstraints constraints = format.getConstraints(c);
-            constraints = (CellConstraints)constraints.clone();
-            constraints.gridX += baseColumn;
-            constraints.gridY += baseRow;
-            add(elementComponents[c], constraints);
+            add(elementComponents[c], new ListLayout.Constraints(c, index));
         }
-    }
-
-    /**
-     * Insert the specified row into the layout. This accomodates
-     * for the appendColumn/insertColumn API weakness in FormLayout.
-     */
-    private void insertRow(int index, RowSpec rowSpec) {
-        if(index == layout.getRowCount()) layout.appendRow(rowSpec);
-        else layout.insertRow(index + 1, rowSpec);
-    }
-
-    /**
-     * Insert the specified column into the layout. This accomodates
-     * for the appendRow/insertRow API weakness in FormLayout.
-     */
-    private void insertColumn(int index, ColumnSpec columnSpec) {
-        if(index == layout.getColumnCount()) layout.appendColumn(columnSpec);
-        else layout.insertColumn(index + 1, columnSpec);
     }
 
     /**
@@ -187,28 +96,10 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
             remove(elementComponents[c]);
         }
 
-        // remove the space from the variable axis
-        if(vertical) {
-            int baseRow = baseLayoutRow(index);
-            if(components.size() > 1 && gapRow != null) {
-                layout.removeRow(baseRow + 1);
-            }
-            for(int r = 0; r < rowSpecs.length; r++) {
-                layout.removeRow(baseRow + 1);
-            }
-
-        } else {
-            int baseColumn = baseLayoutColumn(index);
-            if(components.size() > 1 && gapColumn != null) {
-                layout.removeColumn(baseColumn + 1);
-            }
-            for(int c = 0; c < columnSpecs.length; c++) {
-                layout.removeColumn(baseColumn + 1);
-            }
-        }
-
         // forget the components
         components.remove(index);
+
+        listLayout.removeIndex(index);
     }
 
     /**
@@ -226,19 +117,13 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         }
 
         // swap as necessary
-        int baseRow = baseLayoutRow(index);
-        int baseColumn = baseLayoutColumn(index);
         for(int c = 0; c < oldElementComponents.length; c++) {
             if(oldElementComponents[c] == newElementComponents[c]) continue;
             if(oldElementComponents[c] != null) {
                 remove(oldElementComponents[c]);
             }
             if(newElementComponents[c] != null) {
-                CellConstraints constraints = format.getConstraints(c);
-                constraints = (CellConstraints)constraints.clone();
-                constraints.gridX += baseColumn;
-                constraints.gridY += baseRow;
-                add(newElementComponents[c], constraints);
+                add(newElementComponents[c], new ListLayout.Constraints(c, index));
             }
         }
 
@@ -282,14 +167,6 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
      * Specify how the JComponents of an Object are layed out in a row.
      */
     public interface Format<E> {
-
-        /**
-         * Whether to lay out components in series horizontally or vertically.
-         *
-         * @return true for components to be layed above one another in
-         *      rows, or false for components to be layed beside one another in columns.
-         */
-        boolean isVertical();
 
         /**
          * Get the number of components for each row element.
@@ -344,15 +221,13 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
      * A default implementation of the {@link Format} interface.
      */
     public static abstract class AbstractFormat<E> implements Format<E> {
-        private final boolean vertical;
         private final RowSpec[] rowSpecs;
         private final ColumnSpec[] columnSpecs;
         private final RowSpec gapRow;
         private final ColumnSpec gapColumn;
         private final CellConstraints[] cellConstraints;
 
-        protected AbstractFormat(boolean vertical, RowSpec[] rowSpecs, ColumnSpec[] columnSpecs, RowSpec gapRow, ColumnSpec gapColumn, CellConstraints[] cellConstraints) {
-            this.vertical = vertical;
+        protected AbstractFormat(RowSpec[] rowSpecs, ColumnSpec[] columnSpecs, RowSpec gapRow, ColumnSpec gapColumn, CellConstraints[] cellConstraints) {
             this.rowSpecs = rowSpecs;
             this.columnSpecs = columnSpecs;
             this.gapRow = gapRow;
@@ -360,17 +235,12 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
             this.cellConstraints = cellConstraints;
         }
 
-        public AbstractFormat(boolean vertical, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints) {
-            this(vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), new RowSpec(gapRow), new ColumnSpec(gapColumn), cellConstraints);
+        public AbstractFormat(String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints) {
+            this(RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), new RowSpec(gapRow), new ColumnSpec(gapColumn), cellConstraints);
         }
 
-        public AbstractFormat(boolean vertical, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints) {
-            this(vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), new RowSpec(gapRow), new ColumnSpec(gapColumn), decode(cellConstraints));
-        }
-
-        /** {@inheritDoc} */
-        public boolean isVertical() {
-            return vertical;
+        public AbstractFormat(String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints) {
+            this(RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), decode(cellConstraints));
         }
 
         /** {@inheritDoc} */
@@ -421,18 +291,18 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
     public static class BeanFormat<E> extends AbstractFormat<E> implements Format<E> {
         private final BeanProperty<E>[] properties;
 
-        public BeanFormat(Class<E> beanClass, boolean vertical, RowSpec[] rowSpecs, ColumnSpec[] columnSpecs, RowSpec gapRow, ColumnSpec gapColumn, CellConstraints[] cellConstraints, String[] properties) {
-            super(vertical, rowSpecs, columnSpecs, gapRow, gapColumn, cellConstraints);
+        public BeanFormat(Class<E> beanClass, RowSpec[] rowSpecs, ColumnSpec[] columnSpecs, RowSpec gapRow, ColumnSpec gapColumn, CellConstraints[] cellConstraints, String[] properties) {
+            super(rowSpecs, columnSpecs, gapRow, gapColumn, cellConstraints);
             this.properties = new BeanProperty[properties.length];
             for(int p = 0; p < properties.length; p++) {
                 this.properties[p] = new BeanProperty<E>(beanClass, properties[p], true, false);
             }
         }
-        public BeanFormat(Class<E> beanClass, boolean vertical, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints, String[] properties) {
-            this(beanClass, vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), cellConstraints, properties);
+        public BeanFormat(Class<E> beanClass, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints, String[] properties) {
+            this(beanClass, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), cellConstraints, properties);
         }
-        public BeanFormat(Class<E> beanClass, boolean vertical, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints, String[] properties) {
-            this(beanClass, vertical, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), decode(cellConstraints), properties);
+        public BeanFormat(Class<E> beanClass, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints, String[] properties) {
+            this(beanClass, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), decode(cellConstraints), properties);
         }
 
         /** {@inheritDoc} */

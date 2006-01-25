@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.impl.Grouper;
 // Java collections are used for underlying data storage
 import java.util.*;
 
@@ -37,12 +38,12 @@ import java.util.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author James Lemieux
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class UniqueList<E> extends TransformedList<E, E> {
 
-    private final GroupingList<E> groupingList;
-
-    private final Comparator<E> comparator;
+    /** the grouping service manages collapsing out duplicates */
+    private final Grouper<E> grouper;
 
     /**
      * Creates a {@link UniqueList} that determines uniqueness via the
@@ -63,36 +64,108 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * @param comparator the {@link Comparator} used to determine equality
      */
     public UniqueList(EventList<E> source, Comparator<E> comparator) {
-        this(new GroupingList<E>(source, comparator), comparator);
+        this(new SortedList<E>(source, comparator), comparator, null);
     }
 
     /**
-     * A private constructor which allows us a chance to store a reference to
-     * the {@link GroupingList} we install. UniqueList is largely implemented
-     * through the use of GroupingList and FunctionList. After this constructor
-     * completes, the EventList pipeline looks like this:
+     * A private constructor which allows us to use the {@link SortedList} as
+     * the main decorated {@link EventList}.
      *
-     * UniqueList -> FunctionList -> GroupingList -> source EventList...
+     * <p>The current implementation of {@link UniqueList} uses the {@link Grouper}
+     * service to manage collapsing duplicates, which is more efficient than the
+     * previous implementation that required a longer pipeline of {@link GroupingList}s.
      *
-     * where the GroupingList groups the values into GroupLists and the
-     * FunctionList simply chooses the first element of each GroupList as the
-     * new representation of that GroupList.
+     * <p>UniqueList exposes a few extra querying methods like {@link #getCount(int)}
+     * and {@link #getAll(int)} which require us to query the {@link Grouper}s
+     * barcode, which retains state on groups.
      *
-     * UniqueList exposes a few extra querying methods like {@link #getCount(int)}
-     * and {@link #getAll(int)} which require us to keep a reference to the
-     * GroupingList. This private constructor allows us to retain a handle to
-     * the GroupingList after using it in a call to the super constructor.
-     *
-     * @param groupingList the GroupingList that is installed around the
-     *      original source EventList
+     * @param source a private {@link SortedList} whose {@link Comparator} never
+     *      changes, this is used to keep track of uniqueness.
+     * @param comparator the {@link Comparator} used to determine equality.
+     * @param dummyParameter dummy parameter to differentiate between the different
+     *      {@link GroupingList} constructors.
      */
-    private UniqueList(GroupingList<E> groupingList, Comparator<E> comparator) {
-        super(new FunctionList<List<E>, E>(groupingList, new ListElementZeroFunction<E>(), new WrapInListFunction<E>()));
+    private UniqueList(SortedList<E> source, Comparator<E> comparator, Void dummyParameter) {
+        super(source);
 
-        this.groupingList = groupingList;
-        this.comparator = comparator;
+        // the grouper handles changes to the SortedList
+        GrouperClient grouperClient = new GrouperClient();
+        this.grouper = new Grouper<E>(source, grouperClient);
 
         source.addListEventListener(this);
+    }
+
+    /**
+     * Handle changes to the grouper's groups.
+     */
+    private class GrouperClient implements Grouper.Client {
+        public void groupChanged(int index, int groupIndex, int groupChangeType) {
+            if(groupChangeType == ListEvent.INSERT) {
+                updates.addInsert(groupIndex);
+            } else if(groupChangeType == ListEvent.DELETE) {
+                updates.addDelete(groupIndex);
+            } else if(groupChangeType == ListEvent.UPDATE) {
+                updates.addUpdate(groupIndex);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+    }
+
+
+    /** {@inheritDoc} */
+    public int size() {
+        return grouper.getBarcode().colourSize(Grouper.UNIQUE);
+    }
+
+    /** {@inheritDoc} */
+    protected int getSourceIndex(int index) {
+        if(index == size()) return source.size();
+        return grouper.getBarcode().getIndex(index, Grouper.UNIQUE);
+    }
+
+    /**
+     * Get the first element that's not a duplicate of the element at the specified
+     * index. This is useful for things like {@link #getCount(int)} because we can
+     * find the full range of a value quickly.
+     */
+    private int getEndIndex(int index) {
+        if(index == (size() - 1)) return source.size();
+        else return getSourceIndex(index + 1);
+    }
+
+    /** {@inheritDoc} */
+    public E remove(int index) {
+        if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+
+        updates.beginEvent(true);
+
+        // remember the first duplicate
+        E result = get(index);
+
+        // remove all duplicates at this index
+        int startIndex = getSourceIndex(index);
+        int endIndex = getEndIndex(index);
+        ((SortedList)source).subList(startIndex, endIndex).clear();
+
+        updates.commitEvent();
+
+        return result;
+    }
+
+    /** {@inheritDoc} */
+    public E set(int index, E value) {
+        if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
+
+        updates.beginEvent(true);
+
+        // remove all duplicates of this value first
+        E result = remove(index);
+        add(index, value);
+
+        updates.commitEvent();
+
+        return result;
     }
 
     /**
@@ -113,7 +186,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      *         is incompatible with this list
      */
     public int indexOf(Object element) {
-        final int index = Collections.binarySearch(source, (E) element, this.comparator);
+        final int index = Collections.binarySearch(this, (E) element, ((SortedList)source).getComparator());
 
         // if the element is not found (index is negative) then return -1 to indicate the list does not contain it
         return index < 0 ? -1 : index;
@@ -126,14 +199,18 @@ public final class UniqueList<E> extends TransformedList<E, E> {
 
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
-        updates.forwardEvent(listChanges);
+        updates.beginEvent(true);
+        grouper.listChanged(listChanges);
+        updates.commitEvent();
     }
 
     /**
      * Returns the number of duplicates of the value found at the specified index.
      */
     public int getCount(int index) {
-        return this.getAll(index).size();
+        int startIndex = getSourceIndex(index);
+        int endIndex = getEndIndex(index);
+        return endIndex - startIndex;
     }
 
     /**
@@ -141,7 +218,8 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      */
     public int getCount(E value) {
         final int index = this.indexOf(value);
-        return index == -1 ? 0 : this.getCount(index);
+        if(index == -1) return 0;
+        else return getCount(index);
     }
 
     /**
@@ -149,7 +227,9 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * given <code>index</code> within this {@link UniqueList}.
      */
     public List<E> getAll(int index) {
-        return (List<E>)this.groupingList.get(index);
+        int startIndex = getSourceIndex(index);
+        int endIndex = getEndIndex(index);
+        return new ArrayList<E>(source.subList(startIndex, endIndex));
     }
 
     /**
@@ -163,27 +243,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
 
     /** {@inheritDoc} */
     public void dispose() {
-        this.groupingList.dispose();
-        ((FunctionList) this.source).dispose();
+        ((SortedList)source).dispose();
         super.dispose();
-    }
-
-    /**
-     * This Function maps each List produced by the source GroupingList to its
-     * first element.
-     */
-    private static class ListElementZeroFunction<A> implements FunctionList.Function<List<A>, A> {
-        public A evaluate(List<A> value) {
-            return value.get(0);
-        }
-    }
-
-    /**
-     * This Function creates a single element List from the given value.
-     */
-    private static class WrapInListFunction<B> implements FunctionList.Function<B, List<B>> {
-        public List<B> evaluate(B value) {
-            return Collections.singletonList(value);
-        }
     }
 }

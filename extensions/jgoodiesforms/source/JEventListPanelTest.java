@@ -4,6 +4,7 @@
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.util.Random;
 // JGoodies is industrial layout
 // observable lists are used to store rules
 import ca.odell.glazedlists.*;
@@ -21,7 +22,8 @@ public class JEventListPanelTest {
     public class SillyObjectFormat extends JEventListPanel.AbstractFormat {
 
         public SillyObjectFormat() {
-            super(false, "0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", "15dlu", "15dlu", new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
+            super("0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", "15dlu", "15dlu", new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
+//            super("0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", null, null, new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
         }
 
         public int getComponentsPerElement() {
@@ -73,10 +75,11 @@ public class JEventListPanelTest {
     }
 
     static class AddAction implements ActionListener {
+        private Random dice = new Random();
         private EventList target;
         public AddAction(EventList target) { this.target = target; }
         public void actionPerformed(ActionEvent e) {
-            target.add("X " + (System.currentTimeMillis() % 10));
+            target.add("X " + (dice.nextInt(100)));
         }
     }
 }

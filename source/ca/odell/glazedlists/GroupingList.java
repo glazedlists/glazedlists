@@ -62,7 +62,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * @param comparator the {@link Comparator} used to determine groupings
      */
     public GroupingList(EventList<E> source, Comparator<E> comparator) {
-        this(new SortedList<E>(source, comparator), comparator);
+        this(new SortedList<E>(source, comparator), comparator, null);
     }
 
     /**
@@ -71,8 +71,10 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      *
      * @param source the elements to be grouped arranged in sorted order
      * @param comparator the {@link Comparator} used to determine groupings
+     * @param dummyParameter dummy parameter to differentiate between the different
+     *      {@link GroupingList} constructors.
      */
-    private GroupingList(SortedList<E> source, Comparator<E> comparator) {
+    private GroupingList(SortedList<E> source, Comparator<E> comparator, Void dummyParameter) {
         super(source);
 
         // the grouper handles changes to the SortedList
@@ -132,7 +134,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /** {@inheritDoc} */
     public int size() {
-        return grouper.getBarcode().blackSize();
+        return grouper.getBarcode().colourSize(Grouper.UNIQUE);
     }
 
     /** {@inheritDoc} */
