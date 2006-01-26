@@ -208,11 +208,12 @@
         </javac>
     </target>
 
-    <target name="issuesbrowser" depends="core,swing,swt,jfreechart">
+    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms">
         <javac destdir="classes" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
                 <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
+                <fileset dir="extensions/jgoodiesforms/lib/" includes="*.jar"/>
             </classpath>
         </javac>
     </target>
