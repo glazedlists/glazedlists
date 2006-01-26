@@ -99,7 +99,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * Handle changes to the grouper's groups.
      */
     private class GrouperClient implements Grouper.Client {
-        public void groupChanged(int index, int groupIndex, int groupChangeType) {
+        public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType) {
             if(groupChangeType == ListEvent.INSERT) {
                 updates.addInsert(groupIndex);
             } else if(groupChangeType == ListEvent.DELETE) {

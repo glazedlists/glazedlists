@@ -167,10 +167,10 @@ public class Grouper<E> {
                 // if no group already exists to join, create a new group
                 if(tryJoinExistingGroup(changeIndex, toDoList) == NO_GROUP) {
                     final int groupIndex = barcode.getColourIndex(changeIndex, UNIQUE);
-                    client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT);
+                    client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT, true, changeType);
                 } else {
                     int groupIndex = barcode.getColourIndex(changeIndex, true, UNIQUE);
-                    client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
+                    client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
                 }
 
             // updates can result in INSERT, UPDATE and DELETE events
@@ -191,39 +191,39 @@ public class Grouper<E> {
                 // we're the first element in a new group
                 if(newGroup == NO_GROUP) {
                     if(oldGroup == NO_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
                     } else if(oldGroup == LEFT_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE);
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT);
+                        client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE, false, changeType);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT, true, changeType);
                     } else if(oldGroup == RIGHT_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT);
-                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT, true, changeType);
+                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE, false, changeType);
                     }
 
                 // we are joining an existing group to our left
                 } else if(newGroup == LEFT_GROUP) {
                     if(oldGroup == NO_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
-                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.DELETE);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
+                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.DELETE, false, changeType);
                     } else if(oldGroup == LEFT_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
                     } else if(oldGroup == RIGHT_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
                         if(groupIndex + 1 < barcode.blackSize()) {
-                            client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE);
+                            client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE, false, changeType);
                         }
                     }
 
                 // we are joining an existing group to our right
                 } else if(newGroup == RIGHT_GROUP) {
                     if (oldGroup == NO_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.DELETE);
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.DELETE, false, changeType);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
                     } else if(oldGroup == LEFT_GROUP) {
-                        if(groupIndex - 1 >= 0) client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE);
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
+                        if(groupIndex - 1 >= 0) client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE, false, changeType);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
                     } else if(oldGroup == RIGHT_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType);
                     }
                 }
 
@@ -241,9 +241,9 @@ public class Grouper<E> {
                 // fire the change event
                 if(deleted == UNIQUE) {
                     // if we removed a UNIQUE element then it was the last one and we must remove the group
-                    client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE);
+                    client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE, true, changeType);
                 } else {
-                    client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.UPDATE);
+                    client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.UPDATE, true, changeType);
                 }
             }
         }
@@ -324,7 +324,17 @@ public class Grouper<E> {
          * @param groupChangeType one of {@link ca.odell.glazedlists.event.ListEvent#INSERT},
          *      {@link ca.odell.glazedlists.event.ListEvent#UPDATE} or {@link ca.odell.glazedlists.event.ListEvent#DELETE} signalling
          *      what happened to the group in response to this element change.
+         *      This is potentially different from what happened to the original
+         *      list element.
+         * @param primary whether this is a first event for this change,
+         *      impacting the current group for this element. Sometimes multiple
+         *      groups will be effected, in which case only a single callback will
+         *      be the primary callback.
+         * @param elementChangeType the change type that caused this event. Sometimes
+         *      an {@link ListEvent.UPDATE} event will cause a group to become inserted
+         *      or deleted, in which case the elementChangeType represents the original
+         *      event type.
          */
-        public void groupChanged(int index, int groupIndex, int groupChangeType);
+        public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType);
     }
 }
