@@ -101,7 +101,7 @@ public class ListLayout extends LayoutDecorator {
         int baseRow = logicalToLayoutRow(index);
 
         // insert the gap for all rows but the first
-        if(gridComponents.size() > 1 && gapRow != null) {
+        if(index != 0 && gapRow != null) {
             insertRow(baseRow, gapRow);
             baseRow += 1;
         }
@@ -114,7 +114,7 @@ public class ListLayout extends LayoutDecorator {
         int baseColumn = logicalToLayoutColumn(index);
 
         // insert the gap for all columns but the first
-        if(gridComponents.size() > 1 && gapColumn != null) {
+        if(index != 0 && gapColumn != null) {
             insertColumn(baseColumn, gapColumn);
             baseColumn += 1;
         }
@@ -125,7 +125,7 @@ public class ListLayout extends LayoutDecorator {
     }
     private void removeLogicalRow(int index) {
         int baseRow = logicalToLayoutRow(index);
-        if(gridComponents.size() > 1 && gapRow != null) {
+        if(index != 0 && gapRow != null) {
             formLayout.removeRow(baseRow + 1);
         }
         for(int r = 0; r < rowSpecs.length; r++) {
@@ -134,7 +134,7 @@ public class ListLayout extends LayoutDecorator {
     }
     private void removeLogicalColumn(int index) {
         int baseColumn = logicalToLayoutColumn(index);
-        if(gridComponents.size() > 1 && gapColumn != null) {
+        if(index != 0 && gapColumn != null) {
             formLayout.removeColumn(baseColumn + 1);
         }
         for(int c = 0; c < columnSpecs.length; c++) {
@@ -185,19 +185,18 @@ public class ListLayout extends LayoutDecorator {
         int logicalRowCountBefore = logicalRowCount();
 
         gridComponents.remove(index);
+        reassignConstraints();
 
         int logicalColumnCountAfter = logicalColumnCount();
         int logicalRowCountAfter = logicalRowCount();
 
         // make sure we don't have too many cells
-        if(logicalRowCountAfter > logicalRowCountBefore) {
+        if(logicalRowCountAfter < logicalRowCountBefore) {
             removeLogicalRow(logicalRowCountAfter);
         }
-        if(logicalColumnCountAfter > logicalColumnCountBefore) {
+        if(logicalColumnCountAfter < logicalColumnCountBefore) {
             removeLogicalColumn(logicalColumnCountAfter);
         }
-
-        reassignConstraints();
     }
     private void reassignConstraints() {
         formLayout.invalidateLayout(container);
