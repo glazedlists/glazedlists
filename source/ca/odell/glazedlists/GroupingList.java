@@ -82,7 +82,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         this.grouper = new Grouper<E>(source, grouperClient);
 
         // initialize the tree of GroupLists
-        for (int i = 0; i < grouper.getBarcode().colourSize(Grouper.UNIQUE); i++) {
+        for(int i = 0; i < grouper.getBarcode().colourSize(Grouper.UNIQUE); i++) {
             grouperClient.insertGroupList(i);
         }
 

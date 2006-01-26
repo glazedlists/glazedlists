@@ -47,7 +47,7 @@ public class ListLayout extends LayoutDecorator {
 
     private Container container;
 
-    private static final int COLUMNS = 3;
+    private static final int COLUMNS = 1;
 
     public ListLayout(Container container, JEventListPanel.Format format) {
         this.container = container;

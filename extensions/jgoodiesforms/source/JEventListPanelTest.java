@@ -22,7 +22,7 @@ public class JEventListPanelTest {
     public class SillyObjectFormat extends JEventListPanel.AbstractFormat {
 
         public SillyObjectFormat() {
-            super("0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", "15dlu", "15dlu", new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
+            super("0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", "45dlu", "45dlu", new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
 //            super("0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", null, null, new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
         }
 
