@@ -20,13 +20,13 @@ import java.util.*;
  */
 public class IndexOrderTest extends TestCase {
 
-    /** for randomly choosing list indicies */
+    /** for randomly choosing list indices */
     private Random random = new Random();
     
     /**
      * Test to verify that the list changes occur in increasing order.
      *GlazedL
-     * <p>This creates a long chain of lists designed to cause events where the indicies
+     * <p>This creates a long chain of lists designed to cause events where the indices
      * are out of order. The resultant list is a list of integer arrays of size two.
      * That list has been filtered to not contain any elements where the first index is
      * greater than 50. It has been sorted in increasing order.
@@ -55,9 +55,9 @@ public class IndexOrderTest extends TestCase {
     }
 
     /**
-     * Test to verify that the lists work with change indicies out of order.
+     * Test to verify that the lists work with change indices out of order.
      *
-     * <p>This creates a long chain of lists designed to cause events where the indicies
+     * <p>This creates a long chain of lists designed to cause events where the indices
      * are out of order. The resultant list is a list of integer arrays of size two.
      * That list has been filtered to not contain any elements where the first index is
      * greater than 50. It has been sorted in increasing order.
@@ -101,7 +101,7 @@ public class IndexOrderTest extends TestCase {
     }
     
     /**
-     * A special list change listener that verifies that the change indicies
+     * A special list change listener that verifies that the change indices
      * within each atomic change are in increasing order.
      */
     class IncreasingChangeIndexListener implements ListEventListener {

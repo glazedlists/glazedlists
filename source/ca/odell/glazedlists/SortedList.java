@@ -572,7 +572,7 @@ public final class SortedList<E> extends TransformedList<E, E> {
      */
     private static class IndexedTreeNodeRawOrderComparator implements Comparator {
         /**
-         * Compares the alpha object to the beta object by their indicies.
+         * Compares the alpha object to the beta object by their indices.
          */
         public int compare(Object alpha, Object beta) {
             try {

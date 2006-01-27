@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class SparseListTest extends TestCase {
 
-    /** for randomly choosing list indicies */
+    /** for randomly choosing list indices */
     private Random random = new Random(101);
 
     /** the SparseList to test on */
@@ -824,7 +824,7 @@ public class SparseListTest extends TestCase {
 
     /**
      * Performance tests this ADT.  Some of what I do in this might seem
-     * somewhat odd, namely the pre-calculation of all data and indicies
+     * somewhat odd, namely the pre-calculation of all data and indices
      * prior to each test.  While this isn't efficient in code,, it results in
      * the tests being more accurate to the list operation being performed rather
      * than reflecting other operations as well.
@@ -862,7 +862,7 @@ public class SparseListTest extends TestCase {
 
             // Performance Test For ADD
 
-            // prime the indicies
+            // prime the indices
             indexes[0] = 0;
             for(int i = 2;i <= 500000;i++) {
                 indexes[i-1] = mainRandom.nextInt(i);
@@ -934,7 +934,7 @@ public class SparseListTest extends TestCase {
 
             // Performance Test For SET
 
-            // prime the indicies
+            // prime the indices
             indexes[0] = 0;
             for(int i = 2;i <= 500000;i++) {
                 indexes[i-1] = mainRandom.nextInt(i);
@@ -982,7 +982,7 @@ public class SparseListTest extends TestCase {
 
             // Performance Test For DELETE
 
-            // prime the indicies
+            // prime the indices
             indexes[499999] = 0;
             for(int i = 0;i < 499999;i++) {
                 indexes[i] = mainRandom.nextInt(500000 - i);

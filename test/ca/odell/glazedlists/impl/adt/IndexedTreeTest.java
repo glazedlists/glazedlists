@@ -17,7 +17,7 @@ import java.util.*;
  */
 public class IndexedTreeTest extends TestCase {
 
-    /** for randomly choosing list indicies */
+    /** for randomly choosing list indices */
     private Random random = new Random();
 
     /**

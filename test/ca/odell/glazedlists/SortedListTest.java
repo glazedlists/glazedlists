@@ -21,7 +21,7 @@ public class SortedListTest extends TestCase {
     /** the sorted list */
     private SortedList sortedList = null;
 
-    /** for randomly choosing list indicies */
+    /** for randomly choosing list indices */
     private Random random = new Random(2);
 
     /**
@@ -736,7 +736,7 @@ public class SortedListTest extends TestCase {
      * pairs, when using a ReverseComparator.
      *
      * <p>The source list uses a totally different comparator than the sorted list
-     * in order to guarantee the indicies have no pattern.
+     * in order to guarantee the indices have no pattern.
      */
 //    public void testUpdateEventsFiredRigorous() {
 //        // prepare a unique list with simple data

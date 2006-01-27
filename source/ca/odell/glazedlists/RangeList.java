@@ -110,7 +110,7 @@ public class RangeList<E> extends TransformedList<E, E> {
     }
 
     /**
-     * Set the range to include the specified indicies, offset from the end of
+     * Set the range to include the specified indices, offset from the end of
      * the source {@link EventList}. For example, to show the last five values, use:
      * <code>RangeList.setTailRange(5, 0);</code>
      *

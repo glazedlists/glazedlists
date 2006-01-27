@@ -24,7 +24,7 @@ public class ThresholdListTest extends TestCase {
     /** the enumerator to use to evaluate the objects in the list */
     private IntegerEvaluator evaluator = null;
 
-    /** for randomly choosing list indicies */
+    /** for randomly choosing list indices */
     private Random random = new Random(2);
 
     /**

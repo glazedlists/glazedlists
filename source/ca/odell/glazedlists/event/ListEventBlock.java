@@ -14,7 +14,7 @@ import java.util.List;
  */
 final class ListEventBlock {
     
-    /** the range of indicies that have changed, inclusive */
+    /** the range of indices that have changed, inclusive */
     private int startIndex;
     private int endIndex;
     
@@ -121,7 +121,7 @@ final class ListEventBlock {
     /**
      * Sorts the blocks of the specified list of changes. This ensures that
      * the user iterating the list of change blocks can view changes in
-     * increasing order. This ensures that indicies will not be shifted.
+     * increasing order. This ensures that indices will not be shifted.
      *
      * <p>This performs a bubble sort, swapping adjacent change blocks if
      * they should be swapped. The bubble sort is used instead of a more
@@ -312,7 +312,7 @@ final class ListEventBlock {
     }
     
     /**
-     * When reordering blocks, the indicies within each block should be shifted
+     * When reordering blocks, the indices within each block should be shifted
      * so that they represent the same change. This shifts this ListEventBlock
      * as a consequence of the specified list change block being inserted in front
      * of it in a sequence.

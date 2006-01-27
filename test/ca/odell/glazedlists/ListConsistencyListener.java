@@ -102,7 +102,7 @@ public class ListConsistencyListener implements ListEventListener {
                 // save this index for validation later
                 changedIndices.add(new Integer(changeIndex));
 
-                // make sure the change indicies are positive and not descreasing
+                // make sure the change indices are positive and not descreasing
                 Assert.assertTrue(changeIndex >= 0);
                 Assert.assertTrue(changeIndex >= highestChangeIndex);
                 highestChangeIndex = changeIndex;
