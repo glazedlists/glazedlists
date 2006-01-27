@@ -34,11 +34,7 @@ public class JEventListPanelTest {
             final String sillyObject = (String)element;
             if(component == 0) {
                 JButton button = new JButton(sillyObject);
-                button.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        sillyObjects.remove(sillyObject);
-                    }
-                });
+                button.addActionListener(new ButtonActionListener(sillyObject));
                 return button;
             } else if(component == 1) {
                 return new JSlider();
@@ -47,6 +43,18 @@ public class JEventListPanelTest {
             } else {
                 throw new IllegalStateException();
             }
+        }
+    }
+
+    private class ButtonActionListener implements ActionListener {
+        private String sillyObject;
+
+        public ButtonActionListener(String sillyObject) {
+            this.sillyObject = sillyObject;
+        }
+
+        public void actionPerformed(ActionEvent actionEvent) {
+            sillyObjects.remove(sillyObject);
         }
     }
 

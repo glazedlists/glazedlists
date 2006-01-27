@@ -311,11 +311,19 @@
             <arg value="java14_glazedlists/extensions/jfreechart/source"/>
         </java>
 
+        <!-- Declaw jgoodiesforms/ -->
+        <mkdir dir="java14_glazedlists/extensions/jgoodiesforms/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/jgoodiesforms/source"/>
+            <arg value="classes${path.separator}extensions/jgoodiesforms/lib/forms.jar"/>
+            <arg value="java14_glazedlists/extensions/jgoodiesforms/source"/>
+        </java>
+
         <!-- Declaw issuesbrowser/ -->
         <mkdir dir="java14_glazedlists/extensions/issuesbrowser/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/issuesbrowser/source"/>
-            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar"/>
+            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar"/>
             <arg value="java14_glazedlists/extensions/issuesbrowser/source"/>
         </java>
 
