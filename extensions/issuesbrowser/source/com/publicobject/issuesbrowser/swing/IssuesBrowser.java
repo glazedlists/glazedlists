@@ -115,17 +115,16 @@ public class IssuesBrowser implements Runnable {
      * Display a frame for browsing issues.
      */
     private JPanel constructView() {
+        // sort the original issues list
+        final SortedList<Issue> issuesSortedList = new SortedList<Issue>(issuesEventList, null);
 
-        // filter the original issues list
-        FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesEventList, filterPanel.getMatcherEditor());
-
-        // sort the filtered issues
-        final SortedList<Issue> issuesSortedList = new SortedList<Issue>(filteredIssues, null);
+        // filter the sorted issues
+        FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesSortedList, filterPanel.getMatcherEditor());
 
         // build the issues table
-        issuesTableModel = new EventTableModel<Issue>(issuesSortedList, new IssueTableFormat());
+        issuesTableModel = new EventTableModel<Issue>(filteredIssues, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
-        issuesSelectionModel = new EventSelectionModel<Issue>(issuesSortedList);
+        issuesSelectionModel = new EventSelectionModel<Issue>(filteredIssues);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
@@ -144,7 +143,7 @@ public class IssuesBrowser implements Runnable {
         issuesTableScrollPane.getViewport().setBackground(UIManager.getColor("EditorPane.background"));
         issuesTableScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        issueDetails = new IssueDetailsComponent(issuesEventList);
+        issueDetails = new IssueDetailsComponent(filteredIssues);
 
         // projects
         EventList<Project> projects = Project.getProjects();
@@ -158,7 +157,7 @@ public class IssuesBrowser implements Runnable {
         projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project..."));
 
         // build a label to display the number of issues in the issue table
-        issueCounter = new IssueCounterLabel(issuesSortedList);
+        issueCounter = new IssueCounterLabel(filteredIssues);
         issueCounter.setHorizontalAlignment(SwingConstants.CENTER);
         issueCounter.setForeground(Color.WHITE);
 

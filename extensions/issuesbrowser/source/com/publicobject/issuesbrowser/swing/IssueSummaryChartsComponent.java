@@ -9,14 +9,18 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.jfreechart.EventListPieDataset;
 import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.OpenIssuesByMonthCategoryDataset;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.general.PieDataset;
 
 import javax.swing.*;
-import java.util.List;
+import java.awt.*;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * This component is placed below the issues table and is shown when no issues
@@ -30,6 +34,12 @@ class IssueSummaryChartsComponent {
     // the panel which displays Issues By Status
     private final ChartPanel pieChartPanel_IssuesByStatus;
 
+    // the panel which displays Open Issues Over Time
+    private final ChartPanel lineChartPanel_OpenIssuesOverTime;
+
+    // the panel containing all ChartPanels
+    private final JPanel allChartsPanel = new JPanel(new GridLayout(1, 2));
+
     public IssueSummaryChartsComponent(EventList<Issue> issuesList) {
         // build a PieDataset representing Issues by Status
         final Comparator<Issue> issuesByStatusGrouper = GlazedLists.beanPropertyComparator(Issue.class, "status");
@@ -39,13 +49,22 @@ class IssueSummaryChartsComponent {
         // build a Pie Chart and a panel to display it
         final JFreeChart pieChart_IssuesByStatus = ChartFactory.createPieChart("Issues By Status", IssuesByStatusDataset, true, true, false);
         this.pieChartPanel_IssuesByStatus = new ChartPanel(pieChart_IssuesByStatus, true);
+
+        // build a Line Chart and a panel to display it
+        final JFreeChart lineChart_OpenIssuesOverTime = ChartFactory.createLineChart("Open Issues Over Time", "Time", "Open Issues", new OpenIssuesByMonthCategoryDataset(issuesList), PlotOrientation.VERTICAL, true, true, false);
+        lineChart_OpenIssuesOverTime.getCategoryPlot().getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+        this.lineChartPanel_OpenIssuesOverTime = new ChartPanel(lineChart_OpenIssuesOverTime, true);
+
+        // add all ChartPanels to a master panel
+        this.allChartsPanel.add(this.pieChartPanel_IssuesByStatus);
+        this.allChartsPanel.add(this.lineChartPanel_OpenIssuesOverTime);
     }
 
     /**
      * Returns the component that displays the charts.
      */
     public JComponent getComponent() {
-        return this.pieChartPanel_IssuesByStatus;
+        return this.allChartsPanel;
     }
 
     /**

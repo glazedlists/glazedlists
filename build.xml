@@ -232,6 +232,7 @@
         <!-- unjar the jfreechart classes into the demojar folder -->
         <unjar src="extensions/jfreechart/lib/jcommon.jar" dest="demojar"/>
         <unjar src="extensions/jfreechart/lib/jfreechart.jar" dest="demojar"/>
+        <unjar src="extensions/jgoodiesforms/lib/forms.jar" dest="demojar"/>
 
         <!-- create a *minimal* set of classes required to execute the swing demo -->
         <classfileset id="demoClasses" dir="demojar" rootclass="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>

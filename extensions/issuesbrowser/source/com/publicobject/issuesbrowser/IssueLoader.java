@@ -44,7 +44,7 @@ public class IssueLoader implements Runnable {
     }
 
     public void start() {
-        issueLoaderThread = new Thread(this);
+        issueLoaderThread = new Thread(this, "Issue Loader Thread");
         // ensure the loader thread doesn't compete too aggressively with the EDT
         issueLoaderThread.setPriority(Thread.NORM_PRIORITY);
         issueLoaderThread.start();
@@ -110,4 +110,3 @@ public class IssueLoader implements Runnable {
         }
     }
 }
-

@@ -4,6 +4,8 @@
 package com.publicobject.issuesbrowser;
 
 import ca.odell.glazedlists.TextFilterable;
+import ca.odell.glazedlists.jfreechart.ValueSegment;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ public class Issue implements TextFilterable, Comparable {
     private List<Description> descriptions = new ArrayList<Description>();
     private List<Attachment> attachments = new ArrayList<Attachment>();
     private List<Activity> activities = new ArrayList<Activity>();
+    private List<ValueSegment<Date,String>> stateChanges = new ArrayList<ValueSegment<Date,String>>();
     private List<PeerIssue> duplicates = new ArrayList<PeerIssue>();
     private List<PeerIssue> dependsOn = new ArrayList<PeerIssue>();
 
@@ -116,6 +119,50 @@ public class Issue implements TextFilterable, Comparable {
         descriptions.addAll(template.descriptions);
         attachments.addAll(template.attachments);
         activities.addAll(template.activities);
+    }
+
+    /**
+     * This convenience method processes a fully loaded Issue and produces a
+     * List of RangedValues which describe the duration of each Status within
+     * the lifetime of the given <code>issue</code>. For example, an Issue
+     * might have a series of state changes such as:
+     *
+     * <p>{NEW: Issue creation Timestamp -> Feb}, {STARTED: Feb -> Apr}, {CLOSED: Apr -> Mar}, {RESOLVED: Mar -> lastDate}
+     *
+     * <p> and each part of that progression will be a {@link ValueSegment}
+     * containing a start and end Date and a status.
+     *
+     * @param issue the Issue to compute the state changes for
+     * @return a List of {@link ValueSegment} objecs describing the duration
+     *      of each Status within the lifetime of the <code>issue</code>
+     */
+    public static List<ValueSegment<Date,String>> computeStateChanges(Issue issue, Date lastDate) {
+        // this stores the sequence of state changes in chronological order, like a timeline
+        final List<ValueSegment<Date,String>> timeline = new ArrayList<ValueSegment<Date,String>>();
+
+        String state = "NEW";
+
+        // the end Date of the previous ValueSegment
+        Date last = issue.getCreationTimestamp();
+
+        // Iterate the issues in chronological (natural) order
+        for (Iterator<Activity> i = issue.getActivities().iterator(); i.hasNext();) {
+            Activity activity = i.next();
+
+            // if the Activity represents a change in status
+            if ("issue_status" == activity.getField()) {
+                // create an entry in the timeline
+                timeline.add(new ValueSegment<Date,String>(last, activity.getWhen(), state));
+
+                last = activity.getWhen();
+                state = activity.getNewValue();
+            }
+        }
+
+        // create one last entry in the time timeline that ends at the given lastDate
+        timeline.add(new ValueSegment<Date,String>(last, lastDate, state));
+
+        return timeline;
     }
 
     /**
@@ -283,6 +330,12 @@ public class Issue implements TextFilterable, Comparable {
     public List<Activity> getActivities() { return activities; }
 
     /**
+     * Get the List of RangedValues describing the succession of state changes
+     * this Issue has experienced.
+     */
+    public List<ValueSegment<Date, String>> getStateChanges() { return stateChanges; }
+
+    /**
      * Other issues which were closed as a duplicate of this issue.
      */
     public List<PeerIssue> getDuplicates() { return duplicates; }
@@ -340,54 +393,6 @@ public class Issue implements TextFilterable, Comparable {
             d.next().getFilterStrings(baseList);
         }
     }
-}
-
-/**
- * Data pertaining to the issue's activity record.
- */
-class Activity {
-    private String user = null;
-    private Date when = null;
-    private String field = null;
-    private String fieldDescription = null;
-    private String oldValue = null;
-    private String newValue = null;
-
-    /**
-     * user who performed the action
-     */
-    public String getUser() { return user; }
-    public void setUser(String user) { this.user = user; }
-
-    /**
-     * date the described change was made
-     */
-    public Date getWhen() { return when; }
-    public void setWhen(Date when) { this.when = when; }
-
-    /**
-     * name of db field (in fielddefs)
-     */
-    public String getField() { return field; }
-    public void setField(String field) { this.field = field; }
-
-    /**
-     * description of the database field
-     */
-    public String getFieldDescription() { return fieldDescription; }
-    public void setFieldDescription(String fieldDescription) { this.fieldDescription = fieldDescription; }
-
-    /**
-     * value changed from
-     */
-    public String getOldValue() { return oldValue; }
-    public void setOldValue(String oldValue) { this.oldValue = oldValue; }
-
-    /**
-     * value changed to
-     */
-    public String getNewValue() { return newValue; }
-    public void setNewValue(String newValue) { this.newValue = newValue; }
 }
 
 /**

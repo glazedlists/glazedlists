@@ -218,6 +218,7 @@ public class IssuezillaXMLParser {
         private Issue currentIssue;
         private AbstractSimpleElementHandler simpleElementHandler = null;
         private Project owner;
+        private final Date loadingStarted = new Date();
 
         public IssueHandler(EventList<Issue> issues, Project owner) {
             super(null, "issue", ISSUE_SIMPLE_FIELDS);
@@ -291,6 +292,10 @@ public class IssuezillaXMLParser {
 
                 // add the issue to the list if it was found okay
                 if(currentIssue.getStatusCode() != null && currentIssue.getStatusCode().intValue() == 200) {
+                    // compute the timeline of state changes now that we have loaded the entire Issue
+                    currentIssue.getStateChanges().addAll(Issue.computeStateChanges(currentIssue, loadingStarted));
+
+                    // add the Issue to the list of Issues
                     issues.add(currentIssue);
                 }
 
@@ -317,29 +322,33 @@ public class IssuezillaXMLParser {
         }
 
         public void addFieldAndValue(String currentField, String value) {
-            if(currentField.equals("issue_id")) currentIssue.setId(Integer.valueOf(value));
-            else if(currentField.equals("issue_status")) currentIssue.setStatus(value.intern());
-            else if(currentField.equals("priority")) currentIssue.setPriority(Priority.lookup(value));
-            else if(currentField.equals("resolution")) currentIssue.setResolution(value.intern());
-            else if(currentField.equals("component")) currentIssue.setComponent(value);
-            else if(currentField.equals("version")) currentIssue.setVersion(value);
-            else if(currentField.equals("rep_platform")) currentIssue.setRepPlatform(value);
-            else if(currentField.equals("assigned_to")) currentIssue.setAssignedTo(value);
-            else if(currentField.equals("delta_ts")) currentIssue.setDeltaTimestamp(null);
-            else if(currentField.equals("subcomponent")) currentIssue.setSubcomponent(value);
-            else if(currentField.equals("reporter")) currentIssue.setReporter(value);
-            else if(currentField.equals("target_milestone")) currentIssue.setTargetMilestone(value);
-            else if(currentField.equals("issue_type")) currentIssue.setIssueType(value.intern());
-            else if(currentField.equals("creation_ts")) currentIssue.setCreationTimestamp(null);
-            else if(currentField.equals("qa_contact")) currentIssue.setQAContact(value);
-            else if(currentField.equals("status_whiteboard")) currentIssue.setStatusWhiteboard(value);
-            else if(currentField.equals("issue_file_loc")) currentIssue.setFileLocation(value);
-            else if(currentField.equals("votes")) currentIssue.setVotes(value);
-            else if(currentField.equals("op_sys")) currentIssue.setOperatingSystem(value);
-            else if(currentField.equals("short_desc")) currentIssue.setShortDescription(value);
-            else if(currentField.equals("keywords")) currentIssue.getKeywords().add(value);
-            else if(currentField.equals("cc")) currentIssue.getCC().add(value);
-            else parent.addException(this + " encountered unexpected element " + currentField);
+            try {
+                if(currentField == "issue_id") currentIssue.setId(Integer.valueOf(value));
+                else if(currentField == "issue_status") currentIssue.setStatus(value.intern());
+                else if(currentField == "priority") currentIssue.setPriority(Priority.lookup(value));
+                else if(currentField == "resolution") currentIssue.setResolution(value.intern());
+                else if(currentField == "component") currentIssue.setComponent(value);
+                else if(currentField == "version") currentIssue.setVersion(value);
+                else if(currentField == "rep_platform") currentIssue.setRepPlatform(value);
+                else if(currentField == "assigned_to") currentIssue.setAssignedTo(value);
+                else if(currentField == "delta_ts") currentIssue.setDeltaTimestamp(null);
+                else if(currentField == "subcomponent") currentIssue.setSubcomponent(value);
+                else if(currentField == "reporter") currentIssue.setReporter(value);
+                else if(currentField == "target_milestone") currentIssue.setTargetMilestone(value);
+                else if(currentField == "issue_type") currentIssue.setIssueType(value.intern());
+                else if(currentField == "creation_ts") currentIssue.setCreationTimestamp(dateFormat.parse(value));
+                else if(currentField == "qa_contact") currentIssue.setQAContact(value);
+                else if(currentField == "status_whiteboard") currentIssue.setStatusWhiteboard(value);
+                else if(currentField == "issue_file_loc") currentIssue.setFileLocation(value);
+                else if(currentField == "votes") currentIssue.setVotes(value);
+                else if(currentField == "op_sys") currentIssue.setOperatingSystem(value);
+                else if(currentField == "short_desc") currentIssue.setShortDescription(value);
+                else if(currentField == "keywords") currentIssue.getKeywords().add(value);
+                else if(currentField == "cc") currentIssue.getCC().add(value);
+                else parent.addException(this + " encountered unexpected element " + currentField);
+            } catch (ParseException pe) {
+                parent.addException(this + " unable to parse date in field " + currentField + ": " + value);
+            }
         }
 
         public void endSimpleElement() {
@@ -404,9 +413,9 @@ public class IssuezillaXMLParser {
             description = new Description();
         }
         public void addFieldAndValue(String currentField, String value) {
-            if(currentField.equals("who")) description.setWho(value);
-            else if(currentField.equals("issue_when")) description.setWhen(parse(value));
-            else if(currentField.equals("thetext")) description.setText(value);
+            if(currentField == "who") description.setWho(value);
+            else if(currentField == "issue_when") description.setWhen(parse(value));
+            else if(currentField == "thetext") description.setText(value);
             else parent.addException(this + " encountered unexpected element " + currentField);
         }
     }
@@ -422,16 +431,16 @@ public class IssuezillaXMLParser {
             attachment = new Attachment();
         }
         public void addFieldAndValue(String currentField, String value) {
-            if(currentField.equals("mimetype")) attachment.setMimeType(value);
-            else if(currentField.equals("attachid")) attachment.setAttachId(value);
-            else if(currentField.equals("date")) attachment.setDate(parse(value));
-            else if(currentField.equals("desc")) attachment.setDescription(value);
-            else if(currentField.equals("ispatch")) attachment.setIsPatch(value);
-            else if(currentField.equals("filename")) attachment.setFilename(value);
-            else if(currentField.equals("submitter_id")) attachment.setSubmitterId(value);
-            else if(currentField.equals("submitting_username")) attachment.setSubmitterUsername(value);
-            else if(currentField.equals("data")) attachment.setData(value);
-            else if(currentField.equals("attachment_iz_url")) attachment.setAttachmentIzUrl(value);
+            if(currentField == "mimetype") attachment.setMimeType(value);
+            else if(currentField == "attachid") attachment.setAttachId(value);
+            else if(currentField == "date") attachment.setDate(parse(value));
+            else if(currentField == "desc") attachment.setDescription(value);
+            else if(currentField == "ispatch") attachment.setIsPatch(value);
+            else if(currentField == "filename") attachment.setFilename(value);
+            else if(currentField == "submitter_id") attachment.setSubmitterId(value);
+            else if(currentField == "submitting_username") attachment.setSubmitterUsername(value);
+            else if(currentField == "data") attachment.setData(value);
+            else if(currentField == "attachment_iz_url") attachment.setAttachmentIzUrl(value);
             else parent.addException(this + " encountered unexpected element " + currentField);
         }
     }
@@ -447,12 +456,12 @@ public class IssuezillaXMLParser {
             activity = new Activity();
         }
         public void addFieldAndValue(String currentField, String value) {
-            if(currentField.equals("user")) activity.setUser(value);
-            else if(currentField.equals("when")) activity.setWhen(parse(value));
-            else if(currentField.equals("field_name")) activity.setField(value);
-            else if(currentField.equals("field_desc")) activity.setFieldDescription(value);
-            else if(currentField.equals("oldvalue")) activity.setOldValue(value);
-            else if(currentField.equals("newvalue")) activity.setNewValue(value);
+            if(currentField == "user") activity.setUser(value);
+            else if(currentField == "when") activity.setWhen(parse(value));
+            else if(currentField == "field_name") activity.setField(value);
+            else if(currentField == "field_desc") activity.setFieldDescription(value);
+            else if(currentField == "oldvalue") activity.setOldValue(value);
+            else if(currentField == "newvalue") activity.setNewValue(value);
             else parent.addException(this + " encountered unexpected element " + currentField);
         }
     }
@@ -471,9 +480,9 @@ public class IssuezillaXMLParser {
             peerIssue = new PeerIssue();
         }
         public void addFieldAndValue(String currentField, String value) {
-            if(currentField.equals("issue_id")) peerIssue.setIssueId(value);
-            else if(currentField.equals("who")) peerIssue.setWho(value);
-            else if(currentField.equals("when")) peerIssue.setWhen(parse(value));
+            if(currentField == "issue_id") peerIssue.setIssueId(value);
+            else if(currentField == "who") peerIssue.setWho(value);
+            else if(currentField == "when") peerIssue.setWhen(parse(value));
             else parent.addException(this + " encountered unexpected element " + currentField);
         }
     }
@@ -531,7 +540,7 @@ public class IssuezillaXMLParser {
             } else if(currentField == null) {
                 parent.addException(this + " expected new element but found end of " + qName);
             } else if(currentField.equals(qName)) {
-                addFieldAndValue(currentField, currentValue.toString());
+                addFieldAndValue(currentField, currentValue.toString().intern());
                 currentField = null;
                 currentValue = null;
             } else {
