@@ -208,6 +208,25 @@
         </javac>
     </target>
 
+    <target name="japex" depends="compile">
+        <property environment="env"/>
+        <!-- compile the Japex performance tests -->
+        <javac destdir="classes" srcdir="extensions/japex/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+        <!-- execute the Japex performance tests -->
+        <property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>
+        <java dir="." fork="true" classname="com.sun.japex.Japex">
+            <classpath>
+                <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
+                <fileset dir="${env.JAPEX_HOME}/jdsl/" includes="*.jar"/>
+            </classpath>
+            <arg line="${config}/"/>
+        </java>
+    </target>
+
     <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms">
         <javac destdir="classes" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>

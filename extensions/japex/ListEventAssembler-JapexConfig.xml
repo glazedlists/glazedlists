@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testSuite name="ParsingPerformance" xmlns="http://www.sun.com/japex/testSuite">
+
+    <param name="japex.classPath" value="${JAPEX_HOME}/jdsl/*.jar"/>
+    <param name="japex.classPath" value="classes"/>
+
+    <!-- Run each test for 20 seconds -->
+    <param name="japex.warmupTime" value="10"/>
+    <param name="japex.runTime" value="10"/>
+        <!--<param name="japex.warmupIterations" value="100"/>-->
+        <!--<param name="japex.runIterations" value="100"/>-->
+
+    <!--  normal="true" -->
+    <driver name="List Event Assembler">
+        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.ListEventAssemblerDriver"/>
+        <param name="description" value="List Event Assembler"/>
+    </driver>
+
+    <testCase name="testcase">
+    </testCase>
+</testSuite>
