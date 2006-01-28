@@ -1,4 +1,4 @@
-/* Glazed Lists                                                 (c) 2003-2005 */
+/* Glazed Lists                                                 (c) 2003-2006 */
 /*                                                     O'Dell Engineering Ltd.*/
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 package ca.odell.glazedlists.swt;

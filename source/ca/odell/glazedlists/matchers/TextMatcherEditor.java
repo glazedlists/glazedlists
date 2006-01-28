@@ -1,4 +1,4 @@
-/* Glazed Lists                                                 (c) 2003-2005 */
+/* Glazed Lists                                                 (c) 2003-2006 */
 /* <a href="http://publicobject.com/glazedlists/">http://publicobject.com/glazedlists/</a>                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
