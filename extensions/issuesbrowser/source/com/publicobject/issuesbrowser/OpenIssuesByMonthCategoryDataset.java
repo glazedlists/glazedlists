@@ -5,6 +5,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.jfreechart.EventListCategoryDataset;
 import ca.odell.glazedlists.jfreechart.TreePair;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
+import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import java.text.DateFormat;
@@ -161,7 +162,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      * It is used as a column key for this Dataset, thus it exists in order to
      * provide a pretty {@link #toString()} value.
      */
-    private static class MonthSegment extends ValueSegment<Date,String> {
+    private static class MonthSegment extends DefaultValueSegment<Date,String> {
         private static final DateFormat MONTH_DATE_FORMAT = new SimpleDateFormat("MMMMM yyyy");
 
         private final String description;

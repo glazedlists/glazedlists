@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.jfreechart;
 
 import ca.odell.glazedlists.EventList;
@@ -31,7 +34,7 @@ import java.util.Map;
  * JFreeChart. It handles the maintenance of efficient data structures for
  * implementing {@link #getValue(int, int)} and leaves subclasses the task
  * of defining the logic for maintaining the lists of rowkeys and columnkeys.
- * 
+ *
  * <p> If the rowkeys and columnkeys are statically determined, they can be set
  * like so:
  *

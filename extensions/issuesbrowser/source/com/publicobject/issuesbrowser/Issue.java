@@ -5,6 +5,7 @@ package com.publicobject.issuesbrowser;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
+import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -152,7 +153,7 @@ public class Issue implements TextFilterable, Comparable {
             // if the Activity represents a change in status
             if ("issue_status" == activity.getField()) {
                 // create an entry in the timeline
-                timeline.add(new ValueSegment<Date,String>(last, activity.getWhen(), state));
+                timeline.add(new DefaultValueSegment<Date,String>(last, activity.getWhen(), state));
 
                 last = activity.getWhen();
                 state = activity.getNewValue();
@@ -160,7 +161,7 @@ public class Issue implements TextFilterable, Comparable {
         }
 
         // create one last entry in the time timeline that ends at the given lastDate
-        timeline.add(new ValueSegment<Date,String>(last, lastDate, state));
+        timeline.add(new DefaultValueSegment<Date,String>(last, lastDate, state));
 
         return timeline;
     }
