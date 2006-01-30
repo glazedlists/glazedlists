@@ -69,9 +69,9 @@ public class IndexOrderTest extends TestCase {
         FilterList<int[]> filteredOnce = new FilterList<int[]>(sortedOnce, matcherEditor);
         SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, GlazedListsTests.intArrayComparator(0));
         
-        unsorted.addListEventListener(new IncreasingChangeIndexListener());
-        sortedOnce.addListEventListener(new IncreasingChangeIndexListener());
-        filteredOnce.addListEventListener(new IncreasingChangeIndexListener());
+        unsorted.addListEventListener(new ListConsistencyListener(unsorted, "unsorted"));
+        sortedOnce.addListEventListener(new ListConsistencyListener(sortedOnce, "sortedOnce"));
+        filteredOnce.addListEventListener(new ListConsistencyListener(sortedTwice, "sortedTwice"));
         
         ArrayList<int[]> controlList = new ArrayList<int[]>();
         
@@ -97,54 +97,6 @@ public class IndexOrderTest extends TestCase {
             
             // verify the replica matches
             assertEquals(controlList, filteredOnce);
-        }
-    }
-    
-    /**
-     * A special list change listener that verifies that the change indices
-     * within each atomic change are in increasing order.
-     */
-    public static class IncreasingChangeIndexListener implements ListEventListener {
-        public void listChanged(ListEvent listChanges) {
-            StringBuffer changeDescription = new StringBuffer();
-            int previousChangeIndex = -1;
-            boolean increasingOrder = true;
-            
-            while(listChanges.next()) {
-                int changeIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
-                
-                // maintain the change string
-                if(changeType == ListEvent.UPDATE) {
-                    changeDescription.append("U");
-                } else if(changeType == ListEvent.INSERT) {
-                    changeDescription.append("I");
-                } else if(changeType == ListEvent.DELETE) {
-                    changeDescription.append("D");
-                }
-                changeDescription.append(changeIndex);
-                
-                // see if this was a failure
-                if(changeType == ListEvent.DELETE) {
-                    if(changeIndex <= previousChangeIndex) {
-                        increasingOrder = false;
-                        changeDescription.append("*");
-                    }
-                } else {
-                    if(changeIndex < previousChangeIndex) {
-                        increasingOrder = false;
-                        changeDescription.append("*");
-                    }
-                }
-                
-                // prepare for the next change
-                changeDescription.append(" ");
-                previousChangeIndex = changeIndex;
-            }
-            
-            if(!increasingOrder) {
-                fail("List changes not in increasing order: " + changeDescription);
-            }
         }
     }
 }

@@ -68,6 +68,7 @@ public class ListConsistencyListener implements ListEventListener {
      */
     public void listChanged(ListEvent listChanges) {
         Assert.assertEquals(source, listChanges.getSource());
+        assertEventsInIncreasingOrder(listChanges);
 
         // print the changes if necessary
         if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size() + ", source: " + source);
@@ -126,5 +127,50 @@ public class ListConsistencyListener implements ListEventListener {
                 Assert.assertEquals(expected.get(i), source.get(i));
             }
         }
+    }
+
+    /**
+     * Ensure that events in the specified event flow in the legal order.
+     */
+    public static void assertEventsInIncreasingOrder(ListEvent listChanges) {
+        listChanges.reset();
+        StringBuffer changeDescription = new StringBuffer();
+        int previousChangeIndex = -1;
+        int previousChangeType = ListEvent.DELETE;
+        boolean increasingOrder = true;
+
+        while(listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
+
+            // maintain the change string
+            if(changeType == ListEvent.UPDATE) {
+                changeDescription.append("U");
+            } else if(changeType == ListEvent.INSERT) {
+                changeDescription.append("I");
+            } else if(changeType == ListEvent.DELETE) {
+                changeDescription.append("D");
+            }
+            changeDescription.append(changeIndex);
+
+            // see if this was a failure
+            if(changeIndex < previousChangeIndex
+            || (changeIndex == previousChangeIndex && previousChangeType != ListEvent.DELETE)) {
+                increasingOrder = false;
+                changeDescription.append("*");
+            }
+
+            // prepare for the next change
+            changeDescription.append(" ");
+            previousChangeIndex = changeIndex;
+            previousChangeType = changeType;
+        }
+        if(!increasingOrder) {
+            Assert.fail("List changes not in increasing order: " + changeDescription);
+        }
+
+        // reset the list iterator for other handlers
+        listChanges.reset();
+
     }
 }
