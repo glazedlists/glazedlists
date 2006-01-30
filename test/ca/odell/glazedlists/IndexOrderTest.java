@@ -104,7 +104,7 @@ public class IndexOrderTest extends TestCase {
      * A special list change listener that verifies that the change indices
      * within each atomic change are in increasing order.
      */
-    class IncreasingChangeIndexListener implements ListEventListener {
+    public static class IncreasingChangeIndexListener implements ListEventListener {
         public void listChanged(ListEvent listChanges) {
             StringBuffer changeDescription = new StringBuffer();
             int previousChangeIndex = -1;
@@ -126,12 +126,12 @@ public class IndexOrderTest extends TestCase {
                 
                 // see if this was a failure
                 if(changeType == ListEvent.DELETE) {
-                    if(changeIndex < previousChangeIndex) {
+                    if(changeIndex <= previousChangeIndex) {
                         increasingOrder = false;
                         changeDescription.append("*");
                     }
                 } else {
-                    if(changeIndex <= previousChangeIndex) {
+                    if(changeIndex < previousChangeIndex) {
                         increasingOrder = false;
                         changeDescription.append("*");
                     }

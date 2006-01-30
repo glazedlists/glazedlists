@@ -50,11 +50,11 @@ import java.util.Map;
  * two hooks have been given for the benefit of subclasses:
  *
  * <ul>
- *   <li> {@link #handleInsert} is a hook to process the insertion of new source.
+ *   <li> {@link #postInsert} is a hook to process the insertion of new source.
  *        This is commonly where rows or columns may be created by adding their
  *        keys to the rowKey or columnKey lists.
  *
- *   <li> {@link #handleDelete} is a hook to process the deletion of existing
+ *   <li> {@link #postDelete} is a hook to process the deletion of existing
  *        source. This is commonly where rows or columns may be removed by
  *        removing their keys from the rowKey or columnKey lists.
  * </ul>
@@ -259,8 +259,17 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * Returns the {@link TreePair} associated with the given
      * <code>rowKey</code>.
      */
-    protected TreePair getTreePair(Comparable rowKey) {
+    private TreePair getTreePair(Comparable rowKey) {
         return valueToTreePairs.get(rowKey);
+    }
+
+    /**
+     * Returns the number of values associated with the given <code>rowKey</code>.
+     */
+    public int getCount(Comparable rowKey) {
+        TreePair treePair = valueToTreePairs.get(rowKey);
+        if(treePair == null) return 0;
+        return treePair.size();
     }
 
     /**
@@ -271,7 +280,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * @param valueSegment the data element inserted into this data set
      */
-    protected void handleInsert(ValueSegment<C,R> valueSegment) { }
+    protected void postInsert(ValueSegment<C,R> valueSegment) { }
 
     /**
      * This no-op method is left as a hook for subclasses. It is called after
@@ -281,7 +290,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * @param valueSegment the data element removed from this data set
      */
-    protected void handleDelete(ValueSegment<C,R> valueSegment) { }
+    protected void postDelete(ValueSegment<C,R> valueSegment) { }
 
     /**
      * This listener maintains a fast set of TreePairs for each unique value
@@ -320,7 +329,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
                         // maintain our copy of the source contents
                         sourceCopy.add(index, segment);
                         // call into a hook for custom handling of this insert by subclasses
-                        handleInsert(segment);
+                        postInsert(segment);
 
                     } else if (type == ListEvent.UPDATE) {
                         // fetch the segments involved
@@ -333,11 +342,11 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
 
                         // delete the segment from the oldTreePair
                         oldTreePair.delete(oldSegment);
-                        handleDelete(oldSegment);
+                        postDelete(oldSegment);
 
                         // add the segment to the newTreePair
-                        newTreePair.delete(newSegment);
-                        handleDelete(newSegment);
+                        newTreePair.insert(newSegment);
+                        postInsert(newSegment);
 
                     } else if (type == ListEvent.DELETE) {
                         // fetch the segment that was removed
@@ -348,7 +357,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
                         // delete the segment from the TreePair
                         treePair.delete(segment);
                         // call into a hook for custom handling of this delete by subclasses
-                        handleDelete(segment);
+                        postDelete(segment);
                     }
                 }
             }

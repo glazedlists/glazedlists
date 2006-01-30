@@ -81,4 +81,8 @@ public class TreePair {
 
         return numStartedBeforeSegmentEnd - numEndedBeforeSegmentStart;
     }
+
+    public int size() {
+        return this.start.size();
+    }
 }

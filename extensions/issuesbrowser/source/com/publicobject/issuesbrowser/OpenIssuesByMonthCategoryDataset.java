@@ -6,7 +6,6 @@ package com.publicobject.issuesbrowser;
 import ca.odell.glazedlists.CollectionList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.jfreechart.EventListCategoryDataset;
-import ca.odell.glazedlists.jfreechart.TreePair;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
 import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
@@ -83,7 +82,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      *
      * @param segment the {@link ValueSegment} that was added to the Dataset
      */
-    protected void handleInsert(ValueSegment<Date,String> segment) {
+    protected void postInsert(ValueSegment<Date,String> segment) {
         final String value = segment.getValue();
 
         // if the value of the segment doesn't represent an OPEN issue, skip it
@@ -136,7 +135,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      *
      * @param segment the {@link ValueSegment} that was added to the Dataset
      */
-    protected void handleDelete(ValueSegment<Date,String> segment) {
+    protected void postDelete(ValueSegment<Date,String> segment) {
         final String value = segment.getValue();
 
         // if the value of the segment doesn't represent an OPEN issue, skip it
@@ -144,8 +143,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
             return;
 
         // if no more data is associated to the row, remove its rowkey
-        final TreePair treePair = getTreePair(value);
-        if (treePair.isEmpty())
+        if(getCount(value) == 0)
             getRowKeys().remove(value);
     }
 

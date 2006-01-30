@@ -182,6 +182,7 @@ public class GroupingListTest extends TestCase {
     public void testSet() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
+        groupList.addListEventListener(new IndexOrderTest.IncreasingChangeIndexListener()); // temp hack
         groupList.addListEventListener(new ListConsistencyListener(groupList, "GroupList"));
         sourceList.addListEventListener(new ListConsistencyListener(sourceList, "SourceList", true));
 
