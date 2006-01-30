@@ -5,6 +5,8 @@ package com.publicobject.issuesbrowser;
 
 import ca.odell.glazedlists.CollectionList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.jfreechart.EventListCategoryDataset;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
 import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
@@ -43,10 +45,15 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         this(new CollectionList<Issue,ValueSegment<Date,String>>(issues, new StateChangesCollectionModel()));
     }
 
-    private OpenIssuesByMonthCategoryDataset(CollectionList<Issue,ValueSegment<Date,String>> rangedValues) {
+    private OpenIssuesByMonthCategoryDataset(CollectionList<Issue,ValueSegment<Date,String>> valueSegments) {
+        // filter away ValueSegments whose value represents a retired issue (RESOLVED or CLOSED)
+        this(new FilterList<ValueSegment<Date,String>>(valueSegments, new OpenIssuesMatcher()));
+    }
+
+    private OpenIssuesByMonthCategoryDataset(FilterList<ValueSegment<Date,String>> filteredValueSegments) {
         // ensure all changes are delivered on the EDT to this Category Dataset,
         // since we're displaying the chart on a Swing component
-        super(GlazedListsSwing.swingThreadProxyList(rangedValues));
+        super(GlazedListsSwing.swingThreadProxyList(filteredValueSegments));
     }
 
     /**
@@ -84,10 +91,6 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      */
     protected void postInsert(ValueSegment<Date,String> segment) {
         final String value = segment.getValue();
-
-        // if the value of the segment doesn't represent an OPEN issue, skip it
-        if (value == "CLOSED" || value == "RESOLVED")
-            return;
 
         // if the rowkey is not found, add it
         final List<String> rowKeys = getRowKeys();
@@ -138,10 +141,6 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
     protected void postDelete(ValueSegment<Date,String> segment) {
         final String value = segment.getValue();
 
-        // if the value of the segment doesn't represent an OPEN issue, skip it
-        if (value == "CLOSED" || value == "RESOLVED")
-            return;
-
         // if no more data is associated to the row, remove its rowkey
         if(getCount(value) == 0)
             getRowKeys().remove(value);
@@ -155,6 +154,18 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
     private static class StateChangesCollectionModel implements CollectionList.Model<Issue, ValueSegment<Date,String>> {
         public List<ValueSegment<Date, String>> getChildren(Issue parent) {
             return parent.getStateChanges();
+        }
+    }
+
+    /**
+     * This Matcher filters away RESOLVED and CLOSED ValueSegment objects
+     * since they do not represent an Issue in an open state:
+     * (NEW, STARTED, REOPENED, VERIFIED, UNCONFIRMED)
+     */
+    private static class OpenIssuesMatcher implements Matcher<ValueSegment<Date,String>> {
+        public boolean matches(ValueSegment<Date, String> item) {
+            final String value = item.getValue();
+            return value != "RESOLVED" && value != "CLOSED";
         }
     }
 
