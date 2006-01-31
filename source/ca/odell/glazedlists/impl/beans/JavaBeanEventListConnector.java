@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.EventListener;
 
 /**
- * An {@link ca.odell.glazedlists.ObservableElementList.Connector} for the Java beans'
+ * An {@link ObservableElementList.Connector} for the Java beans'
  * {@link PropertyChangeListener}.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -30,7 +30,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     private ObservableElementList<E> list = null;
 
     /** The PropertyChangeListener to install on each list element. */
-    protected PropertyChangeListener propertyChangeListener = new PropertyChangeHandler();
+    protected PropertyChangeListener propertyChangeListener = this.createPropertyChangeListener();
 
     /**
      * Reflection is used to install/uninstall the {@link #propertyChangeListener}
@@ -60,7 +60,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      */
     public JavaBeanEventListConnector(Class<E> beanClass) {
         final Method[] methods = beanClass.getMethods();
-        for(int m = 0; m < methods.length; m++) {
+        for (int m = 0; m < methods.length; m++) {
             if(methods[m].getParameterTypes().length != 1) continue;
             if(methods[m].getParameterTypes()[0] != PropertyChangeListener.class) continue;
             if(methods[m].getName().startsWith("add")) this.addListenerMethod = methods[m];
@@ -139,6 +139,14 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     /** {@inheritDoc} */
     public void setObservableElementList(ObservableElementList<E> list) {
         this.list = list;
+    }
+
+    /**
+     * A local factory method to produce the PropertyChangeListener which will
+     * be installed on list elements.
+     */
+    protected PropertyChangeListener createPropertyChangeListener() {
+        return new PropertyChangeHandler();
     }
 
     /**

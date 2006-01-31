@@ -18,14 +18,13 @@ import java.util.Iterator;
  * on every list element. Listeners are registered as elements are added to
  * this list and unregistered as elements are removed from this list. Users
  * must specify an implementation of a {@link Connector} in the constructor
- * which contains the necessary logic for registering and unregistering an
- * appropriate listener for detecting modifications to an observable list
- * element.
+ * which contains the necessary logic for registering and unregistering a
+ * listener capable of detecting modifications to an observable list element.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe; elementChanged(), however, is thread ready</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>inserts: O(1), deletes: O(1), updates: O(1), elementChanged: O(n)</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>8 bytes per element</td></tr>
  * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>ObservableElementListTest</td></tr>
@@ -377,35 +376,39 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
     }
 
     /**
-     * Handle a listener being fired for the specified listElement. This method
-     * causes a ListEvent to be fired from this EventList indicating an update
-     * occurred at all locations of the given <code>listElement</code>.
+     * Handle a listener being fired for the specified <code>listElement</code>.
+     * This method causes a ListEvent to be fired from this EventList indicating
+     * an update occurred at all locations of the given <code>listElement</code>.
      *
      * <p>Note that listElement must be the exact object located within this list
      * (i.e. <code>listElement == get(i) for some i >= 0</code>).
      *
-     * @param listElement the List listElement which has been modified.
+     * <p>This method acquires the write lock for this list before locating the
+     * <code>listElement</code> and broadcasting its update. It is assumed that
+     * this method may be called on any Thread, so to decrease the burdens of
+     * the caller in achieving multi-threaded correctness, this method is
+     * Thread ready.
+     *
+     * @param listElement the list element which has been modified
      */
     public void elementChanged(E listElement) {
         if (this.observedElements == null)
             throw new IllegalStateException("This list has been disposed and can no longer be used.");
 
-        this.updates.beginEvent();
+        getReadWriteLock().writeLock().lock();
+        try {
+            this.updates.beginEvent();
 
-        // locate all indexes containing the given listElement
-        for (int i = 0; i < size(); i++) {
-            if (listElement == get(i))
-                this.updates.addUpdate(i);
+            // locate all indexes containing the given listElement
+            for (int i = 0; i < size(); i++) {
+                if (listElement == get(i))
+                    this.updates.addUpdate(i);
+            }
+
+            this.updates.commitEvent();
+        } finally {
+            getReadWriteLock().writeLock().unlock();
         }
-
-        // ensure we found the listElement at least one time in this list
-        final boolean foundElement = !this.updates.isEventEmpty();
-        this.updates.commitEvent();
-
-        // throw an IllegalStateException if the listElement could not be found at least
-        // one time within this list since it probably represents a programmer error
-        if (!foundElement)
-            throw new IllegalStateException("Failed to find list listElement \"" + listElement + "\" in list " + this);
     }
 
 
