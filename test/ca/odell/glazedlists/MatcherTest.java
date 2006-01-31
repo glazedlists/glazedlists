@@ -4,8 +4,7 @@ import ca.odell.glazedlists.matchers.*;
 import ca.odell.glazedlists.impl.matchers.NotMatcher;
 import junit.framework.TestCase;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public class MatcherTest extends TestCase {
 
@@ -85,6 +84,16 @@ public class MatcherTest extends TestCase {
         assertEquals(false, result);
         assertEquals(0, elements.size());
 
+    }
+
+    public void testPropertyMatcher() {
+        Matcher matcher = Matchers.beanPropertyMatcher(Collection.class, "empty", Boolean.TRUE);
+        assertEquals(true, matcher.matches(Collections.EMPTY_LIST));
+        assertEquals(false, matcher.matches(Collections.singletonList("A")));
+        assertEquals(true, matcher.matches(Arrays.asList(new Object[] { })));
+        assertEquals(false, matcher.matches(Arrays.asList(new Object[] { "B" })));
+        assertEquals(true, matcher.matches(Collections.EMPTY_SET));
+        assertEquals(false, matcher.matches(null));
     }
 
     private class NumberMatcherEditor extends AbstractMatcherEditor<Number> {

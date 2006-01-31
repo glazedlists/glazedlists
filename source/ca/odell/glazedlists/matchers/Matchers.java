@@ -6,6 +6,7 @@ package ca.odell.glazedlists.matchers;
 import ca.odell.glazedlists.*;
 // for access to volatile classes
 import ca.odell.glazedlists.impl.matchers.*;
+import ca.odell.glazedlists.impl.beans.BeanMatcher;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -45,6 +46,16 @@ public final class Matchers {
      */
     public static <E> Matcher<E> invert(Matcher<E> original) {
          return new NotMatcher<E>(original);
+    }
+
+    /**
+     * Creates a {@link Matcher} that uses Reflection to compare the value
+     * of the specified property to the expected value of that property. If
+     * the property value equals the expected, the element matches. Otherwise
+     * it doesn't.
+     */
+    public static <E> Matcher<E> beanPropertyMatcher(Class<E> beanClass, String propertyName, Object matchValue) {
+        return new BeanMatcher<E>(beanClass, propertyName, matchValue);
     }
 
     /**
