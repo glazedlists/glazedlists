@@ -4,6 +4,9 @@ import ca.odell.glazedlists.matchers.*;
 import ca.odell.glazedlists.impl.matchers.NotMatcher;
 import junit.framework.TestCase;
 
+import java.util.List;
+import java.util.ArrayList;
+
 public class MatcherTest extends TestCase {
 
     public void testTrueMatcher() {
@@ -50,6 +53,38 @@ public class MatcherTest extends TestCase {
         ((TextMatcherEditor)typedMatcherEditor).setFilterText(new String[] { "3" });
         assertFalse(typedMatcherEditor.getMatcher().matches(new Integer(10)));
         assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
+    }
+
+    public void testFilter() {
+        List<Integer> elements = new ArrayList<Integer>();
+        elements.add(new Integer(45));
+        elements.add(new Integer(22));
+        elements.add(new Integer(15));
+        elements.add(new Integer(22));
+        elements.add(new Integer(13));
+        elements.add(new Integer(53));
+        elements.add(new Integer(22));
+        elements.add(new Integer(23));
+        elements.add(new Integer(22));
+
+        boolean result;
+
+        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(22)));
+        assertEquals(true, result);
+        assertEquals(4, elements.size());
+
+        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(22)));
+        assertEquals(false, result);
+        assertEquals(4, elements.size());
+
+        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(33)));
+        assertEquals(true, result);
+        assertEquals(0, elements.size());
+
+        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(35)));
+        assertEquals(false, result);
+        assertEquals(0, elements.size());
+
     }
 
     private class NumberMatcherEditor extends AbstractMatcherEditor<Number> {
