@@ -264,7 +264,8 @@ class ListDeltas {
         }
 
         public boolean hasNext() {
-            throw new UnsupportedOperationException();
+            // todo: do something smarter
+            return true;
         }
     }
 }
