@@ -22,21 +22,27 @@ public class ListEventAssemblerDriver extends JapexDriverBase {
     private static final List<String> DISTINCT_VALUES = Arrays.asList(new String[] { "A", "B", "C", "D", "E" });
     private static final int SIZE_OF_BASE = 20000;
 
-    private EventList<String> base = new BasicEventList<String>();
-    private FilterList<String> filteredBase = new FilterList<String>(base);
-    private SortedList<String> sortedBase = new SortedList<String>(filteredBase, new FirstCharacterComparator());
+    private EventList<String> base;
+    private FilterList<String> filteredBase;
+    private SortedList<String> sortedBase;
 
     public void initializeDriver() {
+        // do nothing
+    }
+
+    public void prepare(TestCase testCase) {
+        System.setProperty("GlazedLists.useExperimentalDeltas", testCase.getParam("GlazedLists.useExperimentalDeltas"));
+
+        base = new BasicEventList<String>();
+        filteredBase = new FilterList<String>(base);
+        sortedBase = new SortedList<String>(filteredBase, new FirstCharacterComparator());
+
         Random dice = new Random(0);
         for(int i = 0; i < SIZE_OF_BASE; i++) {
             String characterOne = DISTINCT_VALUES.get(dice.nextInt(DISTINCT_VALUES.size()));
             String characterTwo = DISTINCT_VALUES.get(dice.nextInt(DISTINCT_VALUES.size()));
             base.add(characterOne + characterTwo);
         }
-    }
-
-    public void prepare(TestCase testCase) {
-        // do nothing
     }
 
     /**

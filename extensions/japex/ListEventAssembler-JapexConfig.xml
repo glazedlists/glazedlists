@@ -10,12 +10,17 @@
         <!--<param name="japex.warmupIterations" value="100"/>-->
         <!--<param name="japex.runIterations" value="100"/>-->
 
-    <!--  normal="true" -->
     <driver name="List Event Assembler">
         <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.ListEventAssemblerDriver"/>
         <param name="description" value="List Event Assembler"/>
     </driver>
 
-    <testCase name="testcase">
+    <testCase name="List Event Blocks">
+        <param name="GlazedLists.useExperimentalDeltas" value="false"/>
     </testCase>
+
+    <testCase name="List Deltas">
+        <param name="GlazedLists.useExperimentalDeltas" value="true"/>
+    </testCase>
+
 </testSuite>

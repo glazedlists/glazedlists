@@ -21,37 +21,19 @@ import java.util.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class ListEventAssembler<E> {
-    
-    /** the list that this tracks changes for */
-    private EventList<E> sourceList;
-    
-    /** the current working copy of the atomic change */
-    private List<ListEventBlock> atomicChangeBlocks = null;
-    /** the most recent list change; this is the only change we can append to */
-    private ListEventBlock atomicLatestBlock = null;
-    /** the current reordering array if this change is a reorder */
-    private int[] reorderMap = null;
-    
-    /** the sequences that provide a view on this queue */
-    private List<ListEventListener<E>> listeners = new ArrayList<ListEventListener<E>>();
-    private List<ListEvent<E>> listenerEvents = new ArrayList<ListEvent<E>>();
-    
-    /** the pipeline manages the distribution of events */
-    private ListEventPublisher publisher = null;
-    
-    /** the event level is the number of nested events */
-    private int eventLevel = 0;
-    /** whether to allow nested events */
-    private boolean allowNestedEvents = true;
-    /** whether to allow contradicting events */
-    private boolean allowContradictingEvents = false;
 
+    /** the delegate contains logic specific for the current event storage strategy */
+    private final AssemblerHelper<E> delegate;
+    
     /**
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-        this.sourceList = sourceList;
-        this.publisher = publisher;
+        if(System.getProperty("GlazedLists.useExperimentalDeltas").equalsIgnoreCase("true")) {
+            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
+        } else {
+            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+        }
     }
     
     /**
@@ -62,7 +44,7 @@ public final class ListEventAssembler<E> {
      * beginEvent(true).
      */
     public void beginEvent() {
-        beginEvent(false);
+        delegate.beginEvent(false);
     }
         
     /**
@@ -82,38 +64,9 @@ public final class ListEventAssembler<E> {
      *      event.
      */
     public synchronized void beginEvent(boolean allowNestedEvents) {
-        // complain if we cannot nest any further
-        if(!this.allowNestedEvents) {
-            throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress");
-        }
-        this.allowNestedEvents = allowNestedEvents;
-        if(allowNestedEvents) allowContradictingEvents = true;
-        
-        // prepare for a new event if we haven't already
-        if(eventLevel == 0) {
-            prepareEvent();
-        }
-        
-        // track how deeply nested we are
-        eventLevel++;
+        delegate.beginEvent(allowNestedEvents);
     }
-        
-    /**
-     * Prepares to receive event parts. This needs to be called for
-     * each fired event exactly once, even if that event includes some
-     * nested events.
-     *
-     * <p>To prevent two simultaneous atomic changes, the atomicChangeBlocks
-     * arraylist is used as a flag. If it is null, there is no change taking
-     * place. Otherwise there is a conflicting change and a
-     * ConcurrentModificationException is thrown.
-     */
-    private void prepareEvent() {
-        atomicChangeBlocks = new ArrayList<ListEventBlock>();
-        atomicLatestBlock = null;
-        reorderMap = null;
-    }
-        
+
     /**
      * Adds a block of changes to the set of list changes. The change block
      * allows a range of changes to be grouped together for efficiency.
@@ -122,15 +75,7 @@ public final class ListEventAssembler<E> {
      * beginEvent() and followed by a call to commitEvent().
      */
     public void addChange(int type, int startIndex, int endIndex) {
-        // attempt to merge this into the most recent block
-        if(atomicLatestBlock != null) {
-            boolean appendSuccess = atomicLatestBlock.append(startIndex, endIndex, type);
-            if(appendSuccess) return;
-        }
-        
-        // create a new block for the change
-        atomicLatestBlock = new ListEventBlock(startIndex, endIndex, type);
-        atomicChangeBlocks.add(atomicLatestBlock);
+        delegate.addChange(type, startIndex, endIndex);
     }
     /**
      * Convenience method for appending a single change of the specified type.
@@ -179,12 +124,7 @@ public final class ListEventAssembler<E> {
      * combined with other events.
      */
     public void reorder(int[] reorderMap) {
-        if(atomicChangeBlocks.size() > 0) throw new IllegalStateException("Cannot combine reorder with other change events");
-        // can't reorder an empty list, see bug 91
-        if(reorderMap.length == 0) return;
-        addChange(ListEvent.DELETE, 0, reorderMap.length - 1);
-        addChange(ListEvent.INSERT, 0, reorderMap.length - 1);
-        this.reorderMap = reorderMap;
+        delegate.reorder(reorderMap);
     }
     /**
      * Forwards the event. This is a convenience method that does the following:
@@ -200,25 +140,7 @@ public final class ListEventAssembler<E> {
      * any other ListEvent.
      */
     public void forwardEvent(ListEvent<?> listChanges) {
-        // if we're not nested, we can fire the event directly
-        if(eventLevel == 0) {
-            atomicChangeBlocks = listChanges.getBlocks();
-            reorderMap = listChanges.isReordering() ? listChanges.getReorderMap() : null;
-            fireEvent();
-            
-        // if we're nested, we have to copy this event's parts to our queue
-        } else {
-            beginEvent();
-            this.reorderMap = null;
-            if(atomicChangeBlocks.isEmpty() && listChanges.isReordering()) {
-                reorder(listChanges.getReorderMap());
-            } else {
-                while(listChanges.nextBlock()) {
-                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-                }
-            }
-            commitEvent();
-        }
+        delegate.forwardEvent(listChanges);
     }
     /**
      * Commits the current atomic change to this list change queue. This will
@@ -229,18 +151,7 @@ public final class ListEventAssembler<E> {
      * parent change.
      */
     public synchronized void commitEvent() {
-        // complain if we have no event to commit
-        if(eventLevel == 0) throw new IllegalStateException("Cannot commit without an event in progress");
-        
-        // we are one event less nested
-        eventLevel--;
-        allowNestedEvents = true;
-        
-        // if this is the last stage, sort and fire
-        if(eventLevel == 0) {
-            ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
-            fireEvent();
-        }
+        delegate.commitEvent();
     }
 
     /**
@@ -251,55 +162,9 @@ public final class ListEventAssembler<E> {
      *      queue is empty; <tt>false</tt> otherwise
      */
     public boolean isEventEmpty() {
-        return this.atomicChangeBlocks == null || this.atomicChangeBlocks.isEmpty();
+        return delegate.isEventEmpty();
     }
 
-    /**
-     * Fires the current event. This needs to be called for each fired
-     * event exactly once, even if that event includes nested events.
-     */
-    private void fireEvent() {
-        try {
-            // bail on empty changes
-            if(atomicChangeBlocks.isEmpty()) return;
-
-            // Protect against the listener set changing via a duplicate list.
-            // Some listeners (ie. WeakReferenceProxy) remove themselves as listeners
-            // from within their listChanged() method. If we don't make protective
-            // copies, these lists will change while we're operating on them.
-            List<ListEventListener> listenersToNotify = new ArrayList<ListEventListener>(listeners);
-            List<ListEvent<E>> listenerEventsToNotify = new ArrayList<ListEvent<E>>(listenerEvents);
-
-            // perform the notification on the duplicate list
-            publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
-
-        // clear the change for the next caller
-        } finally {
-            atomicChangeBlocks = null;
-            atomicLatestBlock = null;
-            reorderMap = null;
-            allowContradictingEvents = false;
-        }
-    }
-
-    /**
-     * Gets the list of blocks for the specified atomic change.
-     *
-     * @return a List containing the sequence of {@link ListEventBlock}s modelling
-     *      the specified change. It is an error to modify this list or its contents.
-     */
-    List<ListEventBlock> getBlocks() {
-        return atomicChangeBlocks;
-    }
-    
-    /**
-     * Gets the reorder map for the specified atomic change or null if that
-     * change is not a reordering.
-     */
-    int[] getReorderMap() {
-        return reorderMap;
-    }
-    
     /**
      * Registers the specified listener to be notified whenever new changes
      * are appended to this list change sequence.
@@ -311,9 +176,7 @@ public final class ListEventAssembler<E> {
      * changes will persist in the next notification.
      */
     public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
-        listeners.add(listChangeListener);
-        listenerEvents.add(new ListEvent<E>(this, sourceList));
-        publisher.addDependency(sourceList, listChangeListener);
+        delegate.addListEventListener(listChangeListener);
     }
     /**
      * Removes the specified listener from receiving notification when new
@@ -324,31 +187,375 @@ public final class ListEventAssembler<E> {
      * listening and therefore <code>equals()</code> may be ambiguous.
      */
     public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
-        // find the listener
-        int index = -1;
-        for(int i = 0; i < listeners.size(); i++) {
-            if(listeners.get(i) == listChangeListener) {
-                index = i;
-                break;
-            }
-        }
-
-        // remove the listener
-        if(index != -1) {
-            listenerEvents.remove(index);
-            listeners.remove(index);
-        } else {
-            throw new IllegalArgumentException("Cannot remove nonexistent listener " + listChangeListener);
-        }
-        
-        // remove the publisher's dependency
-        publisher.removeDependency(sourceList, listChangeListener);
+        delegate.removeListEventListener(listChangeListener);
     }
 
     /**
      * Get all {@link ListEventListener}s observing the {@link EventList}.
      */
     public List<ListEventListener<E>> getListEventListeners() {
-        return Collections.unmodifiableList(listeners);
+        return delegate.getListEventListeners();
+    }
+
+    /**
+     * Base class for implementing ListEventAssembler logic, regardless of how
+     * the list events are stored.
+     */
+    static abstract class AssemblerHelper<E> {
+
+        /** the list that this tracks changes for */
+        protected EventList<E> sourceList;
+        /** the current reordering array if this change is a reorder */
+        protected int[] reorderMap = null;
+
+        /** the sequences that provide a view on this queue */
+        protected List<ListEventListener<E>> listeners = new ArrayList<ListEventListener<E>>();
+        protected List<ListEvent<E>> listenerEvents = new ArrayList<ListEvent<E>>();
+
+        /** the pipeline manages the distribution of events */
+        protected ListEventPublisher publisher = null;
+
+        /** the event level is the number of nested events */
+        protected int eventLevel = 0;
+        /** whether to allow nested events */
+        protected boolean allowNestedEvents = true;
+        /** whether to allow contradicting events */
+        protected boolean allowContradictingEvents = false;
+
+
+        /**
+         * Starts a new atomic change to this list change queue.
+         */
+        public synchronized void beginEvent(boolean allowNestedEvents) {
+            // complain if we cannot nest any further
+            if(!this.allowNestedEvents) {
+                throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress");
+            }
+            this.allowNestedEvents = allowNestedEvents;
+            if(allowNestedEvents) allowContradictingEvents = true;
+
+            // prepare for a new event if we haven't already
+            if(eventLevel == 0) {
+                prepareEvent();
+            }
+
+            // track how deeply nested we are
+            eventLevel++;
+        }
+
+        protected abstract void prepareEvent();
+
+        /**
+         * Sets the current event as a reordering. Reordering events cannot be
+         * combined with other events.
+         */
+        public void reorder(int[] reorderMap) {
+            if(!isEventEmpty()) throw new IllegalStateException("Cannot combine reorder with other change events");
+            // can't reorder an empty list, see bug 91
+            if(reorderMap.length == 0) return;
+            addChange(ListEvent.DELETE, 0, reorderMap.length - 1);
+            addChange(ListEvent.INSERT, 0, reorderMap.length - 1);
+            this.reorderMap = reorderMap;
+        }
+
+        /**
+         * Adds a block of changes to the set of list changes. The change block
+         * allows a range of changes to be grouped together for efficiency.
+         */
+        public abstract void addChange(int type, int startIndex, int endIndex);
+
+
+        /**
+         * @return <tt>true</tt> if the current atomic change to this list change
+         *      queue is empty; <tt>false</tt> otherwise
+         */
+        public abstract boolean isEventEmpty();
+
+        /**
+         * Commits the current atomic change to this list change queue.
+         */
+        public synchronized void commitEvent() {
+            // complain if we have no event to commit
+            if(eventLevel == 0) throw new IllegalStateException("Cannot commit without an event in progress");
+
+            // we are one event less nested
+            eventLevel--;
+            allowNestedEvents = true;
+
+            // if this is the last stage, sort and fire
+            if(eventLevel == 0) {
+                fireEvent();
+            }
+        }
+
+        /**
+         * Fires the current event. This needs to be called for each fired
+         * event exactly once, even if that event includes nested events.
+         */
+        protected abstract void fireEvent();
+
+        /**
+         * Forward the specified event to listeners.
+         */
+        public abstract void forwardEvent(ListEvent<?> listChanges);
+
+        /**
+         * Add the specified listener.
+         */
+        public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
+            listeners.add(listChangeListener);
+            listenerEvents.add(createListEvent());
+            publisher.addDependency(sourceList, listChangeListener);
+        }
+
+        /**
+         * Gets the reorder map for the specified atomic change or null if that
+         * change is not a reordering.
+         */
+        int[] getReorderMap() {
+            return reorderMap;
+        }
+
+        protected abstract ListEvent<E> createListEvent();
+
+        /**
+         * Removes the specified listener.
+         */
+        public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
+            // find the listener
+            int index = -1;
+            for(int i = 0; i < listeners.size(); i++) {
+                if(listeners.get(i) == listChangeListener) {
+                    index = i;
+                    break;
+                }
+            }
+
+            // remove the listener
+            if(index != -1) {
+                listenerEvents.remove(index);
+                listeners.remove(index);
+            } else {
+                throw new IllegalArgumentException("Cannot remove nonexistent listener " + listChangeListener);
+            }
+
+            // remove the publisher's dependency
+            publisher.removeDependency(sourceList, listChangeListener);
+        }
+
+        /**
+         * Get all {@link ListEventListener}s observing the {@link EventList}.
+         */
+        public List<ListEventListener<E>> getListEventListeners() {
+            return Collections.unmodifiableList(listeners);
+        }
+    }
+
+    /**
+     * ListEventAssembler using {@link ListDeltas} to store list changes.
+     */
+    static class ListDeltasAssembler<E> extends AssemblerHelper<E> {
+
+        private ListDeltas listDeltas = new ListDeltas();
+
+        /**
+         * Creates a new ListEventAssembler that tracks changes for the specified list.
+         */
+        public ListDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
+            this.sourceList = sourceList;
+            this.publisher = publisher;
+        }
+
+        protected void prepareEvent() {
+            listDeltas.reset(sourceList.size());
+        }
+
+        public void addChange(int type, int startIndex, int endIndex) {
+            for(int i = startIndex; i <= endIndex; i++) {
+                if(type == ListEvent.INSERT) {
+                    listDeltas.add(i);
+                } else if(type == ListEvent.UPDATE) {
+                    listDeltas.update(i);
+                } else if(type == ListEvent.DELETE) {
+                    listDeltas.remove(startIndex);
+                }
+            }
+        }
+
+        public ListDeltas getListDeltas() {
+            return listDeltas;
+        }
+
+        public boolean isEventEmpty() {
+            return listDeltas.isEmpty();
+        }
+
+        protected void fireEvent() {
+            try {
+                // bail on empty changes
+                if(isEventEmpty()) return;
+
+                // Protect against the listener set changing via a duplicate list.
+                // Some listeners (ie. WeakReferenceProxy) remove themselves as listeners
+                // from within their listChanged() method. If we don't make protective
+                // copies, these lists will change while we're operating on them.
+                List<ListEventListener> listenersToNotify = new ArrayList<ListEventListener>(listeners);
+                List<ListEvent<E>> listenerEventsToNotify = new ArrayList<ListEvent<E>>(listenerEvents);
+
+                // reset the events before firing them
+                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext(); ) {
+                    ListEvent<E> event = e.next();
+                    event.reset();
+                }
+
+                // perform the notification on the duplicate list
+                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+
+            // clear the change for the next caller
+            } finally {
+                listDeltas.reset(0);
+                reorderMap = null;
+                allowContradictingEvents = false;
+            }
+        }
+
+        public void forwardEvent(ListEvent<?> listChanges) {
+            // if we're not nested, we can fire the event directly
+            if(eventLevel == 0) {
+                // todo: optimize by reusing the existing listDeltas
+                beginEvent(false);
+                while(listChanges.nextBlock()) {
+                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                }
+                commitEvent();
+
+            // if we're nested, we have to copy this event's parts to our queue
+            } else {
+                beginEvent(false);
+                this.reorderMap = null;
+                if(isEventEmpty() && listChanges.isReordering()) {
+                    reorder(listChanges.getReorderMap());
+                } else {
+                    while(listChanges.nextBlock()) {
+                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                    }
+                }
+                commitEvent();
+            }
+        }
+
+        protected ListEvent<E> createListEvent() {
+            return new ListDeltasListEvent<E>(this, sourceList);
+        }
+    }
+
+
+    /**
+     * ListEventAssembler using {@link ListEventBlock}s to store list changes.
+     */
+    static class ListEventBlocksAssembler<E> extends AssemblerHelper<E> {
+
+        /** the current working copy of the atomic change */
+        private List<ListEventBlock> atomicChangeBlocks = null;
+        /** the most recent list change; this is the only change we can append to */
+        private ListEventBlock atomicLatestBlock = null;
+
+        /**
+         * Creates a new ListEventAssembler that tracks changes for the specified list.
+         */
+        public ListEventBlocksAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
+            this.sourceList = sourceList;
+            this.publisher = publisher;
+        }
+
+        /** {@inheritDoc} */
+        protected ListEvent<E> createListEvent() {
+            return new ListEventBlocksListEvent<E>(this, sourceList);
+        }
+
+        /** {@inheritDoc} */
+        protected void prepareEvent() {
+            atomicChangeBlocks = new ArrayList<ListEventBlock>();
+            atomicLatestBlock = null;
+            reorderMap = null;
+        }
+
+        /** {@inheritDoc} */
+        public void addChange(int type, int startIndex, int endIndex) {
+            // attempt to merge this into the most recent block
+            if(atomicLatestBlock != null) {
+                boolean appendSuccess = atomicLatestBlock.append(startIndex, endIndex, type);
+                if(appendSuccess) return;
+            }
+
+            // create a new block for the change
+            atomicLatestBlock = new ListEventBlock(startIndex, endIndex, type);
+            atomicChangeBlocks.add(atomicLatestBlock);
+        }
+
+        /** {@inheritDoc} */
+        public void forwardEvent(ListEvent<?> listChanges) {
+            // if we're not nested, we can fire the event directly
+            if(eventLevel == 0) {
+                atomicChangeBlocks = listChanges.getBlocks();
+                reorderMap = listChanges.isReordering() ? listChanges.getReorderMap() : null;
+                fireEvent();
+
+            // if we're nested, we have to copy this event's parts to our queue
+            } else {
+                beginEvent(false);
+                this.reorderMap = null;
+                if(isEventEmpty() && listChanges.isReordering()) {
+                    reorder(listChanges.getReorderMap());
+                } else {
+                    while(listChanges.nextBlock()) {
+                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                    }
+                }
+                commitEvent();
+            }
+        }
+
+        /** {@inheritDoc} */
+        public boolean isEventEmpty() {
+            return this.atomicChangeBlocks == null || this.atomicChangeBlocks.isEmpty();
+        }
+
+        /** {@inheritDoc} */
+        protected void fireEvent() {
+            ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
+
+            try {
+                // bail on empty changes
+                if(isEventEmpty()) return;
+
+                // Protect against the listener set changing via a duplicate list.
+                // Some listeners (ie. WeakReferenceProxy) remove themselves as listeners
+                // from within their listChanged() method. If we don't make protective
+                // copies, these lists will change while we're operating on them.
+                List<ListEventListener> listenersToNotify = new ArrayList<ListEventListener>(listeners);
+                List<ListEvent<E>> listenerEventsToNotify = new ArrayList<ListEvent<E>>(listenerEvents);
+
+                // perform the notification on the duplicate list
+                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+
+            // clear the change for the next caller
+            } finally {
+                atomicChangeBlocks = null;
+                atomicLatestBlock = null;
+                reorderMap = null;
+                allowContradictingEvents = false;
+            }
+        }
+
+        /**
+         * Gets the list of blocks for the specified atomic change.
+         *
+         * @return a List containing the sequence of {@link ListEventBlock}s modelling
+         *      the specified change. It is an error to modify this list or its contents.
+         */
+        List<ListEventBlock> getBlocks() {
+            return atomicChangeBlocks;
+        }
     }
 }

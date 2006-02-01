@@ -95,7 +95,7 @@ public final class FileList extends TransformedList {
     public void listChanged(ListEvent listChanges) {
         // write the change to disc
         try {
-            ListEvent listChangesCopy = new ListEvent(listChanges);
+            ListEvent listChangesCopy = listChanges.copy();
             Bufferlo listChangesBytes = ListEventToBytes.toBytes(listChangesCopy, byteCoder);
             storage.put(new Integer(nextUpdateId), new Chunk(listChangesBytes));
             nextUpdateId++;

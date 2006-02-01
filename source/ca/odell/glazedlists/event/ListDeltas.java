@@ -47,6 +47,19 @@ class ListDeltas {
         inserts.addBlack(0, length);
     }
 
+    /**
+     * Make sure the deltas are big enough. This hack method is
+     * necessary since we don't necessarily know how large the list
+     * is that we're providing deltas for.
+     */
+    private void ensureCapacity(int size) {
+        int delta = size - deletes.blackSize();
+        if(delta <= 0) return;
+        updates.addBlack(updates.size(), delta);
+        deletes.addBlack(deletes.size(), delta);
+        inserts.addBlack(inserts.size(), delta);
+    }
+
     public int currentToSnapshot(int currentIndex) {
         if(currentIndex < 0 || currentIndex >= currentSize()) throw new IndexOutOfBoundsException();
 
@@ -101,11 +114,13 @@ class ListDeltas {
     }
 
     public void add(int currentIndex) {
+        ensureCapacity(currentIndex + 1);
         if(currentIndex < 0 || currentIndex > currentSize()) throw new IndexOutOfBoundsException();
         inserts.addWhite(currentIndex, 1);
     }
 
     public void remove(int currentIndex) {
+        ensureCapacity(currentIndex + 1);
         if(currentIndex < 0 || currentIndex >= currentSize()) throw new IndexOutOfBoundsException();
 
         // if this was a snapshot element, we need to mark this as deleted from the deletes list
@@ -123,6 +138,7 @@ class ListDeltas {
     }
 
     public void update(int currentIndex) {
+        ensureCapacity(currentIndex + 1);
         if(currentIndex < 0 || currentIndex >= currentSize()) throw new IndexOutOfBoundsException();
 
         // if this was a snapshot element, we need to mark it as an update
@@ -142,5 +158,113 @@ class ListDeltas {
 
     public int snapshotSize() {
         return deletes.size();
+    }
+
+    public String toString() {
+        return "INSERTS: " + inserts + ", UPDATES: " + updates + ", DELETES: " + deletes;
+    }
+
+    public Iterator iterator() {
+        return new Iterator();
+    }
+
+    /**
+     * @return <code>true</code> if this event contains no changes.
+     */
+    public boolean isEmpty() {
+        if(inserts.whiteSize() > 0) return false;
+        else if(deletes.whiteSize() > 0) return false;
+        else if(updates.whiteSize() > 0) return false;
+        return true;
+    }
+
+    /**
+     * Iterate the list of deltas.
+     *
+     * FILTER
+     *
+     * updates: _XX_
+     * deletes: X_XX_X
+     * inserts: XX__X_X
+     *
+     * BLASTED
+     *
+     *
+     * UPDATE 0 FILTER  -> BILTER
+     * DELETE 1 BILTER  -> FLTER
+     * INSERT 2 BLTER   -> BLATER
+     * INSERT 3 BLATER  -> BLASTER
+     * DELETE 5 BLASTER -> BLASTR
+     * INSERT 5 BLASTER -> BLASTER
+     * UPDATE 6 BLASTER -> BLASTED
+     *
+     * "AA"
+     *
+     * updates: __
+     * deletes: XX
+     * inserts: __XX
+     *
+     * "BBaa"
+     *
+     */
+    public class Iterator {
+        int snapshotIndex = 0;
+        int currentIndex = 0;
+        int index = -1;
+        int type = -1;
+
+        private Iterator() {
+            // do nothing
+        }
+
+        public int getIndex() {
+            return index;
+        }
+        public int getType() {
+            return type;
+        }
+        public boolean next() {
+
+            while(snapshotIndex < deletes.size() || currentIndex < inserts.size()) {
+
+                // first look for deletes at the snapshot index
+                if(snapshotIndex < deletes.size() && deletes.get(snapshotIndex) == Barcode.WHITE) {
+                    index = currentIndex;
+                    type = ListEvent.DELETE;
+                    snapshotIndex++;
+                    return true;
+                }
+
+                // then look for inserts at the current index
+                if(currentIndex < inserts.size() && inserts.get(currentIndex) == Barcode.WHITE) {
+                    index = currentIndex;
+                    type = ListEvent.INSERT;
+                    currentIndex++;
+                    return true;
+                }
+
+                // finally look for updates at the current index
+                if(snapshotIndex < deletes.size()) {
+                    int deleteAdjusted = deletes.getBlackIndex(snapshotIndex);
+                    if(updates.get(deleteAdjusted) == Barcode.WHITE) {
+                        index = currentIndex;
+                        type = ListEvent.UPDATE;
+                        currentIndex++;
+                        snapshotIndex++;
+                        return true;
+                    }
+                }
+
+                // no changes at this index
+                currentIndex++;
+                snapshotIndex++;
+            }
+
+            return false;
+        }
+
+        public boolean hasNext() {
+            throw new UnsupportedOperationException();
+        }
     }
 }
