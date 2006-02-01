@@ -58,6 +58,7 @@ final class ListEventBlocksListEvent<E> extends ListEvent<E> {
      */
     public ListEventBlocksListEvent(ListEventBlocksListEvent<E> original) {
         super(original.sourceList);
+        this.blocksAssembler = original.blocksAssembler;
         this.blockCount = original.blockCount;
         this.currentBlock = original.currentBlock;
         this.rowIndex = original.rowIndex;

@@ -127,7 +127,7 @@ public final class NetworkList extends TransformedList {
     public void listChanged(ListEvent listChanges) {
         // notify resource listeners
         try {
-            ListEvent listChangesCopy = new ListEvent(listChanges);
+            ListEvent listChangesCopy = listChanges.copy();
             Bufferlo listChangesBytes = ListEventToBytes.toBytes(listChangesCopy, byteCoder);
             for(int r = 0; r < resourceListeners.size(); r++) {
                 ResourceListener listener = (ResourceListener)resourceListeners.get(r);
