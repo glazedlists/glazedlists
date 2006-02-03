@@ -52,6 +52,10 @@ public final class GlazedLists {
      * <p>This is implemented using Eugene W. Myer's paper, "An O(ND) Difference
      * Algorithm and Its Variations", the same algorithm found in GNU diff.
      *
+     * <p>Note that the runtime of this method is significantly less efficient
+     * in both time and memory than the {@link #replaceAllSorted sorted} version
+     * of replaceAll.
+     *
      * @param updates whether to fire update events for Objects that are equal in
      *      both {@link List}s.
      */
@@ -73,6 +77,49 @@ public final class GlazedLists {
         Diff.replaceAll(target, source, updates, comparator);
     }
 
+
+    /**
+     * Replace the complete contents of the target {@link EventList} with the complete
+     * contents of the source {@link Collection} while making as few list changes
+     * as possible.
+     *
+     * <p>Unlike the {@link #replaceAll general} versions of this method, the
+     * <i>sorted</i> version <strong>requires that both the input and the output
+     * are sorted collections</strong>, and that they're sorted with the
+     * {@link Comparator} specified. If they're sorted in {@link Comparator natural}
+     * order, use {@link #comparableComparator()}.
+     *
+     * <p>In a multi-threaded environment, it is necessary that the caller obtain
+     * the write lock for the target list before this method is invoked. If the
+     * source list is an {@link EventList}, its read lock must also be acquired.
+     *
+     * <p>This method shall be used when it is necessary to update an EventList
+     * to a newer state while minimizing the number of change events fired. It
+     * is desirable over {@link List#clear() clear()}; {@link List#addAll(Collection) addAll()}
+     * because it will not cause selection to be lost if unnecessary. It is also
+     * useful where firing changes may be expensive, such as when they will cause
+     * writes to disk or the network.
+     *
+     * <p>Note that this method is significantly more efficient in both
+     * time and memory than the {@link #replaceAll general} version of replaceAll.
+     *
+     * @see Collections#sort
+     * @see SortedSet
+     *
+     * @param target an EventList sorted with the {@link Comparator} specified.
+     *     Its contents will be replaced with those in <code>source</code>.
+     * @param source a collection sorted with the {@link Comparator} specified.
+     * @param comparator defines the sort order for both target and source. It
+     *     should also define identity. Ie, elements that compare to 0 by
+     *     this comparator represent the same logical element in the list. If
+     *     <code>null</code>, the {@link #comparableComparator} will be used,
+     *     which means that all elements must implement {@link Comparable}.
+     * @param updates whether to fire update events for Objects that are equal in
+     *      both {@link List}s.
+     */
+    public static <E> void replaceAllSorted(EventList<E> target, Collection<E> source, boolean updates, Comparator<E> comparator) {
+        GlazedListsImpl.replaceAll(target, source, updates, comparator);
+    }
 
     // Comparators // // // // // // // // // // // // // // // // // // // //
 

@@ -8,6 +8,8 @@ import junit.framework.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 
+import ca.odell.glazedlists.impl.GlazedListsImpl;
+
 /**
  * A UniqueListTest tests the functionality of the UniqueList
  *
@@ -902,81 +904,131 @@ public class UniqueListTest extends TestCase {
      * Verifies that the UniqueList sends update events and
      * not insert/delete event combinations.
      */
-//    public void testUpdateCount() {
-//        unique.add("A");
-//        unique.add("A");
-//        unique.add("A");
-//        unique.add("B");
-//        unique.add("B");
-//        unique.add("C");
-//
-//        SortedSet replacementSet = new TreeSet();
-//        replacementSet.addAll(source);
-//
-//        // listen to changes on the unique list
-//        ListEventCounter counter = new ListEventCounter();
-//        unique.addListEventListener(counter);
-//
-//        // replace the values with the replacement set
-//        unique.replaceAll(replacementSet);
-//
-//        // verify that only one event has occured
-//        assertEquals(1, counter.getEventCount());
-//        assertEquals(3, counter.getChangeCount(0));
-//    }
+    public void testUpdateCount() {
+        unique.add("A");
+        unique.add("A");
+        unique.add("A");
+        unique.add("B");
+        unique.add("B");
+        unique.add("C");
+
+        SortedSet replacementSet = new TreeSet();
+        replacementSet.addAll(source);
+
+        // listen to changes on the unique list
+        ListEventCounter counter = new ListEventCounter();
+        unique.addListEventListener(counter);
+
+        // replace the values with the replacement set
+        GlazedLists.replaceAllSorted(unique, replacementSet, true, null);
+
+        // verify that only one event has occured
+        assertEquals(3, counter.getEventCount());
+    }
 
     /**
      * Verify that replaceAll() works in the simplest of cases.
      */
-//    public void testReplaceAll() {
-//        unique.add("B");
-//        unique.add("D");
-//        unique.add("E");
-//        unique.add("F");
-//
-//        SortedSet replacementSet = new TreeSet();
-//        replacementSet.add("A");
-//        replacementSet.add("B");
-//        replacementSet.add("C");
-//        replacementSet.add("D");
-//        replacementSet.add("G");
-//
-//        unique.replaceAll(replacementSet);
-//
-//        ArrayList controlList = new ArrayList();
-//        controlList.addAll(replacementSet);
-//        assertEquals(controlList, unique);
-//    }
+    public void testReplaceAll() {
+        unique.add("B");
+        unique.add("D");
+        unique.add("E");
+        unique.add("F");
+
+        SortedSet replacementSet = new TreeSet();
+        replacementSet.add("A");
+        replacementSet.add("B");
+        replacementSet.add("C");
+        replacementSet.add("D");
+        replacementSet.add("G");
+
+        GlazedLists.replaceAllSorted(unique, replacementSet, false, null);
+
+        ArrayList controlList = new ArrayList();
+        controlList.addAll(replacementSet);
+        assertEquals(controlList, unique);
+    }
 
     /**
      * Verify that replaceAll() works in a more sophisticated case.
      */
-//    public void testReplaceAllRigorous() {
-//        for(int i = 0; i < 100; i++) {
-//            unique.add(new Integer(random.nextInt(100)));
-//        }
-//
-//        SortedSet replacementSet = new TreeSet();
-//        for(int i = 0; i < 100; i++) {
-//            replacementSet.add(new Integer(random.nextInt(100)));
-//        }
-//
-//        // listen to changes on the unique list
-//        ListEventCounter counter = new ListEventCounter();
-//        unique.addListEventListener(counter);
-//
-//        // replace the values with the replacement set
-//        unique.replaceAll(replacementSet);
-//
-//        // verify that only one event has occured
-//        assertEquals(1, counter.getEventCount());
-//
-//        // verify that the change applies to the replacement set
-//        ArrayList controlList = new ArrayList();
-//        controlList.addAll(replacementSet);
-//        assertEquals(controlList, unique);
-//    }
+    public void testReplaceAllRigorous() {
+        for(int i = 0; i < 100; i++) {
+            unique.add(new Integer(random.nextInt(100)));
+        }
 
+        SortedSet replacementSet = new TreeSet();
+        for(int i = 0; i < 100; i++) {
+            replacementSet.add(new Integer(random.nextInt(100)));
+        }
+
+        // listen to changes on the unique list
+        ListEventCounter counter = new ListEventCounter();
+        unique.addListEventListener(counter);
+
+        // replace the values with the replacement set
+        GlazedLists.replaceAllSorted(unique, replacementSet, false, null);
+
+        // verify that the change applies to the replacement set
+        ArrayList controlList = new ArrayList();
+        controlList.addAll(replacementSet);
+        assertEquals(controlList, unique);
+    }
+
+
+    public void testNewReplaceAll() {
+
+
+
+        EventList target = new BasicEventList();
+        EventList source = new SortedList(new BasicEventList());
+
+        source.addAll(GlazedListsTests.stringToList("ACDF"));
+
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        assertEquals(GlazedListsTests.stringToList("ACDF"), target);
+
+        source.add(1, "B");
+        source.add(4, "E");
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        assertEquals(GlazedListsTests.stringToList("ABCDEF"), source);
+        assertEquals(GlazedListsTests.stringToList("ABCDEF"), target);
+
+        source.remove(5);
+        source.remove(4);
+        source.remove(0);
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        assertEquals(GlazedListsTests.stringToList("BCD"), source);
+        assertEquals(GlazedListsTests.stringToList("BCD"), target);
+
+        source.remove(1);
+        source.add(2, "F");
+        source.add(3, "G");
+        source.add(4, "H");
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        assertEquals(GlazedListsTests.stringToList("BDFGH"), source);
+        assertEquals(GlazedListsTests.stringToList("BDFGH"), target);
+
+        source.remove(1);
+        source.add(2, "F");
+        source.add(4, "F");
+        source.add(4, "F");
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        assertEquals(GlazedListsTests.stringToList("BFFFFGH"), source);
+        assertEquals(GlazedListsTests.stringToList("BFFFFGH"), target);
+
+        source.add(0, "A");
+        source.add(0, "A");
+        source.add(0, "A");
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        assertEquals(GlazedListsTests.stringToList("AAABFFFFGH"), source);
+        assertEquals(GlazedListsTests.stringToList("AAABFFFFGH"), target);
+
+        source.clear();
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        assertEquals(GlazedListsTests.stringToList(""), source);
+        assertEquals(GlazedListsTests.stringToList(""), target);
+    }
 
 
     /**
@@ -1394,7 +1446,7 @@ public class UniqueListTest extends TestCase {
 
     public void testDispose() {
         assertEquals(1, source.updates.getListEventListeners().size());
-        
+
         // disposing of the UniqueList should leave nothing listening to the source list
         unique.dispose();
         assertEquals(0, source.updates.getListEventListeners().size());
