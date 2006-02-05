@@ -5,7 +5,6 @@ package ca.odell.glazedlists.matchers;
 
 import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.filter.*;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
 // standard collections
@@ -20,14 +19,17 @@ public class TextMatcherTest extends TestCase {
     public void testNormalizeValue() {
         assertTrue(Arrays.equals(new String[0], TextMatcher.normalizeFilters(new String[0])));
         assertTrue(Arrays.equals(new String[0], TextMatcher.normalizeFilters(new String[] {null, ""})));
-        assertTrue(Arrays.equals(new String[] {"X"}, TextMatcher.normalizeFilters(new String[] {"x", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"X", "Y", "Z"}, TextMatcher.normalizeFilters(new String[] {null, "", "x", null, "", "Y", null, "", "z", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"XYZ"}, TextMatcher.normalizeFilters(new String[] {null, "", "x", null, "", "xy", null, "", "xyz", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"XYZ"}, TextMatcher.normalizeFilters(new String[] {null, "", "xyz", null, "", "xy", null, "", "x", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"XYZ"}, TextMatcher.normalizeFilters(new String[] {null, "", "xy", null, "", "xyz", null, "", "x", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"XYZ"}, TextMatcher.normalizeFilters(new String[] {null, "", "xyz", null, "", "xyz", null, "", "xyz", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"BLACKENED"}, TextMatcher.normalizeFilters(new String[] {"black", "blackened"})));
-        assertTrue(Arrays.equals(new String[] {"THIS"}, TextMatcher.normalizeFilters(new String[] {"this", "his"})));
+        assertTrue(Arrays.equals(new String[] {"x"}, TextMatcher.normalizeFilters(new String[] {"x", null, ""})));
+        assertTrue(Arrays.equals(new String[] {"x", "Y", "z"}, TextMatcher.normalizeFilters(new String[] {null, "", "x", null, "", "Y", null, "", "z", null, ""})));
+        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatcher.normalizeFilters(new String[] {null, "", "x", null, "", "xy", null, "", "xyz", null, ""})));
+        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatcher.normalizeFilters(new String[] {null, "", "xyz", null, "", "xy", null, "", "x", null, ""})));
+        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatcher.normalizeFilters(new String[] {null, "", "xy", null, "", "xyz", null, "", "x", null, ""})));
+        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatcher.normalizeFilters(new String[] {null, "", "xyz", null, "", "xyz", null, "", "xyz", null, ""})));
+        assertTrue(Arrays.equals(new String[] {"blackened"}, TextMatcher.normalizeFilters(new String[] {"black", "blackened"})));
+        assertTrue(Arrays.equals(new String[] {"this"}, TextMatcher.normalizeFilters(new String[] {"this", "his"})));
+
+        assertTrue(Arrays.equals(new String[] {"blackened", "this"}, TextMatcher.normalizeFilters(new String[] {"blackened", "this"})));
+        assertTrue(Arrays.equals(new String[] {"blackened", "this"}, TextMatcher.normalizeFilters(new String[] {"this", "blackened"})));
     }
 
     public void testIsFilterRelaxed() {

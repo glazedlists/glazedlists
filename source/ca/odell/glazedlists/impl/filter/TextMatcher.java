@@ -17,6 +17,18 @@ import ca.odell.glazedlists.matchers.*;
  */
 public class TextMatcher<E> implements Matcher<E> {
 
+    /** The single instance of the {@link StringLengthComparator}. */
+    private static final Comparator<String> LENGTH_COMPARATOR = new StringLengthComparator();
+
+    /**
+     * This Comparator orders {@link String}s in descending order by their lengths.
+     */
+    private static final class StringLengthComparator implements Comparator<String> {
+        public int compare(String s1, String s2) {
+            return s2.length() - s1.length();
+        }
+    }
+
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator filterator;
 
@@ -85,7 +97,7 @@ public class TextMatcher<E> implements Matcher<E> {
      *      <code>filter</code> within arbitrary text
      */
     private static TextSearchStrategy selectTextSearchStrategy(String filter) {
-        TextSearchStrategy result = null;
+        final TextSearchStrategy result;
 
         // if the filter is only 1 character, use the optimized SingleCharacter strategy
         if(filter.length() == 1) {
@@ -103,9 +115,11 @@ public class TextMatcher<E> implements Matcher<E> {
 
     /**
      * This convenience method returns a copy of the <code>filterStrings</code>
-     * in upper case format with null and <code>""</code> values removed. It
-     * also removes irrelevant search filters which are search filters that do
-     * not constrain the filter.
+     * with null and <code>""</code> values removed. It also removes irrelevant
+     * search filters which are filters strings that do not add to the
+     * precision of the string filtering. It also orders the search filters in
+     * order of descending length so that the longest, most discriminating
+     * filters occur near the start of the array.
      *
      * <p>For example, if <code>filterStrings</code> contained both
      * <code>"black"</code> and <code>"blackened"</code> then this method's
@@ -117,9 +131,15 @@ public class TextMatcher<E> implements Matcher<E> {
      * <code>"his"</code> since <code>"his"</code> is less precise than
      * <code>"this"</code> and thus adds no filtering value.
      *
-     * @param filterStrings an array of Strings to convert to upper case
+     * <p>If <code>{"this", "blackened"}</code> are passed into this method as
+     * the filter strings, they'll be returned as
+     * <code>{"blackened", "this"}</code> since <code>"blackened"</code> is
+     * longer and thus faster to search for (via Boyer Moore) than the shorter
+     * filter string, <code>"this"</code>.
+     *
+     * @param filterStrings an array of Strings to normalize
      * @return a copy of the minimal array of <code>filterStrings</code> in
-     *      upper case format
+     *      the order of longest to shortest
      */
     public static String[] normalizeFilters(String[] filterStrings) {
         // flags to indicate the valid and minimal filters
@@ -140,7 +160,7 @@ public class TextMatcher<E> implements Matcher<E> {
 
                 // attempt to search for another minimal filter that contains
                 // minimalFilter[i] to prove that minimalFilter[i] is not
-                // a *required* filter
+                // a *required* filter string
                 for(int j = 0; j < minimalFilter.length; j++) {
                     if(minimalFilter[j] && i != j && filterStrings[j].indexOf(filterStrings[i]) != -1) {
                         minimalFilter[i] = false;
@@ -151,13 +171,20 @@ public class TextMatcher<E> implements Matcher<E> {
             }
         }
 
-        // convert all valid filters to uppercase
-        final String[] upperCaseFilterStrings = new String[validFilters];
-        for(int i = 0, j = 0; j < validFilters; i++)
-            if(minimalFilter[i])
-                upperCaseFilterStrings[j++] = filterStrings[i].toUpperCase();
+        // extract all valid filters into a List
+        final List<String> minimalFilters = new ArrayList<String>(validFilters);
+        for(int i = 0, j = 0; j < validFilters; i++) {
+            if(minimalFilter[i]) {
+                minimalFilters.add(filterStrings[i]);
+                j++;
+            }
+        }
 
-        return upperCaseFilterStrings;
+        // order the elements of the list according to their lengths
+        // so the most discriminating filter strings are considered first
+        Collections.sort(minimalFilters, LENGTH_COMPARATOR);
+
+        return minimalFilters.toArray(new String[validFilters]);
     }
 
     /**
