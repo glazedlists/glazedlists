@@ -29,7 +29,7 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy implements TextSea
 
     /**
      * Sets the subtext to locate found when {@link #indexOf(String)} is called.
-     * This
+     * This method is expected to be called with a String of length 1.
      *
      * @param subtext the String containing the single character to locate in
      *      {@link #indexOf(String)}
