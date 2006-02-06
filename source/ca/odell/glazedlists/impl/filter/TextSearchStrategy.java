@@ -16,7 +16,7 @@ package ca.odell.glazedlists.impl.filter;
 public interface TextSearchStrategy {
 
     /**
-     * Sets the subtext to locate found when {@link #indexOf(String)} is called.
+     * Sets the subtext to locate when {@link #indexOf(String)} is called.
      * Implementations should build any special data structures they may need
      * concerning the subtext in this method.
      *

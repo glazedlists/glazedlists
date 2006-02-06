@@ -86,7 +86,7 @@ public final class GlazedLists {
      * <p>Unlike the {@link #replaceAll general} versions of this method, the
      * <i>sorted</i> version <strong>requires that both the input and the output
      * are sorted collections</strong>, and that they're sorted with the
-     * {@link Comparator} specified. If they're sorted in {@link Comparator natural}
+     * {@link Comparator} specified. If they're sorted in {@link Comparable natural}
      * order, use {@link #comparableComparator()}.
      *
      * <p>In a multi-threaded environment, it is necessary that the caller obtain
