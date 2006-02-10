@@ -144,6 +144,7 @@ public class SeparatorListTest extends TestCase {
         assertEquals("C", separatorList.get(1));
         assertEquals(2, separatorList.size());
 
+        // the following test line is known to fail, we need to fix SeparatorList
         source.remove(0);
         assertEquals(0, separatorList.size());
     }
