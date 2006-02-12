@@ -121,10 +121,13 @@ public class IssuesBrowser implements Runnable {
         // filter the sorted issues
         FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesSortedList, filterPanel.getMatcherEditor());
 
+        SeparatorList<Issue> separatedIssues = new SeparatorList<Issue>(filteredIssues, GlazedLists.beanPropertyComparator(Issue.class, "subcomponent"));
+
+
         // build the issues table
-        issuesTableModel = new EventTableModel<Issue>(filteredIssues, new IssueTableFormat());
+        issuesTableModel = new EventTableModel<Issue>(separatedIssues, new IssueTableFormat());
         JTable issuesJTable = new JTable(issuesTableModel);
-        issuesSelectionModel = new EventSelectionModel<Issue>(filteredIssues);
+        issuesSelectionModel = new EventSelectionModel<Issue>(separatedIssues);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);

@@ -4,6 +4,7 @@
 package com.publicobject.issuesbrowser;
 
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SeparatorList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
 import java.util.Comparator;
@@ -58,7 +59,12 @@ public class IssueTableFormat implements AdvancedTableFormat {
 
 	public Object getColumnValue(Object baseObject, int column) {
 		if (baseObject == null) return null;
-		Issue issue = (Issue) baseObject;
+        if (baseObject instanceof SeparatorList.Separator) {
+            SeparatorList.Separator<Issue> separator = (SeparatorList.Separator<Issue>)baseObject;
+            if(column == 5) return separator.first().getSubcomponent();
+            else return "------";
+        }
+        Issue issue = (Issue) baseObject;
 		if (column == 0) {
 			return issue.getId();
 		} else if (column == 1) {
