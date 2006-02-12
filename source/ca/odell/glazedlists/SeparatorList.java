@@ -6,6 +6,8 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.impl.Grouper;
 import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.BarcodeIterator;
+import ca.odell.glazedlists.impl.adt.IndexedTree;
+import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.Comparator;
@@ -32,7 +34,41 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
     /** manage collapsed elements */
     private Barcode collapsedElements = new Barcode();
-    private List<Separator<E>> separators = new ArrayList<Separator<E>>();
+
+    /** the separators list is black for separators, white for everything else
+     *
+     *
+     * <p>The following demonstrates the layout of the barcode for the
+     * given source list:
+     * <pre><code>
+     *           INDICES 0         1         2
+     *                   012345678901234567890
+     *       SOURCE LIST AAAABBBCCCDEFF
+     *   GROUPER BARCODE X___X__X__XXX_
+     * SEPARATOR BARCODE X____X___X___X_X_X__
+     * </pre></code>
+     *
+     * <p>To read this structure:
+     * <li>the grouper barcode is an "X" for the first element in each
+     *     group (called uniques), and an "_" for the following
+     *     elements (called duplicates).
+     * <li>the separator barcode is very similar to the grouper barcode.
+     *     In this barcode, there is an "X" for each separator and an "_"
+     *     for each element in the source list. We use the structure of the
+     *     grouper barcode to derive and maintain the separator barcode.
+     *
+     * <p>When accessing elements, the separator barcode is queried. If it
+     * holds an "X", the element is a separator and that separator is returned.
+     * Otherwise if it is an "_", the corresponding source index is obtained
+     * (by removing the number of preceding "X" elements) and the element is
+     * retrieved from the source list.
+     */
+    private Barcode insertedSeparators = new Barcode();
+    private static final Object SEPARATOR = Barcode.BLACK;
+    private static final Object SOURCE_ELEMENT = Barcode.WHITE;
+
+    /** a list of {@link Separator}s, one for each separator in the list */
+    private IndexedTree<GroupSeparator> separators = new IndexedTree<GroupSeparator>();
 
     /**
      * Create a new {@link UniqueList} that determines groups using the specified
@@ -52,13 +88,21 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         GrouperClient grouperClient = new GrouperClient();
         this.grouper = new Grouper<E>(source, grouperClient);
 
-        // prepare the separator and collapsed elements
-        collapsedElements.addBlack(0, size());
-        for(BarcodeIterator i = grouper.getBarcode().iterator(); i.hasNextBlack(); ) {
-            i.nextBlack();
-            separators.add(new GroupSeparator());
+        // prepare the separator list
+        insertedSeparators.add(0, SOURCE_ELEMENT, source.size());
+        for(BarcodeIterator i = grouper.getBarcode().iterator(); i.hasNextColour(Grouper.UNIQUE); ) {
+            i.nextColour(Grouper.UNIQUE);
+            int groupIndex = i.getColourIndex(Grouper.UNIQUE);
+            int sourceIndex = i.getIndex();
+            insertedSeparators.add(groupIndex + sourceIndex, SEPARATOR, 1);
+            IndexedTreeNode<GroupSeparator> node = separators.addByNode(groupIndex, new GroupSeparator());
+            node.getValue().setNode(node);
         }
 
+        // prepare the collapsed elements
+        collapsedElements.addBlack(0, size());
+
+        // handle changes via the grouper
         source.addListEventListener(this);
     }
 
@@ -68,67 +112,64 @@ public class SeparatorList<E> extends TransformedList<E, E> {
      */
     private class GrouperClient implements Grouper.Client {
         public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType) {
-            // add an event for the actual list element
-            if(primary) {
-                updates.addChange(elementChangeType, fromSourceIndex(index));
+            // handle the group change first
+            if(groupChangeType == ListEvent.INSERT) {
+                int expandedIndex = index + groupIndex;
+                insertedSeparators.add(expandedIndex, SEPARATOR, 1);
+                updates.addInsert(expandedIndex);
+                // add the separator and link the separator to its node
+                IndexedTreeNode<GroupSeparator> node = separators.addByNode(groupIndex, new GroupSeparator());
+                node.getValue().setNode(node);
+            } else if(groupChangeType == ListEvent.UPDATE) {
+                int expandedIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
+                updates.addUpdate(expandedIndex);
+            } else if(groupChangeType == ListEvent.DELETE) {
+                int expandedIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
+                insertedSeparators.remove(expandedIndex, 1);
+                updates.addDelete(expandedIndex);
+                // invalidate the node
+                IndexedTreeNode<GroupSeparator> node = separators.removeByIndex(groupIndex);
+                node.getValue().setNode(null);
+                // this group has gone away, make sure the other changes fired reflect that
+                groupIndex--;
             }
 
-            // add the group event
-            updates.addChange(groupChangeType, fromGroupIndex(groupIndex));
-
-            // update the list of separators
-            if(groupChangeType == ListEvent.INSERT) {
-                separators.add(groupIndex, new GroupSeparator());
-            } else if(groupChangeType == ListEvent.DELETE) {
-                separators.remove(groupIndex);
+            // then handle the element change
+            if(elementChangeType == ListEvent.INSERT) {
+                int expandedIndex = index + groupIndex + 1;
+                insertedSeparators.add(expandedIndex, SOURCE_ELEMENT, 1);
+                updates.addInsert(expandedIndex);
+            } else if(elementChangeType == ListEvent.UPDATE) {
+                int expandedIndex = index + groupIndex + 1;
+                updates.addUpdate(expandedIndex);
+            } else if(elementChangeType == ListEvent.DELETE) {
+                int expandedIndex = index + groupIndex + 1;
+                insertedSeparators.remove(expandedIndex, 1);
+                updates.addDelete(expandedIndex);
             }
         }
-    }
-
-    /**
-     * Convert an index from source to view. This needs to offset for any
-     * additional separators that wouldn't have been in the source list.
-     */
-    private int fromSourceIndex(int index) {
-        int leadingSeparatorCount = grouper.getBarcode().getColourIndex(index, true, Grouper.UNIQUE) + 1;
-        return index + leadingSeparatorCount;
-    }
-    private int fromGroupIndex(int groupIndex) {
-        int regularIndex = grouper.getBarcode().getColourIndex(groupIndex, Grouper.UNIQUE);
-        return groupIndex + regularIndex;
     }
 
     /** {@inheritDoc} */
     public E get(int index) {
-        int sourceIndex = getSourceIndex(index);
-        if(sourceIndex != -1) return source.get(sourceIndex);
-        else return (E)separators.get(getSeparatorIndex(index));
+        Object type = insertedSeparators.get(index);
+        if(type == SEPARATOR) return (E)separators.get(getSeparatorIndex(index));
+        else if(type == SOURCE_ELEMENT) return source.get(getSourceIndex(index));
+        else throw new IllegalStateException();
     }
 
     /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
-        // SLOW. . . . .
-        // This method is dangerously slow and requires rework, possibly of the
-        // datastructures for this entire class. The problem with this method is
-        // that it does a linear search for the element, trying to reverse the
-        // index. Aside from a binary search, there's no faster method to find
-        // this value due to the limited amount of information available from our
-        // barcode.
-        for(int i = 0; i < source.size(); i++) {
-            if(fromSourceIndex(i) == mutationIndex) {
-                return i;
-            }
-        }
-        return -1;
+        Object type = insertedSeparators.get(mutationIndex);
+        if(type == SEPARATOR) return -1;
+        else if(type == SOURCE_ELEMENT) return insertedSeparators.getColourIndex(mutationIndex, SOURCE_ELEMENT);
+        else throw new IllegalStateException();
     }
     protected int getSeparatorIndex(int mutationIndex) {
-        // SLOW . . . .
-        for(int i = 0; i < grouper.getBarcode().colourSize(Grouper.UNIQUE); i++) {
-            if(mutationIndex == i + grouper.getBarcode().getIndex(i, Grouper.UNIQUE)) {
-                return i;
-            }
-        }
-        return -1;
+        Object type = insertedSeparators.get(mutationIndex);
+        if(type == SEPARATOR) return insertedSeparators.getColourIndex(mutationIndex, SEPARATOR);
+        else if(type == SOURCE_ELEMENT) return -1;
+        else throw new IllegalStateException();
     }
 
     /** {@inheritDoc} */
@@ -140,7 +181,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
     /** {@inheritDoc} */
     public int size() {
-        return grouper.getBarcode().colourSize(Grouper.UNIQUE) + source.size();
+        return insertedSeparators.size();
     }
 
     /**
@@ -183,6 +224,12 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     private class GroupSeparator implements Separator<E> {
         private int limit = Integer.MAX_VALUE;
 
+        /**
+         * The node allows the separator to figure out which
+         * group in the overall list its representing.
+         */
+        private IndexedTreeNode<GroupSeparator> node = null;
+
         /** {@inheritDoc} */
         public int getLimit() {
             return limit;
@@ -205,21 +252,39 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         public int size() {
             return end() - start();
         }
+
+        /**
+         * Set the {@link IndexedTreeNode} that this {@link Separator} can
+         * use to find its index in the overall list of {@link Separator}s;
+         */
+        public void setNode(IndexedTreeNode<GroupSeparator> node) {
+            this.node = node;
+        }
+
         /**
          * The first index in the source containing an element from this group.
          */
         public int start() {
-            int separatorIndex = separators.indexOf(this);
+            if(this.node == null) throw new IllegalStateException();
+            int separatorIndex = node.getIndex();
             if(separatorIndex == -1) throw new IllegalStateException();
-            return grouper.getBarcode().getIndex(separatorIndex, Grouper.UNIQUE);
+            int groupStartIndex = insertedSeparators.getIndex(separatorIndex, SEPARATOR);
+            return groupStartIndex - separatorIndex;
         }
         /**
          * The last index in the source containing an element from this group.
          */
         public int end() {
-            int separatorIndex = separators.indexOf(this);
-            if(separatorIndex == -1) throw new IllegalStateException();
-            return ((separatorIndex + 1) == grouper.getBarcode().blackSize()) ? grouper.getBarcode().size() : grouper.getBarcode().getIndex(separatorIndex + 1, Grouper.UNIQUE);
+            if(this.node == null) throw new IllegalStateException();
+            int nextSeparatorIndex = node.getIndex() + 1;
+            if(nextSeparatorIndex == 0) throw new IllegalStateException();
+            int nextGroupStartIndex = nextSeparatorIndex == insertedSeparators.colourSize(SEPARATOR) ? insertedSeparators.size() : insertedSeparators.getIndex(nextSeparatorIndex, SEPARATOR);
+            return nextGroupStartIndex - nextSeparatorIndex;
+        }
+
+        /** {@inheritDoc} */
+        public String toString() {
+            return "" + size() + " elements starting with \"" + first() + "\"";
         }
     }
 }
