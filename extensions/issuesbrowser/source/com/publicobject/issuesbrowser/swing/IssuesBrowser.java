@@ -121,7 +121,7 @@ public class IssuesBrowser implements Runnable {
         // filter the sorted issues
         FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesSortedList, filterPanel.getMatcherEditor());
 
-        SeparatorList<Issue> separatedIssues = new SeparatorList<Issue>(filteredIssues, GlazedLists.beanPropertyComparator(Issue.class, "subcomponent"));
+        SeparatorList<Issue> separatedIssues = new SeparatorList<Issue>(filteredIssues, GlazedLists.beanPropertyComparator(Issue.class, "subcomponent"), 0, Integer.MAX_VALUE);
 
 
         // build the issues table
