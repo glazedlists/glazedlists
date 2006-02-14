@@ -5,7 +5,7 @@ package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
 
-import java.util.Comparator;
+import java.util.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -284,5 +284,78 @@ public class SeparatorListTest extends TestCase {
         assertEquals("C", separatorList.get(7));
         assertEquals("C", separatorList.get(8));
         assertEquals(9, separatorList.size());
+    }
+
+    public void testClear() {
+        EventList<String> source = new SortedList<String>(new BasicEventList<String>());
+        source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
+
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, 5);
+        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+
+        source.clear();
+        assertEquals(Collections.EMPTY_LIST, separatorList);
+    }
+
+    public void testSortedSource() {
+        Comparator<String> alphabetical = (Comparator)GlazedLists.comparableComparator();
+        Comparator<String> length = new StringLengthComparator();
+
+        BasicEventList<String> unsortedSource = new BasicEventList<String>();
+        SortedList<String> source = new SortedList<String>(unsortedSource, null);
+        unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "dear", "frog", "boat", "car", "jesse", "glazed", "shirt", "hat", "art", "dog", "puppy", "foot"));
+
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, length, 0, Integer.MAX_VALUE);
+        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+
+
+        assertEqualsIgnoreSeparators(source, separatorList, length);
+
+        source.setComparator(alphabetical);
+        assertEqualsIgnoreSeparators(source, separatorList, length);
+
+        // now add some duplicates
+        unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "art", "dog", "puppy", "foot", "carrot", "beer"));
+        assertEqualsIgnoreSeparators(source, separatorList, length);
+
+        source.setComparator(alphabetical);
+        assertEqualsIgnoreSeparators(source, separatorList, length);
+    }
+
+    private void assertEqualsIgnoreSeparators(List separatorSource, SeparatorList separatorList, Comparator separatorComparator) {
+        // create a protective copy that we can surely modify
+        separatorSource = new ArrayList(separatorSource);
+        Collections.sort(separatorSource, separatorComparator);
+        int e = 0;
+        int s = 0;
+
+        while(true) {
+            if(e == separatorSource.size() && s == separatorList.size()) break;
+
+            Object source = separatorSource.get(e);
+            Object separator = separatorList.get(s);
+
+            // if this is a separator, make sure it's worthwhile
+            if(separator instanceof SeparatorList.Separator) {
+                if(s > 0) {
+                    Object before = separatorList.get(s - 1);
+                    Object after = separatorList.get(s + 1);
+                    assertTrue(separatorComparator.compare(before, after) < 0);
+                }
+                s++;
+                continue;
+            }
+
+            // otherwise the values should be identical
+            assertSame(source, separator);
+            e++;
+            s++;
+        }
+    }
+
+    private static class StringLengthComparator implements Comparator<String> {
+        public int compare(String a, String b) {
+            return a.length() - b.length();
+        }
     }
 }
