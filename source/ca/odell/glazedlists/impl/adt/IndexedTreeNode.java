@@ -814,9 +814,13 @@ public final class IndexedTreeNode<V> {
      * Prints the tree by its contents.
      */
     public String toString() {
-        String leftString = left == null ? "." : left.toString();
-        String valueString = value instanceof IndexedTreeNode ? "NODE_" + ((IndexedTreeNode)value).getIndex() : value.toString();
-        String rightString = right == null ? "." : right.toString();
-        return "(" + leftString + " " + valueString + " " + rightString + ")";
+
+//        String leftString = left == null ? "." : left.toString();
+        String valueString = value instanceof IndexedTreeNode ? "NODE " + ((IndexedTreeNode)value).getIndex() : value.toString();
+//        String rightString = right == null ? "." : right.toString();
+//        return valueString;
+//        return "(" + leftString + " " + valueString + " " + rightString + ")";
+        int index = getIndex();
+        return "[" + index + "] " + valueString;
     }
 }

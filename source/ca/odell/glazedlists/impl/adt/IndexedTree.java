@@ -256,8 +256,12 @@ public final class IndexedTree<V> {
      * Print the tree by its contents
      */
     public String toString() {
-        if(root == null) return ".";
-        return root.toString();
+        StringBuffer result = new StringBuffer();
+        for(IndexedTreeIterator i = iterator(0); i.hasNext(); ) {
+            if(result.length() > 0) result.append(", ");
+            result.append(i.next());
+        }
+        return result.toString();
     }
 
     /**

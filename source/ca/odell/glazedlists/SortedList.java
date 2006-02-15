@@ -131,31 +131,56 @@ public final class SortedList<E> extends TransformedList<E, E> {
         return this.mode;
     }
 
-
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
         // handle reordering events
         if(listChanges.isReordering()) {
-            // the reorder map tells us what moved where
-            int[] reorderMap = listChanges.getReorderMap();
+            int[] sourceReorder = listChanges.getReorderMap();
 
-            // create an array with the sorted nodes
-            IndexedTreeNode[] sortedNodes = new IndexedTreeNode[sorted.size()];
+            // remember what the mapping was before
+            int[] previousIndexToSortedIndex = new int[sorted.size()];
             int index = 0;
-            for(IndexedTreeIterator<IndexedTreeNode> i = unsorted.iterator(0); i.hasNext(); index++) {
-                IndexedTreeNode<IndexedTreeNode> unsortedNode = i.next();
-                sortedNodes[index] = unsortedNode.getValue();
+            for(IndexedTreeIterator<IndexedTreeNode> i = sorted.iterator(0); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> sortedNode = i.next();
+                int unsortedIndex = sortedNode.getValue().getIndex();
+                previousIndexToSortedIndex[unsortedIndex] = index;
+            }
+            // adjust the from index for the source reorder
+            int[] newIndexToSortedIndex = new int[sorted.size()];
+            for(int i = 0; i < previousIndexToSortedIndex.length; i++) {
+                newIndexToSortedIndex[i] = previousIndexToSortedIndex[sourceReorder[i]];
             }
 
-            // set the unsorted nodes to point to the new set of sorted nodes
+            // reorder the unsorted nodes to get the new sorted order
+            IndexedTreeNode<IndexedTreeNode>[] unsortedNodes = new IndexedTreeNode[unsorted.size()];
             index = 0;
             for(IndexedTreeIterator<IndexedTreeNode> i = unsorted.iterator(0); i.hasNext(); index++) {
                 IndexedTreeNode<IndexedTreeNode> unsortedNode = i.next();
-                unsortedNode.setValue(sortedNodes[reorderMap[index]]);
-                sortedNodes[reorderMap[index]].setValue(unsortedNode);
+                unsortedNodes[index] = unsortedNode;
+            }
+            Arrays.sort(unsortedNodes, sorted.getComparator());
+
+            // create a new reorder map to send the changes forward
+            int[] reorderMap = new int[sorted.size()];
+            boolean indexChanged = false;
+            index = 0;
+            for(IndexedTreeIterator<IndexedTreeNode> i = sorted.iterator(0); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> sortedNode = i.next();
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsortedNodes[index];
+                sortedNode.setValue(unsortedNode);
+                unsortedNode.setValue(sortedNode);
+                int unsortedIndex = unsortedNode.getIndex();
+                reorderMap[index] = newIndexToSortedIndex[unsortedIndex];
+                indexChanged = indexChanged || (index != reorderMap[index]);
             }
 
-            // we have handled the reordering!
+            // notify the world of the reordering
+            if(indexChanged) {
+                updates.beginEvent();
+                updates.reorder(reorderMap);
+                updates.commitEvent();
+            }
+
             return;
         }
 

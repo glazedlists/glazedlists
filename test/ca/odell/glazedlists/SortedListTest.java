@@ -1037,6 +1037,105 @@ public class SortedListTest extends TestCase {
     }
 
     /**
+     * This test ensures that the SortedList sorts by its own
+     * order, then by the order in the source list.
+     */
+    public void testSortedListHandlesSortEvents() {
+        Comparator<Song> artistComparator = GlazedLists.beanPropertyComparator(Song.class, "artist");
+        Comparator<Song> songComparator = GlazedLists.beanPropertyComparator(Song.class, "song");
+        List expectedOrder;
+        sortedList.setComparator(null);
+
+        SortedList sortedAgain = new SortedList(sortedList, artistComparator);
+        sortedAgain.addListEventListener(new ListConsistencyListener(sortedAgain, "sortedAgain"));
+
+        unsortedList.add(new Song("Limp Bizkit", "Nookie"));
+        unsortedList.add(new Song("Limp Bizkit", "Eat You Alive"));
+        unsortedList.add(new Song("Limp Bizkit", "Rearranged"));
+        unsortedList.add(new Song("Limp Bizkit", "The Unquestionable Truth"));
+        unsortedList.add(new Song("Filter", "Welcome to the Fold"));
+        unsortedList.add(new Song("Filter", "Take a Picture"));
+        unsortedList.add(new Song("Filter", "Miss Blue"));
+        unsortedList.add(new Song("Slipknot", "Wait and Bleed"));
+        unsortedList.add(new Song("Slipknot", "Duality"));
+        unsortedList.add(new Song("Godsmack", "Whatever"));
+        unsortedList.add(new Song("Godsmack", "Running Blind"));
+
+        // sorted just by artist
+        expectedOrder = new ArrayList(unsortedList);
+        Collections.sort(expectedOrder, artistComparator);
+        assertEquals(expectedOrder, sortedAgain);
+
+        // sorted by artist, then by song
+        sortedList.setComparator(songComparator);
+        expectedOrder = new ArrayList(unsortedList);
+        Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(new Comparator[] { artistComparator, songComparator })));
+        assertEquals(expectedOrder, sortedAgain);
+
+        // sorted just by artist again
+        sortedList.setComparator(null);
+        expectedOrder = new ArrayList(unsortedList);
+        Collections.sort(expectedOrder, artistComparator);
+        assertEquals(expectedOrder, sortedAgain);
+
+        // change our data to be more random
+        unsortedList.clear();
+        Random dice = new Random(0);
+        List<String> artists = GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        List<String> songs = GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        for(int a = 0; a < 200; a++) {
+            String randomArtist = artists.get(dice.nextInt(artists.size()));
+            String randomSong = artists.get(dice.nextInt(artists.size()));
+            unsortedList.add(new Song(randomArtist, randomSong));
+        }
+
+        // sorted by artist, then by song
+        sortedList.setComparator(songComparator);
+        expectedOrder = new ArrayList(unsortedList);
+        Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(new Comparator[] { artistComparator, songComparator })));
+        assertEquals(expectedOrder, sortedAgain);
+
+        // sorted just by artist again
+        sortedList.setComparator(null);
+        expectedOrder = new ArrayList(unsortedList);
+        Collections.sort(expectedOrder, artistComparator);
+        assertEquals(expectedOrder, sortedAgain);
+
+
+    }
+
+    public void testSortedSource() {
+        Comparator<String> alphabetical = (Comparator)GlazedLists.comparableComparator();
+        Comparator<String> length = new StringLengthComparator();
+
+        sortedList.setComparator(null);
+        unsortedList.addAll(Arrays.asList("dddd", "aaa", "c", "bb"));
+
+        SortedList<String> resortedList = new SortedList<String>(sortedList, length);
+        ListConsistencyListener consistencyTest = new ListConsistencyListener(resortedList, "separatorList");
+
+        sortedList.setComparator(alphabetical);
+        assertSortedEquals(sortedList, resortedList);
+
+        // now add some duplicates
+        unsortedList.addAll(Arrays.asList("c", "dddd", "aaa", "bb"));
+        assertSortedEquals(sortedList, resortedList);
+
+        // now chnage the comparator
+        sortedList.setComparator(alphabetical);
+        assertSortedEquals(sortedList, resortedList);
+    }
+
+    /** test a sorted list for equality */
+    public void assertSortedEquals(List unsorted, SortedList sorted) {
+        // create a protective copy to muck with
+        unsorted = new ArrayList(unsorted);
+        if(sorted.getComparator() != null) Collections.sort(unsorted, sorted.getComparator());
+        assertEquals(unsorted, sorted);
+    }
+
+
+    /**
      * Compares two objects to be equal.
      */
     class AlwaysEqualComparator implements Comparator {
@@ -1106,7 +1205,7 @@ public class SortedListTest extends TestCase {
         }
     }
 
-    private static class Song implements Comparable {
+    public static class Song implements Comparable {
         String artist;
         String song;
 
