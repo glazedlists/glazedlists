@@ -5,8 +5,6 @@ package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Collections;
 
 /**
@@ -17,149 +15,230 @@ import java.util.Collections;
 public class RangeListTest extends TestCase {
 
     public void testAddAll() {
-        EventList source = new BasicEventList();
-        RangeList rangeList = new RangeList(source);
-        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
+        EventList<String> source = new BasicEventList<String>();
+        RangeList<String> rangeList = new RangeList<String>(source);
+        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
 
         assertEquals(0, rangeList.size());
 
-        rangeList.addAll(split("J,E,S,S,E"));
-        assertEquals(5, rangeList.size());
+        rangeList.addAll(GlazedListsTests.stringToList("JESSE"));
+        assertEquals(GlazedListsTests.stringToList("JESSE"), rangeList);
     }
 
     public void testChangeSource() {
-        EventList source = new BasicEventList();
-        source.addAll(split("J,E,S,S,E"));
+        EventList<String> source = new BasicEventList<String>();
+        RangeList<String> rangeList = new RangeList<String>(source);
+        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
 
-        RangeList rangeList = new RangeList(source);
-        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
+        rangeList.setHeadRange(2, 4);
+        assertEquals(0, rangeList.size());
 
-        rangeList.setRange(0, 5);
+        source.addAll(GlazedListsTests.stringToList("JESSE"));
+        assertEquals(GlazedListsTests.stringToList("SS"), rangeList);
+
+        rangeList.setHeadRange(0, 5);
         source.set(0, "M");
         source.set(4, "Y");
-        assertEquals(split("M,E,S,S,Y"), rangeList);
+        // total string: MESSY
+        assertEquals(GlazedListsTests.stringToList("MESSY"), rangeList);
 
-        source.addAll(0, split("J,A"));
-        assertEquals(split("J,A,M,E,S"), rangeList);
+        source.addAll(0, GlazedListsTests.stringToList("JA"));
+        // total string: JAMESSY
+        assertEquals(GlazedListsTests.stringToList("JAMES"), rangeList);
 
-        source.removeAll(split("S"));
-        assertEquals(split("J,A,M,E,Y"), rangeList);
+        source.removeAll(GlazedListsTests.stringToList("S"));
+        // total string: JAMEY
+        assertEquals(GlazedListsTests.stringToList("JAMEY"), rangeList);
 
-        source.removeAll(split("M,E"));
-        assertEquals(split("J,A,Y"), rangeList);
+        source.removeAll(GlazedListsTests.stringToList("ME"));
+        // total string: JAY
+        assertEquals(GlazedListsTests.stringToList("JAY"), rangeList);
 
-        rangeList.setRange(1, 7);
-        assertEquals(split("A,Y"), rangeList);
+        rangeList.setHeadRange(1, 7);
+        assertEquals(GlazedListsTests.stringToList("AY"), rangeList);
 
-        source.addAll(1, split("M"));
-        source.addAll(3, split("L,T,B"));
-        assertEquals(split("M,A,L,T,B,Y"), rangeList);
+        source.addAll(1, GlazedListsTests.stringToList("M"));
+        source.addAll(3, GlazedListsTests.stringToList("LTB"));
+        // total string: JMALTBY
+        assertEquals(GlazedListsTests.stringToList("MALTBY"), rangeList);
 
-        source.addAll(5, split("E,R,N,A,T,I,V,E"));
-        assertEquals(split("M,A,L,T,E,R"), rangeList);
+        source.addAll(5, GlazedListsTests.stringToList("ERNATIVE"));
+        // total string: JMALTERNATIVEBY
+        assertEquals(GlazedListsTests.stringToList("MALTER"), rangeList);
 
-        rangeList.setRange(2, 13);
-        assertEquals(split("A,L,T,E,R,N,A,T,I,V,E"), rangeList);
+        rangeList.setHeadRange(2, 13);
+        assertEquals(GlazedListsTests.stringToList("ALTERNATIVE"), rangeList);
 
-        rangeList.setRange(-9, -3);
-        assertEquals(split("N,A,T,I,V,E"), rangeList);
+        rangeList.setHeadRange(-9, -3);
+        assertEquals(GlazedListsTests.stringToList("NATIVE"), rangeList);
 
         source.subList(0, 7).clear();
-        assertEquals(split("N,A,T,I,V,E"), rangeList);
+        // total string: NATIVEBY
+        assertEquals(GlazedListsTests.stringToList("NATIVE"), rangeList);
 
         source.subList(6, 8).clear();
-        assertEquals(split("N,A,T,I"), rangeList);
+        // total string: NATIVE
+        assertEquals(GlazedListsTests.stringToList("NATI"), rangeList);
 
         source.remove(0);
-        assertEquals(split("A,T,I"), rangeList);
+        // total string: ATI
+        assertEquals(GlazedListsTests.stringToList("ATI"), rangeList);
 
         source.clear();
-        source.addAll(split("R,O,U,G,H,R,I,D,E,R,S"));
-        rangeList.setRange(0, 5);
-        assertEquals(split("R,O,U,G,H"), rangeList);
+        source.addAll(GlazedListsTests.stringToList("ROUGHRIDERS"));
+        // total string: ROUGHRIDERS
+        rangeList.setHeadRange(0, 5);
+        assertEquals(GlazedListsTests.stringToList("ROUGH"), rangeList);
 
-        source.removeAll(split("A,E,I,O,U"));
-        assertEquals(split("R,G,H,R,D"), rangeList);
+        source.removeAll(GlazedListsTests.stringToList("AEIOU"));
+        // total string: RGHRDRS
+        assertEquals(GlazedListsTests.stringToList("RGHRD"), rangeList);
     }
 
     public void testTailRange() {
-        EventList source = new BasicEventList();
-        source.addAll(split("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"));
+        EventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
-        RangeList rangeList = new RangeList(source);
-        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
+        RangeList<String> rangeList = new RangeList<String>(source);
+
+        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
 
         assertEquals(source, rangeList);
 
         rangeList.setTailRange(5, 0);
-        assertEquals(split("V,W,X,Y,Z"), rangeList);
+        assertEquals(GlazedListsTests.stringToList("VWXYZ"), rangeList);
 
         rangeList.setTailRange(3, 1);
-        assertEquals(split("X,Y"), rangeList);
+        assertEquals(GlazedListsTests.stringToList("XY"), rangeList);
     }
 
     public void testRangeAdjust() {
-        EventList source = new BasicEventList();
-        source.addAll(split("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"));
+        EventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
-        RangeList rangeList = new RangeList(source);
-        rangeList.addListEventListener(new ListConsistencyListener(rangeList, "Range List", false));
+        RangeList<String> rangeList = new RangeList<String>(source);
+        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
 
         assertEquals(source, rangeList);
 
-        rangeList.setRange(1, 2);
-        assertEquals(split("B"), rangeList);
+        rangeList.setHeadRange(1, 2);
+        assertEquals(GlazedListsTests.stringToList("B"), rangeList);
 
         // shift right, exclusive
-        rangeList.setRange(-5, -1);
-        assertEquals(split("W,X,Y,Z"), rangeList);
+        rangeList.setHeadRange(-5, -1);
+        assertEquals(GlazedListsTests.stringToList("WXYZ"), rangeList);
 
         // expand left
-        rangeList.setRange(-10, -1);
-        assertEquals(split("R,S,T,U,V,W,X,Y,Z"), rangeList);
+        rangeList.setHeadRange(-10, -1);
+        assertEquals(GlazedListsTests.stringToList("RSTUVWXYZ"), rangeList);
 
         // shift left, inclusive
-        rangeList.setRange(-13, -4);
-        assertEquals(split("O,P,Q,R,S,T,U,V,W"), rangeList);
+        rangeList.setHeadRange(-13, -4);
+        assertEquals(GlazedListsTests.stringToList("OPQRSTUVW"), rangeList);
 
         // shrink
-        rangeList.setRange(-10, -7);
-        assertEquals(split("R,S,T"), rangeList);
+        rangeList.setHeadRange(-10, -7);
+        assertEquals(GlazedListsTests.stringToList("RST"), rangeList);
 
         // shift left, exclusive
-        rangeList.setRange(-15, -12);
-        assertEquals(split("M,N,O"), rangeList);
+        rangeList.setHeadRange(-15, -12);
+        assertEquals(GlazedListsTests.stringToList("MNO"), rangeList);
 
         // expand right
-        rangeList.setRange(-15, -9);
-        assertEquals(split("M,N,O,P,Q,R"), rangeList);
+        rangeList.setHeadRange(-15, -9);
+        assertEquals(GlazedListsTests.stringToList("MNOPQR"), rangeList);
 
         // shift right, inclusive
-        rangeList.setRange(-13, -6);
-        assertEquals(split("O,P,Q,R,S,T,U"), rangeList);
+        rangeList.setHeadRange(-13, -6);
+        assertEquals(GlazedListsTests.stringToList("OPQRSTU"), rangeList);
 
         // grow
-        rangeList.setRange(-15, -2);
-        assertEquals(split("M,N,O,P,Q,R,S,T,U,V,W,X,Y"), rangeList);
+        rangeList.setHeadRange(-15, -2);
+        assertEquals(GlazedListsTests.stringToList("MNOPQRSTUVWXY"), rangeList);
 
         // beyond right end
-        rangeList.setRange(30, 40);
+        rangeList.setHeadRange(30, 40);
         assertEquals(Collections.EMPTY_LIST, rangeList);
 
         // normal
-        rangeList.setRange(0, 3);
-        assertEquals(split("A,B,C"), rangeList);
+        rangeList.setHeadRange(0, 3);
+        assertEquals(GlazedListsTests.stringToList("ABC"), rangeList);
 
         // past left end
-        rangeList.setRange(-30, -40);
+        rangeList.setHeadRange(-30, -40);
         assertEquals(Collections.EMPTY_LIST, rangeList);
 
         // normal
-        rangeList.setRange(0, 3);
-        assertEquals(split("A,B,C"), rangeList);
+        rangeList.setHeadRange(0, 3);
+        assertEquals(GlazedListsTests.stringToList("ABC"), rangeList);
     }
 
-    private static List split(String commaDelimited) {
-        return Arrays.asList(commaDelimited.split(","));
-    }
+    public void testMiddleRange() {
+        EventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+
+        RangeList<String> rangeList = new RangeList<String>(source);
+        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+
+        assertEquals(source, rangeList);
+
+        rangeList.setMiddleRange(1, 1);
+        assertEquals(GlazedListsTests.stringToList("BCDEFGHIJKLMNOPQRSTUVWXY"), rangeList);
+
+        source.add(1, "X");
+        assertEquals(GlazedListsTests.stringToList("XBCDEFGHIJKLMNOPQRSTUVWXY"), rangeList);
+
+        source.addAll(1, GlazedListsTests.stringToList("XXX"));
+        assertEquals(GlazedListsTests.stringToList("XXXXBCDEFGHIJKLMNOPQRSTUVWXY"), rangeList);
+
+        source.add(source.size()-1, "X");
+        assertEquals(GlazedListsTests.stringToList("XXXXBCDEFGHIJKLMNOPQRSTUVWXYX"), rangeList);
+
+        source.addAll(source.size()-1, GlazedListsTests.stringToList("XXX"));
+        assertEquals(GlazedListsTests.stringToList("XXXXBCDEFGHIJKLMNOPQRSTUVWXYXXXX"), rangeList);
+
+        source.add(0, "?");
+        source.add("?");
+        assertEquals(GlazedListsTests.stringToList("AXXXXBCDEFGHIJKLMNOPQRSTUVWXYXXXXZ"), rangeList);
+
+        source.set(1, "?");
+        source.set(source.size()-2, "?");
+        assertEquals(GlazedListsTests.stringToList("?XXXXBCDEFGHIJKLMNOPQRSTUVWXYXXXX?"), rangeList);
+
+        rangeList.set(0, "$");
+        rangeList.set(rangeList.size()-1, "$");
+        assertEquals(GlazedListsTests.stringToList("$XXXXBCDEFGHIJKLMNOPQRSTUVWXYXXXX$"), rangeList);
+
+        source.remove(0);
+        source.remove(source.size()-1);
+        assertEquals(GlazedListsTests.stringToList("XXXXBCDEFGHIJKLMNOPQRSTUVWXYXXXX"), rangeList);
+
+        source.removeAll(GlazedListsTests.stringToList("XXXXXXXXX"));
+        assertEquals(GlazedListsTests.stringToList("BCDEFGHIJKLMNOPQRSTUVWY"), rangeList);
+        assertEquals(GlazedListsTests.stringToList("$BCDEFGHIJKLMNOPQRSTUVWY$"), source);
+
+        source.clear();
+        assertEquals(GlazedListsTests.stringToList(""), source);
+        assertEquals(GlazedListsTests.stringToList(""), rangeList);
+
+        source.add("J");
+        assertEquals(GlazedListsTests.stringToList("J"), source);
+        assertEquals(GlazedListsTests.stringToList(""), rangeList);
+
+        source.add("A");
+        assertEquals(GlazedListsTests.stringToList("JA"), source);
+        assertEquals(GlazedListsTests.stringToList(""), rangeList);
+
+        source.add("M");
+        assertEquals(GlazedListsTests.stringToList("JAM"), source);
+        assertEquals(GlazedListsTests.stringToList("A"), rangeList);
+
+        source.add("E");
+        assertEquals(GlazedListsTests.stringToList("JAME"), source);
+        assertEquals(GlazedListsTests.stringToList("AM"), rangeList);
+
+        source.add("S");
+        assertEquals(GlazedListsTests.stringToList("JAMES"), source);
+        assertEquals(GlazedListsTests.stringToList("AME"), rangeList);
+     }
 }

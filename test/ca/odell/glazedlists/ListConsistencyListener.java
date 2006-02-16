@@ -16,16 +16,16 @@ import junit.framework.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListConsistencyListener implements ListEventListener {
+public class ListConsistencyListener<E> implements ListEventListener<E> {
     
     /** a second copy of the list data */
-    private List expected;
+    private List<E> expected;
 
     /** a name for reporting problems with the list */
     private String name;
 
     /** the source list to compare against */
-    private EventList source;
+    private EventList<E> source;
 
     /** whether to cough out changes to the console as they happen */
     private boolean verbose = false;
@@ -36,23 +36,20 @@ public class ListConsistencyListener implements ListEventListener {
      *
      * @param verbose whether to print changes to the console as they happne
      */
-    public ListConsistencyListener(EventList source, String name, boolean verbose) {
+    public ListConsistencyListener(EventList<E> source, String name, boolean verbose) {
         this.source = source;
         this.name = name;
         this.verbose = verbose;
         
         // populate the list of expected values
-        expected = new ArrayList();
-        for(int i = 0; i < source.size(); i++) {
-            expected.add(source.get(i));
-        }
+        expected = new ArrayList<E>(source);
     }
 
     /**
      * Creates a new ListConsistencyListener that ensures events from the source
      * list are consistent.
      */
-    public ListConsistencyListener(EventList source, String name) {
+    public ListConsistencyListener(EventList<E> source, String name) {
         this(source, name, false);
     }
     
@@ -74,7 +71,7 @@ public class ListConsistencyListener implements ListEventListener {
         if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size() + ", source: " + source);
         
         // record the changed indices
-        List changedIndices = new ArrayList();
+        List<Integer> changedIndices = new ArrayList<Integer>();
         
         // keep track of the highest change index so far
         int highestChangeIndex = 0;
@@ -83,7 +80,7 @@ public class ListConsistencyListener implements ListEventListener {
         if(listChanges.isReordering()) {
             int[] reorderMap = listChanges.getReorderMap();
             Assert.assertEquals(expected.size(), reorderMap.length);
-            List newExpectedValues = new ArrayList(expected.size());
+            List<E> newExpectedValues = new ArrayList<E>(expected.size());
             for(int i = 0; i < reorderMap.length; i++) {
                 newExpectedValues.add(i, expected.get(reorderMap[i]));
                 changedIndices.add(new Integer(i));
@@ -121,8 +118,8 @@ public class ListConsistencyListener implements ListEventListener {
         
         // verify the source is consistent with what we expect
         Assert.assertEquals(expected.size(), source.size());
-        for(Iterator c = changedIndices.iterator(); c.hasNext(); ) {
-            int changeIndex = ((Integer)c.next()).intValue();
+        for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {
+            int changeIndex = c.next().intValue();
             for(int i = Math.max(changeIndex - 1, 0); i < Math.min(changeIndex+2, expected.size()); i++) {
                 Assert.assertEquals(expected.get(i), source.get(i));
             }
@@ -171,6 +168,5 @@ public class ListConsistencyListener implements ListEventListener {
 
         // reset the list iterator for other handlers
         listChanges.reset();
-
     }
 }
