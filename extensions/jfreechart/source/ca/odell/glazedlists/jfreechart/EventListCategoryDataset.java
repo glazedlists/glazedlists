@@ -3,17 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.jfreechart;
 
-import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import org.jfree.data.UnknownKeyException;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.AbstractDataset;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class helps adapt an {@link EventList} to the {@link CategoryDataset}
@@ -72,19 +69,21 @@ import java.util.Map;
 public abstract class EventListCategoryDataset<R extends Comparable, C extends Comparable> extends AbstractDataset implements CategoryDataset {
 
     /** Keep a private copy of the contents of the source list in order to access deleted elements. */
-    private final List<ValueSegment<C, R>> sourceCopy;
+    private final List<ValueSegment<C,R>> sourceCopy;
 
     /** The source of the data to be charted. */
-    private final EventList<ValueSegment<C, R>> source;
+    private final EventList<ValueSegment<C,R>> source;
 
     /** Listens to changes in the source EventList and rebroadcasts them as changes to this CategoryDataset */
     private final DatasetEventListener datasetEventListener = new DatasetEventListener();
 
     /** An ordered list of keys identifying the chart's rows. */
-    private final List<Comparable> rowKeys = new ArrayList<Comparable>();
+    protected List<? extends Comparable> rowKeys = new ArrayList<Comparable>();
 
     /** An ordered list of keys identifying the chart's columns. */
-    private final List<Comparable> columnKeys = new ArrayList<Comparable>();
+    protected List<? extends Comparable> columnKeys;
+
+    private final SequenceList.Sequencer sequencer;
 
     /**
      * This is the main data structure which organizes the data to make
@@ -109,9 +108,20 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
         this.sourceCopy = new ArrayList<ValueSegment<C,R>>(source.size());
         this.sourceCopy.addAll(source);
 
+        this.sequencer = this.createSequencer();
+        this.rebuildColumnKeysList();
+
         // begin listening to changes in the source list
         this.source.addListEventListener(this.datasetEventListener);
     }
+
+    private void rebuildColumnKeysList() {
+        final RangeList<Comparable> columnKeyMaker = new RangeList<Comparable>(new SequenceList(new BasicEventList(), this.sequencer));
+        columnKeyMaker.setMiddleRange(0, 1);
+        this.columnKeys = columnKeyMaker;
+    }
+
+    protected abstract SequenceList.Sequencer createSequencer();
 
     /**
      * Returns the row key for a given index.
@@ -165,7 +175,6 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * Returns the column index for a given key.
      *
      * @param key the column key
-     *
      * @return the column index, or <code>-1</code> if the key is unrecognized
      */
     public int getColumnIndex(Comparable key) {
@@ -218,10 +227,12 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
             throw new UnknownKeyException("unrecognized rowKey: " + rowKey);
 
         // the columnKey is expected to be a ValueSegment
-        final ValueSegment segment = (ValueSegment) columnKey;
+        final Comparable left = columnKey;
+        final Comparable right = (Comparable) this.sequencer.next(left);
 
         // return the number of values within the segment
-        return new Integer(treePair.getCount(segment));
+        return new Integer(treePair.getCount(left, right));
+//        return new Integer(treePair.getCount(segment));
     }
 
     /**
@@ -252,7 +263,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
         sourceCopy.clear();
         valueToTreePairs.clear();
         rowKeys.clear();
-        columnKeys.clear();
+        rebuildColumnKeysList();
     }
 
     /**

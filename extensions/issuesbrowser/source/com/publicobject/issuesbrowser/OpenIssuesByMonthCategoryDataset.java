@@ -3,20 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import ca.odell.glazedlists.CollectionList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.jfreechart.EventListCategoryDataset;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
-import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * This CategoryDataset explodes each {@link Issue} object into a List of
@@ -33,6 +29,8 @@ import java.util.List;
  * @author James Lemieux
  */
 public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<String, Date> {
+
+    private static final DateFormat COLUMN_KEY_DATE_FORMATTER = new SimpleDateFormat("MMMMM yyyy");
 
     /**
      * Create a CategoryDataset by exploding the {@link Issue} objects into a
@@ -54,6 +52,10 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         // ensure all changes are delivered on the EDT to this Category Dataset,
         // since we're displaying the chart on a Swing component
         super(GlazedListsSwing.swingThreadProxyList(filteredValueSegments));
+    }
+
+    protected SequenceList.Sequencer<? extends Comparable> createSequencer() {
+        return Sequencers.monthSequencer();
     }
 
     /**
@@ -97,31 +99,35 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         if (!contains(rowKeys, value))
             rowKeys.add(value);
 
-        // get the earliest date from the segment that was inserted
-        final Date date = segment.getStart();
-        // get the columnKeys that already exist
-        final List<ValueSegment<Date,String>> columnKeys = getColumnKeys();
+        final List<Comparable> columnKeys = getColumnKeys();
+        columnKeys.add(segment.getStart());
+        columnKeys.add(segment.getEnd());
 
-        // determine the earliest date recorded in the existing columns
-        final Date earliestColumnKey = columnKeys.isEmpty() ? new Date() : columnKeys.get(0).getStart();
-
-        // if the newly inserted segment predates the earliest recorded column key
-        if (earliestColumnKey.after(date)) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(earliestColumnKey);
-
-            // we must insert enough column keys to include the new segment
-            while (cal.getTime().after(date)) {
-                // create a new segment for the month
-                final MonthSegment newColumnKey = new MonthSegment(cal);
-
-                // add the segment to the list of column keys
-                columnKeys.add(0, newColumnKey);
-
-                // step back to the previous month
-                cal.add(Calendar.MONTH, -1);
-            }
-        }
+//        // get the earliest date from the segment that was inserted
+//        final Date date = segment.getStart();
+//        // get the columnKeys that already exist
+//        final List<ValueSegment<Date,String>> columnKeys = getColumnKeys();
+//
+//        // determine the earliest date recorded in the existing columns
+//        final Date earliestColumnKey = columnKeys.isEmpty() ? new Date() : columnKeys.get(0).getStart();
+//
+//        // if the newly inserted segment predates the earliest recorded column key
+//        if (earliestColumnKey.after(date)) {
+//            Calendar cal = Calendar.getInstance();
+//            cal.setTime(earliestColumnKey);
+//
+//            // we must insert enough column keys to include the new segment
+//            while (cal.getTime().after(date)) {
+//                // create a new segment for the month
+//                final MonthSegment newColumnKey = new MonthSegment(cal);
+//
+//                // add the segment to the list of column keys
+//                columnKeys.add(0, newColumnKey);
+//
+//                // step back to the previous month
+//                cal.add(Calendar.MONTH, -1);
+//            }
+//        }
     }
 
     /**
@@ -142,7 +148,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         final String value = segment.getValue();
 
         // if no more data is associated to the row, remove its rowkey
-        if(getCount(value) == 0)
+        if (getCount(value) == 0)
             getRowKeys().remove(value);
     }
 
@@ -166,52 +172,6 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         public boolean matches(ValueSegment<Date, String> item) {
             final String value = item.getValue();
             return value != "RESOLVED" && value != "CLOSED";
-        }
-    }
-
-    /**
-     * Represents a segment of time from the beginning to the end of a month.
-     * It is used as a column key for this Dataset, thus it exists in order to
-     * provide a pretty {@link #toString()} value.
-     */
-    private static class MonthSegment extends DefaultValueSegment<Date,String> {
-        private static final DateFormat MONTH_DATE_FORMAT = new SimpleDateFormat("MMMMM yyyy");
-
-        private final String description;
-
-        public MonthSegment(Calendar cal) {
-            super(getMonthBegin(cal), getMonthEnd(cal), null);
-            this.description = MONTH_DATE_FORMAT.format(this.getStart());
-        }
-
-        public String toString() {
-            return this.description;
-        }
-
-        /**
-         * A convenience method to adjust the given <code>calendar</code> to the
-         * start of the month and return the resulting Date.
-         */
-        private static Date getMonthBegin(Calendar calendar) {
-            calendar.set(Calendar.DATE, calendar.getActualMinimum(Calendar.DATE));
-            calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
-            calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
-            calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
-            calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
-            return calendar.getTime();
-        }
-
-        /**
-         * A convenience method to adjust the given <code>calendar</code> to the
-         * end of the month and return the resulting Date.
-         */
-        private static Date getMonthEnd(Calendar calendar) {
-            calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
-            calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY));
-            calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE));
-            calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND));
-            calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND));
-            return calendar.getTime();
         }
     }
 }

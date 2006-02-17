@@ -71,13 +71,24 @@ public class TreePair {
         return this.start.size() == 0;
     }
 
+//    /**
+//     * Returns the number of {@link ValueSegment}s which appear between the
+//     * start and end values of the given <code>segment</code>.
+//     */
+//    public int getCount(ValueSegment segment) {
+//        final int numStartedBeforeSegmentEnd = start.indexOfSimulated(segment.getEnd());
+//        final int numEndedBeforeSegmentStart = end.indexOfSimulated(segment.getStart());
+//
+//        return numStartedBeforeSegmentEnd - numEndedBeforeSegmentStart;
+//    }
+
     /**
      * Returns the number of {@link ValueSegment}s which appear between the
      * start and end values of the given <code>segment</code>.
      */
-    public int getCount(ValueSegment segment) {
-        final int numStartedBeforeSegmentEnd = start.indexOfSimulated(segment.getEnd());
-        final int numEndedBeforeSegmentStart = end.indexOfSimulated(segment.getStart());
+    public int getCount(Comparable left, Comparable right) {
+        final int numStartedBeforeSegmentEnd = start.indexOfSimulated(right);
+        final int numEndedBeforeSegmentStart = end.indexOfSimulated(left);
 
         return numStartedBeforeSegmentEnd - numEndedBeforeSegmentStart;
     }

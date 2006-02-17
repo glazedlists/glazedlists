@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.jfreechart;
 
+import ca.odell.glazedlists.GlazedLists;
+
 /**
  * The default implementation of the {@link ValueSegment} interface.
  *
@@ -69,7 +71,7 @@ public class DefaultValueSegment<T extends Comparable, V extends Comparable> imp
      */
     public int compareTo(ValueSegment<T,V> o) {
         // 1. compare by value
-        final int valueComparison = value.compareTo(o.getValue());
+        final int valueComparison = GlazedLists.comparableComparator().compare(value, o.getValue());
         if (valueComparison != 0)
             return valueComparison;
 

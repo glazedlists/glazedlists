@@ -4,9 +4,7 @@
 package ca.odell.glazedlists.impl;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.impl.sort.ComparableComparator;
 
 import java.util.*;
 
@@ -35,7 +33,6 @@ public final class GlazedListsImpl {
         if(a == null || b == null) return false;
         return a.equals(b);
     }
-
 
     /**
      * Replace all elements in the target {@link EventList} with the elements in
@@ -104,5 +101,42 @@ public final class GlazedListsImpl {
                 sourceObject = NEW_VALUE_NEEDED;
             }
         }
+    }
+
+    // Date Utility Methods // // // // // // // // // // // // // // // // //
+
+    /**
+     * Returns a new Date representing the first millisecond of the month for
+     * the given <code>date</code>.
+     */
+    public static Date getMonthBegin(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return getMonthBegin(cal);
+    }
+
+    /**
+     * Adjusts the given <code>calendar</code> to the start of the month and
+     * return the resulting Date.
+     */
+    public static Date getMonthBegin(Calendar calendar) {
+        calendar.set(Calendar.DATE, calendar.getActualMinimum(Calendar.DATE));
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+        return calendar.getTime();
+    }
+
+    /**
+     * Returns <tt>true</tt> if the given <code>calendar</code> represents the
+     * first millisecond of a month; <tt>false</tt> otherwise.
+     */
+    public static boolean isBeginningOfMonth(Calendar calendar) {
+        return calendar.get(Calendar.MILLISECOND) == 0 &&
+               calendar.get(Calendar.SECOND) == 0 &&
+               calendar.get(Calendar.MINUTE) == 0 &&
+               calendar.get(Calendar.HOUR_OF_DAY) == 0 &&
+               calendar.get(Calendar.DATE) == 1;
     }
 }

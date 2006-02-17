@@ -241,4 +241,23 @@ public class RangeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("JAMES"), source);
         assertEquals(GlazedListsTests.stringToList("AME"), rangeList);
      }
+
+    public void testMiddleRangeZeros() {
+        EventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+
+        RangeList<String> rangeList = new RangeList<String>(source);
+        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+
+        assertEquals(source, rangeList);
+
+        rangeList.setMiddleRange(0, 0);
+        assertEquals(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"), rangeList);
+
+        rangeList.setMiddleRange(1, 0);
+        assertEquals(GlazedListsTests.stringToList("BCDEFGHIJKLMNOPQRSTUVWXYZ"), rangeList);
+
+        rangeList.setMiddleRange(0, 1);
+        assertEquals(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXY"), rangeList);
+    }
 }
