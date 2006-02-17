@@ -70,11 +70,11 @@ class FilterPanel {
         public CloseableFilterComponent(FilterComponent<E> filterComponent) {
             this.filterComponent = filterComponent;
 
-            this.closeButton = new JButton("X");
+            this.closeButton = new IssuesBrowser.IconButton(IssuesBrowser.x_icons);
             this.closeButton.addActionListener(this);
             this.closeButton.setOpaque(false);
-            this.closeButton.setPreferredSize(new Dimension(25, 25));
-            this.closeButton.setFont(closeButton.getFont().deriveFont(8.0f));
+//            this.closeButton.setPreferredSize(new Dimension(25, 25));
+//            this.closeButton.setFont(closeButton.getFont().deriveFont(8.0f));
 
             this.headerLabel = new JLabel();
             this.headerLabel.setHorizontalAlignment(JLabel.CENTER);

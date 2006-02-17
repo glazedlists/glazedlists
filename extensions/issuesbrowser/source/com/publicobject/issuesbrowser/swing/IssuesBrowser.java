@@ -50,7 +50,7 @@ public class IssuesBrowser implements Runnable {
     /** the currently selected issues */
     private EventSelectionModel issuesSelectionModel = null;
 
-    private TableModel issuesTableModel = null;
+    private EventTableModel issuesTableModel = null;
 
     private Issue descriptionIssue = null;
 
@@ -58,8 +58,14 @@ public class IssuesBrowser implements Runnable {
 
     /** monitor loading the issues */
     private JLabel throbber = null;
-    private ImageIcon throbberActive = null;
-    private ImageIcon throbberStatic = null;
+
+    /** application-wide icons */
+    public static final ImageIcon throbberActive = loadIcon("resources/throbber-active.gif");
+    public static final ImageIcon throbberStatic = loadIcon("resources/throbber-static.gif");
+    public static final ImageIcon[] x_icons = loadIcons("x");
+    public static final ImageIcon[] plus_icons = loadIcons("plus");
+    public static final ImageIcon[] down_icons = loadIcons("down");
+    public static final ImageIcon[] right_icons = loadIcons("right");
 
     /** a label to display the count of issues in the issue table */
     private IssueCounterLabel issueCounter = null;
@@ -98,6 +104,27 @@ public class IssuesBrowser implements Runnable {
     }
 
     /**
+     * Load the specified icon from the pathname on the classpath.
+     */
+    private static ImageIcon loadIcon(String pathname) {
+        ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
+        URL url = jarLoader.getResource(pathname);
+        if (url == null) return null;
+        return new ImageIcon(url);
+    }
+    private static ImageIcon[] loadIcons(String name) {
+        String[] iconStates = new String[] { "up", "over", "down" };
+        ImageIcon[] icons = new ImageIcon[3];
+        for(int i = 0; i < icons.length; i++) {
+            for(int s = 0; s < iconStates.length; s++) {
+                String state = iconStates[s];
+                icons[s] = loadIcon("resources/" + name + "_" + state + ".png");
+            }
+        }
+        return icons;
+    }
+
+    /**
      * Constructs the browser as a standalone frame.
      */
     private void constructStandalone() {
@@ -126,7 +153,8 @@ public class IssuesBrowser implements Runnable {
 
         // build the issues table
         issuesTableModel = new EventTableModel<Issue>(separatedIssues, new IssueTableFormat());
-        JTable issuesJTable = new JTable(issuesTableModel);
+        JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel);
+        issuesJTable.setSeparatorRenderer(new IssueSeparatorRenderer());
         issuesSelectionModel = new EventSelectionModel<Issue>(separatedIssues);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
@@ -164,12 +192,7 @@ public class IssuesBrowser implements Runnable {
         issueCounter.setHorizontalAlignment(SwingConstants.CENTER);
         issueCounter.setForeground(Color.WHITE);
 
-        // throbber icons
-        ClassLoader jarLoader = IssuesBrowser.class.getClassLoader();
-        URL url = jarLoader.getResource("resources/throbber-static.gif");
-        if (url != null) throbberStatic = new ImageIcon(url);
-        url = jarLoader.getResource("resources/throbber-active.gif");
-        if (url != null) throbberActive = new ImageIcon(url);
+        // throbber
         throbber = new JLabel(throbberStatic);
         throbber.setHorizontalAlignment(SwingConstants.RIGHT);
 
@@ -209,13 +232,17 @@ public class IssuesBrowser implements Runnable {
     class IssuesSelectionListener implements ListSelectionListener {
         public void valueChanged(ListSelectionEvent e) {
             // get the newly selected issue
-            Issue selected = null;
-            if(issuesSelectionModel.getSelected().size() > 0)
-                selected = (Issue)issuesSelectionModel.getSelected().get(0);
+            Issue selectedIssue = null;
+            if(issuesSelectionModel.getSelected().size() > 0) {
+                Object selectedObject = issuesSelectionModel.getSelected().get(0);
+                if(selectedObject instanceof Issue) {
+                    selectedIssue = (Issue)selectedObject;
+                }
+            }
 
             // update the description issue
-            if(selected == descriptionIssue) return;
-            descriptionIssue = selected;
+            if(selectedIssue == descriptionIssue) return;
+            descriptionIssue = selectedIssue;
             issueDetails.setIssue(descriptionIssue);
         }
     }
@@ -460,6 +487,88 @@ public class IssuesBrowser implements Runnable {
 
         public void run() {
             JOptionPane.showMessageDialog(frame, message, title, JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+
+    /**
+     * Render the issues separator.
+     */
+    public class IssueSeparatorRenderer implements TableCellRenderer {
+        private JPanel panel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
+        private JButton expandButton = new IconButton(x_icons);
+        private JLabel nameLabel = new JLabel();
+        private JLabel countLabel = new JLabel();
+
+        public IssueSeparatorRenderer() {
+            this.nameLabel.setForeground(Color.WHITE);
+            this.nameLabel.setFont(nameLabel.getFont().deriveFont(10.0f));
+            this.countLabel.setForeground(Color.WHITE);
+            this.countLabel.setFont(countLabel.getFont().deriveFont(10.0f));
+
+            this.expandButton.setOpaque(false);
+            
+            this.panel.setLayout(new BorderLayout());
+            this.panel.add(expandButton, BorderLayout.WEST);
+            this.panel.add(nameLabel, BorderLayout.CENTER);
+            this.panel.add(countLabel, BorderLayout.EAST);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            SeparatorList.Separator<Issue> separator = (SeparatorList.Separator<Issue>)value;
+            nameLabel.setText(separator.first().getSubcomponent());
+            countLabel.setText("" + separator.size());
+            return panel;
+        }
+    }
+
+    /**
+     * A button that shows icons in one of three states for
+     * up, over and down.
+     */
+    public static class IconButton extends JButton implements MouseListener {
+        private static final int UP = 0;
+        private static final int OVER = 1;
+        private static final int DOWN = 2;
+        private int state = -1;
+
+        private Icon[] icons;
+
+        public IconButton(Icon[] icons) {
+            this.icons = icons;
+            super.setBorder(BorderFactory.createEmptyBorder());
+            setState(UP);
+
+            addMouseListener(this);
+        }
+
+        public Icon[] getIcons() {
+            return icons;
+        }
+
+        public void setIcons(Icon[] icons) {
+            this.icons = icons;
+            super.setIcon(this.icons[state]);
+        }
+        private void setState(int state) {
+            this.state = state;
+            super.setIcon(icons[state]);
+        }
+
+        public void mouseClicked(MouseEvent e) {
+            // do nothing
+        }
+        public void mousePressed(MouseEvent e) {
+            setState(DOWN);
+        }
+        public void mouseReleased(MouseEvent e) {
+            setState(OVER);
+        }
+        public void mouseEntered(MouseEvent e) {
+            setState(OVER);
+        }
+        public void mouseExited(MouseEvent e) {
+            setState(UP);
         }
     }
 }
