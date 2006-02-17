@@ -496,7 +496,7 @@ public class IssuesBrowser implements Runnable {
      */
     public class IssueSeparatorRenderer implements TableCellRenderer {
         private JPanel panel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
-        private JButton expandButton = new IconButton(x_icons);
+        private JButton expandButton = new IconButton(right_icons);
         private JLabel nameLabel = new JLabel();
         private JLabel countLabel = new JLabel();
 
@@ -507,7 +507,7 @@ public class IssuesBrowser implements Runnable {
             this.countLabel.setFont(countLabel.getFont().deriveFont(10.0f));
 
             this.expandButton.setOpaque(false);
-            
+
             this.panel.setLayout(new BorderLayout());
             this.panel.add(expandButton, BorderLayout.WEST);
             this.panel.add(nameLabel, BorderLayout.CENTER);
