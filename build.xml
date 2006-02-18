@@ -1,6 +1,6 @@
 <!--
    Glazed Lists
-   Copyright 2003-2005 publicobject.com, O'Dell Engineering Ltd.
+   Copyright 2003-2006 publicobject.com, O'Dell Engineering Ltd.
 -->
 
 <project name="glazedlists" default="jar" basedir=".">
@@ -56,7 +56,7 @@
 				<exclude name="**/impl/**"/>
 			</packageset>
 			<doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2005 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
+			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2006 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
 			<link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
 			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
 		</javadoc>

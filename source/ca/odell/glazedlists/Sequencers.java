@@ -28,23 +28,55 @@ public final class Sequencers {
         return new MonthSequencer();
     }
 
+    /**
+     * This Sequencer produces a sequence of {@link Date} objects normalized
+     * to the first millisecond of each month.
+     */
     private static final class MonthSequencer implements SequenceList.Sequencer<Date> {
+        /** A shared Calendar; it is assumed this Sequencer is only access from a single Thread. */
         private final Calendar cal = Calendar.getInstance();
 
+        /**
+         * The previous month in the sequence. For example:
+         *
+         * <ul>
+         *   <li> previous(February 15, 2006 3:21:22.234) returns February 1, 2006 0:00:00.000
+         *   <li> previous(February 1, 2006 0:00:00.000) returns January 1, 2006 0:00:00.000
+         *   <li> previous(January 1, 2006 0:00:00.000) returns December 1, 2005 0:00:00.000
+         * </ul>
+         */
         public Date previous(Date date) {
+            if (date == null)
+                throw new IllegalArgumentException("date may not be null");
+
             cal.setTime(date);
 
-            if (GlazedListsImpl.isBeginningOfMonth(cal))
+            // if cal is on the month boundary, rollback to the previous month
+            if (GlazedListsImpl.isMonthStart(cal))
                 cal.add(Calendar.MONTH, -1);
 
-            return GlazedListsImpl.getMonthBegin(cal);
+            // normalize the Date to the first millisecond of the month
+            return GlazedListsImpl.getMonthStart(cal);
         }
 
+        /**
+         * The next month in the sequence. For example:
+         *
+         * <ul>
+         *   <li> next(November 15, 2005 3:21:22.234) returns December 1, 2005 0:00:00.000
+         *   <li> next(December 1, 2005 0:00:00.000) returns January 1, 2006 0:00:00.000
+         *   <li> next(January 1, 2006 0:00:00.000) returns February 1, 2006 0:00:00.000
+         * </ul>
+         */
         public Date next(Date date) {
+            if (date == null)
+                throw new IllegalArgumentException("date may not be null");
+
             cal.setTime(date);
             cal.add(Calendar.MONTH, 1);
 
-            return GlazedListsImpl.getMonthBegin(cal);
+            // normalize the Date to the first millisecond of the month
+            return GlazedListsImpl.getMonthStart(cal);
         }
     }
 }

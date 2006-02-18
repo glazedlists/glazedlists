@@ -18,7 +18,7 @@ import ca.odell.glazedlists.GlazedLists;
  *   <li> How many {@link ValueSegment}s exist between X and Y?
  * </ul>
  *
- * @author Jame Lemieux
+ * @author James Lemieux
  */
 public class TreePair {
     /** The tree which orders the start indices of all ValueSegments. */
@@ -71,24 +71,13 @@ public class TreePair {
         return this.start.size() == 0;
     }
 
-//    /**
-//     * Returns the number of {@link ValueSegment}s which appear between the
-//     * start and end values of the given <code>segment</code>.
-//     */
-//    public int getCount(ValueSegment segment) {
-//        final int numStartedBeforeSegmentEnd = start.indexOfSimulated(segment.getEnd());
-//        final int numEndedBeforeSegmentStart = end.indexOfSimulated(segment.getStart());
-//
-//        return numStartedBeforeSegmentEnd - numEndedBeforeSegmentStart;
-//    }
-
     /**
      * Returns the number of {@link ValueSegment}s which appear between the
-     * start and end values of the given <code>segment</code>.
+     * given <code>start</code> and <code>end</code> values.
      */
-    public int getCount(Comparable left, Comparable right) {
-        final int numStartedBeforeSegmentEnd = start.indexOfSimulated(right);
-        final int numEndedBeforeSegmentStart = end.indexOfSimulated(left);
+    public int getCount(Comparable start, Comparable end) {
+        final int numStartedBeforeSegmentEnd = this.start.indexOfSimulated(end);
+        final int numEndedBeforeSegmentStart = this.end.indexOfSimulated(start);
 
         return numStartedBeforeSegmentEnd - numEndedBeforeSegmentStart;
     }

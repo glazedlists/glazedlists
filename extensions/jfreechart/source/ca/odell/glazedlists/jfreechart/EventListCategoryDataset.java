@@ -78,12 +78,10 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
     private final DatasetEventListener datasetEventListener = new DatasetEventListener();
 
     /** An ordered list of keys identifying the chart's rows. */
-    protected List<? extends Comparable> rowKeys = new ArrayList<Comparable>();
+    protected List<? extends Comparable> rowKeys;
 
     /** An ordered list of keys identifying the chart's columns. */
     protected List<? extends Comparable> columnKeys;
-
-    private final SequenceList.Sequencer sequencer;
 
     /**
      * This is the main data structure which organizes the data to make
@@ -108,20 +106,33 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
         this.sourceCopy = new ArrayList<ValueSegment<C,R>>(source.size());
         this.sourceCopy.addAll(source);
 
-        this.sequencer = this.createSequencer();
-        this.rebuildColumnKeysList();
+        this.rebuildRowAndColumnKeyList();
 
         // begin listening to changes in the source list
         this.source.addListEventListener(this.datasetEventListener);
     }
 
-    private void rebuildColumnKeysList() {
-        final RangeList<Comparable> columnKeyMaker = new RangeList<Comparable>(new SequenceList(new BasicEventList(), this.sequencer));
-        columnKeyMaker.setMiddleRange(0, 1);
-        this.columnKeys = columnKeyMaker;
+    /**
+     * A convenience method to rebuild the lists of rowKeys and columnKeys.
+     */
+    private void rebuildRowAndColumnKeyList() {
+        this.columnKeys = createColumnKeyList();
+        this.rowKeys = createRowKeyList();
     }
 
-    protected abstract SequenceList.Sequencer createSequencer();
+    /**
+     * A local factory method for creating the list containing the row keys.
+     */
+    protected List<? extends Comparable> createRowKeyList() {
+        return new ArrayList<Comparable>();
+    }
+
+    /**
+     * A local factory method for creating the list containing the column keys.
+     */
+    protected List<? extends Comparable> createColumnKeyList() {
+        return new ArrayList<Comparable>();
+    }
 
     /**
      * Returns the row key for a given index.
@@ -218,22 +229,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * @throws UnknownKeyException if either key is not recognized
      */
-    public Number getValue(Comparable rowKey, Comparable columnKey) {
-        // fetch the relevant pair of trees
-        final TreePair treePair = getTreePair(rowKey);
-
-        // ensure we found something
-        if (treePair == null)
-            throw new UnknownKeyException("unrecognized rowKey: " + rowKey);
-
-        // the columnKey is expected to be a ValueSegment
-        final Comparable left = columnKey;
-        final Comparable right = (Comparable) this.sequencer.next(left);
-
-        // return the number of values within the segment
-        return new Integer(treePair.getCount(left, right));
-//        return new Integer(treePair.getCount(segment));
-    }
+    public abstract Number getValue(Comparable rowKey, Comparable columnKey);
 
     /**
      * Releases the resources consumed by this {@link EventListCategoryDataset}
@@ -263,14 +259,14 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
         sourceCopy.clear();
         valueToTreePairs.clear();
         rowKeys.clear();
-        rebuildColumnKeysList();
+        rebuildRowAndColumnKeyList();
     }
 
     /**
      * Returns the {@link TreePair} associated with the given
      * <code>rowKey</code>.
      */
-    private TreePair getTreePair(Comparable rowKey) {
+    protected TreePair getTreePair(Comparable rowKey) {
         return valueToTreePairs.get(rowKey);
     }
 

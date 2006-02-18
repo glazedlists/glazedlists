@@ -93,7 +93,6 @@ public final class GlazedListsImpl {
                 targetObject = NEW_VALUE_NEEDED;
                 sourceObject = NEW_VALUE_NEEDED;
 
-
             // the source value precedes the target, insert it
             } else if(compareResult > 0) {
                 target.add(targetIndex, sourceObject);
@@ -110,21 +109,21 @@ public final class GlazedListsImpl {
      * the given <code>date</code>.
      */
     public static Date getMonthBegin(Date date) {
-        Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return getMonthBegin(cal);
+        return getMonthStart(cal);
     }
 
     /**
      * Adjusts the given <code>calendar</code> to the start of the month and
-     * return the resulting Date.
+     * returns the resulting {@link Date}.
      */
-    public static Date getMonthBegin(Calendar calendar) {
-        calendar.set(Calendar.DATE, calendar.getActualMinimum(Calendar.DATE));
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
-        calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
-        calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+    public static Date getMonthStart(Calendar calendar) {
+        calendar.set(Calendar.DATE, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
 
@@ -132,7 +131,7 @@ public final class GlazedListsImpl {
      * Returns <tt>true</tt> if the given <code>calendar</code> represents the
      * first millisecond of a month; <tt>false</tt> otherwise.
      */
-    public static boolean isBeginningOfMonth(Calendar calendar) {
+    public static boolean isMonthStart(Calendar calendar) {
         return calendar.get(Calendar.MILLISECOND) == 0 &&
                calendar.get(Calendar.SECOND) == 0 &&
                calendar.get(Calendar.MINUTE) == 0 &&

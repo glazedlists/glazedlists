@@ -21,6 +21,9 @@ import java.util.ArrayList;
  * {@link Sequencer} can be implemented to reliably produce the next or previous
  * value in a sequence using only some value from the source list.
  *
+ * SequenceList is a readonly list; calling any write method on this list
+ * will produce an {@link UnsupportedOperationException}.
+ *
  * <p>The start and end values of the sequence are the smallest sequence values
  * which maintain the invariant that:
  * <code>sequence start &lt;= each value in the source list &lt;= sequence end</code>
@@ -69,38 +72,6 @@ public final class SequenceList<E> extends TransformedList<E,E> {
         this.sequencer = sequencer;
         this.comparator = comparator;
         source.addListEventListener(this);
-    }
-
-    //
-    // Unsupported Operations
-    //
-
-    public E set(int index, E value) {
-        throw new UnsupportedOperationException();
-    }
-
-    public E remove(int index) {
-        throw new UnsupportedOperationException();
-    }
-
-    //
-    // Supported Operations
-    //
-
-    /** {@inheritDoc} */
-    protected boolean isWritable() {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    // todo doc the fact that we discard the index
-    public void add(int index, E value) {
-        this.add(value);
-    }
-
-    /** {@inheritDoc} */
-    public boolean add(E value) {
-        return source.add(value);
     }
 
     /** {@inheritDoc} */

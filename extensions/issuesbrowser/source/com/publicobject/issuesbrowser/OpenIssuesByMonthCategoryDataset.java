@@ -6,13 +6,14 @@ package com.publicobject.issuesbrowser;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.jfreechart.EventListCategoryDataset;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
+import ca.odell.glazedlists.jfreechart.TreePair;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import java.util.Date;
 import java.util.List;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+
+import org.jfree.data.UnknownKeyException;
 
 /**
  * This CategoryDataset explodes each {@link Issue} object into a List of
@@ -30,7 +31,11 @@ import java.text.SimpleDateFormat;
  */
 public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<String, Date> {
 
-    private static final DateFormat COLUMN_KEY_DATE_FORMATTER = new SimpleDateFormat("MMMMM yyyy");
+    /** The sequencer which produces the uniform column keys. */
+    private final SequenceList.Sequencer<Date> monthSequencer = Sequencers.monthSequencer();
+
+    /** The raw, untransformed column keys presented by this dataset. */
+    private EventList rawColumnKeys;
 
     /**
      * Create a CategoryDataset by exploding the {@link Issue} objects into a
@@ -54,8 +59,49 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         super(GlazedListsSwing.swingThreadProxyList(filteredValueSegments));
     }
 
-    protected SequenceList.Sequencer<? extends Comparable> createSequencer() {
-        return Sequencers.monthSequencer();
+    /**
+     * This data set uses a pipeline of Glazed Lists to create its column keys.
+     * It wraps a raw BasicEventList in a SequenceList in order to generate a
+     * sequence of column keys which span the data. It then uses a RangleList
+     * to chop off the last value since it is beyond any of the data values to
+     * be shown in the chart.
+     */
+    protected List<? extends Comparable> createColumnKeyList() {
+        this.rawColumnKeys = new BasicEventList();
+
+        // summarize all Dates added to rawColumnKeys using a Sequence of normalized month Dates
+        final SequenceList columnKeySequenceList = new SequenceList(this.rawColumnKeys, Sequencers.monthSequencer());
+
+        // chop off the last element of the sequence list
+        final RangeList<Comparable> columnKeyList = new RangeList<Comparable>(columnKeySequenceList);
+        columnKeyList.setMiddleRange(0, 1);
+
+        return columnKeyList;
+    }
+
+    /**
+     * Returns the value associated with the specified keys.
+     *
+     * @param rowKey the row key (<code>null</code> not permitted)
+     * @param columnKey the column key (<code>null</code> not permitted)
+     * @return the value
+     *
+     * @throws org.jfree.data.UnknownKeyException if either key is not recognized
+     */
+    public Number getValue(Comparable rowKey, Comparable columnKey) {
+        // fetch the relevant pair of trees
+        final TreePair treePair = getTreePair(rowKey);
+
+        // ensure we found something
+        if (treePair == null)
+            throw new UnknownKeyException("unrecognized rowKey: " + rowKey);
+
+        // the columnKey is expected to be a ValueSegment
+        final Date left = (Date) columnKey;
+        final Date right = this.monthSequencer.next(left);
+
+        // return the number of values within the segment
+        return new Integer(treePair.getCount(left, right));
     }
 
     /**
@@ -99,35 +145,8 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         if (!contains(rowKeys, value))
             rowKeys.add(value);
 
-        final List<Comparable> columnKeys = getColumnKeys();
-        columnKeys.add(segment.getStart());
-        columnKeys.add(segment.getEnd());
-
-//        // get the earliest date from the segment that was inserted
-//        final Date date = segment.getStart();
-//        // get the columnKeys that already exist
-//        final List<ValueSegment<Date,String>> columnKeys = getColumnKeys();
-//
-//        // determine the earliest date recorded in the existing columns
-//        final Date earliestColumnKey = columnKeys.isEmpty() ? new Date() : columnKeys.get(0).getStart();
-//
-//        // if the newly inserted segment predates the earliest recorded column key
-//        if (earliestColumnKey.after(date)) {
-//            Calendar cal = Calendar.getInstance();
-//            cal.setTime(earliestColumnKey);
-//
-//            // we must insert enough column keys to include the new segment
-//            while (cal.getTime().after(date)) {
-//                // create a new segment for the month
-//                final MonthSegment newColumnKey = new MonthSegment(cal);
-//
-//                // add the segment to the list of column keys
-//                columnKeys.add(0, newColumnKey);
-//
-//                // step back to the previous month
-//                cal.add(Calendar.MONTH, -1);
-//            }
-//        }
+        rawColumnKeys.add(segment.getStart());
+        rawColumnKeys.add(segment.getEnd());
     }
 
     /**
@@ -150,6 +169,9 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         // if no more data is associated to the row, remove its rowkey
         if (getCount(value) == 0)
             getRowKeys().remove(value);
+
+        rawColumnKeys.remove(segment.getStart());
+        rawColumnKeys.remove(segment.getEnd());
     }
 
     /**
