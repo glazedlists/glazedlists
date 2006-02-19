@@ -69,10 +69,11 @@ public class IndexOrderTest extends TestCase {
         FilterList<int[]> filteredOnce = new FilterList<int[]>(sortedOnce, matcherEditor);
         SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, GlazedListsTests.intArrayComparator(0));
         
-        unsorted.addListEventListener(new ListConsistencyListener(unsorted, "unsorted"));
-        sortedOnce.addListEventListener(new ListConsistencyListener(sortedOnce, "sortedOnce"));
-        filteredOnce.addListEventListener(new ListConsistencyListener(sortedTwice, "sortedTwice"));
-        
+        ListConsistencyListener.install(unsorted);
+        ListConsistencyListener.install(sortedOnce);
+        ListConsistencyListener.install(filteredOnce);
+        ListConsistencyListener.install(sortedTwice);
+
         ArrayList<int[]> controlList = new ArrayList<int[]>();
         
         // add a block of new elements one hundred times

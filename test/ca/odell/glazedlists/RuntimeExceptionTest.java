@@ -25,14 +25,14 @@ public class RuntimeExceptionTest extends TestCase {
     private ExceptionThrower exceptionThrower = new ExceptionThrower();
 
     /** listener that validates events are received */
-    private ListConsistencyListener listConsistencyListener = new ListConsistencyListener(source, "exceptions");
+    private ListConsistencyListener listConsistencyListener = ListConsistencyListener.install(source);
 
     /**
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
      */
     public void testExceptionRethrown() {
         source.addListEventListener(exceptionThrower);
-        source.addListEventListener(listConsistencyListener);
+        listConsistencyListener = ListConsistencyListener.install(source);
         
         // make sure the plumbing is working
         source.add("Dan");
@@ -56,7 +56,7 @@ public class RuntimeExceptionTest extends TestCase {
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
      */
     public void testExceptionRethrownListenerSecond() {
-        source.addListEventListener(listConsistencyListener);
+        listConsistencyListener = ListConsistencyListener.install(source);
         source.addListEventListener(exceptionThrower);
         
         // make sure the plumbing is working
@@ -81,7 +81,7 @@ public class RuntimeExceptionTest extends TestCase {
      */
     public void testMultipleExceptions() {
         source.addListEventListener(exceptionThrower);
-        source.addListEventListener(listConsistencyListener);
+        listConsistencyListener = ListConsistencyListener.install(source);
         ExceptionThrower exceptionThrower2 = new ExceptionThrower();
         source.addListEventListener(exceptionThrower2);
         

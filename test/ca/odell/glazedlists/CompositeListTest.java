@@ -25,7 +25,7 @@ public class CompositeListTest extends TestCase {
         wendys.add("Junior Bacon Cheeseburger");
         
         CompositeList<String> fastFood = new CompositeList<String>();
-        fastFood.addListEventListener(new ListConsistencyListener(fastFood, "fastFood", false));
+        ListConsistencyListener.install(fastFood);
         fastFood.addMemberList(wendys);
         
         assertEquals(wendys, fastFood);
@@ -65,7 +65,7 @@ public class CompositeListTest extends TestCase {
         tacoBell.add("Bean Burrito");
         
         CompositeList<String> fastFood = new CompositeList<String>();
-        fastFood.addListEventListener(new ListConsistencyListener(fastFood, "fastFood", false));
+        ListConsistencyListener.install(fastFood);
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
         fastFood.addMemberList(tacoBell);
@@ -119,7 +119,7 @@ public class CompositeListTest extends TestCase {
         EventList<String> tacoBell = new BasicEventList<String>();
         
         CompositeList<String> fastFood = new CompositeList<String>();
-        fastFood.addListEventListener(new ListConsistencyListener(fastFood, "fastFood", false));
+        ListConsistencyListener.install(fastFood);
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
         fastFood.addMemberList(tacoBell);
@@ -184,7 +184,7 @@ public class CompositeListTest extends TestCase {
         beta.add("B");
 
         CompositeList<String> aToB = new CompositeList<String>();
-        aToB.addListEventListener(new ListConsistencyListener(aToB, "AtoB", false));
+        ListConsistencyListener.install(aToB);
         aToB.addMemberList(alpha);
         aToB.removeMemberList(alpha);
         aToB.addMemberList(beta);

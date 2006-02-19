@@ -530,7 +530,7 @@ public class EventListTest extends TestCase {
 
     public void testSimpleAddAll() {
         EventList<String> source = new BasicEventList<String>();
-        ListConsistencyListener listener = new ListConsistencyListener(source, "source");
+        ListConsistencyListener.install(source);
         FilterList<String> filterList = new FilterList<String>(source, (Matcher)Matchers.trueMatcher());
 
         filterList.addAll(GlazedListsTests.stringToList("JESSE"));
@@ -553,7 +553,7 @@ public class EventListTest extends TestCase {
         for (int i = 0; i < 16; i++)
              list.add(new Integer(0));
 
-        list.addListEventListener(new ListConsistencyListener(list, "transactional", true));
+        ListConsistencyListener.install(list);
 
         list.beginEvent(true);
 

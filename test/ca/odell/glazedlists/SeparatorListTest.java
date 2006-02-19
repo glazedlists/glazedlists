@@ -17,7 +17,7 @@ public class SeparatorListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("AAAABBBDDD"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+        ListConsistencyListener.install(separatorList);
 
         assertSeparatorEquals(separatorList.get(0), 4, "A");
         assertEquals("A", ((SeparatorList.Separator)(Object)separatorList.get(0)).first());
@@ -161,7 +161,7 @@ public class SeparatorListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("AAAAAAABBCCCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, 3);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+        ListConsistencyListener.install(separatorList);
 
         assertSeparatorEquals(separatorList.get(0), 7, "A");
         assertEquals("A", separatorList.get(1));
@@ -234,7 +234,7 @@ public class SeparatorListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("AAABCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 2, Integer.MAX_VALUE);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+        ListConsistencyListener.install(separatorList);
 
         assertSeparatorEquals(separatorList.get(0), 3, "A");
         assertEquals("A", separatorList.get(1));
@@ -253,7 +253,7 @@ public class SeparatorListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, 5);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+        ListConsistencyListener.install(separatorList);
 
         assertSeparatorEquals(separatorList.get(0), 3, "A");
         assertEquals("A", separatorList.get(1));
@@ -291,7 +291,7 @@ public class SeparatorListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, 5);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+        ListConsistencyListener.install(separatorList);
 
         source.clear();
         assertEquals(Collections.EMPTY_LIST, separatorList);
@@ -306,7 +306,7 @@ public class SeparatorListTest extends TestCase {
         unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "dear", "frog", "boat", "car", "jesse", "glazed", "shirt", "hat", "art", "dog", "puppy", "foot"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, length, 0, Integer.MAX_VALUE);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+        ListConsistencyListener.install(separatorList);
 
 
         assertEqualsIgnoreSeparators(source, separatorList, length);
@@ -330,13 +330,14 @@ public class SeparatorListTest extends TestCase {
         SortedList<String> source = new SortedList<String>(unsortedSource, null);
         unsortedSource.addAll(GlazedListsTests.stringToList("CcaCbCcCAaADdaAbBDbBdDb"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, caseSensitive, 0, Integer.MAX_VALUE);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, caseInsensitive, 0, Integer.MAX_VALUE);
+        ListConsistencyListener consistencyTest = ListConsistencyListener.install(separatorList);
 
-        assertEqualsIgnoreSeparators(source, separatorList, caseSensitive);
+        assertEqualsIgnoreSeparators(source, separatorList, caseInsensitive);
 
-
-
+        source.setComparator(caseSensitive);
+        assertEquals(1, consistencyTest.getEventCount());
+        assertTrue(consistencyTest.isReordering(0));
 
 
     }

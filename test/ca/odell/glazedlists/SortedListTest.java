@@ -48,7 +48,7 @@ public class SortedListTest extends TestCase {
         unsortedList = new BasicEventList();
         sortedList = new SortedList(unsortedList);
         sortedList.setMode(SortedList.AVOID_MOVING_ELEMENTS);
-        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", false));
+        ListConsistencyListener.install(sortedList);
 
         unsortedList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
 
@@ -114,7 +114,7 @@ public class SortedListTest extends TestCase {
     public void testSimpleMoves() {
         unsortedList = new BasicEventList();
         sortedList = new SortedList(unsortedList);
-        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", false));
+        ListConsistencyListener.install(sortedList);
 
         unsortedList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
 
@@ -133,7 +133,7 @@ public class SortedListTest extends TestCase {
         unsortedList = new BasicEventList();
         ExternalNestingEventList nestableList = new ExternalNestingEventList(unsortedList);
         sortedList = new SortedList(nestableList);
-        sortedList.addListEventListener(new ListConsistencyListener(sortedList, "sorted", true));
+        ListConsistencyListener.install(sortedList);
 
         nestableList.beginEvent(true);
         nestableList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
@@ -1047,7 +1047,7 @@ public class SortedListTest extends TestCase {
         sortedList.setComparator(null);
 
         SortedList sortedAgain = new SortedList(sortedList, artistComparator);
-        sortedAgain.addListEventListener(new ListConsistencyListener(sortedAgain, "sortedAgain"));
+        ListConsistencyListener.install(sortedAgain);
 
         unsortedList.add(new Song("Limp Bizkit", "Nookie"));
         unsortedList.add(new Song("Limp Bizkit", "Eat You Alive"));
@@ -1112,7 +1112,7 @@ public class SortedListTest extends TestCase {
         unsortedList.addAll(Arrays.asList("dddd", "aaa", "c", "bb"));
 
         SortedList<String> resortedList = new SortedList<String>(sortedList, length);
-        ListConsistencyListener consistencyTest = new ListConsistencyListener(resortedList, "separatorList");
+        ListConsistencyListener.install(resortedList);
 
         sortedList.setComparator(alphabetical);
         assertSortedEquals(sortedList, resortedList);

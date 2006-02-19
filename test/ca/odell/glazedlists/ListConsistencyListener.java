@@ -16,7 +16,7 @@ import junit.framework.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class ListConsistencyListener<E> implements ListEventListener<E> {
+public class ListConsistencyListener<E> {
     
     /** a second copy of the list data */
     private List<E> expected;
@@ -40,21 +40,29 @@ public class ListConsistencyListener<E> implements ListEventListener<E> {
      *
      * @param verbose whether to print changes to the console as they happne
      */
-    public ListConsistencyListener(EventList<E> source, String name, boolean verbose) {
+    private ListConsistencyListener(EventList<E> source, String name, boolean verbose) {
         this.source = source;
         this.name = name;
         this.verbose = verbose;
         
         // populate the list of expected values
         expected = new ArrayList<E>(source);
+
+        // handle changes to the source list
+        source.addListEventListener(new ListChangeHandler());
     }
 
     /**
-     * Creates a new ListConsistencyListener that ensures events from the source
-     * list are consistent.
+     * Creates a new ListConsistencyListener and installs it as a listener on
+     * the specified source {@link EventList}. Every time that list changes, this
+     * listener will verify the change reported equals the change applied.
      */
-    public ListConsistencyListener(EventList<E> source, String name) {
-        this(source, name, false);
+    public static <E> ListConsistencyListener<E> install(EventList<E> source, String name, boolean verbose) {
+        ListConsistencyListener<E> result = new ListConsistencyListener<E>(source, name, verbose);
+        return result;
+    }
+    public static <E> ListConsistencyListener<E> install(EventList<E> source) {
+        return install(source, "event list", false);
     }
 
     /**
@@ -86,74 +94,78 @@ public class ListConsistencyListener<E> implements ListEventListener<E> {
     }
 
     /**
-     * For implementing the ListEventListener interface.
+     * When the source {@link EventList} is changed, make sure the event reported
+     * describes the differences between before and after.
      */
-    public void listChanged(ListEvent<E> listChanges) {
-        Assert.assertEquals(source, listChanges.getSource());
-        assertEventsInIncreasingOrder(listChanges);
+    private class ListChangeHandler implements ListEventListener<E> {
 
-        // print the changes if necessary
-        if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size() + ", source: " + source);
+        public void listChanged(ListEvent<E> listChanges) {
+            Assert.assertEquals(source, listChanges.getSource());
+            assertEventsInIncreasingOrder(listChanges);
 
-        // record the changed indices
-        List<Integer> changedIndices = new ArrayList<Integer>();
+            // print the changes if necessary
+            if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size() + ", source: " + source);
 
-        // keep track of the highest change index so far
-        int highestChangeIndex = 0;
+            // record the changed indices
+            List<Integer> changedIndices = new ArrayList<Integer>();
 
-        // handle sorting events
-        if(listChanges.isReordering()) {
-            int[] reorderMap = listChanges.getReorderMap();
-            Assert.assertEquals(expected.size(), reorderMap.length);
-            List<E> newExpectedValues = new ArrayList<E>(expected.size());
-            for(int i = 0; i < reorderMap.length; i++) {
-                newExpectedValues.add(i, expected.get(reorderMap[i]));
-                changedIndices.add(new Integer(i));
-            }
-            this.expected = newExpectedValues;
-            changeCounts.add(new Integer(2 * reorderMap.length));
-            reorderings.add(Boolean.TRUE);
+            // keep track of the highest change index so far
+            int highestChangeIndex = 0;
 
-        // handle regular events
-        } else {
-
-            // for all changes, one index at a time
-            int changesForEvent = 0;
-            while(listChanges.next()) {
-                changesForEvent++;
-
-                // get the current change info
-                int changeIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
-
-                // save this index for validation later
-                changedIndices.add(new Integer(changeIndex));
-
-                // make sure the change indices are positive and not descreasing
-                Assert.assertTrue(changeIndex >= 0);
-                Assert.assertTrue(changeIndex >= highestChangeIndex);
-                highestChangeIndex = changeIndex;
-
-                // verify the index is small enough, and adjust the size
-                if(changeType == ListEvent.INSERT) {
-                    expected.add(changeIndex, source.get(changeIndex));
-                } else if(changeType == ListEvent.DELETE) {
-                    expected.remove(changeIndex);
-                } else if(changeType == ListEvent.UPDATE) {
-                    expected.set(changeIndex, source.get(changeIndex));
+            // handle sorting events
+            if(listChanges.isReordering()) {
+                int[] reorderMap = listChanges.getReorderMap();
+                Assert.assertEquals(expected.size(), reorderMap.length);
+                List<E> newExpectedValues = new ArrayList<E>(expected.size());
+                for(int i = 0; i < reorderMap.length; i++) {
+                    newExpectedValues.add(i, expected.get(reorderMap[i]));
+                    changedIndices.add(new Integer(i));
                 }
+                expected = newExpectedValues;
+                changeCounts.add(new Integer(2 * reorderMap.length));
+                reorderings.add(Boolean.TRUE);
+
+            // handle regular events
+            } else {
+
+                // for all changes, one index at a time
+                int changesForEvent = 0;
+                while(listChanges.next()) {
+                    changesForEvent++;
+
+                    // get the current change info
+                    int changeIndex = listChanges.getIndex();
+                    int changeType = listChanges.getType();
+
+                    // save this index for validation later
+                    changedIndices.add(new Integer(changeIndex));
+
+                    // make sure the change indices are positive and not descreasing
+                    Assert.assertTrue(changeIndex >= 0);
+                    Assert.assertTrue(changeIndex >= highestChangeIndex);
+                    highestChangeIndex = changeIndex;
+
+                    // verify the index is small enough, and adjust the size
+                    if(changeType == ListEvent.INSERT) {
+                        expected.add(changeIndex, source.get(changeIndex));
+                    } else if(changeType == ListEvent.DELETE) {
+                        expected.remove(changeIndex);
+                    } else if(changeType == ListEvent.UPDATE) {
+                        expected.set(changeIndex, source.get(changeIndex));
+                    }
+                }
+
+                changeCounts.add(new Integer(changesForEvent));
+                reorderings.add(Boolean.FALSE);
             }
 
-            changeCounts.add(new Integer(changesForEvent));
-            reorderings.add(Boolean.FALSE);
-        }
-
-        // verify the source is consistent with what we expect
-        Assert.assertEquals(expected.size(), source.size());
-        for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {
-            int changeIndex = c.next().intValue();
-            for(int i = Math.max(changeIndex - 1, 0); i < Math.min(changeIndex+2, expected.size()); i++) {
-                Assert.assertEquals(expected.get(i), source.get(i));
+            // verify the source is consistent with what we expect
+            Assert.assertEquals(expected.size(), source.size());
+            for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {
+                int changeIndex = c.next().intValue();
+                for(int i = Math.max(changeIndex - 1, 0); i < Math.min(changeIndex+2, expected.size()); i++) {
+                    Assert.assertEquals(expected.get(i), source.get(i));
+                }
             }
         }
     }

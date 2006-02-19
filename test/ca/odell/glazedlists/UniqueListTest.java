@@ -916,8 +916,7 @@ public class UniqueListTest extends TestCase {
         replacementSet.addAll(source);
 
         // listen to changes on the unique list
-        ListConsistencyListener counter = new ListConsistencyListener(unique, "unique");
-        unique.addListEventListener(counter);
+        ListConsistencyListener counter = ListConsistencyListener.install(unique);
 
         // replace the values with the replacement set
         GlazedLists.replaceAllSorted(unique, replacementSet, true, null);
@@ -963,8 +962,7 @@ public class UniqueListTest extends TestCase {
         }
 
         // listen to changes on the unique list
-        ListConsistencyListener counter = new ListConsistencyListener(unique, "unique");
-        unique.addListEventListener(counter);
+        ListConsistencyListener counter = ListConsistencyListener.install(unique);
 
         // replace the values with the replacement set
         GlazedLists.replaceAllSorted(unique, replacementSet, false, null);
@@ -1266,7 +1264,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Chevy");    // C C
@@ -1281,7 +1279,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(0, "Ford");    // F F
@@ -1297,7 +1295,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C D F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Dodge");    // C D F
@@ -1313,7 +1311,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C D F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Chevy");    // C C F
@@ -1329,7 +1327,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C D F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Ford");    // C F F
@@ -1345,7 +1343,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C C F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Chevy");    // C C F
@@ -1361,7 +1359,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C C F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Datsun");   // C D F
@@ -1377,7 +1375,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C C F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Ford");   // C F F
@@ -1393,7 +1391,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C F F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Ford");   // C F F
@@ -1409,7 +1407,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C F F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Datsun");   // C D F
@@ -1425,7 +1423,7 @@ public class UniqueListTest extends TestCase {
         source.add("Ford");        // C F F
 
         UniqueList uniqueList = new UniqueList(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "unique"));
+        ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
         source.set(1, "Chevy");    // C C F
@@ -1434,7 +1432,7 @@ public class UniqueListTest extends TestCase {
     public void testRemoveAPair() {
         EventList source = new BasicEventList<String>();
         UniqueList<String> uniqueList = new UniqueList<String>(source);
-        uniqueList.addListEventListener(new ListConsistencyListener(uniqueList, "UniqueList"));
+        ListConsistencyListener.install(uniqueList);
 
         source.addAll(GlazedListsTests.stringToList("AABBBD"));
         assertEquals(GlazedListsTests.stringToList("ABD"), uniqueList);

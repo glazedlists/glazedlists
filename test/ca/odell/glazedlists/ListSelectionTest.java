@@ -38,9 +38,9 @@ public class ListSelectionTest extends TestCase {
         listSelection = new ListSelection<Integer>(source);
         selectedList = listSelection.getSelected();
         deselectedList = listSelection.getDeselected();
-        source.addListEventListener(new ListConsistencyListener(source, "source: ", false));
-        selectedList.addListEventListener(new ListConsistencyListener(selectedList, "selected: ", false));
-        deselectedList.addListEventListener(new ListConsistencyListener(deselectedList, "deselected: ", false));
+        ListConsistencyListener.install(source);
+        ListConsistencyListener.install(selectedList);
+        ListConsistencyListener.install(deselectedList);
     }
 
     /**

@@ -35,7 +35,7 @@ public class ThresholdListTest extends TestCase {
         evaluator = new IntegerEvaluator();
         thresholdList = new ThresholdList(source, evaluator);
         // monitor the fired events
-        thresholdList.addListEventListener(new ListConsistencyListener(thresholdList, "thresholdList"));
+        ListConsistencyListener.install(thresholdList);
     }
 
     /**
@@ -1000,8 +1000,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testNumberOfEventsFired() {
         // count events
-        ListConsistencyListener counter = new ListConsistencyListener(thresholdList, "threshold list");
-        thresholdList.addListEventListener(counter);
+        ListConsistencyListener counter = ListConsistencyListener.install(thresholdList);
 
         // putz around with the thresholds on an empty list
         thresholdList.setLowerThreshold(-14922);
@@ -1064,8 +1063,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testIncreasingSlidingWindow() {
         // count events
-        ListConsistencyListener counter = new ListConsistencyListener(thresholdList, "threshold list");
-        thresholdList.addListEventListener(counter);
+        ListConsistencyListener counter = ListConsistencyListener.install(thresholdList);
 
         thresholdList.setLowerThreshold(-14938);
         thresholdList.setUpperThreshold(-1938);
@@ -1089,8 +1087,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testDecreasingSlidingWindow() {
         // count events
-        ListConsistencyListener counter = new ListConsistencyListener(thresholdList, "threshold list");
-        thresholdList.addListEventListener(counter);
+        ListConsistencyListener counter = ListConsistencyListener.install(thresholdList);
 
         thresholdList.setUpperThreshold(20063);
         thresholdList.setLowerThreshold(7063);

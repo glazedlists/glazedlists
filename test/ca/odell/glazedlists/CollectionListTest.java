@@ -29,7 +29,7 @@ public class CollectionListTest extends TestCase {
 	public void setUp() {
 		parentList = new BasicEventList<String>();
 		collectionList = new CollectionList<String, String>(parentList, new StringDecomposerModel());
-        collectionList.addListEventListener(new ListConsistencyListener(collectionList, "collection list", false));
+        ListConsistencyListener.install(collectionList);
 		parentList.add(DEV_ROB);
 		parentList.add(DEV_JESSE);
 		parentList.add(DEV_KEVIN);
@@ -219,7 +219,7 @@ public class CollectionListTest extends TestCase {
         // use a list of Lists instead of Strings
 		BasicEventList<List<String>> characterLists = new BasicEventList<List<String>>();
         CollectionList<List<String>, String> characters = new CollectionList<List<String>, String>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
-        characters.addListEventListener(new ListConsistencyListener(characters, "characters", false));
+        ListConsistencyListener.install(characters);
         characterLists.add(GlazedListsTests.stringToList(DEV_ROB));
         characterLists.add(GlazedListsTests.stringToList(DEV_JESSE));
         characterLists.add(GlazedListsTests.stringToList(DEV_KEVIN));

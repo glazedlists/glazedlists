@@ -17,7 +17,7 @@ public class RangeListTest extends TestCase {
     public void testAddAll() {
         EventList<String> source = new BasicEventList<String>();
         RangeList<String> rangeList = new RangeList<String>(source);
-        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+        ListConsistencyListener.install(rangeList);
 
         assertEquals(0, rangeList.size());
 
@@ -28,7 +28,7 @@ public class RangeListTest extends TestCase {
     public void testChangeSource() {
         EventList<String> source = new BasicEventList<String>();
         RangeList<String> rangeList = new RangeList<String>(source);
-        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+        ListConsistencyListener.install(rangeList);
 
         rangeList.setHeadRange(2, 4);
         assertEquals(0, rangeList.size());
@@ -101,7 +101,7 @@ public class RangeListTest extends TestCase {
 
         RangeList<String> rangeList = new RangeList<String>(source);
 
-        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+        ListConsistencyListener.install(rangeList);
 
         assertEquals(source, rangeList);
 
@@ -117,7 +117,7 @@ public class RangeListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
         RangeList<String> rangeList = new RangeList<String>(source);
-        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+        ListConsistencyListener.install(rangeList);
 
         assertEquals(source, rangeList);
 
@@ -178,7 +178,7 @@ public class RangeListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
         RangeList<String> rangeList = new RangeList<String>(source);
-        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+        ListConsistencyListener.install(rangeList);
 
         assertEquals(source, rangeList);
 
@@ -247,7 +247,7 @@ public class RangeListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
         RangeList<String> rangeList = new RangeList<String>(source);
-        rangeList.addListEventListener(new ListConsistencyListener<String>(rangeList, "Range List", false));
+        ListConsistencyListener.install(rangeList);
 
         assertEquals(source, rangeList);
 

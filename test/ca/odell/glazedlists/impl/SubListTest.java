@@ -53,7 +53,7 @@ public class SubListTest extends TestCase {
 
         // get the sublist
         EventList subListBefore = (EventList)eventList.subList(25, 75);
-        subListBefore.addListEventListener(new ListConsistencyListener(subListBefore, "sublist"));
+        ListConsistencyListener.install(subListBefore);
 
         // change the source list to be 0,1,2,3,...49,50,51,..99,100,101...149
         for(int i = 0; i < 50; i++) {

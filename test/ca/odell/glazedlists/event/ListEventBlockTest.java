@@ -17,7 +17,7 @@ public class ListEventBlockTest extends TestCase {
 
     public void testSortListEventBlocks() {
         ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
-        list.addListEventListener(new ListConsistencyListener(list, "list"));
+        ListConsistencyListener.install(list);
 
         list.beginEvent(true);
         list.addAll(GlazedListsTests.stringToList("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
@@ -39,7 +39,7 @@ public class ListEventBlockTest extends TestCase {
 
     public void testSortListEventBlocks2() {
         ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
-        list.addListEventListener(new ListConsistencyListener(list, "list"));
+        ListConsistencyListener.install(list);
 
         list.beginEvent(true);
         list.addAll(GlazedListsTests.stringToList("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
@@ -54,7 +54,7 @@ public class ListEventBlockTest extends TestCase {
 
     public void testSortListEventBlocks3() {
         ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
-        list.addListEventListener(new ListConsistencyListener(list, "list"));
+        ListConsistencyListener.install(list);
 
         list.beginEvent(true);
         list.addAll(GlazedListsTests.stringToList("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));

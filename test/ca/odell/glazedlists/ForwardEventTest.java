@@ -32,8 +32,7 @@ public class ForwardEventTest extends TestCase {
     public void setUp() {
         source = new BasicEventList<String>();
         forwarding = new ForwardingList<String>(source);
-        test = new ListConsistencyListener(forwarding, "forwarding");
-        forwarding.addListEventListener(test);
+        test = ListConsistencyListener.install(forwarding);
     }
 
     /**

@@ -24,7 +24,7 @@ public class FilterListTest extends TestCase {
         // prepare a filter to filter our list
         MinimumValueMatcherEditor editor = new MinimumValueMatcherEditor();
         FilterList<Integer> myFilterList = new FilterList<Integer>(original, editor);
-        myFilterList.addListEventListener(new ListConsistencyListener(myFilterList, "filter"));
+        ListConsistencyListener.install(myFilterList);
         
         // relax the list
         editor.setMinimum(11);
@@ -87,7 +87,7 @@ public class FilterListTest extends TestCase {
 
 		AllOrNothingMatcherEditor matcher = new AllOrNothingMatcherEditor();
 		FilterList<Integer> filterList = new FilterList<Integer>(baseList,matcher);
-		filterList.addListEventListener(new ListConsistencyListener(filterList, "Filter List", true));
+		ListConsistencyListener.install(filterList);
 
 		// Test initial size
 		assertEquals(5, filterList.size());
