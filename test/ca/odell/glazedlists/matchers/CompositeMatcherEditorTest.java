@@ -137,7 +137,7 @@ public class CompositeMatcherEditorTest extends TestCase {
         listener.assertRelaxed(6);
         
         compositeMatcherEditor.getMatcherEditors().add(anotherTextMatcherEditor);
-        anotherTextMatcherEditor.setFilterText(new String[] { "Earthquake" });
+        anotherTextMatcherEditor.setFilterText(new String[] { "EarthQuake" });
         listener.assertConstrained(8);
         anotherTextMatcherEditor.setFilterText(new String[] { "Earth" , "Quake" });
         anotherTextMatcherEditor.setFilterText(new String[] { "Quake" });
@@ -172,7 +172,7 @@ public class CompositeMatcherEditorTest extends TestCase {
         
         compositeMatcherEditor.getMatcherEditors().add(anotherTextMatcherEditor);
         listener.assertRelaxed(7);
-        anotherTextMatcherEditor.setFilterText(new String[] { "Earthquake" });
+        anotherTextMatcherEditor.setFilterText(new String[] { "EarthQuake" });
         listener.assertConstrained(8);
         anotherTextMatcherEditor.setFilterText(new String[] { "Earth" , "Quake" });
         anotherTextMatcherEditor.setFilterText(new String[] { "Quake" });
