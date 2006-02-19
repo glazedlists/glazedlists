@@ -7,6 +7,8 @@ package ca.odell.glazedlists.impl;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEvent;
 // standard collections
 import java.util.*;
 
@@ -35,7 +37,7 @@ public class DiffTest extends TestCase {
         List modifiedSequence = new SparseDifferencesList(new ReallyBigList(1000 * 1000));
         assertEquals(0, getChangeCount(sequence, modifiedSequence, false, null));
 
-        Random dice = new Random();
+        Random dice = new Random(2);
         for(int i = 0; i < 10; i++) {
             modifiedSequence.set(dice.nextInt(modifiedSequence.size()), new Object());
         }
@@ -230,6 +232,41 @@ public class DiffTest extends TestCase {
 
         public boolean matchPair(int alphaIndex, int betaIndex) {
             return alpha.charAt(alphaIndex) == beta.charAt(betaIndex);
+        }
+    }
+
+
+    /**
+     * Counts how many ListEvents are received.
+     */
+    public class ListEventCounter<E> implements ListEventListener<E> {
+
+        /** count the number of changes per event */
+        private List<Integer> changeCounts = new ArrayList<Integer>();
+
+        /**
+         * When an event occurs, count that.
+         */
+        public void listChanged(ListEvent<E> listChanges) {
+            int changesForEvent = 0;
+            while(listChanges.next()) {
+                changesForEvent++;
+            }
+            changeCounts.add(new Integer(changesForEvent));
+        }
+
+        /**
+         * Gets the number of events that have occured thus far.
+         */
+        public int getEventCount() {
+            return changeCounts.size();
+        }
+
+        /**
+         * Gets the number of changes for the specified event.
+         */
+        public int getChangeCount(int event) {
+            return changeCounts.get(event).intValue();
         }
     }
 }

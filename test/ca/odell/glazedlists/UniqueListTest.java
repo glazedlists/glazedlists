@@ -916,7 +916,7 @@ public class UniqueListTest extends TestCase {
         replacementSet.addAll(source);
 
         // listen to changes on the unique list
-        ListEventCounter counter = new ListEventCounter();
+        ListConsistencyListener counter = new ListConsistencyListener(unique, "unique");
         unique.addListEventListener(counter);
 
         // replace the values with the replacement set
@@ -963,7 +963,7 @@ public class UniqueListTest extends TestCase {
         }
 
         // listen to changes on the unique list
-        ListEventCounter counter = new ListEventCounter();
+        ListConsistencyListener counter = new ListConsistencyListener(unique, "unique");
         unique.addListEventListener(counter);
 
         // replace the values with the replacement set

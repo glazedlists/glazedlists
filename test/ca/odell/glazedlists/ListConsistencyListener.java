@@ -30,6 +30,10 @@ public class ListConsistencyListener<E> implements ListEventListener<E> {
     /** whether to cough out changes to the console as they happen */
     private boolean verbose = false;
 
+    /** count the number of changes per event */
+    private List<Integer> changeCounts = new ArrayList<Integer>();
+    private List<Boolean> reorderings = new ArrayList<Boolean>();
+
     /**
      * Creates a new ListConsistencyListener that ensures events from the source
      * list are consistent.
@@ -52,7 +56,28 @@ public class ListConsistencyListener<E> implements ListEventListener<E> {
     public ListConsistencyListener(EventList<E> source, String name) {
         this(source, name, false);
     }
-    
+
+    /**
+     * Gets the number of events that have occured thus far.
+     */
+    public int getEventCount() {
+        return changeCounts.size();
+    }
+
+    /**
+     * Gets the number of changes for the specified event.
+     */
+    public int getChangeCount(int event) {
+        return changeCounts.get(event).intValue();
+    }
+
+    /**
+     * Get whether the specified event was a reordering.
+     */
+    public Boolean isReordering(int event) {
+        return reorderings.get(event).booleanValue();
+    }
+
     /**
      * Validate that this list is as expected.
      */
@@ -63,16 +88,16 @@ public class ListConsistencyListener<E> implements ListEventListener<E> {
     /**
      * For implementing the ListEventListener interface.
      */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         Assert.assertEquals(source, listChanges.getSource());
         assertEventsInIncreasingOrder(listChanges);
 
         // print the changes if necessary
         if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size() + ", source: " + source);
-        
+
         // record the changed indices
         List<Integer> changedIndices = new ArrayList<Integer>();
-        
+
         // keep track of the highest change index so far
         int highestChangeIndex = 0;
 
@@ -86,12 +111,16 @@ public class ListConsistencyListener<E> implements ListEventListener<E> {
                 changedIndices.add(new Integer(i));
             }
             this.expected = newExpectedValues;
+            changeCounts.add(new Integer(2 * reorderMap.length));
+            reorderings.add(Boolean.TRUE);
 
         // handle regular events
         } else {
-        
+
             // for all changes, one index at a time
+            int changesForEvent = 0;
             while(listChanges.next()) {
+                changesForEvent++;
 
                 // get the current change info
                 int changeIndex = listChanges.getIndex();
@@ -114,8 +143,11 @@ public class ListConsistencyListener<E> implements ListEventListener<E> {
                     expected.set(changeIndex, source.get(changeIndex));
                 }
             }
+
+            changeCounts.add(new Integer(changesForEvent));
+            reorderings.add(Boolean.FALSE);
         }
-        
+
         // verify the source is consistent with what we expect
         Assert.assertEquals(expected.size(), source.size());
         for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {

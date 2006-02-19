@@ -17,7 +17,7 @@ import java.util.*;
 public class ObservableElementListTest extends TestCase {
 
     private ObservableElementList<JLabel> labels;
-    private ListEventCounter<JLabel> counter;
+    private ListConsistencyListener<JLabel> counter;
 
     public ObservableElementListTest() {
         super("Observable Elements - RFE 157");
@@ -25,7 +25,7 @@ public class ObservableElementListTest extends TestCase {
 
     public void setUp() {
         labels = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
-        counter = new ListEventCounter<JLabel>();
+        counter = new ListConsistencyListener<JLabel>(labels, "observable elements");
         labels.addListEventListener(counter);
         assertEquals(0, counter.getEventCount());
     }

@@ -33,7 +33,7 @@ public class MultipleEventsTest extends TestCase {
         FilterList<int[]> filterList = new FilterList<int[]>(source, matcherEditor);
 
         // listen to changes on the filter list
-        ListEventCounter<int[]> counter = new ListEventCounter<int[]>();
+        ListConsistencyListener<int[]> counter = new ListConsistencyListener<int[]>(filterList, "filter list");
         filterList.addListEventListener(counter);
 
         // clear the filter list
@@ -59,7 +59,7 @@ public class MultipleEventsTest extends TestCase {
         EventList<String> subList = (EventList<String>)source.subList(1, 3);
         
         // listen to changes on the sub list
-        ListEventCounter<String> counter = new ListEventCounter<String>();
+        ListConsistencyListener<String> counter = new ListConsistencyListener<String>(subList, "sublist");
         subList.addListEventListener(counter);
 
         // clear the sub list
@@ -85,7 +85,7 @@ public class MultipleEventsTest extends TestCase {
         EventList<String> uniqueList = new UniqueList<String>(source);
         
         // listen to changes on the unique list
-        ListEventCounter<String> counter = new ListEventCounter<String>();
+        ListConsistencyListener<String> counter = new ListConsistencyListener<String>(uniqueList, "unique list");
         uniqueList.addListEventListener(counter);
 
         // clear the unique list

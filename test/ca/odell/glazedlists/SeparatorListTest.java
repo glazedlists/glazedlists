@@ -322,6 +322,25 @@ public class SeparatorListTest extends TestCase {
         assertEqualsIgnoreSeparators(source, separatorList, length);
     }
 
+    public void testSortSource() {
+        Comparator<String> caseSensitive = (Comparator)GlazedLists.comparableComparator();
+        Comparator<String> caseInsensitive = String.CASE_INSENSITIVE_ORDER;
+
+        BasicEventList<String> unsortedSource = new BasicEventList<String>();
+        SortedList<String> source = new SortedList<String>(unsortedSource, null);
+        unsortedSource.addAll(GlazedListsTests.stringToList("CcaCbCcCAaADdaAbBDbBdDb"));
+
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, caseSensitive, 0, Integer.MAX_VALUE);
+        ListConsistencyListener consistencyTest = new ListConsistencyListener(separatorList, "separatorList");
+
+        assertEqualsIgnoreSeparators(source, separatorList, caseSensitive);
+
+
+
+
+
+    }
+
     private void assertEqualsIgnoreSeparators(List separatorSource, SeparatorList separatorList, Comparator separatorComparator) {
         // create a protective copy that we can surely modify
         separatorSource = new ArrayList(separatorSource);
