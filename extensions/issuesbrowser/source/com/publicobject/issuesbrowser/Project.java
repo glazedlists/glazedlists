@@ -32,6 +32,7 @@ public class Project {
 
     private String projectName = null;
     private String projectTitle = null;
+    private String fileName = null;
 
     public Project(String projectName, String projectTitle) {
         this.projectName = projectName;
@@ -44,6 +45,17 @@ public class Project {
 
     public String getBaseUri() {
         return "https://" + projectName + ".dev.java.net";
+    }
+
+    /**
+     * Optional, the filename defines a file to load issues from rather than
+     * a webservice.
+     */
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+    public String getFileName() {
+        return fileName;
     }
 
     public String getXMLUri() {

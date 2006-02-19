@@ -6,6 +6,7 @@ package com.publicobject.issuesbrowser;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SeparatorList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import java.util.Comparator;
 
@@ -15,7 +16,7 @@ import java.util.Comparator;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class IssueTableFormat implements AdvancedTableFormat {
+public class IssueTableFormat implements WritableTableFormat, AdvancedTableFormat {
 
 	public int getColumnCount() {
 		return 6;
@@ -57,7 +58,15 @@ public class IssueTableFormat implements AdvancedTableFormat {
         }
 	}
 
-	public Object getColumnValue(Object baseObject, int column) {
+    public boolean isEditable(Object baseObject, int column) {
+        return baseObject instanceof SeparatorList.Separator;
+    }
+
+    public Object setColumnValue(Object baseObject, Object editedValue, int column) {
+        return null;
+    }
+
+    public Object getColumnValue(Object baseObject, int column) {
 		if (baseObject == null) return null;
         if (baseObject instanceof SeparatorList.Separator) {
             SeparatorList.Separator<Issue> separator = (SeparatorList.Separator<Issue>)baseObject;

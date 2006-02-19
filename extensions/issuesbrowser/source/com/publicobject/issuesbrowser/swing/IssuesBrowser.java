@@ -76,6 +76,16 @@ public class IssuesBrowser implements Runnable {
     /** the application window */
     private JFrame frame;
 
+    /** things to handle when booting the issues loader */
+    private String[] startupArgs;
+
+    /**
+     * Tell the IssuesBrowser how to configure itself when starting up.
+     */
+    public void setStartupArgs(String[] startupArgs) {
+        this.startupArgs = startupArgs;
+    }
+
     /**
      * Loads the issues browser as standalone application.
      */
@@ -101,6 +111,11 @@ public class IssuesBrowser implements Runnable {
 
         // start loading the issues
         issueLoader.start();
+
+        // load issues from a file if requested
+        if(startupArgs.length == 1) {
+            issueLoader.setFileName(startupArgs[0]);
+        }
     }
 
     /**
@@ -154,7 +169,8 @@ public class IssuesBrowser implements Runnable {
         // build the issues table
         issuesTableModel = new EventTableModel<Issue>(separatedIssues, new IssueTableFormat());
         JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel);
-        issuesJTable.setSeparatorRenderer(new IssueSeparatorRenderer());
+        issuesJTable.setSeparatorRenderer(new IssueSeparatorTableCell());
+        issuesJTable.setSeparatorEditor(new IssueSeparatorTableCell());
         issuesSelectionModel = new EventSelectionModel<Issue>(separatedIssues);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
@@ -266,6 +282,7 @@ public class IssuesBrowser implements Runnable {
     public static void main(String[] args) {
         // load the issues and display the browser
         IssuesBrowser browser = new IssuesBrowser();
+        browser.setStartupArgs(args);
         SwingUtilities.invokeLater(browser);
     }
 
@@ -494,19 +511,22 @@ public class IssuesBrowser implements Runnable {
     /**
      * Render the issues separator.
      */
-    public class IssueSeparatorRenderer implements TableCellRenderer {
+    public class IssueSeparatorTableCell extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
         private JPanel panel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
-        private JButton expandButton = new IconButton(right_icons);
+        private IconButton expandButton = new IconButton(right_icons);
         private JLabel nameLabel = new JLabel();
         private JLabel countLabel = new JLabel();
 
-        public IssueSeparatorRenderer() {
+        private SeparatorList.Separator<Issue> separator;
+
+        public IssueSeparatorTableCell() {
             this.nameLabel.setForeground(Color.WHITE);
             this.nameLabel.setFont(nameLabel.getFont().deriveFont(10.0f));
             this.countLabel.setForeground(Color.WHITE);
             this.countLabel.setFont(countLabel.getFont().deriveFont(10.0f));
 
             this.expandButton.setOpaque(false);
+            this.expandButton.addActionListener(this);
 
             this.panel.setLayout(new BorderLayout());
             this.panel.add(expandButton, BorderLayout.WEST);
@@ -514,11 +534,31 @@ public class IssuesBrowser implements Runnable {
             this.panel.add(countLabel, BorderLayout.EAST);
         }
 
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            configure(value);
+            return panel;
+        }
+
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            SeparatorList.Separator<Issue> separator = (SeparatorList.Separator<Issue>)value;
+            configure(value);
+            return panel;
+        }
+
+        public Object getCellEditorValue() {
+            return this.separator;
+        }
+
+        private void configure(Object value) {
+            this.separator = (SeparatorList.Separator<Issue>)value;
+            expandButton.setIcons(separator.getLimit() == 0 ? right_icons : down_icons);
             nameLabel.setText(separator.first().getSubcomponent());
             countLabel.setText("" + separator.size());
-            return panel;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            boolean collapsed = separator.getLimit() == 0;
+            separator.setLimit(collapsed ? Integer.MAX_VALUE : 0);
+            expandButton.setIcons(collapsed ? down_icons : right_icons);
         }
     }
 

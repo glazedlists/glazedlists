@@ -16,8 +16,9 @@ import java.awt.*;
  */
 public class JSeparatorTable extends JTable {
 
-    /** renderer for separator cells */
+    /** working with separator cells */
     private TableCellRenderer separatorRenderer;
+    private TableCellEditor separatorEditor;
 
     public JSeparatorTable(EventTableModel tableModel) {
         super(tableModel);
@@ -77,6 +78,20 @@ public class JSeparatorTable extends JTable {
         }
     }
 
+    /** {@inheritDoc} */
+    public TableCellEditor getCellEditor(int row, int column) {
+        Object rowValue = ((EventTableModel)getModel()).getElementAt(row);
+
+        // if it's the separator row, use the separator editor
+        if(rowValue instanceof SeparatorList.Separator) {
+            return separatorEditor;
+
+        // otherwise it's business as usual
+        } else {
+            return super.getCellEditor(row, column);
+        }
+    }
+
     /**
      * Get the renderer for separator rows.
      */
@@ -87,8 +102,15 @@ public class JSeparatorTable extends JTable {
         this.separatorRenderer = separatorRenderer;
     }
 
-
-
+    /**
+     * Get the editor for separator rows.
+     */
+    public TableCellEditor getSeparatorEditor() {
+        return separatorEditor;
+    }
+    public void setSeparatorEditor(TableCellEditor separatorEditor) {
+        this.separatorEditor = separatorEditor;
+    }
 }
 
 

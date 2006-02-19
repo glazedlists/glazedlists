@@ -8,6 +8,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.net.ConnectException;
@@ -43,6 +44,15 @@ public class IssueLoader implements Runnable {
         }
     }
 
+    public void setFileName(String fileName) {
+        synchronized(this) {
+            this.project = new Project(null, fileName);
+            this.project.setFileName(fileName);
+            issueLoaderThread.interrupt();
+            notify();
+        }
+    }
+
     public void start() {
         issueLoaderThread = new Thread(this, "Issue Loader Thread");
         // ensure the loader thread doesn't compete too aggressively with the EDT
@@ -73,7 +83,13 @@ public class IssueLoader implements Runnable {
 
                 // load the issues
                 issuesList.clear();
-                IssuezillaXMLParser.loadIssues(issuesList, currentProject.getXMLUri(), currentProject);
+                if(currentProject.getFileName() != null) {
+                    IssuezillaXMLParser.loadIssues(issuesList, new FileInputStream(currentProject.getFileName()), currentProject);
+
+                } else {
+                    IssuezillaXMLParser.loadIssues(issuesList, currentProject.getXMLUri(), currentProject);
+                }
+
 
             // handling interruptions is really gross
             } catch (UnknownHostException e) {
