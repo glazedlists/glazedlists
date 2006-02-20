@@ -555,8 +555,10 @@ public class IssuesBrowser implements Runnable {
 
         private void configure(Object value) {
             this.separator = (SeparatorList.Separator<Issue>)value;
+            Issue issue = separator.first();
+            if(issue == null) return; // handle 'late' rendering calls after this separator is invalid
             expandButton.setIcons(separator.getLimit() == 0 ? right_icons : down_icons);
-            nameLabel.setText(separator.first().getSubcomponent());
+            nameLabel.setText(issue.getSubcomponent());
             countLabel.setText("" + separator.size());
         }
 

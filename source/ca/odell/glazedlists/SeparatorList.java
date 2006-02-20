@@ -9,6 +9,7 @@ import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Collections;
 
 /**
  * A list that adds separator objects before each group of elements.
@@ -558,14 +559,17 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             }
             /** {@inheritDoc} */
             public List<E> getGroup() {
+                if(node == null) return Collections.EMPTY_LIST;
                 return source.subList(start(), end());
             }
             /** {@inheritDoc} */
             public E first() {
+                if(node == null) return null;
                 return source.get(start());
             }
             /** {@inheritDoc} */
             public int size() {
+                if(node == null) return 0;
                 return end() - start();
             }
 
@@ -580,7 +584,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             /**
              * The first index in the source containing an element from this group.
              */
-            public int start() {
+            private int start() {
                 if(this.node == null) throw new IllegalStateException();
                 int separatorIndex = node.getIndex();
                 if(separatorIndex == -1) throw new IllegalStateException();
@@ -590,7 +594,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             /**
              * The last index in the source containing an element from this group.
              */
-            public int end() {
+            private int end() {
                 if(this.node == null) throw new IllegalStateException();
                 int nextSeparatorIndex = node.getIndex() + 1;
                 if(nextSeparatorIndex == 0) throw new IllegalStateException();
