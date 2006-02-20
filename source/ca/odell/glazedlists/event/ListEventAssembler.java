@@ -29,11 +29,11 @@ public final class ListEventAssembler<E> {
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-        if("true".equalsIgnoreCase(System.getProperty("GlazedLists.useExperimentalDeltas"))) {
-            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
-        } else {
+//        if("true".equalsIgnoreCase(System.getProperty("GlazedLists.useExperimentalDeltas"))) {
+//            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
+//        } else {
             delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-        }
+//        }
     }
     
     /**
