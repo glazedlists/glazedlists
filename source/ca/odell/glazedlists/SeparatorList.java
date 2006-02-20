@@ -541,6 +541,12 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             /** {@inheritDoc} */
             public void setLimit(int limit) {
                 if(this.limit == limit) return;
+                // fail gracefully if the node is null, that means this separator
+                // has been removed from the list but its still visible to an editor
+                if(node == null) {
+                    return;
+                }
+
                 this.limit = limit;
 
                 // notify the world of this separator change

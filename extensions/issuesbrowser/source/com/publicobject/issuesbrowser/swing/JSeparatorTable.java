@@ -7,6 +7,7 @@ import ca.odell.glazedlists.SeparatorList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.*;
 import java.awt.*;
@@ -119,6 +120,18 @@ public class JSeparatorTable extends JTable {
     }
     public void setSeparatorEditor(TableCellEditor separatorEditor) {
         this.separatorEditor = separatorEditor;
+    }
+
+    /** {@inheritDoc} */
+    public void tableChanged(TableModelEvent e) {
+        // stop edits when the table changes, or else we might
+        // get a relocated edit in the wrong cell!
+        if(isEditing()) {
+            super.getCellEditor().stopCellEditing();
+        }
+
+        // handle the change event
+        super.tableChanged(e);
     }
 }
 
