@@ -515,7 +515,7 @@ public class IssuesBrowser implements Runnable {
         /** the separator list to lock */
         private final SeparatorList separatorList;
 
-        private final JPanel panel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
+        private final JPanel panel = new IssuesBrowser.GradientPanel(GLAZED_LISTS_LIGHT_BROWN, GLAZED_LISTS_LIGHT_BROWN, true);
         private final IconButton expandButton = new IconButton(right_icons);
         private final JLabel nameLabel = new JLabel();
         private final JLabel countLabel = new JLabel();
@@ -525,10 +525,10 @@ public class IssuesBrowser implements Runnable {
         public IssueSeparatorTableCell(SeparatorList separatorList) {
             this.separatorList = separatorList;
 
-            this.nameLabel.setForeground(Color.WHITE);
             this.nameLabel.setFont(nameLabel.getFont().deriveFont(10.0f));
-            this.countLabel.setForeground(Color.WHITE);
+            this.nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
             this.countLabel.setFont(countLabel.getFont().deriveFont(10.0f));
+            this.countLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
             this.expandButton.setOpaque(false);
             this.expandButton.addActionListener(this);
