@@ -36,9 +36,18 @@ public class JSeparatorTable extends JTable {
 
     /** {@inheritDoc} */
     public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
-        Object rowValue = ((EventTableModel)getModel()).getElementAt(row);
+        EventTableModel eventTableModel = (EventTableModel) getModel();
+
+        // sometimes JTable asks for a cellrect that doesn't exist anymore, due
+        // to an editor being installed before a bunch of rows were removed.
+        // In this case, just return an empty rectangle, since it's going to
+        // be discarded anyway
+        if(row >= eventTableModel.getRowCount()) {
+            return new Rectangle(0, 0, 0, 0);
+        }
 
         // if it's the separator row, return the entire row as one big rectangle
+        Object rowValue = eventTableModel.getElementAt(row);
         if(rowValue instanceof SeparatorList.Separator) {
             Rectangle firstColumn = super.getCellRect(row, 0, includeSpacing);
             Rectangle lastColumn = super.getCellRect(row, getColumnCount() - 1, includeSpacing);

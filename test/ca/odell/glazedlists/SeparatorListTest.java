@@ -322,9 +322,15 @@ public class SeparatorListTest extends TestCase {
         assertEqualsIgnoreSeparators(source, separatorList, length);
     }
 
+    /**
+     * Make sure the SeparatorList handles sortings of the source list correctly,
+     * by reflecting the new elements in that list.
+     */
     public void testSortSource() {
         Comparator<String> caseSensitive = (Comparator)GlazedLists.comparableComparator();
         Comparator<String> caseInsensitive = String.CASE_INSENSITIVE_ORDER;
+        Random dice = new Random(0);
+        int expectedEventCount = 0;
 
         BasicEventList<String> unsortedSource = new BasicEventList<String>();
         SortedList<String> source = new SortedList<String>(unsortedSource, null);
@@ -336,10 +342,107 @@ public class SeparatorListTest extends TestCase {
         assertEqualsIgnoreSeparators(source, separatorList, caseInsensitive);
 
         source.setComparator(caseSensitive);
-        assertEquals(1, consistencyTest.getEventCount());
+        expectedEventCount++;
+        assertEquals(expectedEventCount, consistencyTest.getEventCount());
         assertTrue(consistencyTest.isReordering(0));
 
+        // collapse some
+        for(int i = 0; i < separatorList.size(); i++) {
+            Object value = separatorList.get(i);
+            if(!(value instanceof SeparatorList.Separator)) continue;
+            SeparatorList.Separator separator = (SeparatorList.Separator)value;
+            if(dice.nextBoolean()) {
+                separator.setLimit(0);
+                expectedEventCount++;
+                assertEquals(expectedEventCount, consistencyTest.getEventCount());
+            }
+        }
 
+        // do some more reorderings: to null comparator
+        source.setComparator(null);
+        expectedEventCount++;
+        assertEquals(expectedEventCount, consistencyTest.getEventCount());
+        assertTrue(consistencyTest.isReordering(expectedEventCount - 1));
+
+        // do some more reorderings: back to case sensitive comparator
+        source.setComparator(caseSensitive);
+        expectedEventCount++;
+        assertEquals(expectedEventCount, consistencyTest.getEventCount());
+        assertTrue(consistencyTest.isReordering(expectedEventCount - 1));
+    }
+
+    /**
+     * See what happens when we filter out separators.
+     */
+    public void testRemoveInsertSeparators() {
+        Random dice = new Random(0);
+        int expectedEventCount = 0;
+
+        BasicEventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
+
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        ListConsistencyListener consistencyTest = ListConsistencyListener.install(separatorList);
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        source.removeAll(GlazedListsTests.stringToList("BC"));
+        source.removeAll(GlazedListsTests.stringToList("H"));
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        source.addAll(2, GlazedListsTests.stringToList("BBBBCCC"));
+        source.addAll(source.size(), GlazedListsTests.stringToList("HHHH"));
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        collapseThenExpandAllSeparators(source, separatorList);
+
+        // remove the 'D' element slowly
+        source.remove(12);
+        source.remove(9);
+        source.remove(10);
+        source.remove(9);
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        // remove the 'F' and 'E' elements slowly
+        source.remove(10);
+        source.remove(9);
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        // restore the 'F' and 'E' elements
+        source.add(9, "F");
+        source.add(9, "E");
+        collapseThenExpandAllSeparators(source, separatorList);
+
+        // do removes while "H" is collapsed
+        ((SeparatorList.Separator)(Object)separatorList.get(18)).setLimit(0);
+        source.remove(12);
+        source.remove(14);
+        source.remove(12);
+        ((SeparatorList.Separator)(Object)separatorList.get(18)).setLimit(Integer.MAX_VALUE);
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        source.add(12, "H");
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+    }
+
+    /**
+     * Test the separator list by collapsing and expanding the separators within.
+     */
+    private void collapseThenExpandAllSeparators(EventList source, SeparatorList separatorList) {
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        // collapse all
+        for(int i = 0; i < separatorList.size(); i++) {
+            SeparatorList.Separator separator = (SeparatorList.Separator)(Object)separatorList.get(i);
+            separator.setLimit(0);
+        }
+        // expand all
+        for(int i = 0; i < separatorList.size(); i++) {
+            Object value = separatorList.get(i);
+            if(!(value instanceof SeparatorList.Separator)) continue;
+            SeparatorList.Separator separator = (SeparatorList.Separator)value;
+            separator.setLimit(Integer.MAX_VALUE);
+        }
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
     }
 
     private void assertEqualsIgnoreSeparators(List separatorSource, SeparatorList separatorList, Comparator separatorComparator) {

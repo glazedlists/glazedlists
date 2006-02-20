@@ -4,10 +4,7 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.Grouper;
-import ca.odell.glazedlists.impl.adt.Barcode;
-import ca.odell.glazedlists.impl.adt.BarcodeIterator;
-import ca.odell.glazedlists.impl.adt.IndexedTree;
-import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
+import ca.odell.glazedlists.impl.adt.*;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.Comparator;
@@ -71,65 +68,160 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         return collapsedElements.getIndex(mutationIndex, Barcode.BLACK);
     }
 
+
+    /**
+     * Go from the current group (assumed to be black) to the next black group
+     * to follow. This works by finding a white follower, then a black follower
+     * of that one.
+     *
+     * @return <code>true</code> if the next group was found, or <code>false</code>
+     *      if there was no such group and the iterator is now in an unspecified
+     *      location, not necessarily the end of the barcode.
+     */
+    private static boolean nextBlackGroup(BarcodeIterator iterator) {
+        // step to an intermediate white group
+        if(!iterator.hasNextWhite()) return false;
+        iterator.nextWhite();
+
+        // then to the following black group to get a completely different group
+        if(!iterator.hasNextBlack()) return false;
+        iterator.nextBlack();
+
+        // success!
+        return true;
+    }
+
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent(true);
 
-        // keep this around, it's handy
-        int groupCount = separatorSource.insertedSeparators.colourSize(SEPARATOR);
-
-        // first update the barcode, optimistically
-        while(listChanges.next()) {
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-
-            // if we're inserting something new, always fire an insert event,
-            // even if we need to revoke it later
-            if(changeType == ListEvent.INSERT) {
-                collapsedElements.add(changeIndex, Barcode.BLACK, 1);
-                int viewIndex = collapsedElements.getColourIndex(changeIndex, Barcode.BLACK);
-                updates.addInsert(viewIndex);
-
-            // updates are probably already accurate, don't change the state
-            } else if(changeType == ListEvent.UPDATE) {
-                // do nothing
-
-            // fire a delete event if this is a visible element being deleted
-            } else if(changeType == ListEvent.DELETE) {
-                Object oldColor = collapsedElements.get(changeIndex);
-                if(oldColor == Barcode.BLACK) {
-                    int viewIndex = collapsedElements.getColourIndex(changeIndex, Barcode.BLACK);
-                    updates.addDelete(viewIndex);
-                }
-                collapsedElements.remove(changeIndex, 1);
+        // when the source changes order, forward a reordering if no elements
+        // go from being outside the limit filter to inside it
+        if(listChanges.isReordering()) {
+            boolean canReorder = true;
+            for(IndexedTreeIterator<SeparatorInjectorList<E>.GroupSeparator> i = separatorSource.separators.iterator(0); i.hasNext(); ) {
+                IndexedTreeNode<SeparatorInjectorList<E>.GroupSeparator> node = i.next();
+                int limit = node.getValue().getLimit();
+                if(limit == 0) continue;
+                if(limit >= separatorSource.size()) continue;
+                if(limit >= node.getValue().size()) continue;
+                canReorder = false;
+                break;
             }
-        }
 
-        // Now make sure our limits are correct, which they may not be
-        // due to the fact that we made a lot of guesses in the first pass.
-        // Note that this is really slow and needs some work for performance
-        // reasons
-        listChanges.reset();
-        while(listChanges.next()) {
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
+            // forward the reorder event, this requires a lot of rework because
+            // we're mapping backwards and fowards unnecessarily
+            if(canReorder) {
+                int[] previousIndices = listChanges.getReorderMap();
+                int[] reorderMap = new int[collapsedElements.colourSize(Barcode.BLACK)];
 
-            if(changeType == ListEvent.INSERT) {
-                int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
-                updateGroup(group, groupCount);
-            } else if(changeType == ListEvent.UPDATE) {
-                int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
-                // it's possible that this impacts the previous group!
-                if(group > 0) updateGroup(group - 1, groupCount);
-                updateGroup(group, groupCount);
-                // it's possible that this impacts the next group
-                if(group < groupCount - 1) updateGroup(group + 1, groupCount);
+                // walk through the unfiltered elements, adjusting the indices
+                // for each group of unfiltered (black) elements
+                BarcodeIterator i = collapsedElements.iterator();
+                int groupStartSourceIndex = 0;
+                while(true) {
 
-            } else if(changeType == ListEvent.DELETE) {
-                // if there is a group that this came from, update it
-                if(changeIndex < separatorSource.insertedSeparators.size()) {
+                    // we already know where this group starts, now we calculate
+                    // where it ends, and how many indices it's offset by in the view
+                    boolean newGroupFound;
+                    int groupEndSourceIndex;
+                    int leadingCollapsedElements;
+                    if(i.hasNextWhite()) {
+                        i.nextWhite();
+                        groupEndSourceIndex = i.getIndex();
+                        newGroupFound = true;
+                        leadingCollapsedElements = i.getWhiteIndex();
+                    } else {
+                        newGroupFound = false;
+                        groupEndSourceIndex = collapsedElements.size();
+                        leadingCollapsedElements = collapsedElements.whiteSize();
+                    }
+
+                    // update the reorder map for each element in this group
+                    for(int j = groupStartSourceIndex; j < groupEndSourceIndex; j++) {
+                        reorderMap[j - leadingCollapsedElements] = previousIndices[j] - leadingCollapsedElements;
+                    }
+
+                    // prepare the next iteration: find the start of the next group
+                    if(newGroupFound && i.hasNextBlack()) {
+                        i.nextBlack();
+                        groupStartSourceIndex = i.getIndex();
+                    } else {
+                        break;
+                    }
+                }
+                updates.reorder(reorderMap);
+
+            // fire insert/delete pairs. This loses selection because currently
+            // Glazed Lists lacks the ability to fire a mix of move and insert/update
+            // events
+            } else {
+                int size = collapsedElements.colourSize(Barcode.BLACK);
+                if(size > 0) {
+                    updates.addDelete(0, size - 1);
+                    updates.addInsert(0, size - 1);
+                }
+            }
+
+        // handle other changes by adjusting the limits as necessary
+        } else {
+
+            // keep this around, it's handy
+            int groupCount = separatorSource.insertedSeparators.colourSize(SEPARATOR);
+
+            // first update the barcode, optimistically
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+
+                // if we're inserting something new, always fire an insert event,
+                // even if we need to revoke it later
+                if(changeType == ListEvent.INSERT) {
+                    collapsedElements.add(changeIndex, Barcode.BLACK, 1);
+                    int viewIndex = collapsedElements.getColourIndex(changeIndex, Barcode.BLACK);
+                    updates.addInsert(viewIndex);
+
+                // updates are probably already accurate, don't change the state
+                } else if(changeType == ListEvent.UPDATE) {
+                    // do nothing
+
+                // fire a delete event if this is a visible element being deleted
+                } else if(changeType == ListEvent.DELETE) {
+                    Object oldColor = collapsedElements.get(changeIndex);
+                    if(oldColor == Barcode.BLACK) {
+                        int viewIndex = collapsedElements.getColourIndex(changeIndex, Barcode.BLACK);
+                        updates.addDelete(viewIndex);
+                    }
+                    collapsedElements.remove(changeIndex, 1);
+                }
+            }
+
+            // Now make sure our limits are correct, which they may not be
+            // due to the fact that we made a lot of guesses in the first pass.
+            // Note that this is really slow and needs some work for performance
+            // reasons
+            listChanges.reset();
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
+
+                if(changeType == ListEvent.INSERT) {
                     int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
                     updateGroup(group, groupCount);
+                } else if(changeType == ListEvent.UPDATE) {
+                    int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
+                    // it's possible that this impacts the previous group!
+                    if(group > 0) updateGroup(group - 1, groupCount);
+                    updateGroup(group, groupCount);
+                    // it's possible that this impacts the next group
+                    if(group < groupCount - 1) updateGroup(group + 1, groupCount);
+
+                } else if(changeType == ListEvent.DELETE) {
+                    // if there is a group that this came from, update it
+                    if(changeIndex < separatorSource.insertedSeparators.size()) {
+                        int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
+                        updateGroup(group, groupCount);
+                    }
                 }
             }
         }
@@ -340,13 +432,51 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             return insertedSeparators.size();
         }
 
-
         /** {@inheritDoc} */
         public void listChanged(ListEvent<E> listChanges) {
             updates.beginEvent(true);
-            grouper.listChanged(listChanges);
+
+            // reorderings should be contained within the existing groups, we
+            // need to send these reorderings forward
+            if(listChanges.isReordering()) {
+                int[] previousIndices = listChanges.getReorderMap();
+                int[] reorderMap = new int[insertedSeparators.size()];
+
+                // walk through each group, adjusting indices in the forward
+                // reorder map to notify listeners
+                int groupStartIndex = -1; // inclusive
+                int groupEndIndex = 0; // exclusive
+                int group = -1;
+                for(int i = 0; i < previousIndices.length; i++) {
+
+                    // if this is the start of a new group, add that to the reorder map
+                    if(i == groupEndIndex) {
+                        group++;
+                        reorderMap[i + group] = i + group;
+                        groupStartIndex = groupEndIndex;
+                        int nextGroup = group + 1;
+                        groupEndIndex = nextGroup < separators.size() ? separators.get(nextGroup).start() : insertedSeparators.size();
+                    }
+
+                    // make sure the move doesn't leave the group
+                    int previousIndex = previousIndices[i];
+                    if(previousIndex < groupStartIndex || previousIndex >= groupEndIndex) {
+                        throw new IllegalStateException();
+                    }
+
+                    // adjust this change within the current group
+                    reorderMap[i + group + 1] = previousIndex + group + 1;
+                }
+                updates.reorder(reorderMap);
+
+            // handle reorderings by adjusting the separators via our grouper
+            } else {
+                grouper.listChanged(listChanges);
+            }
+
             updates.commitEvent();
         }
+
         /**
          * Fire two events, one for the group (the separator) and another for the
          * actual list element.
