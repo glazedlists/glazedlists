@@ -169,8 +169,8 @@ public class IssuesBrowser implements Runnable {
         // build the issues table
         issuesTableModel = new EventTableModel<Issue>(separatedIssues, new IssueTableFormat());
         JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel);
-        issuesJTable.setSeparatorRenderer(new IssueSeparatorTableCell());
-        issuesJTable.setSeparatorEditor(new IssueSeparatorTableCell());
+        issuesJTable.setSeparatorRenderer(new IssueSeparatorTableCell(separatedIssues));
+        issuesJTable.setSeparatorEditor(new IssueSeparatorTableCell(separatedIssues));
         issuesSelectionModel = new EventSelectionModel<Issue>(separatedIssues);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
@@ -512,14 +512,19 @@ public class IssuesBrowser implements Runnable {
      * Render the issues separator.
      */
     public class IssueSeparatorTableCell extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
-        private JPanel panel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
-        private IconButton expandButton = new IconButton(right_icons);
-        private JLabel nameLabel = new JLabel();
-        private JLabel countLabel = new JLabel();
+        /** the separator list to lock */
+        private final SeparatorList separatorList;
+
+        private final JPanel panel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
+        private final IconButton expandButton = new IconButton(right_icons);
+        private final JLabel nameLabel = new JLabel();
+        private final JLabel countLabel = new JLabel();
 
         private SeparatorList.Separator<Issue> separator;
 
-        public IssueSeparatorTableCell() {
+        public IssueSeparatorTableCell(SeparatorList separatorList) {
+            this.separatorList = separatorList;
+
             this.nameLabel.setForeground(Color.WHITE);
             this.nameLabel.setFont(nameLabel.getFont().deriveFont(10.0f));
             this.countLabel.setForeground(Color.WHITE);
@@ -556,8 +561,14 @@ public class IssuesBrowser implements Runnable {
         }
 
         public void actionPerformed(ActionEvent e) {
-            boolean collapsed = separator.getLimit() == 0;
-            separator.setLimit(collapsed ? Integer.MAX_VALUE : 0);
+            separatorList.getReadWriteLock().writeLock().lock();
+            boolean collapsed;
+            try {
+                collapsed = separator.getLimit() == 0;
+                separator.setLimit(collapsed ? Integer.MAX_VALUE : 0);
+            } finally {
+                separatorList.getReadWriteLock().writeLock().unlock();
+            }
             expandButton.setIcons(collapsed ? down_icons : right_icons);
         }
     }
