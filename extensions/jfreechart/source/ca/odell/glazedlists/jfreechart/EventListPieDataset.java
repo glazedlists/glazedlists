@@ -10,6 +10,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import org.jfree.data.general.AbstractDataset;
 import org.jfree.data.general.PieDataset;
+import org.jfree.data.general.DatasetChangeEvent;
 
 import java.util.Comparator;
 import java.util.List;
@@ -30,6 +31,9 @@ import java.util.List;
  * @author James Lemieux
  */
 public class EventListPieDataset extends AbstractDataset implements PieDataset {
+
+    /** The single immutable DatasetChangeEvent we fire each time this Dataset is changed. */
+    private final DatasetChangeEvent immutableChangeEvent = new DatasetChangeEvent(this, this);
 
     // the list that groups the data into sections of the pie
     private final GroupingList groupingList;
@@ -135,6 +139,14 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
         this.functionList.dispose();
         this.groupingList.removeListEventListener(this.datasetEventListener);
         this.groupingList.dispose();
+    }
+
+    /**
+     * We override this method for speed reasons, since the super needlessly
+     * constructs a new DatasetChangedEvent each time this method is called.
+     */
+    protected void fireDatasetChanged() {
+        notifyListeners(immutableChangeEvent);
     }
 
     /**

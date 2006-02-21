@@ -6,14 +6,11 @@ package com.publicobject.issuesbrowser;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.jfreechart.EventListCategoryDataset;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
-import ca.odell.glazedlists.jfreechart.TreePair;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import java.util.Date;
 import java.util.List;
-
-import org.jfree.data.UnknownKeyException;
 
 /**
  * This CategoryDataset explodes each {@link Issue} object into a List of
@@ -79,29 +76,13 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         return columnKeyList;
     }
 
-    /**
-     * Returns the value associated with the specified keys.
-     *
-     * @param rowKey the row key (<code>null</code> not permitted)
-     * @param columnKey the column key (<code>null</code> not permitted)
-     * @return the value
-     *
-     * @throws org.jfree.data.UnknownKeyException if either key is not recognized
-     */
+    /** @inheritDoc */
     public Number getValue(Comparable rowKey, Comparable columnKey) {
-        // fetch the relevant pair of trees
-        final TreePair treePair = getTreePair(rowKey);
+        // the columnKey is expected to be a Date
+        final Date start = (Date) columnKey;
+        final Date end = this.monthSequencer.next(start);
 
-        // ensure we found something
-        if (treePair == null)
-            throw new UnknownKeyException("unrecognized rowKey: " + rowKey);
-
-        // the columnKey is expected to be a ValueSegment
-        final Date left = (Date) columnKey;
-        final Date right = this.monthSequencer.next(left);
-
-        // return the number of values within the segment
-        return new Integer(treePair.getCount(left, right));
+        return new Integer(this.getCount((String) rowKey, start, end));
     }
 
     /**

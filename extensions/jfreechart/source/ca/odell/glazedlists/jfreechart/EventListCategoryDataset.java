@@ -9,6 +9,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import org.jfree.data.UnknownKeyException;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.AbstractDataset;
+import org.jfree.data.general.DatasetChangeEvent;
 
 import java.util.*;
 
@@ -68,6 +69,9 @@ import java.util.*;
  */
 public abstract class EventListCategoryDataset<R extends Comparable, C extends Comparable> extends AbstractDataset implements CategoryDataset {
 
+    /** The single immutable DatasetChangeEvent we fire each time this Dataset is changed. */
+    private final DatasetChangeEvent immutableChangeEvent = new DatasetChangeEvent(this, this);
+
     /** Keep a private copy of the contents of the source list in order to access deleted elements. */
     private final List<ValueSegment<C,R>> sourceCopy;
 
@@ -91,7 +95,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * {@link ValueSegment} or the ending value of its {@link ValueSegment}.
      * The count of all such values within a range can thus be calculated.
      */
-    private Map<R,TreePair> valueToTreePairs = new HashMap<R,TreePair>();
+    private Map<R,TreePair<C>> valueToTreePairs = new HashMap<R,TreePair<C>>();
 
     /**
      * Constructs an implementation of {@link CategoryDataset} which presents
@@ -266,16 +270,32 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * Returns the {@link TreePair} associated with the given
      * <code>rowKey</code>.
      */
-    protected TreePair getTreePair(Comparable rowKey) {
+    private TreePair<C> getTreePair(R rowKey) {
         return valueToTreePairs.get(rowKey);
     }
 
     /**
      * Returns the number of values associated with the given <code>rowKey</code>.
      */
-    public int getCount(Comparable rowKey) {
-        final TreePair treePair = valueToTreePairs.get(rowKey);
+    public int getCount(R rowKey) {
+        final TreePair<C> treePair = getTreePair(rowKey);
         return treePair == null ? 0 : treePair.size();
+    }
+
+    /**
+     * Returns the number of values associated with the given <code>rowKey</code>
+     * between the given <code>start</code> and <code>end</code> values.
+     */
+    public int getCount(R rowKey, C start, C end) {
+        // fetch the relevant pair of trees
+        final TreePair treePair = getTreePair(rowKey);
+
+        // ensure we found something
+        if (treePair == null)
+            throw new UnknownKeyException("unrecognized rowKey: " + rowKey);
+
+        // return the number of values between start and end
+        return new Integer(treePair.getCount(start, end));
     }
 
     /**
@@ -297,6 +317,14 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * @param valueSegment the data element removed from this data set
      */
     protected void postDelete(ValueSegment<C,R> valueSegment) { }
+
+    /**
+     * We override this method for speed reasons, since the super needlessly
+     * constructs a new DatasetChangedEvent each time this method is called.
+     */
+    protected void fireDatasetChanged() {
+        notifyListeners(immutableChangeEvent);
+    }
 
     /**
      * This listener maintains a fast set of TreePairs for each unique value
@@ -322,11 +350,11 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
                         // fetch the segment that was inserted
                         final ValueSegment<C,R> segment = listChanges.getSourceList().get(index);
                         // fetch the TreePair for the segment's value
-                        TreePair treePair = getTreePair(segment.getValue());
+                        TreePair<C> treePair = getTreePair(segment.getValue());
 
                         // if a TreePair has not been created for the segment's value, create one now
                         if (treePair == null) {
-                            treePair = new TreePair();
+                            treePair = new TreePair<C>();
                             valueToTreePairs.put(segment.getValue(), treePair);
                         }
 
@@ -343,8 +371,8 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
                         final ValueSegment<C,R> oldSegment = sourceCopy.set(index, newSegment);
 
                         // fetch the TreePairs involved
-                        final TreePair oldTreePair = getTreePair(oldSegment.getValue());
-                        final TreePair newTreePair = getTreePair(newSegment.getValue());
+                        final TreePair<C> oldTreePair = getTreePair(oldSegment.getValue());
+                        final TreePair<C> newTreePair = getTreePair(newSegment.getValue());
 
                         // delete the segment from the oldTreePair
                         oldTreePair.delete(oldSegment);
@@ -358,7 +386,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
                         // fetch the segment that was removed
                         final ValueSegment<C,R> segment = sourceCopy.remove(index);
                         // fetch the TreePair for the segment's value
-                        final TreePair treePair = getTreePair(segment.getValue());
+                        final TreePair<C> treePair = getTreePair(segment.getValue());
 
                         // delete the segment from the TreePair
                         treePair.delete(segment);

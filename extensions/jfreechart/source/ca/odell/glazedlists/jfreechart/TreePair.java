@@ -20,17 +20,17 @@ import ca.odell.glazedlists.GlazedLists;
  *
  * @author James Lemieux
  */
-public class TreePair {
+public class TreePair<V extends Comparable> {
     /** The tree which orders the start indices of all ValueSegments. */
-    private IndexedTree<Comparable> start = new IndexedTree<Comparable>(GlazedLists.comparableComparator());
+    private IndexedTree<V> start = new IndexedTree<V>(GlazedLists.comparableComparator());
 
     /** The tree which orders the start indices of all ValueSegments. */
-    private IndexedTree<Comparable> end = new IndexedTree<Comparable>(GlazedLists.comparableComparator());
+    private IndexedTree<V> end = new IndexedTree<V>(GlazedLists.comparableComparator());
 
     /**
      * Inserts the given <code>segment</code> into the trees.
      */
-    public void insert(ValueSegment segment) {
+    public void insert(ValueSegment<V,?> segment) {
         start.addByNode(segment.getStart());
         end.addByNode(segment.getEnd());
     }
@@ -39,7 +39,7 @@ public class TreePair {
      * Removes the <code>previousSegment</code> and inserts the
      * <code>newSegment</code> into the trees.
      */
-    public void update(ValueSegment previousSegment, ValueSegment newSegment) {
+    public void update(ValueSegment<V,?> previousSegment, ValueSegment<V,?> newSegment) {
         delete(previousSegment);
         insert(newSegment);
     }
@@ -47,9 +47,9 @@ public class TreePair {
     /**
      * Removes the <code>segment</code> from the trees.
      */
-    public void delete(ValueSegment segment) {
-        final IndexedTreeNode<Comparable> startNode = start.getNode(segment.getStart());
-        final IndexedTreeNode<Comparable> endNode = end.getNode(segment.getEnd());
+    public void delete(ValueSegment<V,?> segment) {
+        final IndexedTreeNode<V> startNode = start.getNode(segment.getStart());
+        final IndexedTreeNode<V> endNode = end.getNode(segment.getEnd());
 
         startNode.removeFromTree(start);
         endNode.removeFromTree(end);
@@ -59,8 +59,8 @@ public class TreePair {
      * Clears the data from the trees efficiently.
      */
     public void clear() {
-        this.start = new IndexedTree<Comparable>(GlazedLists.comparableComparator());
-        this.end = new IndexedTree<Comparable>(GlazedLists.comparableComparator());
+        this.start = new IndexedTree<V>(GlazedLists.comparableComparator());
+        this.end = new IndexedTree<V>(GlazedLists.comparableComparator());
     }
 
     /**
@@ -75,7 +75,7 @@ public class TreePair {
      * Returns the number of {@link ValueSegment}s which appear between the
      * given <code>start</code> and <code>end</code> values.
      */
-    public int getCount(Comparable start, Comparable end) {
+    public int getCount(V start, V end) {
         final int numStartedBeforeSegmentEnd = this.start.indexOfSimulated(end);
         final int numEndedBeforeSegmentStart = this.end.indexOfSimulated(start);
 
