@@ -27,6 +27,18 @@ import java.util.ArrayList;
  * <p>The start and end values of the sequence are the smallest sequence values
  * which maintain the invariant that:
  * <code>sequence start &lt;= each value in the source list &lt;= sequence end</code>
+ *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>no</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(1)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>SequenceListTest</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * </table>
+ *
+ * @author James Lemieux
  */
 public final class SequenceList<E> extends TransformedList<E,E> {
 
@@ -169,44 +181,48 @@ public final class SequenceList<E> extends TransformedList<E,E> {
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent();
 
-        while (listChanges.next()) {
-            if (listChanges.getType() == ListEvent.INSERT) {
-                // determine the location of the change in the sorted source list
-                final int index = listChanges.getIndex();
+        // check for the special case when the underlying list has been completely cleared
+        if (source.isEmpty()) {
+            updates.addDelete(0, size()-1);
+            sequence.clear();
 
-                // if the element wasn't added at the first or last index of the list, our sequence already includes it
-                if (index != 0 && index != listChanges.getSourceList().size()-1)
-                    continue;
-
-                // fetch the value and calculate its previous and next sequence values
-                final E value = listChanges.getSourceList().get(index);
+        } else {
+            // seed this SequenceList with the initial two values
+            if (this.isEmpty()) {
+                final E value = listChanges.getSourceList().get(0);
                 final E previousSequenceValue = getPreviousSequenceValue(value);
                 final E nextSequenceValue = getNextSequenceValue(value);
 
-                // if this is the first element added to the SequenceList, add the first two sequence values
-                if (this.isEmpty()) {
-                    sequence.add(previousSequenceValue);
-                    sequence.add(nextSequenceValue);
-                    updates.addInsert(0);
-                    updates.addInsert(1);
+                sequence.add(previousSequenceValue);
+                sequence.add(nextSequenceValue);
+                updates.addInsert(0);
+                updates.addInsert(1);
+            }
 
-                } else {
-                    // prepend sequence values until the required first sequence value is covered
-                    E firstSequenceValue = sequence.get(0);
-                    while (comparator.compare(previousSequenceValue, firstSequenceValue) == -1) {
-                        firstSequenceValue = sequencer.previous(firstSequenceValue);
-                        sequence.add(0, firstSequenceValue);
-                        updates.addInsert(0);
-                    }
+            // add the necessary leading sequence values
+            final E firstSourceValue = source.get(0);
+            while (comparator.compare(firstSourceValue, get(0)) == -1) {
+                updates.addInsert(0);
+                sequence.add(0, sequencer.previous(get(0)));
+            }
 
-                    // append sequence values until the required last sequence value is covered
-                    E lastSequenceValue = sequence.get(sequence.size()-1);
-                    while (comparator.compare(nextSequenceValue, lastSequenceValue) == 1) {
-                        lastSequenceValue = sequencer.next(lastSequenceValue);
-                        sequence.add(lastSequenceValue);
-                        updates.addInsert(sequence.size());
-                    }
-                }
+            // remove the unnecessary leading sequence values
+            while (comparator.compare(get(1), firstSourceValue) == -1) {
+                updates.addDelete(0);
+                sequence.remove(0);
+            }
+
+            // add the necessary trailing sequence values
+            final E lastSourceValue = source.get(source.size()-1);
+            while (comparator.compare(lastSourceValue, get(size()-1)) == 1) {
+                updates.addInsert(size());
+                sequence.add(sequencer.next(get(size()-1)));
+            }
+
+            // remove the unnecessary trailing sequence values
+            while (comparator.compare(get(size()-2), lastSourceValue) == 1) {
+                updates.addDelete(size()-1);
+                sequence.remove(size()-1);
             }
         }
 
