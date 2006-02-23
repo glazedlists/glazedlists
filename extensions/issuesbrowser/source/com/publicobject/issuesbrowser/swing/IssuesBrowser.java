@@ -90,12 +90,6 @@ public class IssuesBrowser implements Runnable {
      * Loads the issues browser as standalone application.
      */
     public void run() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            // do nothing - fall back to default look and feel
-        }
-
         constructStandalone();
 
         // debug a problem where the thread is getting interrupted
@@ -279,11 +273,21 @@ public class IssuesBrowser implements Runnable {
     /**
      * When started via a main method, this creates a standalone issues browser.
      */
-    public static void main(String[] args) {
-        // load the issues and display the browser
-        IssuesBrowser browser = new IssuesBrowser();
-        browser.setStartupArgs(args);
-        SwingUtilities.invokeLater(browser);
+    public static void main(final String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception e) {
+                    // do nothing - fall back to default look and feel
+                }
+
+                // load the issues and display the browser
+                final IssuesBrowser browser = new IssuesBrowser();
+                browser.setStartupArgs(args);
+                browser.run();
+            }
+        });
     }
 
     /**
@@ -515,7 +519,7 @@ public class IssuesBrowser implements Runnable {
         /** the separator list to lock */
         private final SeparatorList separatorList;
 
-        private final JPanel panel = new IssuesBrowser.GradientPanel(GLAZED_LISTS_LIGHT_BROWN, GLAZED_LISTS_LIGHT_BROWN, true);
+        private final JPanel panel = new JPanel(new BorderLayout());
         private final IconButton expandButton = new IconButton(right_icons);
         private final JLabel nameLabel = new JLabel();
         private final JLabel countLabel = new JLabel();
@@ -530,10 +534,9 @@ public class IssuesBrowser implements Runnable {
             this.countLabel.setFont(countLabel.getFont().deriveFont(10.0f));
             this.countLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
-            this.expandButton.setOpaque(false);
             this.expandButton.addActionListener(this);
 
-            this.panel.setLayout(new BorderLayout());
+            this.panel.setBackground(GLAZED_LISTS_LIGHT_BROWN);
             this.panel.add(expandButton, BorderLayout.WEST);
             this.panel.add(nameLabel, BorderLayout.CENTER);
             this.panel.add(countLabel, BorderLayout.EAST);
@@ -589,8 +592,9 @@ public class IssuesBrowser implements Runnable {
 
         public IconButton(Icon[] icons) {
             this.icons = icons;
-            super.setBorder(BorderFactory.createEmptyBorder());
+            super.setBorder(null);
             setState(UP);
+            setContentAreaFilled(false);
 
             addMouseListener(this);
         }
@@ -603,6 +607,7 @@ public class IssuesBrowser implements Runnable {
             this.icons = icons;
             super.setIcon(this.icons[state]);
         }
+
         private void setState(int state) {
             this.state = state;
             super.setIcon(icons[state]);
