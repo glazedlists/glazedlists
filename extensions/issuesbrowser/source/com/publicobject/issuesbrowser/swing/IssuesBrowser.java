@@ -92,11 +92,6 @@ public class IssuesBrowser implements Runnable {
     public void run() {
         constructStandalone();
 
-        // debug a problem where the thread is getting interrupted
-        if (Thread.currentThread().isInterrupted()) {
-            new Exception("thread has been interrupted").printStackTrace();
-        }
-
         // we have advice for the user when we cannot connect to a host
         Exceptions.getInstance().addHandler(new UnknownHostExceptionHandler());
         Exceptions.getInstance().addHandler(new ConnectExceptionHandler());
