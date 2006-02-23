@@ -6,7 +6,6 @@ package com.publicobject.issuesbrowser.swing;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -20,7 +19,7 @@ import java.awt.*;
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class PriorityMatcherEditor extends AbstractMatcherEditor implements FilterComponent<Issue>, ChangeListener {
+public class PriorityMatcherEditor extends AbstractMatcherEditor<Issue> implements FilterComponent<Issue>, ChangeListener {
 
     private JSlider slider;
 
@@ -70,10 +69,8 @@ public class PriorityMatcherEditor extends AbstractMatcherEditor implements Filt
             this.minimumPriority = minimumPriority;
         }
 
-        public boolean matches(Issue item) {
-            Issue issue = (Issue)item;
-            int priority = issue.getPriority().getRating();
-            return priority >= minimumPriority;
+        public boolean matches(Issue issue) {
+            return issue.getPriority().getRating() >= minimumPriority;
         }
     }
 }
