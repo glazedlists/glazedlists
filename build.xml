@@ -189,6 +189,22 @@
         </javac>
     </target>
 
+    <target name="swinglabs" depends="core,swing">
+        <!-- the swinglabs .jar is Java 1.5+ only, so we do not bother to run
+             this code through our Java 1.5 to Java 1.4 source code translator -->
+        <mkdir dir="extensions/swinglabs/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/29693/swingx.jar"/>
+            <arg value="extensions/swinglabs/lib/swingx.jar"/>
+        </java>
+        <javac destdir="classes" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="extensions/swinglabs/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
     <target name="jfreechart" depends="swing">
         <mkdir dir="extensions/jfreechart/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
