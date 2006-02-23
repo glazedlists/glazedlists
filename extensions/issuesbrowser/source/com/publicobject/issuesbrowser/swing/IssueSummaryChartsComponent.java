@@ -13,23 +13,24 @@ import com.publicobject.issuesbrowser.OpenIssuesByMonthCategoryDataset;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.renderer.category.DefaultCategoryItemRenderer;
-import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
-import org.jfree.data.general.PieDataset;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.DefaultCategoryItemRenderer;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.general.PieDataset;
 import org.jfree.text.TextBlock;
 import org.jfree.ui.RectangleEdge;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
-import java.util.List;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
 
 /**
  * This component is placed below the issues table and is shown when no issues
@@ -39,6 +40,10 @@ import java.text.SimpleDateFormat;
  * @author James Lemieux
  */
 class IssueSummaryChartsComponent {
+    public static final Paint CHART_PLOT_BACKGROUND_PAINT = Color.WHITE;
+    public static final BlockBorder CHART_LEGEND_BORDER = BlockBorder.NONE;
+    public static final Paint CHART_PANEL_BACKGROUND_PAINT = Color.WHITE;
+    public static final Paint PIE_CHART_PLOT_PAINT = null;
 
     // the panel which displays Issues By Status
     private final ChartPanel pieChartPanel_IssuesByStatus;
@@ -69,11 +74,16 @@ class IssueSummaryChartsComponent {
 
         // build a Pie Chart and a panel to display it
         final JFreeChart pieChart_IssuesByStatus = new JFreeChart("Issues By Status", new CustomPiePlot(issuesByStatusDataset));
+        pieChart_IssuesByStatus.setBackgroundPaint(CHART_PANEL_BACKGROUND_PAINT);
+        pieChart_IssuesByStatus.getLegend().setBorder(CHART_LEGEND_BORDER);
         this.pieChartPanel_IssuesByStatus = new ChartPanel(pieChart_IssuesByStatus, true);
 
         // build a Line Chart and a panel to display it
         final JFreeChart lineChart_OpenIssuesOverTime = ChartFactory.createLineChart("Open Issues Over Time", "Time", "Open Issues", new OpenIssuesByMonthCategoryDataset(issuesList), PlotOrientation.VERTICAL, true, true, false);
+        lineChart_OpenIssuesOverTime.setBackgroundPaint(CHART_PANEL_BACKGROUND_PAINT);
+        lineChart_OpenIssuesOverTime.getLegend().setBorder(CHART_LEGEND_BORDER);
         final CategoryPlot categoryPlot = lineChart_OpenIssuesOverTime.getCategoryPlot();
+        categoryPlot.setBackgroundPaint(CHART_PLOT_BACKGROUND_PAINT);
         categoryPlot.setDomainAxis(new CustomCategoryAxis());
         categoryPlot.setRenderer(new CustomCategoryItemRenderer(categoryPlot.getDataset()));
         this.lineChartPanel_OpenIssuesOverTime = new ChartPanel(lineChart_OpenIssuesOverTime, true);
@@ -106,6 +116,8 @@ class IssueSummaryChartsComponent {
     private static class CustomPiePlot extends PiePlot {
         public CustomPiePlot(PieDataset dataset) {
             super(dataset);
+            this.setBackgroundPaint(CHART_PLOT_BACKGROUND_PAINT);
+            this.setOutlinePaint(PIE_CHART_PLOT_PAINT);
         }
 
         public Paint getSectionPaint(int section) {
