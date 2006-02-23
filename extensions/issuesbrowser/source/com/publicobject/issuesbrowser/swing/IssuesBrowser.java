@@ -11,6 +11,7 @@ import ca.odell.glazedlists.swing.*;
 import com.publicobject.issuesbrowser.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.*;
 import javax.swing.table.*;
 import java.awt.*;
@@ -164,12 +165,12 @@ public class IssuesBrowser implements Runnable {
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
-        issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(10);
-        issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(30);
-        issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(10);
-        issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(30);
-        issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(30);
-        issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(200);
+        issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(400);
+        issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(2000);
         // turn off cell focus painting
         issuesJTable.setDefaultRenderer(String.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(String.class)));
         issuesJTable.setDefaultRenderer(Integer.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(Integer.class)));
@@ -511,13 +512,14 @@ public class IssuesBrowser implements Runnable {
      * Render the issues separator.
      */
     public class IssueSeparatorTableCell extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
+        private final MessageFormat nameFormat = new MessageFormat("{0} ({1})");
+
         /** the separator list to lock */
         private final SeparatorList separatorList;
 
         private final JPanel panel = new JPanel(new BorderLayout());
         private final IconButton expandButton = new IconButton(right_icons);
         private final JLabel nameLabel = new JLabel();
-        private final JLabel countLabel = new JLabel();
 
         private SeparatorList.Separator<Issue> separator;
 
@@ -526,15 +528,12 @@ public class IssuesBrowser implements Runnable {
 
             this.nameLabel.setFont(nameLabel.getFont().deriveFont(10.0f));
             this.nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-            this.countLabel.setFont(countLabel.getFont().deriveFont(10.0f));
-            this.countLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
             this.expandButton.addActionListener(this);
 
             this.panel.setBackground(GLAZED_LISTS_LIGHT_BROWN);
             this.panel.add(expandButton, BorderLayout.WEST);
             this.panel.add(nameLabel, BorderLayout.CENTER);
-            this.panel.add(countLabel, BorderLayout.EAST);
         }
 
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
@@ -556,8 +555,7 @@ public class IssuesBrowser implements Runnable {
             Issue issue = separator.first();
             if(issue == null) return; // handle 'late' rendering calls after this separator is invalid
             expandButton.setIcons(separator.getLimit() == 0 ? right_icons : down_icons);
-            nameLabel.setText(issue.getSubcomponent());
-            countLabel.setText("" + separator.size());
+            nameLabel.setText(nameFormat.format(new Object[] {issue.getSubcomponent(), new Integer(separator.size())}));
         }
 
         public void actionPerformed(ActionEvent e) {
@@ -578,6 +576,8 @@ public class IssuesBrowser implements Runnable {
      * up, over and down.
      */
     public static class IconButton extends JButton implements MouseListener {
+        private static final Border emptyBorder = BorderFactory.createEmptyBorder();
+
         private static final int UP = 0;
         private static final int OVER = 1;
         private static final int DOWN = 2;
@@ -587,7 +587,7 @@ public class IssuesBrowser implements Runnable {
 
         public IconButton(Icon[] icons) {
             this.icons = icons;
-            super.setBorder(null);
+            super.setBorder(emptyBorder);
             setState(UP);
             setContentAreaFilled(false);
 
