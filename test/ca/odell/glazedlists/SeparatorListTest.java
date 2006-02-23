@@ -308,7 +308,6 @@ public class SeparatorListTest extends TestCase {
         SeparatorList<String> separatorList = new SeparatorList<String>(source, length, 0, Integer.MAX_VALUE);
         ListConsistencyListener.install(separatorList);
 
-
         assertEqualsIgnoreSeparators(source, separatorList, length);
 
         source.setComparator(alphabetical);
@@ -424,6 +423,25 @@ public class SeparatorListTest extends TestCase {
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
     }
 
+
+
+    public void testSeparatorIsThreadSafe() throws InterruptedException {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
+
+        final SeparatorList separatorList = new SeparatorList(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        ListConsistencyListener consistencyTest = ListConsistencyListener.install(separatorList);
+        assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
+
+        SeparatorList.Separator separator = (SeparatorList.Separator)separatorList.get(0);
+        assertEquals("A", separator.first());
+        assertEquals(2, separator.size());
+
+        source.clear();
+        assertEquals(null, separator.first());
+        assertEquals(0, separator.size());
+    }
+
     /**
      * Test the separator list by collapsing and expanding the separators within.
      */
@@ -445,21 +463,27 @@ public class SeparatorListTest extends TestCase {
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
     }
 
-    private void assertEqualsIgnoreSeparators(List separatorSource, SeparatorList separatorList, Comparator separatorComparator) {
+    private void assertEqualsIgnoreSeparators(List source, SeparatorList separatorList, Comparator separatorComparator) {
         // create a protective copy that we can surely modify
-        separatorSource = new ArrayList(separatorSource);
-        Collections.sort(separatorSource, separatorComparator);
+        source = new ArrayList(source);
+        Collections.sort(source, separatorComparator);
         int e = 0;
         int s = 0;
 
         while(true) {
-            if(e == separatorSource.size() && s == separatorList.size()) break;
+            if(e == source.size() && s == separatorList.size()) break;
 
-            Object source = separatorSource.get(e);
-            Object separator = separatorList.get(s);
+            Object sourceValue = source.get(e);
+            Object separatorValue = separatorList.get(s);
 
             // if this is a separator, make sure it's worthwhile
-            if(separator instanceof SeparatorList.Separator) {
+            if(separatorValue instanceof SeparatorList.Separator) {
+                SeparatorList.Separator separator = (SeparatorList.Separator)separatorValue;
+                int separatorSize = separator.size();
+                assertTrue(separatorSize > 0);
+                assertTrue(separatorSize <= source.size());
+                Object first = separator.first();
+                assertSame(first, sourceValue);
                 if(s > 0) {
                     Object before = separatorList.get(s - 1);
                     Object after = separatorList.get(s + 1);
@@ -470,7 +494,7 @@ public class SeparatorListTest extends TestCase {
             }
 
             // otherwise the values should be identical
-            assertSame(source, separator);
+            assertSame(sourceValue, separatorValue);
             e++;
             s++;
         }

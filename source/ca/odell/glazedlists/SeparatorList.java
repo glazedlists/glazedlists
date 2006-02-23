@@ -306,11 +306,17 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          * Set the maximum number of elements in this group to show. This is
          * useful to collapse a group (limit of 0), cap the elements of a group
          * (limit of 5) or reverse those actions.
+         *
+         * <p>This method requires the write lock of the {@link SeparatorList} to be
+         * held during invocation.
          */
         public void setLimit(int limit);
 
         /**
          * Get the {@link List} of all elements in this group.
+         *
+         * <p>This method requires the read lock of the {@link SeparatorList}
+         * to be held during invocation.
          */
         public List<E> getGroup();
 
@@ -400,6 +406,10 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 node.getValue().setNode(node);
                 node.getValue().setLimit(defaultLimit);
             }
+            // update the cached values in all separators
+            for(int i = 0; i < separators.size(); i++) {
+                separators.get(i).updateCachedValues();
+            }
 
             // handle changes via the grouper
             source.addListEventListener(this);
@@ -470,9 +480,14 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 }
                 updates.reorder(reorderMap);
 
-            // handle reorderings by adjusting the separators via our grouper
+            // handle regular changes by adjusting the separators via our grouper
             } else {
                 grouper.listChanged(listChanges);
+            }
+
+            // update the cached values in all separators
+            for(int i = 0; i < separators.size(); i++) {
+                separators.get(i).updateCachedValues();
             }
 
             updates.commitEvent();
@@ -503,6 +518,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     // invalidate the node
                     IndexedTreeNode<GroupSeparator> node = separators.removeByIndex(groupIndex);
                     node.getValue().setNode(null);
+                    node.getValue().updateCachedValues();
                     // this group has gone away, make sure the other changes fired reflect that
                     groupIndex--;
                 }
@@ -528,6 +544,8 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          */
         private class GroupSeparator implements Separator<E> {
             private int limit = Integer.MAX_VALUE;
+            private int size;
+            private E first;
 
             /**
              * The node allows the separator to figure out which
@@ -564,13 +582,11 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             }
             /** {@inheritDoc} */
             public E first() {
-                if(node == null) return null;
-                return source.get(start());
+                return first;
             }
             /** {@inheritDoc} */
             public int size() {
-                if(node == null) return 0;
-                return end() - start();
+                return size;
             }
 
             /**
@@ -600,6 +616,22 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 if(nextSeparatorIndex == 0) throw new IllegalStateException();
                 int nextGroupStartIndex = nextSeparatorIndex == insertedSeparators.colourSize(SEPARATOR) ? insertedSeparators.size() : insertedSeparators.getIndex(nextSeparatorIndex, SEPARATOR);
                 return nextGroupStartIndex - nextSeparatorIndex;
+            }
+
+            /**
+             * Update the cached {@link #first()} and {@link #size()} values, so that they
+             * can be retrieved without the {@link SeparatorList}'s lock.
+             */
+            public void updateCachedValues() {
+                if(node != null) {
+                    int start = start();
+                    int end = end();
+                    this.first = source.get(start);
+                    this.size = end - start;
+                } else {
+                    this.first = null;
+                    this.size = 0;
+                }
             }
 
             /** {@inheritDoc} */
