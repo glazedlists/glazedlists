@@ -499,6 +499,27 @@ public class ListSelectionTest extends TestCase {
         assertEquals(new Integer(19), source.get(2));
     }
 
+    public void testContradictingUpdates() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+
+        ListSelection<String> listSelection = new ListSelection<String>(source);
+        ListConsistencyListener.install(listSelection.getSelected());
+
+        source.beginEvent(false);
+        source.add("C");
+        source.add("E");
+        source.commitEvent();
+        source.beginEvent(false);
+        source.add(0, "A");
+        source.add(1, "B");
+        source.set(2, "C");
+        source.set(3, "E");
+        source.add(3, "D");
+        source.set(4, "E");
+        source.add(5, "F");
+        source.commitEvent();
+    }
+
     /**
      * See feature request,
      * <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=250">Issue 250</a>
