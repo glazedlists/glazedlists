@@ -7,6 +7,7 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
 import junit.framework.TestCase;
 
 import java.util.Date;
+import java.util.Comparator;
 
 public class SequenceListTest extends TestCase {
 
@@ -16,6 +17,46 @@ public class SequenceListTest extends TestCase {
     private static final Date jul = new Date(106, 6, 15);
     private static final Date aug = new Date(106, 7, 15);
     private static final Date sep = new Date(106, 8, 15);
+
+    public void testConstructor() {
+        try {
+            new SequenceList<Date>(new BasicEventList<Date>(), null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            new SequenceList<Date>(new BasicEventList<Date>(), null, (Comparator) GlazedLists.comparableComparator());
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer(), null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        // valid constructor arguments
+        new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer());
+        new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer(), (Comparator) GlazedLists.comparableComparator());
+
+        // construct a SequenceList with a populated source list
+        final EventList<Date> source = new BasicEventList<Date>();
+        source.add(apr);
+        source.add(aug);
+        final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
+        assertEquals(6, sequence.size());
+        assertEquals(GlazedListsImpl.getMonthBegin(apr), sequence.get(0));
+        assertEquals(GlazedListsImpl.getMonthBegin(may), sequence.get(1));
+        assertEquals(GlazedListsImpl.getMonthBegin(jun), sequence.get(2));
+        assertEquals(GlazedListsImpl.getMonthBegin(jul), sequence.get(3));
+        assertEquals(GlazedListsImpl.getMonthBegin(aug), sequence.get(4));
+        assertEquals(GlazedListsImpl.getMonthBegin(sep), sequence.get(5));
+    }
 
     public void testAdd() {
         final EventList<Date> source = new BasicEventList<Date>();

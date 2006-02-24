@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * intervals from each other. A simple SequenceList could be:
  * <pre> {-10, -5, 0, 5, 10, 15} </pre>
  *
- * while a more complicated example could be:
+ * while a more sophisticated example could be:
  * <pre> {Jun 1, Jul 1, Aug 1, Sep 1, Oct 1} </pre>
  *
  * As long as the values can be ordered via a {@link Comparator} and a
@@ -81,8 +81,15 @@ public final class SequenceList<E> extends TransformedList<E,E> {
 
     private SequenceList(SortedList<E> source, Sequencer<E> sequencer, Comparator<E> comparator) {
         super(source);
+
+        if (sequencer == null)
+            throw new IllegalArgumentException("sequencer may not be null");
+        if (comparator == null)
+            throw new IllegalArgumentException("comparator may not be null");
+
         this.sequencer = sequencer;
         this.comparator = comparator;
+        this.updateSequence();
         source.addListEventListener(this);
     }
 
@@ -179,17 +186,27 @@ public final class SequenceList<E> extends TransformedList<E,E> {
 
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
+        this.updateSequence();
+    }
+
+    /**
+     * A convenience method to update the sequence to minimally cover the
+     * underlying SortedList.
+     */
+    private void updateSequence() {
         updates.beginEvent();
 
         // check for the special case when the underlying list has been completely cleared
         if (source.isEmpty()) {
-            updates.addDelete(0, size()-1);
-            sequence.clear();
+            if (!this.isEmpty()) {
+                updates.addDelete(0, size()-1);
+                sequence.clear();
+            }
 
         } else {
             // seed this SequenceList with the initial two values
             if (this.isEmpty()) {
-                final E value = listChanges.getSourceList().get(0);
+                final E value = source.get(0);
                 final E previousSequenceValue = getPreviousSequenceValue(value);
                 final E nextSequenceValue = getNextSequenceValue(value);
 
