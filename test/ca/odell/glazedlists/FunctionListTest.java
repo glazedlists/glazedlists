@@ -22,6 +22,14 @@ public class FunctionListTest extends TestCase {
         source.add(new Integer(1));
         source.add(new Integer(2));
 
+        assertEquals(3, intsToStrings.size());
+        assertEquals("0", intsToStrings.get(0));
+        assertEquals("1", intsToStrings.get(1));
+        assertEquals("2", intsToStrings.get(2));
+
+        // build a FunctionList with a source that is already populated
+        intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        assertEquals(3, intsToStrings.size());
         assertEquals("0", intsToStrings.get(0));
         assertEquals("1", intsToStrings.get(1));
         assertEquals("2", intsToStrings.get(2));
