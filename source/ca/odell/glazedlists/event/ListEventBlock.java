@@ -150,7 +150,7 @@ final class ListEventBlock {
                     simplifyContradiction(contradictingPair);
                     if(contradictingPair.size() == 0) { i -= 2; break; }
                     else if(contradictingPair.size() == 1) { i -= 1; j--; }
-                    else if(contradictingPair.size() == 2) { j--; } 
+                    else if(contradictingPair.size() == 2) { i -= 1; j--; } 
                 } else if(requiresSplit(first, second)) {
                     ListEventBlock third = split(first, second);
                     changes.add(j+2, third);
