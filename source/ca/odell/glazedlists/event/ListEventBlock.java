@@ -143,7 +143,9 @@ final class ListEventBlock {
                 ListEventBlock second = changes.get(j+1);
                 
                 if(blocksContradict(first, second)) {
-                    if(!allowContradictingEvents) throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
+                    if(!allowContradictingEvents) {
+                        throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
+                    }
                     List<ListEventBlock> contradictingPair = changes.subList(j, j + 2);
                     simplifyContradiction(contradictingPair);
                     if(contradictingPair.size() == 0) { i -= 2; break; }

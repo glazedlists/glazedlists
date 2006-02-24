@@ -509,7 +509,7 @@ public class ListSelectionTest extends TestCase {
         source.add("C");
         source.add("E");
         source.commitEvent();
-        source.beginEvent(false);
+        source.beginEvent(true);
         source.add(0, "A");
         source.add(1, "B");
         source.set(2, "C");
@@ -518,6 +518,26 @@ public class ListSelectionTest extends TestCase {
         source.set(4, "E");
         source.add(5, "F");
         source.commitEvent();
+
+        source.beginEvent(false);
+        while(!source.isEmpty()) source.remove(0);
+        source.add("A");
+        source.add("B");
+        source.commitEvent();
+        source.beginEvent(true);
+        source.set(0, "a");
+        source.set(1, "b");
+        source.add(2, "c");
+        source.set(0, "a");
+        source.set(1, "b");
+        source.set(2, "c");
+        source.add(3, "d");
+        source.add(1, "e");
+        source.set(2, "c");
+        source.set(3, "d");
+        source.commitEvent();
+
+//        [U.0-1, I.2, U.0-2, I.3, I.1, U.2-3]
     }
 
     /**
