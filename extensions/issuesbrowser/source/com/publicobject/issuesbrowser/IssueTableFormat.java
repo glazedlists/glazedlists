@@ -9,6 +9,7 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import java.util.Comparator;
+import java.util.Date;
 
 /**
  * The IssueTableFormat specifies how an issue is displayed in a table.
@@ -18,45 +19,40 @@ import java.util.Comparator;
  */
 public class IssueTableFormat implements WritableTableFormat, AdvancedTableFormat {
 
-	public int getColumnCount() {
-		return 6;
-	}
+    public int getColumnCount() {
+        return 7;
+    }
 
-	public String getColumnName(int column) {
-		if (column == 0) {
-			return "ID";
-		} else if (column == 1) {
-			return "Type";
-		} else if (column == 2) {
-			return "Priority";
-		} else if (column == 3) {
-			return "State";
-		} else if (column == 4) {
-			return "Result";
-		} else if (column == 5) {
-			return "Summary";
-		}
-		return null;
-	}
+    public String getColumnName(int column) {
+        switch (column) {
+            case 0: return "ID";
+            case 1: return "Type";
+            case 2: return "Created";
+            case 3: return "Priority";
+            case 4: return "Status";
+            case 5: return "Result";
+            case 6: return "Summary";
+        }
+
+        return null;
+    }
 
     public Class getColumnClass(int column) {
-		switch(column) {
-			case 0:
-				return Integer.class;
-			case 2:
-				return Priority.class;
-			default:
-				return String.class;
-		}
-	}
+        switch(column) {
+            case 0: return Integer.class;
+            case 2: return Date.class;
+            case 3: return Priority.class;
+            default: return String.class;
+        }
+    }
 
-	public Comparator getColumnComparator(int column) {
+    public Comparator getColumnComparator(int column) {
         if(column == 5) {
             return GlazedLists.caseInsensitiveComparator();
         } else {
             return GlazedLists.comparableComparator();
         }
-	}
+    }
 
     public boolean isEditable(Object baseObject, int column) {
         return baseObject instanceof SeparatorList.Separator;
@@ -67,26 +63,23 @@ public class IssueTableFormat implements WritableTableFormat, AdvancedTableForma
     }
 
     public Object getColumnValue(Object baseObject, int column) {
-		if (baseObject == null) return null;
+        if (baseObject == null) return null;
         if (baseObject instanceof SeparatorList.Separator) {
             SeparatorList.Separator<Issue> separator = (SeparatorList.Separator<Issue>)baseObject;
             if(column == 5) return separator.first().getSubcomponent();
             else return "------";
         }
         Issue issue = (Issue) baseObject;
-		if (column == 0) {
-			return issue.getId();
-		} else if (column == 1) {
-			return issue.getIssueType();
-		} else if (column == 2) {
-			return issue.getPriority();
-		} else if (column == 3) {
-			return issue.getStatus();
-		} else if (column == 4) {
-			return issue.getResolution();
-		} else if (column == 5) {
-			return issue.getShortDescription();
-		}
-		return null;
-	}
+        switch (column) {
+            case 0: return issue.getId();
+            case 1: return issue.getIssueType();
+            case 2: return issue.getCreationTimestamp();
+            case 3: return issue.getPriority();
+            case 4: return issue.getStatus();
+            case 5: return issue.getResolution();
+            case 6: return issue.getShortDescription();
+        }
+
+        return null;
+    }
 }
