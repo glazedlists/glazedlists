@@ -6,8 +6,8 @@ package ca.odell.glazedlists;
 import java.util.List;
 
 /**
- * An utility class that can get a list of Strings for a given object
- * for testing whether a filter matches.
+ * An interface through which a list of Strings for a given object
+ * can be extracted for testing whether a filter matches.
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  * @see GlazedLists#textFilterator(String[])

@@ -10,7 +10,7 @@ import ca.odell.glazedlists.impl.filter.*;
  * A matcher editor that matches Objects that contain a filter text string.
  * This {@link TextMatcherEditor} is not coupled with any UI component that
  * allows the user to edit the filter text. That job is left to subclasses.
- * This matcher is fully concrete, and may be used directly by headless
+ * This matcher editor is fully concrete, and may be used directly by headless
  * applications.
  *
  * <p>The {@link TextMatcherEditor} requires that either a
