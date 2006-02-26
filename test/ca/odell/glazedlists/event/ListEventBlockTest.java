@@ -5,9 +5,6 @@ package ca.odell.glazedlists.event;
 
 import junit.framework.TestCase;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import ca.odell.glazedlists.*;
 
 /**
@@ -64,6 +61,23 @@ public class ListEventBlockTest extends TestCase {
         list.remove(2);
         list.set(0, "A");
         list.add(2, "A");
+        list.commitEvent();
+    }
+
+    public void testSortListEventBlocks4() {
+        ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
+        ListConsistencyListener.install(list);
+
+        list.beginEvent(true);
+        list.addAll(GlazedListsTests.stringToList("AAA"));
+        list.commitEvent();
+
+        list.beginEvent(true);
+        list.set(0, "B");
+        list.set(0, "A");
+        list.set(1, "B");
+        list.set(2, "B");
+        list.remove(1);
         list.commitEvent();
     }
 }
