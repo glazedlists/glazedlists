@@ -7,10 +7,12 @@ import javax.swing.event.EventListenerList;
 
 /**
  * Basic building block for {@link MatcherEditor} implementations that
- * handles the details of dealing with listenerList. All {@link MatcherEditor}
- * implementators are encouraged to extends this class for its convenience methods.
+ * handles the details of dealing with registered {@link MatcherEditor.Listener}s.
+ * All {@link MatcherEditor} implementations should extend this class for its
+ * convenience methods.
  *
- * <p>Extending classes can fire events to listenerList using "fire" methods:
+ * <p>Extending classes can fire events to registered listeners using the
+ * "fire" methods:
  * <ul>
  *    <li>{@link #fireMatchNone()}</li>
  *    <li>{@link #fireConstrained(Matcher)}</li>
@@ -23,8 +25,8 @@ import javax.swing.event.EventListenerList;
  */
 public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
 
-    /** listenerList for this Editor */
-    private EventListenerList listenerList = new EventListenerList(); // normally only one listener
+    /** listeners for this Editor */
+    private EventListenerList listenerList = new EventListenerList();
 
 	/** the current Matcher in effect */
 	protected Matcher<E> currentMatcher = Matchers.trueMatcher();
