@@ -7,14 +7,15 @@ import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.filter.*;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 // standard collections
 import java.util.*;
 
 public class TextMatcherTest extends TestCase {
 
-    private List numbers = Arrays.asList(new Object[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
+    private List<Object> numbers = Arrays.asList(new Object[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
 
-    private List monotonicAlphabet = Arrays.asList(new Object[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
+    private List<Object> monotonicAlphabet = Arrays.asList(new Object[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
 
     public void testNormalizeValue() {
         assertTrue(Arrays.equals(new String[0], TextMatcher.normalizeFilters(new String[0])));
@@ -86,8 +87,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testConstrainingFilter() {
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-        FilterList list = new FilterList(new BasicEventList(), textMatcherEditor);
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
         
         list.addAll(numbers);
         assertEquals(list, numbers);
@@ -142,8 +143,8 @@ public class TextMatcherTest extends TestCase {
 //	}
 
 	public void testRelaxingFilter() {
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-        FilterList list = new FilterList(new BasicEventList(), textMatcherEditor);
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
         list.addAll(numbers);
 
@@ -172,8 +173,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testRelaxAndConstrainFilter() {
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-        FilterList list = new FilterList(new BasicEventList(), textMatcherEditor);
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
         list.addAll(monotonicAlphabet);
 
@@ -215,8 +216,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testClearFilter() {
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-        FilterList list = new FilterList(new BasicEventList(), textMatcherEditor);
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
         
         list.addAll(numbers);
 
@@ -241,9 +242,9 @@ public class TextMatcherTest extends TestCase {
      */
     public void testFilterBeforeAndAfter() {
         // set up
-        BasicEventList unfilteredList = new BasicEventList();
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-        FilterList filteredList = new FilterList(unfilteredList, textMatcherEditor);
+        EventList<Object> unfilteredList = new BasicEventList<Object>();
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
         
         // apply a filter
         String filter = "7";
@@ -251,13 +252,13 @@ public class TextMatcherTest extends TestCase {
 
         // populate a list with strings
         for(int i = 1000; i < 2000; i++) {
-            unfilteredList.add("" + i);
+            unfilteredList.add(String.valueOf(i));
         }
 
         // build a control list of the desired results
-        ArrayList controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         for(Iterator i = unfilteredList.iterator(); i.hasNext(); ) {
-            String element = (String)i.next();
+            String element = (String) i.next();
             if(element.indexOf(filter) != -1) controlList.add(element);
         }
 
@@ -280,9 +281,9 @@ public class TextMatcherTest extends TestCase {
     public void testFilterDynamic() {
         // set up
         Random random = new Random();
-        BasicEventList unfilteredList = new BasicEventList();
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-        FilterList filteredList = new FilterList(unfilteredList, textMatcherEditor);
+        EventList<Object> unfilteredList = new BasicEventList<Object>();
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
         
         // apply a filter
         String filter = "5";
@@ -295,7 +296,7 @@ public class TextMatcherTest extends TestCase {
             int index = unfilteredList.isEmpty() ? 0 : random.nextInt(unfilteredList.size());
 
             if(operation <= 1 || unfilteredList.isEmpty()) {
-                unfilteredList.add(index, "" + value);
+                unfilteredList.add(index, String.valueOf(value));
             } else if(operation == 2) {
                 unfilteredList.remove(index);
             } else if(operation == 3) {
@@ -304,7 +305,7 @@ public class TextMatcherTest extends TestCase {
         }
 
         // build a control list of the desired results
-        ArrayList controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         for(Iterator i = unfilteredList.iterator(); i.hasNext(); ) {
             String element = (String)i.next();
             if(element.indexOf(filter) != -1) controlList.add(element);
@@ -324,9 +325,9 @@ public class TextMatcherTest extends TestCase {
     public void testFilterWritable() {
         // set up
         Random random = new Random();
-        BasicEventList unfilteredList = new BasicEventList();
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-        FilterList filteredList = new FilterList(unfilteredList, textMatcherEditor);
+        EventList<Object> unfilteredList = new BasicEventList<Object>();
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
         
         // apply a filter
         String filter = "5";
@@ -334,7 +335,7 @@ public class TextMatcherTest extends TestCase {
 
         // apply various operations to a list of strings
         for(int i = 0; i < 4000; i++) {
-            List list;
+            List<Object> list;
             if(random.nextBoolean()) list = filteredList;
             else list = unfilteredList;
             int operation = random.nextInt(4);
@@ -342,16 +343,16 @@ public class TextMatcherTest extends TestCase {
             int index = list.isEmpty() ? 0 : random.nextInt(list.size());
 
             if(operation <= 1 || list.isEmpty()) {
-                list.add(index, "" + value);
+                list.add(index, String.valueOf(value));
             } else if(operation == 2) {
                 list.remove(index);
             } else if(operation == 3) {
-                list.set(index, "" + value);
+                list.set(index, String.valueOf(value));
             }
         }
 
         // build a control list of the desired results
-        ArrayList controlList = new ArrayList();
+        List<String> controlList = new ArrayList<String>();
         for(Iterator i = unfilteredList.iterator(); i.hasNext(); ) {
             String element = (String)i.next();
             if(element.indexOf(filter) != -1) controlList.add(element);
