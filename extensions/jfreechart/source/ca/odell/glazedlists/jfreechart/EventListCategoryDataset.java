@@ -278,7 +278,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * Returns the number of values associated with the given <code>rowKey</code>.
      */
     public int getCount(R rowKey) {
-        final TreePair<C> treePair = getTreePair(rowKey);
+        final TreePair treePair = getTreePair(rowKey);
         return treePair == null ? 0 : treePair.size();
     }
 
