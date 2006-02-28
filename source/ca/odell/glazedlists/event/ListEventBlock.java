@@ -150,10 +150,11 @@ final class ListEventBlock {
                     simplifyContradiction(contradictingPair);
                     if(contradictingPair.size() == 0) { i -= 2; break; }
                     else if(contradictingPair.size() == 1) { i -= 1; j--; }
-                    else if(contradictingPair.size() == 2) { i -= 1; j--; } 
+                    else if(contradictingPair.size() == 2) { i -= 1; j--; }
                 } else if(requiresSplit(first, second)) {
                     ListEventBlock third = split(first, second);
                     changes.add(j+2, third);
+                    i--;
                     j++;
                 } else if(canBeCombined(first, second)) {
                     combine(first, second);
@@ -171,8 +172,8 @@ final class ListEventBlock {
             }
         }
     }
-    
-    
+
+
     /**
      * When one block undoes part of another, we have a contradiction.
      * Types of contradictions:
@@ -189,16 +190,16 @@ final class ListEventBlock {
         // if the ranges intersect
         boolean rangesIntersect = (first.endIndex >= second.startIndex && first.startIndex <= second.endIndex);
         if(!rangesIntersect) return false;
-        
+
         // (insert or update) is later (deleted or updated)
         if(first.type != ListEvent.DELETE && second.type != ListEvent.INSERT) {
             return true;
         }
-        
+
         // can't be an contradiction
         return false;
     }
-    
+
     /**
      * Removes the contradiction contained within the specified list of two blocks.
      */
@@ -206,12 +207,12 @@ final class ListEventBlock {
         if(contradictingPair.size() != 2) throw new IllegalStateException();
         ListEventBlock first = contradictingPair.get(0);
         ListEventBlock second = contradictingPair.get(1);
-        
+
         // get the overlap range
         int commonStart = Math.max(first.startIndex, second.startIndex);
         int commonEnd = Math.min(first.endIndex, second.endIndex);
         int commonLength = (commonEnd - commonStart + 1);
-        
+
         // insert then delete kill each other
         if(first.type == ListEvent.INSERT && second.type == ListEvent.DELETE) {
             first.endIndex -= commonLength;
@@ -230,7 +231,7 @@ final class ListEventBlock {
             // shift the update and make it first, chronologically
             second.startIndex = Math.min(first.startIndex, second.startIndex);
             second.endIndex = second.startIndex + secondLength - 1;
-            contradictingPair.add(0, second); 
+            contradictingPair.add(0, second);
 
         // update then delete shortens update and reorders the two changes
         } else if(first.type == ListEvent.UPDATE && second.type == ListEvent.DELETE) {
