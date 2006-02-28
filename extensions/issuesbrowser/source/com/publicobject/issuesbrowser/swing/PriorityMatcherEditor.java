@@ -61,6 +61,6 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
     }
 
     public void stateChanged(ChangeEvent changeEvent) {
-        rangeMatcherEditor.setRange(slider.getValue(), null);
+        rangeMatcherEditor.setRange(new Integer(slider.getValue()), null);
     }
 }
