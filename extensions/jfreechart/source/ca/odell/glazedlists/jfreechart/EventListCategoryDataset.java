@@ -288,14 +288,14 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      */
     public int getCount(R rowKey, C start, C end) {
         // fetch the relevant pair of trees
-        final TreePair treePair = getTreePair(rowKey);
+        final TreePair<C> treePair = getTreePair(rowKey);
 
         // ensure we found something
         if (treePair == null)
             throw new UnknownKeyException("unrecognized rowKey: " + rowKey);
 
         // return the number of values between start and end
-        return new Integer(treePair.getCount(start, end));
+        return treePair.getCount(start, end);
     }
 
     /**
