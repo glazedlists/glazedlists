@@ -19,7 +19,7 @@ public class TextFilterComponent implements FilterComponent<Issue> {
     private TextComponentMatcherEditor<Issue> textComponentMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, null);
 
     public String getName() {
-        return "Filter";
+        return "Text Filter";
     }
 
     public JComponent getComponent() {

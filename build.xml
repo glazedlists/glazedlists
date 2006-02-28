@@ -198,9 +198,24 @@
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/29693/swingx.jar"/>
             <arg value="extensions/swinglabs/lib/swingx.jar"/>
         </java>
-        <javac destdir="classes" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+        <!-- uncomment the following when we have real code in the swinglabs extension -->
+        <!--<javac destdir="classes" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">-->
+            <!--<classpath>-->
+                <!--<fileset dir="extensions/swinglabs/lib/" includes="*.jar"/>-->
+            <!--</classpath>-->
+        <!--</javac>-->
+    </target>
+
+    <target name="nachocalendar" depends="core,swing">
+        <mkdir dir="extensions/nachocalendar/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/29958/nachocalendar.jar"/>
+            <arg value="extensions/nachocalendar/lib/nachocalendar.jar"/>
+        </java>
+        <javac destdir="classes" srcdir="extensions/nachocalendar/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
-                <fileset dir="extensions/swinglabs/lib/" includes="*.jar"/>
+                <fileset dir="extensions/nachocalendar/lib/" includes="*.jar"/>
             </classpath>
         </javac>
     </target>
@@ -243,12 +258,13 @@
         </java>
     </target>
 
-    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms">
+    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms,nachocalendar">
         <javac destdir="classes" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
                 <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
                 <fileset dir="extensions/jgoodiesforms/lib/" includes="*.jar"/>
+                <fileset dir="extensions/nachocalendar/lib/" includes="*.jar"/>
             </classpath>
         </javac>
     </target>
@@ -264,10 +280,11 @@
             <fileset dir="classes"/>
         </copy>
 
-        <!-- unjar the jfreechart classes into the demojar folder -->
+        <!-- unjar the third-party classes into the demojar folder -->
         <unjar src="extensions/jfreechart/lib/jcommon.jar" dest="demojar"/>
         <unjar src="extensions/jfreechart/lib/jfreechart.jar" dest="demojar"/>
         <unjar src="extensions/jgoodiesforms/lib/forms.jar" dest="demojar"/>
+        <unjar src="extensions/nachocalendar/lib/nachocalendar.jar" dest="demojar"/>
 
         <!-- create a *minimal* set of classes required to execute the swing demo -->
         <classfileset id="demoClasses" dir="demojar" rootclass="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
@@ -279,6 +296,7 @@
                 <include name="**/LocalizationBundle*.properties"/>
                 <include name="org/jfree/chart/resources/JFreeChartResources.class"/>
                 <include name="org/jfree/resources/JCommonResources.class"/>
+                <include name="net/sf/nachocalendar/language*.properties"/>
             </fileset>
             <fileset dir=".">
                 <include name="resources/**"/>
@@ -292,7 +310,7 @@
         </jar>
 
         <!-- clean up the demojar folder -->
-        <delete dir="demojar"/>
+        <!--<delete dir="demojar"/>-->
 	</target>
 
 
@@ -346,6 +364,14 @@
             <arg value="java14_glazedlists/extensions/jfreechart/source"/>
         </java>
 
+        <!-- Declaw nachocalendar/ -->
+        <mkdir dir="java14_glazedlists/extensions/nachocalendar/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/nachocalendar/source"/>
+            <arg value="classes${path.separator}extensions/nachocalendar/lib/nachocalendar.jar"/>
+            <arg value="java14_glazedlists/extensions/nachocalendar/source"/>
+        </java>
+
         <!-- Declaw jgoodiesforms/ -->
         <mkdir dir="java14_glazedlists/extensions/jgoodiesforms/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
@@ -358,7 +384,7 @@
         <mkdir dir="java14_glazedlists/extensions/issuesbrowser/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/issuesbrowser/source"/>
-            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar"/>
+            <arg value="classes${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/nachocalendar/lib/nachocalendar.jar"/>
             <arg value="java14_glazedlists/extensions/issuesbrowser/source"/>
         </java>
 

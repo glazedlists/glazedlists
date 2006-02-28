@@ -3,10 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.*;
 // for access to volatile classes
-import ca.odell.glazedlists.impl.matchers.*;
+import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.impl.beans.BeanMatcher;
+import ca.odell.glazedlists.impl.matchers.FalseMatcher;
+import ca.odell.glazedlists.impl.matchers.NotMatcher;
+import ca.odell.glazedlists.impl.matchers.RangeMatcher;
+import ca.odell.glazedlists.impl.matchers.TrueMatcher;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -56,6 +59,36 @@ public final class Matchers {
      */
     public static <E> Matcher<E> beanPropertyMatcher(Class<E> beanClass, String propertyName, Object matchValue) {
         return new BeanMatcher<E>(beanClass, propertyName, matchValue);
+    }
+
+    /**
+     * Creates a {@link Matcher} that matches {@link Comparable} objects for
+     * containment within the range between the given <code>start</code>
+     * and <code>end</code>.
+     */
+    public static <D extends Comparable,E> Matcher<E> rangeMatcher(D start, D end) {
+        return new RangeMatcher<D,E>(start, end);
+    }
+
+    /**
+     * Creates a {@link Matcher} that uses the given <code>filterator</code>
+     * to extract {@link Comparable} objects from filtered objects and compares
+     * those Comparables against the range between the given <code>start</code>
+     * and <code>end</code>. If at least one Comparable returned by the
+     * <code>filterator</code> is within the range, the object is considered
+     * a match.
+     *
+     * <p><code>null</code> <code>start</code> or <code>end</code> values are
+     * allowed and are interpreted as <code>"no start"</code> or
+     * <code>"no end"</code> to the range respectively.
+     *
+     * @param start the {@link Comparable} which starts the range
+     * @param end the {@link Comparable} which ends the range
+     * @param filterator the logic for extracting filter {@link Comparable}s
+     *      from filtered objects
+     */
+    public static <D extends Comparable,E> Matcher<E> rangeMatcher(D start, D end, Filterator<D,E> filterator) {
+        return new RangeMatcher<D,E>(start, end, filterator);
     }
 
     /**

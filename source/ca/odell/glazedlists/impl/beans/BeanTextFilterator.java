@@ -7,6 +7,7 @@ package ca.odell.glazedlists.impl.beans;
 import java.util.*;
 // To implement the interface
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.Filterator;
 
 /**
  * TextFilterator implementation that uses reflection to be used for any
@@ -14,7 +15,7 @@ import ca.odell.glazedlists.TextFilterator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class BeanTextFilterator<E> implements TextFilterator<E> {
+public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,E> {
 
     /** Java Beans property names */
     private String[] propertyNames;
@@ -29,10 +30,7 @@ public class BeanTextFilterator<E> implements TextFilterator<E> {
         this.propertyNames = propertyNames;
     }
 
-    /**
-     * Gets the specified object as a list of Strings. These Strings should contain
-     * all object information so that it can be compared to the filter set.
-     */
+    /** {@inheritDoc} */
     public void getFilterStrings(List<String> baseList, E element) {
         if(element == null) return;
 
@@ -44,6 +42,21 @@ public class BeanTextFilterator<E> implements TextFilterator<E> {
             Object propertyValue = beanProperties[p].get(element);
             if(propertyValue == null) continue;
             baseList.add(propertyValue.toString());
+        }
+    }
+
+    /** {@inheritDoc} */
+    public void getFilterValues(List<D> baseList, E element) {
+        if(element == null) return;
+
+        // load the property descriptors on first request
+        if(beanProperties == null) loadPropertyDescriptors(element);
+
+        // get the filter strings
+        for(int p = 0; p < beanProperties.length; p++) {
+            Object propertyValue = beanProperties[p].get(element);
+            if(propertyValue == null) continue;
+            baseList.add((D)propertyValue);
         }
     }
 

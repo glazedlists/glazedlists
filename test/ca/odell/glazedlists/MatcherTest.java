@@ -1,7 +1,7 @@
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.matchers.*;
 import ca.odell.glazedlists.impl.matchers.NotMatcher;
+import ca.odell.glazedlists.matchers.*;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -83,7 +83,6 @@ public class MatcherTest extends TestCase {
         result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(35)));
         assertEquals(false, result);
         assertEquals(0, elements.size());
-
     }
 
     public void testPropertyMatcher() {
@@ -94,6 +93,41 @@ public class MatcherTest extends TestCase {
         assertEquals(false, matcher.matches(Arrays.asList(new Object[] { "B" })));
         assertEquals(true, matcher.matches(Collections.EMPTY_SET));
         assertEquals(false, matcher.matches(null));
+    }
+
+    public void testDateRangeMatcher() {
+        Matcher matcher = Matchers.rangeMatcher(new Date(10000), new Date(20000));
+        assertEquals(false, matcher.matches(new Date(9999)));
+        assertEquals(true, matcher.matches(new Date(10000)));
+        assertEquals(true, matcher.matches(new Date(15000)));
+        assertEquals(true, matcher.matches(new Date(20000)));
+        assertEquals(false, matcher.matches(new Date(20001)));
+        assertEquals(true, matcher.matches(null));
+
+        matcher = Matchers.rangeMatcher(null, new Date(20000));
+        assertEquals(true, matcher.matches(new Date(-9999)));
+        assertEquals(true, matcher.matches(new Date(9999)));
+        assertEquals(true, matcher.matches(new Date(10000)));
+        assertEquals(true, matcher.matches(new Date(15000)));
+        assertEquals(true, matcher.matches(new Date(20000)));
+        assertEquals(false, matcher.matches(new Date(20001)));
+        assertEquals(true, matcher.matches(null));
+
+        matcher = Matchers.rangeMatcher(new Date(10000), null);
+        assertEquals(false, matcher.matches(new Date(9999)));
+        assertEquals(true, matcher.matches(new Date(10000)));
+        assertEquals(true, matcher.matches(new Date(15000)));
+        assertEquals(true, matcher.matches(new Date(20000)));
+        assertEquals(true, matcher.matches(new Date(20001)));
+        assertEquals(true, matcher.matches(null));
+
+        matcher = Matchers.rangeMatcher(null, null);
+        assertEquals(true, matcher.matches(new Date(9999)));
+        assertEquals(true, matcher.matches(new Date(10000)));
+        assertEquals(true, matcher.matches(new Date(15000)));
+        assertEquals(true, matcher.matches(new Date(20000)));
+        assertEquals(true, matcher.matches(new Date(20001)));
+        assertEquals(true, matcher.matches(null));
     }
 
     private class NumberMatcherEditor extends AbstractMatcherEditor<Number> {
@@ -114,13 +148,13 @@ public class MatcherTest extends TestCase {
         }
     }
 
-    private class CapitalizedStringMatcher implements Matcher<String> {
+    private static class CapitalizedStringMatcher implements Matcher<String> {
         public boolean matches(String item) {
             return item != null && item.length() > 0 && Character.isUpperCase(item.charAt(0));
         }
     }
 
-    private class OnMatcher implements Matcher<Boolean> {
+    private static class OnMatcher implements Matcher<Boolean> {
         public boolean matches(Boolean item) {
             return item != null && item.booleanValue();
         }

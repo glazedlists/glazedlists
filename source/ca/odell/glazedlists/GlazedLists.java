@@ -253,7 +253,15 @@ public final class GlazedLists {
      * properties.
      */
     public static <E> TextFilterator<E> textFilterator(String[] propertyNames) {
-        return new BeanTextFilterator<E>(propertyNames);
+        return new BeanTextFilterator<Object,E>(propertyNames);
+    }
+
+    /**
+     * Creates a {@link TextFilterator} that searches the given JavaBean
+     * properties.
+     */
+    public static <D,E> Filterator<D,E> filterator(String[] propertyNames) {
+        return new BeanTextFilterator<D,E>(propertyNames);
     }
 
     /**

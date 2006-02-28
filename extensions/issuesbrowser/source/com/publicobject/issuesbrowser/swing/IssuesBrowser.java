@@ -136,7 +136,7 @@ public class IssuesBrowser implements Runnable {
         // create a frame with that panel
         frame = new JFrame("Issues");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(1024, 600);
         frame.setLocationRelativeTo(null);
         frame.getContentPane().setLayout(new GridBagLayout());
         frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -168,9 +168,10 @@ public class IssuesBrowser implements Runnable {
         issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(300);
         issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(300);
         issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(400);
-        issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(400);
         issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(300);
-        issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(2000);
+        issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(6).setPreferredWidth(1000);
         // turn off cell focus painting
         issuesJTable.setDefaultRenderer(String.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(String.class)));
         issuesJTable.setDefaultRenderer(Integer.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(Integer.class)));
@@ -270,20 +271,32 @@ public class IssuesBrowser implements Runnable {
      * When started via a main method, this creates a standalone issues browser.
      */
     public static void main(final String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception e) {
-                    // do nothing - fall back to default look and feel
-                }
+        SwingUtilities.invokeLater(new IssuesBrowserStarter(args));
+    }
 
-                // load the issues and display the browser
-                final IssuesBrowser browser = new IssuesBrowser();
-                browser.setStartupArgs(args);
-                browser.run();
+    /**
+     * This Runnable contains the logic to start the IssuesBrowser application.
+     * It is guaranteed to be executed on the EventDispatch Thread.
+     */
+    private static class IssuesBrowserStarter implements Runnable {
+        private final String[] args;
+
+        public IssuesBrowserStarter(String[] args) {
+            this.args = args;
+        }
+
+        public void run() {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                // do nothing - fall back to default look and feel
             }
-        });
+
+            // load the issues and display the browser
+            final IssuesBrowser browser = new IssuesBrowser();
+            browser.setStartupArgs(args);
+            browser.run();
+        }
     }
 
     /**

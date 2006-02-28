@@ -3,21 +3,18 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-import com.publicobject.issuesbrowser.Issue;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.ColumnSpec;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.swing.JEventListPanel;
 import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.swing.JEventListPanel;
+import com.publicobject.issuesbrowser.Issue;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Manage a bunch of issue filters in a panel.
@@ -33,12 +30,13 @@ class FilterPanel {
     private JPanel filtersPanel;
     private JScrollPane filtersScrollPane;
 
-    public FilterPanel(EventList issues) {
+    public FilterPanel(EventList<Issue> issues) {
         // create a MatcherEditor which edits the filter text
         this.filterComponents.add(new CloseableFilterComponent<Issue>(new StatusMatcherEditor(issues)));
         this.filterComponents.add(new CloseableFilterComponent<Issue>(new TextFilterComponent()));
         this.filterComponents.add(new CloseableFilterComponent<Issue>(new SwingUsersMatcherEditor(issues)));
         this.filterComponents.add(new CloseableFilterComponent<Issue>(new PriorityMatcherEditor()));
+        this.filterComponents.add(new CloseableFilterComponent<Issue>(new CreationDateMatcherEditor()));
 
         EventList<MatcherEditor<Issue>> matcherEditors = new FunctionList<CloseableFilterComponent<Issue>,MatcherEditor<Issue>>(filterComponents, new CloseableFilterComponentToMatcherEditor<Issue>());
         this.matcherEditor = new CompositeMatcherEditor<Issue>(matcherEditors);
