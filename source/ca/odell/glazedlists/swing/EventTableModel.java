@@ -237,14 +237,24 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         if(tableFormat instanceof WritableTableFormat) {
             swingThreadSource.getReadWriteLock().writeLock().lock();
             try {
-                WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
+                final WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
                 // get the object being edited from the source list
-                E baseObject = swingThreadSource.get(row);
+                final E baseObject = swingThreadSource.get(row);
+
+                // record the number of rows BEFORE the value is updated (to determine later if the baseObject gets filtered out)
+                final int rowCountBeforeEdit = this.getRowCount();
+
                 // tell the table format to set the value based on what it knows
-                E updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
-                // update the list with the revised value
+                final E updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
+
+                // try to update the list with the revised value
                 if(updatedObject != null) {
-                    swingThreadSource.set(row, updatedObject);
+                    // check if updating the baseObject has caused it to be filtered out of this table model
+                    final boolean baseObjectFilteredOut = rowCountBeforeEdit != this.getRowCount();
+
+                    // if the row is still present, update it
+                    if(!baseObjectFilteredOut)
+                        swingThreadSource.set(row, updatedObject);
                 }
             } finally {
                 swingThreadSource.getReadWriteLock().writeLock().unlock();
