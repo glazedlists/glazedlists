@@ -72,7 +72,7 @@ public class EventTableModelTest extends SwingTestCase {
         } catch (IndexOutOfBoundsException e) { }
     }
 
-    public void guiTestSetValueAt() {
+    public void guiTestSetValueAt_FilterList() {
         final EventList<JLabel> labels = new BasicEventList<JLabel>();
         labels.add(new JLabel("saskatchewan"));
         labels.add(new JLabel("saskwatch"));
@@ -93,6 +93,34 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals(2, tableModel.getRowCount());
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
         assertEquals("sasky", tableModel.getValueAt(1, 0));
+
+        tableModel.setValueAt("maskwatch", 1, 0);
+        assertEquals(1, tableModel.getRowCount());
+        assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
+    }
+
+    public void guiTestSetValueAt_SortedList() {
+        final EventList<JLabel> labels = new BasicEventList<JLabel>();
+        labels.add(new JLabel("banana"));
+        labels.add(new JLabel("cherry"));
+        labels.add(new JLabel("apple"));
+
+        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<JLabel>(labels, GlazedLists.beanConnector(JLabel.class));
+
+        final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(observedLabels, GlazedLists.beanPropertyComparator(JLabel.class, "text"));
+
+        final EventTableModel tableModel = new EventTableModel<JLabel>(sortedLabels, new SaskTableFormat());
+
+        assertEquals(3, tableModel.getRowCount());
+        assertEquals("apple", tableModel.getValueAt(0, 0));
+        assertEquals("banana", tableModel.getValueAt(1, 0));
+        assertEquals("cherry", tableModel.getValueAt(2, 0));
+
+        tableModel.setValueAt("orange", 1, 0);
+        assertEquals(3, tableModel.getRowCount());
+        assertEquals("apple", tableModel.getValueAt(0, 0));
+        assertEquals("cherry", tableModel.getValueAt(1, 0));
+        assertEquals("orange", tableModel.getValueAt(2, 0));
     }
 
     private static final class SaskTableFormat implements WritableTableFormat<JLabel> {

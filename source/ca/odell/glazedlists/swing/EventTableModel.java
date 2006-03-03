@@ -241,19 +241,17 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
                 // get the object being edited from the source list
                 final E baseObject = swingThreadSource.get(row);
 
-                // record the number of rows BEFORE the value is updated (to determine later if the baseObject gets filtered out)
-                final int rowCountBeforeEdit = this.getRowCount();
-
                 // tell the table format to set the value based on what it knows
                 final E updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
 
                 // try to update the list with the revised value
                 if(updatedObject != null) {
-                    // check if updating the baseObject has caused it to be filtered out of this table model
-                    final boolean baseObjectFilteredOut = rowCountBeforeEdit != this.getRowCount();
+                    // check if updating the baseObject has caused it to be removed from this
+                    // TableModel (FilterList) or moved to another location (SortedList)
+                    final boolean baseObjectHasNotMoved = row < this.getRowCount() && swingThreadSource.get(row) == updatedObject;
 
                     // if the row is still present, update it
-                    if(!baseObjectFilteredOut)
+                    if(baseObjectHasNotMoved)
                         swingThreadSource.set(row, updatedObject);
                 }
             } finally {
