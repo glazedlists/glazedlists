@@ -476,24 +476,29 @@ public class IssuesBrowser implements Runnable {
      * probable cause and how to configure Java to use a proxy server.
      */
     private class AccessControlExceptionHandler implements Exceptions.Handler {
-        // sample message: "access denied (java.net.SocketPermission javacc.dev.java.net resolve)"
-        private final Matcher messageMatcher = Pattern.compile(".*access denied \\p{Punct}java.net.SocketPermission (.*) resolve\\p{Punct}").matcher("");
+        // sample message 1: "access denied (java.net.SocketPermission javacc.dev.java.net resolve)"
+        // sample message 2: "access denied (java.net.SocketPermission beavertn-svr-eh.ad.nike.com:8080 connect,resolve)"
+        private final Matcher messageMatcher = Pattern.compile(".*access denied \\p{Punct}java.net.SocketPermission (\\S*) (.*)").matcher("");
 
         public boolean recognize(Exception e) {
             return e instanceof AccessControlException && messageMatcher.reset(e.getMessage()).matches();
         }
 
         public void handle(Exception e) {
-            final String title = "Unable to resolve the address of the Host";
+            final String title = "Unable to connect to Host";
 
             final String message;
             final String osname = System.getProperty("os.name");
             if (osname != null && osname.toLowerCase().contains("windows")) {
+                final String hostname = messageMatcher.group(1);
+
                 // explain how to configure a Proxy Server for Java on Windows
-                message = "If connecting to the Internet via a proxy server,\n" +
+                message = MessageFormat.format(
+                          "Insufficient security privileges to connect to:\n\n\t{0} \n\n" +
+                          "If connecting to the Internet via a proxy server,\n" +
                           "ensure you have configured Java correctly in\n" +
                           "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
-                          "You must restart this application if you adjust the settings.";
+                          "You must restart this application if you adjust the settings.", new Object[] {hostname});
             } else {
                 message = "Please check your Internet connection settings.";
             }

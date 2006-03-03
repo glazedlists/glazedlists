@@ -7,11 +7,10 @@ package com.publicobject.issuesbrowser;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 
-import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
-import java.net.ConnectException;
 import java.security.AccessControlException;
 
 /**
@@ -31,7 +30,7 @@ public class IssueLoader implements Runnable {
     private Thread issueLoaderThread = null;
     private EventList issuesList = null;
 
-    public IssueLoader(EventList issuesList, Throbber throbber) {
+    public IssueLoader(EventList<Issue> issuesList, Throbber throbber) {
         this.issuesList = GlazedLists.threadSafeList(issuesList);
         this.throbber = throbber;
     }
@@ -62,7 +61,7 @@ public class IssueLoader implements Runnable {
 
     public void run() {
         // loop forever, loading projects
-        Project currentProject = null;
+        Project currentProject;
         while(true) {
             try {
                 // get a project to load
@@ -85,11 +84,9 @@ public class IssueLoader implements Runnable {
                 issuesList.clear();
                 if(currentProject.getFileName() != null) {
                     IssuezillaXMLParser.loadIssues(issuesList, new FileInputStream(currentProject.getFileName()), currentProject);
-
                 } else {
                     IssuezillaXMLParser.loadIssues(issuesList, currentProject.getXMLUri(), currentProject);
                 }
-
 
             // handling interruptions is really gross
             } catch (UnknownHostException e) {
@@ -109,6 +106,7 @@ public class IssueLoader implements Runnable {
                 } else {
                     Exceptions.getInstance().handle(e);
                 }
+
             } catch (RuntimeException e) {
                 if(e.getCause() instanceof InterruptedException) {
                     // do nothing, we were just interrupted as expected
@@ -117,8 +115,10 @@ public class IssueLoader implements Runnable {
                 } else {
                     throw e;
                 }
+
             } catch(InterruptedException e) {
                 // do nothing, we were just interrupted as expected
+
             } finally {
                 // stop the progress bar no matter what
                 throbber.setOff();
