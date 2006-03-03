@@ -1,26 +1,26 @@
 package ca.odell.glazedlists.impl.matchers;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.impl.beans.BeanProperty;
+import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.beans.BeanProperty;
+import ca.odell.glazedlists.matchers.Matchers;
+import junit.framework.TestCase;
 
 public class BeanPropertyMatcherTest extends TestCase {
 
     public void testConstructor() {
-        new BeanPropertyMatcher(new BeanProperty(Dog.class, "legs", true, false), new Integer(4));
-        new BeanPropertyMatcher(new BeanProperty(Dog.class, "name", true, false), null);
+        new BeanPropertyMatcher<Dog>(new BeanProperty<Dog>(Dog.class, "legs", true, false), new Integer(4));
+        new BeanPropertyMatcher<Dog>(new BeanProperty<Dog>(Dog.class, "name", true, false), null);
 
         try {
-            new BeanPropertyMatcher(null, "should fail");
+            new BeanPropertyMatcher<Dog>(null, "should fail");
             fail("failed to receive IllegalArgumentException on null BeanProperty");
         } catch (IllegalArgumentException iae) { }
     }
 
     public void testMatching() {
-        final EventList dogs = new FilterList(new BasicEventList(), GlazedLists.beanPropertyMatcher(Dog.class, "name", "Fido"));
+        final EventList<Dog> dogs = new FilterList<Dog>(new BasicEventList<Dog>(), Matchers.beanPropertyMatcher(Dog.class, "name", "Fido"));
 
         assertEquals(0, dogs.size());
 
