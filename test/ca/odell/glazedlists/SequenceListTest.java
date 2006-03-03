@@ -6,17 +6,17 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import junit.framework.TestCase;
 
-import java.util.Date;
 import java.util.Comparator;
+import java.util.Date;
 
 public class SequenceListTest extends TestCase {
 
-    private static final Date apr = new Date(106, 3, 15);
-    private static final Date may = new Date(106, 4, 15);
-    private static final Date jun = new Date(106, 5, 15);
-    private static final Date jul = new Date(106, 6, 15);
-    private static final Date aug = new Date(106, 7, 15);
-    private static final Date sep = new Date(106, 8, 15);
+    private static final Date apr = GlazedListsTests.createDate(2006, 3, 15);
+    private static final Date may = GlazedListsTests.createDate(2006, 4, 15);
+    private static final Date jun = GlazedListsTests.createDate(2006, 5, 15);
+    private static final Date jul = GlazedListsTests.createDate(2006, 6, 15);
+    private static final Date aug = GlazedListsTests.createDate(2006, 7, 15);
+    private static final Date sep = GlazedListsTests.createDate(2006, 8, 15);
 
     public void testConstructor() {
         try {

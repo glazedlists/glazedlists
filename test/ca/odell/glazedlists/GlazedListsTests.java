@@ -5,10 +5,7 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.matchers.Matcher;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Comparator;
+import java.util.*;
 import java.io.*;
 
 /**
@@ -150,4 +147,12 @@ public class GlazedListsTests {
         }
     }
 
+    public static Date createDate(int year, int month, int date) {
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month);
+        cal.set(Calendar.DATE, date);
+        return cal.getTime();
+    }
 }
