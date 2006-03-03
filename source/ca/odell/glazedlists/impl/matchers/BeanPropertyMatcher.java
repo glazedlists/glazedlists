@@ -3,10 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.matchers;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.matchers.*;
+import ca.odell.glazedlists.impl.beans.BeanProperty;
+import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * A {@link Matcher} which uses a {@link BeanProperty} to read a bean property
@@ -15,15 +14,19 @@ import ca.odell.glazedlists.matchers.*;
  *
  * @author James Lemieux
  */
-public final class BeanPropertyMatcher implements Matcher {
+public final class BeanPropertyMatcher<E> implements Matcher<E> {
 
     /** The BeanProperty containing logic for extracting the property value from an item. */
-    private final BeanProperty beanProperty;
+    private final BeanProperty<E> beanProperty;
 
     /** The value with which to compare the bean property. */
     private final Object value;
 
-    public BeanPropertyMatcher(BeanProperty beanProperty, Object value) {
+    /**
+     * Create a new {@link Matcher} that matches whenever the given property
+     * equals the given <code>value</code>.
+     */
+    public BeanPropertyMatcher(BeanProperty<E> beanProperty, Object value) {
         if (beanProperty == null)
             throw new IllegalArgumentException("beanProperty may not be null");
         
@@ -31,7 +34,8 @@ public final class BeanPropertyMatcher implements Matcher {
         this.value = value;
     }
 
-    public boolean matches(Object item) {
+    /** {@inheritDoc} */
+    public boolean matches(E item) {
         return GlazedListsImpl.equal(this.beanProperty.get(item), this.value);
     }
 }

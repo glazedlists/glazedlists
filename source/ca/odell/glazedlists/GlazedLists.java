@@ -434,9 +434,14 @@ public final class GlazedLists {
      * @param propertyName the name of the bean property
      * @param value the value to compare with the bean property
      * @return <tt>true</tt> if the named bean property equals the given <code>value</code>
+     *
+     * @deprecated as of 3/3/2006 - this method has been replaced by
+     *      {@link Matchers#beanPropertyMatcher}. {@link Matchers} is now
+     *      the permanent factory class which creates all basic Matcher
+     *      implementations.
      */
     public static <E> Matcher<E> beanPropertyMatcher(Class<E> beanClass, String propertyName, Object value) {
-        return new BeanPropertyMatcher(new BeanProperty<E>(beanClass, propertyName, true, false), value);
+        return Matchers.beanPropertyMatcher(beanClass, propertyName, value);
     }
 
     /**

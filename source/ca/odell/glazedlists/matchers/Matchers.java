@@ -5,11 +5,8 @@ package ca.odell.glazedlists.matchers;
 
 // for access to volatile classes
 import ca.odell.glazedlists.Filterator;
-import ca.odell.glazedlists.impl.beans.BeanMatcher;
-import ca.odell.glazedlists.impl.matchers.FalseMatcher;
-import ca.odell.glazedlists.impl.matchers.NotMatcher;
-import ca.odell.glazedlists.impl.matchers.RangeMatcher;
-import ca.odell.glazedlists.impl.matchers.TrueMatcher;
+import ca.odell.glazedlists.impl.beans.BeanProperty;
+import ca.odell.glazedlists.impl.matchers.*;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -58,7 +55,7 @@ public final class Matchers {
      * it doesn't.
      */
     public static <E> Matcher<E> beanPropertyMatcher(Class<E> beanClass, String propertyName, Object matchValue) {
-        return new BeanMatcher<E>(beanClass, propertyName, matchValue);
+        return new BeanPropertyMatcher<E>(new BeanProperty<E>(beanClass, propertyName, true, false), matchValue);
     }
 
     /**
