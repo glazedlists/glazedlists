@@ -36,6 +36,11 @@ public class BeanProperty<T> {
      * specified class.
      */
     public BeanProperty(Class<T> beanClass, String propertyName, boolean readable, boolean writable) {
+        if (beanClass == null)
+            throw new IllegalArgumentException("beanClass may not be null");
+        if (propertyName == null)
+            throw new IllegalArgumentException("propertyName may not be null");
+
         this.beanClass = beanClass;
         this.propertyName = propertyName;
 
@@ -72,7 +77,7 @@ public class BeanProperty<T> {
      * Finds a getter of the specified property on the specified class.
      */
     private Method findGetterMethod(Class targetClass, String property) {
-        Method result = null;
+        Method result;
 
         Class currentClass = targetClass;
         while(currentClass != null) {

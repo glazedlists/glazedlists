@@ -10,11 +10,16 @@ import junit.framework.TestCase;
 public class BeanPropertyMatcherTest extends TestCase {
 
     public void testConstructor() {
-        new BeanPropertyMatcher<Dog>(new BeanProperty<Dog>(Dog.class, "legs", true, false), new Integer(4));
-        new BeanPropertyMatcher<Dog>(new BeanProperty<Dog>(Dog.class, "name", true, false), null);
+        new BeanPropertyMatcher<Dog>(Dog.class, "legs", new Integer(4));
+        new BeanPropertyMatcher<Dog>(Dog.class, "name", null);
 
         try {
-            new BeanPropertyMatcher<Dog>(null, "should fail");
+            new BeanPropertyMatcher<Dog>(null, "name", "should fail");
+            fail("failed to receive IllegalArgumentException on null BeanProperty");
+        } catch (IllegalArgumentException iae) { }
+
+        try {
+            new BeanPropertyMatcher<Dog>(Dog.class, null, "should fail");
             fail("failed to receive IllegalArgumentException on null BeanProperty");
         } catch (IllegalArgumentException iae) { }
     }
