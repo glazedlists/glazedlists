@@ -248,7 +248,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
                 if(updatedObject != null) {
                     // check if updating the baseObject has caused it to be removed from this
                     // TableModel (FilterList) or moved to another location (SortedList)
-                    final boolean baseObjectHasNotMoved = row < this.getRowCount() && swingThreadSource.get(row) == updatedObject;
+                    final boolean baseObjectHasNotMoved = row < this.getRowCount() && swingThreadSource.get(row) == baseObject;
 
                     // if the row is still present, update it
                     if(baseObjectHasNotMoved)

@@ -99,6 +99,33 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
     }
 
+    public void guiTestSetValueAtWithCopyingTableFormat_FilterList() {
+        final EventList<JLabel> labels = new BasicEventList<JLabel>();
+        labels.add(new JLabel("saskatchewan"));
+        labels.add(new JLabel("saskwatch"));
+        labels.add(new JLabel("sasky"));
+
+        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<JLabel>(labels, GlazedLists.beanConnector(JLabel.class));
+
+        final FilterList<JLabel> saskLabels = new FilterList<JLabel>(observedLabels, new SaskLabelMatcher());
+
+        final EventTableModel tableModel = new EventTableModel<JLabel>(saskLabels, new CopyingSaskTableFormat());
+
+        assertEquals(3, tableModel.getRowCount());
+        assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
+        assertEquals("saskwatch", tableModel.getValueAt(1, 0));
+        assertEquals("sasky", tableModel.getValueAt(2, 0));
+
+        tableModel.setValueAt("maskwatch", 1, 0);
+        assertEquals(2, tableModel.getRowCount());
+        assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
+        assertEquals("sasky", tableModel.getValueAt(1, 0));
+
+        tableModel.setValueAt("maskwatch", 1, 0);
+        assertEquals(1, tableModel.getRowCount());
+        assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
+    }
+
     public void guiTestSetValueAt_SortedList() {
         final EventList<JLabel> labels = new BasicEventList<JLabel>();
         labels.add(new JLabel("banana"));
@@ -123,6 +150,25 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals("orange", tableModel.getValueAt(2, 0));
     }
 
+    /**
+     * This TableFormat returns new JLabels from its setValueAt()
+     * method rather than modifying the existing one in place.
+     */
+    private static final class CopyingSaskTableFormat implements WritableTableFormat<JLabel> {
+        public boolean isEditable(JLabel baseObject, int column) { return true; }
+
+        public JLabel setColumnValue(JLabel baseObject, Object editedValue, int column) {
+            return new JLabel(editedValue == null ? null : editedValue.toString());
+        }
+
+        public int getColumnCount() { return 1; }
+        public String getColumnName(int column) { return "Label Text"; }
+        public Object getColumnValue(JLabel baseObject, int column) { return baseObject.getText(); }
+    }
+
+    /**
+     * This TableFormat modifyies existing JLabels in place.
+     */
     private static final class SaskTableFormat implements WritableTableFormat<JLabel> {
         public boolean isEditable(JLabel baseObject, int column) { return true; }
 
