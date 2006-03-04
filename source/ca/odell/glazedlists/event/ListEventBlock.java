@@ -136,40 +136,38 @@ final class ListEventBlock {
      */
     static void sortListEventBlocks(List<ListEventBlock> changes, boolean allowContradictingEvents) {
         // bubblesort the changes
-        for(int i = 0; i < changes.size() - 1; i++) {
-            if(i < 0) i = 0;
-            for(int j = i; j >= 0; ) {
+        while(true) {
+            // count the number of swaps made on this repetition
+            int swapCount = 0;
+            // for each adjacent pair, make any swaps necessary
+            int j = 0;
+            while(j < changes.size() - 1) {
                 ListEventBlock first = changes.get(j);
                 ListEventBlock second = changes.get(j+1);
-                
+
                 if(blocksContradict(first, second)) {
-                    if(!allowContradictingEvents) {
-                        throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
-                    }
-                    List<ListEventBlock> contradictingPair = changes.subList(j, j + 2);
-                    simplifyContradiction(contradictingPair);
-                    if(contradictingPair.size() == 0) { i -= 2; break; }
-                    else if(contradictingPair.size() == 1) { i -= 1; j--; }
-                    else if(contradictingPair.size() == 2) { i -= 1; j--; }
+                    if(!allowContradictingEvents) throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
+                    simplifyContradiction(changes.subList(j, j+2));
+                    swapCount++;
                 } else if(requiresSplit(first, second)) {
                     ListEventBlock third = split(first, second);
                     changes.add(j+2, third);
-                    i--;
-                    j++;
                 } else if(canBeCombined(first, second)) {
                     combine(first, second);
                     changes.remove(j+1);
-                    i--;
-                    j--;
+                    if(j > 0) j--;
                 } else if(requiresSwap(first, second)) {
+                    swapCount++;
                     shift(first, second);
                     changes.set(j, second);
                     changes.set(j+1, first);
-                    j--;
+                    j++;
                 } else {
-                    break;
+                    j++;
                 }
             }
+            // we're done if there were no changes this iteration
+            if(swapCount == 0) break;
         }
     }
 

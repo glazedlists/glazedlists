@@ -28,6 +28,7 @@ public class Project {
 		projects.add(new Project("jdic", "JavaDesktop Integration Components"));
 		projects.add(new Project("jdnc", "JavaDesktop Network Components"));
 		projects.add(new Project("javanettasks", "Java.Net Tasks"));
+		projects.add(new Project("swingx", "SwingX"));
     }
 
     private String projectName = null;
