@@ -327,7 +327,6 @@ public class IssuesBrowser implements Runnable {
         }
     }
 
-
     /**
      * A custom label designed for displaying the number of issues in the issue
      * table. Use {@link #setIssueCount(int)} to update the text of the label
@@ -391,6 +390,15 @@ public class IssuesBrowser implements Runnable {
     }
 
     /**
+     * Returns <tt>true</tt> if this application is executing on a Windows
+     * operating system; <tt>false</tt> otherwise.
+     */
+    private static boolean isWindowsOS() {
+        final String osname = System.getProperty("os.name");
+        return osname != null && osname.toLowerCase().indexOf("windows") == 0;
+    }
+
+    /**
      * An abstract Exceptions.Handler for all types of Exceptions that indicate
      * a connection to the internet could not be establishedd. It displays an
      * informative message stating how to configure Java to use a proxy
@@ -401,8 +409,7 @@ public class IssuesBrowser implements Runnable {
             final String title = "Unable to connect to the Internet";
 
             final String message;
-            final String osname = System.getProperty("os.name");
-            if (osname != null && osname.toLowerCase().contains("windows")) {
+            if (isWindowsOS()) {
                 // explain how to configure a Proxy Server for Java on Windows
                 message = "If connecting to the Internet via a proxy server,\n" +
                           "ensure you have configured Java correctly in\n" +
@@ -452,8 +459,7 @@ public class IssuesBrowser implements Runnable {
             final String title = "Unable to find a route to the Host";
 
             final String message;
-            final String osname = System.getProperty("os.name");
-            if (osname != null && osname.toLowerCase().contains("windows")) {
+            if (isWindowsOS()) {
                 // explain how to configure a Proxy Server for Java on Windows
                 message = "Typically, the remote host cannot be reached because of an\n" +
                           "intervening firewall, or if an intermediate router is down.\n\n" +
@@ -472,8 +478,8 @@ public class IssuesBrowser implements Runnable {
 
     /**
      * An Exceptions.Handler for an AccessControlException when attempting to resolve
-     * a hostname to an IP address that displays an informative message stating the
-     * probable cause and how to configure Java to use a proxy server.
+     * a hostname to an IP address or connect to that IP. It displays an informative
+     * message stating the probable cause and how to configure Java to use a proxy server.
      */
     private class AccessControlExceptionHandler implements Exceptions.Handler {
         // sample message 1: "access denied (java.net.SocketPermission javacc.dev.java.net resolve)"
@@ -488,8 +494,7 @@ public class IssuesBrowser implements Runnable {
             final String title = "Unable to connect to Host";
 
             final String message;
-            final String osname = System.getProperty("os.name");
-            if (osname != null && osname.toLowerCase().contains("windows")) {
+            if (isWindowsOS()) {
                 final String hostname = messageMatcher.group(1);
 
                 // explain how to configure a Proxy Server for Java on Windows
