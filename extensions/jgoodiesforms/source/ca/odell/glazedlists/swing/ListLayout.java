@@ -11,22 +11,19 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import java.util.List;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
+ * Layout list elements by delegating to a {@link FormLayout}. This layout manages
+ * the {@link ListLayout} by responding to list changes and shifting components
+ * around as elements are inserted or removed.
  *
- * Layout list elements.
- *
- * Constraints - relative constraints: indices as Integers
- * What about subconstraints?
- *
- * INTEGER
- * CELL CONSTRAINTS
- *
+ * <p>Note that this class is subject to significant API changes and improvements,
+ * and that only the {@link JEventListPanel} class should be referenced in
+ * client source code.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListLayout extends LayoutDecorator {
+class ListLayout extends LayoutDecorator {
 
     /** all components for the entire grid */
     private final List<CellComponents> gridComponents = new ArrayList<CellComponents>();
@@ -47,8 +44,13 @@ public class ListLayout extends LayoutDecorator {
 
     private Container container;
 
-    private static final int COLUMNS = 1;
+    private int elementColumns = 1;
+    private int elementRows = Integer.MAX_VALUE;
 
+    /**
+     * Layout the specified container using the specified format to manage
+     * rows, columns and constraints.
+     */
     public ListLayout(Container container, JEventListPanel.Format format) {
         this.container = container;
         this.format = format;
@@ -64,6 +66,66 @@ public class ListLayout extends LayoutDecorator {
         super.delegateLayout = formLayout;
     }
 
+    /**
+     * Set the number of columns the layout wraps over. If set, the layout will
+     * wrap from left to right, adding rows as necessary.
+     */
+    public void setElementColumns(int elementColumns) {
+        if(elementColumns == this.elementColumns) return;
+        setElementRowsAndColumns(Integer.MAX_VALUE, elementColumns);
+    }
+
+    /**
+     * Set the number of rows the layout wraps over. If set, the layout will
+     * wrap from top to bottom, adding rows as necessary.
+     */
+    public void setElementRows(int elementRows) {
+        if(elementRows == this.elementRows) return;
+        setElementRowsAndColumns(elementRows, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Adjust the number of logical rows and columns and how elements are wrapped
+     * into those cells.
+     */
+    private void setElementRowsAndColumns(int elementRows, int elementColumns) {
+        int logicalRowCountBefore = logicalRowCount();
+        int logicalColumnCountBefore = logicalColumnCount();
+        this.elementRows = elementRows;
+        this.elementColumns = elementColumns;
+
+        fixCellCount(logicalRowCountBefore, logicalColumnCountBefore);
+    }
+
+    /**
+     * We can improve this method by replacing the before counts as parameters
+     * by figuring out what the counts are by examining the layout.
+     */
+    private void fixCellCount(int logicalRowCountBefore, int logicalColumnCountBefore) {
+        int logicalColumnCountAfter = logicalColumnCount();
+        int logicalRowCountAfter = logicalRowCount();
+
+        // make sure we have enough cells
+        for(int r = logicalRowCountBefore; r < logicalRowCountAfter; r++) {
+            insertLogicalRow(r);
+        }
+        for(int c = logicalColumnCountBefore; c < logicalColumnCountAfter; c++) {
+            insertLogicalColumn(c);
+        }
+
+        // we have too many cells in one dimension, the perfect time to
+        // reassign constraints safely
+        reassignConstraints();
+
+        // make sure we don't have too many cells
+        for(int r = logicalRowCountBefore - 1; r >= logicalRowCountAfter; r--) {
+            removeLogicalRow(r);
+        }
+        for(int c = logicalColumnCountBefore - 1; c >= logicalColumnCountAfter; c--) {
+            removeLogicalColumn(c);
+        }
+    }
+
     private CellConstraints deriveCellConstraints(int component, int logicalColumn, int logicalRow) {
         CellConstraints constraints = format.getConstraints(component);
         constraints = (CellConstraints)constraints.clone();
@@ -72,6 +134,7 @@ public class ListLayout extends LayoutDecorator {
         return constraints;
     }
 
+    /** {@inheritDoc} */
     public void addLayoutComponent(Component component, Object constraints) {
         Constraints listLayoutConstraints = (Constraints)constraints;
         int index = listLayoutConstraints.getIndex();
@@ -86,16 +149,32 @@ public class ListLayout extends LayoutDecorator {
     }
 
     private int logicalColumn(int index) {
-        return index % COLUMNS;
+        if(elementRows == Integer.MAX_VALUE) {
+            return index % elementColumns;
+        } else {
+            return index / elementRows;
+        }
     }
     private int logicalRow(int index) {
-        return index / COLUMNS;
+        if(elementRows == Integer.MAX_VALUE) {
+            return index / elementColumns;
+        } else {
+            return index % elementRows;
+        }
     }
     private int logicalRowCount() {
-        return (gridComponents.size() + COLUMNS - 1) / COLUMNS;
+        if(elementRows == Integer.MAX_VALUE) {
+            return (gridComponents.size() + elementColumns - 1) / elementColumns;
+        } else {
+            return Math.min(gridComponents.size(), elementRows);
+        }
     }
     private int logicalColumnCount() {
-        return Math.min(gridComponents.size(), COLUMNS);
+        if(elementRows == Integer.MAX_VALUE) {
+            return Math.min(gridComponents.size(), elementColumns);
+        } else {
+            return (gridComponents.size() + elementRows - 1) / elementRows;
+        }
     }
     private void insertLogicalRow(int index) {
         int baseRow = logicalToLayoutRow(index);
@@ -161,42 +240,28 @@ public class ListLayout extends LayoutDecorator {
         else return (column * columnSpecs.length) + (gapColumn == null ? 0 : column - 1);
     }
 
+    /**
+     * Handle a list element being inserted by adjusting the layout.
+     */
     public void insertIndex(int index) {
         int logicalColumnCountBefore = logicalColumnCount();
         int logicalRowCountBefore = logicalRowCount();
 
         gridComponents.add(new CellComponents());
 
-        int logicalColumnCountAfter = logicalColumnCount();
-        int logicalRowCountAfter = logicalRowCount();
-
-        // make sure we have enough cells
-        if(logicalRowCountAfter > logicalRowCountBefore) {
-            insertLogicalRow(logicalRowCountAfter - 1);
-        }
-        if(logicalColumnCountAfter > logicalColumnCountBefore) {
-            insertLogicalColumn(logicalColumnCountAfter - 1);
-        }
-
-        reassignConstraints();
+        fixCellCount(logicalRowCountBefore, logicalColumnCountBefore);
     }
+
+    /**
+     * Handle a list element being removed by adjusting the layout.
+     */
     public void removeIndex(int index) {
         int logicalColumnCountBefore = logicalColumnCount();
         int logicalRowCountBefore = logicalRowCount();
 
         gridComponents.remove(index);
-        reassignConstraints();
 
-        int logicalColumnCountAfter = logicalColumnCount();
-        int logicalRowCountAfter = logicalRowCount();
-
-        // make sure we don't have too many cells
-        if(logicalRowCountAfter < logicalRowCountBefore) {
-            removeLogicalRow(logicalRowCountAfter);
-        }
-        if(logicalColumnCountAfter < logicalColumnCountBefore) {
-            removeLogicalColumn(logicalColumnCountAfter);
-        }
+        fixCellCount(logicalRowCountBefore, logicalColumnCountBefore);
     }
     private void reassignConstraints() {
         formLayout.invalidateLayout(container);
@@ -211,7 +276,9 @@ public class ListLayout extends LayoutDecorator {
         }
     }
 
-
+    /**
+     * Count the cells in the grid.
+     */
     public int size() {
         return gridComponents.size();
     }
@@ -242,6 +309,9 @@ public class ListLayout extends LayoutDecorator {
         private List<Constraints> constraints = new ArrayList<Constraints>(1);
     }
 
+    /**
+     * Map a {@link Component} to a list element and a location in the container.
+     */
     public static class Constraints {
         private int formConstraints;
         private int index;
@@ -251,56 +321,23 @@ public class ListLayout extends LayoutDecorator {
             this.index = index;
         }
 
+        /**
+         * The form constraints specifies which {@link CellConstraints}
+         * in the element cell belongs to this {@link Component}.
+         */
         public int getFormConstraints() {
             return formConstraints;
         }
 
+        /**
+         * The initial index of the element, it will become stale as other
+         * elements are added before it. It's only used the first time a
+         * component is used to find the appropriate {@link CellComponents}
+         * object.
+         */
         public int getIndex() {
             return index;
         }
     }
 }
 
-abstract class LayoutDecorator implements LayoutManager2 {
-    protected LayoutManager2 delegateLayout;
-
-    public void addLayoutComponent(Component component, Object constraints) {
-        delegateLayout.addLayoutComponent(component, constraints);
-    }
-
-    public Dimension maximumLayoutSize(Container target) {
-        return delegateLayout.maximumLayoutSize(target);
-    }
-
-    public float getLayoutAlignmentX(Container target) {
-        return delegateLayout.getLayoutAlignmentX(target);
-    }
-
-    public float getLayoutAlignmentY(Container target) {
-        return delegateLayout.getLayoutAlignmentY(target);
-    }
-
-    public void invalidateLayout(Container target) {
-        delegateLayout.invalidateLayout(target);
-    }
-
-    public void addLayoutComponent(String name, Component component) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void removeLayoutComponent(Component component) {
-        delegateLayout.removeLayoutComponent(component);
-    }
-
-    public Dimension preferredLayoutSize(Container container) {
-        return delegateLayout.preferredLayoutSize(container);
-    }
-
-    public Dimension minimumLayoutSize(Container container) {
-        return delegateLayout.minimumLayoutSize(container);
-    }
-
-    public void layoutContainer(Container container) {
-        delegateLayout.layoutContainer(container);
-    }
-}

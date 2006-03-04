@@ -63,7 +63,7 @@ public class JEventListPanelTest {
         sillyObjects.add("X 3");
         sillyObjects.add("X 9");
 
-        JPanel panel = new JEventListPanel(sillyObjects, new SillyObjectFormat());
+        JEventListPanel panel = new JEventListPanel(sillyObjects, new SillyObjectFormat());
         panel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.RED));
 
         JButton addButton = new JButton("ADD");

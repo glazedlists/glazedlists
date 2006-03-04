@@ -42,7 +42,7 @@ class FilterPanel {
         this.matcherEditor = new CompositeMatcherEditor<Issue>(matcherEditors);
 
         // create the filters panel
-        this.filtersPanel = new JEventListPanel<CloseableFilterComponent<Issue>>(filterComponents, createFormat());
+        this.filtersPanel = new JEventListPanel<CloseableFilterComponent<Issue>>(filterComponents, new CloseableFilterComponentPanelFormat<Issue>());
         this.filtersPanel.setBackground(IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN);
 
         this.filtersScrollPane = new JScrollPane(this.filtersPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -101,14 +101,21 @@ class FilterPanel {
         }
     }
 
-    private static JEventListPanel.Format<CloseableFilterComponent<Issue>> createFormat() {
-        String rowSpecs = "min, 2px, pref";
-        String columnSpecs = "2px, fill:pref:grow, 2px";
-        String gapRow = "4px";
-        String gapColumn = null;
-        String[] cellConstraints = new String[] { "1, 1, 3, 1", "2, 3" };
-        String[] properties = new String[] { "header", "component" };
-        return new JEventListPanel.BeanFormat(CloseableFilterComponent.class, rowSpecs, columnSpecs, gapRow, gapColumn, cellConstraints, properties);
+    /**
+     * Provide layout for {@link CloseableFilterComponent}s. 
+     */
+    private class CloseableFilterComponentPanelFormat<E> extends JEventListPanel.AbstractFormat<CloseableFilterComponent<E>> {
+        protected CloseableFilterComponentPanelFormat() {
+            setElementCells("min, 2px, pref", "2px, fill:pref:grow, 2px");
+            setGaps("4px", null);
+            setCellConstraints(new String[] { "1, 1, 3, 1", "2, 3" });
+        }
+
+        public JComponent getComponent(CloseableFilterComponent element, int component) {
+            if(component == 0) return element.getHeader();
+            else if(component == 1) return element.getComponent();
+            else throw new IllegalStateException();
+        }
     }
 
     /**

@@ -127,7 +127,7 @@ public class JSeparatorTable extends JTable {
         // stop edits when the table changes, or else we might
         // get a relocated edit in the wrong cell!
         if(isEditing()) {
-            super.getCellEditor().stopCellEditing();
+            super.getCellEditor().cancelCellEditing();
         }
 
         // handle the change event

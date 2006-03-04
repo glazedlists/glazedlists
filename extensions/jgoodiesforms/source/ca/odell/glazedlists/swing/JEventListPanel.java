@@ -10,7 +10,6 @@ import javax.swing.*;
 import com.jgoodies.forms.layout.*;
 // observable lists are used to store rules
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.event.*;
 
 /**
@@ -18,20 +17,20 @@ import ca.odell.glazedlists.event.*;
  *
  * <p>To use {@link JEventListPanel}:
  * <ol>
- *   <li>Create an {@link EventList} of {@link JComponent}s, or an {@link EventList}
- *       of objects which each reference a set of {@link JComponent}s.
+ *   <li>Create an {@link EventList} of {@link JComponent}s, or any
+ *       objects that reference a set of {@link JComponent}s.
  *   <li>Implement {@link JEventListPanel.Format} for the object's in your
  *       {@link EventList}. This interface defines how a single cell is layed out.
  *       Once the layout for a single cell is known, all cells can be tiled to
  *       show all of the {@link JComponent}s in your {@link EventList}.
  *   <li>Create an {@link JEventListPanel} and add it in your application somewhere.
  *       If the number of elements in the {@link EventList} may grow unbounded,
- *       consider wrapping {@link JEventListPanel} in a {@link JScrollPane}.
+ *       wrap your {@link JEventListPanel} in a {@link JScrollPane}.
  * </ol>
  *
  * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
  */
-public class JEventListPanel<E> extends JPanel implements ListEventListener {
+public final class JEventListPanel<E> extends JPanel {
 
     /** the source contains all the JComponents */
     private TransformedList<E,E> swingSource;
@@ -39,8 +38,14 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
     /** the components of the panel */
     private List<JComponent[]> components = new ArrayList<JComponent[]>();
 
+    /** the layout supports a forms layout under the hood */
     private final ListLayout listLayout;
+
+    /** the format specifies what an element cell looks like */
     private final Format format;
+
+    /** handle changes to the source {@link EventList} */
+    private final SourceChangeHandler sourceChangeHandler = new SourceChangeHandler();
 
     /**
      * Creates a new {@link JEventListPanel} hosting the
@@ -50,106 +55,119 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         this.swingSource = GlazedListsSwing.swingThreadProxyList(source);
         this.listLayout = new ListLayout(this, format);
         this.format = format;
-
         this.setLayout(listLayout);
 
         // populate the initial elements
         for(int i = 0; i < swingSource.size(); i++) {
-            insert(i);
+            sourceChangeHandler.insert(i);
         }
 
         // listen for changes to the source
-        swingSource.addListEventListener(this);
+        swingSource.addListEventListener(sourceChangeHandler);
+    }
+
+    public void setElementColumns(int elementColumns) {
+        listLayout.setElementColumns(elementColumns);
+    }
+
+    public void setElementRows(int elementRows) {
+        listLayout.setElementRows(elementRows);
     }
 
     /**
-     * Handle an inserted element.
+     * Provide the binding between this panel and the source {@link EventList}.
      */
-    private void insert(int index) {
-        // save the components
-        E element = swingSource.get(index);
-        JComponent[] elementComponents = new JComponent[format.getComponentsPerElement()];
-        for(int c = 0; c < elementComponents.length; c++) {
-            elementComponents[c] = format.getComponent(element, c);
-        }
-
-        // remember these components
-        components.add(index, elementComponents);
-
-        listLayout.insertIndex(index);
-
-        // insert the components
-        for(int c = 0; c < elementComponents.length; c++) {
-            if(elementComponents[c] == null) continue;
-            add(elementComponents[c], new ListLayout.Constraints(c, index));
-        }
-    }
-
-    /**
-     * Handle a deleted element.
-     */
-    private void delete(int index) {
-        // remove the components
-        JComponent[] elementComponents = (JComponent[])components.get(index);
-        for(int c = 0; c < elementComponents.length; c++) {
-            if(elementComponents[c] == null) continue;
-            remove(elementComponents[c]);
-        }
-
-        // forget the components
-        components.remove(index);
-
-        listLayout.removeIndex(index);
-    }
-
-    /**
-     * Handle an updated element.
-     */
-    private void update(int index) {
-        // get the old components
-        JComponent[] oldElementComponents = (JComponent[])components.get(index);
-
-        // get the new components
-        E element = swingSource.get(index);
-        JComponent[] newElementComponents = new JComponent[format.getComponentsPerElement()];
-        for(int c = 0; c < newElementComponents.length; c++) {
-            newElementComponents[c] = format.getComponent(element, c);
-        }
-
-        // swap as necessary
-        for(int c = 0; c < oldElementComponents.length; c++) {
-            if(oldElementComponents[c] == newElementComponents[c]) continue;
-            if(oldElementComponents[c] != null) {
-                remove(oldElementComponents[c]);
+    private class SourceChangeHandler implements ListEventListener {
+        /**
+         * Handle an inserted element.
+         */
+        private void insert(int index) {
+            // save the components
+            E element = swingSource.get(index);
+            JComponent[] elementComponents = new JComponent[format.getComponentsPerElement()];
+            for(int c = 0; c < elementComponents.length; c++) {
+                elementComponents[c] = format.getComponent(element, c);
             }
-            if(newElementComponents[c] != null) {
-                add(newElementComponents[c], new ListLayout.Constraints(c, index));
+
+            // remember these components
+            components.add(index, elementComponents);
+
+            listLayout.insertIndex(index);
+
+            // insert the components
+            for(int c = 0; c < elementComponents.length; c++) {
+                if(elementComponents[c] == null) continue;
+                add(elementComponents[c], new ListLayout.Constraints(c, index));
             }
         }
 
-        // save the latest components
-        components.set(index, newElementComponents);
-    }
-
-    /**
-     * When the components list changes, this updates the panel.
-     */
-    public void listChanged(ListEvent listChanges) {
-        while(listChanges.next()) {
-            int type = listChanges.getType();
-            int index = listChanges.getIndex();
-            if(type == ListEvent.INSERT) {
-                insert(index);
-            } else if(type == ListEvent.DELETE) {
-                delete(index);
-            } else if(type == ListEvent.UPDATE) {
-                update(index);
+        /**
+         * Handle a deleted element.
+         */
+        private void delete(int index) {
+            // remove the components
+            JComponent[] elementComponents = (JComponent[])components.get(index);
+            for(int c = 0; c < elementComponents.length; c++) {
+                if(elementComponents[c] == null) continue;
+                remove(elementComponents[c]);
             }
+
+            // forget the components
+            components.remove(index);
+
+            listLayout.removeIndex(index);
         }
 
-        // repaint the panel
-        revalidate();
-        repaint();
+        /**
+         * Handle an updated element.
+         */
+        private void update(int index) {
+            // get the old components
+            JComponent[] oldElementComponents = (JComponent[])components.get(index);
+
+            // get the new components
+            E element = swingSource.get(index);
+            JComponent[] newElementComponents = new JComponent[format.getComponentsPerElement()];
+            for(int c = 0; c < newElementComponents.length; c++) {
+                newElementComponents[c] = format.getComponent(element, c);
+            }
+
+            // swap as necessary
+            for(int c = 0; c < oldElementComponents.length; c++) {
+                if(oldElementComponents[c] == newElementComponents[c]) continue;
+                if(oldElementComponents[c] != null) {
+                    remove(oldElementComponents[c]);
+                }
+                if(newElementComponents[c] != null) {
+                    add(newElementComponents[c], new ListLayout.Constraints(c, index));
+                }
+            }
+
+            // save the latest components
+            components.set(index, newElementComponents);
+        }
+
+
+        /**
+         * When the components list changes, this updates the panel.
+         */
+        public void listChanged(ListEvent listChanges) {
+            while(listChanges.next()) {
+                int type = listChanges.getType();
+                int index = listChanges.getIndex();
+                if(type == ListEvent.INSERT) {
+                    insert(index);
+                } else if(type == ListEvent.DELETE) {
+                    delete(index);
+                } else if(type == ListEvent.UPDATE) {
+                    update(index);
+                }
+            }
+
+            // repaint the panel
+            revalidate();
+            repaint();
+        }
     }
 
     /**
@@ -221,36 +239,76 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
      * A default implementation of the {@link Format} interface.
      */
     public static abstract class AbstractFormat<E> implements Format<E> {
-        private final RowSpec[] rowSpecs;
-        private final ColumnSpec[] columnSpecs;
-        private final RowSpec gapRow;
-        private final ColumnSpec gapColumn;
-        private final CellConstraints[] cellConstraints;
+        private RowSpec[] elementRows;
+        private ColumnSpec[] elementColumns;
+        private RowSpec gapRow;
+        private ColumnSpec gapColumn;
+        private CellConstraints[] cellConstraints;
 
+        /**
+         * Construct a format using the specifications and constraints specified.
+         */
         protected AbstractFormat(RowSpec[] rowSpecs, ColumnSpec[] columnSpecs, RowSpec gapRow, ColumnSpec gapColumn, CellConstraints[] cellConstraints) {
-            this.rowSpecs = rowSpecs;
-            this.columnSpecs = columnSpecs;
+            this.elementRows = rowSpecs;
+            this.elementColumns = columnSpecs;
             this.gapRow = gapRow;
             this.gapColumn = gapColumn;
             this.cellConstraints = cellConstraints;
         }
 
-        public AbstractFormat(String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints) {
+        /**
+         * Construct a format using the specifications and constraints specified.
+         */
+        protected AbstractFormat(String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints) {
             this(RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), new RowSpec(gapRow), new ColumnSpec(gapColumn), cellConstraints);
         }
 
-        public AbstractFormat(String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints) {
+        /**
+         * Construct a format using the specifications and constraints specified.
+         */
+        protected AbstractFormat(String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints) {
             this(RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), decode(cellConstraints));
+        }
+
+        /**
+         * Construct a bare format. Extending classes must populate all specs
+         * or override the corresponding getters so that all appropriate
+         * specifications are available.
+         */
+        protected AbstractFormat() {
+            // do nothing
         }
 
         /** {@inheritDoc} */
         public RowSpec[] getElementRows() {
-            return rowSpecs;
+            return elementRows;
+        }
+
+        /**
+         * Set the rows used for a single element cell.
+         */
+        public void setElementRows(RowSpec[] elementRows) {
+            this.elementRows = elementRows;
         }
 
         /** {@inheritDoc} */
         public ColumnSpec[] getElementColumns() {
-            return columnSpecs;
+            return elementColumns;
+        }
+
+        /**
+         * Set the columns used for a single element cell.
+         */
+        public void setElementColumns(ColumnSpec[] elementColumns) {
+            this.elementColumns = elementColumns;
+        }
+
+        /**
+         * Set the rows and columns used for a single element cell.
+         */
+        public void setElementCells(String rowSpecs, String columnSpecs) {
+            this.setElementRows(RowSpec.decodeSpecs(rowSpecs));
+            this.setElementColumns(ColumnSpec.decodeSpecs(columnSpecs));
         }
 
         /** {@inheritDoc} */
@@ -261,6 +319,20 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         /** {@inheritDoc} */
         public CellConstraints getConstraints(int component) {
             return cellConstraints[component];
+        }
+
+        /**
+         * Set the constraints used for the components of each element.
+         */
+        public void setCellConstraints(CellConstraints[] cellConstraints) {
+            this.cellConstraints = cellConstraints;
+        }
+
+        /**
+         * Set the constraints used for the components of each element.
+         */
+        public void setCellConstraints(String[] cellConstraints) {
+            setCellConstraints(decode(cellConstraints));
         }
 
         /** {@inheritDoc} */
@@ -274,40 +346,36 @@ public class JEventListPanel<E> extends JPanel implements ListEventListener {
         }
 
         /**
-         * Decode the specified Strings ino cell constraints.
+         * Set the height of the vertical gap between element cells.
          */
-        protected static CellConstraints[] decode(String[] cellConstraints) {
+        public void setGapRow(RowSpec gapRow) {
+            this.gapRow = gapRow;
+        }
+
+        /**
+         * Set the width of the horizontal gap between element cells.
+         */
+        public void setGapColumn(ColumnSpec gapColumn) {
+            this.gapColumn = gapColumn;
+        }
+
+        /**
+         * Set the size of the gaps between element cells.
+         */
+        public void setGaps(String gapRow, String gapColumn) {
+            this.setGapRow(gapRow != null ? new RowSpec(gapRow) : null);
+            this.setGapColumn(gapColumn != null ? new ColumnSpec(gapColumn) : null);
+        }
+
+        /**
+         * Decode the specified Strings into cell constraints.
+         */
+        private static CellConstraints[] decode(String[] cellConstraints) {
             CellConstraints[] decoded = new CellConstraints[cellConstraints.length];
             for(int c = 0; c < cellConstraints.length; c++) {
                 decoded[c] = new CellConstraints(cellConstraints[c]);
             }
             return decoded;
-        }
-    }
-
-    /**
-     * A default implementation of {@link Format} that uses bean properties.
-     */
-    public static class BeanFormat<E> extends AbstractFormat<E> implements Format<E> {
-        private final BeanProperty<E>[] properties;
-
-        public BeanFormat(Class<E> beanClass, RowSpec[] rowSpecs, ColumnSpec[] columnSpecs, RowSpec gapRow, ColumnSpec gapColumn, CellConstraints[] cellConstraints, String[] properties) {
-            super(rowSpecs, columnSpecs, gapRow, gapColumn, cellConstraints);
-            this.properties = new BeanProperty[properties.length];
-            for(int p = 0; p < properties.length; p++) {
-                this.properties[p] = new BeanProperty<E>(beanClass, properties[p], true, false);
-            }
-        }
-        public BeanFormat(Class<E> beanClass, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, CellConstraints[] cellConstraints, String[] properties) {
-            this(beanClass, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), cellConstraints, properties);
-        }
-        public BeanFormat(Class<E> beanClass, String rowSpecs, String columnSpecs, String gapRow, String gapColumn, String[] cellConstraints, String[] properties) {
-            this(beanClass, RowSpec.decodeSpecs(rowSpecs), ColumnSpec.decodeSpecs(columnSpecs), gapRow == null ? null : new RowSpec(gapRow), gapColumn == null ? null : new ColumnSpec(gapColumn), decode(cellConstraints), properties);
-        }
-
-        /** {@inheritDoc} */
-        public JComponent getComponent(E element, int component) {
-            return (JComponent)properties[component].get(element);
         }
     }
 }
