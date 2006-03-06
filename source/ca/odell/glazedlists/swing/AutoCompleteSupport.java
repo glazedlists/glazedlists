@@ -631,51 +631,55 @@ public final class AutoCompleteSupport<E> {
         }
 
         protected ComboPopup createPopup() {
-            final BasicComboPopup popup = new BasicComboPopup( this.comboBox) {
-
-                /**
-                 * This method is only called when the arrow button which shows
-                 * and hides the popup is clicked. We exploit this fact and use
-                 * it as a hook to clear the filter which is filtering the drop
-                 * down. This emulates the behaviour of FireFox's URL selector.
-                 */
-                protected void togglePopup() {
-                    if (!isVisible())
-                        updateFilter("");
-
-                    super.togglePopup();
-                }
-
-                /**
-                 * Override the method which computes the bounds of the popup in
-                 * order to inject logic which sizes it more appropriately. The
-                 * preferred width of the popup is the maximum preferred width of
-                 * any item and the height is the combobox's maximum row count.
-                 *
-                 * @param px starting x location
-                 * @param py starting y location
-                 * @param pw starting width
-                 * @param ph starting height
-                 * @return a rectangle which represents the placement and size of the popup
-                 */
-                protected Rectangle computePopupBounds(int px, int py, int pw, int ph) {
-                    final Dimension popupSize = getPreferredPopupSize();
-                    final int maximumRowCount = this.comboBox.getMaximumRowCount();
-                    popupSize.setSize(popupSize.width, getPopupHeightForRowCount(maximumRowCount));
-
-                    if (this.comboBox.getSize().width-2 > popupSize.width)
-                        // use the combobox width (-2?) as a minimum width to respect
-                        popupSize.width = this.comboBox.getSize ().width-2;
-                    else
-                        // pad 20 pixels wide for the popup scrollbar which might be shown
-                        popupSize.width += 20;
-
-                    return super.computePopupBounds (px, py, popupSize.width, popupSize.height);
-                }
-            };
-
+            final BasicComboPopup popup = new CustomComboPopup( this.comboBox);
             popup.getAccessibleContext().setAccessibleParent(this.comboBox);
             return popup;
+        }
+
+        private class CustomComboPopup extends BasicComboPopup {
+            public CustomComboPopup(JComboBox combo) {
+                super(combo);
+            }
+
+            /**
+             * This method is only called when the arrow button which shows
+             * and hides the popup is clicked. We exploit this fact and use
+             * it as a hook to clear the filter which is filtering the drop
+             * down. This emulates the behaviour of FireFox's URL selector.
+             */
+            protected void togglePopup() {
+                if (!isVisible())
+                    updateFilter("");
+
+                super.togglePopup();
+            }
+
+            /**
+             * Override the method which computes the bounds of the popup in
+             * order to inject logic which sizes it more appropriately. The
+             * preferred width of the popup is the maximum preferred width of
+             * any item and the height is the combobox's maximum row count.
+             *
+             * @param px starting x location
+             * @param py starting y location
+             * @param pw starting width
+             * @param ph starting height
+             * @return a rectangle which represents the placement and size of the popup
+             */
+            protected Rectangle computePopupBounds(int px, int py, int pw, int ph) {
+                final Dimension popupSize = getPreferredPopupSize();
+                final int maximumRowCount = this.comboBox.getMaximumRowCount();
+                popupSize.setSize(popupSize.width, getPopupHeightForRowCount(maximumRowCount));
+
+                if (this.comboBox.getSize().width-2 > popupSize.width)
+                    // use the combobox width (-2?) as a minimum width to respect
+                    popupSize.width = this.comboBox.getSize ().width-2;
+                else
+                    // pad 20 pixels wide for the popup scrollbar which might be shown
+                    popupSize.width += 20;
+
+                return super.computePopupBounds (px, py, popupSize.width, popupSize.height);
+            }
         }
 
         /**
