@@ -30,7 +30,13 @@ public class TextMatcher<E> implements Matcher<E> {
     }
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
-    private final TextFilterator filterator;
+    private final TextFilterator<E> filterator;
+
+    /** the filters being matched */
+    private final String[] filters;
+
+    /** one of {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH} */
+    private final int mode;
 
     /** a parallel array to locate filter substrings in arbitrary text */
     private final TextSearchStrategy[] filterStrategies;
@@ -45,14 +51,32 @@ public class TextMatcher<E> implements Matcher<E> {
      *      object in the <code>source</code>; <code>null</code> indicates the
      *      list elements implement {@link TextFilterable}
      */
-    public TextMatcher(String[] filters, TextFilterator filterator) {
+    public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode) {
         this.filterator = filterator;
+        this.filters = filters;
+        this.mode = mode;
 
         // build the parallel list of TextSearchStrategies for the new filters
         filterStrategies = new TextSearchStrategy[filters.length];
         for(int i = 0; i < filters.length; i++) {
-            filterStrategies[i] = selectTextSearchStrategy(filters[i]);
+            filterStrategies[i] = selectTextSearchStrategy(filters[i], mode);
         }
+    }
+
+    /**
+     * Returns the behaviour mode for this {@link TextMatcher}.
+     *
+     * @return one of {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH}
+     */
+    public int getMode() {
+        return mode;
+    }
+
+    /**
+     * Returns the filters strings matched by this {@link TextMatcher}.
+     */
+    public String[] getFilters() {
+        return filters;
     }
 
     /** {@inheritDoc} */
@@ -93,18 +117,20 @@ public class TextMatcher<E> implements Matcher<E> {
      * searched or the subtext being located.
      *
      * @param filter the filter for which to locate a TextSearchStrategy
+     * @param mode the type of search behaviour to use; either
+     *      {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH}
      * @return a TextSearchStrategy capable of locating the given
      *      <code>filter</code> within arbitrary text
      */
-    private static TextSearchStrategy selectTextSearchStrategy(String filter) {
+    private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode) {
         final TextSearchStrategy result;
 
-        // if the filter is only 1 character, use the optimized SingleCharacter strategy
-        if(filter.length() == 1) {
-            result = new SingleCharacterCaseInsensitiveTextSearchStrategy();
-        // default to using the Boyer-Moore algorithm
+        if (mode == TextMatcherEditor.CONTAINS) {
+            result = filter.length() == 1 ? new SingleCharacterCaseInsensitiveTextSearchStrategy() : new BoyerMooreCaseInsensitiveTextSearchStrategy();
+        } else if (mode == TextMatcherEditor.STARTS_WITH) {
+            result = new StartsWithCaseInsensitiveTextSearchStrategy();
         } else {
-            result = new BoyerMooreCaseInsensitiveTextSearchStrategy();
+            throw new IllegalArgumentException("unrecognized mode: " + mode);
         }
 
         // apply the subtext

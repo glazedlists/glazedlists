@@ -17,6 +17,8 @@ public class TextMatcherTest extends TestCase {
 
     private List<Object> monotonicAlphabet = Arrays.asList(new Object[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
 
+    private List<Object> dictionary = Arrays.asList(new Object[] {"act", "actor", "enact", "reactor"});
+
     public void testNormalizeValue() {
         assertTrue(Arrays.equals(new String[0], TextMatcher.normalizeFilters(new String[0])));
         assertTrue(Arrays.equals(new String[0], TextMatcher.normalizeFilters(new String[] {null, ""})));
@@ -235,6 +237,67 @@ public class TextMatcherTest extends TestCase {
 		assertEquals(list, numbers);
     }
 
+    public void testChangeMode() {
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        list.addAll(monotonicAlphabet);
+
+        textMatcherEditor.setFilterText(new String[] {"789"});
+        assertEquals(Arrays.asList(new String[] {"0123456789"}), list);
+
+        textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
+        assertEquals(Collections.EMPTY_LIST, list);
+
+        textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
+        assertEquals(Arrays.asList(new String[] {"0123456789"}), list);
+
+        list.clear();
+        list.addAll(dictionary);
+        assertEquals(Collections.EMPTY_LIST, list);
+
+        textMatcherEditor.setFilterText(new String[] {"act"});
+        assertEquals(dictionary, list);
+
+        textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
+        assertEquals(Arrays.asList(new String[] {"act", "actor"}), list);
+
+        textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
+        assertEquals(dictionary, list);
+    }
+
+    public void testChangeModeNotifications() {
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        list.addAll(monotonicAlphabet);
+
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        textMatcherEditor.addMatcherEditorListener(counter);
+
+        assertEquals(TextMatcherEditor.CONTAINS, textMatcherEditor.getMode());
+
+        // changing the mode produces no changes if there is no filter text
+        textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
+        assertEquals(TextMatcherEditor.STARTS_WITH, textMatcherEditor.getMode());
+		counter.assertCounterState(0, 0, 0, 0, 0);
+
+        textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
+        assertEquals(TextMatcherEditor.CONTAINS, textMatcherEditor.getMode());
+		counter.assertCounterState(0, 0, 0, 0, 0);
+
+        // set some filter text
+        textMatcherEditor.setFilterText(new String[] {"012"});
+        counter.assertCounterState(0, 0, 0, 1, 0);
+        counter.resetCounterState();
+
+        // changing the mode with filter text present should constrain or relax
+        textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
+        assertEquals(TextMatcherEditor.STARTS_WITH, textMatcherEditor.getMode());
+		counter.assertCounterState(0, 0, 0, 1, 0);
+
+        textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
+        assertEquals(TextMatcherEditor.CONTAINS, textMatcherEditor.getMode());
+		counter.assertCounterState(0, 0, 0, 1, 1);
+    }
 
     /**
      * Test to verify that the filter is working correctly when values
@@ -300,7 +363,7 @@ public class TextMatcherTest extends TestCase {
             } else if(operation == 2) {
                 unfilteredList.remove(index);
             } else if(operation == 3) {
-                unfilteredList.set(index, "" + value);
+                unfilteredList.set(index, String.valueOf(value));
             }
         }
 

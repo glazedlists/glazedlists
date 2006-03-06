@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.IOException;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -98,6 +99,7 @@ public class IssuesBrowser implements Runnable {
         Exceptions.getInstance().addHandler(new ConnectExceptionHandler());
         Exceptions.getInstance().addHandler(new NoRouteToHostExceptionHandler());
         Exceptions.getInstance().addHandler(new AccessControlExceptionHandler());
+        Exceptions.getInstance().addHandler(new IOExceptionCode500Handler());
 
         // start loading the issues
         issueLoader.start();
@@ -227,7 +229,7 @@ public class IssuesBrowser implements Runnable {
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.add(iconBar,                        new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         mainPanel.add(filtersPanel,                   new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        mainPanel.add(Box.createHorizontalStrut(250), new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(Box.createHorizontalStrut(210), new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         mainPanel.add(dataPanel,                      new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
         return mainPanel;
@@ -509,6 +511,31 @@ public class IssuesBrowser implements Runnable {
             }
 
             // explain how to configure a Proxy Server for Java on Windows
+            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
+        }
+    }
+
+    /**
+     * An Exceptions.Handler for an IOException containing a HTTP response code of 500
+     * indicating some error occurred within the java.net webserver. All a use can do
+     * at this point is retry the operation later.
+     */
+    private class IOExceptionCode500Handler implements Exceptions.Handler {
+        // sample message: "Server returned HTTP response code: 500 for URL: https://javanettasks.dev.java.net/issues/xml.cgi?id=1:2:3:4:5:6:..."
+        private final Matcher messageMatcher = Pattern.compile("Server returned HTTP response code: 500 (.*)").matcher("");
+
+        public boolean recognize(Exception e) {
+            return e instanceof IOException && messageMatcher.reset(e.getMessage()).matches();
+        }
+
+        public void handle(Exception e) {
+            final String title = "Internal Server Error";
+
+            // explain that this is not our fault
+            final String message = "An error occurred within the java.net webserver.\n" +
+                                   "Please retry your operation later.";
+
+            // explain that this is java.net's fault
             SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
         }
     }

@@ -6,7 +6,6 @@ package ca.odell.glazedlists.matchers;
 
 import junit.framework.Assert;
 
-
 /**
  * Count matcher events, inserting a delay if requested to test multithreaded
  * matchers.
@@ -27,6 +26,7 @@ class CountingMatcherEditorListener implements MatcherEditor.Listener {
 	CountingMatcherEditorListener(long delay_ms) {
 		this.delay_ms = delay_ms;
 	}
+    
     /**
      * Create a {@link CountingMatcherEditorListener} with no delay.
      */
@@ -58,16 +58,13 @@ class CountingMatcherEditorListener implements MatcherEditor.Listener {
 	/**
 	 * Check the change counters match the expected values.
 	 */
-	void assertCounterState(int matchAll, int matchNone, int changed, int constrained,
-		int relaxed) {
-
+	void assertCounterState(int matchAll, int matchNone, int changed, int constrained, int relaxed) {
 		Assert.assertEquals(matchAll, this.matchAll);
 		Assert.assertEquals(matchNone, this.matchNone);
 		Assert.assertEquals(changed, this.changed);
 		Assert.assertEquals(constrained, this.constrained);
 		Assert.assertEquals(relaxed, this.relaxed);
 	}
-
 
 	public void changedMatcher(MatcherEditor.Event matcherEvent) {
 		switch (matcherEvent.getType()) {

@@ -36,7 +36,7 @@ import java.awt.event.ActionEvent;
 public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
 
     /** The Document that provides the filter values. */
-    private Document document;
+    private final Document document;
 
     /** the JTextField being observed for actions */
     private JTextComponent textComponent;
@@ -45,7 +45,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
     private boolean live;
 
     /** The listener attached to the given {@link #document}. */
-    private FilterHandler filterHandler = new FilterHandler();
+    private final FilterHandler filterHandler = new FilterHandler();
 
     /**
      * Creates a TextMatcherEditor bound to the {@link Document} backing the
@@ -113,7 +113,6 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
         refilter();
     }
 
-
     /**
      * Whether filtering occurs by the keystroke or not.
      */
@@ -174,9 +173,20 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
     /**
      * Update the filter text from the contents of the Document.
      */
-    private void refilter() {
+    protected void refilter() {
         try {
-            setFilterText(document.getText(0, document.getLength()).split("[ \t]"));
+            final String text = document.getText(0, document.getLength());
+            String[] filters = null;
+
+            // in CONTAINS mode we treat the string as whitespace delimited
+            if (this.getMode() == CONTAINS)
+                filters = text.split("[ \t]");
+
+            // in STARTS_WITH mode we use the string in its entirety
+            else if (this.getMode() == STARTS_WITH)
+                filters = new String[] {text};
+
+            setFilterText(filters);
         } catch (BadLocationException ble) {
             // this shouldn't ever, ever happen
             throw new RuntimeException(ble);
