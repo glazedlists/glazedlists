@@ -126,7 +126,10 @@ public class TextMatcher<E> implements Matcher<E> {
         final TextSearchStrategy result;
 
         if (mode == TextMatcherEditor.CONTAINS) {
-            result = filter.length() == 1 ? new SingleCharacterCaseInsensitiveTextSearchStrategy() : new BoyerMooreCaseInsensitiveTextSearchStrategy();
+            if (filter.length() == 1)
+                result = new SingleCharacterCaseInsensitiveTextSearchStrategy();
+            else
+                result = new BoyerMooreCaseInsensitiveTextSearchStrategy();
         } else if (mode == TextMatcherEditor.STARTS_WITH) {
             result = new StartsWithCaseInsensitiveTextSearchStrategy();
         } else {
