@@ -14,24 +14,24 @@ import junit.framework.TestCase;
  */
 public class TreeTest extends TestCase {
 
+    /** test values */
+    private static List<String> colors = GlazedListsTests.stringToList("ABC");
+    private static ListToByteCoder<String> coder = new ListToByteCoder<String>(colors);
+    private static final String january = "January";
+    private static final String february = "February";
+    private static final String march = "March";
+    private static final String april = "April";
+    private static final String may = "May";
+    private static final byte allColors = coder.colorsToByte(GlazedListsTests.stringToList("ABC"));
+    private static final byte a = coder.colorToByte("A");
+    private static final byte b = coder.colorToByte("B");
+    private static final byte c = coder.colorToByte("C");
+    private static final byte aOrB = (byte) (a | b);
+    private static final byte bOrC = (byte) (b | c);
+    private static final byte aOrC = (byte) (a | c);
+
     public void testThreeColorInserts() {
-        List<String> colors = GlazedListsTests.stringToList("ABC");
-        ListToByteCoder<String> coder = new ListToByteCoder<String>(colors);
-        String january = "January";
-        String february = "February";
-        String march = "March";
-        String april = "April";
-        String may = "May";
-
         Tree<String> tree = new Tree<String>(coder);
-
-        byte allColors = coder.colorsToByte(GlazedListsTests.stringToList("ABC"));
-        byte a = coder.colorToByte("A");
-        byte b = coder.colorToByte("B");
-        byte c = coder.colorToByte("C");
-        byte aOrB = (byte) (a | b);
-        byte bOrC = (byte) (b | c);
-        byte aOrC = (byte) (a | c);
 
         Element<String> nodeB1 = tree.add(0, allColors, b, january, 5);
         Element<String> nodeA1 = tree.add(0, allColors, a, march, 5);
@@ -98,5 +98,58 @@ public class TreeTest extends TestCase {
         assertEquals(29, tree.size(aOrB));
         assertEquals(18, tree.size(aOrC));
         assertEquals(37, tree.size(allColors));
+    }
+
+    public void testThreeColorDeletes() {
+        Tree<String> tree = new Tree<String>(coder);
+
+        tree.add(0, allColors, b, january, 5);
+        tree.add(0, allColors, a, march, 5);
+        assertEquals("AAAAABBBBB", tree.asSequenceOfColors());
+
+        tree.remove(0, allColors, 3);
+        assertEquals("AABBBBB", tree.asSequenceOfColors());
+        assertEquals(2, tree.size(a));
+        assertEquals(5, tree.size(b));
+
+        tree.remove(0, allColors, 2);
+        assertEquals("BBBBB", tree.asSequenceOfColors());
+
+        tree.remove(3, allColors, 2);
+        assertEquals("BBB", tree.asSequenceOfColors());
+
+        tree.add(3, allColors, b, january, 6);
+        assertEquals("BBBBBBBBB", tree.asSequenceOfColors());
+
+        tree.remove(0, allColors, 3);
+        tree.remove(3, allColors, 3);
+        tree.remove(1, allColors, 1);
+        assertEquals("BB", tree.asSequenceOfColors());
+
+        tree.add(1, allColors, a, february, 4);
+        tree.add(5, allColors, b, january, 3);
+        tree.add(1, allColors, b, january, 3);
+        assertEquals("BBBBAAAABBBB", tree.asSequenceOfColors());
+
+        tree.remove(4, b, 4);
+        assertEquals("BBBBAAAA", tree.asSequenceOfColors());
+
+        tree.remove(2, aOrB, 4);
+        assertEquals("BBAA", tree.asSequenceOfColors());
+
+        tree.remove(0, aOrB, 4);
+        assertEquals("", tree.asSequenceOfColors());
+        System.out.println(tree);
+
+        tree.add(0, allColors, b, february, 28);
+        tree.add(0, allColors, a, january, 31);
+        tree.add(59, allColors, c, march, 31);
+        System.out.println(tree);
+
+        tree.remove(30, allColors, 30);
+        assertEquals(30, tree.size(a));
+        assertEquals(0, tree.size(b));
+        assertEquals(30, tree.size(c));
+        System.out.println(tree);
     }
 }

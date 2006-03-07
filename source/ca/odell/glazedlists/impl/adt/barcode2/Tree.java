@@ -64,13 +64,16 @@ public class Tree<V> {
      * <p><strong>Note that nodes with <code>null</code> values will never be
      * merged together to allow those nodes to be assigned other values later.
      *
-     * @param size the size of the node to insert, at least 1.
+     * @param size the size of the node to insert.
      * @param index the location into this tree to insert at
      * @param indexColors the colors that index is relative to. This should be
      *      all colors in the tree ORed together for the entire tree.
      * @param value the node value. If non-<code>null</code>, the node may be
      *      combined with other nodes of the same color and value. <code>null</code>
      *      valued nodes will never be combined with each other.
+     * @return the element the specified value was inserted into. This is non-null
+     *      unless the size parameter is 0, in which case the result is always
+     *      <code>null</code>.
      */
     public Element<V> add(int index, byte indexColors, byte color, V value, int size) {
         assert(index >= 0);
@@ -106,7 +109,7 @@ public class Tree<V> {
     private Node<V> insertIntoSubtree(Node<V> parent, int index, byte indexColors, byte color, int colorAsIndex, V value, int size) {
         while(true) {
             assert(parent != null);
-            if(index < 0) throw new IndexOutOfBoundsException();
+            assert(index >= 0);
             parent.counts[colorAsIndex] += size;
 
             // figure out the layout of this node
@@ -189,6 +192,100 @@ public class Tree<V> {
         }
     }
 
+    /**
+     * Remove size values at the specified index. Only values of the type
+     * specified in indexColors will be removed.
+     */
+    void remove(int index, byte indexColors, int size) {
+        if(size == 0) return;
+        assert(index >= 0);
+        assert(index + size < size(indexColors));
+        assert(root != null);
+
+        removeFromSubtree(root, index, indexColors, size);
+    }
+
+    /**
+     */
+    private void removeFromSubtree(Node<V> node, int index, byte indexColors, int size) {
+        while(size > 0) {
+            assert(node != null);
+            assert(index >= 0);
+
+            // figure out the layout of this node
+            int leftSize = node.left != null ? node.left.size(indexColors) : 0;
+
+            // delete on the left first
+            if(index < leftSize) {
+                // we can only remove part of our requirement on the left, so do
+                // that part recursively
+                if(index + size > leftSize) {
+                    int toRemove = leftSize - index;
+                    removeFromSubtree(node.left, index, indexColors, toRemove);
+                    leftSize -= toRemove;
+                    size -= toRemove;
+                // we can do our full delete on the left side
+                } else {
+                    node = node.left;
+                    continue;
+                }
+            }
+            assert(index >= leftSize);
+
+            // delete in the centre
+            int rightStartIndex = leftSize + node.nodeSize(indexColors);
+            if(index < rightStartIndex) {
+                int toRemove = Math.min(rightStartIndex - index, size);
+                node.size -= toRemove;
+                // decrement the appropriate counts all the way up
+                int colorIndex = Node.colorAsIndex(node.color);
+                for(Node toDecrement = node; toDecrement != null; toDecrement = toDecrement.parent) {
+                    toDecrement.counts[colorIndex] -= toRemove;
+                    assert(toDecrement.counts[colorIndex] >= 0);
+                }
+                // replace this node with another if empty
+                if(node.size == 0) {
+                    if(node.right == null) {
+                        replaceChild(node.parent, node, node.left);
+                    } else if(node.left == null) {
+                        replaceChild(node.parent, node, node.right);
+                    } else {
+                        throw new UnsupportedOperationException();
+                    }
+                }
+                size -= toRemove;
+                if(size == 0) return;
+                leftSize -= toRemove;
+                rightStartIndex -= toRemove;
+            }
+            assert(index >= rightStartIndex);
+
+            // delete on the right last
+            index -= rightStartIndex;
+            node = node.right;
+        }
+    }
+
+    private void replaceChild(Node<V> parent, Node<V> node, Node<V> replacement) {
+        // replace the root
+        if(parent == null) {
+            assert(node == root);
+            root = replacement;
+
+        // replace on the left
+        } else if(parent.left == node) {
+            parent.left = replacement;
+
+        // replace on the right
+        } else if(parent.right == node) {
+            parent.right = replacement;
+        }
+
+        // update the replacement's parent
+        if(replacement != null) {
+            replacement.parent = parent;
+        }
+    }
 
     public void set(int index, byte indexColors, byte color, V value, int size) {
         throw new UnsupportedOperationException();
@@ -269,10 +366,6 @@ public class Tree<V> {
             index -= rightStartIndex;
             node = node.right;
         }
-    }
-
-    void remove(int index, byte indexColors, int size) {
-        throw new UnsupportedOperationException();
     }
 
     /**
