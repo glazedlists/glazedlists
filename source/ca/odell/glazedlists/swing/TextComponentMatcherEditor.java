@@ -173,7 +173,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
     /**
      * Update the filter text from the contents of the Document.
      */
-    protected void refilter() {
+    private void refilter() {
         try {
             final String text = document.getText(0, document.getLength());
             String[] filters = null;
@@ -201,15 +201,12 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
         public void insertUpdate(DocumentEvent e) {
             refilter();
         }
-
         public void removeUpdate(DocumentEvent e) {
             refilter();
         }
-
         public void changedUpdate(DocumentEvent e) {
             refilter();
         }
-
         public void actionPerformed(ActionEvent e) {
             refilter();
         }

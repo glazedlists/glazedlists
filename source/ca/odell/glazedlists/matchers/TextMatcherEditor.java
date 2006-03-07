@@ -17,7 +17,18 @@ import ca.odell.glazedlists.impl.filter.TextMatcher;
  * <p>The {@link TextMatcherEditor} requires that either a
  * {@link TextFilterator} be specified in its constructor, or that every Object
  * to be matched implements the {@link TextFilterable} interface. These are
- * used to specify the {@link String}s to search for each Object.
+ * used to extract the searchable {@link String}s for each Object.
+ *
+ * <p>{@link TextMatcherEditor} is able to operate in one of two modes.
+ * <ul>
+ *   <li>{@link #CONTAINS} will produce {@link Matcher} objects that test if
+ *        at least one searchable string for an Object contains one of the
+ *        filter strings <strong>anywhere</strong> within itself.
+ *
+ *   <li>{@link #STARTS_WITH} will produce {@link Matcher} objects that test
+ *        if at least one searchable string for an Object
+ *        <strong>begins with</strong> at least one of the filter strings.
+ * </ul>
  *
  * @author James Lemieux
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
@@ -91,7 +102,17 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         // apply the new mode
         this.mode = mode;
 
-        refilter();
+        // if no filter text exists, no Matcher change is necessary
+        if (getCurrentFilter().length == 0)
+            return;
+
+        if (mode == STARTS_WITH) {
+            // CONTAINS -> STARTS_WITH is a constraining change
+            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode));
+        } else {
+            // STARTS_WITH -> CONTAINS is a relaxing change
+            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode));
+        }
     }
     /**
      * Returns the behaviour mode for this {@link TextMatcherEditor}.
@@ -102,33 +123,15 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         return mode;
     }
 
+    /**
+     * Returns the filter that was last produced from this editor or an empty
+     * filter if one doesn't exist.
+     */
     private String[] getCurrentFilter() {
-        if (currentMatcher instanceof TextMatcher) {
-            final TextMatcher<E> textMatcher = (TextMatcher<E>) currentMatcher;
-            return textMatcher.getFilters();
-        }
+        if (currentMatcher instanceof TextMatcher)
+            return ((TextMatcher<E>) currentMatcher).getFilters();
 
         return EMPTY_FILTER;
-    }
-
-    /**
-     * Reset the filters to reinvoke a filtering.
-     */
-    protected void refilter() {
-        setFilterText(getCurrentFilter());
-    }
-
-    private boolean hasModeChanged() {
-        if (currentMatcher instanceof TextMatcher) {
-            final TextMatcher<E> textMatcher = (TextMatcher<E>) currentMatcher;
-            return textMatcher.getMode() != mode;
-        }
-
-        return false;
-    }
-
-    private boolean hasFilterChanged(String[] newFilter) {
-        return !TextMatcher.isFilterEqual(getCurrentFilter(), newFilter);
     }
 
     /**
@@ -141,37 +144,24 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         final String[] oldFilters = getCurrentFilter();
         newFilters = TextMatcher.normalizeFilters(newFilters);
 
-        // 1. if no filters exist, always degrade to match all
+        // fire the event only as necessary
+        if (TextMatcher.isFilterEqual(oldFilters, newFilters))
+            return;
+
+        // classify the change in filter and apply the new filter to this list
         if (newFilters.length == 0) {
-            if (oldFilters.length != 0)
-                fireMatchAll();
+            fireMatchAll();
             return;
         }
 
-        // 2. check if the mode has changed
-        if (hasModeChanged()) {
-            if (mode == STARTS_WITH) {
-                // CONTAINS -> STARTS_WITH is a constraining change
-                fireConstrained(new TextMatcher<E>(newFilters, filterator, mode));
-            } else {
-                // STARTS_WITH -> CONTAINS is a relaxing change
-                fireRelaxed(new TextMatcher<E>(newFilters, filterator, mode));
-            }
-            return;
-        }
+        // classify the change in filter and apply the new filter to this list
+        final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode);
 
-        // 3. check if the filters have changed
-        if (hasFilterChanged(newFilters)) {
-            // classify the change in filter and apply the new filter to this list
-            final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode);
-
-            if (TextMatcher.isFilterRelaxed(oldFilters, newFilters)) {
-                fireRelaxed(matcher);
-            } else if (TextMatcher.isFilterConstrained(oldFilters, newFilters)) {
-                fireConstrained(matcher);
-            } else {
-                fireChanged(matcher);
-            }
-        }
+        if (TextMatcher.isFilterRelaxed(oldFilters, newFilters))
+            fireRelaxed(matcher);
+        else if(TextMatcher.isFilterConstrained(oldFilters, newFilters))
+            fireConstrained(matcher);
+        else
+            fireChanged(matcher);
     }
 }

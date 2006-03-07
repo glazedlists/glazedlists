@@ -148,7 +148,7 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
     /**
      * Refilter based on the new contents of the Text..
      */
-    protected void refilter() {
+    private void refilter() {
         setFilterText(text.getText().split("[ \t]"));
     }
 
