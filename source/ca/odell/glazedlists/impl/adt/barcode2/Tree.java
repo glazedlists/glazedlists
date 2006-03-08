@@ -56,7 +56,34 @@ public class Tree<V> {
      * colors.
      */
     public Element<V> get(int index, byte indexColors) {
-        throw new UnsupportedOperationException();
+        if(root == null) throw new IndexOutOfBoundsException();
+
+        // go deep, looking for our node of interest
+        Node<V> node = root;
+        while(true) {
+            assert(node != null);
+            assert(index >= 0);
+
+            // recurse on the left
+            int leftSize = node.left != null ? node.left.size(indexColors) : 0;
+            if(index < leftSize) {
+                node = node.left;
+                continue;
+            } else {
+                index -= leftSize;
+            }
+
+            // the result is in the centre
+            int size = node.nodeSize(indexColors);
+            if(index < size) {
+                return node;
+            } else {
+                index -= size;
+            }
+
+            // the result is on the right
+            node = node.right;
+        }
     }
 
     /**
@@ -430,7 +457,7 @@ public class Tree<V> {
         Node<V> node = root;
         while(true) {
             assert(node != null);
-            if(index < 0) throw new IndexOutOfBoundsException();
+            assert(index >= 0);
 
             // figure out the layout of this node
             int leftSize = node.left != null ? node.left.size(indexColors) : 0;
@@ -442,15 +469,15 @@ public class Tree<V> {
             // increment by the count on the left
             } else {
                 if(node.left != null) result += node.left.size(colorsOut);
+                index -= leftSize;
             }
 
             // the result is in the centre
-            int rightStartIndex = leftSize + node.nodeSize(indexColors);
-            if(index < rightStartIndex) {
-                int leftHalfSize = index - leftSize;
+            int size = node.nodeSize(indexColors);
+            if(index < size) {
                 // we're on a node of the same color, return the adjusted index
                 if((colorsOut & node.color) > 0) {
-                    result += leftHalfSize;
+                    result += index;
                 // we're on a node of a different color, return the previous node of the requested color
                 } else {
                     result -= 1;
@@ -460,12 +487,10 @@ public class Tree<V> {
             // increment by the count in the centre
             } else {
                 result += node.nodeSize(colorsOut);
+                index -= size;
             }
 
             // the result is on the right
-            int size = node.size(indexColors);
-            if(index > size) throw new IndexOutOfBoundsException();
-            index -= rightStartIndex;
             node = node.right;
         }
     }
