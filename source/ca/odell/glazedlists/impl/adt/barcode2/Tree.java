@@ -498,7 +498,7 @@ public class Tree<V> {
     /**
      * The size of the tree for the specified colors.
      */
-    int size(byte colors) {
+    public int size(byte colors) {
         if(root == null) return 0;
         else return root.size(colors);
     }

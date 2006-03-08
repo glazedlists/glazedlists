@@ -194,4 +194,27 @@ public class TreeTest extends TestCase {
         tree.remove(2, bOrC, 6);
         assertEquals("BB", tree.asSequenceOfColors());
     }
+
+    public void testGet() {
+        Tree<String> tree = new Tree<String>(coder);
+        tree.add(0, allColors, b, february, 4);
+        tree.add(4, allColors, c, march, 4);
+        tree.add(0, allColors, a, january, 4);
+        assertEquals("AAAABBBBCCCC", tree.asSequenceOfColors());
+        assertEquals(january, tree.get(0, allColors).get());
+        assertEquals(january, tree.get(3, allColors).get());
+        assertEquals(february, tree.get(4, allColors).get());
+        assertEquals(february, tree.get(7, allColors).get());
+        assertEquals(march, tree.get(8, allColors).get());
+        assertEquals(march, tree.get(11, allColors).get());
+        assertEquals(march, tree.get(2, c).get());
+        assertEquals(february, tree.get(2, b).get());
+        assertEquals(march, tree.get(4, bOrC).get());
+        tree.add(4, b, a, april, 4);
+        assertEquals("AAAABBBBAAAACCCC", tree.asSequenceOfColors());
+        tree.add(8, a, b, february, 4);
+        assertEquals("AAAABBBBAAAABBBBCCCC", tree.asSequenceOfColors());
+        assertEquals(february, tree.get(12, allColors).get());
+        assertEquals(april, tree.get(4, a).get());
+    }
 }
