@@ -2,48 +2,103 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TextFilterator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.TimeZone;
+import java.util.List;
 
 public class AutoCompleteSupportTestApp {
 
-    private JComboBox combo;
+    private static final String[] uiDelegates = {
+        "com.sun.java.swing.plaf.windows.WindowsLookAndFeel",
+        "com.sun.java.swing.plaf.mac.MacLookAndFeel",
+        "javax.swing.plaf.metal.MetalLookAndFeel",
+        "com.sun.java.swing.plaf.motif.MotifLookAndFeel",
+        "com.incors.plaf.kunststoff.KunststoffLookAndFeel"
+    };
 
-    /**
-     * Creates a new instance of Main
-     */
+    private static final String[] urlData = {
+        "http://mail.google.com/mail/",
+        "http://slashdot.org/",
+        "http://www.clientjava.com/blog",
+        "http://java.sun.com/",
+        "http://java.sun.com/javase/6/",
+        "http://java.sun.com/j2se/1.5.0/download.jsp",
+        "http://java.sun.com/javaone/sf/",
+        "http://www.jetbrains.com/",
+        "http://www.jetbrains.com/idea/?ggl502",
+        "http://www.wilshipley.com/blog/",
+        "http://jroller.com/page/fate",
+        "http://wilwheaton.typepad.com/",
+        "http://www.theonion.com/content/",
+        "http://www.indeed.com/",
+    };
+
     public AutoCompleteSupportTestApp() {
         JFrame frame = new JFrame("AutoCompleteSupport Test Application");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane ().add(_createPanel(), BorderLayout.NORTH);
-        frame.setBounds(100, 100, 550, 350);
+        frame.getContentPane().add(createPanel(), BorderLayout.CENTER);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    private JPanel _createPanel() {
-        JPanel panel = new JPanel(new GridLayout(11, 2, 5, 2));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    private JPanel createPanel() {
+        final TextFilterator<String> filterator = new URLTextFilterator();
+        final EventList<String> items = new BasicEventList<String>();
+        items.addAll(Arrays.asList(urlData));
 
-        final EventList items = new BasicEventList();
-        items.addAll(Arrays.asList(TimeZone.getAvailableIDs()));
+        final JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        combo = new JComboBox();
-        AutoCompleteSupport.install(combo, items);
+        int comboBoxCount = 0;
+        for (int i = 0; i < uiDelegates.length; i++) {
+            try {
+                UIManager.setLookAndFeel(uiDelegates[i]);
+            } catch (Exception e) {
+                continue;
+            }
+            comboBoxCount++;
 
-        panel.add(new JLabel("Auto-complete combo:"));
-        panel.add(combo);
+            final String[] lookAndFeelNameParts = uiDelegates[i].split("\\p{Punct}");
+            final String lookAndFeelName = lookAndFeelNameParts[lookAndFeelNameParts.length-1];
+
+            final JLabel nameLabel = new JLabel(lookAndFeelName);
+
+            final JComboBox comboBox = new JComboBox();
+            AutoCompleteSupport.install(comboBox, items, filterator);
+
+            if (comboBoxCount > 1)
+                panel.add(Box.createVerticalStrut(1), new GridBagConstraints(0, i*3, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+
+            panel.add(nameLabel, new GridBagConstraints(0, i*3+1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+            panel.add(comboBox, new GridBagConstraints(0, i*3+2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        }
 
         return panel;
     }
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        new AutoCompleteSupportTestApp();
+        SwingUtilities.invokeLater(new Starter());
+    }
+
+    private static class Starter implements Runnable {
+        public void run() {
+            new AutoCompleteSupportTestApp();
+        }
+    }
+
+    private static final class URLTextFilterator implements TextFilterator<String> {
+        public void getFilterStrings(List<String> baseList, String element) {
+            baseList.add(element);
+            if (element.startsWith("http://"))
+                baseList.add(element.substring(7));
+            if (element.startsWith("http://www."))
+                baseList.add(element.substring(11));
+        }
     }
 }

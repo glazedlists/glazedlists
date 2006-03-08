@@ -71,13 +71,6 @@ public final class AutoCompleteSupport<E> {
     /** The Document backing the comboBoxEditor. */
     private AbstractDocument document;
 
-    /**
-     * Watches for changes in the Document which backs comboBoxEditor and
-     * uninstalls our DocumentFilter from the old Document and reinstalls it on
-     * the new.
-     */
-    private final DocumentWatcher documentWatcher = new DocumentWatcher();
-
     /** A DocumentFilter that controls edits to the Document behind the comboBoxEditor. */
     private final ComboCompleterFilter documentFilter = new ComboCompleterFilter();
 
@@ -86,6 +79,22 @@ public final class AutoCompleteSupport<E> {
 
     /** This matcher determines if the user-defined prefix matches the beginning of a given String. */
     private Matcher<String> prefixMatcher = Matchers.trueMatcher();
+
+    //
+    // These listeners watch for invariant violations in the JComboBox and report them
+    //
+
+    /**
+     * Watches for changes of the Document which backs comboBoxEditor and uninstalls
+     * our DocumentFilter from the old Document and reinstalls it on the new.
+     */
+    private final DocumentWatcher documentWatcher = new DocumentWatcher();
+
+    /** Watches for changes of the ComboBoxModel and reports them as violations. */
+    private final ModelWatcher modelWatcher = new ModelWatcher();
+
+    /** Watches for changes of the ComboBoxUI and reports them as violations. */
+    private final UIWatcher uiWatcher = new UIWatcher();
 
     //
     // These booleans control when certain changes are to be respected and when they aren't
@@ -107,9 +116,6 @@ public final class AutoCompleteSupport<E> {
     /** The original editor for the comboBox. */
     private final ComboBoxEditor originalComboBoxEditor;
 
-    /** The original Document backing the comboBoxEditor. */
-    private Document originalDocument;
-
     /** The original model installed on the comboBox. */
     private ComboBoxModel originalModel;
 
@@ -122,7 +128,6 @@ public final class AutoCompleteSupport<E> {
      * particular, a custom {@link ComboBoxModel} is installed behind the
      * <code>comboBox</code> containing the given <code>items</code>. The
      * <code>filterator</code> is consulted in order to extract searchable
-
      * text from each of the <code>items</code>.
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
@@ -136,7 +141,6 @@ public final class AutoCompleteSupport<E> {
         this.originalComboBoxEditable = comboBox.isEditable();
         this.originalModel = comboBox.getModel();
         this.originalComboBoxEditor = comboBox.getEditor();
-        this.originalDocument = ((JTextField) this.originalComboBoxEditor.getEditorComponent()).getDocument();
 
         // build the ComboBoxModel capable of filtering its values
         this.filterMatcherEditor = new TextMatcherEditor<E>(filterator);
@@ -146,23 +150,16 @@ public final class AutoCompleteSupport<E> {
 
         // customize the comboBox
         this.comboBox.setUI(new DynamicPopupComboBoxUI(10));
+        this.comboBox.addPropertyChangeListener("UI", this.uiWatcher);
         this.comboBox.setEditable(true);
         this.comboBox.setModel(this.comboBoxModel);
+        this.comboBox.addPropertyChangeListener("model", this.modelWatcher);
         this.comboBoxEditor = (JTextField) comboBox.getEditor().getEditorComponent();
         this.comboBoxEditor.addPropertyChangeListener("document", this.documentWatcher);
 
-        // either customize the existing Document behind the editor JTextField, or
-        // build and install our own Document
-        if (this.originalDocument instanceof AbstractDocument) {
-            this.document = (AbstractDocument) this.comboBoxEditor.getDocument();
-            this.document.setDocumentFilter(this.documentFilter);
-
-        } else {
-            this.document = new PlainDocument();
-            this.document.setDocumentFilter(this.documentFilter);
-
-            this.comboBoxEditor.setDocument(this.document);
-        }
+        // customize the existing Document behind the editor JTextField
+        this.document = (AbstractDocument) this.comboBoxEditor.getDocument();
+        this.document.setDocumentFilter(this.documentFilter);
     }
 
     /**
@@ -181,7 +178,6 @@ public final class AutoCompleteSupport<E> {
      * @return an instance of the support class that is providing autocomplete
      *      features
      */
-
     public static <E> AutoCompleteSupport install(JComboBox comboBox, EventList<E> items) {
         return install(comboBox, items, GlazedLists.toStringTextFilterator());
     }
@@ -203,11 +199,43 @@ public final class AutoCompleteSupport<E> {
      * @return an instance of the support class that is providing autocomplete
      *      features
      */
-
     public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
         if (!(comboBox.getEditor().getEditorComponent() instanceof JTextField))
             throw new IllegalArgumentException("comboBox must use a JTextField as its editor component");
+
+        if (!(((JTextField) comboBox.getEditor().getEditorComponent()).getDocument() instanceof AbstractDocument))
+            throw new IllegalArgumentException("comboBox must use a JTextField backed by an AbstractDocument as its editor component");
+
         return new AutoCompleteSupport<E>(comboBox, items, filterator);
+    }
+
+    /**
+     * This method is used to report environmental invariants which are
+     * violated when the user adjusts the combo box in a way that is
+     * incompatible with the requirements for autocompletion. A message can be
+     * specified which will be dumped out to {@link System#err} before the
+     * autocompletion support is uninstalled.
+     *
+     * @param message a message to the programmer explaining the environmental
+     *      invariant that was violated
+     */
+    private void throwIllegalStateException(String message) {
+        final StringBuffer exceptionMsg = new StringBuffer(message);
+        exceptionMsg.append("\n");
+
+        exceptionMsg.append("In order for AutoCompleteSupport to continue to " +
+                "work, the following invariants must be maintained after " +
+                "AutoCompleteSupport.install() has been called:\n" +
+                "* the ComboBoxModel may not be removed\n" +
+                "* the ComboBoxUI may not be removed\n" +
+                "* the ComboBoxEditor may not be removed\n" +
+                "* the Document behind the JTextField can be changed but must be changed to some subclass of AbstractDocument\n" +
+                "* the DocumentFilter on the Document behind the JTextField may not be removed\n"
+        );
+
+        this.dispose();
+
+        throw new IllegalStateException(exceptionMsg.toString());
     }
 
     /**
@@ -222,7 +250,9 @@ public final class AutoCompleteSupport<E> {
         if (this.comboBox == null)
             throw new IllegalStateException("This AutoCompleteSupport has already been disposed");
 
-        // 1. stop listening for new Documents installed behind the JTextField
+        // 1. stop listening for changes
+        this.comboBox.removePropertyChangeListener("UI", this.uiWatcher);
+        this.comboBox.removePropertyChangeListener("model", this.modelWatcher);
         this.comboBoxEditor.removePropertyChangeListener("document", this.documentWatcher);
 
         // 2. restore the original model to the JComboBox
@@ -233,17 +263,9 @@ public final class AutoCompleteSupport<E> {
         this.comboBox.setUI(this.originalUI);
         this.originalUI = null;
 
-        // 4. clear our DocumentFilter away from the original document
-        if (this.originalDocument instanceof AbstractDocument) {
-            final AbstractDocument originalAbstractDocument = (AbstractDocument) this.originalDocument;
-            if (originalAbstractDocument.getDocumentFilter() == documentFilter)
-                originalAbstractDocument.setDocumentFilter(null);
-        }
-
         // 5. restore the original Document behind the combo box editor
         this.comboBox.setEditor(this.originalComboBoxEditor);
-        this.comboBoxEditor.setDocument(this.originalDocument);
-        this.originalDocument = null;
+        this.comboBoxEditor.setDocument(this.document);
 
         // 6. restore the original editable flag
         this.comboBox.setEditable(originalComboBoxEditable);
@@ -327,19 +349,19 @@ public final class AutoCompleteSupport<E> {
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
             if (ignoreDocumentChanges) return;
             super.replace(filterBypass, offset, length, string, attributeSet);
-            updateComboBoxEditor(filterBypass, attributeSet);
+            processDocumentChange(filterBypass, attributeSet);
         }
 
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
             if (ignoreDocumentChanges) return;
             super.insertString(filterBypass, offset, string, attributeSet);
-            updateComboBoxEditor(filterBypass, attributeSet);
+            processDocumentChange(filterBypass, attributeSet);
         }
 
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
             if (ignoreDocumentChanges) return;
             super.remove(filterBypass, offset, length);
-            processDocumentChange(filterBypass, null);
+            processDocumentChange(null, null);
         }
 
         /**
@@ -349,7 +371,7 @@ public final class AutoCompleteSupport<E> {
          * <ol>
          *   <li> save the prefix as the user has entered it
          *   <li> filter the combo box items against the prefix
-         *   <li> update the text in the combo box editor with a autocomplete suggestion
+         *   <li> update the text in the combo box editor with an autocomplete suggestion
          *   <li> try to show the popup, if possible
          * </ol>
          */
@@ -374,7 +396,7 @@ public final class AutoCompleteSupport<E> {
                 // if the user-specified prefix matches the item's prefix
                 // we have found an appropriate item to select
                 if (prefixMatcher.matches(item)) {
-                    if (filterBypass != null && attributeSet != null) {
+                    if (filterBypass != null) {
                         // either keep the user's prefix or replace it with the item's prefix
                         // depending on whether we correct the case
                         if (correctsCase) {
@@ -628,30 +650,43 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
+     * Watch for a change of the ComboBoxUI and report it as a violation.
+     */
+    private class UIWatcher implements PropertyChangeListener {
+        public void propertyChange(PropertyChangeEvent evt) {
+            throwIllegalStateException("The ComboBoxUI cannot be changed. It was changed to: " + evt.getNewValue());
+        }
+    }
+
+    /**
+     * Watch for a change of the ComboBoxModel and report it as a violation.
+     */
+    private class ModelWatcher implements PropertyChangeListener {
+        public void propertyChange(PropertyChangeEvent evt) {
+            throwIllegalStateException("The ComboBoxModel cannot be changed. It was changed to: " + evt.getNewValue());
+        }
+    }
+
+    /**
      * Watch the Document behind the editor component in case it changes. If a
      * new Document is swapped in, uninstall our DocumentFilter from the old
      * Document and install it on the new.
      */
     private class DocumentWatcher implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent evt) {
-            final Document oldDocument = (Document) evt.getOldValue();
             final Document newDocument = (Document) evt.getNewValue();
 
-            // reset the document we track internally
-            document = null;
+            if (!(newDocument instanceof AbstractDocument))
+                throwIllegalStateException("The Document behind the JTextField was changed to no longer be an AbstractDocument. It was a " + newDocument);
 
-            // clear our DocumentFilter away from the old document
-            if (oldDocument instanceof AbstractDocument) {
-                final AbstractDocument oldAbstractDocument = (AbstractDocument) oldDocument;
-                if (oldAbstractDocument.getDocumentFilter() == documentFilter)
-                    oldAbstractDocument.setDocumentFilter(null);
-            }
+            // clear our DocumentFilter from the old document
+            document.setDocumentFilter(null);
 
-            // check if the new document is an AbstractDocument, and thus we can autocomplete
-            if (newDocument instanceof AbstractDocument) {
-                document = (AbstractDocument) newDocument;
-                document.setDocumentFilter(documentFilter);
-            }
+            // update the document we track internally
+            document = (AbstractDocument) newDocument;
+
+            // add our DocumentFilter to the new Document
+            document.setDocumentFilter(documentFilter);
         }
     }
 }
