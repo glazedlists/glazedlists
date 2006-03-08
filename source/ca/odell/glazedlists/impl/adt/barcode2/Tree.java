@@ -200,8 +200,14 @@ public class Tree<V> {
     /**
      * Remove size values at the specified index. Only values of the type
      * specified in indexColors will be removed.
+     *
+     * <p>Note that if the two nodes on either side of the removed node could
+     * be merged, they probably will not be merged by this implementation. This
+     * is to simplify the implementation, but it means that when iterating a
+     * tree, sometimes multiple nodes of the same color and value will be
+     * encountered in sequence.
      */
-    void remove(int index, byte indexColors, int size) {
+    public void remove(int index, byte indexColors, int size) {
         if(size == 0) return;
         assert(index >= 0);
         assert(index + size <= size(indexColors));
@@ -212,6 +218,7 @@ public class Tree<V> {
     }
 
     /**
+     * Remove at the specified index in the specified subtree.
      */
     private void removeFromSubtree(Node<V> node, int index, byte indexColors, int size) {
         while(size > 0) {
@@ -252,9 +259,9 @@ public class Tree<V> {
                 // replace this node with another if empty
                 if(node.size == 0) {
                     if(node.right == null) {
-                        replaceChild(node.parent, node, node.left);
+                        replaceChild(node, node.left);
                     } else if(node.left == null) {
-                        replaceChild(node.parent, node, node.right);
+                        replaceChild(node, node.right);
                     } else {
                         node = replaceEmptyNodeWithChild(node);
                     }
@@ -272,28 +279,34 @@ public class Tree<V> {
         }
     }
 
-    private void replaceChild(Node<V> parent, Node<V> node, Node<V> replacement) {
+    /**
+     * Replace the specified node with the specified replacement. This does the
+     * replacement, then walks up the tree to ensure heights are correct, so
+     * the replacement node should have its height set first before this method
+     * is called.
+     */
+    private void replaceChild(Node<V> node, Node<V> replacement) {
         // replace the root
-        if(parent == null) {
+        if(node.parent == null) {
             assert(node == root);
             root = replacement;
 
         // replace on the left
-        } else if(parent.left == node) {
-            parent.left = replacement;
+        } else if(node.parent.left == node) {
+            node.parent.left = replacement;
 
         // replace on the right
-        } else if(parent.right == node) {
-            parent.right = replacement;
+        } else if(node.parent.right == node) {
+            node.parent.right = replacement;
         }
 
         // update the replacement's parent
         if(replacement != null) {
-            replacement.parent = parent;
+            replacement.parent = node.parent;
         }
 
         // the height has changed, update that up the tree
-        fixHeightPostChange(parent);
+        fixHeightPostChange(node.parent);
     }
 
     /**
@@ -319,7 +332,7 @@ public class Tree<V> {
         int replacementColorIndex = Node.colorAsIndex(replacement.color);
 
         // remove that node from the tree
-        replaceChild(replacement.parent, replacement, replacement.left);
+        replaceChild(replacement, replacement.left);
         // update sizes up the tree all the way back to our replaced node
         for(Node sizeUpdated = replacement.parent; replacement.parent != toReplace; sizeUpdated = sizeUpdated.parent) {
             sizeUpdated.counts[replacementColorIndex] -= replacement.size;
@@ -331,9 +344,9 @@ public class Tree<V> {
         if(replacement.left != null) replacement.left.parent = replacement;
         replacement.right = toReplace.right;
         if(replacement.right != null) replacement.right.parent = replacement;
-        replaceChild(toReplace.parent, toReplace, replacement);
         replacement.height = toReplace.height;
         replacement.setCountsFromChildNodesAndSize();
+        replaceChild(toReplace, replacement);
 
         return replacement;
     }
@@ -367,8 +380,17 @@ public class Tree<V> {
         return true;
     }
 
+    /**
+     * Replace all values at the specified index with the specified new value.
+     *
+     * <p>Currently this uses a naive implementation of remove then add. If
+     * it proves desirable, it may be worthwhile to optimize this implementation
+     * with one that performs the remove and insert simultaneously, to save
+     * on tree navigation.
+     */
     public void set(int index, byte indexColors, byte color, V value, int size) {
-        throw new UnsupportedOperationException();
+        remove(index, indexColors, size);
+        add(index, indexColors, color, value, size);
     }
 
     /**
