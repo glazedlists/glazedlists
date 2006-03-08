@@ -93,14 +93,27 @@ class Node<V> implements Element<V> {
     }
 
     /**
+     * Update the counts member variable by examining the counts of
+     * the child nodes and the size member variable.
+     */
+    final void setCountsFromChildNodesAndSize() {
+        for(int colorIndex = 0; colorIndex < counts.length; colorIndex++) {
+            int colorTotal = 0;
+            if(left != null) colorTotal += left.counts[colorIndex];
+            if(right != null) colorTotal += right.counts[colorIndex];
+            if((color >> colorIndex) == 1) colorTotal += size;
+            counts[colorIndex] = colorTotal;
+        }
+    }
+
+    /**
      * Convert the specified color value (such as 1, 2, 4, 8, 16 etc.) into an
      * index value (such as 0, 1, 2, 3, 4 etc. ).
      */
     static final int colorAsIndex(byte color) {
         int colorAsIndex = 0;
-        while((color >> colorAsIndex) != 1) {
+        for(; (color >> colorAsIndex) != 1; colorAsIndex++) {
             if((color >> colorAsIndex) == 0) throw new IllegalStateException();
-            colorAsIndex++;
         }
         return colorAsIndex;
     }

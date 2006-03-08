@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+import java.util.Arrays;
+
 /**
  * Our second generation tree class.
  *
@@ -86,9 +88,12 @@ public class Tree<V> {
             if(index != 0) throw new IndexOutOfBoundsException();
 
             this.root = new Node<V>(colorCount, color, colorAsIndex, size, value, null);
+            assert(valid());
             return this.root;
         } else {
-            return insertIntoSubtree(root, index, indexColors, color, colorAsIndex, value, size);
+            Node<V> inserted = insertIntoSubtree(root, index, indexColors, color, colorAsIndex, value, size);
+            assert(valid());
+            return inserted;
         }
     }
 
@@ -131,7 +136,7 @@ public class Tree<V> {
                 if(parent.left == null) {
                     Node<V> inserted = new Node<V>(colorCount, color, colorAsIndex, size, value, parent);
                     parent.left = inserted;
-                    fixHeightPostInsert(parent);
+                    fixHeightPostChange(parent);
                     return inserted;
 
                 // recurse on the left
@@ -167,7 +172,7 @@ public class Tree<V> {
                 if(parent.right == null) {
                     Node<V> inserted = new Node<V>(colorCount, color, colorAsIndex, size, value, parent);
                     parent.right = inserted;
-                    fixHeightPostInsert(parent);
+                    fixHeightPostChange(parent);
                     return inserted;
 
                 // recurse on the right
@@ -182,11 +187,11 @@ public class Tree<V> {
     /**
      * Fix the height of the specified ancestor after inserting a child node.
      */
-    private static final void fixHeightPostInsert(Node parent) {
+    private static final void fixHeightPostChange(Node parent) {
         for(Node ancestor = parent; ancestor != null; ancestor = ancestor.parent) {
             byte leftHeight = ancestor.left != null ? ancestor.left.height : 0;
             byte rightHeight = ancestor.right != null ? ancestor.right.height : 0;
-            byte newHeight = (byte)Math.max(leftHeight, rightHeight);
+            byte newHeight = (byte)(Math.max(leftHeight, rightHeight) + 1);
             if(ancestor.height == newHeight) break;
             ancestor.height = newHeight;
         }
@@ -199,10 +204,11 @@ public class Tree<V> {
     void remove(int index, byte indexColors, int size) {
         if(size == 0) return;
         assert(index >= 0);
-        assert(index + size < size(indexColors));
+        assert(index + size <= size(indexColors));
         assert(root != null);
 
         removeFromSubtree(root, index, indexColors, size);
+        valid();
     }
 
     /**
@@ -250,7 +256,7 @@ public class Tree<V> {
                     } else if(node.left == null) {
                         replaceChild(node.parent, node, node.right);
                     } else {
-                        throw new UnsupportedOperationException();
+                        node = replaceEmptyNodeWithChild(node);
                     }
                 }
                 size -= toRemove;
@@ -285,6 +291,80 @@ public class Tree<V> {
         if(replacement != null) {
             replacement.parent = parent;
         }
+
+        // the height has changed, update that up the tree
+        fixHeightPostChange(parent);
+    }
+
+    /**
+     * Replace the specified node with another node deeper in the tree. This
+     * is necessary to maintain treeness through deletes.
+     *
+     * <p>This implementation finds the largest node in the left subtree,
+     * removes it, and puts it in the specified node's place.
+     *
+     * @return the replacement node
+     */
+    private Node<V> replaceEmptyNodeWithChild(Node<V> toReplace) {
+        assert(toReplace.size == 0);
+        assert(toReplace.left != null);
+        assert(toReplace.right != null);
+
+        // find the rightmost child on the leftside
+        Node<V> replacement = toReplace.left;
+        while(replacement.right != null) {
+            replacement = replacement.right;
+        }
+        assert(replacement.right == null);
+        int replacementColorIndex = Node.colorAsIndex(replacement.color);
+
+        // remove that node from the tree
+        replaceChild(replacement.parent, replacement, replacement.left);
+        // update sizes up the tree all the way back to our replaced node
+        for(Node sizeUpdated = replacement.parent; replacement.parent != toReplace; sizeUpdated = sizeUpdated.parent) {
+            sizeUpdated.counts[replacementColorIndex] -= replacement.size;
+            assert(sizeUpdated.counts[replacementColorIndex] >= 0);
+        }
+
+        // update the tree structure to point to the replacement
+        replacement.left = toReplace.left;
+        if(replacement.left != null) replacement.left.parent = replacement;
+        replacement.right = toReplace.right;
+        if(replacement.right != null) replacement.right.parent = replacement;
+        replaceChild(toReplace.parent, toReplace, replacement);
+        replacement.height = toReplace.height;
+        replacement.setCountsFromChildNodesAndSize();
+
+        return replacement;
+    }
+
+    /**
+     * @return true if this tree is structurally valid
+     */
+    private boolean valid() {
+        if(root == null) return true;
+
+        // walk through all nodes in the tree, looking for something invalid
+        for(Node node = root.leftmostChild(); node != null; node = node.next()) {
+            // sizes (counts) are valid
+            int[] currentCounts = node.counts.clone();
+            node.setCountsFromChildNodesAndSize();
+            assert(Arrays.equals(currentCounts, node.counts));
+
+            // heights are valid
+            int leftHeight = node.left != null ? node.left.height : 0;
+            int rightHeight = node.right != null ? node.right.height : 0;
+            assert(Math.max(leftHeight, rightHeight) + 1 == node.height);
+
+            // left child's parent is this
+            assert(node.left == null || node.left.parent == node);
+
+            // right child's parent is this
+            assert(node.right == null || node.right.parent == node);
+        }
+
+        // we're valid
+        return true;
     }
 
     public void set(int index, byte indexColors, byte color, V value, int size) {

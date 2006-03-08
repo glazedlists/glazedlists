@@ -100,7 +100,7 @@ public class TreeTest extends TestCase {
         assertEquals(37, tree.size(allColors));
     }
 
-    public void testThreeColorDeletes() {
+    public void testRemoves() {
         Tree<String> tree = new Tree<String>(coder);
 
         tree.add(0, allColors, b, january, 5);
@@ -139,17 +139,59 @@ public class TreeTest extends TestCase {
 
         tree.remove(0, aOrB, 4);
         assertEquals("", tree.asSequenceOfColors());
-        System.out.println(tree);
+    }
+
+    public void testRemovesFromCenter() {
+        Tree<String> tree = new Tree<String>(coder);
 
         tree.add(0, allColors, b, february, 28);
         tree.add(0, allColors, a, january, 31);
         tree.add(59, allColors, c, march, 31);
-        System.out.println(tree);
 
         tree.remove(30, allColors, 30);
         assertEquals(30, tree.size(a));
         assertEquals(0, tree.size(b));
         assertEquals(30, tree.size(c));
-        System.out.println(tree);
+    }
+
+    public void testRemoveInBulk() {
+        Tree<String> tree = new Tree<String>(coder);
+
+        // remove all nodes from the tree
+        for(int i = 0; i < 100; i++) {
+            byte color = coder.colorToByte(colors.get(i % colors.size()));
+            tree.add(tree.size(allColors), allColors, color, null, 5);
+        }
+        tree.remove(0, allColors, tree.size(allColors));
+        assertEquals("", tree.asSequenceOfColors());
+
+        // remove the nodes from the middle of the tree
+        for(int i = 0; i < 10; i++) {
+            byte color = coder.colorToByte(colors.get(i % colors.size()));
+            tree.add(tree.size(allColors), allColors, color, null, 2);
+        }
+        tree.remove(5, allColors, 10);
+        assertEquals("AABBCBCCAA", tree.asSequenceOfColors());
+        tree.remove(0, b, 3);
+        assertEquals("AACCCAA", tree.asSequenceOfColors());
+        tree.remove(1, a, 2);
+        assertEquals("ACCCA", tree.asSequenceOfColors());
+        tree.remove(0, aOrC, 5);
+        assertEquals("", tree.asSequenceOfColors());
+    }
+
+    /**
+     * Remove such that the centre node is completely removed, and the
+     * right node shifts in to take its place, but we want to continue to
+     * remove on the right hand side.
+     */
+    public void testRemoveCentreShiftRight() {
+        Tree<String> tree = new Tree<String>(coder);
+        tree.add(0, allColors, b, february, 4);
+        tree.add(4, allColors, c, march, 4);
+        assertEquals("BBBBCCCC", tree.asSequenceOfColors());
+
+        tree.remove(2, bOrC, 6);
+        assertEquals("BB", tree.asSequenceOfColors());
     }
 }
