@@ -566,7 +566,8 @@ public final class AutoCompleteSupport<E> {
             final Action delegateAction = actionMap.get("selectNext");
             actionMap.put("selectNext", new DownAction(delegateAction));
 
-            // install a custom action for Apple LAFs
+            // install custom actions for Apple LAFs to avoid a ClassCastException
+            actionMap.put("aquaSelectPrevious", new AquaUpAction());
             actionMap.put("aquaSelectNext", new AquaDownAction());
         }
 
@@ -657,14 +658,28 @@ public final class AutoCompleteSupport<E> {
          * Decorate the UI Delegate's DownAction with our own that always
          * applies the latest filter before displaying the popup.
          */
+        private class AquaUpAction extends AbstractAction {
+            public void actionPerformed(ActionEvent e) {
+                if (comboBox.isEnabled() && comboBox.isShowing()) {
+                    if (comboBox.isPopupVisible()) {
+                        int i = listBox.getSelectedIndex();
+                        if (i > 0) {
+                            listBox.setSelectedIndex(i - 1);
+                            listBox.ensureIndexIsVisible(i - 1);
+                        }
+                        comboBox.repaint();
+                    } else {
+                        applyFilter(prefix);
+                        comboBox.setPopupVisible(true);
+                    }
+                }
+            }
+        }
+
         private class AquaDownAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
-                if (!comboBox.isPopupVisible())
-                    applyFilter(prefix);
-
-                JComboBox jcombobox = (JComboBox) e.getSource();
-                if (jcombobox.isEnabled() && jcombobox.isShowing()) {
-                    if (jcombobox.isPopupVisible()) {
+                if (comboBox.isEnabled() && comboBox.isShowing()) {
+                    if (comboBox.isPopupVisible()) {
                         int i = listBox.getSelectedIndex();
                         if (i < comboBox.getModel().getSize() - 1) {
                             listBox.setSelectedIndex(i + 1);
@@ -672,7 +687,8 @@ public final class AutoCompleteSupport<E> {
                         }
                         comboBox.repaint();
                     } else {
-                        jcombobox.setPopupVisible(true);
+                        applyFilter(prefix);
+                        comboBox.setPopupVisible(true);
                     }
                 }
             }
