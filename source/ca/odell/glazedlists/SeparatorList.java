@@ -100,8 +100,9 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         // go from being outside the limit filter to inside it
         if(listChanges.isReordering()) {
             boolean canReorder = true;
-            for(IndexedTreeIterator<SeparatorInjectorList<E>.GroupSeparator> i = separatorSource.separators.iterator(0); i.hasNext(); ) {
-                IndexedTreeNode<SeparatorInjectorList<E>.GroupSeparator> node = i.next();
+
+            for(IndexedTreeIterator i = separatorSource.separators.iterator(0); i.hasNext(); ) {
+                IndexedTreeNode<SeparatorInjectorList<E>.GroupSeparator> node = (IndexedTreeNode<SeparatorInjectorList<E>.GroupSeparator>)i.next();
                 int limit = node.getValue().getLimit();
                 if(limit == 0) continue;
                 if(limit >= separatorSource.size()) continue;
