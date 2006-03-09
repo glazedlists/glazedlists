@@ -16,7 +16,8 @@ public class AutoCompleteSupportTestApp {
         "com.sun.java.swing.plaf.mac.MacLookAndFeel",
         "javax.swing.plaf.metal.MetalLookAndFeel",
         "com.sun.java.swing.plaf.motif.MotifLookAndFeel",
-        "com.incors.plaf.kunststoff.KunststoffLookAndFeel"
+        "com.incors.plaf.kunststoff.KunststoffLookAndFeel",
+        "apple.laf.AquaLookAndFeel",
     };
 
     private static final String[] urlData = {
@@ -71,12 +72,19 @@ public class AutoCompleteSupportTestApp {
             final JComboBox comboBox = new JComboBox();
             AutoCompleteSupport.install(comboBox, items, filterator);
 
+            final JComboBox plainComboBox = new JComboBox();
+            plainComboBox.setEditable(true);
+            plainComboBox.setModel(new EventComboBoxModel(items));
+
             if (comboBoxCount > 1)
                 panel.add(Box.createVerticalStrut(1), new GridBagConstraints(0, i*3, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
 
             panel.add(nameLabel, new GridBagConstraints(0, i*3+1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
             panel.add(comboBox, new GridBagConstraints(0, i*3+2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+
+            panel.add(Box.createHorizontalStrut(5), new GridBagConstraints(1, i*3, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+            panel.add(plainComboBox, new GridBagConstraints(2, i*3+2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
         }
 
         return panel;
@@ -88,6 +96,7 @@ public class AutoCompleteSupportTestApp {
 
     private static class Starter implements Runnable {
         public void run() {
+            System.out.println(UIManager.getSystemLookAndFeelClassName());
             new AutoCompleteSupportTestApp();
         }
     }
