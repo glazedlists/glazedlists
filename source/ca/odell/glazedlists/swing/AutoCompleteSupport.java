@@ -16,6 +16,7 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.metal.MetalComboBoxUI ;
 import javax.swing.plaf.ComboBoxUI;
 
@@ -453,7 +454,7 @@ public final class AutoCompleteSupport<E> {
      *
      * @author James Lemieux
      */
-    private class DynamicPopupComboBoxUI extends MetalComboBoxUI {
+    private class DynamicPopupComboBoxUI extends BasicComboBoxUI {
         /**
          * The preferred width of the combo box popup calculated one time in
          * {@link #calculatePopupWidth()} by considering the preferred width
@@ -564,6 +565,9 @@ public final class AutoCompleteSupport<E> {
             final ActionMap actionMap = comboBox.getActionMap();
             final Action delegateAction = actionMap.get("selectNext");
             actionMap.put("selectNext", new DownAction(delegateAction));
+
+            // install a custom action for Apple LAFs
+            actionMap.put("aquaSelectNext", new AquaDownAction());
         }
 
         protected ComboPopup createPopup() {
@@ -645,6 +649,32 @@ public final class AutoCompleteSupport<E> {
 
                 if (this.delegateAction != null)
                     this.delegateAction.actionPerformed(e);
+            }
+        }
+
+        /**
+         * // todo doc
+         * Decorate the UI Delegate's DownAction with our own that always
+         * applies the latest filter before displaying the popup.
+         */
+        private class AquaDownAction extends AbstractAction {
+            public void actionPerformed(ActionEvent e) {
+                if (!comboBox.isPopupVisible())
+                    applyFilter(prefix);
+
+                JComboBox jcombobox = (JComboBox) e.getSource();
+                if (jcombobox.isEnabled() && jcombobox.isShowing()) {
+                    if (jcombobox.isPopupVisible()) {
+                        int i = listBox.getSelectedIndex();
+                        if (i < comboBox.getModel().getSize() - 1) {
+                            listBox.setSelectedIndex(i + 1);
+                            listBox.ensureIndexIsVisible(i + 1);
+                        }
+                        comboBox.repaint();
+                    } else {
+                        jcombobox.setPopupVisible(true);
+                    }
+                }
             }
         }
     }
