@@ -5,21 +5,17 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
-
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-
-import javax.swing.* ;
+import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.plaf.ComboBoxUI;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
-import javax.swing.plaf.basic.BasicComboBoxUI;
-import javax.swing.plaf.metal.MetalComboBoxUI ;
-import javax.swing.plaf.ComboBoxUI;
-
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -563,6 +559,9 @@ public final class AutoCompleteSupport<E> {
         protected void installKeyboardActions() {
             super.installKeyboardActions();
             final ActionMap actionMap = comboBox.getActionMap();
+
+            // decorate the normal DownAction with our own that removes any
+            // filters before proceeding with the normal DownAction
             final Action delegateAction = actionMap.get("selectNext");
             actionMap.put("selectNext", new DownAction(delegateAction));
 
@@ -654,9 +653,10 @@ public final class AutoCompleteSupport<E> {
         }
 
         /**
-         * // todo doc
-         * Decorate the UI Delegate's DownAction with our own that always
-         * applies the latest filter before displaying the popup.
+         * Apple's Aqua Look and Feel defines AquaUpAction in a way that
+         * assumes the UI delegate to be AquaComboBoxUI. Since we install our
+         * own UI, we must replace Apple's AquaUpAction with our own which
+         * does not make the same assumption.
          */
         private class AquaUpAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
@@ -676,6 +676,12 @@ public final class AutoCompleteSupport<E> {
             }
         }
 
+        /**
+         * Apple's Aqua Look and Feel defines AquaDownAction in a way that
+         * assumes the UI delegate to be AquaComboBoxUI. Since we install our
+         * own UI, we must replace Apple's AquaDownAction with our own which
+         * does not make the same assumption.
+         */
         private class AquaDownAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
                 if (comboBox.isEnabled() && comboBox.isShowing()) {
