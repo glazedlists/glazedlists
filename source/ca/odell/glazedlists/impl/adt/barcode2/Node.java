@@ -112,7 +112,8 @@ class Node<V> implements Element<V> {
      */
     static final int colorAsIndex(byte color) {
         int colorAsIndex = 0;
-        for(; (color >> colorAsIndex) != 1; colorAsIndex++) {
+        int colorAsInt = color < 0 ? -color : color;
+        for(; (colorAsInt >> colorAsIndex) != 1; colorAsIndex++) {
             if((color >> colorAsIndex) == 0) throw new IllegalStateException();
         }
         return colorAsIndex;

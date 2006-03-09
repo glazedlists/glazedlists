@@ -4,8 +4,10 @@
 package ca.odell.glazedlists.impl.adt.barcode2;
 
 import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.GlazedLists;
 
 import java.util.List;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 
@@ -17,18 +19,18 @@ public class TreeTest extends TestCase {
     /** test values */
     private static List<String> colors = GlazedListsTests.stringToList("ABC");
     private static ListToByteCoder<String> coder = new ListToByteCoder<String>(colors);
+    private static byte allColors = coder.colorsToByte(GlazedListsTests.stringToList("ABC"));
+    private static byte a = coder.colorToByte("A");
+    private static byte b = coder.colorToByte("B");
+    private static byte c = coder.colorToByte("C");
+    private static byte aOrB = (byte) (a | b);
+    private static byte bOrC = (byte) (b | c);
+    private static byte aOrC = (byte) (a | c);
     private static final String january = "January";
     private static final String february = "February";
     private static final String march = "March";
     private static final String april = "April";
     private static final String may = "May";
-    private static final byte allColors = coder.colorsToByte(GlazedListsTests.stringToList("ABC"));
-    private static final byte a = coder.colorToByte("A");
-    private static final byte b = coder.colorToByte("B");
-    private static final byte c = coder.colorToByte("C");
-    private static final byte aOrB = (byte) (a | b);
-    private static final byte bOrC = (byte) (b | c);
-    private static final byte aOrC = (byte) (a | c);
 
     public void testThreeColorInserts() {
         Tree<String> tree = new Tree<String>(coder);
@@ -216,5 +218,40 @@ public class TreeTest extends TestCase {
         assertEquals("AAAABBBBAAAABBBBCCCC", tree.asSequenceOfColors());
         assertEquals(february, tree.get(12, allColors).get());
         assertEquals(april, tree.get(4, a).get());
+    }
+
+    public void testEightColors() {
+        colors = GlazedListsTests.stringToList("ABCDEFGH");
+        coder = new ListToByteCoder<String>(colors);
+        allColors = coder.colorsToByte(GlazedListsTests.stringToList("ABCDEFGH"));
+        final byte d = coder.colorToByte("D");
+        final byte e = coder.colorToByte("E");
+        final byte f = coder.colorToByte("F");
+        final byte g = coder.colorToByte("G");
+        final byte h = coder.colorToByte("H");
+
+        Tree<String> tree = new Tree<String>(coder);
+        tree.add(0, allColors, a, null, 4);
+        tree.add(4, allColors, b, null, 4);
+        tree.add(8, allColors, c, null, 4);
+        tree.add(12, allColors, d, null, 4);
+        tree.add(16, allColors, e, null, 4);
+        tree.add(20, allColors, f, null, 4);
+        tree.add(24, allColors, g, null, 4);
+        tree.add(28, allColors, h, null, 4);
+        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH", tree.asSequenceOfColors());
+        assertEquals(4, tree.size(a));
+        assertEquals(4, tree.size(b));
+        assertEquals(4, tree.size(c));
+        assertEquals(4, tree.size(d));
+        assertEquals(4, tree.size(e));
+        assertEquals(4, tree.size(f));
+        assertEquals(4, tree.size(g));
+        assertEquals(4, tree.size(h));
+
+
+
+
+
     }
 }
