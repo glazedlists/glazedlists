@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
@@ -70,6 +71,33 @@ public class EventTableModelTest extends SwingTestCase {
             tableModel.getValueAt(-1, 0);
             fail("failed to receive IndexOutOfBoundsException for invalid index");
         } catch (IndexOutOfBoundsException e) { }
+    }
+
+    public void guiTestConstructorLocking() throws InterruptedException {
+        // create a list whose get() method pauses for 100 ms before returning the value
+        final EventList<Integer> integers = new SlowReadList<Integer>(new BasicEventList<Integer>(), 100);
+        integers.add(new Integer(0));
+        integers.add(new Integer(1));
+        integers.add(new Integer(2));
+        integers.add(new Integer(3));
+        integers.add(new Integer(5));
+
+        // start a thread which adds new Integers every 50 ms
+        new Thread(new ListAddRunnable(integers, 1000, 50)).start();
+
+        // make sure the ListAddRunnable has started
+        Thread.sleep(200);
+
+        // at this point we have created an environment where writes are
+        // happening twice as fast as reads (50 ms between reads, 100 ms between writes),
+        // thus if our locking code is not correct when we try initializing an
+        // EventTableModel, we'll get an assertion failure in SlowReadList.get(), which
+        // records the size of the list on the first call to SlowReadList.get() and then
+        // rechecks to that size on every subsequent call to SlowReadList.get(). With the
+        // read lock held in the constructor of EventTableModel, the size of SlowReadList
+        // should remain consistent through the construction of EventTableModel.
+        final String[] properties = {"class"};
+        new EventTableModel(integers, GlazedLists.tableFormat(properties, properties));
     }
 
     public void guiTestSetValueAt_FilterList() {
@@ -185,6 +213,63 @@ public class EventTableModelTest extends SwingTestCase {
     private static final class SaskLabelMatcher implements Matcher<JLabel> {
         public boolean matches(JLabel item) {
             return item.getText().startsWith("sask");
+        }
+    }
+
+    private static class SlowReadList<S> extends TransformedList<S,S> {
+        private int sizeAtFirstRead;
+        private final long pause;
+
+        public SlowReadList(EventList<S> source, long pause) {
+            super(source);
+            source.addListEventListener(this);
+            this.pause = pause;
+        }
+
+        public void listChanged(ListEvent<S> listChanges) {
+            // nothing to do - this is just a test class
+        }
+
+        protected boolean isWritable() {
+            return true;
+        }
+
+        public S get(int index) {
+            if (sizeAtFirstRead == 0)
+                sizeAtFirstRead = this.size();
+            else
+                assertEquals(sizeAtFirstRead, this.size());
+
+            try {
+                Thread.sleep(pause);
+            } catch (InterruptedException e) {}
+            return super.get(index);
+        }
+    }
+
+    private static final class ListAddRunnable implements Runnable {
+        private final EventList<Integer> list;
+        private final long endTime;
+        private final long pause;
+
+        public ListAddRunnable(EventList<Integer> list, long duration, long pause) {
+            this.list = list;
+            this.endTime = System.currentTimeMillis() + duration;
+            this.pause = pause;
+        }
+
+        public void run() {
+            while (System.currentTimeMillis() < this.endTime) {
+                // acquire the write lock and add a new element
+                this.list.getReadWriteLock().writeLock().lock();
+                this.list.add(null);
+                this.list.getReadWriteLock().writeLock().unlock();
+
+                // pause before adding another element
+                try {
+                    Thread.sleep(this.pause);
+                } catch (InterruptedException e) {}
+            }
         }
     }
 }

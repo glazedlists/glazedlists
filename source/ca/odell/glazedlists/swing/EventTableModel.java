@@ -33,24 +33,31 @@ import javax.swing.table.*;
 public class EventTableModel<E> extends AbstractTableModel implements ListEventListener<E> {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E, E> swingThreadSource = null;
+    private final TransformedList<E, E> swingThreadSource;
 
     /** Specifies how to render table headers and sort */
     private TableFormat<E> tableFormat;
 
     /** Reusable table event for broadcasting changes */
-    private MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
+    private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
 
     /**
      * Creates a new table that renders the specified list in the specified
      * format.
      */
     public EventTableModel(EventList<E> source, TableFormat<E> tableFormat) {
-        this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
-        this.tableFormat = tableFormat;
+        // lock the source list for reading since we want to prevent writes
+        // from occurring until we fully initialize this TableModel
+        source.getReadWriteLock().readLock().lock();
+        try {
+            this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
+            this.tableFormat = tableFormat;
 
-        // prepare listeners
-        swingThreadSource.addListEventListener(this);
+            // prepare listeners
+            swingThreadSource.addListEventListener(this);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -114,7 +121,6 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
             swingThreadSource.getReadWriteLock().readLock().unlock();
         }
     }
-
 
     /**
      * For implementing the ListEventListener interface. This sends changes
@@ -259,7 +265,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
             }
         // this is not a writable table
         } else {
-            throw new UnsupportedOperationException("Unexpected set() on read-only table");
+            throw new UnsupportedOperationException("Unexpected setValueAt() on read-only table");
         }
     }
     
