@@ -10,40 +10,44 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.*;
 
 /**
- * An {@link EventList} that only forwards its events on a user-interface thread,
+ * An {@link EventList} that only forwards its events on a proxy thread,
  * regardless of the thread of their origin.
  *
- * <p>While the UI thread is getting to the events to forward, more events may
- * arrive. This means that multiple changes may have occurred before the user interface
- * can be notified. One problem with this limitation is that some of these changes
- * may contradict one another. For example, an inserted item may be later removed 
- * before either event is processed. To overcome this limitation, this class uses
- * the change-contradiction resolving logic of {@link ListEventAssembler}.
+ * <p>While the proxy thread is not executing, any number of events may arrive.
+ * This means that multiple changes may have occurred before the proxy can
+ * notify its listeners. One problem with this limitation is that some of these
+ * changes may contradict one another. For example, an inserted item may be
+ * later removed before either event is processed. To overcome this limitation,
+ * this class uses the change-contradiction resolving logic of
+ * {@link ListEventAssembler}.
  *
  * <p>The flow of events is as follows:
- * <ol><li>Any thread makes a change to the source list and calls
- *     {@link ThreadProxyEventList#listChanged(ListEvent)}.
- *     <li>The event is enqueued and the user interface thread is notified that
- *     it has a task in the future.
+ * <ol>
+ *   <li>Any thread makes a change to the source list and calls
+ *       {@link ThreadProxyEventList#listChanged(ListEvent)}.
+ *   <li>The event is enqueued and the proxy thread is notified that it has a
+ *       task to process in the future.
  * </ol>
- * <p>Then some time later in the future after one or more events have been enqueued,
- * the user-interface thread gets to its queue:
- * <ol><li>First it acquires a lock so that no more changes can occur
- *     <li>The complete set of changes are combined into one change. Currently this
- *     implementation does a best effort on conflict resolution. It is limited in
- *     its handling of reordering events, as caused by changing a {@link SortedList}
- *     {@link Comparator}.
- *     <li>The completed set of events is fired
- *     <li>The first listener is the {@link ThreadProxyEventList} itself. It listens
- *     to its own event because this event will be free of conflicts. It applies the
- *     changes to its own internal copy of the data.
- *     <li>All other listeners are notified of the change
+ *
+ * <p>Then some time later in the future after one or more events have been
+ * enqueued, the proxy thread executes and processes its queue:
+ * <ol>
+ *   <li>First it acquires a lock so that no more concurrent changes can occur
+ *   <li>All enqueued changes are combined into one change. Currently this
+ *       implementation does a best effort on conflict resolution. It is
+ *       limited in its handling of reordering events, as caused by changing a
+ *       {@link SortedList} {@link Comparator}.
+ *   <li>The completed set of events is fired.
+ *   <li>The first listener is the {@link ThreadProxyEventList} itself. It listens
+ *       to its own event because this event will be free of conflicts. It applies
+ *       the changes to its own internal copy of the data.
+ *     <li>All other listeners are notified of the change.
  *     <li>The lock is released.
  * </ol>
  *
- * <p>The {@link ThreadProxyEventList} keeps a private copy of the source {@link EventList}'s
- * elements. This enables interested classes to read a consistent (albeit potentially
- * out of date) view of the data at all times.
+ * <p>The {@link ThreadProxyEventList} keeps a private copy of the elements of the
+ * source {@link EventList}. This enables interested classes to read a consistent
+ * (albeit potentially out of date) view of the data at all times.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
@@ -52,15 +56,19 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     /** a local cache of the source list */
     private List<E> localCache = new ArrayList<E>();
     
-    /** propagates events on the Swing thread */
+    /** propagates events on the proxy thread */
     private UpdateRunner updateRunner = new UpdateRunner();
     
-    /** whether the dispatch thread has been scheduled */
+    /** whether the proxy thread has been scheduled */
     private boolean scheduled = false;
     
     public volatile boolean debug = false;
         
     /**
+     * Create a {@link ThreadProxyEventList} which delivers changes to the
+     * given <code>source</code> on a particular {@link Thread}, called the
+     * proxy {@link Thread} of a subclasses choosing. The {@link Thread} used
+     * depends on the implementation of {@link #schedule(Runnable)}.
      */
     public ThreadProxyEventList(EventList<E> source) {
         super(source);
@@ -95,7 +103,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     }
     
     /**
-     * Schedule the specified runnable to be run on the proxied thread.
+     * Schedule the specified runnable to be executed on the proxy thread.
      */
     protected abstract void schedule(Runnable runnable);    
 
@@ -114,9 +122,8 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
         return true;
     }
     
-    
     /**
-     * Updates the internal data over the Swing thread.
+     * Updates the internal data using the proxy thread.
      *
      * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
      */
