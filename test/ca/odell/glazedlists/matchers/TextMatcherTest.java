@@ -8,6 +8,7 @@ import ca.odell.glazedlists.impl.filter.*;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TextFilterator;
 // standard collections
 import java.util.*;
 
@@ -237,6 +238,27 @@ public class TextMatcherTest extends TestCase {
 		assertEquals(list, numbers);
     }
 
+    public void testMatchNonStrings() {
+        final TextMatcherEditor<Integer> textMatcherEditor = new TextMatcherEditor<Integer>(new IntegerTextFilterator());
+        FilterList<Integer> list = new FilterList<Integer>(new BasicEventList<Integer>(), textMatcherEditor);
+
+        list.add(new Integer(10));
+        list.add(new Integer(3));
+        list.add(new Integer(11));
+        list.add(new Integer(2));
+        list.add(new Integer(12));
+        list.add(new Integer(9));
+        list.add(new Integer(103));
+        list.add(new Integer(7));
+
+        textMatcherEditor.setFilterText(new String[] {"1"});
+        assertEquals(4, list.size());
+        assertEquals(list.get(0), new Integer(10));
+        assertEquals(list.get(1), new Integer(11));
+        assertEquals(list.get(2), new Integer(12));
+        assertEquals(list.get(3), new Integer(103));
+    }
+
     public void testChangeMode() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
@@ -423,5 +445,17 @@ public class TextMatcherTest extends TestCase {
 
         // verify the lists are equal
         assertEquals(controlList, filteredList);
+    }
+
+    /**
+     * Intentionally add raw Integers into the list with this TextFilterator in
+     * order to validate that TextFilterator is always backwards compatible with
+     * old behaviour. (Namely that the .toString() value is used for filtering
+     * all of the filterator's object)
+     */
+    private static class IntegerTextFilterator implements TextFilterator<Integer> {
+        public void getFilterStrings(List<String> baseList, Integer element) {
+            ((List) baseList).add(element);
+        }
     }
 }
