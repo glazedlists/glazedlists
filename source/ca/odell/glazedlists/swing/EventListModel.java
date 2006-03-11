@@ -47,10 +47,17 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * Creates a new widget that renders the specified list.
      */
     public EventListModel(EventList<E> source) {
-        swingSource = GlazedListsSwing.swingThreadProxyList(source);
+        // lock the source list for reading since we want to prevent writes
+        // from occurring until we fully initialize this EventListModel
+        source.getReadWriteLock().readLock().lock();
+        try {
+            swingSource = GlazedListsSwing.swingThreadProxyList(source);
 
-        // prepare listeners
-        swingSource.addListEventListener(this);
+            // prepare listeners
+            swingSource.addListEventListener(this);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
     }
     
     /**

@@ -73,11 +73,18 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      *      {@link EventTableModel} or {@link EventListModel}.
      */
     public EventSelectionModel(EventList<E> source) {
-        swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
+        // lock the source list for reading since we want to prevent writes
+        // from occurring until we fully initialize this EventSelectionModel
+        source.getReadWriteLock().readLock().lock();
+        try {
+            swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
 
-        // build a list for reading the selection
-        this.listSelection = new ListSelection<E>(swingThreadSource);
-        listSelection.addSelectionListener(new SwingSelectionListener());
+            // build a list for reading the selection
+            this.listSelection = new ListSelection<E>(swingThreadSource);
+            this.listSelection.addSelectionListener(new SwingSelectionListener());
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**

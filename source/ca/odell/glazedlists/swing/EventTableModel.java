@@ -47,7 +47,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      */
     public EventTableModel(EventList<E> source, TableFormat<E> tableFormat) {
         // lock the source list for reading since we want to prevent writes
-        // from occurring until we fully initialize this TableModel
+        // from occurring until we fully initialize this EventTableModel
         source.getReadWriteLock().readLock().lock();
         try {
             this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);

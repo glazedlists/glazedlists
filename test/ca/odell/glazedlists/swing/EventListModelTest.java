@@ -3,14 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import junit.framework.TestCase;
-
-import java.awt.*;
-
+import ca.odell.glazedlists.ThreadRecorderEventList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.GlazedListsTests;
+
+import java.awt.*;
 
 /**
  * Test EventListModel from the Swing thread.
@@ -22,16 +20,16 @@ public class EventListModelTest extends SwingTestCase {
      * Verifies that the new getElementAt() method of EventListModel works.
      */
     public void guiTestGetElementAt() {
-        EventList colors = new BasicEventList();
-        colors.add(Color.red);
-        colors.add(Color.green);
-        colors.add(Color.blue);
+        EventList<Color> colors = new BasicEventList<Color>();
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+        colors.add(Color.BLUE);
 
-        EventListModel tableModel = new EventListModel(colors);
+        EventListModel tableModel = new EventListModel<Color>(colors);
 
-        assertEquals(Color.red, tableModel.getElementAt(0));
-        assertEquals(Color.green, tableModel.getElementAt(1));
-        assertEquals(Color.blue, tableModel.getElementAt(2));
+        assertEquals(Color.RED, tableModel.getElementAt(0));
+        assertEquals(Color.GREEN, tableModel.getElementAt(1));
+        assertEquals(Color.BLUE, tableModel.getElementAt(2));
 
         try {
             tableModel.getElementAt(100);
@@ -42,5 +40,30 @@ public class EventListModelTest extends SwingTestCase {
             tableModel.getElementAt(-1);
             fail("failed to receive IndexOutOfBoundsException for invalid index");
         } catch (IndexOutOfBoundsException e) { }
+    }
+
+    public void guiTestConstructorLocking() throws InterruptedException {
+        // create a list which will record our multithreaded interactions with a list
+        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
+
+        // start a thread which adds new Integers every 50 ms
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
+        writerThread.start();
+
+        // make sure the writerThread has started writing
+        Thread.sleep(200);
+
+        // create a list whose get() method pauses for 50 ms before returning the value
+        final EventList<Integer> delayList = GlazedListsTests.delayList(atomicList, 50);
+
+        // the test: creating the EventListModel should be atomic and pause the writerThread while it initializes its internal state
+        new EventListModel<Integer>(delayList);
+
+        // wait until the writerThread finishes before asserting the recorded state
+        writerThread.join();
+
+        // correct locking should have produced a thread log like: WriterThread* AWT-EventQueue-0* WriterThread*
+        // correct locking should have produced a read/write pattern like: W...W R...R W...W
+        assertEquals(3, atomicList.getReadWriteBlockCount());
     }
 }

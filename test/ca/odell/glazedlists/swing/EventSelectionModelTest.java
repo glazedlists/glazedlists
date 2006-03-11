@@ -6,10 +6,11 @@ package ca.odell.glazedlists.swing;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.Matchers;
-import ca.odell.glazedlists.matchers.Matcher;
-// standard collections
-import java.util.*;
-import javax.swing.event.*;
+
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * This test verifies that the EventSelectionModel works.
@@ -19,31 +20,12 @@ import javax.swing.event.*;
 public class EventSelectionModelTest extends SwingTestCase {
 
     /**
-     * Prepare for the test.
-     */
-    public void guiSetUp() {
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void guiTearDown() {
-    }
-
-    /**
-     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
-     */
-    public void testGui() {
-        super.testGui();
-    }
-    
-    /**
      * Tests that selection survives a sorting.
      */
     public void guiTestSort() {
-        BasicEventList list = new BasicEventList();
-        SortedList sorted = new SortedList(list, null);
-        EventSelectionModel eventSelectionModel = new EventSelectionModel(sorted);
+        BasicEventList<Comparable> list = new BasicEventList<Comparable>();
+        SortedList<Comparable> sorted = new SortedList<Comparable>(list, null);
+        EventSelectionModel<Comparable> eventSelectionModel = new EventSelectionModel<Comparable>(sorted);
         
         // populate the list
         list.add("E");
@@ -72,8 +54,8 @@ public class EventSelectionModelTest extends SwingTestCase {
      * Verifies that the selected index is cleared when the selection is cleared.
      */
     public void guiTestClear() {
-        BasicEventList list = new BasicEventList();
-        EventSelectionModel eventSelectionModel = new EventSelectionModel(list);
+        BasicEventList<String> list = new BasicEventList<String>();
+        EventSelectionModel eventSelectionModel = new EventSelectionModel<String>(list);
 
         // populate the list
         list.add("A");
@@ -105,13 +87,12 @@ public class EventSelectionModelTest extends SwingTestCase {
      * This test was contributed by: Sergey Bogatyrjov
      */
     public void guiTestSelectionModel() {
-        String[] data = new String[] { "one", "two", "three" };
-        EventList source = new BasicEventList();
-        source.addAll(Arrays.asList(data));
-        FilterList filtered = new FilterList(source, Matchers.trueMatcher());
+        EventList<Object> source = new BasicEventList<Object>();
+        source.addAll(Arrays.asList(new String[] { "one", "two", "three" }));
+        FilterList<Object> filtered = new FilterList<Object>(source, Matchers.trueMatcher());
 
         // create selection model
-        EventSelectionModel model = new EventSelectionModel(filtered);
+        EventSelectionModel<Object> model = new EventSelectionModel<Object>(filtered);
         ListSelectionChangeCounter counter = new ListSelectionChangeCounter();
         model.addListSelectionListener(counter);
 
@@ -134,6 +115,31 @@ public class EventSelectionModelTest extends SwingTestCase {
         // clear the filter
         filtered.setMatcher(Matchers.falseMatcher());
         assertEquals(1, counter.getCountAndReset());
+    }
+
+    public void guiTestConstructorLocking() throws InterruptedException {
+        // create a list which will record our multithreaded interactions with a list
+        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
+
+        // start a thread which adds new Integers every 50 ms
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
+        writerThread.start();
+
+        // make sure the writerThread has started writing
+        Thread.sleep(200);
+
+        // create a list whose get() method pauses for 50 ms before returning the value
+        final EventList<Integer> delayList = GlazedListsTests.delayList(atomicList, 50);
+
+        // the test: creating the EventSelectionModel should be atomic and pause the writerThread while it initializes its internal state
+        new EventSelectionModel<Integer>(delayList);
+
+        // wait until the writerThread finishes before asserting the recorded state
+        writerThread.join();
+
+        // correct locking should have produced a thread log like: WriterThread* AWT-EventQueue-0* WriterThread*
+        // correct locking should have produced a read/write pattern like: W...W R...R W...W
+        assertEquals(3, atomicList.getReadWriteBlockCount());
     }
 
     /**

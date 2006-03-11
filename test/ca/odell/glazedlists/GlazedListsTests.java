@@ -82,6 +82,14 @@ public class GlazedListsTests {
     }
 
     /**
+     * Returns an EventList which delays each read and write operation by
+     * the given <code>delay</code> (in milliseconds).
+     */
+    public static <E> EventList<E> delayList(EventList<E> source, long delay) {
+        return new DelayList<E>(source, delay);
+    }
+
+    /**
      * This matcher matches everything greater than its minimum.
      */
     public static Matcher<Integer> matchAtLeast(int minimum) {
@@ -154,5 +162,60 @@ public class GlazedListsTests {
         cal.set(Calendar.MONTH, month);
         cal.set(Calendar.DATE, date);
         return cal.getTime();
+    }
+
+    /**
+     * Create a Runnable which executes the following logic repeatedly for the
+     * given duration:
+     *
+     * <ol>
+     *   <li> acquires the write lock for the list
+     *   <li> adds the value to the end of the list
+     *   <li> releases the write lock for the list
+     *   <li> pauses for the given pause (in milliseconds)
+     * </ol>
+     */
+    public static <E> Runnable createJerkyAddRunnable(EventList<E> list, E value, long duration, long pause) {
+        return new JerkyAddRunnable(list, value, duration, pause);
+    }
+
+    private static final class JerkyAddRunnable implements Runnable {
+        private final EventList list;
+        private final Object value;
+        private final long duration;
+        private final long pause;
+
+        public JerkyAddRunnable(EventList list, Object value, long duration, long pause) {
+            if (duration < 1)
+                throw new IllegalArgumentException("duration must be non-negative");
+            if (pause < 1)
+                throw new IllegalArgumentException("pause must be non-negative");
+
+            this.list = list;
+            this.value = value;
+            this.duration = duration;
+            this.pause = pause;
+        }
+
+        public void run() {
+            final long endTime = System.currentTimeMillis() + this.duration;
+
+            while (System.currentTimeMillis() < endTime) {
+                // acquire the write lock and add a new element
+                this.list.getReadWriteLock().writeLock().lock();
+                try {
+                    this.list.add(this.value);
+                } finally {
+                    this.list.getReadWriteLock().writeLock().unlock();
+                }
+
+                // pause before adding another element
+                try {
+                    Thread.sleep(this.pause);
+                } catch (InterruptedException e) {
+                    // best attempt only
+                }
+            }
+        }
     }
 }
