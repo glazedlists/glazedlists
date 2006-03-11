@@ -213,15 +213,171 @@ public class Tree<V> {
 
     /**
      * Fix the height of the specified ancestor after inserting a child node.
+     * This method short circuits when it finds the first node where the size
+     * has not changed.
+     *
+     * @param node the root of a changed subtree. This shouldn't be called
+     *      on inserted nodes, but rather their parent nodes, since only
+     *      the parent nodes sizes will be changing.
      */
-    private static final void fixHeightPostChange(Node parent) {
-        for(Node ancestor = parent; ancestor != null; ancestor = ancestor.parent) {
-            byte leftHeight = ancestor.left != null ? ancestor.left.height : 0;
-            byte rightHeight = ancestor.right != null ? ancestor.right.height : 0;
+    private final void fixHeightPostChange(Node<V> node) {
+        int LEFT = -1;
+        int EQUAL = 0;
+        int RIGHT = 1;
+        int largerChild = EQUAL;
+        int largerGrandChild = EQUAL;
+
+        // update the height
+        for(; node != null; node = node.parent) {
+            byte leftHeight = node.left != null ? node.left.height : 0;
+            byte rightHeight = node.right != null ? node.right.height : 0;
             byte newHeight = (byte)(Math.max(leftHeight, rightHeight) + 1);
-            if(ancestor.height == newHeight) break;
-            ancestor.height = newHeight;
+            if(node.height == newHeight) break;
+            node.height = newHeight;
+
+            // figure out rotations
+            largerGrandChild = largerChild;
+            int delta = 0;
+            if(leftHeight > rightHeight) {
+                largerChild = LEFT;
+                delta = leftHeight - rightHeight;
+            } else if(rightHeight > leftHeight) {
+                largerChild = RIGHT;
+                delta = rightHeight - leftHeight;
+            }
+            assert(delta >= 0 && delta <= 2);
+
+            // do rotations as necessary
+            if(delta == 2) {
+                if(largerChild == LEFT) {
+                    // single rotate left
+                    if(largerGrandChild != RIGHT) {
+                        node = rotateLeft(node);
+                    // double rotate left
+                    } else {
+                        rotateRight(node.left);
+                        node = rotateLeft(node);
+                    }
+                } else if(largerChild == RIGHT) {
+                    // single rotate right
+                    if(largerGrandChild != LEFT) {
+                        node = rotateRight(node);
+                    // double rotate right
+                    } else {
+                        rotateLeft(node.right);
+                        node = rotateRight(node);
+                    }
+                }
+            }
+            assert(Math.abs((node.left != null ? node.left.height : 0)
+                    - (node.right != null ? node.right.height : 0)) <= 1);
         }
+    }
+
+    /**
+     * Perform an AVL rotation of the tree.
+     *
+     * @return the new root of the subtree
+     *
+     *     D               B
+     *    / \   ROTATE    / \
+     *   B   E  LEFT AT  A   D
+     *  / \     NODE D      / \
+     * A   C               C   E
+     */
+    private final Node<V> rotateLeft(Node<V> subtreeRoot) {
+        assert(subtreeRoot.left != null);
+        // subtreeRoot is D
+        // newSubtreeRoot is B
+        Node<V> newSubtreeRoot = subtreeRoot.left;
+
+        // modify the counts
+        // originally: B = A + C, D = A + B + C + E
+        // remove C counts from B and (so B = A)
+        // then remove B counts from D (which includes A) (so  D = C + E)
+        // then add D counts to B (so B = A + C + D + E)
+        for(int i = 0; i < colorCount; i++) {
+            if(newSubtreeRoot.right != null) {
+                newSubtreeRoot.counts[i] -= newSubtreeRoot.right.counts[i]; // remove C from B
+            }
+            subtreeRoot.counts[i] -= newSubtreeRoot.counts[i]; // remove B from D
+            newSubtreeRoot.counts[i] += subtreeRoot.counts[i]; // add D to B
+        }
+
+        // modify the links between nodes
+        // attach C as a child of to D
+        subtreeRoot.left = newSubtreeRoot.right;
+        if(newSubtreeRoot.right != null) newSubtreeRoot.right.parent = subtreeRoot;
+        // link b as the new root node for this subtree
+        newSubtreeRoot.parent = subtreeRoot.parent;
+        if(newSubtreeRoot.parent != null) {
+            if(newSubtreeRoot.parent.left == subtreeRoot) newSubtreeRoot.parent.left = newSubtreeRoot;
+            else if(newSubtreeRoot.parent.right == subtreeRoot) newSubtreeRoot.parent.right = newSubtreeRoot;
+            else throw new IllegalStateException();
+        } else {
+            root = newSubtreeRoot;
+        }
+        // attach D as a child of B
+        newSubtreeRoot.right = subtreeRoot;
+        subtreeRoot.parent = newSubtreeRoot;
+
+        // update height of the old subtree root
+        byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
+        byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
+        subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
+        // update height of the new subtree root
+        byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
+        byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
+        newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
+
+        return newSubtreeRoot;
+    }
+    private final Node<V> rotateRight(Node<V> subtreeRoot) {
+        assert(subtreeRoot.right != null);
+        // subtreeRoot is D
+        // newSubtreeRoot is B
+        Node<V> newSubtreeRoot = subtreeRoot.right;
+
+        // modify the counts
+        // originally: B = A + C, D = A + B + C + E
+        // remove C counts from B and (so B = A)
+        // then remove B counts from D (which includes A) (so  D = C + E)
+        // then add D counts to B (so B = A + C + D + E)
+        for(int i = 0; i < colorCount; i++) {
+            if(newSubtreeRoot.left != null) {
+                newSubtreeRoot.counts[i] -= newSubtreeRoot.left.counts[i]; // remove C from B
+            }
+            subtreeRoot.counts[i] -= newSubtreeRoot.counts[i]; // remove B from D
+            newSubtreeRoot.counts[i] += subtreeRoot.counts[i]; // add D to B
+        }
+
+        // modify the links between nodes
+        // attach C as a child of to D
+        subtreeRoot.right = newSubtreeRoot.left;
+        if(newSubtreeRoot.left != null) newSubtreeRoot.left.parent = subtreeRoot;
+        // link b as the new root node for this subtree
+        newSubtreeRoot.parent = subtreeRoot.parent;
+        if(newSubtreeRoot.parent != null) {
+            if(newSubtreeRoot.parent.left == subtreeRoot) newSubtreeRoot.parent.left = newSubtreeRoot;
+            else if(newSubtreeRoot.parent.right == subtreeRoot) newSubtreeRoot.parent.right = newSubtreeRoot;
+            else throw new IllegalStateException();
+        } else {
+            root = newSubtreeRoot;
+        }
+        // attach D as a child of B
+        newSubtreeRoot.left = subtreeRoot;
+        subtreeRoot.parent = newSubtreeRoot;
+
+        // update height of the old subtree root
+        byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
+        byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
+        subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
+        // update height of the new subtree root
+        byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
+        byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
+        newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
+
+        return newSubtreeRoot;
     }
 
     /**
