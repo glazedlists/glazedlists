@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.EventList;
@@ -494,6 +497,10 @@ public final class AutoCompleteSupport<E> {
             return new ModelPropertyChangeHandler(super.createPropertyChangeListener());
         }
 
+        /**
+         * This class decorates the normal PropertyChangeListener to allow
+         * handling a changing of the ComboBoxModel.
+         */
         private class ModelPropertyChangeHandler implements PropertyChangeListener {
             private final PropertyChangeListener decorated;
 
@@ -502,7 +509,11 @@ public final class AutoCompleteSupport<E> {
             }
 
             public void propertyChange(PropertyChangeEvent evt) {
-                decorated.propertyChange(evt);
+                // allow the decorated listener a change to handle the event first
+                this.decorated.propertyChange(evt);
+
+                // if the ComboBoxModel changed, start listening for data changes
+                // to to the new model
                 if ("model".equals(evt.getPropertyName())) {
                     final ComboBoxModel oldModel = (ComboBoxModel) evt.getOldValue();
                     final ComboBoxModel newModel = (ComboBoxModel) evt.getNewValue();
@@ -536,15 +547,15 @@ public final class AutoCompleteSupport<E> {
         private int getPreferredPopupWidth() {
             if (this.preferredPopupWidth == 0)
                 this.preferredPopupWidth = this.calculatePopupWidth();
-            return this.preferredPopupWidth ;
+            return this.preferredPopupWidth;
         }
 
         /**
          * Returns the preferred dimensions of the combo box.
          */
         private Dimension getPreferredPopupSize() {
-            final Dimension size = this.comboBox.getPreferredSize();
-            return new Dimension(this.getPreferredPopupWidth(), size.height);
+            final Dimension preferredSize = this.comboBox.getPreferredSize();
+            return new Dimension(this.getPreferredPopupWidth(), preferredSize.height);
         }
 
         /**
@@ -571,10 +582,7 @@ public final class AutoCompleteSupport<E> {
         }
 
         protected ComboPopup createPopup() {
-            final BasicComboPopup popup = new CustomSizedComboPopup(this.comboBox);
-
-            popup.getAccessibleContext().setAccessibleParent(this.comboBox);
-            return popup;
+            return new CustomSizedComboPopup(this.comboBox);
         }
 
         private class CustomSizedComboPopup extends BasicComboPopup {
@@ -613,7 +621,7 @@ public final class AutoCompleteSupport<E> {
                 popupSize.setSize(popupSize.width, getPopupHeightForRowCount(maximumRowCount));
                 if (this.comboBox.getSize().width - 2 > popupSize.width)
                     popupSize.width = this.comboBox.getSize().width - 2; else popupSize.width += 20;
-                return super.computePopupBounds (px, py, popupSize.width, popupSize.height);
+                return super.computePopupBounds(px, py, popupSize.width, popupSize.height);
             }
         }
 
@@ -686,7 +694,7 @@ public final class AutoCompleteSupport<E> {
             public void actionPerformed(ActionEvent e) {
                 if (comboBox.isEnabled() && comboBox.isShowing()) {
                     if (comboBox.isPopupVisible()) {
-                        int i = listBox.getSelectedIndex();
+                        final int i = listBox.getSelectedIndex();
                         if (i < comboBox.getModel().getSize() - 1) {
                             listBox.setSelectedIndex(i + 1);
                             listBox.ensureIndexIsVisible(i + 1);
