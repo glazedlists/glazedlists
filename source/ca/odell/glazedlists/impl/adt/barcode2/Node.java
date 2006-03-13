@@ -96,7 +96,7 @@ class Node<V> implements Element<V> {
      * Update the counts member variable by examining the counts of
      * the child nodes and the size member variable.
      */
-    final void setCountsFromChildNodesAndSize() {
+    final void refreshCounts() {
         for(int colorIndex = 0; colorIndex < counts.length; colorIndex++) {
             int colorTotal = 0;
             if(left != null) colorTotal += left.counts[colorIndex];
