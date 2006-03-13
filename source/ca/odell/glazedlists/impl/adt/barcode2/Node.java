@@ -42,6 +42,7 @@ class Node<V> implements Element<V> {
      *      root node.
      */
     public Node(int colorCount, byte color, int colorAsIndex, int size, V value, Node<V> parent) {
+        assert(colorAsIndex(color) >= 0 && colorAsIndex(color) < 7);
         this.color = color;
         this.size = size;
         this.value = value;
@@ -111,12 +112,16 @@ class Node<V> implements Element<V> {
      * index value (such as 0, 1, 2, 3, 4 etc. ).
      */
     static final int colorAsIndex(byte color) {
-        int colorAsIndex = 0;
-        int colorAsInt = color < 0 ? -color : color;
-        for(; (colorAsInt >> colorAsIndex) != 1; colorAsIndex++) {
-            if((color >> colorAsIndex) == 0) throw new IllegalStateException();
+        switch(color) {
+            case 1: return 0;
+            case 2: return 1;
+            case 4: return 2;
+            case 8: return 3;
+            case 16: return 4;
+            case 32: return 5;
+            case 64: return 6;
         }
-        return colorAsIndex;
+        throw new IllegalArgumentException();
     }
 
     /**

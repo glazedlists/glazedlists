@@ -40,7 +40,7 @@ public class Tree<V> {
     /** the number of colors in this tree */
     private final int colorCount;
     /** the colors in the tree, used for printing purposes only */
-    private final ListToByteCoder coder;
+    private final ListToByteCoder<V> coder;
 
     /** the tree's root, or <code>null</code> for an empty tree */
     private Node<V> root = null;
@@ -51,9 +51,13 @@ public class Tree<V> {
     /**
      * Create a tree using the specified color codings for the nodes.
      */
-    public Tree(ListToByteCoder coder) {
+    public Tree(ListToByteCoder<V> coder) {
         this.coder = coder;
         this.colorCount = coder.getColors().size();
+    }
+
+    public ListToByteCoder<V> getCoder() {
+        return coder;
     }
 
     /**
@@ -130,7 +134,6 @@ public class Tree<V> {
     }
 
     /**
-     *
      * @param parent the subtree to insert into, must not be null.
      * @param index the color index to insert at
      * @param indexColors a bitmask of all colors that the index is defined in

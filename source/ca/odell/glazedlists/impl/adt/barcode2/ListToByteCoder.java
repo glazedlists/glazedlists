@@ -19,7 +19,7 @@ public class ListToByteCoder<C> {
     private final int colorCount;
 
     public ListToByteCoder(List<C> allColors) {
-        if(allColors.size() > 8) throw new IllegalArgumentException("Max 8 colors!");
+        if(allColors.size() > 7) throw new IllegalArgumentException("Max 7 colors!");
         this.allColors = Collections.unmodifiableList(new ArrayList<C>(allColors));
         this.colorCount = this.allColors.size();
     }
