@@ -4,6 +4,8 @@
 package ca.odell.glazedlists.impl.adt.barcode2;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Our second generation tree class.
@@ -42,6 +44,9 @@ public class Tree<V> {
 
     /** the tree's root, or <code>null</code> for an empty tree */
     private Node<V> root = null;
+
+    /** a working list to help manage what we're removing */
+    private final List<Node<V>> zeroQueue = new ArrayList<Node<V>>();
 
     /**
      * Create a tree using the specified color codings for the nodes.
@@ -234,56 +239,40 @@ public class Tree<V> {
      *      the parent nodes sizes will be changing.
      */
     private final void fixHeightPostChange(Node<V> node) {
-        int LEFT = -1;
-        int EQUAL = 0;
-        int RIGHT = 1;
-        int largerChild = EQUAL;
-        int largerGrandChild = EQUAL;
 
         // update the height
         for(; node != null; node = node.parent) {
             byte leftHeight = node.left != null ? node.left.height : 0;
             byte rightHeight = node.right != null ? node.right.height : 0;
-            byte newHeight = (byte)(Math.max(leftHeight, rightHeight) + 1);
-            if(node.height == newHeight) break;
-            node.height = newHeight;
 
-            // figure out rotations
-            largerGrandChild = largerChild;
-            int delta = 0;
-            if(leftHeight > rightHeight) {
-                largerChild = LEFT;
-                delta = leftHeight - rightHeight;
-            } else if(rightHeight > leftHeight) {
-                largerChild = RIGHT;
-                delta = rightHeight - leftHeight;
-            }
-            assert(delta >= 0 && delta <= 2);
-
-            // do rotations as necessary
-            if(delta == 2) {
-                if(largerChild == LEFT) {
-                    // single rotate left
-                    if(largerGrandChild != RIGHT) {
-                        node = rotateLeft(node);
-                    // double rotate left
-                    } else {
-                        rotateRight(node.left);
-                        node = rotateLeft(node);
-                    }
-                } else if(largerChild == RIGHT) {
-                    // single rotate right
-                    if(largerGrandChild != LEFT) {
-                        node = rotateRight(node);
-                    // double rotate right
-                    } else {
-                        rotateLeft(node.right);
-                        node = rotateRight(node);
-                    }
+            // rotate left?
+            if(leftHeight > rightHeight && (leftHeight - rightHeight == 2)) {
+                // do we need to rotate the left child first?
+                int leftLeftHeight = node.left.left != null ? node.left.left.height : 0;
+                int leftRightHeight = node.left.right != null ? node.left.right.height : 0;
+                if(leftRightHeight > leftLeftHeight) {
+                    rotateRight(node.left);
                 }
+
+                // finally rotate right
+                node = rotateLeft(node);
+            // rotate right?
+            } else if(rightHeight > leftHeight && (rightHeight - leftHeight == 2)) {
+                // do we need to rotate the right child first?
+                int rightLeftHeight = node.right.left != null ? node.right.left.height : 0;
+                int rightRightHeight = node.right.right != null ? node.right.right.height : 0;
+                if(rightLeftHeight > rightRightHeight) {
+                    rotateLeft(node.right);
+                }
+
+                // finally rotate left
+                node = rotateRight(node);
             }
-            assert(Math.abs((node.left != null ? node.left.height : 0)
-                    - (node.right != null ? node.right.height : 0)) <= 1);
+
+            // update the node height
+            leftHeight = node.left != null ? node.left.height : 0;
+            rightHeight = node.right != null ? node.right.height : 0;
+            node.height = (byte)(Math.max(leftHeight, rightHeight) + 1);
         }
     }
 
@@ -413,14 +402,38 @@ public class Tree<V> {
         assert(index + size <= size(indexColors));
         assert(root != null);
 
-        removeFromSubtree(root, index, indexColors, size);
-        valid();
+        // remove values from the tree
+        removeFromSubtree(root, index, indexColors, size, zeroQueue);
+
+        // remove the emptied nodes
+        for(int i = 0; i < zeroQueue.size(); i++) {
+            Node<V> node = zeroQueue.get(i);
+            assert(node.size == 0);
+
+            if(node.right == null) {
+                replaceChild(node, node.left);
+            } else if(node.left == null) {
+                replaceChild(node, node.right);
+            } else {
+                node = replaceEmptyNodeWithChild(node);
+            }
+        }
+        zeroQueue.clear();
+
+        assert(valid());
     }
 
     /**
-     * Remove at the specified index in the specified subtree.
+     * Remove at the specified index in the specified subtree. This doesn't ever
+     * remove any nodes of size zero, that's up to the caller to do after by
+     * removing all nodes in the zeroQueue from the tree.
+     *
+     * @param zeroQueue a list to add all nodes to that must be removed from
+     *      the tree. The nodes are removed only after the tree has been modified,
+     *      which allows us a chance to do rotations without losing our position
+     *      in the tree.
      */
-    private void removeFromSubtree(Node<V> node, int index, byte indexColors, int size) {
+    private void removeFromSubtree(Node<V> node, int index, byte indexColors, int size, List<Node<V>> zeroQueue) {
         while(size > 0) {
             assert(node != null);
             assert(index >= 0);
@@ -434,9 +447,9 @@ public class Tree<V> {
                 // that part recursively
                 if(index + size > leftSize) {
                     int toRemove = leftSize - index;
-                    removeFromSubtree(node.left, index, indexColors, toRemove);
-                    leftSize -= toRemove;
+                    removeFromSubtree(node.left, index, indexColors, toRemove, zeroQueue);
                     size -= toRemove;
+                    leftSize -= toRemove;
                 // we can do our full delete on the left side
                 } else {
                     node = node.left;
@@ -452,21 +465,11 @@ public class Tree<V> {
                 // decrement the appropriate counts all the way up
                 int colorIndex = Node.colorAsIndex(node.color);
                 node.size -= toRemove;
-                fixCountsThruRoot(node, colorIndex, -toRemove);
-                // replace this node with another if empty
-                if(node.size == 0) {
-                    if(node.right == null) {
-                        replaceChild(node, node.left);
-                    } else if(node.left == null) {
-                        replaceChild(node, node.right);
-                    } else {
-                        node = replaceEmptyNodeWithChild(node);
-                    }
-                }
                 size -= toRemove;
-                if(size == 0) return;
-                leftSize -= toRemove;
                 rightStartIndex -= toRemove;
+                fixCountsThruRoot(node, colorIndex, -toRemove);
+                if(node.size == 0) zeroQueue.add(node);
+                if(size == 0) return;
             }
             assert(index >= rightStartIndex);
 
@@ -568,6 +571,9 @@ public class Tree<V> {
 
             // right child's parent is this
             assert(node.right == null || node.right.parent == node);
+
+            // tree is AVL
+            assert(Math.abs(leftHeight - rightHeight) < 2) : "Subtree is not AVL: \n" + node;
         }
 
         // we're valid

@@ -6,8 +6,7 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 import ca.odell.glazedlists.GlazedListsTests;
 import ca.odell.glazedlists.GlazedLists;
 
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -160,6 +159,14 @@ public class TreeTest extends TestCase {
         Tree<String> tree = new Tree<String>(coder);
 
         // remove all nodes from the tree
+        for(int i = 0; i < 10; i++) {
+            byte color = coder.colorToByte(colors.get(i % colors.size()));
+            tree.add(tree.size(allColors), allColors, color, null, 5);
+        }
+        tree.remove(0, allColors, tree.size(allColors));
+        assertEquals("", tree.asSequenceOfColors());
+
+        // remove all nodes from the tree
         for(int i = 0; i < 100; i++) {
             byte color = coder.colorToByte(colors.get(i % colors.size()));
             tree.add(tree.size(allColors), allColors, color, null, 5);
@@ -180,6 +187,82 @@ public class TreeTest extends TestCase {
         assertEquals("ACCCA", tree.asSequenceOfColors());
         tree.remove(0, aOrC, 5);
         assertEquals("", tree.asSequenceOfColors());
+    }
+
+    /**
+     * This tests a scenario where the trees used to become unbalanced
+     * when the height didn't change when it became unbalanced.
+     */
+    public void testBalance() {
+        Tree<String> tree = new Tree<String>(coder);
+        tree.add(0, allColors, b, null, 1);
+        tree.add(0, allColors, c, null, 1);
+        tree.add(2, allColors, c, null, 1);
+        tree.add(0, allColors, b, null, 1);
+        tree.add(2, allColors, a, null, 1);
+        tree.add(5, allColors, a, null, 1);
+        assertEquals("BCABCA", tree.asSequenceOfColors());
+        tree.remove(0, allColors, 3);
+        assertEquals("BCA", tree.asSequenceOfColors());
+    }
+
+    /**
+     * We need to make sure that when we delete, we rebalance
+     * in the right place. This tree rebalances on the opposite
+     * side as is deleted.
+     */
+    public void testDeleteRebalance() {
+        Tree<String> tree = new Tree<String>(coder);
+        tree.add(0, allColors, a, null, 1);
+        tree.add(0, allColors, a, null, 1);
+        tree.add(2, allColors, b, null, 1);
+        tree.add(0, allColors, c, null, 1);
+        tree.add(2, allColors, c, null, 1);
+        tree.add(5, allColors, c, null, 1);
+        tree.add(3, allColors, c, null, 1);
+        assertEquals("CACCABC", tree.asSequenceOfColors());
+        tree.remove(6, allColors, 1);
+        assertEquals("CACCAB", tree.asSequenceOfColors());
+    }
+
+    /**
+     * Insert a bunch of stuff randomly into the tree, and hope it works.
+     */
+    public void testRandomOperations() {
+        Tree<String> tree = new Tree<String>(coder);
+        List<String> expectedSequenceOfColors = new ArrayList<String>();
+
+        Random dice = new Random(0);
+        for(int i = 0; i < 1000; i++) {
+            int operation = dice.nextInt(3);
+            if(expectedSequenceOfColors.isEmpty() || operation <= 1) {
+                int index = dice.nextInt(expectedSequenceOfColors.size() + 1);
+                String color = coder.getColors().get(dice.nextInt(coder.getColors().size()));
+                tree.add(index, allColors, coder.colorToByte(color), null, 1);
+                expectedSequenceOfColors.add(index, color);
+
+            } else if(operation == 2) {
+                int index = dice.nextInt(expectedSequenceOfColors.size());
+                tree.remove(index, allColors, 1);
+                expectedSequenceOfColors.remove(index);
+
+            }
+
+            assertEquals(listToString(expectedSequenceOfColors, ""), tree.asSequenceOfColors());
+        }
+    }
+
+    /**
+     * Convert the list elements to a larger String, using the specified
+     * delimeter between elements.
+     */
+    private String listToString(List<String> list, String delimiter) {
+        StringBuffer result = new StringBuffer();
+        for(Iterator<String> i = list.iterator(); i.hasNext(); ) {
+            result.append(i.next());
+            if(i.hasNext()) result.append(delimiter);
+        }
+        return result.toString();
     }
 
     /**
@@ -238,23 +321,15 @@ public class TreeTest extends TestCase {
         tree.add(16, allColors, e, null, 4);
         tree.add(20, allColors, f, null, 4);
         tree.add(24, allColors, g, null, 4);
-//        tree.add(28, allColors, h, null, 4);
-        tree.add(28, allColors, a, null, 4); // todo: remove
-//        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH", tree.asSequenceOfColors());
-        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGGAAAA", tree.asSequenceOfColors()); // todo: remove
-        assertEquals(8, tree.size(a)); // todo: remove
-//        assertEquals(4, tree.size(a));
+        tree.add(28, allColors, h, null, 4);
+        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH", tree.asSequenceOfColors());
+        assertEquals(4, tree.size(a));
         assertEquals(4, tree.size(b));
         assertEquals(4, tree.size(c));
         assertEquals(4, tree.size(d));
         assertEquals(4, tree.size(e));
         assertEquals(4, tree.size(f));
         assertEquals(4, tree.size(g));
-//        assertEquals(4, tree.size(h)); // todo: restore
-
-
-
-
-
+        assertEquals(4, tree.size(h));
     }
 }

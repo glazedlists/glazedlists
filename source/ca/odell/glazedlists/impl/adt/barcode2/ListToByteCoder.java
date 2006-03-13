@@ -27,7 +27,7 @@ public class ListToByteCoder<C> {
     /**
      * List the colors encoded by this coder.
      */
-    public List getColors() {
+    public List<C> getColors() {
         return allColors;
     }
 
