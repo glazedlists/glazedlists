@@ -303,15 +303,14 @@ public class TreeTest extends TestCase {
         assertEquals(april, tree.get(4, a).get());
     }
 
-    public void testEightColors() {
-        colors = GlazedListsTests.stringToList("ABCDEFGH");
+    public void testSevenColors() {
+        colors = GlazedListsTests.stringToList("ABCDEFG");
         coder = new ListToByteCoder<String>(colors);
-        allColors = coder.colorsToByte(GlazedListsTests.stringToList("ABCDEFGH"));
+        allColors = coder.colorsToByte(GlazedListsTests.stringToList("ABCDEFG"));
         final byte d = coder.colorToByte("D");
         final byte e = coder.colorToByte("E");
         final byte f = coder.colorToByte("F");
         final byte g = coder.colorToByte("G");
-        final byte h = coder.colorToByte("H");
 
         Tree<String> tree = new Tree<String>(coder);
         tree.add(0, allColors, a, null, 4);
@@ -321,8 +320,7 @@ public class TreeTest extends TestCase {
         tree.add(16, allColors, e, null, 4);
         tree.add(20, allColors, f, null, 4);
         tree.add(24, allColors, g, null, 4);
-        tree.add(28, allColors, h, null, 4);
-        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH", tree.asSequenceOfColors());
+        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGG", tree.asSequenceOfColors());
         assertEquals(4, tree.size(a));
         assertEquals(4, tree.size(b));
         assertEquals(4, tree.size(c));
@@ -330,6 +328,92 @@ public class TreeTest extends TestCase {
         assertEquals(4, tree.size(e));
         assertEquals(4, tree.size(f));
         assertEquals(4, tree.size(g));
-        assertEquals(4, tree.size(h));
+    }
+
+    public void testTreeAsList() {
+        Tree<String> tree = new Tree<String>(coder);
+        TreeAsList<String> treeAsList = new TreeAsList<String>(tree);
+        List<String> expected = new ArrayList<String>();
+
+        treeAsList.add(0, "A");
+        expected.add(0, "A");
+        treeAsList.add(1, "B");
+        expected.add(1, "B");
+        treeAsList.add(2, "C");
+        expected.add(2, "C");
+        treeAsList.add(3, "D");
+        expected.add(3, "D");
+        treeAsList.add(4, "E");
+        expected.add(4, "E");
+        assertEquals(treeAsList, expected);
+
+        treeAsList.removeAll(GlazedListsTests.stringToList("AE"));
+        expected.removeAll(GlazedListsTests.stringToList("AE"));
+
+        assertEquals(treeAsList, expected);
+
+        treeAsList.addAll(2, GlazedListsTests.stringToList("FGHIJKLMNOPQRSTU"));
+        expected.addAll(2, GlazedListsTests.stringToList("FGHIJKLMNOPQRSTU"));
+        assertEquals(treeAsList, expected);
+
+        treeAsList.removeAll(GlazedListsTests.stringToList("DGJLOPU"));
+        expected.removeAll(GlazedListsTests.stringToList("DGJLOPU"));
+        assertEquals(treeAsList, expected);
+    }
+
+    /**
+     * Make sure the iterator works for simple operations.
+     */
+    public void testTreeIterator() {
+        Tree<String> tree = new Tree<String>(coder);
+        tree.add(0, allColors, a, january, 3);
+        tree.add(3, allColors, b, february, 4);
+        tree.add(7, allColors, c, march, 3);
+        tree.add(10, allColors, a, april, 2);
+        tree.add(12, allColors, a, may, 2);
+        tree.add(14, allColors, b, january, 1);
+
+        TreeIterator<String> iterator = new TreeIterator<String>(tree);
+        assertTrue(iterator.hasNext(allColors));
+        assertTrue(iterator.hasNext(a));
+        assertTrue(iterator.hasNext(aOrB));
+
+        iterator.next(allColors);
+        assertEquals(a, iterator.color());
+        assertEquals(january, iterator.value());
+        assertEquals(0, iterator.index(allColors));
+
+        iterator.next(allColors);
+        iterator.next(allColors);
+        iterator.next(allColors);
+        assertEquals(b, iterator.color());
+        assertEquals(february, iterator.value());
+        assertEquals(3, iterator.index(allColors));
+
+        iterator.next(allColors);
+        assertEquals(4, iterator.index(allColors));
+
+        iterator.next(allColors);
+        iterator.next(allColors);
+        iterator.next(allColors);
+        assertEquals(c, iterator.color());
+        assertEquals(march, iterator.value());
+        assertEquals(7, iterator.index(allColors));
+        assertEquals(4, iterator.index(b));
+        assertEquals(3, iterator.index(a));
+
+        iterator.next(a);
+        assertEquals(a, iterator.color());
+        assertEquals(10, iterator.index(allColors));
+        assertTrue(iterator.hasNext(b));
+        assertTrue(iterator.hasNext(a));
+
+        iterator.next(b);
+        assertEquals(b, iterator.color());
+        assertEquals(14, iterator.index(allColors));
+        assertEquals(january, iterator.value());
+        assertFalse(iterator.hasNext(allColors));
+        assertFalse(iterator.hasNext(a));
+        assertFalse(iterator.hasNext(b));
     }
 }

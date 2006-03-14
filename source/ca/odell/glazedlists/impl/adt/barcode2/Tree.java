@@ -118,7 +118,7 @@ public class Tree<V> {
         assert(index <= size(indexColors));
         assert(size >= 0);
 
-        int colorAsIndex = Node.colorAsIndex(color);
+        int colorAsIndex = colorAsIndex(color);
 
         if(this.root == null) {
             if(index != 0) throw new IndexOutOfBoundsException();
@@ -188,7 +188,7 @@ public class Tree<V> {
                 int parentLeftHalfSize = index - parentLeftSize;
                 int parentRightHalfSize = parentRightStartIndex - index;
                 parent.size -= parentRightHalfSize;
-                int parentColorAsIndex = Node.colorAsIndex(parent.color);
+                int parentColorAsIndex = colorAsIndex(parent.color);
                 fixCountsThruRoot(parent, parentColorAsIndex, -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
                 Element<V> inserted = insertIntoSubtree(parent, parentLeftHalfSize, parent.color, parent.color, parentColorAsIndex, null, parentRightHalfSize);
@@ -466,7 +466,7 @@ public class Tree<V> {
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
-                int colorIndex = Node.colorAsIndex(node.color);
+                int colorIndex = colorAsIndex(node.color);
                 node.size -= toRemove;
                 size -= toRemove;
                 rightStartIndex -= toRemove;
@@ -534,7 +534,7 @@ public class Tree<V> {
         assert(replacement.right == null);
 
         // remove that node from the tree
-        int replacementColorIndex = Node.colorAsIndex(replacement.color);
+        int replacementColorIndex = colorAsIndex(replacement.color);
         fixCountsThruRoot(replacement, replacementColorIndex, -replacement.size);
         replaceChild(replacement, replacement.left);
 
@@ -558,7 +558,7 @@ public class Tree<V> {
         if(root == null) return true;
 
         // walk through all nodes in the tree, looking for something invalid
-        for(Node node = root.leftmostChild(); node != null; node = node.next()) {
+        for(Node<V> node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid
             int[] currentCounts = node.counts.clone();
             node.refreshCounts();
@@ -695,12 +695,66 @@ public class Tree<V> {
 
         // print it flattened, like a list of colors
         StringBuffer result = new StringBuffer();
-        for(Node n = root.leftmostChild(); n != null; n = n.next()) {
-            Object color = coder.getColors().get(Node.colorAsIndex(n.color));
+        for(Node<V> n = firstNode(); n != null; n = next(n)) {
+            Object color = coder.getColors().get(colorAsIndex(n.color));
             for(int i = 0; i < n.size; i++) {
                 result.append(color);
             }
         }
         return result.toString();
+    }
+
+
+    /**
+     * Find the next node in the tree, working from left to right.
+     */
+    static <V> Node<V> next(Node<V> node) {
+        // if this node has a right subtree, it's the leftmost node in that subtree
+        if(node.right != null) {
+            Node<V> child = node.right;
+            while(child.left != null) {
+                child = child.left;
+            }
+            return child;
+
+        // otherwise its the nearest ancestor where I'm in the left subtree
+        } else {
+            Node<V> ancestor = node;
+            while(ancestor.parent != null && ancestor.parent.right == ancestor) {
+                ancestor = ancestor.parent;
+            }
+            return ancestor.parent;
+        }
+    }
+
+    /**
+     * Find the leftmost child in this subtree.
+     */
+    Node<V> firstNode() {
+        if(root == null) return null;
+
+        Node<V> result = root;
+        while(result.left != null) {
+            result = result.left;
+        }
+        return result;
+    }
+
+
+    /**
+     * Convert the specified color value (such as 1, 2, 4, 8, 16 etc.) into an
+     * index value (such as 0, 1, 2, 3, 4 etc. ).
+     */
+    static final int colorAsIndex(byte color) {
+        switch(color) {
+            case 1: return 0;
+            case 2: return 1;
+            case 4: return 2;
+            case 8: return 3;
+            case 16: return 4;
+            case 32: return 5;
+            case 64: return 6;
+        }
+        throw new IllegalArgumentException();
     }
 }

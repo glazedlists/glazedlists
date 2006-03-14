@@ -42,7 +42,7 @@ class Node<V> implements Element<V> {
      *      root node.
      */
     public Node(int colorCount, byte color, int colorAsIndex, int size, V value, Node<V> parent) {
-        assert(colorAsIndex(color) >= 0 && colorAsIndex(color) < 7);
+        assert(Tree.colorAsIndex(color) >= 0 && Tree.colorAsIndex(color) < 7);
         this.color = color;
         this.size = size;
         this.value = value;
@@ -107,56 +107,6 @@ class Node<V> implements Element<V> {
         }
     }
 
-    /**
-     * Convert the specified color value (such as 1, 2, 4, 8, 16 etc.) into an
-     * index value (such as 0, 1, 2, 3, 4 etc. ).
-     */
-    static final int colorAsIndex(byte color) {
-        switch(color) {
-            case 1: return 0;
-            case 2: return 1;
-            case 4: return 2;
-            case 8: return 3;
-            case 16: return 4;
-            case 32: return 5;
-            case 64: return 6;
-        }
-        throw new IllegalArgumentException();
-    }
-
-    /**
-     * Find the next node in the tree, working from left to right.
-     */
-    Node<V> next() {
-        // if this node has a right subtree, it's the leftmost node in that subtree
-        if(right != null) {
-            Node<V> child = right;
-            while(child.left != null) {
-                child = child.left;
-            }
-            return child;
-
-        // otherwise its the nearest ancestor where I'm in the left subtree
-        } else {
-            Node<V> ancestor = this;
-            while(ancestor.parent != null && ancestor.parent.right == ancestor) {
-                ancestor = ancestor.parent;
-            }
-            return ancestor.parent;
-        }
-    }
-
-    /**
-     * Find the leftmost child in this subtree.
-     */
-    Node<V> leftmostChild() {
-        Node<V> result = this;
-        while(result.left != null) {
-            result = result.left;
-        }
-        return result;
-    }
-
     /** {@inheritDoc} */
     public String toString() {
         return toString(Arrays.asList(new String[] { "A", "B", "C", "D", "E", "F", "G", "H"}));
@@ -182,7 +132,7 @@ class Node<V> implements Element<V> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-        out.append(colors.get(colorAsIndex(color)));
+        out.append(colors.get(Tree.colorAsIndex(color)));
         if(size > 1) out.append(" [").append(size).append("]");
         if(value != null) out.append(": ").append(value);
         out.append("\n");
