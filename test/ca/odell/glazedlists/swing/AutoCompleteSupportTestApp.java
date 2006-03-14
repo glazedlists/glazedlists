@@ -141,6 +141,10 @@ public class AutoCompleteSupportTestApp {
         int comboBoxCount = 0;
 
         final JComboBox autocompleteComboBox = new JComboBox();
+
+        // setting a prototype value prevents the combo box from resizing when
+        // the model contents are filtered away
+        autocompleteComboBox.setPrototypeDisplayValue("http://java.sun.com/j2se/1.5.0/download.jsp");
         autocompleteSupport = AutoCompleteSupport.install(autocompleteComboBox, items, filterator);
 
         final JComboBox plainComboBox = new JComboBox();

@@ -49,6 +49,8 @@ import java.beans.PropertyChangeListener;
  */
 public final class AutoCompleteSupport<E> {
 
+    private static final boolean DEBUG = false;
+
     //
     // These are member variables for convenience
     //
@@ -103,8 +105,8 @@ public final class AutoCompleteSupport<E> {
     /** <tt>true</tt> indicates attempts to filter the combo box items should be ignored. */
     private boolean ignoreFilterUpdates = false;
 
-    /** <tt>true</tt> indicates attempts to change the document should be ignored. */
-    private boolean ignoreDocumentChanges = false;
+    /** <tt>&gt; 0</tt> indicates attempts to change the document should be ignored. */
+    private int ignoreDocumentChanges;
 
     //
     // Values present when install() executed - these are restored in dispose()
@@ -289,11 +291,12 @@ public final class AutoCompleteSupport<E> {
 
         // ignore attempts to change the text in the combo box editor while
         // the filtering is taking place
-        ignoreDocumentChanges = true;
+        ignoreDocumentChanges++;
         try {
+            if (DEBUG) System.out.println("setting new filter to: '" + newFilter + "'");
             filterMatcherEditor.setFilterText(new String[] {newFilter});
         } finally {
-            ignoreDocumentChanges = false;
+            ignoreDocumentChanges--;
         }
     }
 
@@ -303,6 +306,7 @@ public final class AutoCompleteSupport<E> {
      */
     private void savePrefixSnapshot() throws BadLocationException {
         prefix = document.getText(0, document.getLength());
+        if (DEBUG) System.out.println("adjusted new prefix to: '" + prefix + "'");
 
         if (prefix.length() == 0)
             prefixMatcher = Matchers.trueMatcher();
@@ -313,9 +317,15 @@ public final class AutoCompleteSupport<E> {
     /**
      * A small convenience method to try showing the combo box popup.
      */
-    private void tryToShowPopup() {
-        if (comboBox.isShowing() && !comboBox.isPopupVisible())
+    private void togglePopup() {
+        if (comboBoxModel.getSize() == 0) {
+            if (DEBUG) System.out.println("hiding popup");
+            comboBox.hidePopup();
+
+        } else if (comboBox.isShowing() && !comboBox.isPopupVisible()) {
+            if (DEBUG) System.out.println("showing popup");
             comboBox.showPopup();
+        }
     }
 
     /**
@@ -330,6 +340,7 @@ public final class AutoCompleteSupport<E> {
         public void setSelectedItem(Object selected) {
             ignoreFilterUpdates = true;
             try {
+                if (DEBUG) System.out.println("setting selected item popup to: '" + selected + "'");
                 super.setSelectedItem(selected);
             } finally {
                 ignoreFilterUpdates = false;
@@ -347,19 +358,19 @@ public final class AutoCompleteSupport<E> {
         protected boolean correctsCase = true;
 
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
-            if (ignoreDocumentChanges) return;
+            if (ignoreDocumentChanges > 0) return;
             super.replace(filterBypass, offset, length, string, attributeSet);
             processDocumentChange(filterBypass, attributeSet);
         }
 
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
-            if (ignoreDocumentChanges) return;
+            if (ignoreDocumentChanges > 0) return;
             super.insertString(filterBypass, offset, string, attributeSet);
             processDocumentChange(filterBypass, attributeSet);
         }
 
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
-            if (ignoreDocumentChanges) return;
+            if (ignoreDocumentChanges > 0) return;
             super.remove(filterBypass, offset, length);
             processDocumentChange(null, null);
         }
@@ -378,8 +389,8 @@ public final class AutoCompleteSupport<E> {
         private void processDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
             savePrefixSnapshot();
             applyFilter(prefix);
-            updateComboBoxEditor(filterBypass, attributeSet);
-            tryToShowPopup();
+            updateComboBox(filterBypass, attributeSet);
+            togglePopup();
         }
 
         /**
@@ -388,37 +399,46 @@ public final class AutoCompleteSupport<E> {
          * combo box editor with the remaining text which matches the
          * autocomplete item and select it.
          */
-        private void updateComboBoxEditor(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
-            // search the combobox model for a value that starts with our prefix
-            for (int i = 0; i < comboBoxModel.getSize(); i++) {
-                final String item = comboBoxModel.getElementAt(i).toString();
+        private void updateComboBox(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
+            // make sure the prefix is not "" (in which case we skip the search)
+            if (prefix.length() > 0) {
+                // search the combobox model for a value that starts with our prefix
+                for (int i = 0; i < comboBoxModel.getSize(); i++) {
+                    final String item = comboBoxModel.getElementAt(i).toString();
 
-                // if the user-specified prefix matches the item's prefix
-                // we have found an appropriate item to select
-                if (prefixMatcher.matches(item)) {
-                    if (filterBypass != null) {
-                        // either keep the user's prefix or replace it with the item's prefix
-                        // depending on whether we correct the case
-                        if (correctsCase) {
-                            filterBypass.replace(0, prefix.length(), item, attributeSet);
-                        } else {
-                            final String itemSuffix = item.substring(prefix.length());
-                            filterBypass.insertString (prefix.length(), itemSuffix, attributeSet);
+                    // if the user-specified prefix matches the item's prefix
+                    // we have found an appropriate item to select
+                    if (prefixMatcher.matches(item)) {
+                        if (filterBypass != null) {
+                            // either keep the user's prefix or replace it with the item's prefix
+                            // depending on whether we correct the case
+                            if (correctsCase) {
+                                filterBypass.replace(0, prefix.length(), item, attributeSet);
+                            } else {
+                                final String itemSuffix = item.substring(prefix.length());
+                                filterBypass.insertString (prefix.length(), itemSuffix, attributeSet);
+                            }
                         }
+
+                        // select the matched item
+                        ignoreDocumentChanges++;
+                        comboBox.setSelectedIndex(i);
+                        ignoreDocumentChanges--;
+
+                        // select the text after the prefix but before the end of the text
+                        // (it represents the autocomplete text)
+                        comboBoxEditor.select(prefix.length(), document.getLength());
+
+                        return;
                     }
-
-                    // select the matched item
-                    ignoreDocumentChanges = true;
-                    comboBox.setSelectedIndex(i);
-                    ignoreDocumentChanges = false;
-
-                    // select the text after the prefix but before the end of the text
-                    // (it represents the autocomplete text)
-                    comboBoxEditor.select(prefix.length(), document.getLength());
-
-                    return;
                 }
             }
+
+            // reset the selection since we couldn't find the prefix in the model
+            // (this has the side-effect of scrolling the popup to the top)
+            ignoreDocumentChanges++;
+            comboBox.setSelectedIndex(-1);
+            ignoreDocumentChanges--;
         }
 
         /**
@@ -597,10 +617,18 @@ public final class AutoCompleteSupport<E> {
              * down. This emulates the behaviour of FireFox's URL selector.
              */
             protected void togglePopup() {
-                if (!isVisible())
-                    applyFilter("");
-
+                applyFilter("");
                 super.togglePopup();
+            }
+
+            public void hide() {
+                if (DEBUG) System.out.println("hiding popup");
+                super.hide();
+            }
+
+            public void show() {
+                if (DEBUG) System.out.println("showing popup");
+                super.show();
             }
 
             /**
@@ -739,7 +767,7 @@ public final class AutoCompleteSupport<E> {
             if (!(newDocument instanceof AbstractDocument))
                 throwIllegalStateException("The Document behind the JTextField was changed to no longer be an AbstractDocument. It was a " + newDocument);
 
-            // clear our DocumentFilter from the old document
+            // remove our DocumentFilter from the old document
             document.setDocumentFilter(null);
 
             // update the document we track internally
