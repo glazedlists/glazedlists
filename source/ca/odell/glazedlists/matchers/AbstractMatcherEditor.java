@@ -55,7 +55,7 @@ public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
     }
 
     /**
-     * Indicates that the filter has changed in an inditerminate way.
+     * Indicates that the filter has changed in an indeterminate way.
      */
     protected final void fireChanged(Matcher<E> matcher) {
 		if(matcher == null) throw new NullPointerException();
