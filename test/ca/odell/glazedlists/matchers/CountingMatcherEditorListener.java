@@ -10,7 +10,7 @@ import junit.framework.Assert;
  * Count matcher events, inserting a delay if requested to test multithreaded
  * matchers.
  */
-class CountingMatcherEditorListener implements MatcherEditor.Listener {
+public class CountingMatcherEditorListener implements MatcherEditor.Listener {
 	private int matchAll = 0;
 	private int matchNone = 0;
 	private int changed = 0;
@@ -23,14 +23,14 @@ class CountingMatcherEditorListener implements MatcherEditor.Listener {
      * Create a {@link CountingMatcherEditorListener} that blocks for the specified
      * duration whenever a matcher event is received.
      */
-	CountingMatcherEditorListener(long delay_ms) {
+	public CountingMatcherEditorListener(long delay_ms) {
 		this.delay_ms = delay_ms;
 	}
     
     /**
      * Create a {@link CountingMatcherEditorListener} with no delay.
      */
-    CountingMatcherEditorListener() {
+    public CountingMatcherEditorListener() {
         this(0);
     }
 
@@ -47,7 +47,7 @@ class CountingMatcherEditorListener implements MatcherEditor.Listener {
 	/**
 	 * Reset the change counters to zero.
 	 */
-	void resetCounterState() {
+	public void resetCounterState() {
 		matchAll = 0;
 		matchNone = 0;
 		changed = 0;
@@ -58,7 +58,7 @@ class CountingMatcherEditorListener implements MatcherEditor.Listener {
 	/**
 	 * Check the change counters match the expected values.
 	 */
-	void assertCounterState(int matchAll, int matchNone, int changed, int constrained, int relaxed) {
+	public void assertCounterState(int matchAll, int matchNone, int changed, int constrained, int relaxed) {
 		Assert.assertEquals(matchAll, this.matchAll);
 		Assert.assertEquals(matchNone, this.matchNone);
 		Assert.assertEquals(changed, this.changed);

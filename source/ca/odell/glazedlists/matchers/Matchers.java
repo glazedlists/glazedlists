@@ -24,6 +24,41 @@ public final class Matchers {
         throw new UnsupportedOperationException();
     }
 
+    // Matcher Editors // // // // // // // // // // // // // // // // // // //
+
+     /**
+     * Provides a proxy to another MatcherEditor that may go out of scope
+     * without explicitly removing itself from the source MatcherEditor's set
+     * of listeners.
+     *
+     * <p>This exists to solve a garbage collection problem. Suppose I have a
+     * {@link MatcherEditor} <i>M</i> which is long lived and many
+     * {@link MatcherEditor.Listener}s, <i>t</i> which must listen to <i>M</i>
+     * while they exist. Instead of adding each of the <i>t</i> directly as
+     * listeners of <i>M</i>, add a proxy instead. The proxy will retain a
+     * <code>WeakReference</code> to the <i>t</i>, and will remove itself from
+     * the list of listeners for <i>M</i>.
+     *
+     * The {@link MatcherEditor} returned by this method makes implementing the
+     * above scheme trivial. It does two things for you automatically:
+     *
+     * <ol>
+     *   <li>It wraps each {@link MatcherEditor.Listener} passed to
+     *       {@link MatcherEditor#addMatcherEditorListener} in a
+     *       {@link java.lang.ref.WeakReference} so that the listeners are
+     *       garbage collected when they become unreachable.
+     *
+     *   <li>It registers <strong>itself</strong> as a weak listener of the
+     *       given <code>matcherEditor</code> so the MatcherEditor returned by
+     *       this method will be garbage collected when it becomes unreachable.
+     * </ol>
+     *
+     * @see java.lang.ref.WeakReference
+     */
+    public static <E> MatcherEditor<E> weakReferenceProxy(MatcherEditor<E> matcherEditor) {
+        return new WeakReferenceMatcherEditor<E>(matcherEditor);
+    }
+
     // Matchers // // // // // // // // // // // // // // // // // // // // //
 
     /**
