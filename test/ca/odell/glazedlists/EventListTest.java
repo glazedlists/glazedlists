@@ -540,7 +540,6 @@ public class EventListTest extends TestCase {
 
     }
 
-
     /**
      * This test case was generated from a problem that we received in the field.
      * It occured when a crazy amount of list events were being combined into one,

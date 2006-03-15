@@ -20,7 +20,7 @@ import ca.odell.glazedlists.GlazedListsTests;
 public class ListToByteCoderTest extends TestCase {
 
     public void testSymmetry() {
-        List values = GlazedListsTests.stringToList("ABCDEFGH");
+        List values = GlazedListsTests.stringToList("ABCDEFG");
         ListToByteCoder coder = new ListToByteCoder(values);
 
         // color to byte
@@ -31,7 +31,6 @@ public class ListToByteCoderTest extends TestCase {
         byte e = coder.colorToByte("E");
         byte f = coder.colorToByte("F");
         byte g = coder.colorToByte("G");
-        byte h = coder.colorToByte("H");
 
         // make sure all values are distinct
         Set<Byte> distinctValues = new HashSet<Byte>();
@@ -42,8 +41,7 @@ public class ListToByteCoderTest extends TestCase {
         assertTrue(distinctValues.add(new Byte(e)));
         assertTrue(distinctValues.add(new Byte(f)));
         assertTrue(distinctValues.add(new Byte(g)));
-        assertTrue(distinctValues.add(new Byte(h)));
-        assertEquals(8, distinctValues.size());
+        assertEquals(7, distinctValues.size());
 
         // byte to color
         assertEquals("A", coder.byteToColor(a));
@@ -53,21 +51,20 @@ public class ListToByteCoderTest extends TestCase {
         assertEquals("E", coder.byteToColor(e));
         assertEquals("F", coder.byteToColor(f));
         assertEquals("G", coder.byteToColor(g));
-        assertEquals("H", coder.byteToColor(h));
 
         // colors to bytes
         byte abd = coder.colorsToByte(GlazedListsTests.stringToList("ABD"));
         byte abe = coder.colorsToByte(GlazedListsTests.stringToList("ABE"));
         byte abcde = coder.colorsToByte(GlazedListsTests.stringToList("ABCDE"));
         byte ae = coder.colorsToByte(GlazedListsTests.stringToList("AE"));
-        byte gh = coder.colorsToByte(GlazedListsTests.stringToList("GH"));
+        byte fg = coder.colorsToByte(GlazedListsTests.stringToList("FG"));
 
         // make sure all values are still distinct
         assertTrue(distinctValues.add(new Byte(abd)));
         assertTrue(distinctValues.add(new Byte(abe)));
         assertTrue(distinctValues.add(new Byte(abcde)));
         assertTrue(distinctValues.add(new Byte(ae)));
-        assertTrue(distinctValues.add(new Byte(gh)));
+        assertTrue(distinctValues.add(new Byte(fg)));
 
         // bytes to colors
         assertEquals(GlazedListsTests.stringToList("ABD"), coder.byteToColors(abd));

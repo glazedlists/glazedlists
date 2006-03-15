@@ -27,7 +27,7 @@ import java.util.Arrays;
  * <li>Provide special-case support for increasing event indices, such as
  *     those from FilterList.matcherChanged
  * <li>Faster Tree.clear() method
- * 
+ *
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -46,6 +46,7 @@ public class ListDeltas2 {
     private static final byte CHANGE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
 
     private Tree tree = new Tree(BYTE_CODER);
+    private boolean allowContradictingEvents = true;
 
     private void ensureCapacity(int size) {
         int currentSize = tree.size(CURRENT_INDICES);
@@ -54,6 +55,13 @@ public class ListDeltas2 {
             int endOfTree = tree.size(ALL_INDICES);
             tree.add(endOfTree, ALL_INDICES, NO_CHANGE, LIST_CHANGE, delta);
         }
+    }
+
+    public boolean isAllowContradictingEvents() {
+        return allowContradictingEvents;
+    }
+    public void setAllowContradictingEvents(boolean allowContradictingEvents) {
+        this.allowContradictingEvents = allowContradictingEvents;
     }
 
     public int currentToSnapshot(int currentIndex) {
@@ -68,7 +76,10 @@ public class ListDeltas2 {
 
     public void  update(int currentIndex) {
         ensureCapacity(currentIndex + 1);
-        tree.set(currentIndex, CURRENT_INDICES, UPDATE, LIST_CHANGE, 1);
+        int overallIndex = tree.indexOf(currentIndex, CURRENT_INDICES, ALL_INDICES);
+        // don't bother updating an inserted element
+        if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) return;
+        tree.set(overallIndex, ALL_INDICES, UPDATE, LIST_CHANGE, 1);
     }
 
     public void insert(int currentIndex) {
@@ -78,8 +89,16 @@ public class ListDeltas2 {
 
     public void delete(int currentIndex) {
         ensureCapacity(currentIndex + 1);
-        int snapshotIndex = tree.indexOf(currentIndex, CURRENT_INDICES, SNAPSHOT_INDICES);
-        tree.set(snapshotIndex, SNAPSHOT_INDICES, DELETE, LIST_CHANGE, 1);
+        int overallIndex = tree.indexOf(currentIndex, CURRENT_INDICES, ALL_INDICES);
+        // if its an insert, simply remove that insert
+        if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) {
+            if(!allowContradictingEvents) throw new IllegalStateException("Remove " + currentIndex + " undoes prior insert at the same index! Consider enabling contradicting events.");
+            tree.remove(overallIndex, ALL_INDICES, 1);
+
+        // otherwise apply the delete
+        } else {
+            tree.set(overallIndex, ALL_INDICES, DELETE, LIST_CHANGE, 1);
+        }
     }
 
     public int currentSize() {

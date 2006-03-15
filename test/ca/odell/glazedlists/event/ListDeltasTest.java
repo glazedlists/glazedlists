@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.*;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -167,6 +167,25 @@ public class ListDeltasTest extends TestCase {
     }
 
 
+    /**
+     * Test a simple problem that initially failed in the second round
+     * of ListDeltas.
+     */
+    public void testAddAndRemove() {
+        EventList<String> source = new BasicEventList<String>();
+        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        ListConsistencyListener.install(nesting);
+
+        nesting.beginEvent(true);
+        source.addAll(GlazedListsTests.stringToList("ABCDE"));
+        nesting.commitEvent();
+
+        nesting.beginEvent(true);
+        source.remove(4);
+        source.add(4, "F");
+        nesting.commitEvent();
+    }
+
     public void assertConsistent(List original, ListDeltas deltas, List current) {
         // test the original to current mapping
         for(int i = 0; i < original.size(); i++) {
@@ -194,5 +213,55 @@ public class ListDeltasTest extends TestCase {
                 assertSame(valueInOriginal, valueInCurrent);
             }
         }
+    }
+
+
+    /**
+     * Tests that update does the right thing in list deltas.
+     */
+    public void testInsertedElementUpdated() {
+        EventList<String> source = new BasicEventList<String>();
+        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        ListConsistencyListener.install(nesting);
+
+        nesting.beginEvent(true);
+        source.addAll(GlazedListsTests.stringToList("AB"));
+        nesting.commitEvent();
+
+        nesting.beginEvent(true);
+        source.add(0, "C");
+        source.add(1, "D");
+        source.set(1, "d");
+        source.remove(2);
+        source.set(2, "b");
+        nesting.commitEvent();
+    }
+
+
+
+    /**
+     *
+     */
+    public void testInsertsAndDeletes() {
+        EventList<String> source = new BasicEventList<String>();
+        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        ListConsistencyListener.install(nesting);
+
+        nesting.beginEvent(true);
+        source.addAll(GlazedListsTests.stringToList("ABC"));
+        nesting.commitEvent();
+
+        nesting.beginEvent(true);
+        source.add(0, "D");
+        source.add(1, "E");
+        source.add(2, "F");
+        source.add(3, "G");
+        source.add(4, "H");
+        source.remove(3);
+        source.remove(3);
+        source.remove(3);
+        source.remove(3);
+        source.remove(3);
+        nesting.commitEvent();
     }
 }

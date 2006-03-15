@@ -464,6 +464,16 @@ public final class ListEventAssembler<E> {
             this.publisher = publisher;
         }
 
+        public void beginEvent(boolean allowNestedEvents) {
+            super.beginEvent(allowNestedEvents);
+            listDeltas.setAllowContradictingEvents(this.allowNestedEvents);
+        }
+
+        public void commitEvent() {
+            super.commitEvent();
+            listDeltas.setAllowContradictingEvents(this.allowNestedEvents);
+        }
+
         protected void prepareEvent() {
             listDeltas.reset(sourceList.size());
         }
