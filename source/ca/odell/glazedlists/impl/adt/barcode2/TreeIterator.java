@@ -25,7 +25,7 @@ public class TreeIterator<V> {
         this.index = 0;
     }
 
-    boolean hasNext(byte colors) {
+    public boolean hasNext(byte colors) {
         if(node != null && (colors & node.color) != 0) {
             return index(colors) < tree.size(colors) - 1;
         } else {
@@ -33,7 +33,7 @@ public class TreeIterator<V> {
         }
     }
 
-    void next(byte colors) {
+    public void next(byte colors) {
         // we could optimize this loop by going through one node
         // at a time rather than one index at a time
         while(true) {
@@ -66,14 +66,14 @@ public class TreeIterator<V> {
     /**
      * The color of the current element.
      */
-    byte color() {
+    public byte color() {
         return node.color;
     }
 
     /**
      * Expected values for index should be 0, 1, 2, 3..
      */
-    int index(byte colors) {
+    public int index(byte colors) {
         int result = 0;
         for(int i = 0; i < counts.length; i++) {
             if((colors & (1 << i)) > 0) result += counts[i];
@@ -81,7 +81,7 @@ public class TreeIterator<V> {
         return result;
     }
 
-    V value() {
+    public V value() {
         return node.get();
     }
 }

@@ -29,11 +29,9 @@ public final class ListEventAssembler<E> {
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-//        if("true".equalsIgnoreCase(System.getProperty("GlazedLists.useExperimentalDeltas"))) {
-//            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
-//        } else {
-            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-//        }
+        //delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
+        //delegate = new ListDeltasAssembler<E>(sourceList, publisher);
+        delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
     }
     
     /**
@@ -446,6 +444,110 @@ public final class ListEventAssembler<E> {
 
         protected ListEvent<E> createListEvent() {
             return new ListDeltasListEvent<E>(this, sourceList);
+        }
+    }
+
+
+
+    /**
+     * ListEventAssembler using {@link ListDeltas2} to store list changes.
+     */
+    static class ListDeltas2Assembler<E> extends AssemblerHelper<E> {
+
+        private ListDeltas2 listDeltas = new ListDeltas2();
+
+        /**
+         * Creates a new ListEventAssembler that tracks changes for the specified list.
+         */
+        public ListDeltas2Assembler(EventList<E> sourceList, ListEventPublisher publisher) {
+            this.sourceList = sourceList;
+            this.publisher = publisher;
+        }
+
+        protected void prepareEvent() {
+            listDeltas.reset(sourceList.size());
+        }
+
+        public void addChange(int type, int startIndex, int endIndex) {
+            for(int i = startIndex; i <= endIndex; i++) {
+                if(type == ListEvent.INSERT) {
+                    listDeltas.insert(i);
+                } else if(type == ListEvent.UPDATE) {
+                    listDeltas.update(i);
+                } else if(type == ListEvent.DELETE) {
+                    listDeltas.delete(startIndex);
+                }
+            }
+        }
+
+        public ListDeltas2 getListDeltas() {
+            return listDeltas;
+        }
+
+        public boolean isEventEmpty() {
+            return listDeltas.isEmpty();
+        }
+
+        protected void fireEvent() {
+            try {
+                // bail on empty changes
+                if(isEventEmpty()) return;
+
+                // Protect against the listener set changing via a duplicate list.
+                // Some listeners (ie. WeakReferenceProxy) remove themselves as listeners
+                // from within their listChanged() method. If we don't make protective
+                // copies, these lists will change while we're operating on them.
+                List<ListEventListener> listenersToNotify = new ArrayList<ListEventListener>(listeners);
+                List<ListEvent<E>> listenerEventsToNotify = new ArrayList<ListEvent<E>>(listenerEvents);
+
+                // reset the events before firing them
+                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext(); ) {
+                    ListEvent<E> event = e.next();
+                    event.reset();
+                }
+
+                // perform the notification on the duplicate list
+                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+
+            // clear the change for the next caller
+            } finally {
+                listDeltas.reset(0);
+                reorderMap = null;
+                allowContradictingEvents = false;
+            }
+        }
+
+        public void forwardEvent(ListEvent<?> listChanges) {
+            // if we're not nested, we can fire the event directly
+            if(eventLevel == 0) {
+                // todo: optimize by reusing the existing listDeltas
+                beginEvent(false);
+                while(listChanges.nextBlock()) {
+                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                }
+                commitEvent();
+
+            // if we're nested, we have to copy this event's parts to our queue
+            } else {
+                beginEvent(false);
+                this.reorderMap = null;
+                if(isEventEmpty() && listChanges.isReordering()) {
+                    reorder(listChanges.getReorderMap());
+                } else {
+                    while(listChanges.nextBlock()) {
+                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                    }
+                }
+                commitEvent();
+            }
+        }
+
+        protected ListEvent<E> createListEvent() {
+            return new ListDeltas2ListEvent<E>(this, sourceList);
+        }
+
+        public String toString() {
+            return listDeltas.toString();
         }
     }
 
