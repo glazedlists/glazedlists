@@ -20,6 +20,8 @@ public class AutoCompleteSupportTestApp {
     public static final String LOOK_AND_FEEL_MOTIF = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
     public static final String LOOK_AND_FEEL_WINDOWS = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
     public static final String LOOK_AND_FEEL_KUNSTSTOFF = "com.incors.plaf.kunststoff.KunststoffLookAndFeel";
+    public static final String LOOK_AND_FEEL_JGOODIES_PLASTIC = "com.jgoodies.looks.plastic.PlasticLookAndFeel";
+    public static final String LOOK_AND_FEEL_WINLAF = "net.java.plaf.windows.WindowsLookAndFeel";
 
     /** The current look and feel. */
      protected String currentLookAndFeel = LOOK_AND_FEEL_METAL;
@@ -60,6 +62,8 @@ public class AutoCompleteSupportTestApp {
         this.createLafMenuItem(lafMenu, lafMenuGroup, LOOK_AND_FEEL_MOTIF);
         this.createLafMenuItem(lafMenu, lafMenuGroup, LOOK_AND_FEEL_WINDOWS);
         this.createLafMenuItem(lafMenu, lafMenuGroup, LOOK_AND_FEEL_KUNSTSTOFF);
+        this.createLafMenuItem(lafMenu, lafMenuGroup, LOOK_AND_FEEL_JGOODIES_PLASTIC);
+        this.createLafMenuItem(lafMenu, lafMenuGroup, LOOK_AND_FEEL_WINLAF);
 
         frame = new JFrame("AutoCompleteSupport Test Application");
         frame.setJMenuBar(menuBar);

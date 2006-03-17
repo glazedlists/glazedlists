@@ -11,9 +11,13 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
+
+import java.awt.*;
+import java.awt.event.ActionListener;
 
 public class AutoCompleteSupportTest extends TestCase {
 
@@ -28,6 +32,7 @@ public class AutoCompleteSupportTest extends TestCase {
         final int originalEditorPropertyChangeListenerCount = originalEditor.getEditorComponent().getPropertyChangeListeners().length;
         final AbstractDocument originalEditorDocument = (AbstractDocument) ((JTextField) combo.getEditor().getEditorComponent()).getDocument();
         final int originalComboBoxPropertyChangeListenerCount = combo.getPropertyChangeListeners().length;
+        final int originalMaxRowCount = combo.getMaximumRowCount();
 
         AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
 
@@ -40,7 +45,13 @@ public class AutoCompleteSupportTest extends TestCase {
         assertTrue(originalEditor != combo.getEditor());
         assertTrue(currentEditorDocument != originalEditorDocument);
         assertTrue(currentEditorDocument.getDocumentFilter() != null);
+
+        // two PropertyChangeListeners are added to the JComboBox:
+        // * one to watch for ComboBoxUI changes
+        // * one to watch for Model changes
         assertTrue(originalComboBoxPropertyChangeListenerCount + 2 == combo.getPropertyChangeListeners().length);
+
+        // one PropertyChangeListener is added to the ComboBoxEditor to watch for Document changes
         assertTrue(originalEditorPropertyChangeListenerCount + 1 == currentEditor.getPropertyChangeListeners().length);
 
         support.dispose();
@@ -56,11 +67,42 @@ public class AutoCompleteSupportTest extends TestCase {
         assertTrue(currentEditorDocument.getDocumentFilter() == null);
         assertTrue(originalComboBoxPropertyChangeListenerCount == combo.getPropertyChangeListeners().length);
         assertTrue(originalEditorPropertyChangeListenerCount == currentEditor.getPropertyChangeListeners().length);
+        assertTrue(originalMaxRowCount == combo.getMaximumRowCount());
 
         try {
             support.dispose();
             fail("Double disposing AutoCompleteSupport did not fail as expected");
         } catch (IllegalStateException e) {
+            // expected
+        }
+    }
+
+    public void testInstall() {
+        JComboBox combo = new JComboBox();
+        combo.setEditor(new NoopComboBoxEditor());
+        try {
+            AutoCompleteSupport.install(combo, new BasicEventList());
+            fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        combo = new JComboBox();
+        combo.setUI(new NoopComboBoxUI());
+        try {
+            AutoCompleteSupport.install(combo, new BasicEventList());
+            fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        combo = new JComboBox();
+        final JTextField editor = (JTextField) combo.getEditor().getEditorComponent();
+        editor.setDocument(new NoopDocument());
+        try {
+            AutoCompleteSupport.install(combo, new BasicEventList());
+            fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
+        } catch (IllegalArgumentException e) {
             // expected
         }
     }
@@ -136,5 +178,25 @@ public class AutoCompleteSupportTest extends TestCase {
             public Element getElement(int index) { return null; }
             public boolean isLeaf() { return false; }
         }
+    }
+
+    private static class NoopComboBoxEditor implements ComboBoxEditor {
+        public Component getEditorComponent() { return null; }
+        public void setItem(Object anObject) { }
+        public Object getItem() { return null; }
+        public void selectAll() { }
+        public void addActionListener(ActionListener l) { }
+        public void removeActionListener(ActionListener l) { }
+    }
+
+    private static class NoopComboBoxUI extends ComboBoxUI {
+        public void installUI(JComponent c) {
+            JComboBox combo = (JComboBox) c;
+            combo.setEditor(new BasicComboBoxEditor());
+        }
+
+        public void setPopupVisible(JComboBox c, boolean v) { }
+        public boolean isPopupVisible(JComboBox c) { return false; }
+        public boolean isFocusTraversable(JComboBox c) { return false; }
     }
 }
