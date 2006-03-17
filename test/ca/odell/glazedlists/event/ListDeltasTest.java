@@ -264,4 +264,21 @@ public class ListDeltasTest extends TestCase {
         source.remove(3);
         nesting.commitEvent();
     }
+
+    public void testDeleteIndexBeforeAnotherDeleteIndex() {
+        EventList<String> source = new BasicEventList<String>();
+        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        ListConsistencyListener.install(nesting);
+
+        nesting.beginEvent(true);
+        source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLM"));
+        nesting.commitEvent();
+
+        nesting.beginEvent(true);
+        source.remove(0);
+        source.remove(2);
+        source.remove(9);
+        source.remove(7);
+        nesting.commitEvent();
+    }
 }

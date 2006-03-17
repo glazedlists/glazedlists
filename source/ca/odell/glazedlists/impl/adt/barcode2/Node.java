@@ -133,7 +133,7 @@ class Node<V> implements Element<V> {
             out.append("   ");
         }
         out.append(colors.get(Tree.colorAsIndex(color)));
-        if(size > 1) out.append(" [").append(size).append("]");
+        out.append(" [").append(size).append("]");
         if(value != null) out.append(": ").append(value);
         out.append("\n");
 

@@ -191,7 +191,7 @@ public class Tree<V> {
                 int parentColorAsIndex = colorAsIndex(parent.color);
                 fixCountsThruRoot(parent, parentColorAsIndex, -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
-                Element<V> inserted = insertIntoSubtree(parent, parentLeftHalfSize, parent.color, parent.color, parentColorAsIndex, null, parentRightHalfSize);
+                Element<V> inserted = insertIntoSubtree(parent, index, indexColors, parent.color, parentColorAsIndex, null, parentRightHalfSize);
                 inserted.set(parent.value);
 
                 // recalculate parentRightStartIndex, since that should have

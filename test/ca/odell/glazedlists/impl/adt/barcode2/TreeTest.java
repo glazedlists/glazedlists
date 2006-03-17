@@ -361,6 +361,18 @@ public class TreeTest extends TestCase {
         assertEquals(treeAsList, expected);
     }
 
+    public void testSetIndexIsCorrect() {
+        Tree<String> tree = new Tree<String>(coder);
+        tree.add(0, allColors, a, january, 13);
+        tree.set(0, allColors, b, february, 1);
+        tree.set(2, a, b, february, 1);
+        tree.set(9, a, b, february, 1);
+        tree.set(7, a, b, february, 1);
+//        tree.remove(7, a, 1);
+//        tree.add(7, a, b, february, 1);
+        assertEquals("BAABAAAAABABA", tree.asSequenceOfColors());
+    }
+
     /**
      * Make sure the iterator works for simple operations.
      */
