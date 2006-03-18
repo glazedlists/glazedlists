@@ -82,7 +82,7 @@ public class ListConsistencyListener<E> {
     /**
      * Get whether the specified event was a reordering.
      */
-    public Boolean isReordering(int event) {
+    public boolean isReordering(int event) {
         return reorderings.get(event).booleanValue();
     }
 

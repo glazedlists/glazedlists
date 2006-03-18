@@ -303,7 +303,7 @@ public class SeparatorListTest extends TestCase {
 
         BasicEventList<String> unsortedSource = new BasicEventList<String>();
         SortedList<String> source = new SortedList<String>(unsortedSource, null);
-        unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "dear", "frog", "boat", "car", "jesse", "glazed", "shirt", "hat", "art", "dog", "puppy", "foot"));
+        unsortedSource.addAll(Arrays.asList(new String[] { "apple", "banana", "cat", "dear", "frog", "boat", "car", "jesse", "glazed", "shirt", "hat", "art", "dog", "puppy", "foot" }));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, length, 0, Integer.MAX_VALUE);
         ListConsistencyListener.install(separatorList);
@@ -314,7 +314,7 @@ public class SeparatorListTest extends TestCase {
         assertEqualsIgnoreSeparators(source, separatorList, length);
 
         // now add some duplicates
-        unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "art", "dog", "puppy", "foot", "carrot", "beer"));
+        unsortedSource.addAll(Arrays.asList(new String[] { "apple", "banana", "cat", "art", "dog", "puppy", "foot", "carrot", "beer" }));
         assertEqualsIgnoreSeparators(source, separatorList, length);
 
         source.setComparator(alphabetical);

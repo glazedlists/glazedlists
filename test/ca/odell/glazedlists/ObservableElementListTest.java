@@ -222,10 +222,6 @@ public class ObservableElementListTest extends TestCase {
         // get the Thread that was started by the connector
         final Thread updateThread = connector.getLastUpdateThread();
 
-        // install an exception handler on the thread so we can ensure later that no RuntimeExceptions were thrown
-        final Thread.UncaughtExceptionHandler handler = new YesNoExceptionHandler();
-        updateThread.setUncaughtExceptionHandler(handler);
-
         // ensure the update thread is still running and thus the test is valid
         assertTrue(updateThread.isAlive());
 
@@ -233,12 +229,7 @@ public class ObservableElementListTest extends TestCase {
         updateThread.join();
 
         // ensure the update thread finished with no exception
-        assertEquals("no", handler.toString());
-    }
-    private class YesNoExceptionHandler implements Thread.UncaughtExceptionHandler {
-        private String exception = "no";
-        public void uncaughtException(Thread t, Throwable e) { exception = "yes"; }
-        public String toString() { return exception; }
+        assertEquals(false, connector.isExitDueToException());
     }
 
     /**
@@ -320,6 +311,7 @@ public class ObservableElementListTest extends TestCase {
      */
     private class LazyThreadedConnector extends JavaBeanEventListConnector<JLabel> {
         private Thread lastUpdateThread;
+        private boolean exitDueToException = false;
 
         public LazyThreadedConnector() {
             super(JLabel.class);
@@ -331,6 +323,10 @@ public class ObservableElementListTest extends TestCase {
 
         public Thread getLastUpdateThread() {
             return lastUpdateThread;
+        }
+
+        public boolean isExitDueToException() {
+            return exitDueToException;
         }
 
         /**
@@ -356,13 +352,17 @@ public class ObservableElementListTest extends TestCase {
             }
 
             public void run() {
-                // 1. delay
                 try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {}
+                    // 1. delay
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {}
 
-                // 2. notify the list of the change
-                handler.propertyChange(event);
+                    // 2. notify the list of the change
+                    handler.propertyChange(event);
+                } catch(Exception e) {
+                    exitDueToException = true;
+                }
             }
         }
     }

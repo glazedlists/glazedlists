@@ -571,7 +571,7 @@ public class Tree<V> {
             // sizes (counts) are valid
             int[] currentCounts = node.counts.clone();
             node.refreshCounts();
-            assert(Arrays.equals(currentCounts, node.counts)) : "Incorrect counts on node: \n" + node  + "\n Expected " + Arrays.toString(currentCounts) + " but was " + Arrays.toString(node.counts);
+            assert(Arrays.equals(currentCounts, node.counts)) : "Incorrect counts on node: \n" + node  + "\n Expected " + Arrays.asList(currentCounts) + " but was " + Arrays.asList(node.counts);
 
             // heights are valid
             int leftHeight = node.left != null ? node.left.height : 0;
