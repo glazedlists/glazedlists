@@ -1109,7 +1109,7 @@ public class SortedListTest extends TestCase {
         Comparator<String> length = new StringLengthComparator();
 
         sortedList.setComparator(null);
-        unsortedList.addAll(Arrays.asList("dddd", "aaa", "c", "bb"));
+        unsortedList.addAll(Arrays.asList(new String[] { "dddd", "aaa", "c", "bb" }));
 
         SortedList<String> resortedList = new SortedList<String>(sortedList, length);
         ListConsistencyListener.install(resortedList);
@@ -1118,7 +1118,7 @@ public class SortedListTest extends TestCase {
         assertSortedEquals(sortedList, resortedList);
 
         // now add some duplicates
-        unsortedList.addAll(Arrays.asList("c", "dddd", "aaa", "bb"));
+        unsortedList.addAll(Arrays.asList(new String[] { "c", "dddd", "aaa", "bb" }));
         assertSortedEquals(sortedList, resortedList);
 
         // now chnage the comparator
