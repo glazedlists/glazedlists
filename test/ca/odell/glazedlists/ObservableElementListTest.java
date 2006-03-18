@@ -342,19 +342,27 @@ public class ObservableElementListTest extends TestCase {
             public void propertyChange(final PropertyChangeEvent event) {
                 // start another thread which, in half a second, will notify the list of the
                 // update (which allows us time to modify the list in our TestCase thread)
-                lastUpdateThread = new Thread(new Runnable() {
-                    public void run() {
-                        // 1. delay
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {}
-
-                        // 2. notify the list of the change
-                        LazyThreadedPropertyChangeHandler.super.propertyChange(event);
-                    }
-                });
-
+                lastUpdateThread = new Thread(new DelayThenNotifyRunnable(event, this));
                 lastUpdateThread.start();
+            }
+        }
+        private class DelayThenNotifyRunnable implements Runnable {
+            private PropertyChangeEvent event;
+            private LazyThreadedPropertyChangeHandler handler;
+
+            public DelayThenNotifyRunnable(PropertyChangeEvent event, LazyThreadedPropertyChangeHandler handler) {
+                this.event = event;
+                this.handler = handler;
+            }
+
+            public void run() {
+                // 1. delay
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {}
+
+                // 2. notify the list of the change
+                handler.propertyChange(event);
             }
         }
     }
