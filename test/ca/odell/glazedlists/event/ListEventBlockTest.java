@@ -9,6 +9,7 @@ import ca.odell.glazedlists.*;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -87,7 +88,7 @@ public class ListEventBlockTest extends TestCase {
     /**
      * Sort all possible permutations of five changes on a five element list.
      */
-    public void testSortListEventBlocksRandom() {
+    public void testSortListEventBlocksAllPermutations() {
         final int LIST_INITIAL_SIZE = 4;
         final int LIST_CHANGE_COUNT = 4;
 
@@ -116,7 +117,8 @@ public class ListEventBlockTest extends TestCase {
 
             // perform all required changes to this list
             list.beginEvent(true);
-            for(ListChangeEnumeration listChange : listChangeEnumarations) {
+            for(Iterator i = listChangeEnumarations.iterator(); i.hasNext(); ) {
+                ListChangeEnumeration listChange = (ListChangeEnumeration)i.next();
                 int changeType = listChange.getChangeType();
                 int changeIndex = listChange.getChangeIndex();
 

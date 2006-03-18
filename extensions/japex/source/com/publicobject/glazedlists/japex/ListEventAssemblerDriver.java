@@ -31,8 +31,6 @@ public class ListEventAssemblerDriver extends JapexDriverBase {
     }
 
     public void prepare(TestCase testCase) {
-        System.setProperty("GlazedLists.useExperimentalDeltas", testCase.getParam("GlazedLists.useExperimentalDeltas"));
-
         base = new BasicEventList<String>();
         filteredBase = new FilterList<String>(base);
         sortedBase = new SortedList<String>(filteredBase, new FirstCharacterComparator());
@@ -65,13 +63,6 @@ public class ListEventAssemblerDriver extends JapexDriverBase {
             filteredBase.setMatcher(new SameLastCharacterMatcher(value));
         }
         filteredBase.setMatcher((Matcher)Matchers.trueMatcher());
-    }
-
-
-    public static void main(String[] args) {
-        ListEventAssemblerDriver driver = new ListEventAssemblerDriver();
-        driver.initializeDriver();
-        driver.run(null);
     }
 
     public void finish(TestCase testCase) {

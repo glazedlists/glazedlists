@@ -29,9 +29,18 @@ public final class ListEventAssembler<E> {
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-        delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
-        //delegate = new ListDeltasAssembler<E>(sourceList, publisher);
-        //delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
+        if(driver == null) {
+            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("blocks")) {
+            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("deltas")) {
+            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("deltas2")) {
+            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
+        } else {
+            throw new IllegalStateException();
+        }
     }
     
     /**
@@ -455,6 +464,8 @@ public final class ListEventAssembler<E> {
     static class ListDeltas2Assembler<E> extends AssemblerHelper<E> {
 
         private ListDeltas2 listDeltas = new ListDeltas2();
+        /** the size of the source eventlist at the end of the most recent change */
+        //private int sourceSize;
 
         /**
          * Creates a new ListEventAssembler that tracks changes for the specified list.
@@ -464,20 +475,13 @@ public final class ListEventAssembler<E> {
             this.publisher = publisher;
         }
 
-        public void beginEvent(boolean allowNestedEvents) {
-            super.beginEvent(allowNestedEvents);
-            listDeltas.setAllowContradictingEvents(this.allowNestedEvents);
-        }
-
-        public void commitEvent() {
-            super.commitEvent();
-            listDeltas.setAllowContradictingEvents(this.allowNestedEvents);
-        }
-
+        /** {@inheritDoc} */
         protected void prepareEvent() {
-            listDeltas.reset(sourceList.size());
+            //listDeltas.reset(sourceSize);
+            listDeltas.setAllowContradictingEvents(this.allowContradictingEvents);
         }
 
+        /** {@inheritDoc} */
         public void addChange(int type, int startIndex, int endIndex) {
             for(int i = startIndex; i <= endIndex; i++) {
                 if(type == ListEvent.INSERT) {
@@ -494,10 +498,12 @@ public final class ListEventAssembler<E> {
             return listDeltas;
         }
 
+        /** {@inheritDoc} */
         public boolean isEventEmpty() {
             return listDeltas.isEmpty();
         }
 
+        /** {@inheritDoc} */
         protected void fireEvent() {
             try {
                 // bail on empty changes
@@ -524,6 +530,7 @@ public final class ListEventAssembler<E> {
                 listDeltas.reset(0);
                 reorderMap = null;
                 allowContradictingEvents = false;
+                //sourceSize = sourceList.size();
             }
         }
 

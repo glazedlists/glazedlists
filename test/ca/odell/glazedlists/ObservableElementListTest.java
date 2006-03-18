@@ -223,12 +223,7 @@ public class ObservableElementListTest extends TestCase {
         final Thread updateThread = connector.getLastUpdateThread();
 
         // install an exception handler on the thread so we can ensure later that no RuntimeExceptions were thrown
-        final Thread.UncaughtExceptionHandler handler = new Thread.UncaughtExceptionHandler() {
-            private String exception = "no";
-
-            public void uncaughtException(Thread t, Throwable e) { exception = "yes"; }
-            public String toString() { return exception; }
-        };
+        final Thread.UncaughtExceptionHandler handler = new YesNoExceptionHandler();
         updateThread.setUncaughtExceptionHandler(handler);
 
         // ensure the update thread is still running and thus the test is valid
@@ -239,6 +234,11 @@ public class ObservableElementListTest extends TestCase {
 
         // ensure the update thread finished with no exception
         assertEquals("no", handler.toString());
+    }
+    private class YesNoExceptionHandler implements Thread.UncaughtExceptionHandler {
+        private String exception = "no";
+        public void uncaughtException(Thread t, Throwable e) { exception = "yes"; }
+        public String toString() { return exception; }
     }
 
     /**

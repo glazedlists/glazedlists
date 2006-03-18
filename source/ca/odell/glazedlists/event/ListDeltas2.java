@@ -110,8 +110,7 @@ public class ListDeltas2 {
     }
 
     public void reset(int size) {
-        // tree.clear();
-        tree = new Tree(BYTE_CODER);
+        tree.clear();
         ensureCapacity(size);
     }
 

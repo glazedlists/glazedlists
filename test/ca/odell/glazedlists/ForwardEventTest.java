@@ -77,31 +77,38 @@ public class ForwardEventTest extends TestCase {
     }
 
     public void testBadListEventHandler() {
-        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getType(); }
-        });
-        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
-        });
-        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
-        });
-        assertIllegalStateExceptionIsThrown(source, new DoNotStartIteratingListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getIndex(); }
-        });
-
-        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getType(); }
-        });
-        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
-        });
-        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
-        });
-        assertIllegalStateExceptionIsThrown(source, new IterateTooFarListEventListener() {
-            protected void breakListEvent(ListEvent l) { l.getIndex(); }
-        });
+        assertIllegalStateExceptionIsThrown(source, new GetTypeListener());
+        assertIllegalStateExceptionIsThrown(source, new GetBlockStartIndexListener());
+        assertIllegalStateExceptionIsThrown(source, new GetBlockEndIndexListener());
+        assertIllegalStateExceptionIsThrown(source, new GetIndexListener());
+        assertIllegalStateExceptionIsThrown(source, new GetTypeTooFarListener());
+        assertIllegalStateExceptionIsThrown(source, new GetBlockStartIndexTooFarListener());
+        assertIllegalStateExceptionIsThrown(source, new GetBlockEndIndexTooFarListener());
+        assertIllegalStateExceptionIsThrown(source, new GetIndexTooFarListener());
+    }
+    private class GetTypeListener extends DoNotStartIteratingListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getType(); }
+    }
+    private class GetBlockStartIndexListener extends DoNotStartIteratingListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
+    }
+    private class GetBlockEndIndexListener extends DoNotStartIteratingListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
+    }
+    private class GetIndexListener extends DoNotStartIteratingListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getIndex(); }
+    }
+    private class GetTypeTooFarListener extends IterateTooFarListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getType(); }
+    }
+    private class GetBlockStartIndexTooFarListener extends IterateTooFarListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
+    }
+    private class GetBlockEndIndexTooFarListener extends IterateTooFarListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
+    }
+    private class GetIndexTooFarListener extends IterateTooFarListEventListener {
+        protected void breakListEvent(ListEvent l) { l.getIndex(); }
     }
 
     private static void assertIllegalStateExceptionIsThrown(EventList list, ListEventListener listener) {

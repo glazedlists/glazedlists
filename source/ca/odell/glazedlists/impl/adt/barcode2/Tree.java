@@ -427,6 +427,15 @@ public class Tree<V> {
     }
 
     /**
+     * Remove all nodes from the tree. Note that this is much faster than calling
+     * remove on all elements, since the structure can be discarded instead of
+     * managed during the removal.
+     */
+    public void clear() {
+        root = null;
+    }
+
+    /**
      * Remove at the specified index in the specified subtree. This doesn't ever
      * remove any nodes of size zero, that's up to the caller to do after by
      * removing all nodes in the zeroQueue from the tree.
