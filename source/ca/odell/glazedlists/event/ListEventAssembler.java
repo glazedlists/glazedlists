@@ -31,7 +31,7 @@ public final class ListEventAssembler<E> {
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
         String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
         if(driver == null) {
-            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
         } else if(driver.equals("blocks")) {
             delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
         } else if(driver.equals("deltas")) {
@@ -483,14 +483,12 @@ public final class ListEventAssembler<E> {
 
         /** {@inheritDoc} */
         public void addChange(int type, int startIndex, int endIndex) {
-            for(int i = startIndex; i <= endIndex; i++) {
-                if(type == ListEvent.INSERT) {
-                    listDeltas.insert(i);
-                } else if(type == ListEvent.UPDATE) {
-                    listDeltas.update(i);
-                } else if(type == ListEvent.DELETE) {
-                    listDeltas.delete(startIndex);
-                }
+            if(type == ListEvent.INSERT) {
+                listDeltas.insert(startIndex, endIndex + 1);
+            } else if(type == ListEvent.UPDATE) {
+                listDeltas.update(startIndex, endIndex + 1);
+            } else if(type == ListEvent.DELETE) {
+                listDeltas.delete(startIndex, endIndex + 1);
             }
         }
 

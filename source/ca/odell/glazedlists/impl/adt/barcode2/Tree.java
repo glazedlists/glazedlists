@@ -172,7 +172,7 @@ public class Tree<V> {
                     Node<V> inserted = new Node<V>(colorCount, color, colorAsIndex, size, value, parent);
                     parent.left = inserted;
                     fixCountsThruRoot(parent, colorAsIndex, size);
-                    fixHeightPostChange(parent);
+                    fixHeightPostChange(parent, false);
                     return inserted;
 
                 // recurse on the left
@@ -209,7 +209,7 @@ public class Tree<V> {
                     Node<V> inserted = new Node<V>(colorCount, color, colorAsIndex, size, value, parent);
                     parent.right = inserted;
                     fixCountsThruRoot(parent, colorAsIndex, size);
-                    fixHeightPostChange(parent);
+                    fixHeightPostChange(parent, false);
                     return inserted;
 
                 // recurse on the right
@@ -240,8 +240,13 @@ public class Tree<V> {
      * @param node the root of a changed subtree. This shouldn't be called
      *      on inserted nodes, but rather their parent nodes, since only
      *      the parent nodes sizes will be changing.
+     * @param allTheWayToRoot <code>true</code> to walk up the tree all the way
+     *      to the tree's root, or <code>false</code> to walk up until the height
+     *      is unchanged. We go to the root on a delete, since the rotate is on
+     *      the opposite side of the tree, whereas on an insert we only delete
+     *      as far as necessary.
      */
-    private final void fixHeightPostChange(Node<V> node) {
+    private final void fixHeightPostChange(Node<V> node, boolean allTheWayToRoot) {
 
         // update the height
         for(; node != null; node = node.parent) {
@@ -275,39 +280,30 @@ public class Tree<V> {
             // update the node height
             leftHeight = node.left != null ? node.left.height : 0;
             rightHeight = node.right != null ? node.right.height : 0;
-            node.height = (byte)(Math.max(leftHeight, rightHeight) + 1);
+            byte newNodeHeight = (byte) (Math.max(leftHeight, rightHeight) + 1);
+            // if the height doesn't need updating, we might just be done!
+            if(!allTheWayToRoot && node.height == newNodeHeight) return;
+            // otherwise change the height and keep rotating
+            node.height = newNodeHeight;
         }
     }
 
     /**
      * Perform an AVL rotation of the tree.
      *
-     * @return the new root of the subtree
-     *
      *     D               B
      *    / \   ROTATE    / \
      *   B   E  LEFT AT  A   D
      *  / \     NODE D      / \
      * A   C               C   E
+     *
+     * @return the new root of the subtree
      */
     private final Node<V> rotateLeft(Node<V> subtreeRoot) {
         assert(subtreeRoot.left != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
         Node<V> newSubtreeRoot = subtreeRoot.left;
-
-        // modify the counts
-        // originally: B = A + C, D = A + B + C + E
-        // remove C counts from B and (so B = A)
-        // then remove B counts from D (which includes A) (so  D = C + E)
-        // then add D counts to B (so B = A + C + D + E)
-        //for(int i = 0; i < colorCount; i++) {
-        //    if(newSubtreeRoot.right != null) {
-        //        newSubtreeRoot.counts[i] -= newSubtreeRoot.right.counts[i]; // remove C from B
-        //    }
-        //    subtreeRoot.counts[i] -= newSubtreeRoot.counts[i]; // remove B from D
-        //    newSubtreeRoot.counts[i] += subtreeRoot.counts[i]; // add D to B
-        //}
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -344,19 +340,6 @@ public class Tree<V> {
         // subtreeRoot is D
         // newSubtreeRoot is B
         Node<V> newSubtreeRoot = subtreeRoot.right;
-
-        // modify the counts
-        // originally: B = A + C, D = A + B + C + E
-        // remove C counts from B and (so B = A)
-        // then remove B counts from D (which includes A) (so  D = C + E)
-        // then add D counts to B (so B = A + C + D + E)
-        //for(int i = 0; i < colorCount; i++) {
-        //    if(newSubtreeRoot.left != null) {
-        //        newSubtreeRoot.counts[i] -= newSubtreeRoot.left.counts[i]; // remove C from B
-        //    }
-        //    subtreeRoot.counts[i] -= newSubtreeRoot.counts[i]; // remove B from D
-        //    newSubtreeRoot.counts[i] += subtreeRoot.counts[i]; // add D to B
-        //}
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -518,7 +501,7 @@ public class Tree<V> {
         }
 
         // the height has changed, update that up the tree
-        fixHeightPostChange(node.parent);
+        fixHeightPostChange(node.parent, true);
     }
 
     /**
@@ -558,38 +541,6 @@ public class Tree<V> {
         fixCountsThruRoot(replacement.parent, replacementColorIndex, replacement.size);
 
         return replacement;
-    }
-
-    /**
-     * @return true if this tree is structurally valid
-     */
-    private boolean valid() {
-        if(root == null) return true;
-
-        // walk through all nodes in the tree, looking for something invalid
-        for(Node<V> node = firstNode(); node != null; node = next(node)) {
-            // sizes (counts) are valid
-            int[] currentCounts = node.counts.clone();
-            node.refreshCounts();
-            assert(Arrays.equals(currentCounts, node.counts)) : "Incorrect counts on node: \n" + node  + "\n Expected " + currentCounts + " but was " + node.counts;
-
-            // heights are valid
-            int leftHeight = node.left != null ? node.left.height : 0;
-            int rightHeight = node.right != null ? node.right.height : 0;
-            assert(Math.max(leftHeight, rightHeight) + 1 == node.height);
-
-            // left child's parent is this
-            assert(node.left == null || node.left.parent == node);
-
-            // right child's parent is this
-            assert(node.right == null || node.right.parent == node);
-
-            // tree is AVL
-            assert(Math.abs(leftHeight - rightHeight) < 2) : "Subtree is not AVL: \n" + node;
-        }
-
-        // we're valid
-        return true;
     }
 
     /**
@@ -749,6 +700,53 @@ public class Tree<V> {
         return result;
     }
 
+
+    /**
+     * @return true if this tree is structurally valid
+     */
+    private boolean valid() {
+        if(root == null) return true;
+
+        // walk through all nodes in the tree, looking for something invalid
+        for(Node<V> node = firstNode(); node != null; node = next(node)) {
+            // sizes (counts) are valid
+            int[] currentCounts = node.counts.clone();
+            node.refreshCounts();
+            assert(Arrays.equals(currentCounts, node.counts)) : "Incorrect counts on node: \n" + node  + "\n Expected " + intArrayToString(currentCounts) + " but was " + intArrayToString(node.counts);
+
+            // heights are valid
+            int leftHeight = node.left != null ? node.left.height : 0;
+            int rightHeight = node.right != null ? node.right.height : 0;
+            assert(Math.max(leftHeight, rightHeight) + 1 == node.height);
+
+            // left child's parent is this
+            assert(node.left == null || node.left.parent == node);
+
+            // right child's parent is this
+            assert(node.right == null || node.right.parent == node);
+
+            // tree is AVL
+            assert(Math.abs(leftHeight - rightHeight) < 2) : "Subtree is not AVL: \n" + node;
+        }
+
+        // we're valid
+        return true;
+    }
+
+    /**
+     * We don't use <code>Arrays.toString</code> here because that method doesn't
+     * exist on Java 1.4, which we continue to support.
+     */
+    private static final String intArrayToString(int[] value) {
+        StringBuffer result = new StringBuffer();
+        result.append("[");
+        for(int i = 0; i < value.length; i++) {
+            if(i > 0) result.append(", ");
+            result.append(value[i]);
+        }
+        result.append("]");
+        return result.toString();
+    }
 
     /**
      * Convert the specified color value (such as 1, 2, 4, 8, 16 etc.) into an

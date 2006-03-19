@@ -33,7 +33,7 @@ import java.util.Arrays;
  */
 public class ListDeltas2 {
 
-    private static final Object LIST_CHANGE = new Object();
+    private static final String LIST_CHANGE = "*";
     private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList(new String[] { "+", "U", "X", "_" }));
     private static final byte INSERT = BYTE_CODER.colorToByte("+");
     private static final byte UPDATE = BYTE_CODER.colorToByte("U");
@@ -45,7 +45,7 @@ public class ListDeltas2 {
     private static final byte ALL_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+", "_" }));
     private static final byte CHANGE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
 
-    private Tree tree = new Tree(BYTE_CODER);
+    private Tree<String> tree = new Tree<String>(BYTE_CODER);
     private boolean allowContradictingEvents = true;
 
     /**
@@ -73,30 +73,52 @@ public class ListDeltas2 {
         return tree.indexOf(snapshotIndex, SNAPSHOT_INDICES, CURRENT_INDICES);
     }
 
-    public void  update(int currentIndex) {
-        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
-        int overallIndex = tree.indexOf(currentIndex, CURRENT_INDICES, ALL_INDICES);
-        // don't bother updating an inserted element
-        if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) return;
-        tree.set(overallIndex, ALL_INDICES, UPDATE, LIST_CHANGE, 1);
+    /**
+     * <p>We should consider removing the loop by only setting on removed elements.
+     *
+     * @param startIndex the first updated element, inclusive
+     * @param endIndex the last index, exclusive
+     */
+    public void  update(int startIndex, int endIndex) {
+        if(!initialCapacityKnown) ensureCapacity(endIndex);
+        for(int i = startIndex; i < endIndex; i++) {
+            int overallIndex = tree.indexOf(i, CURRENT_INDICES, ALL_INDICES);
+            // don't bother updating an inserted element
+            if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) return;
+            tree.set(overallIndex, ALL_INDICES, UPDATE, LIST_CHANGE, 1);
+        }
     }
 
-    public void insert(int currentIndex) {
-        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
-        tree.add(currentIndex, CURRENT_INDICES, INSERT, LIST_CHANGE, 1);
+    /**
+     * @param startIndex the first inserted element, inclusive
+     * @param endIndex the last index, exclusive
+     */
+    public void insert(int startIndex, int endIndex) {
+        if(!initialCapacityKnown) ensureCapacity(endIndex);
+        tree.add(startIndex, CURRENT_INDICES, INSERT, LIST_CHANGE, endIndex - startIndex);
     }
 
-    public void delete(int currentIndex) {
-        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
-        int overallIndex = tree.indexOf(currentIndex, CURRENT_INDICES, ALL_INDICES);
-        // if its an insert, simply remove that insert
-        if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) {
-            if(!allowContradictingEvents) throw new IllegalStateException("Remove " + currentIndex + " undoes prior insert at the same index! Consider enabling contradicting events.");
-            tree.remove(overallIndex, ALL_INDICES, 1);
+    /**
+     * <p>We should consider removing the loop from this method by counting
+     * the inserted elements between startIndex and endIndex, removing those,
+     * then removing everything else...
+     *
+     * @param startIndex the index of the first element to remove
+     * @param endIndex the last index, exclusive
+     */
+    public void delete(int startIndex, int endIndex) {
+        if(!initialCapacityKnown) ensureCapacity(endIndex);
+        for(int i = startIndex; i < endIndex; i++) {
+            int overallIndex = tree.indexOf(startIndex, CURRENT_INDICES, ALL_INDICES);
+            // if its an insert, simply remove that insert
+            if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) {
+                if(!allowContradictingEvents) throw new IllegalStateException("Remove " + i + " undoes prior insert at the same index! Consider enabling contradicting events.");
+                tree.remove(overallIndex, ALL_INDICES, 1);
 
-        // otherwise apply the delete
-        } else {
-            tree.set(overallIndex, ALL_INDICES, DELETE, LIST_CHANGE, 1);
+            // otherwise apply the delete
+            } else {
+                tree.set(overallIndex, ALL_INDICES, DELETE, LIST_CHANGE, 1);
+            }
         }
     }
 
