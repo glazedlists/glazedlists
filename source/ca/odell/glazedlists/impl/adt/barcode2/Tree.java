@@ -157,7 +157,7 @@ public class Tree<V> {
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(value == parent.value && value != null && color == parent.color) {
+            if(color == parent.color && value == parent.value && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
                     parent.size += size;
                     fixCountsThruRoot(parent, colorAsIndex, size);
@@ -185,7 +185,6 @@ public class Tree<V> {
             // we need to insert in the centre. This works by splitting in the
             // centre, and inserting the value
             if(index < parentRightStartIndex) {
-                int parentLeftHalfSize = index - parentLeftSize;
                 int parentRightHalfSize = parentRightStartIndex - index;
                 parent.size -= parentRightHalfSize;
                 int parentColorAsIndex = colorAsIndex(parent.color);
@@ -202,7 +201,7 @@ public class Tree<V> {
             // on the right
             right: {
                 int parentSize = parent.size(indexColors);
-                if(index > parentSize) throw new IndexOutOfBoundsException();
+                assert(index <= parentSize);
 
                 // as a right child
                 if(parent.right == null) {
@@ -705,8 +704,6 @@ public class Tree<V> {
      * @return true if this tree is structurally valid
      */
     private boolean valid() {
-        if(root == null) return true;
-
         // walk through all nodes in the tree, looking for something invalid
         for(Node<V> node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid

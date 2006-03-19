@@ -7,8 +7,6 @@
     <!-- Run each test for 20 seconds -->
     <param name="japex.warmupTime" value="10"/>
     <param name="japex.runTime" value="10"/>
-        <!--<param name="japex.warmupIterations" value="100"/>-->
-        <!--<param name="japex.runIterations" value="100"/>-->
 
     <driver name="List Event Blocks">
         <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.ListEventBlocksDriver"/>
@@ -25,7 +23,7 @@
         <param name="description" value="List Event Deltas 2"/>
     </driver>
 
-    <testCase name="List Event Blocks">
+    <testCase name="List Event Performance">
     </testCase>
 
 </testSuite>
