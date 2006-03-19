@@ -65,6 +65,13 @@ public final class AutoCompleteSupport<E> {
      */
     private int maximumRowCount;
 
+    /**
+     * <tt>true</tt> if user specified text is converted into the same case as
+     * the first matched element. <tt>false</tt> will leave user specified text
+     * unaltered.
+     */
+    protected boolean correctsCase = true;
+
     //
     // These are member variables for convenience
     //
@@ -192,7 +199,6 @@ public final class AutoCompleteSupport<E> {
      *
      * <p>This method assumes that the <code>items</code> can be converted into
      * reasonable String representations via {@link Object#toString()}.
-
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
      * @param items the objects to display in the <code>comboBox</code>
@@ -270,18 +276,38 @@ public final class AutoCompleteSupport<E> {
         throw new IllegalStateException(exceptionMsg.toString());
     }
 
-    /**
-     * Return the maximum number of rows the popup can display.
-     */
+    /** Return the maximum number of rows the popup can display. */
     public int getMaximumRowCount() {
         return maximumRowCount;
     }
-
-    /**
-     * Set the maximum number of rows the popup can display.
-     */
+    /** Set the maximum number of rows the popup can display. */
     public void setMaximumRowCount(int maximumRowCount) {
         this.maximumRowCount = maximumRowCount;
+        this.updateMaximumRowCount();
+    }
+
+    /**
+     * Updates the maximum number of rows to display in the combobox popup
+     * to be the minimum of either the item count or the maximum row count.
+     */
+    private void updateMaximumRowCount() {
+        comboBox.setMaximumRowCount(Math.min(maximumRowCount, comboBox.getItemCount()));
+    }
+
+    /**
+     * Return <tt>true</tt> if user specified strings are converted to the
+     * case of the element they match; <tt>false</tt> otherwise.
+     */
+    public boolean getCorrectsCase() {
+        return correctsCase;
+    }
+    /**
+     * If <code>correctCase</code> is <tt>true</tt>, user specified strings
+     * will be converted to the case of the element they match. Otherwise
+     * they will be left unaltered.
+     */
+    public void setCorrectsCase(boolean correctCase) {
+        this.correctsCase = correctCase;
     }
 
     /**
@@ -409,9 +435,13 @@ public final class AutoCompleteSupport<E> {
      * edits as well as the effect the edit has on autocompletion.
      */
     private class ComboCompleterFilter extends DocumentFilter {
-        protected boolean correctsCase = true;
-
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
+            // this short-circuit helps with the PlasticLookAndFeel behaviour. Hitting the enter key in Plastic
+            // will cause the popup to reopen because the Plastic ComboBoxEditor forwards on unecessary updates
+            // to the document, including ones where the text isn't really changing
+            if (offset == 0 && document.getLength() == length && string != null && string.equals(comboBoxEditor.getText()))
+                return;
+
             if (ignoreDocumentChanges) return;
             super.replace(filterBypass, offset, length, string, attributeSet);
             processDocumentChange(filterBypass, attributeSet);
@@ -495,19 +525,6 @@ public final class AutoCompleteSupport<E> {
             comboBox.setSelectedIndex(-1);
             ignoreDocumentChanges = false;
         }
-
-        /**
-         * Will change the user entered part of the string to match the case
-         * of the matched item.
-         *
-         * <p/>e.g. "europe/lONdon" would be corrected to "Europe/London"
-         */
-        public void setCorrectsCase(boolean correctCase) {
-            this.correctsCase = correctCase;
-        }
-        public boolean getCorrectsCase() {
-            return correctsCase;
-        }
     }
 
 
@@ -540,6 +557,10 @@ public final class AutoCompleteSupport<E> {
          */
         private ArrowButtonMouseListener arrowButtonMouseListener;
 
+        // Control the selection behavior of the JComboBox when it is used
+        // in the JTable DefaultCellEditor.
+        private boolean isTableCellEditor;
+
         /**
          * Build a UI delegate that decorates the given <code>delegate</code>
          * with autocompletion and filtering behaviour. The look of the
@@ -557,6 +578,11 @@ public final class AutoCompleteSupport<E> {
             popup = (ComboPopup) delegate.getAccessibleChild(c, 0);
             arrowButton = findArrowButton(comboBox);
 
+            // is this combo box a cell editor?
+            final Boolean inTable = (Boolean) c.getClientProperty("JComboBox.isTableCellEditor");
+            if (inTable != null)
+                isTableCellEditor = Boolean.TRUE.equals(inTable);
+
             // if an arrow button was found, decorate the ComboPopup's
             // MouseListener with logic that unfilters the ComboBoxModel when
             // the arrow button is pressed
@@ -572,15 +598,15 @@ public final class AutoCompleteSupport<E> {
             // decorate the normal DownAction and UpActions with logic that clears the
             // filters before proceeding with the normal Action
             final ActionMap actionMap = comboBox.getActionMap();
-            final Action selectNextAction = actionMap.get("selectNext");
-            final Action aquaSelectNextAction = actionMap.get("aquaSelectNext");
 
-            if (selectNextAction != null) {
-                actionMap.put("selectNext", new DownAction(selectNextAction));
-            } else if (aquaSelectNextAction != null) {
-                // install custom actions for Apple LAFs to avoid a ClassCastException
-                actionMap.put("aquaSelectPrevious", new AquaUpAction());
-                actionMap.put("aquaSelectNext", new AquaDownAction());
+            if (actionMap.get("selectNext") != null) {
+                actionMap.put("selectPrevious", new UpAction());
+                actionMap.put("selectNext", new DownAction());
+
+            } else if (actionMap.get("aquaSelectNext") != null) {
+                // install custom action keys for the Apple LAF
+                actionMap.put("aquaSelectPrevious", new UpAction());
+                actionMap.put("aquaSelectNext", new DownAction());
             }
         }
 
@@ -599,7 +625,7 @@ public final class AutoCompleteSupport<E> {
         }
 
         public void uninstallUI(JComponent c) {
-            // return the normal MouseListener to the arrowButton
+            // reinstall the normal MouseListener for the arrowButton
             if (arrowButton != null) {
                 arrowButton.addMouseListener(arrowButtonMouseListener.getDecorated());
                 arrowButton.removeMouseListener(arrowButtonMouseListener);
@@ -621,23 +647,38 @@ public final class AutoCompleteSupport<E> {
         // todo override these with some custom logic ?
         protected void selectNextPossibleValue() {
 //            ignoreDocumentChanges = true;
-            super.selectNextPossibleValue();
+
+            final int nextIndex = (isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) + 1;
+
+            if (nextIndex < comboBox.getModel().getSize()) {
+                if (isTableCellEditor) {
+                    listBox.setSelectedIndex(nextIndex);
+                    listBox.ensureIndexIsVisible(nextIndex);
+                } else {
+                    comboBox.setSelectedIndex(nextIndex);
+                }
+                comboBox.repaint();
+            }
+
 //            ignoreDocumentChanges = false;
         }
 
         protected void selectPreviousPossibleValue() {
 //            ignoreDocumentChanges = true;
-            super.selectPreviousPossibleValue();
-//            ignoreDocumentChanges = false;
-        }
 
-        /**
-         * Updates the maximum number of rows to display in the combobox popup
-         * to be the minimum of either the item count or the maximum row count.
-         */
-        protected void updateMaximumRowCount() {
-            if (maximumRowCount > 0)
-                comboBox.setMaximumRowCount(Math.min(maximumRowCount, comboBox.getItemCount()));
+            final int previousIndex = (isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) - 1;
+
+            if (previousIndex >= 0) {
+                if (isTableCellEditor) {
+                    listBox.setSelectedIndex(previousIndex);
+                    listBox.ensureIndexIsVisible(previousIndex);
+                } else {
+                    comboBox.setSelectedIndex(previousIndex);
+                }
+                comboBox.repaint();
+            }
+
+//            ignoreDocumentChanges = false;
         }
 
         /**
@@ -680,42 +721,11 @@ public final class AutoCompleteSupport<E> {
             public void mouseExited(MouseEvent e) { decorated.mouseExited(e); }
         }
 
-        /**
-         * Decorate the UI Delegate's DownAction with our own that always
-         * applies the latest filter before displaying the popup.
-         */
         private class DownAction extends AbstractAction {
-            private final Action delegateAction;
-
-            public DownAction(Action delegateAction) {
-                this.delegateAction = delegateAction;
-            }
             public void actionPerformed(ActionEvent e) {
-                if (!comboBox.isPopupVisible())
-                    applyFilter(prefix);
-
-                if (this.delegateAction != null)
-                    this.delegateAction.actionPerformed(e);
-            }
-        }
-
-        /**
-         * Apple's Aqua Look and Feel defines AquaUpAction in a way that
-         * assumes the UI delegate to be AquaComboBoxUI. Since we install our
-         * own UI, we must replace Apple's AquaUpAction with our own which
-         * does not make the same assumption.
-         */
-        private class AquaUpAction extends AbstractAction {
-            public void actionPerformed(ActionEvent e) {
-                if (comboBox.isEnabled() && comboBox.isShowing()) {
+                if (comboBox.isShowing()) {
                     if (comboBox.isPopupVisible()) {
-                        final JList listBox = popup.getList();
-                        int i = listBox.getSelectedIndex();
-                        if (i > 0) {
-                            listBox.setSelectedIndex(i - 1);
-                            listBox.ensureIndexIsVisible(i - 1);
-                        }
-                        comboBox.repaint();
+                        selectNextPossibleValue();
                     } else {
                         applyFilter(prefix);
                         comboBox.setPopupVisible(true);
@@ -724,23 +734,11 @@ public final class AutoCompleteSupport<E> {
             }
         }
 
-        /**
-         * Apple's Aqua Look and Feel defines AquaDownAction in a way that
-         * assumes the UI delegate to be AquaComboBoxUI. Since we install our
-         * own UI, we must replace Apple's AquaDownAction with our own which
-         * does not make the same assumption.
-         */
-        private class AquaDownAction extends AbstractAction {
+        private class UpAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
-                if (comboBox.isEnabled() && comboBox.isShowing()) {
+                if (comboBox.isShowing()) {
                     if (comboBox.isPopupVisible()) {
-                        final JList listBox = popup.getList();
-                        final int i = listBox.getSelectedIndex();
-                        if (i < comboBox.getModel().getSize() - 1) {
-                            listBox.setSelectedIndex(i + 1);
-                            listBox.ensureIndexIsVisible(i + 1);
-                        }
-                        comboBox.repaint();
+                        selectPreviousPossibleValue();
                     } else {
                         applyFilter(prefix);
                         comboBox.setPopupVisible(true);
