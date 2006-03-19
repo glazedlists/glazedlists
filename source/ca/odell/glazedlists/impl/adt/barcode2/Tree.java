@@ -72,11 +72,12 @@ public class Tree<V> {
         while(true) {
             assert(node != null);
             assert(index >= 0);
+            Node<V> nodeLeft = node.left;
 
             // recurse on the left
-            int leftSize = node.left != null ? node.left.size(indexColors) : 0;
+            int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
             if(index < leftSize) {
-                node = node.left;
+                node = nodeLeft;
                 continue;
             } else {
                 index -= leftSize;
@@ -123,7 +124,7 @@ public class Tree<V> {
         if(this.root == null) {
             if(index != 0) throw new IndexOutOfBoundsException();
 
-            this.root = new Node<V>(colorCount, color, colorAsIndex, size, value, null);
+            this.root = new Node<V>(color, size, value, null);
             assert(valid());
             return this.root;
         } else {
@@ -152,7 +153,8 @@ public class Tree<V> {
             assert(index >= 0);
 
             // figure out the layout of this node
-            int parentLeftSize = parent.left != null ? parent.left.size(indexColors) : 0;
+            Node<V> parentLeft = parent.left;
+            int parentLeftSize = parentLeft != null ? parentLeft.size(indexColors) : 0;
             int parentRightStartIndex = parentLeftSize + parent.nodeSize(indexColors);
 
             // the first thing we want to try is to merge this value into the
@@ -168,8 +170,8 @@ public class Tree<V> {
             // we can insert on the left
             if(index <= parentLeftSize) {
                 // as a new left child
-                if(parent.left == null) {
-                    Node<V> inserted = new Node<V>(colorCount, color, colorAsIndex, size, value, parent);
+                if(parentLeft == null) {
+                    Node<V> inserted = new Node<V>(color, size, value, parent);
                     parent.left = inserted;
                     fixCountsThruRoot(parent, colorAsIndex, size);
                     fixHeightPostChange(parent, false);
@@ -177,7 +179,7 @@ public class Tree<V> {
 
                 // recurse on the left
                 } else {
-                    parent = parent.left;
+                    parent = parentLeft;
                     continue;
                 }
             }
@@ -202,10 +204,11 @@ public class Tree<V> {
             right: {
                 int parentSize = parent.size(indexColors);
                 assert(index <= parentSize);
+                Node<V> parentRight = parent.right;
 
                 // as a right child
-                if(parent.right == null) {
-                    Node<V> inserted = new Node<V>(colorCount, color, colorAsIndex, size, value, parent);
+                if(parentRight == null) {
+                    Node<V> inserted = new Node<V>(color, size, value, parent);
                     parent.right = inserted;
                     fixCountsThruRoot(parent, colorAsIndex, size);
                     fixHeightPostChange(parent, false);
@@ -213,7 +216,7 @@ public class Tree<V> {
 
                 // recurse on the right
                 } else {
-                    parent = parent.right;
+                    parent = parentRight;
                     index -= parentRightStartIndex;
                 }
             }
@@ -227,7 +230,11 @@ public class Tree<V> {
      */
     private final void fixCountsThruRoot(Node<V> node, int colorIndex, int delta) {
         for( ; node != null; node = node.parent) {
-            node.counts[colorIndex] += delta;
+            if(node.counts == null) {
+                node.refreshCounts(colorCount);
+            } else {
+                node.counts[colorIndex] += delta;
+            }
         }
     }
 
@@ -325,12 +332,12 @@ public class Tree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+        subtreeRoot.refreshCounts(colorCount);
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+        newSubtreeRoot.refreshCounts(colorCount);
 
         return newSubtreeRoot;
     }
@@ -361,12 +368,12 @@ public class Tree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+        subtreeRoot.refreshCounts(colorCount);
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+        newSubtreeRoot.refreshCounts(colorCount);
 
         return newSubtreeRoot;
     }
@@ -433,7 +440,8 @@ public class Tree<V> {
             assert(index >= 0);
 
             // figure out the layout of this node
-            int leftSize = node.left != null ? node.left.size(indexColors) : 0;
+            Node<V> nodeLeft = node.left;
+            int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
 
             // delete on the left first
             if(index < leftSize) {
@@ -441,12 +449,12 @@ public class Tree<V> {
                 // that part recursively
                 if(index + size > leftSize) {
                     int toRemove = leftSize - index;
-                    removeFromSubtree(node.left, index, indexColors, toRemove, zeroQueue);
+                    removeFromSubtree(nodeLeft, index, indexColors, toRemove, zeroQueue);
                     size -= toRemove;
                     leftSize -= toRemove;
                 // we can do our full delete on the left side
                 } else {
-                    node = node.left;
+                    node = nodeLeft;
                     continue;
                 }
             }
@@ -480,27 +488,29 @@ public class Tree<V> {
      * is called.
      */
     private void replaceChild(Node<V> node, Node<V> replacement) {
+        Node<V> nodeParent = node.parent;
+
         // replace the root
-        if(node.parent == null) {
+        if(nodeParent == null) {
             assert(node == root);
             root = replacement;
 
         // replace on the left
-        } else if(node.parent.left == node) {
-            node.parent.left = replacement;
+        } else if(nodeParent.left == node) {
+            nodeParent.left = replacement;
 
         // replace on the right
-        } else if(node.parent.right == node) {
-            node.parent.right = replacement;
+        } else if(nodeParent.right == node) {
+            nodeParent.right = replacement;
         }
 
         // update the replacement's parent
         if(replacement != null) {
-            replacement.parent = node.parent;
+            replacement.parent = nodeParent;
         }
 
         // the height has changed, update that up the tree
-        fixHeightPostChange(node.parent, true);
+        fixHeightPostChange(nodeParent, true);
     }
 
     /**
@@ -535,7 +545,7 @@ public class Tree<V> {
         replacement.right = toReplace.right;
         if(replacement.right != null) replacement.right.parent = replacement;
         replacement.height = toReplace.height;
-        replacement.refreshCounts();
+        replacement.refreshCounts(colorCount);
         replaceChild(toReplace, replacement);
         fixCountsThruRoot(replacement.parent, replacementColorIndex, replacement.size);
 
@@ -566,12 +576,11 @@ public class Tree<V> {
         int index = node.left != null ? node.left.size(colorsOut) : 0;
 
         // add all elements on the left, all the way to the root
-        while(node.parent != null) {
+        for( ; node.parent != null; node = node.parent) {
             if(node.parent.right == node) {
                 index += node.parent.left != null ? node.parent.left.size(colorsOut) : 0;
                 index += node.parent.nodeSize(colorsOut);
             }
-            node = node.parent;
         }
 
         return index;
@@ -595,15 +604,16 @@ public class Tree<V> {
             assert(index >= 0);
 
             // figure out the layout of this node
-            int leftSize = node.left != null ? node.left.size(indexColors) : 0;
+            Node<V> nodeLeft = node.left;
+            int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
 
             // recurse on the left
             if(index < leftSize) {
-                node = node.left;
+                node = nodeLeft;
                 continue;
             // increment by the count on the left
             } else {
-                if(node.left != null) result += node.left.size(colorsOut);
+                if(nodeLeft != null) result += nodeLeft.size(colorsOut);
                 index -= leftSize;
             }
 
@@ -707,8 +717,8 @@ public class Tree<V> {
         // walk through all nodes in the tree, looking for something invalid
         for(Node<V> node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid
-            int[] currentCounts = node.counts.clone();
-            node.refreshCounts();
+            int[] currentCounts = node.counts != null ? node.counts.clone() : null;
+            node.refreshCounts(colorCount);
             assert(Arrays.equals(currentCounts, node.counts)) : "Incorrect counts on node: \n" + node  + "\n Expected " + intArrayToString(currentCounts) + " but was " + intArrayToString(node.counts);
 
             // heights are valid
@@ -735,6 +745,8 @@ public class Tree<V> {
      * exist on Java 1.4, which we continue to support.
      */
     private static final String intArrayToString(int[] value) {
+        if(value == null) return "[]";
+
         StringBuffer result = new StringBuffer();
         result.append("[");
         for(int i = 0; i < value.length; i++) {

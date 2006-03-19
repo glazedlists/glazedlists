@@ -10,12 +10,18 @@ import java.util.Arrays;
  * A node in a tree which supports both a value and compressed nodes that
  * contain a size, useful for index offsetting.
  *
+ * <p>Note that the <code>counts</code> summary member is created lazily when
+ * this node is given children. This causes the code to be less easy to read,
+ * but it means we can put off about a huge number of object allocations since
+ * 50% of the nodes in an arbitrary tree are leaf nodes, and these leaf nodes
+ * now don't have counts.
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class Node<V> implements Element<V> {
 
     /** the number of elements of each color in this subtree */
-    final int[] counts;
+    int[] counts;
 
     /** the node's color */
     final byte color;
@@ -33,24 +39,19 @@ class Node<V> implements Element<V> {
     /**
      * Create a new node.
      *
-     * @param colorCount the number of colors in the tree
      * @param color a bitmask value usch as 1, 2, 4, 8 or 16.
-     * @param colorAsIndex an index value such as 0, 1, 2, 3 or 4.
      * @param size the size of the node
      * @param value the value of the node
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public Node(int colorCount, byte color, int colorAsIndex, int size, V value, Node<V> parent) {
+    public Node(byte color, int size, V value, Node<V> parent) {
         assert(Tree.colorAsIndex(color) >= 0 && Tree.colorAsIndex(color) < 7);
         this.color = color;
         this.size = size;
         this.value = value;
         this.height = 1;
         this.parent = parent;
-
-        counts = new int[colorCount];
-        this.counts[colorAsIndex] = size;
     }
 
     /**
@@ -79,6 +80,10 @@ class Node<V> implements Element<V> {
      * and the right child.
      */
     final int size(byte colors) {
+        if(counts == null) {
+            return (colors & color) != 0 ? size : 0;
+        }
+
         int result = 0;
 
         if((colors & 1) != 0) result += counts[0];
@@ -106,7 +111,7 @@ class Node<V> implements Element<V> {
     }
 
     /**
-     * The size of the left subtree and this node.
+     * The size of the node for the specified colors.
      */
     final int nodeSize(byte colors) {
         return (colors & color) > 0 ? size : 0;
@@ -115,14 +120,31 @@ class Node<V> implements Element<V> {
     /**
      * Update the counts member variable by examining the counts of
      * the child nodes and the size member variable.
+     *
+     * @param colorCount the number of colors in the tree
      */
-    final void refreshCounts() {
-        for(int colorIndex = 0; colorIndex < counts.length; colorIndex++) {
-            int colorTotal = 0;
-            if(left != null) colorTotal += left.counts[colorIndex];
-            if(right != null) colorTotal += right.counts[colorIndex];
-            if((color >> colorIndex) == 1) colorTotal += size;
-            counts[colorIndex] = colorTotal;
+    final void refreshCounts(int colorCount) {
+        // if we have a child node, we need a valid counts array
+        if(left != null || right != null) {
+            if(counts == null) counts = new int[colorCount];
+            for(int colorIndex = 0; colorIndex < counts.length; colorIndex++) {
+                int colorTotal = 0;
+                if(left != null && left.counts != null) colorTotal += left.counts[colorIndex];
+                if(right != null && right.counts != null) colorTotal += right.counts[colorIndex];
+                counts[colorIndex] = colorTotal;
+            }
+            counts[Tree.colorAsIndex(color)] += size;
+            if(left != null && left.counts == null) counts[Tree.colorAsIndex(left.color)] += left.size;
+            if(right != null && right.counts == null) counts[Tree.colorAsIndex(right.color)] += right.size;
+
+        // we don't have a child node, the counts array may be null
+        } else {
+            if(counts != null) {
+                for(int c = 0; c < colorCount; c++) {
+                    counts[c] = 0;
+                }
+                counts[Tree.colorAsIndex(color)] = size;
+            }
         }
     }
 

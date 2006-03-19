@@ -31,7 +31,7 @@ public final class ListEventAssembler<E> {
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
         String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
         if(driver == null) {
-            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
+            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
         } else if(driver.equals("blocks")) {
             delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
         } else if(driver.equals("deltas")) {
