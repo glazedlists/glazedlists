@@ -6,7 +6,11 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 /**
  * Iterate through a {@link Tree}, one element at a time.
  *
- * <p>We should consider enhancing this to iterate one node at a time.
+ * <p>We should consider adding the following enhancements to this class:
+ * <li>writing methods, such as <code>set()</code> and <code>remove()</code>.
+ * <li>a default color, specified at construction time, that shall always be
+ *     used as the implicit parameter to overloaded versions of {@link #hasNext}
+ *     and {@link #next}.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -17,6 +21,7 @@ public class TreeIterator<V> {
     private Tree<V> tree;
     private Node<V> node;
     private int index;
+    private int nodeColorAsIndex;
 
     public TreeIterator(Tree<V> tree) {
         this.counts = new int[tree.getCoder().getColors().size()];
@@ -34,31 +39,30 @@ public class TreeIterator<V> {
     }
 
     public void next(byte colors) {
-        // we could optimize this loop by going through one node
-        // at a time rather than one index at a time
+        assert(hasNext(colors));
+
+        // start at the first node in the tree
+        if(node == null) {
+            node = tree.firstNode();
+            nodeColorAsIndex = Tree.colorAsIndex(node.color);
+            index = 0;
+            if((node.color & colors) != 0) return;
+
+        // increment within the current node
+        } else if((node.color & colors) != 0 && index < node.size - 1) {
+            counts[nodeColorAsIndex]++;
+            index++;
+            return;
+        }
+
+        // scan through the nodes, looking for the first one of the right color
         while(true) {
-            assert(hasNext(colors));
+            counts[nodeColorAsIndex] += node.size - index;
+            node = Tree.next(node);
+            nodeColorAsIndex = Tree.colorAsIndex(node.color);
+            index = 0;
 
-            // handle the first node in the tree
-            if(node == null) {
-                node = tree.firstNode();
-                index = 0;
-
-            // count the previous quantity, then increment
-            } else {
-                counts[Tree.colorAsIndex(node.color)]++;
-                index++;
-            }
-
-            // if we've gone past the current node, prepare for next node
-            if(index == node.size) {
-                index = 0;
-                node = Tree.next(node);
-                assert(node.size > 0);
-            }
-
-            // we've incremented to a node that meets our requirements
-            // so we can quit incrementing
+            // we've found a node that meet our requirements, so return
             if((node.color & colors) != 0) break;
         }
     }
@@ -71,7 +75,7 @@ public class TreeIterator<V> {
     }
 
     /**
-     * Expected values for index should be 0, 1, 2, 3..
+     * Expected values for index should be 0, 1, 2, 3...
      */
     public int index(byte colors) {
         int result = 0;

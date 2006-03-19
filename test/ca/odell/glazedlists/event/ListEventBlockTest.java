@@ -90,7 +90,9 @@ public class ListEventBlockTest extends TestCase {
      */
     public void testSortListEventBlocksAllPermutations() {
         final int LIST_INITIAL_SIZE = 4;
-        final int LIST_CHANGE_COUNT = 4;
+        final int LIST_CHANGE_COUNT = 3;
+//        final int LIST_INITIAL_SIZE = 4;
+//        final int LIST_CHANGE_COUNT = 4;
 
         // prepare the change counters
         List<ListChangeEnumeration> listChangeEnumarations = new ArrayList<ListChangeEnumeration>(LIST_CHANGE_COUNT);

@@ -48,14 +48,13 @@ public class ListDeltas2 {
     private Tree tree = new Tree(BYTE_CODER);
     private boolean allowContradictingEvents = true;
 
-    private void ensureCapacity(int size) {
-        int currentSize = tree.size(CURRENT_INDICES);
-        int delta = size - currentSize;
-        if(delta > 0) {
-            int endOfTree = tree.size(ALL_INDICES);
-            tree.add(endOfTree, ALL_INDICES, NO_CHANGE, LIST_CHANGE, delta);
-        }
-    }
+    /**
+     * When the first change to a list happens, we need to guess what the list's
+     * capacity is. After that change, we reliably know the list's capacity, so
+     * we don't need to keep testing the capacity one index at a time.
+     */
+    private boolean initialCapacityKnown = false;
+
 
     public boolean isAllowContradictingEvents() {
         return allowContradictingEvents;
@@ -65,17 +64,17 @@ public class ListDeltas2 {
     }
 
     public int currentToSnapshot(int currentIndex) {
-        ensureCapacity(currentIndex + 1);
+        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
         return tree.indexOf(currentIndex, CURRENT_INDICES, SNAPSHOT_INDICES);
     }
 
     public int snapshotToCurrent(int snapshotIndex) {
-        ensureCapacity(snapshotIndex + 1);
+        if(!initialCapacityKnown) ensureCapacity(snapshotIndex + 1);
         return tree.indexOf(snapshotIndex, SNAPSHOT_INDICES, CURRENT_INDICES);
     }
 
     public void  update(int currentIndex) {
-        ensureCapacity(currentIndex + 1);
+        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
         int overallIndex = tree.indexOf(currentIndex, CURRENT_INDICES, ALL_INDICES);
         // don't bother updating an inserted element
         if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) return;
@@ -83,12 +82,12 @@ public class ListDeltas2 {
     }
 
     public void insert(int currentIndex) {
-        ensureCapacity(currentIndex + 1);
+        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
         tree.add(currentIndex, CURRENT_INDICES, INSERT, LIST_CHANGE, 1);
     }
 
     public void delete(int currentIndex) {
-        ensureCapacity(currentIndex + 1);
+        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
         int overallIndex = tree.indexOf(currentIndex, CURRENT_INDICES, ALL_INDICES);
         // if its an insert, simply remove that insert
         if(tree.get(overallIndex, ALL_INDICES).getColor() == INSERT) {
@@ -111,7 +110,16 @@ public class ListDeltas2 {
 
     public void reset(int size) {
         tree.clear();
+        initialCapacityKnown = true;
         ensureCapacity(size);
+    }
+    private void ensureCapacity(int size) {
+        int currentSize = tree.size(CURRENT_INDICES);
+        int delta = size - currentSize;
+        if(delta > 0) {
+            int endOfTree = tree.size(ALL_INDICES);
+            tree.add(endOfTree, ALL_INDICES, NO_CHANGE, LIST_CHANGE, delta);
+        }
     }
 
     /**

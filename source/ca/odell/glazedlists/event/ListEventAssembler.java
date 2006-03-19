@@ -465,7 +465,7 @@ public final class ListEventAssembler<E> {
 
         private ListDeltas2 listDeltas = new ListDeltas2();
         /** the size of the source eventlist at the end of the most recent change */
-        //private int sourceSize;
+        private int sourceSize = -1;
 
         /**
          * Creates a new ListEventAssembler that tracks changes for the specified list.
@@ -527,10 +527,9 @@ public final class ListEventAssembler<E> {
 
             // clear the change for the next caller
             } finally {
-                listDeltas.reset(0);
+                listDeltas.reset(sourceList.size());
                 reorderMap = null;
                 allowContradictingEvents = false;
-                //sourceSize = sourceList.size();
             }
         }
 
