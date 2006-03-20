@@ -157,7 +157,6 @@ public class IssuesBrowser implements Runnable {
 
         SeparatorList<Issue> separatedIssues = new SeparatorList<Issue>(filteredIssues, GlazedLists.beanPropertyComparator(Issue.class, "subcomponent"), 0, Integer.MAX_VALUE);
 
-
         // build the issues table
         issuesTableModel = new EventTableModel<Issue>(separatedIssues, new IssueTableFormat());
         JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel);
@@ -229,7 +228,7 @@ public class IssuesBrowser implements Runnable {
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.add(iconBar,                        new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         mainPanel.add(filtersPanel,                   new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        mainPanel.add(Box.createHorizontalStrut(210), new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        mainPanel.add(Box.createHorizontalStrut(240), new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         mainPanel.add(dataPanel,                      new GridBagConstraints(1, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
         return mainPanel;

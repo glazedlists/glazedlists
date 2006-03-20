@@ -23,7 +23,7 @@ public class JSeparatorTable extends JTable {
 
     public JSeparatorTable(EventTableModel tableModel) {
         super(tableModel);
-        setUI(new SpanTableUI());
+        setUI(new SpanTableUI((BasicTableUI)getUI(), this));
 
         // use a toString() renderer for the separator
         this.separatorRenderer = getDefaultRenderer(Object.class);
@@ -58,6 +58,9 @@ public class JSeparatorTable extends JTable {
         } else {
             return super.getCellRect(row, column, includeSpacing);
         }
+    }
+    public Rectangle getCellRectWithoutSpanning(int row, int column, boolean includeSpacing) {
+        return super.getCellRect(row, column, includeSpacing);
     }
 
     /** {@inheritDoc} */
@@ -135,11 +138,69 @@ public class JSeparatorTable extends JTable {
     }
 }
 
+///**
+// * Delegate table look & feel to another {@link BasicTableUI}. This is useful
+// * to make minor tweaks to existing look & feels.
+// */
+//class DelegatingTableUI extends BasicTableUI {
+//
+//    private final BasicTableUI delegate;
+//
+//    public DelegatingTableUI(BasicTableUI delegate) {
+//        this.delegate = delegate;
+//    }
+//
+//    public void installUI(JComponent c) {
+//        delegate.installUI(c);
+//    }
+//
+//    public void uninstallUI(JComponent c) {
+//        delegate.uninstallUI(c);
+//    }
+//
+//    public Dimension getMinimumSize(JComponent c) {
+//        return delegate.getMinimumSize(c);
+//    }
+//
+//    public Dimension getPreferredSize(JComponent c) {
+//        return delegate.getPreferredSize(c);
+//    }
+//
+//    public Dimension getMaximumSize(JComponent c) {
+//        return delegate.getMaximumSize(c);
+//    }
+//
+//    public void paint(Graphics g, JComponent c) {
+//        delegate.paint(g, c);
+//    }
+//
+//    public void update(Graphics g, JComponent c) {
+//        paint(g, c);
+//    }
+//
+//    public boolean contains(JComponent c, int x, int y) {
+//        return delegate.contains(c, x, y);
+//    }
+//
+//    public int getAccessibleChildrenCount(JComponent c) {
+//        return delegate.getAccessibleChildrenCount(c);
+//    }
+//
+//    public Accessible getAccessibleChild(JComponent c, int i) {
+//        return delegate.getAccessibleChild(c, i);
+//    }
+//}
 
 /**
  * Modified from BasicTableUI to allow for spanning cells.
  */
 class SpanTableUI extends BasicTableUI {
+
+    private JSeparatorTable separatorTable;
+
+    public SpanTableUI(BasicTableUI delegate, JSeparatorTable separatorTable) {
+        this.separatorTable = separatorTable;
+    }
 
     /** Paint a representation of the <code>table</code> instance
      * that was set in installUI().
@@ -152,29 +213,29 @@ class SpanTableUI extends BasicTableUI {
         // into the table's bounds
         bounds.x = bounds.y = 0;
 
-	if (table.getRowCount() <= 0 || table.getColumnCount() <= 0 ||
-                // this check prevents us from painting the entire table
-                // when the clip doesn't intersect our bounds at all
-                !bounds.intersects(clip)) {
+        if (table.getRowCount() <= 0 || table.getColumnCount() <= 0 ||
+            // this check prevents us from painting the entire table
+            // when the clip doesn't intersect our bounds at all
+            !bounds.intersects(clip)) {
 
-	    return;
-	}
+            return;
+        }
 
-	Point upperLeft = clip.getLocation();
-	Point lowerRight = new Point(clip.x + clip.width - 1, clip.y + clip.height - 1);
+        Point upperLeft = clip.getLocation();
+        Point lowerRight = new Point(clip.x + clip.width - 1, clip.y + clip.height - 1);
         int rMin = table.rowAtPoint(upperLeft);
         int rMax = table.rowAtPoint(lowerRight);
         // This should never happen (as long as our bounds intersect the clip,
         // which is why we bail above if that is the case).
         if (rMin == -1) {
-	    rMin = 0;
+    	    rMin = 0;
         }
         // If the table does not have enough rows to fill the view we'll get -1.
         // (We could also get -1 if our bounds don't intersect the clip,
         // which is why we bail above if that is the case).
         // Replace this with the index of the last row.
         if (rMax == -1) {
-	    rMax = table.getRowCount()-1;
+	        rMax = table.getRowCount()-1;
         }
 
         boolean ltr = table.getComponentOrientation().isLeftToRight();
@@ -182,32 +243,30 @@ class SpanTableUI extends BasicTableUI {
         int cMax = table.columnAtPoint(ltr ? lowerRight : upperLeft);
         // This should never happen.
         if (cMin == -1) {
-	    cMin = 0;
+    	    cMin = 0;
         }
-	// If the table does not have enough columns to fill the view we'll get -1.
+	    // If the table does not have enough columns to fill the view we'll get -1.
         // Replace this with the index of the last column.
         if (cMax == -1) {
-	    cMax = table.getColumnCount()-1;
+	        cMax = table.getColumnCount()-1;
         }
 
         // Paint the grid.
         paintGrid(g, rMin, rMax, cMin, cMax);
 
         // Paint the cells.
-	paintCells(g, rMin, rMax, cMin, cMax);
+    	paintCells(g, rMin, rMax, cMin, cMax);
     }
     private void paintCell(Graphics g, Rectangle cellRect, int row, int column) {
-        if (table.isEditing() && table.getEditingRow()==row &&
-                                 table.getEditingColumn()==column) {
+        if (table.isEditing() && table.getEditingRow()==row && table.getEditingColumn()==column) {
             Component component = table.getEditorComponent();
-	    component.setBounds(cellRect);
+            component.setBounds(cellRect);
             component.validate();
-        }
-        else {
+        } else {
             TableCellRenderer renderer = table.getCellRenderer(row, column);
             Component component = table.prepareRenderer(renderer, row, column);
             rendererPane.paintComponent(g, component, table, cellRect.x, cellRect.y,
-                                        cellRect.width, cellRect.height, true);
+                                    cellRect.width, cellRect.height, true);
         }
     }
     private void paintCells(Graphics g, int rMin, int rMax, int cMin, int cMax) {
@@ -270,40 +329,40 @@ class SpanTableUI extends BasicTableUI {
     private void paintGrid(Graphics g, int rMin, int rMax, int cMin, int cMax) {
         g.setColor(table.getGridColor());
 
-	Rectangle minCell = table.getCellRect(rMin, cMin, true);
-	Rectangle maxCell = table.getCellRect(rMax, cMax, true);
+        Rectangle minCell = table.getCellRect(rMin, cMin, true);
+        Rectangle maxCell = table.getCellRect(rMax, cMax, true);
         Rectangle damagedArea = minCell.union( maxCell );
 
         if (table.getShowHorizontalLines()) {
-	    int tableWidth = damagedArea.x + damagedArea.width;
-	    int y = damagedArea.y;
-	    for (int row = rMin; row <= rMax; row++) {
-		y += table.getRowHeight(row);
-		g.drawLine(damagedArea.x, y - 1, tableWidth - 1, y - 1);
-	    }
-	}
+            int tableWidth = damagedArea.x + damagedArea.width;
+            int y = damagedArea.y;
+            for (int row = rMin; row <= rMax; row++) {
+                y += table.getRowHeight(row);
+                g.drawLine(damagedArea.x, y - 1, tableWidth - 1, y - 1);
+            }
+        }
         if (table.getShowVerticalLines()) {
-	    TableColumnModel cm = table.getColumnModel();
-	    int tableHeight = damagedArea.y + damagedArea.height;
-	    int x;
-	    if (table.getComponentOrientation().isLeftToRight()) {
-		x = damagedArea.x;
-		for (int column = cMin; column <= cMax; column++) {
-		    int w = cm.getColumn(column).getWidth();
-		    x += w;
-		    g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
-		}
-	    } else {
-		x = damagedArea.x + damagedArea.width;
-		for (int column = cMin; column < cMax; column++) {
-		    int w = cm.getColumn(column).getWidth();
-		    x -= w;
-		    g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
-		}
-		x -= cm.getColumn(cMax).getWidth();
-		g.drawLine(x, 0, x, tableHeight - 1);
-	    }
-	}
+            TableColumnModel cm = table.getColumnModel();
+            int tableHeight = damagedArea.y + damagedArea.height;
+            int x;
+            if (table.getComponentOrientation().isLeftToRight()) {
+                x = damagedArea.x;
+                for (int column = cMin; column <= cMax; column++) {
+                    int w = cm.getColumn(column).getWidth();
+                    x += w;
+                    g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
+                }
+            } else {
+                x = damagedArea.x + damagedArea.width;
+                for (int column = cMin; column < cMax; column++) {
+                    int w = cm.getColumn(column).getWidth();
+                    x -= w;
+                    g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
+                }
+                x -= cm.getColumn(cMax).getWidth();
+                g.drawLine(x, 0, x, tableHeight - 1);
+            }
+    	}
     }
 
     private int viewIndexForColumn(TableColumn aColumn) {
@@ -319,54 +378,58 @@ class SpanTableUI extends BasicTableUI {
     private void paintDraggedArea(Graphics g, int rMin, int rMax, TableColumn draggedColumn, int distance) {
         int draggedColumnIndex = viewIndexForColumn(draggedColumn);
 
-        Rectangle minCell = table.getCellRect(rMin, draggedColumnIndex, true);
-	Rectangle maxCell = table.getCellRect(rMax, draggedColumnIndex, true);
+        Rectangle minCell = separatorTable.getCellRectWithoutSpanning(rMin, draggedColumnIndex, true);
+    	Rectangle maxCell = separatorTable.getCellRectWithoutSpanning(rMax, draggedColumnIndex, true);
+        Rectangle vacatedColumnRect = minCell.union(maxCell);
 
-	Rectangle vacatedColumnRect = minCell.union(maxCell);
+        for(int row = rMin; row <= rMax; row++) {
+            // skip separator rows
+            Object rowValue = ((EventTableModel)separatorTable.getModel()).getElementAt(row);
 
-	// Paint a gray well in place of the moving column.
-	g.setColor(table.getParent().getBackground());
-	g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
-		   vacatedColumnRect.width, vacatedColumnRect.height);
+            // only paint the cell on non-separator rows
+            if(!(rowValue instanceof SeparatorList.Separator)) {
 
-	// Move to the where the cell has been dragged.
-	vacatedColumnRect.x += distance;
+                Rectangle cellRect = table.getCellRect(row, draggedColumnIndex, false);
 
-	// Fill the background.
-	g.setColor(table.getBackground());
-	g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
-		   vacatedColumnRect.width, vacatedColumnRect.height);
+                // Paint a gray well in place of the moving column.
+                g.setColor(table.getParent().getBackground());
+                g.fillRect(cellRect.x, cellRect.y, cellRect.width, cellRect.height);
 
-	// Paint the vertical grid lines if necessary.
-	if (table.getShowVerticalLines()) {
-	    g.setColor(table.getGridColor());
-	    int x1 = vacatedColumnRect.x;
-	    int y1 = vacatedColumnRect.y;
-	    int x2 = x1 + vacatedColumnRect.width - 1;
-	    int y2 = y1 + vacatedColumnRect.height - 1;
-	    // Left
-	    g.drawLine(x1-1, y1, x1-1, y2);
-	    // Right
-	    g.drawLine(x2, y1, x2, y2);
-	}
+                // Move to the where the cell has been dragged.
+                cellRect.x += distance;
 
-	for(int row = rMin; row <= rMax; row++) {
-	    // Render the cell value
-	    Rectangle r = table.getCellRect(row, draggedColumnIndex, false);
-	    r.x += distance;
-	    paintCell(g, r, row, draggedColumnIndex);
+                // Fill the background.
+                g.setColor(table.getBackground());
+                g.fillRect(cellRect.x, cellRect.y, cellRect.width, cellRect.height);
 
-	    // Paint the (lower) horizontal grid line if necessary.
-	    if (table.getShowHorizontalLines()) {
-		g.setColor(table.getGridColor());
-		Rectangle rcr = table.getCellRect(row, draggedColumnIndex, true);
-		rcr.x += distance;
-		int x1 = rcr.x;
-		int y1 = rcr.y;
-		int x2 = x1 + rcr.width - 1;
-		int y2 = y1 + rcr.height - 1;
-		g.drawLine(x1, y2, x2, y2);
-	    }
-	}
+                // Paint the vertical grid lines if necessary.
+                if (table.getShowVerticalLines()) {
+                    g.setColor(table.getGridColor());
+                    int x1 = cellRect.x;
+                    int y1 = cellRect.y;
+                    int x2 = x1 + cellRect.width - 1;
+                    int y2 = y1 + cellRect.height - 1;
+                    // Left
+                    g.drawLine(x1-1, y1, x1-1, y2);
+                    // Right
+                    g.drawLine(x2, y1, x2, y2);
+                }
+
+                // Render the cell value
+                paintCell(g, cellRect, row, draggedColumnIndex);
+            }
+
+            // Paint the (lower) horizontal grid line if necessary.
+            if (table.getShowHorizontalLines()) {
+                g.setColor(table.getGridColor());
+                Rectangle rcr = table.getCellRect(row, draggedColumnIndex, true);
+                rcr.x += distance;
+                int x1 = rcr.x;
+                int y1 = rcr.y;
+                int x2 = x1 + rcr.width - 1;
+                int y2 = y1 + rcr.height - 1;
+                g.drawLine(x1, y2, x2, y2);
+            }
+        }
     }
 }
