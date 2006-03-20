@@ -39,7 +39,7 @@ class Node<V> implements Element<V> {
     /**
      * Create a new node.
      *
-     * @param color a bitmask value usch as 1, 2, 4, 8 or 16.
+     * @param color a bitmask value such as 1, 2, 4, 8 or 16.
      * @param size the size of the node
      * @param value the value of the node
      * @param parent the parent node in the tree, or <code>null</code> for the
@@ -82,32 +82,33 @@ class Node<V> implements Element<V> {
     final int size(byte colors) {
         if(counts == null) {
             return (colors & color) != 0 ? size : 0;
+        } else {
+            // total the values of the specified array for the specified colors.
+            int result = 0;
+
+            if((colors & 1) != 0) result += counts[0];
+            if(counts.length == 1) return result;
+
+            if((colors & 2) != 0) result += counts[1];
+            if(counts.length == 2) return result;
+
+            if((colors & 4) != 0) result += counts[2];
+            if(counts.length == 3) return result;
+
+            if((colors & 8) != 0) result += counts[3];
+            if(counts.length == 4) return result;
+
+            if((colors & 16) != 0) result += counts[4];
+            if(counts.length == 5) return result;
+
+            if((colors & 32) != 0) result += counts[5];
+            if(counts.length == 6) return result;
+
+            if((colors & 64) != 0) result += counts[6];
+            if(counts.length == 7) return result;
+
+            throw new IllegalStateException();
         }
-
-        int result = 0;
-
-        if((colors & 1) != 0) result += counts[0];
-        if(counts.length == 1) return result;
-
-        if((colors & 2) != 0) result += counts[1];
-        if(counts.length == 2) return result;
-
-        if((colors & 4) != 0) result += counts[2];
-        if(counts.length == 3) return result;
-
-        if((colors & 8) != 0) result += counts[3];
-        if(counts.length == 4) return result;
-
-        if((colors & 16) != 0) result += counts[4];
-        if(counts.length == 5) return result;
-
-        if((colors & 32) != 0) result += counts[5];
-        if(counts.length == 6) return result;
-
-        if((colors & 64) != 0) result += counts[6];
-        if(counts.length == 7) return result;
-
-        throw new IllegalStateException();
     }
 
     /**
@@ -137,7 +138,7 @@ class Node<V> implements Element<V> {
             if(left != null && left.counts == null) counts[Tree.colorAsIndex(left.color)] += left.size;
             if(right != null && right.counts == null) counts[Tree.colorAsIndex(right.color)] += right.size;
 
-        // we don't have a child node, the counts array may be null
+        // we don't have a child node yet, the counts array may be null
         } else {
             if(counts != null) {
                 for(int c = 0; c < colorCount; c++) {

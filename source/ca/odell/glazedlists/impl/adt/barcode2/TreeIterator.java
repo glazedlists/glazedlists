@@ -78,13 +78,32 @@ public class TreeIterator<V> {
      * Expected values for index should be 0, 1, 2, 3...
      */
     public int index(byte colors) {
+        // total the values of the specified array for the specified colors.
         int result = 0;
-        for(int i = 0; i < counts.length; i++) {
-            if((colors & (1 << i)) > 0) result += counts[i];
-        }
-        return result;
-    }
 
+        if((colors & 1) != 0) result += counts[0];
+        if(counts.length == 1) return result;
+
+        if((colors & 2) != 0) result += counts[1];
+        if(counts.length == 2) return result;
+
+        if((colors & 4) != 0) result += counts[2];
+        if(counts.length == 3) return result;
+
+        if((colors & 8) != 0) result += counts[3];
+        if(counts.length == 4) return result;
+
+        if((colors & 16) != 0) result += counts[4];
+        if(counts.length == 5) return result;
+
+        if((colors & 32) != 0) result += counts[5];
+        if(counts.length == 6) return result;
+
+        if((colors & 64) != 0) result += counts[6];
+        if(counts.length == 7) return result;
+
+        throw new IllegalStateException();
+    }
     public V value() {
         return node.get();
     }

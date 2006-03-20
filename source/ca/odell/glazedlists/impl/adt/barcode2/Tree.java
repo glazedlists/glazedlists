@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * for your particular application.
  *
  * <p>This is a prototype replacement for the <code>Barcode</code> class that adds support
- * for up to eight different colors. As well, this supports values in the node.
+ * for up to seven different colors. As well, this supports values in the node.
  * It will hopefully also replace our <code>IndexedTree</code> class. This class
  * is designed after those two classes and hopefully improves upon them in
  * a few interesting ways:
@@ -45,7 +45,12 @@ public class Tree<V> {
     /** the tree's root, or <code>null</code> for an empty tree */
     private Node<V> root = null;
 
-    /** a working list to help manage what we're removing */
+    /**
+     * a list to add all nodes to that must be removed from
+     * the tree. The nodes are removed only after the tree has been modified,
+     * which allows us a chance to do rotations without losing our position
+     * in the tree.
+     */
     private final List<Node<V>> zeroQueue = new ArrayList<Node<V>>();
 
     /**
@@ -72,9 +77,9 @@ public class Tree<V> {
         while(true) {
             assert(node != null);
             assert(index >= 0);
-            Node<V> nodeLeft = node.left;
 
             // recurse on the left
+            Node<V> nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
             if(index < leftSize) {
                 node = nodeLeft;
@@ -395,7 +400,7 @@ public class Tree<V> {
         assert(root != null);
 
         // remove values from the tree
-        removeFromSubtree(root, index, indexColors, size, zeroQueue);
+        removeFromSubtree(root, index, indexColors, size);
 
         // remove the emptied nodes
         for(int i = 0; i < zeroQueue.size(); i++) {
@@ -414,27 +419,12 @@ public class Tree<V> {
 
         assert(valid());
     }
-
-    /**
-     * Remove all nodes from the tree. Note that this is much faster than calling
-     * remove on all elements, since the structure can be discarded instead of
-     * managed during the removal.
-     */
-    public void clear() {
-        root = null;
-    }
-
     /**
      * Remove at the specified index in the specified subtree. This doesn't ever
      * remove any nodes of size zero, that's up to the caller to do after by
      * removing all nodes in the zeroQueue from the tree.
-     *
-     * @param zeroQueue a list to add all nodes to that must be removed from
-     *      the tree. The nodes are removed only after the tree has been modified,
-     *      which allows us a chance to do rotations without losing our position
-     *      in the tree.
      */
-    private void removeFromSubtree(Node<V> node, int index, byte indexColors, int size, List<Node<V>> zeroQueue) {
+    private void removeFromSubtree(Node<V> node, int index, byte indexColors, int size) {
         while(size > 0) {
             assert(node != null);
             assert(index >= 0);
@@ -449,7 +439,7 @@ public class Tree<V> {
                 // that part recursively
                 if(index + size > leftSize) {
                     int toRemove = leftSize - index;
-                    removeFromSubtree(nodeLeft, index, indexColors, toRemove, zeroQueue);
+                    removeFromSubtree(nodeLeft, index, indexColors, toRemove);
                     size -= toRemove;
                     leftSize -= toRemove;
                 // we can do our full delete on the left side
@@ -480,7 +470,6 @@ public class Tree<V> {
             node = node.right;
         }
     }
-
     /**
      * Replace the specified node with the specified replacement. This does the
      * replacement, then walks up the tree to ensure heights are correct, so
@@ -512,7 +501,6 @@ public class Tree<V> {
         // the height has changed, update that up the tree
         fixHeightPostChange(nodeParent, true);
     }
-
     /**
      * Replace the specified node with another node deeper in the tree. This
      * is necessary to maintain treeness through deletes.
@@ -552,6 +540,7 @@ public class Tree<V> {
         return replacement;
     }
 
+
     /**
      * Replace all values at the specified index with the specified new value.
      *
@@ -564,6 +553,17 @@ public class Tree<V> {
         remove(index, indexColors, size);
         add(index, indexColors, color, value, size);
     }
+
+
+    /**
+     * Remove all nodes from the tree. Note that this is much faster than calling
+     * remove on all elements, since the structure can be discarded instead of
+     * managed during the removal.
+     */
+    public void clear() {
+        root = null;
+    }
+
 
     /**
      * Get the index of the specified element, counting only the colors

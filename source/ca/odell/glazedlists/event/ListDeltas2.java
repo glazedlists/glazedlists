@@ -11,23 +11,13 @@ import java.util.Arrays;
 
 /**
  * Working copy of a class to eventually become a proper replacement for
- * {@link ListEventBlock}s. This class doesn't work at the moment, but hopefully
- * we soon have time to comb it over and fix its weaknesses. Current problems:
- * <li>Test cases fail!
- * <li>ListDelta Iterator is index by index, not node by node
- * <li>Tree Iterator is index by index, not node by node
+ * {@link ListEventBlock}s.
+ *
+ * <li>Test cases fail due to no copy constructor in {@link ListEvent}
  * <li>Logic to find appropriate index doing an extra layer of mapping isn't nice
- * <li>reset() / ensureCapacity() could be fixed by making ListEventAssembler
- *     cache the list size whenever an event is fired
- * <li>Tree nodes could have count attributes created lazily
- * <li>Tree could be optimized!
- * <li>Where necessary, asserts should be pulled out because they're slow!
- * <li>Fix the API to accept blocks
  * <li>Clarify tree's rules regarding combining of nodes
  * <li>Provide special-case support for increasing event indices, such as
  *     those from FilterList.matcherChanged
- * <li>Faster Tree.clear() method
- *
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -162,14 +152,14 @@ public class ListDeltas2 {
     /**
      * Iterate through the list of changes in this tree.
      */
-    public static class Iterator {
+    public static class Iterator<V> {
 
-        private final Tree tree;
-        private final TreeIterator treeIterator;
+        private final Tree<V> tree;
+        private final TreeIterator<V> treeIterator;
 
-        private Iterator(Tree tree) {
+        private Iterator(Tree<V> tree) {
             this.tree = tree;
-            this.treeIterator = new TreeIterator(tree);
+            this.treeIterator = new TreeIterator<V>(tree);
         }
         public int getIndex() {
             return treeIterator.index(CURRENT_INDICES);
