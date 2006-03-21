@@ -3,25 +3,22 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import junit.framework.TestCase;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
-import javax.swing.text.*;
 import javax.swing.plaf.ComboBoxUI;
-import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.BasicEventList;
-
+import javax.swing.plaf.basic.BasicComboBoxUI;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class AutoCompleteSupportTest extends TestCase {
+public class AutoCompleteSupportTest extends SwingTestCase {
 
-    public void testDispose() {
+    public void guiTestDispose() {
         final JComboBox combo = new JComboBox();
         final EventList items = new BasicEventList();
 
@@ -77,7 +74,7 @@ public class AutoCompleteSupportTest extends TestCase {
         }
     }
 
-    public void testInstall() {
+    public void guiTestInstall() {
         JComboBox combo = new JComboBox();
         combo.setEditor(new NoopComboBoxEditor());
         try {
@@ -107,7 +104,7 @@ public class AutoCompleteSupportTest extends TestCase {
         }
     }
 
-    public void testChangeModel() {
+    public void guiTestChangeModel() {
         final JComboBox combo = new JComboBox();
         AutoCompleteSupport.install(combo, new BasicEventList());
 
@@ -119,7 +116,7 @@ public class AutoCompleteSupportTest extends TestCase {
         }
     }
 
-    public void testChangeUI() {
+    public void guiTestChangeUI() {
         final JComboBox combo = new JComboBox();
         AutoCompleteSupport.install(combo, new BasicEventList());
 
@@ -131,7 +128,7 @@ public class AutoCompleteSupportTest extends TestCase {
         }
     }
 
-    public void testChangeEditorDocumentToNonAbstractDocument() {
+    public void guiTestChangeEditorDocumentToNonAbstractDocument() {
         final JComboBox combo = new JComboBox();
         AutoCompleteSupport.install(combo, new BasicEventList());
 
@@ -144,8 +141,7 @@ public class AutoCompleteSupportTest extends TestCase {
         }
     }
 
-
-    public void testNullElements() {
+    public void guiTestNullElements() {
         final JComboBox combo = new JComboBox();
         final EventList<String> items = new BasicEventList<String>();
         items.add(null);
