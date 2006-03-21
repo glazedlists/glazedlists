@@ -145,6 +145,27 @@ public class AutoCompleteSupportTest extends TestCase {
     }
 
 
+    public void testNullElements() {
+        final JComboBox combo = new JComboBox();
+        final EventList<String> items = new BasicEventList<String>();
+        items.add(null);
+        items.add("New Brunswick");
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+        items.add(null);
+
+        AutoCompleteSupport.install(combo, items);
+
+        assertEquals(6, combo.getModel().getSize());
+
+        final JTextField editor = (JTextField) combo.getEditor().getEditorComponent();
+        editor.setText("New");
+
+        assertEquals(2, combo.getModel().getSize());
+    }
+
+
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
 

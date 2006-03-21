@@ -488,23 +488,24 @@ public final class AutoCompleteSupport<E> {
             if (prefix.length() > 0) {
                 // search the combobox model for a value that starts with our prefix
                 for (int i = 0; i < comboBoxModel.getSize(); i++) {
-                    final String item = comboBoxModel.getElementAt(i).toString();
+                    final Object item = comboBoxModel.getElementAt(i);
+                    final String itemString = item == null ? null : item.toString();
 
-                    // if the user-specified prefix matches the item's prefix
-                    // we have found an appropriate item to select
-                    if (prefixMatcher.matches(item)) {
+                    // if the user-specified prefix matches the itemString's prefix
+                    // we have found an appropriate itemString to select
+                    if (prefixMatcher.matches(itemString)) {
                         if (filterBypass != null) {
-                            // either keep the user's prefix or replace it with the item's prefix
+                            // either keep the user's prefix or replace it with the itemString's prefix
                             // depending on whether we correct the case
                             if (correctsCase) {
-                                filterBypass.replace(0, prefix.length(), item, attributeSet);
+                                filterBypass.replace(0, prefix.length(), itemString, attributeSet);
                             } else {
-                                final String itemSuffix = item.substring(prefix.length());
+                                final String itemSuffix = itemString.substring(prefix.length());
                                 filterBypass.insertString (prefix.length(), itemSuffix, attributeSet);
                             }
                         }
 
-                        // select the matched item
+                        // select the matched itemString
                         ignoreDocumentChanges = true;
                         comboBox.setSelectedIndex(i);
                         ignoreDocumentChanges = false;
@@ -644,7 +645,6 @@ public final class AutoCompleteSupport<E> {
             delegate.uninstallUI(c);
         }
 
-        // todo override these with some custom logic ?
         protected void selectNextPossibleValue() {
 //            ignoreDocumentChanges = true;
 
