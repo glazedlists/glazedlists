@@ -39,7 +39,7 @@ import java.lang.ref.*;
 public final class WeakReferenceProxy<E> implements ListEventListener<E> {
 
     /** a weak reference the target ListEventListener */
-    private WeakReference<ListEventListener<E>> proxyTargetReference;
+    private final WeakReference<ListEventListener<E>> proxyTargetReference;
 
     /** the list to remove this listener from when done */
     private EventList<E> source;
@@ -50,10 +50,14 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
      * listener.
      */
     public WeakReferenceProxy(EventList<E> source, ListEventListener<E> proxyTarget) {
-        if(source == null || proxyTarget == null) throw new NullPointerException();
+        if (source == null)
+            throw new IllegalArgumentException("source may not be null");
+
+        if (proxyTarget == null)
+            throw new IllegalArgumentException("proxyTarget may not be null");
 
         this.source = source;
-        proxyTargetReference = new WeakReference<ListEventListener<E>>(proxyTarget);
+        this.proxyTargetReference = new WeakReference<ListEventListener<E>>(proxyTarget);
     }
 
     /**
@@ -61,13 +65,40 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
      * if it has not yet been garbage collected.
      */
     public void listChanged(ListEvent<E> listChanges) {
-        ListEventListener<E> proxyTarget = proxyTargetReference.get();
+        // if this listener has already been cleaned up, ignore ListEvents
+        if (source == null) return;
 
-        if(source != null && (proxyTarget == null || proxyTargetReference.isEnqueued())) {
+        // fetch the underlying ListEventListener
+        final ListEventListener<E> proxyTarget = getReferent();
+
+        // test to see if the underlying ListEventListener still exists
+        if (proxyTarget == null) {
+            // it doesn't so clean it up
             source.removeListEventListener(this);
-            source = null;
+            proxyUnregistered();
+
         } else {
+            // it does, so notify it of the ListEvent
             proxyTarget.listChanged(listChanges);
         }
+    }
+
+    /**
+     * Returns the underlying ListEventListener or <code>null</code> if it has
+     * been garbage collected.
+     */
+    public ListEventListener<E> getReferent() {
+        return proxyTargetReference.get();
+    }
+
+    /**
+     * A callback to notify this WeakReferenceProxy that it has been
+     * unregistered from the EventList to which it was listening. The
+     * WeakReferenceProxy responds by cleaning up internal references to the
+     * EventList and ensuring that any future ListEvents it receives are
+     * ignored.
+     */
+    public void proxyUnregistered() {
+        source = null;
     }
 }
