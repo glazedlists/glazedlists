@@ -30,18 +30,20 @@ public final class ListEventAssembler<E> {
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-        if(driver == null) {
-            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("blocks")) {
-            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("deltas")) {
-            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("deltas2")) {
-            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
-        } else {
-            throw new IllegalStateException();
-        }
+        delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+
+//        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
+//        if(driver == null) {
+//            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+//        } else if(driver.equals("blocks")) {
+//            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+//        } else if(driver.equals("deltas")) {
+//            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
+//        } else if(driver.equals("deltas2")) {
+//            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
+//        } else {
+//            throw new IllegalStateException();
+//        }
     }
     
     /**

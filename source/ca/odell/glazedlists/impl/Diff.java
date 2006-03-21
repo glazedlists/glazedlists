@@ -9,37 +9,40 @@ import ca.odell.glazedlists.EventList;
 import java.util.*;
 
 /**
- * Implementation of Eugene W. Myer's paper, "An O(ND) Difference Algorithm and Its
- * Variations", the same algorithm found in GNU diff.
+ * Implementation of Eugene W. Myer's paper, "An O(ND) Difference Algorithm and
+ * Its Variations", the same algorithm found in GNU diff.
  *
- * <p>Note that this is a cleanroom implementation of this popular algorithm that is
- * particularly suited for the Java programmer. The variable names are descriptive and the
- * approach is more object-oriented than Myer's sample algorithm.
+ * <p>Note that this is a cleanroom implementation of this popular algorithm
+ * that is particularly suited for the Java programmer. The variable names are
+ * descriptive and the approach is more object-oriented than Myer's sample
+ * algorithm.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class Diff {
 
     /**
-     * Convenience method for {@link #replaceAll(EventList,List,boolean,Comparator) replaceAll()}
-     * that uses {@link Object#equals(Object)} to determine equality.
+     * Convenience method for {@link #replaceAll(EventList,List,boolean,Comparator)
+     * replaceAll()} that uses {@link Object#equals(Object)} to determine
+     * equality.
      */
     public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates) {
         replaceAll(target, source, updates, new EqualsComparator());
     }
 
     /**
-     * Replace the complete contents of the target {@link EventList} with the complete
-     * contents of the source {@link EventList} while making as few list changes as
-     * possible.
+     * Replace the complete contents of the target {@link EventList} with the
+     * complete contents of the source {@link EventList} while making as few
+     * list changes as possible.
      *
      * @param comparator a {@link Comparator} to use to test only for equality.
-     *      This comparator shall return 0 to signal that two elements are equal,
-     *      and nonzero otherwise.
-     * @param updates whether to fire update events for Objects that are equal in both
-     *                {@link List}s.
+     *      This comparator shall return 0 to signal that two elements are
+     *      equal, and nonzero otherwise.
+     * @param updates whether to fire update events for Objects that are equal
+     *      in both {@link List}s.
      */
-    public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates, Comparator<E> comparator) {
+    public static <E> void replaceAll(EventList<E> target, List<E> source,
+                                      boolean updates, Comparator<E> comparator) {
         DiffMatcher listDiffMatcher = new ListDiffMatcher<E>(target, source, comparator);
         List<Point> editScript = shortestEditScript(listDiffMatcher);
         
@@ -95,7 +98,8 @@ public final class Diff {
 
 
     /**
-     * Calculate the length of the longest common subsequence for the specified input.
+     * Calculate the length of the longest common subsequence for the specified
+     * input.
      */
     private static List<Point> shortestEditScript(DiffMatcher input) {
         // calculate limits based on the size of the input matcher
@@ -116,9 +120,9 @@ public final class Diff {
             // diagonal k means every point on k, (k = x - y)
             for(int k = -D; k <= D; k += 2) {
                 // the furthest reaching D-path on the left and right diagonals
-                // either of these may be null. The terms 'below left' and 'above right'
-                // refer to the diagonals that the points are on and may not be
-                // representative of the point positions
+                // either of these may be null. The terms 'below left' and 'above
+                // right' refer to the diagonals that the points are on and may
+                // not be representative of the point positions
                 Point belowLeft = furthestReachingPoints.get(new Integer(k - 1));
                 Point aboveRight = furthestReachingPoints.get(new Integer(k + 1));
                 
@@ -129,14 +133,14 @@ public final class Diff {
                 if(furthestReachingPoints.isEmpty()) {
                     point = new Point(0, 0);
 
-                    // if this is the leftmost diagonal, or the left edge is further
-                    // than the right edge, our new X is that value and our y is one greater
-                    // (shift verically by one)
+                // if this is the leftmost diagonal, or the left edge is
+                // further than the right edge, our new X is that value and
+                // our y is one greater (shift verically by one)
                 } else if(k == -D || (k != D && belowLeft.getX() < aboveRight.getX())) {
                     point = aboveRight.createDeltaPoint(0, 1);
 
-                    // if the right edge is further than the left edge, use that x
-                    // and keep y the same (shift horizontally by one)
+                // if the right edge is further than the left edge, use that
+                // x and keep y the same (shift horizontally by one)
                 } else {
                     point = belowLeft.createDeltaPoint(1, 0);
                 }
@@ -228,8 +232,9 @@ public final class Diff {
         }
 
         /**
-         * Get a trail from the original point to this point. This is a list of all points
-         * created via a series of {@link #createDeltaPoint(int,int)} calls.
+         * Get a trail from the original point to this point. This is a list of
+         * all points created via a series of {@link #createDeltaPoint(int,int)}
+         * calls.
          */
         public List<Point> trail() {
             List<Point> reverse = new ArrayList<Point>();
