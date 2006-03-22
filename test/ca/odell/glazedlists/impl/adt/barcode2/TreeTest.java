@@ -368,8 +368,6 @@ public class TreeTest extends TestCase {
         tree.set(2, a, b, february, 1);
         tree.set(9, a, b, february, 1);
         tree.set(7, a, b, february, 1);
-//        tree.remove(7, a, 1);
-//        tree.add(7, a, b, february, 1);
         assertEquals("BAABAAAAABABA", tree.asSequenceOfColors());
     }
 
@@ -427,5 +425,16 @@ public class TreeTest extends TestCase {
         assertFalse(iterator.hasNext(allColors));
         assertFalse(iterator.hasNext(a));
         assertFalse(iterator.hasNext(b));
+    }
+
+    public void testSortedTree() {
+        Tree<String> tree = new Tree<String>(coder);
+        tree.addInSortedOrder(a, january, 1);
+        tree.addInSortedOrder(a, february, 1);
+        tree.addInSortedOrder(a, march, 1);
+        tree.addInSortedOrder(a, april, 1);
+        tree.addInSortedOrder(a, may, 1);
+
+        assertEquals(Arrays.asList(new String[] { april, february, january, march, may }), new TreeAsList<String>(tree));
     }
 }

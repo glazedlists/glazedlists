@@ -235,13 +235,6 @@ public final class IndexedTree<V> {
     }
 
     /**
-     * Returns an {@link Iterator} that is optimized for tree traversal.
-     */
-    //public Iterator iterator() {
-    //    return new IndexedTreeIterator(this);
-    //}
-
-    /**
      * Validates the entire tree by iterating over its nodes and validating
      * them one at a time.
      */

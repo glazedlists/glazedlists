@@ -3,9 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+import ca.odell.glazedlists.GlazedLists;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Our second generation tree class.
@@ -54,15 +57,40 @@ public class Tree<V> {
     private final List<Node<V>> zeroQueue = new ArrayList<Node<V>>();
 
     /**
-     * Create a tree using the specified color codings for the nodes.
+     * The comparator to use when performing ordering operations on the tree.
+     * Sometimes this tree will not be sorted, so in such situations this
+     * comparator will not be used.
      */
-    public Tree(ListToByteCoder<V> coder) {
+    private final Comparator<V> comparator;
+
+    /**
+     * @param coder specifies the node colors
+     * @param comparator the comparator to use when ordering values within the
+     *      tree. If this tree is unsorted, use the one-argument constructor.
+     */
+    public Tree(ListToByteCoder<V> coder, Comparator<V> comparator) {
+        if(coder == null) throw new NullPointerException("Coder cannot be null.");
+        if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
+
         this.coder = coder;
         this.colorCount = coder.getColors().size();
+        this.comparator = comparator;
     }
+
+    /**
+     * @param coder specifies the node colors
+     */
+    public Tree(ListToByteCoder<V> coder) {
+        this(coder, (Comparator)GlazedLists.comparableComparator());
+    }
+
 
     public ListToByteCoder<V> getCoder() {
         return coder;
+    }
+
+    public Comparator<V> getComparator() {
+        return comparator;
     }
 
     /**
@@ -223,6 +251,98 @@ public class Tree<V> {
                 } else {
                     parent = parentRight;
                     index -= parentRightStartIndex;
+                }
+            }
+        }
+    }
+
+    /**
+     * Add a tree node in sorted order.
+     *
+     * @param size the size of the node to insert.
+     * @param value the node value. If non-<code>null</code>, the node may be
+     *      combined with other nodes of the same color and value. <code>null</code>
+     *      valued nodes will never be combined with each other.
+     * @return the element the specified value was inserted into. This is non-null
+     *      unless the size parameter is 0, in which case the result is always
+     *      <code>null</code>.
+     */
+    public Element<V> addInSortedOrder(byte color, V value, int size) {
+        assert(size >= 0);
+
+        int colorAsIndex = colorAsIndex(color);
+
+        if(this.root == null) {
+            this.root = new Node<V>(color, size, value, null);
+            assert(valid());
+            return this.root;
+        } else {
+            Node<V> inserted = insertIntoSubtreeInSortedOrder(root, color, colorAsIndex, value, size);
+            assert(valid());
+            return inserted;
+        }
+    }
+
+    /**
+     * @param parent the subtree to insert into, must not be null.
+     * @param color a bitmask value such as 1, 2, 4, 8, 16, 32, 64 or 128.
+     * @param colorAsIndex an index value such as 0, 1, 2, 3, 4, 5, 6 or 7.
+     * @param value the object to hold in the inserted node.
+     * @param size the size of the inserted node, with respect to indices.
+     * @return the inserted node, or the modified node if this insert simply
+     *      increased the size of an existing node.
+     */
+    private Node<V> insertIntoSubtreeInSortedOrder(Node<V> parent, byte color, int colorAsIndex, V value, int size) {
+        while(true) {
+            assert(parent != null);
+
+            int compareResult = comparator.compare(value, parent.value);
+
+            // the first thing we want to try is to merge this value into the
+            // current node, since that's the cheapest thing to do:
+            if(compareResult == 0 && color == parent.color && value == parent.value && value != null) {
+                parent.size += size;
+                fixCountsThruRoot(parent, colorAsIndex, size);
+                return parent;
+            }
+
+            // insert on the left...
+            boolean insertOnLeft = false;
+            insertOnLeft = insertOnLeft || compareResult < 0;
+            insertOnLeft = insertOnLeft || compareResult == 0 && parent.left == null;
+            insertOnLeft = insertOnLeft || compareResult == 0 && parent.right != null && parent.left.height < parent.right.height;
+            if(insertOnLeft) {
+                Node<V> parentLeft = parent.left;
+
+                // as a new left child
+                if(parentLeft == null) {
+                    Node<V> inserted = new Node<V>(color, size, value, parent);
+                    parent.left = inserted;
+                    fixCountsThruRoot(parent, colorAsIndex, size);
+                    fixHeightPostChange(parent, false);
+                    return inserted;
+
+                // recurse on the left
+                } else {
+                    parent = parentLeft;
+                    continue;
+                }
+
+            // ...or on the right
+            } else {
+                Node<V> parentRight = parent.right;
+
+                // as a right child
+                if(parentRight == null) {
+                    Node<V> inserted = new Node<V>(color, size, value, parent);
+                    parent.right = inserted;
+                    fixCountsThruRoot(parent, colorAsIndex, size);
+                    fixHeightPostChange(parent, false);
+                    return inserted;
+
+                // recurse on the right
+                } else {
+                    parent = parentRight;
                 }
             }
         }
