@@ -18,7 +18,7 @@ import java.util.*;
 public class IteratorTest extends TestCase {
 
     /** for randomly choosing list indices */
-    private Random random = new Random();
+    private final Random random = new Random();
 
     /**
      * Tests to verify that the Iterator can iterate through the list both
@@ -26,25 +26,23 @@ public class IteratorTest extends TestCase {
      */
     public void testIterateThrough() {
         // create a list of values
-        BasicEventList originalList = new BasicEventList();
-        for(int i = 0; i < 26; i++) {
+        final EventList<Integer> originalList = new BasicEventList<Integer>();
+        for (int i = 0; i < 26; i++)
             originalList.add(new Integer(i));
-        }
 
         // iterate through that list forwards and add the results to a new list
-        List forwardsControlList = new ArrayList();
-        for(Iterator i = originalList.iterator(); i.hasNext(); ) {
+        final List<Integer> forwardsControlList = new ArrayList<Integer>();
+        for (Iterator<Integer> i = originalList.iterator(); i.hasNext();)
             forwardsControlList.add(i.next());
-        }
 
         // verify the lists are equal
         assertEquals(originalList, forwardsControlList);
 
         // iterate through that list backwards and add the results to a new list
-        List backwardsControlList = new ArrayList();
-        for(ListIterator i = originalList.listIterator(originalList.size()); i.hasPrevious(); ) {
+        final List<Integer> backwardsControlList = new ArrayList<Integer>();
+        for(ListIterator<Integer> i = originalList.listIterator(originalList.size()); i.hasPrevious();)
             backwardsControlList.add(i.previous());
-        }
+
         Collections.reverse(backwardsControlList);
 
         // verify the lists are equal
@@ -57,29 +55,28 @@ public class IteratorTest extends TestCase {
      */
     public void testIterateWithExternalRemove() {
         // create a list of values
-        BasicEventList deleteFromList = new BasicEventList();
-        ArrayList originalList = new ArrayList();
-        for(int i = 0; i < 100; i++) {
-            Object value = new Integer(i);
+        final EventList<Integer> deleteFromList = new BasicEventList<Integer>();
+        final List<Integer> originalList = new ArrayList<Integer>();
+        for (int i = 0; i < 100; i++) {
+            final Integer value = new Integer(i);
             deleteFromList.add(value);
             originalList.add(value);
         }
 
-        List iteratedElements = new ArrayList();
-        Iterator iterator = deleteFromList.listIterator();
+        final List<Integer> iteratedElements = new ArrayList<Integer>();
+        final Iterator<Integer> iterator = deleteFromList.listIterator();
 
         // iterate through the list forwards for the first 50 values
-        for(int a = 0; a < 50; a++) {
+        for (int a = 0; a < 50; a++)
             iteratedElements.add(iterator.next());
-        }
+
         // delete 50 elements from the beginning of the list
-        for(int a = 50; a > 0; a--) {
+        for (int a = 50; a > 0; a--)
             deleteFromList.remove(random.nextInt(a));
-        }
+
         // continue iterating for the last 50 values
-        for(int a = 0; a < 50; a++) {
+        for (int a = 0; a < 50; a++)
             iteratedElements.add(iterator.next());
-        }
 
         // verify the lists are equal and that we're out of elements
         assertEquals(originalList, iteratedElements);
@@ -87,70 +84,67 @@ public class IteratorTest extends TestCase {
     }
 
     /**
-     * Tests to verify that the EventListIterator and the SimpleIterator
-     * can iterate through the list and remove its elements as it goes without
+     * Tests to verify that the EventListIterator and the SimpleIterator can
+     * iterate through the list and remove its elements as it goes without
      * incident.
      */
     public void testIterateWithInternalRemove() {
         // create a list of values
-        BasicEventList iterateForwardList = new BasicEventList();
-        BasicEventList iterateBackwardList = new BasicEventList();
-        ArrayList originalList = new ArrayList();
-        for(int i = 0; i < 20; i++) {
-            Integer value = new Integer(random.nextInt(100));
+        final EventList<Integer> iterateForwardList = new BasicEventList<Integer>();
+        final EventList<Integer> iterateBackwardList = new BasicEventList<Integer>();
+        final List<Integer> originalList = new ArrayList<Integer>();
+        for (int i = 0; i < 20; i++) {
+            final Integer value = new Integer(random.nextInt(100));
             iterateForwardList.add(value);
             iterateBackwardList.add(value);
             originalList.add(value);
         }
 
         // walk through the forward lists, removing all values greater than 50
-        for(ListIterator i = iterateForwardList.listIterator(); i.hasNext(); ) {
-            Integer current = (Integer)i.next();
-            if(current.intValue() > 50) i.remove();
-        }
+        for (ListIterator<Integer> i = iterateForwardList.listIterator(); i.hasNext();)
+            if (i.next().intValue() > 50)
+                i.remove();
 
         // walk through the backward list, removing all values greater than 50
-        for(ListIterator i = iterateBackwardList.listIterator(iterateBackwardList.size()); i.hasPrevious(); ) {
-            Integer current = (Integer)i.previous();
-            if(current.intValue() > 50) i.remove();
-        }
+        for (ListIterator<Integer> i = iterateBackwardList.listIterator(iterateBackwardList.size()); i.hasPrevious();)
+            if (i.previous().intValue() > 50)
+                i.remove();
 
         // verify the lists are equal and that we're out of elements
-        for(int i = 0; i < originalList.size(); ) {
-            Integer current = (Integer)originalList.get(i);
-            if(current.intValue() > 50) originalList.remove(i);
-            else i++;
+        for (int i = 0; i < originalList.size(); ) {
+            if (originalList.get(i).intValue() > 50)
+                originalList.remove(i);
+            else
+                i++;
         }
+
         assertEquals(originalList, iterateForwardList);
         assertEquals(originalList, iterateBackwardList);
     }
 
     /**
-     * Tests the edge condition of the previous method
+     * Tests the edge condition of the previous method.
      */
     public void testPreviousEdgeCondition() {
         // create a list of values
-        BasicEventList iterationList = new BasicEventList();
-        for(int i = 0; i < 20; i++) {
-            Integer value = new Integer(random.nextInt(100));
-            iterationList.add(value);
-        }
+        final EventList<Integer> iterationList = new BasicEventList<Integer>();
+        for (int i = 0; i < 20; i++)
+            iterationList.add(new Integer(random.nextInt(100)));
 
-        ListIterator i = iterationList.listIterator();
+        final ListIterator<Integer> i = iterationList.listIterator();
 
         // Test before next is called
-        assertEquals(false, i.hasPrevious());
+        assertFalse(i.hasPrevious());
         try {
             i.previous();
             fail("A call to previous() was allowed before next() was called");
-        } catch(Exception e) {
-            assertEquals(NoSuchElementException.class, e.getClass());
-
+        } catch (NoSuchElementException e) {
+            // expected
         }
 
         // Test when the iterator is at the first element
         i.next();
-        assertEquals(true, i.hasPrevious());
+        assertTrue(i.hasPrevious());
     }
 
     /**
@@ -158,19 +152,20 @@ public class IteratorTest extends TestCase {
      * doesn't break the expectation of the remove operation.
      */
     public void testRemoveAfterInsertAtCursor() {
-        BasicEventList testList = new BasicEventList();
+        final EventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(bye);
         testList.add(end);
-        ListIterator iterator = testList.listIterator();
+
+        final ListIterator<String> iterator = testList.listIterator();
 
         // move iterator to bye
         iterator.next();
         testList.add(0, hello);
         iterator.remove();
-        assertEquals(false, testList.contains(bye));
+        assertFalse(testList.contains(bye));
     }
 
     /**
@@ -178,19 +173,20 @@ public class IteratorTest extends TestCase {
      * doesn't break the expectation of the remove operation.
      */
     public void testRemoveAfterInsertAtNext() {
-        BasicEventList testList = new BasicEventList();
+        final EventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(bye);
         testList.add(end);
-        ListIterator iterator = testList.listIterator();
+
+        final ListIterator<String> iterator = testList.listIterator();
 
         // move iterator to bye
         iterator.next();
         testList.add(1, hello);
         iterator.remove();
-        assertEquals(false, testList.contains(bye));
+        assertFalse(testList.contains(bye));
     }
 
     /**
@@ -198,19 +194,20 @@ public class IteratorTest extends TestCase {
      * doesn't break the expectation of the remove operation.
      */
     public void testRemoveAfterInsertAtCursorReverse() {
-        BasicEventList testList = new BasicEventList();
+        BasicEventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(end);
         testList.add(bye);
-        ListIterator iterator = testList.listIterator(testList.size());
+
+        final ListIterator<String> iterator = testList.listIterator(testList.size());
 
         // move iterator to bye
         iterator.previous();
         testList.add(1, hello);
         iterator.remove();
-        assertEquals(false, testList.contains(bye));
+        assertFalse(testList.contains(bye));
     }
 
     /**
@@ -218,19 +215,20 @@ public class IteratorTest extends TestCase {
      * doesn't break the expectation of the remove operation.
      */
     public void testRemoveAfterInsertAtPrevious() {
-        BasicEventList testList = new BasicEventList();
+        BasicEventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
         testList.add(end);
         testList.add(bye);
-        ListIterator iterator = testList.listIterator(testList.size());
+
+        final ListIterator<String> iterator = testList.listIterator(testList.size());
 
         // move iterator to bye
         iterator.previous();
         testList.add(0, hello);
         iterator.remove();
-        assertEquals(false, testList.contains(bye));
+        assertFalse(testList.contains(bye));
     }
 
     /**
@@ -238,7 +236,7 @@ public class IteratorTest extends TestCase {
      */
     public void testAdding() {
         // Create a control list to test against
-        ArrayList controlList = new ArrayList();
+        final List<String> controlList = new ArrayList<String>();
         controlList.add("zero");
         controlList.add("one");
         controlList.add("two");
@@ -246,34 +244,34 @@ public class IteratorTest extends TestCase {
         controlList.add("four");
 
         // Create a list to be iterated on forwards
-        BasicEventList forwardsList = new BasicEventList();
+        final EventList<String> forwardsList = new BasicEventList<String>();
         forwardsList.add("one");
         forwardsList.add("three");
 
         // Iterate through the list forwards adding in places of interest
-        ListIterator iterator = forwardsList.listIterator(0);
+        final ListIterator<String> iterator = forwardsList.listIterator(0);
         iterator.add("zero");
-        assertEquals("one", (String)iterator.next());
+        assertEquals("one", iterator.next());
         iterator.add("two");
-        assertEquals("three", (String)iterator.next());
+        assertEquals("three", iterator.next());
         iterator.add("four");
         assertEquals(controlList, forwardsList);
 
         // Create a list to be iterated of backwards
-        BasicEventList backwardsList = new BasicEventList();
+        final EventList<String> backwardsList = new BasicEventList<String>();
         backwardsList.add("one");
         backwardsList.add("three");
 
         // Iterate through the list backwards adding in places of interest
-        ListIterator backwardsIterator = backwardsList.listIterator(backwardsList.size());
+        final ListIterator<String> backwardsIterator = backwardsList.listIterator(backwardsList.size());
         backwardsIterator.add("four");
-        assertEquals("four", (String)backwardsIterator.previous());
-        assertEquals("three", (String)backwardsIterator.previous());
+        assertEquals("four", backwardsIterator.previous());
+        assertEquals("three", backwardsIterator.previous());
         backwardsIterator.add("two");
-        assertEquals("two", (String)backwardsIterator.previous());
-        assertEquals("one", (String)backwardsIterator.previous());
+        assertEquals("two", backwardsIterator.previous());
+        assertEquals("one", backwardsIterator.previous());
         backwardsIterator.add("zero");
-        assertEquals("zero", (String)backwardsIterator.previous());
+        assertEquals("zero", backwardsIterator.previous());
         assertEquals(false, backwardsIterator.hasPrevious());
         assertEquals(controlList, backwardsList);
     }
@@ -282,11 +280,13 @@ public class IteratorTest extends TestCase {
      * Tests empty list adds
      */
     public void testEmptyListAdding() {
-        List testList = new BasicEventList();
-        ListIterator iterator = testList.listIterator();
+        final List<String> testList = new BasicEventList<String>();
+        final ListIterator<String> iterator = testList.listIterator();
         iterator.add("just one element");
-        assertEquals(false, iterator.hasNext());
-        assertEquals(true, iterator.hasPrevious());
+
+        assertEquals(1, testList.size());
+        assertFalse(iterator.hasNext());
+        assertTrue(iterator.hasPrevious());
     }
 
     /**
@@ -294,19 +294,19 @@ public class IteratorTest extends TestCase {
      * empty list from an external call to remove().
      */
     public void testExternalAddingOnEmptyList() {
-        BasicEventList testList = new BasicEventList();
-        ListIterator iterator = testList.listIterator();
-        assertEquals(false, iterator.hasPrevious());
-        assertEquals(false, iterator.hasNext());
+        final EventList<String> testList = new BasicEventList<String>();
+        final ListIterator<String> iterator = testList.listIterator();
+        assertFalse(iterator.hasPrevious());
+        assertFalse(iterator.hasNext());
 
         // add one element to validate the iterator responds accordingly
         String hello = "hello, world";
         testList.add(hello);
-        assertEquals(true, iterator.hasPrevious());
-        assertEquals(false, iterator.hasNext());
+        assertTrue(iterator.hasPrevious());
+        assertFalse(iterator.hasNext());
         assertEquals(hello, iterator.previous());
-        assertEquals(false, iterator.hasPrevious());
-        assertEquals(true, iterator.hasNext());
+        assertFalse(iterator.hasPrevious());
+        assertTrue(iterator.hasNext());
     }
 
     /**
@@ -314,12 +314,12 @@ public class IteratorTest extends TestCase {
      * sublists of a source list, and modifying that list.
      */
     public static void main(String[] args) {
-        List list = new BasicEventList();
+        final List<Integer> list = new BasicEventList<Integer>();
         long memoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);
         int repetitions = 0;
         Random random = new Random();
 
-        while(true) {
+        while (true) {
             // perform a random operation on this list
             int operation = random.nextInt(3);
             int index = list.isEmpty() ? 0 : random.nextInt(list.size());
