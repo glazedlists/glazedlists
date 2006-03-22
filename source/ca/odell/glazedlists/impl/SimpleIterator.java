@@ -17,12 +17,11 @@ public class SimpleIterator<E> implements Iterator<E> {
     /** the list being iterated */
     private final List<E> source;
 
-    /** the index of and reference to the next element to view */
+    /** the index of the next element to view */
     private int nextIndex = 0;
 
     /**
-     * Create a new event list iterator that iterates over the specified
-     * source list.
+     * Create a new iterator that iterates over the specified source list.
      *
      * @param source the list to iterate
      */
@@ -33,7 +32,6 @@ public class SimpleIterator<E> implements Iterator<E> {
     /**
      * Returns true if this iterator has more elements when traversing the
      * list in the forward direction.
-     *
      */
     public boolean hasNext() {
         return nextIndex < source.size();
@@ -44,13 +42,11 @@ public class SimpleIterator<E> implements Iterator<E> {
      */
     public E next() {
         // there are no more values
-        if(nextIndex == source.size())
+        if (nextIndex == source.size())
             throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
 
         // a next value exists
-        final E result = source.get(nextIndex);
-        nextIndex++;
-        return result;
+        return source.get(nextIndex++);
     }
 
     /**
@@ -58,8 +54,9 @@ public class SimpleIterator<E> implements Iterator<E> {
      * or previous.
      */
     public void remove() {
-        if(nextIndex == 0) throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");
-        source.remove(nextIndex - 1);
-        nextIndex--;
+        if (nextIndex == 0)
+            throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");
+
+        source.remove(--nextIndex);
     }
 }
