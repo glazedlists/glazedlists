@@ -16,12 +16,11 @@ import java.lang.ref.*;
  * <p>WeakReferenceProxy exists to solve a garbage collection problem. Suppose
  * there exists an EventList <i>L</i> and with an iterator <i>I</i>. <i>I</i>
  * must listen to <i>L</i> for change events in order to remain consistent.
- * Therefore such an iterator will register itself as a listener to <i>L</i>.
- * When the iterator goes out of scope (as they typically do), it will remain
- * registered as a listener of <i>L</i>. This prevents <i>I</i> from ever
- * being garbage collected! But <i>I</i> can never used again. Because
- * iterators are expected to be used very frequently, this will cause an
- * unacceptable memory leak.
+ * Therefore <i>I</i> will register itself as a listener to <i>L</i>. When
+ * <i>I</i> goes out of scope (as they typically do), it will remain registered
+ * as a listener of <i>L</i>. This prevents <i>I</i> from ever being garbage
+ * collected! But <i>I</i> can never used again. Because iterators are expected
+ * to be used very frequently, this will cause an unacceptable memory leak.
  *
  * <p>This problem is solved by WeakReferenceProxy. Instead of adding <i>I</i>
  * as a direct listener of <i>L</i>, add a proxy instead. The proxy will retain
