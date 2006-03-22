@@ -10,31 +10,40 @@ import ca.odell.glazedlists.event.*;
 import java.lang.ref.*;
 
 /**
- * This class is a proxy to another ListEventListener that may go out of
- * scope without explicitly removing itself from the source list's set of
- * listeners.
+ * This class is a proxy to another ListEventListener that may go out of scope
+ * without explicitly removing itself from the source list's set of listeners.
  *
- * <p>WeakReferenceProxy exists to solve a garbage
- * collection problem. Suppose I have an EventList <i>L</i> and I request
- * an iterator for <i>L</i>. The iterator must listen for change events to
- * <i>L</i> in order to be consistent. Therefore such an iterator will register
- * itself as a listener for <i>L</i>. When the iterator goes out of scope (as
- * they usually do), it will remain as a listener for <i>L</i>. This prevents
- * the iterator object from ever being garbage collected! But the iterator is
- * never used again. Because iterators can be used very frequently, this will
- * cause an unacceptable memory leak.
+ * <p>WeakReferenceProxy exists to solve a garbage collection problem. Suppose
+ * there exists an EventList <i>L</i> and with an iterator <i>I</i>. <i>I</i>
+ * must listen to <i>L</i> for change events in order to remain consistent.
+ * Therefore such an iterator will register itself as a listener to <i>L</i>.
+ * When the iterator goes out of scope (as they typically do), it will remain
+ * registered as a listener of <i>L</i>. This prevents <i>I</i> from ever
+ * being garbage collected! But <i>I</i> can never used again. Because
+ * iterators are expected to be used very frequently, this will cause an
+ * unacceptable memory leak.
  *
- * <p>This problem is solved by WeakReferenceProxy. Instead
- * of adding the iterator directly as a listener for <i>L</i>, add the proxy
- * instead. The proxy will retain a <code>WeakReference</code> to the iterator
- * and forward events to the iterator as long as it is reachable. When the
- * iterator is no longer reachable, the proxy will remove itself from the list
- * of listeners for <i>L</i>. All garbage is available for collection.
+ * <p>This problem is solved by WeakReferenceProxy. Instead of adding <i>I</i>
+ * as a direct listener of <i>L</i>, add a proxy instead. The proxy will retain
+ * a <code>WeakReference</code> to <i>I</i> and forward events to <i>I</i> as
+ * long as it is reachable. When <i>I</i> is no longer reachable, the proxy
+ * will remove itself from the list of listeners for <i>L</i> and all garbage
+ * is available for collection.
+ *
+ * <p>Specifically, the proxy stops listening to <i>L</i> the
+ * <strong>next</strong> time any of the following occurs:
+ *
+ * <ul>
+ *   <li> another ListEventListener is registered with the same EventList
+ *   <li> another ListEventListener is deregistered with the same EventList
+ *   <li> another ListEvent is broadcast for the same EventList
+ * </ul>
  *
  * @see java.lang.ref.WeakReference
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=21">Bug 21</a>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author James Lemieux
  */
 public final class WeakReferenceProxy<E> implements ListEventListener<E> {
 
@@ -45,9 +54,8 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
     private EventList<E> source;
 
     /**
-     * Creates a new WeakReferenceProxy that listens for
-     * events from the specified list and forwards them to the specified
-     * listener.
+     * Creates a new WeakReferenceProxy that listens for events from the
+     * specified list and forwards them to the specified listener.
      */
     public WeakReferenceProxy(EventList<E> source, ListEventListener<E> proxyTarget) {
         if (source == null)
@@ -61,8 +69,8 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
     }
 
     /**
-     * Accepts notification for the changes and forwards them to the proxy target
-     * if it has not yet been garbage collected.
+     * Accepts notification for the changes and forwards them to the proxy
+     * target if it has not yet been garbage collected.
      */
     public void listChanged(ListEvent<E> listChanges) {
         // if this listener has already been cleaned up, ignore ListEvents
