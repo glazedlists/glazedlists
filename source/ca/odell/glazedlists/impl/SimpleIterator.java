@@ -15,7 +15,7 @@ import java.util.*;
 public class SimpleIterator<E> implements Iterator<E> {
 
     /** the list being iterated */
-    private List<E> source;
+    private final List<E> source;
 
     /** the index of and reference to the next element to view */
     private int nextIndex = 0;
@@ -31,13 +31,12 @@ public class SimpleIterator<E> implements Iterator<E> {
     }
 
     /**
-     * Returns true if this list iterator has more elements when traversing the
+     * Returns true if this iterator has more elements when traversing the
      * list in the forward direction.
      *
      */
     public boolean hasNext() {
-        if(nextIndex < source.size()) return true;
-        return false;
+        return nextIndex < source.size();
     }
 
     /**
@@ -45,15 +44,13 @@ public class SimpleIterator<E> implements Iterator<E> {
      */
     public E next() {
         // there are no more values
-        if(nextIndex == source.size()) {
+        if(nextIndex == source.size())
             throw new NoSuchElementException("Cannot retrieve element " + nextIndex + " on a list of size " + source.size());
 
         // a next value exists
-        } else {
-            E result = source.get(nextIndex);
-            nextIndex++;
-            return result;
-        }
+        final E result = source.get(nextIndex);
+        nextIndex++;
+        return result;
     }
 
     /**
