@@ -61,19 +61,9 @@ public class AutoCompleteSupportTestApp {
     private final JCheckBox correctCase = new JCheckBox();
 
     public AutoCompleteSupportTestApp() {
-        maxRowCount.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                final int maximumRowCount = ((Integer) maxRowCount.getValue()).intValue();
-                autoCompleteSupport.setMaximumRowCount(maximumRowCount);
-            }
-        });
+        maxRowCount.addChangeListener(new MaxRowCountChangeHandler());
 
-        correctCase.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                final boolean willCorrectCase = correctCase.isSelected();
-                autoCompleteSupport.setCorrectsCase(willCorrectCase);
-            }
-        });
+        correctCase.addActionListener(new CorrectCaseActionHandler());
         correctCase.setSelected(true);
 
         tweakerPanel = createTweakerPanel();
@@ -156,6 +146,20 @@ public class AutoCompleteSupportTestApp {
                 System.err.println("Failed loading L&F: " + currentLookAndFeel);
                 System.err.println(ex);
             }
+        }
+    }
+
+    private class MaxRowCountChangeHandler implements ChangeListener {
+        public void stateChanged(ChangeEvent e) {
+            final int maximumRowCount = ((Integer) maxRowCount.getValue()).intValue();
+            autoCompleteSupport.setMaximumRowCount(maximumRowCount);
+        }
+    }
+
+    private class CorrectCaseActionHandler implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            final boolean willCorrectCase = correctCase.isSelected();
+            autoCompleteSupport.setCorrectsCase(willCorrectCase);
         }
     }
 
