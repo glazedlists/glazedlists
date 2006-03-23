@@ -60,6 +60,8 @@ public class AutoCompleteSupportTestApp {
 
     private final JCheckBox correctCase = new JCheckBox();
 
+    private final ButtonGroup lafMenuGroup = new ButtonGroup();
+
     public AutoCompleteSupportTestApp() {
         maxRowCount.addChangeListener(new MaxRowCountChangeHandler());
 
@@ -91,7 +93,6 @@ public class AutoCompleteSupportTestApp {
      */
     private JMenuBar createLafMenuBar() {
         final JMenuBar menuBar = new JMenuBar();
-        final ButtonGroup lafMenuGroup = new ButtonGroup();
 
         final JMenu lafMenu = menuBar.add(new JMenu("Look And Feel"));
         lafMenu.setMnemonic('L');
@@ -135,6 +136,10 @@ public class AutoCompleteSupportTestApp {
 
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.dispose();
+
+            JRadioButtonMenuItem selectedMenuItem = (JRadioButtonMenuItem) e.getSource();
+
+            currentLookAndFeel = selectedMenuItem.getText();
 
             try {
                 // set the LookAndFeel

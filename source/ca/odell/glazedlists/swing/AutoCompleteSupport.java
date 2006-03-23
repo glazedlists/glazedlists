@@ -16,6 +16,8 @@ import javax.accessibility.Accessible;
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
 import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
@@ -552,15 +554,31 @@ public final class AutoCompleteSupport<E> {
         private final ListDataListener listDataHandler = new ListDataHandler();
 
         /**
+         * We ensure the popup menu is sized correctly each time it is shown.
+         * Namely, we respect the prototype display value of the combo box, if
+         * it has one. Regardless of the width of the combo box, we attempt to
+         * size the popup to accomodate the width of the prototype display value.
+         */
+        private final PopupMenuListener popupSizerHandler = new PopupSizer();
+
+        /**
          * The MouseListener which is installed on the {@link #arrowButton} and
          * is responsible for clearing the filter and then showing / hiding the
          * {@link #popup}.
          */
         private ArrowButtonMouseListener arrowButtonMouseListener;
 
-        // Control the selection behavior of the JComboBox when it is used
-        // in the JTable DefaultCellEditor.
+        /**
+         * Control the selection behavior of the JComboBox when it is used in
+         * the JTable DefaultCellEditor.
+         */
         private boolean isTableCellEditor;
+
+        /**
+         * A handle to the JPopupMenu which functions as the popup of the
+         * JComboBox.
+         */
+        private JPopupMenu popupMenu;
 
         /**
          * Build a UI delegate that decorates the given <code>delegate</code>
@@ -576,13 +594,12 @@ public final class AutoCompleteSupport<E> {
         public void installUI(JComponent c) {
             comboBox = (JComboBox) c;
             delegate.installUI(c);
-            popup = (ComboPopup) delegate.getAccessibleChild(c, 0);
+            popupMenu = (JPopupMenu) delegate.getAccessibleChild(c, 0);
+            popup = (ComboPopup) popupMenu;
             arrowButton = findArrowButton(comboBox);
 
-            // is this combo box a cell editor?
-            final Boolean inTable = (Boolean) c.getClientProperty("JComboBox.isTableCellEditor");
-            if (inTable != null)
-                isTableCellEditor = Boolean.TRUE.equals(inTable);
+            // is this combo box a table cell editor?
+            isTableCellEditor = Boolean.TRUE.equals(c.getClientProperty("JComboBox.isTableCellEditor"));
 
             // if an arrow button was found, decorate the ComboPopup's
             // MouseListener with logic that unfilters the ComboBoxModel when
@@ -596,16 +613,19 @@ public final class AutoCompleteSupport<E> {
             // start listening for model changes (due to filtering) so we can resize the popup appropriately
             comboBox.getModel().addListDataListener(listDataHandler);
 
-            // decorate the normal DownAction and UpActions with logic that clears the
-            // filters before proceeding with the normal Action
+            // size the popup according to the prototype value, if one exists
+            popupMenu.addPopupMenuListener(popupSizerHandler);
+
+            // replace the normal DownAction and UpActions with custom ones
             final ActionMap actionMap = comboBox.getActionMap();
 
             if (actionMap.get("selectNext") != null) {
+                // install custom actions in the Apple L&F
                 actionMap.put("selectPrevious", new UpAction());
                 actionMap.put("selectNext", new DownAction());
 
             } else if (actionMap.get("aquaSelectNext") != null) {
-                // install custom action keys for the Apple LAF
+                // install custom actions for the arrow keys in the Apple L&F
                 actionMap.put("aquaSelectPrevious", new UpAction());
                 actionMap.put("aquaSelectNext", new DownAction());
             }
@@ -628,19 +648,23 @@ public final class AutoCompleteSupport<E> {
         public void uninstallUI(JComponent c) {
             // reinstall the normal MouseListener for the arrowButton
             if (arrowButton != null) {
-                arrowButton.addMouseListener(arrowButtonMouseListener.getDecorated());
                 arrowButton.removeMouseListener(arrowButtonMouseListener);
+                arrowButton.addMouseListener(arrowButtonMouseListener.getDecorated());
             }
 
             // stop listening for model changes
             comboBox.getModel().removeListDataListener(listDataHandler);
 
+            // stop listening for popup menu changes
+            popupMenu.removePopupMenuListener(popupSizerHandler);
+
             // clear our member variable state
             comboBox = null;
+            popupMenu = null;
             popup = null;
             arrowButton = null;
 
-            // the delegate will uninstall our decorated keyboard actions
+            // the delegate will uninstall our custom keyboard actions
             // so we don't worry about them here
             delegate.uninstallUI(c);
         }
@@ -682,8 +706,9 @@ public final class AutoCompleteSupport<E> {
         }
 
         /**
-         * This method listens the to the combo box model and updates the maximum
-         * row count of the combo box based on the new item count in the new model.
+         * This class listens the to the ComboBoxModel and updates the maximum
+         * row count of the combo box based on the new item count in the model
+         * after changes are received.
          */
         private class ListDataHandler implements ListDataListener {
             public void contentsChanged(ListDataEvent e) {
@@ -696,6 +721,66 @@ public final class AutoCompleteSupport<E> {
             public void intervalRemoved(ListDataEvent e) {
                 updateMaximumRowCount();
             }
+        }
+
+        /**
+         * This class sizes the popup menu of the combo box immediately before
+         * it is shown on the screen. In particular, it will adjust the width
+         * of the popup to accomodate a prototype display value if the combo
+         * box contains one.
+         */
+        private class PopupSizer implements PopupMenuListener {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                // if the combo box does not contain a prototype display value, skip our sizing logic
+                final Object prototypeValue = comboBox.getPrototypeDisplayValue();
+                if (prototypeValue == null)
+                    return;
+
+                // attempt to extract the JScrollPane that scrolls the popup
+                final JComponent popupComponent = (JComponent) e.getSource();
+                if (popupComponent.getComponent(0) instanceof JScrollPane) {
+                    final JScrollPane scroller = (JScrollPane) popupComponent.getComponent(0);
+
+                    // fetch the existing preferred size of the scroller, and we'll check if it is large enough
+                    final Dimension scrollerSize = scroller.getPreferredSize();
+
+                    // calculates the preferred size of the renderer's component for the prototype value
+                    final Dimension prototypeSize = getPrototypeSize(prototypeValue);
+
+                    // add to the preferred width, the width of the vertical scrollbar, when it is visible
+                    prototypeSize.width += scroller.getVerticalScrollBar().getPreferredSize().width;
+
+                    // adjust the preferred width of the scroller, if necessary
+                    if (prototypeSize.width > scrollerSize.width) {
+                        scrollerSize.width = prototypeSize.width;
+
+                        // set the new size of the scroller
+                        scroller.setMaximumSize(scrollerSize);
+                        scroller.setPreferredSize(scrollerSize);
+                        scroller.setMinimumSize(scrollerSize);
+                    }
+                }
+            }
+
+            private Dimension getPrototypeSize(Object prototypeValue) {
+                // get the renderer responsible for drawing the prototype value
+                ListCellRenderer renderer = comboBox.getRenderer();
+                if (renderer == null)
+                    renderer = new DefaultListCellRenderer();
+
+                // get the component from the renderer
+                final Component comp = renderer.getListCellRendererComponent(popup.getList(), prototypeValue, -1, false, false);
+
+                // determine the preferred size of the component
+                currentValuePane.add(comp);
+                comp.setFont(comboBox.getFont());
+                Dimension d = comp.getPreferredSize();
+                currentValuePane.remove(comp);
+                return d;
+            }
+
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) { }
+            public void popupMenuCanceled(PopupMenuEvent e) { }
         }
 
         /**
