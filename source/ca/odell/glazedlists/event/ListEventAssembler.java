@@ -340,57 +340,48 @@ public final class ListEventAssembler<E> {
          * @param toRemove a ListEventListener to be removed, or <code>null</code>
          */
         private void updateListEventListeners(ListEventListener<E> toAdd, ListEventListener<E> toRemove) {
-            // lazily build the list of indexes of the removed WeakReferenceProxy objects
-            List<Integer> removedIndices = null;
-            int toRemoveIndex = -1;
-
-            // record the indices of all listeners to remove
-            for (int i = 0; i < listeners.size(); i++) {
-                final ListEventListener<E> listener = listeners.get(i);
-
-                // if the listener is the one nominated for removal, record its index
-                if (listener == toRemove) {
-                    toRemoveIndex = i;
-                    if (removedIndices == null) removedIndices = new LinkedList<Integer>();
-                    removedIndices.add(0, new Integer(i));
-                    
-                } else if (listener instanceof WeakReferenceProxy) {
-                    // if the listener is a WeakReferenceProxy with a null referent
-                    // (i.e. the referent has been garbage collected), record its index
-                    final WeakReferenceProxy weakReferenceProxy = (WeakReferenceProxy) listener;
-                    if (weakReferenceProxy.getReferent() == null) {
-                        // notify the proxy it is being unregistered
-                        weakReferenceProxy.proxyUnregistered();
-                        if (removedIndices == null) removedIndices = new LinkedList<Integer>();
-                        removedIndices.add(0, new Integer(i));
-                    }
-                }
-            }
-
-            // sanity check to ensure we found the listener we were told to remove, if any
-            if (toRemove != null && toRemoveIndex == -1)
-                throw new IllegalArgumentException("Cannot remove nonexistent listener " + toRemove);
-
-            // modify copies of the lists
+            // only work on copies of the Lists and swap them in place at the end
             final List<ListEventListener<E>> listenersCopy = new ArrayList<ListEventListener<E>>(listeners);
             final List<ListEvent<E>> listenerEventsCopy = new ArrayList<ListEvent<E>>(listenerEvents);
 
-            // if we found some indices to be removed, do that now
-            if (removedIndices != null) {
-                for (Iterator<Integer> i = removedIndices.iterator(); i.hasNext();) {
-                    int index = i.next().intValue();
-                    listenersCopy.remove(index);
-                    listenerEventsCopy.remove(index);
+            // a flag to determine whether we found the ListEventListener toRemove
+            boolean toRemoveFound = (toRemove == null);
+
+            for (int i = listenersCopy.size()-1; i >= 0; i--) {
+                final ListEventListener<E> listener = listenersCopy.get(i);
+
+                // if we're supposed to remove this ListEventListener, do so
+                if (listener == toRemove) {
+                    toRemoveFound = true;
+
+                // if the ListEventListener is a WeakReferenceProxy with a null
+                // (i.e. garbage collected) referent, also remove it
+                } else if (listener instanceof WeakReferenceProxy) {
+                    final WeakReferenceProxy weakReferenceProxy = (WeakReferenceProxy) listener;
+                    if (weakReferenceProxy.getReferent() != null) continue;
+                    weakReferenceProxy.dispose();
+
+                // otherwise we should not remove this listener
+                } else {
+                    continue;
                 }
+
+                // remove the listener
+                listenersCopy.remove(i);
+                listenerEventsCopy.remove(i);
             }
 
-            // if we were given a listener to add, do that now
+            // sanity check to ensure we found the listener we were asked to remove, if any
+            if (!toRemoveFound)
+                throw new IllegalArgumentException("Cannot remove nonexistent listener " + toRemove);
+
+            // add the listener we were asked to add, if any
             if (toAdd != null) {
                 listenersCopy.add(toAdd);
                 listenerEventsCopy.add(createListEvent());
             }
 
-            // swap the copies overtop of the active lists
+            // swap the copies overtop of the real thing
             listeners = listenersCopy;
             listenerEvents = listenerEventsCopy;
         }
@@ -467,9 +458,8 @@ public final class ListEventAssembler<E> {
                 }
 
                 // reset the events before firing them
-                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext(); ) {
-                    ListEvent<E> event = e.next();
-                    event.reset();
+                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
+                    e.next().reset();
                 }
 
                 // perform the notification on the duplicate list
@@ -574,9 +564,8 @@ public final class ListEventAssembler<E> {
                 }
 
                 // reset the events before firing them
-                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext(); ) {
-                    ListEvent<E> event = e.next();
-                    event.reset();
+                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
+                    e.next().reset();
                 }
 
                 // perform the notification on the duplicate list

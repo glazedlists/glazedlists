@@ -82,7 +82,7 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
         if (proxyTarget == null) {
             // it doesn't so clean it up
             source.removeListEventListener(this);
-            proxyUnregistered();
+            dispose();
 
         } else {
             // it does, so notify it of the ListEvent
@@ -105,7 +105,7 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
      * EventList and ensuring that any future ListEvents it receives are
      * ignored.
      */
-    public void proxyUnregistered() {
+    public void dispose() {
         source = null;
     }
 }
