@@ -32,6 +32,7 @@ public class AutoCompleteSupportTestApp {
         "http://mail.google.com/mail/",
         "http://slashdot.org/",
         "http://www.clientjava.com/blog",
+        "del.icio.us",
         "http://java.sun.com/",
         "http://java.sun.com/javase/6/",
         "http://java.sun.com/j2se/1.5.0/download.jsp",

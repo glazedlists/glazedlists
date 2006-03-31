@@ -125,11 +125,15 @@ public final class AutoCompleteSupport<E> {
     // These booleans control when certain changes are to be respected and when they aren't
     //
 
-    /** <tt>true</tt> indicates attempts to filter the combo box items should be ignored. */
-    private boolean ignoreFilterUpdates = false;
+    /** <tt>true</tt> indicates document changes should not be post processed
+     * (i.e. just commit changes to the Document and do not react to those changes). */
+    private boolean doNotPostProcessDocumentChanges = false;
+
+    /** <tt>true</tt> indicates attempts to filter the combo box model should be ignored. */
+    private boolean doNotFilter = false;
 
     /** <tt>&gt; 0</tt> indicates attempts to change the document should be ignored. */
-    private boolean ignoreDocumentChanges;
+    private boolean doNotChangeDocument = false;
 
     //
     // Values present when install() executed - these are restored in dispose()
@@ -363,16 +367,16 @@ public final class AutoCompleteSupport<E> {
      */
     private void applyFilter(String newFilter) {
         // break out early if we're flagged to ignore filter updates for the time being
-        if (ignoreFilterUpdates) return;
+        if (doNotFilter) return;
 
         // ignore attempts to change the text in the combo box editor while
         // the filtering is taking place
-        ignoreDocumentChanges = true;
+        doNotChangeDocument = true;
         try {
             if (DEBUG) System.out.println("setting new filter to: '" + newFilter + "'");
             filterMatcherEditor.setFilterText(new String[] {newFilter});
         } finally {
-            ignoreDocumentChanges = false;
+            doNotChangeDocument = false;
         }
     }
 
@@ -414,7 +418,7 @@ public final class AutoCompleteSupport<E> {
             super(source);
         }
         public void setSelectedItem(Object selected) {
-            ignoreFilterUpdates = true;
+            doNotFilter = true;
             try {
                 if (DEBUG) System.out.println("setting selected item popup to: '" + selected + "'");
                 super.setSelectedItem(selected);
@@ -425,7 +429,7 @@ public final class AutoCompleteSupport<E> {
                 final int caretPos = comboBoxEditor.getCaretPosition();
                 comboBoxEditor.select(caretPos, caretPos);
             } finally {
-                ignoreFilterUpdates = false;
+                doNotFilter = false;
             }
         }
     }
@@ -444,19 +448,19 @@ public final class AutoCompleteSupport<E> {
             if (offset == 0 && document.getLength() == length && string != null && string.equals(comboBoxEditor.getText()))
                 return;
 
-            if (ignoreDocumentChanges) return;
+            if (doNotChangeDocument) return;
             super.replace(filterBypass, offset, length, string, attributeSet);
             processDocumentChange(filterBypass, attributeSet);
         }
 
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
-            if (ignoreDocumentChanges) return;
+            if (doNotChangeDocument) return;
             super.insertString(filterBypass, offset, string, attributeSet);
             processDocumentChange(filterBypass, attributeSet);
         }
 
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
-            if (ignoreDocumentChanges) return;
+            if (doNotChangeDocument) return;
             super.remove(filterBypass, offset, length);
             processDocumentChange(null, null);
         }
@@ -473,6 +477,8 @@ public final class AutoCompleteSupport<E> {
          * </ol>
          */
         private void processDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
+            if (doNotPostProcessDocumentChanges) return;
+
             savePrefixSnapshot();
             applyFilter(prefix);
             updateComboBox(filterBypass, attributeSet);
@@ -508,9 +514,12 @@ public final class AutoCompleteSupport<E> {
                         }
 
                         // select the matched itemString
-                        ignoreDocumentChanges = true;
-                        comboBox.setSelectedIndex(i);
-                        ignoreDocumentChanges = false;
+                        doNotChangeDocument = true;
+                        try {
+                            comboBox.setSelectedIndex(i);
+                        } finally {
+                            doNotChangeDocument = false;
+                        }
 
                         // select the text after the prefix but before the end of the text
                         // (it represents the autocomplete text)
@@ -524,9 +533,12 @@ public final class AutoCompleteSupport<E> {
 
             // reset the selection since we couldn't find the prefix in the model
             // (this has the side-effect of scrolling the popup to the top)
-            ignoreDocumentChanges = true;
-            comboBox.setSelectedIndex(-1);
-            ignoreDocumentChanges = false;
+            doNotChangeDocument = true;
+            try {
+                comboBox.setSelectedIndex(-1);
+            } finally {
+                doNotChangeDocument = false;
+            }
         }
     }
 
@@ -669,40 +681,60 @@ public final class AutoCompleteSupport<E> {
             delegate.uninstallUI(c);
         }
 
+        /**
+         * Selects the next item in the list.  It won't change the selection if the
+         * currently selected item is already the last item.
+         */
         protected void selectNextPossibleValue() {
-//            ignoreDocumentChanges = true;
-
-            final int nextIndex = (isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) + 1;
-
-            if (nextIndex < comboBox.getModel().getSize()) {
-                if (isTableCellEditor) {
-                    listBox.setSelectedIndex(nextIndex);
-                    listBox.ensureIndexIsVisible(nextIndex);
-                } else {
-                    comboBox.setSelectedIndex(nextIndex);
-                }
-                comboBox.repaint();
-            }
-
-//            ignoreDocumentChanges = false;
+            selectPossibleValue((isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) + 1);
         }
 
+        /**
+         * Selects the previous item in the list.  It won't change the selection if the
+         * currently selected item is already the first item.
+         */
         protected void selectPreviousPossibleValue() {
-//            ignoreDocumentChanges = true;
+            selectPossibleValue((isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) - 1);
+        }
 
-            final int previousIndex = (isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) - 1;
+        /**
+         * Select the item at the given index
+         * @param index
+         */
+        private void selectPossibleValue(int index) {
+            // wrap the index from past the start to the end of the list
+            if (index == -2)
+                index = comboBox.getModel().getSize()-1;
 
-            if (previousIndex >= 0) {
+            // check if the index is within a valid range
+            final boolean validIndex = index >= 0 && index < comboBox.getModel().getSize();
+
+            // if the index isn't valid, select nothing
+            if (!validIndex)
+                index = -1;
+
+            // adjust only the value in the comboBoxEditor, but leave the comboBoxModel unchanged
+            doNotPostProcessDocumentChanges = true;
+            try {
+                // select the index
                 if (isTableCellEditor) {
-                    listBox.setSelectedIndex(previousIndex);
-                    listBox.ensureIndexIsVisible(previousIndex);
+                    listBox.setSelectedIndex(index);
+                    listBox.ensureIndexIsVisible(index);
                 } else {
-                    comboBox.setSelectedIndex(previousIndex);
+                    comboBox.setSelectedIndex(index);
                 }
-                comboBox.repaint();
+
+                // if we selected -1, set the user's prefix into the editor
+                if (!validIndex)
+                    comboBoxEditor.setText(prefix);
+            } finally {
+                doNotPostProcessDocumentChanges = false;
             }
 
-//            ignoreDocumentChanges = false;
+            // if the comboBoxEditor's values begins with the user's prefix, highlight the remainder of the value
+            final String newSelection = comboBoxEditor.getText();
+            if (prefixMatcher.matches(newSelection))
+                comboBoxEditor.select(prefix.length(), newSelection.length());
         }
 
         /**
