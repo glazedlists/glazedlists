@@ -39,6 +39,7 @@ import java.beans.PropertyChangeListener;
  * <ul>
  *   <li> the JComboBox will be made editable
  *   <li> the JComboBox will have a custom UI delegate installed on it
+ *        that decorates the existing UI delegate
  *   <li> the JComboBox will have a custom ComboBoxModel installed on it
  *        containing the given items
  *   <li> the JTextField which is the editor component for the JComboBox
@@ -55,21 +56,21 @@ import java.beans.PropertyChangeListener;
  */
 public final class AutoCompleteSupport<E> {
 
-    private static final boolean DEBUG = false;
-
     //
     // These member variables control behaviour of the autocompletion support
     //
 
     /**
-     * The preferred number of rows to use when calculating the vertical
-     * dimension of the combo box popup.
+     * The maximum number of rows to show when displaying the combo box popup.
+     * Since the popup shrinks and grows as the values are filtered, this value
+     * represents the maximum number of rows to display before scrolling the
+     * popup's list of values.
      */
     private int maximumRowCount;
 
     /**
      * <tt>true</tt> if user specified text is converted into the same case as
-     * the first matched element. <tt>false</tt> will leave user specified text
+     * the matched element. <tt>false</tt> will leave user specified text
      * unaltered.
      */
     protected boolean correctsCase = true;
@@ -97,7 +98,7 @@ public final class AutoCompleteSupport<E> {
     private AbstractDocument document;
 
     /** A DocumentFilter that controls edits to the Document behind the comboBoxEditor. */
-    private final ComboCompleterFilter documentFilter = new ComboCompleterFilter();
+    private final AutoCompleteFilter documentFilter = new AutoCompleteFilter();
 
     /** The last prefix specified by the user. */
     private String prefix = "";
@@ -126,13 +127,13 @@ public final class AutoCompleteSupport<E> {
     //
 
     /** <tt>true</tt> indicates document changes should not be post processed
-     * (i.e. just commit changes to the Document and do not react to those changes). */
+     * (i.e. just commit changes to the Document and do not cause any side-effects). */
     private boolean doNotPostProcessDocumentChanges = false;
 
     /** <tt>true</tt> indicates attempts to filter the combo box model should be ignored. */
     private boolean doNotFilter = false;
 
-    /** <tt>&gt; 0</tt> indicates attempts to change the document should be ignored. */
+    /** <tt>true</tt> indicates attempts to change the document should be ignored. */
     private boolean doNotChangeDocument = false;
 
     //
@@ -226,12 +227,12 @@ public final class AutoCompleteSupport<E> {
      * strings from each of the <code>items</code>.
      *
      * The following must be true in order to successfully install support for
-     * autocomplete on a {@link JComboBox}:
+     * autocompletion on a {@link JComboBox}:
      *
      * <ul>
-     *   <li> The JComboBox must use a JTextField as its editor
-     *   <li> The JTextField must us an AbstractDocument as its model
-     *   <li> The JComboBox UI delegate must be a subclass of BasicComboBoxUI
+     *   <li> The JComboBox must use a {@link JTextField} as its editor
+     *   <li> The JTextField must use an {@link AbstractDocument} as its model
+     *   <li> The JComboBox UI delegate must be a subclass of {@link BasicComboBoxUI}
      * </ul>
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
@@ -257,15 +258,16 @@ public final class AutoCompleteSupport<E> {
      * This method is used to report environmental invariants which are
      * violated when the user adjusts the combo box in a way that is
      * incompatible with the requirements for autocompletion. A message can be
-     * specified which will be dumped out to {@link System#err} before the
-     * autocompletion support is uninstalled.
+     * specified which will be included in the {@link IllegalStateException}
+     * that is throw out of this method after the autocompletion support is
+     * uninstalled.
      *
      * @param message a message to the programmer explaining the environmental
      *      invariant that was violated
      */
     private void throwIllegalStateException(String message) {
         final StringBuffer exceptionMsg = new StringBuffer(message);
-        exceptionMsg.append("\n");
+        exceptionMsg.append('\n');
 
         exceptionMsg.append("In order for AutoCompleteSupport to continue to " +
                 "work, the following invariants must be maintained after " +
@@ -282,19 +284,25 @@ public final class AutoCompleteSupport<E> {
         throw new IllegalStateException(exceptionMsg.toString());
     }
 
-    /** Return the maximum number of rows the popup can display. */
+    /**
+     * Return the maximum number of rows the popup will display before it
+     * scrolls.
+     */
     public int getMaximumRowCount() {
         return maximumRowCount;
     }
-    /** Set the maximum number of rows the popup can display. */
+    /**
+     * Set the maximum number of rows the popup will display before it scrolls.
+     */
     public void setMaximumRowCount(int maximumRowCount) {
         this.maximumRowCount = maximumRowCount;
         this.updateMaximumRowCount();
     }
 
     /**
-     * Updates the maximum number of rows to display in the combobox popup
-     * to be the minimum of either the item count or the maximum row count.
+     * Updates the <strong>comboBox's</strong> maximum number of rows to
+     * display in the combobox popup. It is adjusted to be the minimum of
+     * either the item count or the maximum row count.
      */
     private void updateMaximumRowCount() {
         comboBox.setMaximumRowCount(Math.min(maximumRowCount, comboBox.getItemCount()));
@@ -373,7 +381,6 @@ public final class AutoCompleteSupport<E> {
         // the filtering is taking place
         doNotChangeDocument = true;
         try {
-            if (DEBUG) System.out.println("setting new filter to: '" + newFilter + "'");
             filterMatcherEditor.setFilterText(new String[] {newFilter});
         } finally {
             doNotChangeDocument = false;
@@ -384,9 +391,8 @@ public final class AutoCompleteSupport<E> {
      * This method updates the {@link #prefix} to be the current value in the
      * combo box editor.
      */
-    private void savePrefixSnapshot() throws BadLocationException {
+    private void updatePrefix() throws BadLocationException {
         prefix = document.getText(0, document.getLength());
-        if (DEBUG) System.out.println("adjusted new prefix to: '" + prefix + "'");
 
         if (prefix.length() == 0)
             prefixMatcher = Matchers.trueMatcher();
@@ -398,14 +404,11 @@ public final class AutoCompleteSupport<E> {
      * A small convenience method to try showing the combo box popup.
      */
     private void togglePopup() {
-        if (comboBoxModel.getSize() == 0) {
-            if (DEBUG) System.out.println("hiding popup");
+        if (comboBoxModel.getSize() == 0)
             comboBox.hidePopup();
 
-        } else if (comboBox.isShowing() && !comboBox.isPopupVisible()) {
-            if (DEBUG) System.out.println("showing popup");
+        else if (comboBox.isShowing() && !comboBox.isPopupVisible())
             comboBox.showPopup();
-        }
     }
 
     /**
@@ -420,7 +423,6 @@ public final class AutoCompleteSupport<E> {
         public void setSelectedItem(Object selected) {
             doNotFilter = true;
             try {
-                if (DEBUG) System.out.println("setting selected item popup to: '" + selected + "'");
                 super.setSelectedItem(selected);
 
                 // Windows L&F likes to selectAll() text in the comboBoxEditor when a new item
@@ -438,36 +440,38 @@ public final class AutoCompleteSupport<E> {
      * This class is the crux of the entire solution. This custom
      * DocumentFilter controls all edits which are attempted against the combo
      * box editor's Document. It is our hook to either control when to respect
-     * edits as well as the effect the edit has on autocompletion.
+     * edits as well as the side-effects the edit has on autocompletion and
+     * filtering.
      */
-    private class ComboCompleterFilter extends DocumentFilter {
+    private class AutoCompleteFilter extends DocumentFilter {
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
-            // this short-circuit helps with the PlasticLookAndFeel behaviour. Hitting the enter key in Plastic
-            // will cause the popup to reopen because the Plastic ComboBoxEditor forwards on unecessary updates
+            // this short-circuit corrects the PlasticLookAndFeel behaviour. Hitting the enter key in Plastic
+            // will cause the popup to reopen because the Plastic ComboBoxEditor forwards on unnecessary updates
             // to the document, including ones where the text isn't really changing
             if (offset == 0 && document.getLength() == length && string != null && string.equals(comboBoxEditor.getText()))
                 return;
 
             if (doNotChangeDocument) return;
             super.replace(filterBypass, offset, length, string, attributeSet);
-            processDocumentChange(filterBypass, attributeSet);
+            postProcessDocumentChange(filterBypass, attributeSet);
         }
 
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
             super.insertString(filterBypass, offset, string, attributeSet);
-            processDocumentChange(filterBypass, attributeSet);
+            postProcessDocumentChange(filterBypass, attributeSet);
         }
 
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
             if (doNotChangeDocument) return;
             super.remove(filterBypass, offset, length);
-            processDocumentChange(null, null);
+            postProcessDocumentChange(null, null);
         }
 
         /**
-         * This method generically processes changes to the ComboBox editor's Document.
-         * The generic algorithm, regardless of the type of change, is as follows:
+         * This method generically post processes changes to the ComboBox
+         * editor's Document. The generic algorithm, regardless of the type of
+         * change, is as follows:
          *
          * <ol>
          *   <li> save the prefix as the user has entered it
@@ -476,10 +480,11 @@ public final class AutoCompleteSupport<E> {
          *   <li> try to show the popup, if possible
          * </ol>
          */
-        private void processDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
+        private void postProcessDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
+            // break out early if we're flagged to not post process the Document change
             if (doNotPostProcessDocumentChanges) return;
 
-            savePrefixSnapshot();
+            updatePrefix();
             applyFilter(prefix);
             updateComboBox(filterBypass, attributeSet);
             togglePopup();
@@ -501,7 +506,7 @@ public final class AutoCompleteSupport<E> {
 
                     // if the user-specified prefix matches the itemString's prefix
                     // we have found an appropriate itemString to select
-                    if (prefixMatcher.matches(itemString)) {
+                    if (itemString != null && prefixMatcher.matches(itemString)) {
                         if (filterBypass != null) {
                             // either keep the user's prefix or replace it with the itemString's prefix
                             // depending on whether we correct the case
@@ -523,7 +528,6 @@ public final class AutoCompleteSupport<E> {
 
                         // select the text after the prefix but before the end of the text
                         // (it represents the autocomplete text)
-                        if (DEBUG) System.out.println("selecting characters from " + prefix.length() + " to " + document.getLength());
                         comboBoxEditor.select(prefix.length(), document.getLength());
 
                         return;
@@ -561,7 +565,7 @@ public final class AutoCompleteSupport<E> {
 
         /**
          * A listener which reacts to changes in the combo box model by
-         * resizing the combo box to recompute the preferred size of the popup.
+         * resizing the popup appropriately to accomodate the new data.
          */
         private final ListDataListener listDataHandler = new ListDataHandler();
 
@@ -686,7 +690,7 @@ public final class AutoCompleteSupport<E> {
          * currently selected item is already the last item.
          */
         protected void selectNextPossibleValue() {
-            selectPossibleValue((isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) + 1);
+            selectPossibleValue((isTableCellEditor ? popup.getList().getSelectedIndex() : comboBox.getSelectedIndex()) + 1);
         }
 
         /**
@@ -694,7 +698,7 @@ public final class AutoCompleteSupport<E> {
          * currently selected item is already the first item.
          */
         protected void selectPreviousPossibleValue() {
-            selectPossibleValue((isTableCellEditor ? listBox.getSelectedIndex() : comboBox.getSelectedIndex()) - 1);
+            selectPossibleValue((isTableCellEditor ? popup.getList().getSelectedIndex() : comboBox.getSelectedIndex()) - 1);
         }
 
         /**
@@ -718,13 +722,14 @@ public final class AutoCompleteSupport<E> {
             try {
                 // select the index
                 if (isTableCellEditor) {
-                    listBox.setSelectedIndex(index);
-                    listBox.ensureIndexIsVisible(index);
+                    popup.getList().setSelectedIndex(index);
+                    popup.getList().ensureIndexIsVisible(index);
                 } else {
                     comboBox.setSelectedIndex(index);
                 }
 
-                // if we selected -1, set the user's prefix into the editor
+                // if the original index wasn't valid, we've cleared the selection
+                // and must set the user's prefix into the editor
                 if (!validIndex)
                     comboBoxEditor.setText(prefix);
             } finally {
@@ -739,8 +744,8 @@ public final class AutoCompleteSupport<E> {
 
         /**
          * This class listens the to the ComboBoxModel and updates the maximum
-         * row count of the combo box based on the new item count in the model
-         * after changes are received.
+         * row count of the combo box popup based on the new item count in the
+         * model.
          */
         private class ListDataHandler implements ListDataListener {
             public void contentsChanged(ListDataEvent e) {
@@ -911,7 +916,7 @@ public final class AutoCompleteSupport<E> {
             final Document newDocument = (Document) evt.getNewValue();
 
             if (!(newDocument instanceof AbstractDocument))
-                throwIllegalStateException("The Document behind the JTextField was changed to no longer be an AbstractDocument. It was a " + newDocument);
+                throwIllegalStateException("The Document behind the JTextField was changed to no longer be an AbstractDocument. It was changed to: " + newDocument);
 
             // remove our DocumentFilter from the old document
             document.setDocumentFilter(null);
