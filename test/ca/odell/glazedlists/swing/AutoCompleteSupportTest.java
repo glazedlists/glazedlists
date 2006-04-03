@@ -20,7 +20,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
     public void guiTestUninstall() {
         final JComboBox combo = new JComboBox();
-        final EventList items = new BasicEventList();
+        final EventList<Object> items = new BasicEventList<Object>();
 
         final ComboBoxUI originalUI = combo.getUI();
         final ComboBoxModel originalModel = combo.getModel();
@@ -78,7 +78,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         JComboBox combo = new JComboBox();
         combo.setEditor(new NoopComboBoxEditor());
         try {
-            AutoCompleteSupport.install(combo, new BasicEventList());
+            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
             fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
         } catch (IllegalArgumentException e) {
             // expected
@@ -87,7 +87,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         combo = new JComboBox();
         combo.setUI(new NoopComboBoxUI());
         try {
-            AutoCompleteSupport.install(combo, new BasicEventList());
+            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
             fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
         } catch (IllegalArgumentException e) {
             // expected
@@ -97,7 +97,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JTextField editor = (JTextField) combo.getEditor().getEditorComponent();
         editor.setDocument(new NoopDocument());
         try {
-            AutoCompleteSupport.install(combo, new BasicEventList());
+            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
             fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
         } catch (IllegalArgumentException e) {
             // expected
@@ -106,7 +106,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
     public void guiTestChangeModel() {
         final JComboBox combo = new JComboBox();
-        AutoCompleteSupport.install(combo, new BasicEventList());
+        AutoCompleteSupport.install(combo, new BasicEventList<Object>());
 
         try {
             combo.setModel(new DefaultComboBoxModel());
@@ -118,7 +118,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
     public void guiTestChangeUI() {
         final JComboBox combo = new JComboBox();
-        AutoCompleteSupport.install(combo, new BasicEventList());
+        AutoCompleteSupport.install(combo, new BasicEventList<Object>());
 
         try {
             combo.setUI(new BasicComboBoxUI());
@@ -130,7 +130,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
     public void guiTestChangeEditorDocumentToNonAbstractDocument() {
         final JComboBox combo = new JComboBox();
-        AutoCompleteSupport.install(combo, new BasicEventList());
+        AutoCompleteSupport.install(combo, new BasicEventList<Object>());
 
         try {
             final JTextField editor = (JTextField) combo.getEditor().getEditorComponent();
