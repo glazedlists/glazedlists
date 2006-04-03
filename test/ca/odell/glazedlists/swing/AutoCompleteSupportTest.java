@@ -18,7 +18,7 @@ import java.awt.event.ActionListener;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
 
-    public void guiTestDispose() {
+    public void guiTestUninstall() {
         final JComboBox combo = new JComboBox();
         final EventList items = new BasicEventList();
 
@@ -51,7 +51,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         // one PropertyChangeListener is added to the ComboBoxEditor to watch for Document changes
         assertTrue(originalEditorPropertyChangeListenerCount + 1 == currentEditor.getPropertyChangeListeners().length);
 
-        support.dispose();
+        support.uninstall();
 
         currentEditor = ((JTextField) combo.getEditor().getEditorComponent());
         currentEditorDocument = (AbstractDocument) currentEditor.getDocument();
@@ -67,7 +67,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertTrue(originalMaxRowCount == combo.getMaximumRowCount());
 
         try {
-            support.dispose();
+            support.uninstall();
             fail("Double disposing AutoCompleteSupport did not fail as expected");
         } catch (IllegalStateException e) {
             // expected

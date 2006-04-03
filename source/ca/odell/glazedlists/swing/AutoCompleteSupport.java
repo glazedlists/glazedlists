@@ -201,7 +201,7 @@ public final class AutoCompleteSupport<E> {
      * Installs support for autocompletion into the <code>comboBox</code> and
      * returns the support object that is actually providing those facilities.
      * The support object is returned so that the caller may invoke
-     * {@link #dispose} at some later time to remove the autocompletion
+     * {@link #uninstall} at some later time to remove the autocompletion
      * features.
      *
      * <p>This method assumes that the <code>items</code> can be converted into
@@ -220,7 +220,7 @@ public final class AutoCompleteSupport<E> {
      * Installs support for autocompletion into the <code>comboBox</code> and
      * returns the support object that is actually providing those facilities.
      * The support object is returned so that the caller may invoke
-     * {@link #dispose} at some later time to remove the autocompletion
+     * {@link #uninstall} at some later time to remove the autocompletion
      * features.
      *
      * <p>The <code>filterator</code> will be used to extract searchable text
@@ -279,7 +279,7 @@ public final class AutoCompleteSupport<E> {
                 "* the DocumentFilter on the AbstractDocument behind the JTextField may not be removed\n"
         );
 
-        this.dispose();
+        uninstall();
 
         throw new IllegalStateException(exceptionMsg.toString());
     }
@@ -332,7 +332,7 @@ public final class AutoCompleteSupport<E> {
      * before autocompletion was installed, and it will be available for
      * garbage collection independently of the {@link EventList} of items.
      */
-    public void dispose() {
+    public void uninstall() {
         if (this.comboBox == null)
             throw new IllegalStateException("This AutoCompleteSupport has already been disposed");
 

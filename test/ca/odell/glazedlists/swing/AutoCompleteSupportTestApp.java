@@ -52,6 +52,8 @@ public class AutoCompleteSupportTestApp {
     /** The last AutoCompleteSupport object installed. */
     private AutoCompleteSupport autoCompleteSupport;
 
+    private final JComboBox autocompleteComboBox = new JComboBox();
+
     /** The test application's frame. */
     private final JFrame frame;
 
@@ -136,7 +138,7 @@ public class AutoCompleteSupportTestApp {
         }
 
         public void actionPerformed(ActionEvent e) {
-            autoCompleteSupport.dispose();
+            autoCompleteSupport.uninstall();
 
             JRadioButtonMenuItem selectedMenuItem = (JRadioButtonMenuItem) e.getSource();
 
@@ -191,8 +193,6 @@ public class AutoCompleteSupportTestApp {
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         int comboBoxCount = 0;
-
-        final JComboBox autocompleteComboBox = new JComboBox();
 
         // setting a prototype value prevents the combo box from resizing when
         // the model contents are filtered away
