@@ -168,8 +168,10 @@ public final class AutoCompleteSupport<E> {
      * @param filterator extracts searchable text strings from each item
      */
     private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
-        // record some original settings of comboBox
         this.comboBox = comboBox;
+        this.maximumRowCount = this.comboBox.getMaximumRowCount();
+
+        // record some original settings of comboBox
         this.originalUI = comboBox.getUI();
         this.originalComboBoxEditable = comboBox.isEditable();
         this.originalModel = comboBox.getModel();
@@ -184,17 +186,18 @@ public final class AutoCompleteSupport<E> {
 
         // customize the comboBox
         this.comboBox.setModel(this.comboBoxModel);
-        this.maximumRowCount = this.comboBox.getMaximumRowCount();
         this.comboBox.setUI(new AutoCompleteComboBoxUI((BasicComboBoxUI) this.comboBox.getUI()));
-        this.comboBox.addPropertyChangeListener("UI", this.uiWatcher);
         this.comboBox.setEditable(true);
-        this.comboBox.addPropertyChangeListener("model", this.modelWatcher);
-        this.comboBoxEditor = (JTextField) comboBox.getEditor().getEditorComponent();
-        this.comboBoxEditor.addPropertyChangeListener("document", this.documentWatcher);
 
-        // customize the existing Document behind the editor JTextField
+        // add a DocumentFilter to the Document backing the editor JTextField
+        this.comboBoxEditor = (JTextField) comboBox.getEditor().getEditorComponent();
         this.document = (AbstractDocument) this.comboBoxEditor.getDocument();
         this.document.setDocumentFilter(this.documentFilter);
+
+        // detect changes made to the key parts of JComboBox which must be controlled for autocompletion
+        this.comboBox.addPropertyChangeListener("UI", this.uiWatcher);
+        this.comboBox.addPropertyChangeListener("model", this.modelWatcher);
+        this.comboBoxEditor.addPropertyChangeListener("document", this.documentWatcher);
     }
 
     /**
