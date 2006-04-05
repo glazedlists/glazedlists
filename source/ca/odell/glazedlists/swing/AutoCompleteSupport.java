@@ -32,9 +32,57 @@ import java.beans.PropertyChangeListener;
 /**
  * This class installs support for filtering and autocompletion into a standard
  * {@link JComboBox}. All behaviour provided is meant to mimic the
- * functionality of the Firefox address field. In order to achieve all of the
- * autocompletion and filtering behaviour, the following occurs when
- * {@link #install} is called:
+ * functionality of the Firefox address field. To be explicit, the following is
+ * a list of expected behaviours which are installed:
+ *
+ * <p><strong>Typing into the ComboBox Editor</strong>
+ * <ol>
+ *   <li> typing any value into the editor when the popup is invisible causes
+ *        the popup to appear and its contents to be filtered according to the
+ *        editor's text. It also autocompletes to the first item that is
+ *        prefixed with the editor's text and selects that item within the popup.
+ *   <li> typing any value into the editor when the popup is visible causes
+ *        the popup to be refiltered to contain values that start with the prefix
+ *        and reselects an appropriate autocompletion item
+ *   <li> typing the down or up arrow keys in the editor when the popup is
+ *        invisible causes the popup to appear and its contents to be filtered
+ *        according to the editor's text. It also autocompletes to the first
+ *        item that is prefixed with the editor's text and selects that item
+ *        within the popup.
+ *   <li> typing the up arrow key when the popup is visible and the selected
+ *        element is the first element causes the autocompletion to be cleared
+ *        and the popup's selection to be removed
+ *   <li> typing the up arrow key when no selection exists causes the last
+ *        element of the popup to become selected and used for autocompletion
+ *   <li> typing the down arrow key when the popup is visible and the selected
+ *        element is the last element causes the autocompletion to be cleared
+ *        and the popup's selection to be removed
+ *   <li> typing the down arrow key when no selection exists causes the first
+ *        element of the popup to become selected and used for autocompletion
+ * </ol>
+ *
+ * <strong>Clicking on the Arrow Button</strong>
+ * <ol>
+ *   <li> clicking the arrow button when the popup is invisible causes the
+ *        popup to appear and its contents to be shown unfiltered
+ *   <li> clicking the arrow button when the popup is visible causes the popup
+ *        to disappear
+ * </ol>
+ *
+ * <strong>Sizing the ComboBox Popup</strong>
+ * <ol>
+ *   <li> the popup is always <strong>at least</strong> as wide as the
+ *        autocompleting {@link JComboBox}, but may grow wider to accomodate a
+ *        {@link JComboBox#getPrototypeDisplayValue()} if a non-null value is
+ *        returned.
+ *   <li> as items are filtered in the ComboBoxModel, the popup height is
+ *        adjusted to display between 0 and
+ *        {@link JComboBox#getMaximumRowCount()} rows before resorting to
+ *        scrolling the popup.
+ * </ol>
+ *
+ * In order to achieve all of the autocompletion and filtering behaviour, the
+ * following occurs when {@link #install} is called:
  *
  * <ul>
  *   <li> the JComboBox will be made editable
@@ -47,10 +95,9 @@ import java.beans.PropertyChangeListener;
  * </ul>
  *
  * The strategy of this support class is to alter all of the objects which
- * influence the behaviour of the JComboBox's popup in one single context.
- * With that achieved, it greatly reduces the cross-functional communication
- * required to customize the behaviour of JComboBox for filtering and
- * autocompletion.
+ * influence the behaviour of the JComboBox in one single context. With that
+ * achieved, it greatly reduces the cross-functional communication required to
+ * customize the behaviour of JComboBox for filtering and autocompletion.
  *
  * @author James Lemieux
  */
@@ -61,19 +108,11 @@ public final class AutoCompleteSupport<E> {
     //
 
     /**
-     * The maximum number of rows to show when displaying the combo box popup.
-     * Since the popup shrinks and grows as the values are filtered, this value
-     * represents the maximum number of rows to display before scrolling the
-     * popup's list of values.
-     */
-    private int maximumRowCount;
-
-    /**
      * <tt>true</tt> if user specified text is converted into the same case as
      * the matched element. <tt>false</tt> will leave user specified text
      * unaltered.
      */
-    protected boolean correctsCase = true;
+    private boolean correctsCase = true;
 
     //
     // These are member variables for convenience
@@ -83,7 +122,7 @@ public final class AutoCompleteSupport<E> {
     private JComboBox comboBox;
 
     /** The model backing the comboBox. */
-    private final FilteringComboBoxModel comboBoxModel;
+    private final AutoCompleteComboBoxModel comboBoxModel;
 
     /** The FilterList which holds the items present in the comboBoxModel. */
     private final FilterList<E> filteredItems;
@@ -137,7 +176,7 @@ public final class AutoCompleteSupport<E> {
     private boolean doNotChangeDocument = false;
 
     //
-    // Values present when install() executed - these are restored in dispose()
+    // Values present when install() executed - these are restored in uninstall()
     //
 
     /** The original setting of the editable field on the comboBox. */
@@ -151,9 +190,6 @@ public final class AutoCompleteSupport<E> {
 
     /** The original UI delegate installed on the comboBox. */
     private ComboBoxUI originalUI;
-
-    /** The original maximum row count of the comboBox. */
-    private int originalMaximumRowCount;
 
     /**
      * This private constructor creates an AutoCompleteSupport object which adds
@@ -169,20 +205,18 @@ public final class AutoCompleteSupport<E> {
      */
     private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
         this.comboBox = comboBox;
-        this.maximumRowCount = this.comboBox.getMaximumRowCount();
 
         // record some original settings of comboBox
         this.originalUI = comboBox.getUI();
         this.originalComboBoxEditable = comboBox.isEditable();
         this.originalModel = comboBox.getModel();
         this.originalComboBoxEditor = comboBox.getEditor();
-        this.originalMaximumRowCount = comboBox.getMaximumRowCount();
 
         // build the ComboBoxModel capable of filtering its values
         this.filterMatcherEditor = new TextMatcherEditor<E>(filterator);
         this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         this.filteredItems = new FilterList<E>(items, filterMatcherEditor);
-        this.comboBoxModel = new FilteringComboBoxModel(filteredItems);
+        this.comboBoxModel = new AutoCompleteComboBoxModel(filteredItems);
 
         // customize the comboBox
         this.comboBox.setModel(this.comboBoxModel);
@@ -245,13 +279,14 @@ public final class AutoCompleteSupport<E> {
      *      features
      */
     public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
-        if (!(comboBox.getEditor().getEditorComponent() instanceof JTextField))
-            throw new IllegalArgumentException("comboBox must use a JTextField as its editor component");
-
         if (!(comboBox.getUI() instanceof BasicComboBoxUI))
             throw new IllegalArgumentException("comboBox UI must be a subclass of " + BasicComboBoxUI.class);
 
-        if (!(((JTextField) comboBox.getEditor().getEditorComponent()).getDocument() instanceof AbstractDocument))
+        final Component editorComponent = comboBox.getEditor().getEditorComponent();
+        if (!(editorComponent instanceof JTextField))
+            throw new IllegalArgumentException("comboBox must use a JTextField as its editor component");
+
+        if (!(((JTextField) editorComponent).getDocument() instanceof AbstractDocument))
             throw new IllegalArgumentException("comboBox must use a JTextField backed by an AbstractDocument as its editor component");
 
         return new AutoCompleteSupport<E>(comboBox, items, filterator);
@@ -269,46 +304,35 @@ public final class AutoCompleteSupport<E> {
      *      invariant that was violated
      */
     private void throwIllegalStateException(String message) {
-        final StringBuffer exceptionMsg = new StringBuffer(message);
-        exceptionMsg.append('\n');
-
-        exceptionMsg.append("In order for AutoCompleteSupport to continue to " +
+        final String exceptionMsg = message + "\n" +
+                "In order for AutoCompleteSupport to continue to " +
                 "work, the following invariants must be maintained after " +
                 "AutoCompleteSupport.install() has been called:\n" +
                 "* the ComboBoxModel may not be removed\n" +
                 "* the ComboBoxUI may not be removed\n" +
                 "* the ComboBoxEditor may not be removed\n" +
                 "* the AbstractDocument behind the JTextField can be changed but must be changed to some subclass of AbstractDocument\n" +
-                "* the DocumentFilter on the AbstractDocument behind the JTextField may not be removed\n"
-        );
+                "* the DocumentFilter on the AbstractDocument behind the JTextField may not be removed\n";
 
         uninstall();
 
-        throw new IllegalStateException(exceptionMsg.toString());
+        throw new IllegalStateException(exceptionMsg);
     }
 
     /**
-     * Return the maximum number of rows the popup will display before it
-     * scrolls.
+     * Returns the autocompleting {@link JComboBox} or <code>null</code> if
+     * {@link AutoCompleteSupport} has been {@link #uninstall}ed.
      */
-    public int getMaximumRowCount() {
-        return maximumRowCount;
-    }
-    /**
-     * Set the maximum number of rows the popup will display before it scrolls.
-     */
-    public void setMaximumRowCount(int maximumRowCount) {
-        this.maximumRowCount = maximumRowCount;
-        this.updateMaximumRowCount();
+    public JComboBox getComboBox() {
+        return this.comboBox;
     }
 
     /**
-     * Updates the <strong>comboBox's</strong> maximum number of rows to
-     * display in the combobox popup. It is adjusted to be the minimum of
-     * either the item count or the maximum row count.
+     * Returns the filtered {@link EventList} of items which backs the
+     * {@link ComboBoxModel} of the autocompleting {@link JComboBox}.
      */
-    private void updateMaximumRowCount() {
-        comboBox.setMaximumRowCount(Math.min(maximumRowCount, comboBox.getItemCount()));
+    public EventList<E> getItemList() {
+        return this.filteredItems;
     }
 
     /**
@@ -337,7 +361,7 @@ public final class AutoCompleteSupport<E> {
      */
     public void uninstall() {
         if (this.comboBox == null)
-            throw new IllegalStateException("This AutoCompleteSupport has already been disposed");
+            throw new IllegalStateException("This AutoCompleteSupport has already been uninstalled");
 
         // 1. stop listening for changes
         this.comboBox.removePropertyChangeListener("UI", this.uiWatcher);
@@ -362,11 +386,7 @@ public final class AutoCompleteSupport<E> {
         // 7. dispose of our FilterList so that it is severed from the given items EventList
         this.filteredItems.dispose();
 
-        // 8. restore the original maximum row count to the JComboBox
-        this.comboBox.setMaximumRowCount(originalMaximumRowCount);
-        originalMaximumRowCount = -1;
-
-        // null out the comboBox to indicate that this support class is disposed
+        // null out the comboBox to indicate that this support class is uninstalled
         this.comboBox = null;
     }
 
@@ -419,8 +439,8 @@ public final class AutoCompleteSupport<E> {
      * indicate the items in the ComboBoxModel should not be filtered as a
      * side-effect of setting the selected item.
      */
-    private class FilteringComboBoxModel extends EventComboBoxModel<E> {
-        public FilteringComboBoxModel(EventList<E> source) {
+    private class AutoCompleteComboBoxModel extends EventComboBoxModel<E> {
+        public AutoCompleteComboBoxModel(EventList<E> source) {
             super(source);
         }
         public void setSelectedItem(Object selected) {
@@ -611,8 +631,9 @@ public final class AutoCompleteSupport<E> {
         }
 
         public void installUI(JComponent c) {
-            comboBox = (JComboBox) c;
             delegate.installUI(c);
+
+            comboBox = (JComboBox) c;
             popupMenu = (JPopupMenu) delegate.getAccessibleChild(c, 0);
             popup = (ComboPopup) popupMenu;
             arrowButton = findArrowButton(comboBox);
@@ -620,31 +641,28 @@ public final class AutoCompleteSupport<E> {
             // is this combo box a table cell editor?
             isTableCellEditor = Boolean.TRUE.equals(c.getClientProperty("JComboBox.isTableCellEditor"));
 
-            // if an arrow button was found, decorate the ComboPopup's
-            // MouseListener with logic that unfilters the ComboBoxModel when
-            // the arrow button is pressed
+            // if an arrow button was found, decorate the ComboPopup's MouseListener
+            // with logic that unfilters the ComboBoxModel when the arrow button is pressed
             if (arrowButton != null) {
                 arrowButton.removeMouseListener(popup.getMouseListener());
                 arrowButtonMouseListener = new ArrowButtonMouseListener(popup.getMouseListener());
                 arrowButton.addMouseListener(arrowButtonMouseListener);
             }
 
-            // start listening for model changes (due to filtering) so we can resize the popup appropriately
+            // start listening for model changes (due to filtering) so we can resize the popup vertically
             comboBox.getModel().addListDataListener(listDataHandler);
 
-            // size the popup according to the prototype value, if one exists
+            // calculate the popup's width according to the prototype value, if one exists
             popupMenu.addPopupMenuListener(popupSizerHandler);
 
-            // replace the normal DownAction and UpActions with custom ones
             final ActionMap actionMap = comboBox.getActionMap();
-
             if (actionMap.get("selectNext") != null) {
-                // install custom actions in the Apple L&F
+                // install custom actions for the arrow keys in all non-Apple L&Fs
                 actionMap.put("selectPrevious", new UpAction());
                 actionMap.put("selectNext", new DownAction());
 
             } else if (actionMap.get("aquaSelectNext") != null) {
-                // install custom actions for the arrow keys in the Apple L&F
+                // install custom actions for the arrow keys in the Apple Aqua L&F
                 actionMap.put("aquaSelectPrevious", new UpAction());
                 actionMap.put("aquaSelectNext", new DownAction());
             }
@@ -733,8 +751,15 @@ public final class AutoCompleteSupport<E> {
 
                 // if the original index wasn't valid, we've cleared the selection
                 // and must set the user's prefix into the editor
-                if (!validIndex)
+                if (!validIndex) {
                     comboBoxEditor.setText(prefix);
+
+                    if (popupMenu.isShowing()) {
+                        // clear the selected value from the popup's display
+                        setPopupVisible(comboBox, false);
+                        setPopupVisible(comboBox, true);
+                    }
+                }
             } finally {
                 doNotPostProcessDocumentChanges = false;
             }
@@ -746,21 +771,35 @@ public final class AutoCompleteSupport<E> {
         }
 
         /**
-         * This class listens the to the ComboBoxModel and updates the maximum
-         * row count of the combo box popup based on the new item count in the
-         * model.
+         * This class listens the to the ComboBoxModel redraws the popup if it
+         * must grow or shrink to accomodate the latest list of items.
          */
         private class ListDataHandler implements ListDataListener {
+            private int previousItemCount = -1;
+
             public void contentsChanged(ListDataEvent e) {
-                if (e.getIndex0() != -1 && e.getIndex1() != -1)
-                    updateMaximumRowCount();
+                final int newItemCount = comboBox.getItemCount();
+
+                // if the size of the model didn't change, the popup size won't change
+                if (previousItemCount == newItemCount)
+                    return;
+
+                final int maxPopupItemCount = comboBox.getMaximumRowCount();
+
+                // if the popup is showing, check if it must be resized
+                if (popupMenu.isShowing()) {
+                    // if either the previous or new item count is less than the max,
+                    // hide and show the popup to recalculate its new height
+                    if (newItemCount < maxPopupItemCount || previousItemCount < maxPopupItemCount) {
+                        setPopupVisible(comboBox, false);
+                        setPopupVisible(comboBox, true);
+                    }
+                }
+
+                previousItemCount = newItemCount;
             }
-            public void intervalAdded(ListDataEvent e) {
-                updateMaximumRowCount();
-            }
-            public void intervalRemoved(ListDataEvent e) {
-                updateMaximumRowCount();
-            }
+            public void intervalAdded(ListDataEvent e) { contentsChanged(e); }
+            public void intervalRemoved(ListDataEvent e) { contentsChanged(e); }
         }
 
         /**
@@ -819,8 +858,8 @@ public final class AutoCompleteSupport<E> {
                 return d;
             }
 
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) { }
-            public void popupMenuCanceled(PopupMenuEvent e) { }
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+            public void popupMenuCanceled(PopupMenuEvent e) {}
         }
 
         /**
@@ -834,18 +873,23 @@ public final class AutoCompleteSupport<E> {
                 this.decorated = decorated;
             }
 
-            public MouseListener getDecorated() { return decorated; }
-
             public void mousePressed(MouseEvent e) {
+                // clear the filter if we're about to hide or show the popup
+                // by clicking on the arrow button (this is EXPLICITLY different
+                // than using the up/down arrow keys to show the popup
                 applyFilter("");
                 decorated.mousePressed(e);
             }
+            public MouseListener getDecorated() { return decorated; }
             public void mouseClicked(MouseEvent e) { decorated.mouseClicked(e); }
             public void mouseReleased(MouseEvent e) { decorated.mouseReleased(e); }
             public void mouseEntered(MouseEvent e) { decorated.mouseEntered(e); }
             public void mouseExited(MouseEvent e) { decorated.mouseExited(e); }
         }
 
+        /**
+         * The action invoked by hitting the down arrow key.
+         */
         private class DownAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
                 if (comboBox.isShowing()) {
@@ -859,6 +903,9 @@ public final class AutoCompleteSupport<E> {
             }
         }
 
+        /**
+         * The action invoked by hitting the up arrow key.
+         */
         private class UpAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
                 if (comboBox.isShowing()) {

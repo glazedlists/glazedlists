@@ -21,6 +21,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     public void guiTestUninstall() {
         final JComboBox combo = new JComboBox();
         final EventList<Object> items = new BasicEventList<Object>();
+        items.add("First");
+        items.add("Second");
 
         final ComboBoxUI originalUI = combo.getUI();
         final ComboBoxModel originalModel = combo.getModel();

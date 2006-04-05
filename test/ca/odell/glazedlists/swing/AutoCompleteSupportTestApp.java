@@ -8,8 +8,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TextFilterator;
 
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -59,15 +57,11 @@ public class AutoCompleteSupportTestApp {
 
     private final JPanel tweakerPanel;
 
-    private final JSpinner maxRowCount = new JSpinner(new SpinnerNumberModel(8, 1, 99, 1));
-
     private final JCheckBox correctCase = new JCheckBox();
 
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
     public AutoCompleteSupportTestApp() {
-        maxRowCount.addChangeListener(new MaxRowCountChangeHandler());
-
         correctCase.addActionListener(new CorrectCaseActionHandler());
         correctCase.setSelected(true);
 
@@ -157,13 +151,6 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
-    private class MaxRowCountChangeHandler implements ChangeListener {
-        public void stateChanged(ChangeEvent e) {
-            final int maximumRowCount = ((Integer) maxRowCount.getValue()).intValue();
-            autoCompleteSupport.setMaximumRowCount(maximumRowCount);
-        }
-    }
-
     private class CorrectCaseActionHandler implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             final boolean willCorrectCase = correctCase.isSelected();
@@ -173,10 +160,6 @@ public class AutoCompleteSupportTestApp {
 
     private JPanel createTweakerPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
-
-        panel.add(new JLabel("Max Row Count:"),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(maxRowCount,                      new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(Box.createHorizontalStrut(1),     new GridBagConstraints(2, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
         panel.add(new JLabel("Correct Case:"),      new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
         panel.add(correctCase,                      new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -198,7 +181,6 @@ public class AutoCompleteSupportTestApp {
         // the model contents are filtered away
         autocompleteComboBox.setPrototypeDisplayValue("http://java.sun.com/j2se/1.5.0/download.jsp");
         autoCompleteSupport = AutoCompleteSupport.install(autocompleteComboBox, items, filterator);
-        autoCompleteSupport.setMaximumRowCount(((Integer) maxRowCount.getValue()).intValue());
         autoCompleteSupport.setCorrectsCase(correctCase.isSelected());
 
         final JComboBox plainComboBox = new JComboBox();
