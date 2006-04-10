@@ -14,6 +14,7 @@ import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
@@ -163,6 +164,82 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(2, combo.getModel().getSize());
     }
 
+    public void guiTestFiringActionEvent() throws BadLocationException {
+        final CountingActionListener listener = new CountingActionListener();
+
+        final JComboBox combo = new JComboBox();
+        combo.addActionListener(listener);
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add(null);
+        items.add("New Brunswick");
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+        items.add(null);
+
+        AutoCompleteSupport.install(combo, items);
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        assertEquals(0, listener.getCount());
+
+        // typing into an empty Document
+        doc.replace(0, 0, "New", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(0, listener.getCount());
+
+        // typing over all the text in a Document
+        doc.replace(0, doc.getLength(), "x", null);
+        assertEquals(0, combo.getItemCount());
+        assertEquals("x", textField.getText());
+        assertEquals(0, listener.getCount());
+
+        // appending to a Document
+        doc.insertString(1, "y", null);
+        assertEquals(0, combo.getItemCount());
+        assertEquals("xy", textField.getText());
+        assertEquals(0, listener.getCount());
+
+        // removing from a Document
+        doc.remove(1, 1);
+        assertEquals(0, combo.getItemCount());
+        assertEquals("x", textField.getText());
+        assertEquals(0, listener.getCount());
+
+        // removing the last char from a Document
+        doc.remove(0, 1);
+        assertEquals(items.size(), combo.getItemCount());
+        assertEquals("", textField.getText());
+        assertEquals(0, listener.getCount());
+
+        // setting in text through the JTextField
+        textField.setText("Prince");
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Prince Edward Island", textField.getText());
+        assertEquals(" Edward Island", textField.getSelectedText());
+        assertEquals(0, listener.getCount());
+
+        // simulate the enter key
+        textField.postActionEvent();
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Prince Edward Island", textField.getText());
+        assertEquals(null, textField.getSelectedText());
+        assertEquals(1, listener.getCount());
+
+        // select an index programmatically
+        combo.setSelectedIndex(-1);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("", textField.getText());
+        assertEquals(2, listener.getCount());
+
+        // select a value programmatically
+        combo.setSelectedItem("Prince Edward Island");
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Prince Edward Island", textField.getText());
+        assertEquals(3, listener.getCount());
+    }
+
 
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
@@ -217,5 +294,12 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         public void setPopupVisible(JComboBox c, boolean v) { }
         public boolean isPopupVisible(JComboBox c) { return false; }
         public boolean isFocusTraversable(JComboBox c) { return false; }
+    }
+
+    private static class CountingActionListener implements ActionListener {
+        private int count;
+
+        public int getCount() { return count; }
+        public void actionPerformed(ActionEvent e) { count++; }
     }
 }
