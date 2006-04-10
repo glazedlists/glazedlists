@@ -3,10 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
@@ -26,14 +24,18 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * This class installs support for filtering and autocompletion into a standard
- * {@link JComboBox}. All behaviour provided is meant to mimic the
- * functionality of the Firefox address field. To be explicit, the following is
- * a list of expected behaviours which are installed:
+ * This class {@link #install}s support for filtering and autocompletion into
+ * a standard {@link JComboBox}. It also acts as a factory class for
+ * {@link #createTableCellEditor creating autocompleting table cell editors}.
+ *
+ * <p>All autocompletion behaviour provided is meant to mimic the functionality
+ * of the Firefox address field. To be explicit, the following is a list of
+ * expected behaviours which are installed:
  *
  * <p><strong>Typing into the ComboBox Editor</strong>
  * <ol>
@@ -72,13 +74,19 @@ import java.beans.PropertyChangeListener;
  * <strong>Sizing the ComboBox Popup</strong>
  * <ol>
  *   <li> the popup is always <strong>at least</strong> as wide as the
- *        autocompleting {@link JComboBox}, but may grow wider to accomodate a
- *        {@link JComboBox#getPrototypeDisplayValue()} if a non-null value is
- *        returned.
+ *        autocompleting {@link JComboBox}, but may be wider to accomodate a
+ *        {@link JComboBox#getPrototypeDisplayValue()} if a non-null prototype
+ *        value exists
  *   <li> as items are filtered in the ComboBoxModel, the popup height is
- *        adjusted to display between 0 and
- *        {@link JComboBox#getMaximumRowCount()} rows before resorting to
- *        scrolling the popup.
+ *        adjusted to display between 0 and {@link JComboBox#getMaximumRowCount()}
+ *        rows before scrolling the popup
+ * </ol>
+ *
+ * <strong>JComboBox ActionEvents</strong>
+ * A single {@link ActionEvent} is fired from the JComboBox in these situations:
+ * <ol>
+ *   <li> the user hits the enter key
+ *   <li> the user selects an item from the popup
  * </ol>
  *
  * In order to achieve all of the autocompletion and filtering behaviour, the
@@ -190,6 +198,33 @@ public final class AutoCompleteSupport<E> {
 
     /** The original UI delegate installed on the comboBox. */
     private ComboBoxUI originalUI;
+
+    /**
+     * A convenience method to unregister and return all {@link ActionListener}s
+     * currently installed on the given <code>comboBox</code>. This is the only
+     * technique we can rely on to prevent the <code>comboBox</code> from
+     * broadcasting {@link ActionEvent}s at inappropriate times.
+     *
+     * This method is the logical inverse of {@link #registerAllActionListeners}.
+     */
+    private static ActionListener[] unregisterAllActionListeners(JComboBox comboBox) {
+        final ActionListener[] listeners = comboBox.getActionListeners();
+        for (int i = 0; i < listeners.length; i++)
+            comboBox.removeActionListener(listeners[i]);
+
+        return listeners;
+    }
+
+    /**
+     * A convenience method to register all of the given <code>listeners</code>
+     * with the given <code>comboBox</code>.
+     *
+     * This method is the logical inverse of {@link #unregisterAllActionListeners}.
+     */
+    private static void registerAllActionListeners(JComboBox comboBox, ActionListener[] listeners) {
+        for (int i = 0; i < listeners.length; i++)
+            comboBox.addActionListener(listeners[i]);
+    }
 
     /**
      * This private constructor creates an AutoCompleteSupport object which adds
@@ -403,9 +438,11 @@ public final class AutoCompleteSupport<E> {
         // ignore attempts to change the text in the combo box editor while
         // the filtering is taking place
         doNotChangeDocument = true;
+        final ActionListener[] listeners = unregisterAllActionListeners(comboBox);
         try {
             filterMatcherEditor.setFilterText(new String[] {newFilter});
         } finally {
+            registerAllActionListeners(comboBox, listeners);
             doNotChangeDocument = false;
         }
     }
@@ -445,6 +482,9 @@ public final class AutoCompleteSupport<E> {
         }
         public void setSelectedItem(Object selected) {
             doNotFilter = true;
+            // remove all ActionListeners from the JComboBox since setting the selected item
+            // would normally notify them, but in normal autocompletion behaviour, we don't want that
+            final ActionListener[] listeners = unregisterAllActionListeners(comboBox);
             try {
                 super.setSelectedItem(selected);
 
@@ -454,6 +494,8 @@ public final class AutoCompleteSupport<E> {
                 final int caretPos = comboBoxEditor.getCaretPosition();
                 comboBoxEditor.select(caretPos, caretPos);
             } finally {
+                // reinstall the ActionListeners we removed
+                registerAllActionListeners(comboBox, listeners);
                 doNotFilter = false;
             }
         }
@@ -542,12 +584,7 @@ public final class AutoCompleteSupport<E> {
                         }
 
                         // select the matched itemString
-                        doNotChangeDocument = true;
-                        try {
-                            comboBox.setSelectedIndex(i);
-                        } finally {
-                            doNotChangeDocument = false;
-                        }
+                        selectItemSilently(i);
 
                         // select the text after the prefix but before the end of the text
                         // (it represents the autocomplete text)
@@ -560,9 +597,17 @@ public final class AutoCompleteSupport<E> {
 
             // reset the selection since we couldn't find the prefix in the model
             // (this has the side-effect of scrolling the popup to the top)
+            selectItemSilently(-1);
+        }
+
+        /**
+         * Select the item at the given <code>index</code> without causing the
+         * JComboBox to broadcast an ActionEvent to its listeners.
+         */
+        private void selectItemSilently(int index) {
             doNotChangeDocument = true;
             try {
-                comboBox.setSelectedIndex(-1);
+                comboBoxModel.setSelectedItem(index == -1 ? null : comboBoxModel.getElementAt(index));
             } finally {
                 doNotChangeDocument = false;
             }
@@ -746,7 +791,7 @@ public final class AutoCompleteSupport<E> {
                     popup.getList().setSelectedIndex(index);
                     popup.getList().ensureIndexIsVisible(index);
                 } else {
-                    comboBox.setSelectedIndex(index);
+                    comboBoxModel.setSelectedItem(index == -1 ? null : comboBoxModel.getElementAt(index));
                 }
 
                 // if the original index wasn't valid, we've cleared the selection
@@ -976,6 +1021,62 @@ public final class AutoCompleteSupport<E> {
 
             // add our DocumentFilter to the new Document
             document.setDocumentFilter(documentFilter);
+        }
+    }
+
+    /**
+     * This factory method creates and returns a {@link DefaultCellEditor}
+     * which adapts an autocompleting {@link JComboBox} for use as a Table
+     * Cell Editor. The values within the table column are used as
+     * autocompletion terms within the {@link ComboBoxModel}.
+     *
+     * <p>If the appearance or function of the autocompleting {@link JComboBox}
+     * is to be customized, it can be retrieved using
+     * {@link DefaultCellEditor#getComponent()}.
+     *
+     * @param tableFormat specifies how each row object within a table is
+     *      broken apart into column values
+     * @param tableData the {@link EventList} backing the TableModel
+     * @param columnIndex the index of the column for which to return a Table
+     *      Cell Editor
+     * @return a {@link DefaultCellEditor} which contains an autocompleting
+     *      combobox whose contents remain consistent with the data in the
+     *      table column at the given <code>columnIndex</code>
+     */
+    public static <E> DefaultCellEditor createTableCellEditor(TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex) {
+        // use a function to extract all values for the column
+        final FunctionList.Function<E,String> columnValueFunction = new TableColumnValueFunction<E>(tableFormat, columnIndex);
+        final FunctionList<E, String> allColumnValues = new FunctionList<E, String>(tableData, columnValueFunction);
+
+        // narrow the list to just unique values within the column
+        final EventList<String> uniqueColumnValues = new UniqueList<String>(allColumnValues);
+
+        // create a DefaultCellEditor backed by an autocompleting JComboBox
+        final AutoCompleteSupport support = AutoCompleteSupport.install(new JComboBox(), uniqueColumnValues);
+        final DefaultCellEditor cellEditor = new DefaultCellEditor(support.getComboBox());
+        cellEditor.setClickCountToStart(2);
+
+        return cellEditor;
+    }
+
+    /**
+     * This function uses a TableFormat and columnIndex to extract all of the
+     * values from an object that are displayed in the given column. These
+     * values are used as autocompletion terms when editing a cell within that
+     * column.
+     */
+    private static final class TableColumnValueFunction<E> implements FunctionList.Function<E,String> {
+        private final TableFormat<E> tableFormat;
+        private final int columnIndex;
+
+        public TableColumnValueFunction(TableFormat<E> tableFormat, int columnIndex) {
+            this.tableFormat = tableFormat;
+            this.columnIndex = columnIndex;
+        }
+
+        public String evaluate(E sourceValue) {
+            final Object columnValue = tableFormat.getColumnValue(sourceValue, columnIndex);
+            return columnValue == null ? null : columnValue.toString();
         }
     }
 }
