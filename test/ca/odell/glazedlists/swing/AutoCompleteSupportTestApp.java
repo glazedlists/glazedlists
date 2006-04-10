@@ -3,20 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.TableFormat;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class AutoCompleteSupportTestApp {
 
-    private static final String[] LOOK_AND_FEEL_SELECTIONS = {
+    private static final List<String> LOOK_AND_FEEL_SELECTIONS = new ArrayList<String>(Arrays.asList(new String[] {
         "javax.swing.plaf.metal.MetalLookAndFeel",
         "apple.laf.AquaLookAndFeel",
         "com.sun.java.swing.plaf.motif.MotifLookAndFeel",
@@ -24,9 +25,11 @@ public class AutoCompleteSupportTestApp {
         "com.incors.plaf.kunststoff.KunststoffLookAndFeel",
         "com.jgoodies.looks.plastic.PlasticLookAndFeel",
         "net.java.plaf.windows.WindowsLookAndFeel"
-    };
+    }));
 
     private static final String[] URL_SAMPLE_DATA = {
+        null,
+        "",
         "http://mail.google.com/mail/",
         "http://slashdot.org/",
         "http://www.clientjava.com/blog",
@@ -44,69 +47,170 @@ public class AutoCompleteSupportTestApp {
         "http://www.indeed.com/",
     };
 
+    private static final Location[] STATE_CAPITALS_DATA = {
+        new Location("USA", "Alabama", "Montgomery"),
+        new Location("USA", "Alaska", "Juneau"),
+        new Location("USA", "Arizona", "Phoenix"),
+        new Location("USA", "Arkansas", "Little Rock"),
+        new Location("USA", "California", "Sacramento"),
+        new Location("USA", "Colorado", "Denver"),
+        new Location("USA", "Connecticut", "Hartford"),
+        new Location("USA", "Delaware", "Dover"),
+        new Location("USA", "Florida", "Tallahassee"),
+        new Location("USA", "Georgia", "Atlanta"),
+        new Location("USA", "Hawaii", "Honolulu"),
+        new Location("USA", "Idaho", "Boise"),
+        new Location("USA", "Illinois", "Springfield"),
+        new Location("USA", "Indiana", "Indianapolis"),
+        new Location("USA", "Iowa", "Des Moines"),
+        new Location("USA", "Kansas", "Topeka"),
+        new Location("USA", "Kentucky", "Frankfort"),
+        new Location("USA", "Louisiana", "Baton Rouge"),
+        new Location("USA", "Maine", "Augusta"),
+        new Location("USA", "Maryland", "Annapolis"),
+        new Location("USA", "Massachusetts", "Boston"),
+        new Location("USA", "Michigan", "Lansing"),
+        new Location("USA", "Minnesota", "Saint Paul"),
+        new Location("USA", "Mississippi", "Jackson"),
+        new Location("USA", "Missouri", "Jefferson City"),
+        new Location("USA", "Montana", "Helena"),
+        new Location("USA", "Nebraska", "Lincoln"),
+        new Location("USA", "Nevada", "Carson City"),
+        new Location("USA", "New Hampshire", "Concord"),
+        new Location("USA", "New Jersey", "Trenton"),
+        new Location("USA", "New Mexico", "Santa Fe"),
+        new Location("USA", "New York", "Albany"),
+        new Location("USA", "North Carolina", "Raleigh"),
+        new Location("USA", "North Dakota", "Bismarck"),
+        new Location("USA", "Ohio", "Columbus"),
+        new Location("USA", "Oklahoma", "Oklahoma City"),
+        new Location("USA", "Oregon", "Salem"),
+        new Location("USA", "Pennsylvania", "Harrisburg"),
+        new Location("USA", "Rhode Island", "Providence"),
+        new Location("USA", "South Carolina", "Columbia"),
+        new Location("USA", "South Dakota", "Pierre"),
+        new Location("USA", "Tennessee", "Nashville"),
+        new Location("USA", "Texas", "Austin"),
+        new Location("USA", "Utah", "Salt Lake City"),
+        new Location("USA", "Vermont", "Montpelier"),
+        new Location("USA", "Virginia", "Richmond"),
+        new Location("USA", "Washington", "Olympia"),
+        new Location("USA", "West Virginia", "Charleston"),
+        new Location("USA", "Wisconsin", "Madison"),
+        new Location("USA", "Wyoming", "Cheyenne")
+    };
+
     /** The currently installed look and feel. */
-    protected String currentLookAndFeel = LOOK_AND_FEEL_SELECTIONS[0];
+    private String currentLookAndFeel;
 
     /** The last AutoCompleteSupport object installed. */
     private AutoCompleteSupport autoCompleteSupport;
 
-    private final JComboBox autocompleteComboBox = new JComboBox();
+    /** The single JComboBox on which AutoCompleteSupport is repeatedly installed and uninstalled. */
+    private final JComboBox autoCompleteComboBox = new JComboBox();
 
     /** The test application's frame. */
     private final JFrame frame;
 
+    /** The panel which allows the user to change the behaviour of the {@link #autoCompleteComboBox}. */
     private final JPanel tweakerPanel;
 
-    private final JCheckBox correctCase = new JCheckBox();
+    private final JPanel actionPanel;
 
+    private final DefaultListModel actionListModel = new DefaultListModel();
+
+    private final JList actionList = new JList(actionListModel);
+
+    private final JTable table = new JTable();
+
+    /** A checkbox to toggle whether the {@link #autoCompleteSupport} toggles the case of the user input to match the autocomplete term. */
+    private final JCheckBox correctsCaseCheckBox = new JCheckBox();
+
+    /** The ButtonGroup to which all Look & Feel radio buttons belong. */
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
     public AutoCompleteSupportTestApp() {
-        correctCase.addActionListener(new CorrectCaseActionHandler());
-        correctCase.setSelected(true);
+        final EventList<Location> locations = new BasicEventList<Location>();
+        locations.addAll(Arrays.asList(STATE_CAPITALS_DATA));
+        final String[] propertyNames = {"country", "state", "city"};
+        final String[] columnLabels = {"Country", "State", "City"};
+        final boolean[] writable = {true, true, true};
+        final TableFormat<Location> tableFormat = GlazedLists.tableFormat(propertyNames, columnLabels, writable);
+        table.setModel(new EventTableModel<Location>(locations, tableFormat));
+
+        // install a DefaultCellEditor with autocompleting support in each column
+        for (int i = 0; i < propertyNames.length; i++) {
+            final DefaultCellEditor cellEditor = AutoCompleteSupport.createTableCellEditor(tableFormat, locations, i);
+            table.getColumnModel().getColumn(i).setCellEditor(cellEditor);
+        }
+
+        autoCompleteComboBox.addActionListener(new RecordActionHandler());
+
+        actionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
 
         tweakerPanel = createTweakerPanel();
+        actionPanel = createActionPanel();
 
         frame = new JFrame("AutoCompleteSupport Test Application");
         frame.setJMenuBar(createLafMenuBar());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BorderLayout());
 
-        rebuildPanel();
+        rebuildContentPane();
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }
 
-    private void rebuildPanel() {
-        frame.getContentPane().removeAll();
-        frame.getContentPane().add(tweakerPanel, BorderLayout.NORTH);
-        frame.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
+        // initialize the tweaker panel
+        correctsCaseCheckBox.addActionListener(new CorrectCaseActionHandler());
+        correctsCaseCheckBox.setSelected(autoCompleteSupport.getCorrectsCase());
     }
 
     /**
-     * A local factory method to produce a JMenuBar that allows the Look&Feel
-     * to be changed to any of the common Swing Look&Feels.
+     * Rebuilds the main panel from scratch and refreshes the UI.
+     */
+    private void rebuildContentPane() {
+        frame.getContentPane().removeAll();
+        frame.getContentPane().add(tweakerPanel, BorderLayout.NORTH);
+        frame.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
+        frame.getContentPane().add(actionPanel, BorderLayout.WEST);
+    }
+
+    /**
+     * A local factory method to produce a JMenuBar that allows the L&F
+     * to be changed to any of the common Swing L&Fs.
      */
     private JMenuBar createLafMenuBar() {
         final JMenuBar menuBar = new JMenuBar();
 
-        final JMenu lafMenu = menuBar.add(new JMenu("Look And Feel"));
+        // add a L&F menu to the menu bar
+        final JMenu lafMenu = menuBar.add(new JMenu("Look & Feel"));
         lafMenu.setMnemonic('L');
 
-        // add the look and feel menu items
-        for (int i = 0; i < LOOK_AND_FEEL_SELECTIONS.length; i++)
-            createLafMenuItem(lafMenu, lafMenuGroup, LOOK_AND_FEEL_SELECTIONS[i]);
+        // add the currently installed L&F to the list of available L&Fs if it isn't present
+        final String currentLandF = UIManager.getLookAndFeel().getClass().getName();
+        if (!LOOK_AND_FEEL_SELECTIONS.contains(currentLandF))
+            LOOK_AND_FEEL_SELECTIONS.add(0, currentLandF);
 
-        ((JMenuItem) lafMenu.getMenuComponent(0)).setSelected(true);
+        // add a menu item for each of the L&Fs
+        for (Iterator<String> i = LOOK_AND_FEEL_SELECTIONS.iterator(); i.hasNext();)
+            createLafMenuItem(lafMenu, i.next());
 
         return menuBar;
     }
 
-    private JMenuItem createLafMenuItem(JMenu menu, ButtonGroup lafMenuGroup, String laf) {
-        final JMenuItem menuItem = menu.add(new JRadioButtonMenuItem(laf));
+    /**
+     * A local factory method to produce a JMenuItem for a given L&F.
+     */
+    private JMenuItem createLafMenuItem(JMenu menu, String laf) {
+        final JRadioButtonMenuItem menuItem = (JRadioButtonMenuItem) menu.add(new JRadioButtonMenuItem(laf));
         menuItem.addActionListener(new ChangeLookAndFeelAction());
         menuItem.setEnabled(isAvailableLookAndFeel(laf));
+
+        if (laf.equals(UIManager.getLookAndFeel().getClass().getName())) {
+            menuItem.setSelected(true);
+            currentLookAndFeel = laf;
+        }
 
         lafMenuGroup.add(menuItem);
 
@@ -127,10 +231,6 @@ public class AutoCompleteSupportTestApp {
      * <code>laf</code>.
      */
     private class ChangeLookAndFeelAction extends AbstractAction {
-        protected ChangeLookAndFeelAction() {
-            super("Change Look And Feel");
-        }
-
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.uninstall();
 
@@ -143,7 +243,7 @@ public class AutoCompleteSupportTestApp {
                 UIManager.setLookAndFeel(currentLookAndFeel);
                 SwingUtilities.updateComponentTreeUI(frame);
 
-                rebuildPanel();
+                rebuildContentPane();
             } catch (Exception ex) {
                 System.err.println("Failed loading L&F: " + currentLookAndFeel);
                 System.err.println(ex);
@@ -153,16 +253,24 @@ public class AutoCompleteSupportTestApp {
 
     private class CorrectCaseActionHandler implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            final boolean willCorrectCase = correctCase.isSelected();
-            autoCompleteSupport.setCorrectsCase(willCorrectCase);
+            autoCompleteSupport.setCorrectsCase(correctsCaseCheckBox.isSelected());
         }
     }
 
     private JPanel createTweakerPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
 
-        panel.add(new JLabel("Correct Case:"),      new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(correctCase,                      new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Corrects Case:"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(correctsCaseCheckBox,         new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+        return panel;
+    }
+
+    private JPanel createActionPanel() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+
+        panel.add(new JLabel("JComboBox ActionEvent Log"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
+        panel.add(new JScrollPane(actionList),             new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
 
         return panel;
     }
@@ -179,9 +287,9 @@ public class AutoCompleteSupportTestApp {
 
         // setting a prototype value prevents the combo box from resizing when
         // the model contents are filtered away
-        autocompleteComboBox.setPrototypeDisplayValue("http://java.sun.com/j2se/1.5.0/download.jsp");
-        autoCompleteSupport = AutoCompleteSupport.install(autocompleteComboBox, items, filterator);
-        autoCompleteSupport.setCorrectsCase(correctCase.isSelected());
+        autoCompleteComboBox.setPrototypeDisplayValue("http://java.sun.com/j2se/1.5.0/download.jsp");
+        autoCompleteSupport = AutoCompleteSupport.install(autoCompleteComboBox, items, filterator);
+        autoCompleteSupport.setCorrectsCase(correctsCaseCheckBox.isSelected());
 
         final JComboBox plainComboBox = new JComboBox();
         plainComboBox.setEditable(true);
@@ -192,14 +300,17 @@ public class AutoCompleteSupportTestApp {
 
         final JLabel nameLabel = new JLabel(lookAndFeelName);
 
+        final JScrollPane tableScroller = new JScrollPane(table);
+        tableScroller.setPreferredSize(new Dimension(1, 200));
 
         if (comboBoxCount > 1)
-            panel.add(Box.createVerticalStrut(1),   new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+            panel.add(Box.createVerticalStrut(1), new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(nameLabel,                        new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(autocompleteComboBox,             new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(Box.createHorizontalStrut(5),     new GridBagConstraints(1, 3, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(plainComboBox,                    new GridBagConstraints(2, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(nameLabel,                      new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(autoCompleteComboBox,           new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(Box.createHorizontalStrut(5),   new GridBagConstraints(1, 2, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(plainComboBox,                  new GridBagConstraints(2, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(tableScroller,                  new GridBagConstraints(0, 3, 3, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 0, 0, 0), 0, 0));
 
         return panel;
     }
@@ -212,6 +323,36 @@ public class AutoCompleteSupportTestApp {
         public void run() {
             new AutoCompleteSupportTestApp();
         }
+    }
+
+    private final class RecordActionHandler implements ActionListener {
+        private int count = 0;
+
+        public void actionPerformed(ActionEvent e) {
+            final String actionSummary = String.valueOf(++count) + ": " + autoCompleteComboBox.getSelectedItem();
+            actionListModel.add(0, actionSummary);
+        }
+    }
+
+    public static final class Location {
+        private String country;
+        private String state;
+        private String city;
+
+        public Location(String country, String state, String city) {
+            this.country = country;
+            this.state = state;
+            this.city = city;
+        }
+
+        public String getCountry() { return country; }
+        public void setCountry(String country) { this.country = country; }
+
+        public String getState() { return state; }
+        public void setState(String state) { this.state = state; }
+
+        public String getCity() { return city; }
+        public void setCity(String city) { this.city = city; }
     }
 
     /**
@@ -227,10 +368,12 @@ public class AutoCompleteSupportTestApp {
     private static final class URLTextFilterator implements TextFilterator<String> {
         public void getFilterStrings(List<String> baseList, String element) {
             baseList.add(element);
-            if (element.startsWith("http://"))
-                baseList.add(element.substring(7));
-            if (element.startsWith("http://www."))
-                baseList.add(element.substring(11));
+            if (element != null) {
+                if (element.startsWith("http://"))
+                    baseList.add(element.substring(7));
+                if (element.startsWith("http://www."))
+                    baseList.add(element.substring(11));
+            }
         }
     }
 }
