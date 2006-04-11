@@ -19,7 +19,7 @@ public class ListDeltasTest extends TestCase {
         List original = GlazedListsTests.stringToList("FILTER");
         List current = new ArrayList(original);
 
-        ListDeltas deltas = new ListDeltas();
+        BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());
 
         current.remove(2);
@@ -56,7 +56,7 @@ public class ListDeltasTest extends TestCase {
         List original = GlazedListsTests.stringToList("FILTER");
         List current = new ArrayList(original);
 
-        ListDeltas deltas = new ListDeltas();
+        BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());
 
         current.remove(1);
@@ -96,7 +96,7 @@ public class ListDeltasTest extends TestCase {
         List original = GlazedListsTests.stringToList("FILTER");
         List current = new ArrayList(original);
 
-        ListDeltas deltas = new ListDeltas();
+        BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());
 
         current.remove(1);
@@ -121,7 +121,7 @@ public class ListDeltasTest extends TestCase {
 
         assertConsistent(original, deltas, current);
 
-        ListDeltas.Iterator iterator = deltas.iterator();
+        BarcodeListDeltas.Iterator iterator = deltas.iterator();
         assertEquals(true, iterator.next());
         assertEquals(ListEvent.UPDATE, iterator.getType());
         assertEquals(0, iterator.getIndex());
@@ -150,7 +150,7 @@ public class ListDeltasTest extends TestCase {
         List original = GlazedListsTests.stringToList("JA");
         List current = new ArrayList(original);
 
-        ListDeltas deltas = new ListDeltas();
+        BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());
 
         current.add(2, "M");
@@ -159,7 +159,7 @@ public class ListDeltasTest extends TestCase {
 
         assertConsistent(original, deltas, current);
 
-        ListDeltas.Iterator iterator = deltas.iterator();
+        BarcodeListDeltas.Iterator iterator = deltas.iterator();
         assertEquals(true, iterator.next());
         assertEquals(ListEvent.INSERT, iterator.getType());
         assertEquals(2, iterator.getIndex());
@@ -186,7 +186,7 @@ public class ListDeltasTest extends TestCase {
         nesting.commitEvent();
     }
 
-    public void assertConsistent(List original, ListDeltas deltas, List current) {
+    public void assertConsistent(List original, BarcodeListDeltas deltas, List current) {
         // test the original to current mapping
         for(int i = 0; i < original.size(); i++) {
             Object valueInOriginal = original.get(i);

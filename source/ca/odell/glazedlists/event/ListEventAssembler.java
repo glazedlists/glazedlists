@@ -34,14 +34,12 @@ public final class ListEventAssembler<E> {
 //        delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
 
         String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-        if(driver == null) {
-            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("blocks")) {
-            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("deltas")) {
-            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("deltas2")) {
-            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
+        if(driver == null || driver.equals("blockdeltas")) {
+            delegate = new BlockDeltasAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("barcodedeltas")) {
+            delegate = new BarcodeDeltasAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("treedeltas")) {
+            delegate = new TreeDeltasAssembler<E>(sourceList, publisher);
         } else {
             throw new IllegalStateException();
         }
@@ -406,16 +404,16 @@ public final class ListEventAssembler<E> {
     }
 
     /**
-     * ListEventAssembler using {@link ListDeltas} to store list changes.
+     * ListEventAssembler using {@link BarcodeListDeltas} to store list changes.
      */
-    static class ListDeltasAssembler<E> extends AssemblerHelper<E> {
+    static class BarcodeDeltasAssembler<E> extends AssemblerHelper<E> {
 
-        private ListDeltas listDeltas = new ListDeltas();
+        private BarcodeListDeltas listDeltas = new BarcodeListDeltas();
 
         /**
          * Creates a new ListEventAssembler that tracks changes for the specified list.
          */
-        public ListDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
+        public BarcodeDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
             this.sourceList = sourceList;
             this.publisher = publisher;
         }
@@ -436,7 +434,7 @@ public final class ListEventAssembler<E> {
             }
         }
 
-        public ListDeltas getListDeltas() {
+        public BarcodeListDeltas getListDeltas() {
             return listDeltas;
         }
 
@@ -500,30 +498,28 @@ public final class ListEventAssembler<E> {
         }
 
         protected ListEvent<E> createListEvent() {
-            return new ListDeltasListEvent<E>(this, sourceList);
+            return new BarcodeListDeltasListEvent<E>(this, sourceList);
         }
     }
 
 
 
     /**
-     * ListEventAssembler using {@link ListDeltas2} to store list changes.
+     * ListEventAssembler using {@link TreeDeltas} to store list changes.
      */
-    static class ListDeltas2Assembler<E> extends AssemblerHelper<E> {
+    static class TreeDeltasAssembler<E> extends AssemblerHelper<E> {
 
         /** prefer to use the linear blocks, which are more performant but handle only a subset of all cases */
-        private ListBlocksLinear listBlocksLinear = new ListBlocksLinear();
+        private BlockSequence blockSequence = new BlockSequence();
         private boolean useListBlocksLinear = false;
 
         /** fall back to list deltas 2, which are capable of all list changes */
-        private ListDeltas2 listDeltas = new ListDeltas2();
-        /** the size of the source eventlist at the end of the most recent change */
-        private int sourceSize = -1;
+        private TreeDeltas listDeltas = new TreeDeltas();
 
         /**
          * Creates a new ListEventAssembler that tracks changes for the specified list.
          */
-        public ListDeltas2Assembler(EventList<E> sourceList, ListEventPublisher publisher) {
+        public TreeDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
             this.sourceList = sourceList;
             this.publisher = publisher;
         }
@@ -539,11 +535,11 @@ public final class ListEventAssembler<E> {
         public void addChange(int type, int startIndex, int endIndex) {
             // try the linear holder first
             if(useListBlocksLinear) {
-                boolean success = listBlocksLinear.addChange(type, startIndex, endIndex + 1);
+                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1);
                 if(success) {
                     return;
                 } else {
-                    listDeltas.addAll(listBlocksLinear);
+                    listDeltas.addAll(blockSequence);
                     useListBlocksLinear = false;
                 }
             }
@@ -562,17 +558,17 @@ public final class ListEventAssembler<E> {
             return useListBlocksLinear;
         }
 
-        public ListDeltas2 getListDeltas() {
+        public TreeDeltas getListDeltas() {
             return listDeltas;
         }
 
-        public ListBlocksLinear getListBlocksLinear() {
-            return listBlocksLinear;
+        public BlockSequence getListBlocksLinear() {
+            return blockSequence;
         }
 
         /** {@inheritDoc} */
         public boolean isEventEmpty() {
-            if(useListBlocksLinear) return listBlocksLinear.isEmpty();
+            if(useListBlocksLinear) return blockSequence.isEmpty();
             else return listDeltas.isEmpty();
         }
 
@@ -601,7 +597,7 @@ public final class ListEventAssembler<E> {
 
             // clear the change for the next caller
             } finally {
-                listBlocksLinear.reset();
+                blockSequence.reset();
                 listDeltas.reset(sourceList.size());
                 reorderMap = null;
                 allowContradictingEvents = false;
@@ -634,7 +630,7 @@ public final class ListEventAssembler<E> {
         }
 
         protected ListEvent<E> createListEvent() {
-            return new ListDeltas2ListEvent<E>(this, sourceList);
+            return new TreeDeltasListEvent<E>(this, sourceList);
         }
 
         public String toString() {
@@ -644,31 +640,31 @@ public final class ListEventAssembler<E> {
 
 
     /**
-     * ListEventAssembler using {@link ListEventBlock}s to store list changes.
+     * ListEventAssembler using {@link Block}s to store list changes.
      */
-    static class ListEventBlocksAssembler<E> extends AssemblerHelper<E> {
+    static class BlockDeltasAssembler<E> extends AssemblerHelper<E> {
 
         /** the current working copy of the atomic change */
-        private List<ListEventBlock> atomicChangeBlocks = null;
+        private List<Block> atomicChangeBlocks = null;
         /** the most recent list change; this is the only change we can append to */
-        private ListEventBlock atomicLatestBlock = null;
+        private Block atomicLatestBlock = null;
 
         /**
          * Creates a new ListEventAssembler that tracks changes for the specified list.
          */
-        public ListEventBlocksAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
+        public BlockDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
             this.sourceList = sourceList;
             this.publisher = publisher;
         }
 
         /** {@inheritDoc} */
         protected ListEvent<E> createListEvent() {
-            return new ListEventBlocksListEvent<E>(this, sourceList);
+            return new BlockDeltasListEvent<E>(this, sourceList);
         }
 
         /** {@inheritDoc} */
         protected void prepareEvent() {
-            atomicChangeBlocks = new ArrayList<ListEventBlock>();
+            atomicChangeBlocks = new ArrayList<Block>();
             atomicLatestBlock = null;
             reorderMap = null;
         }
@@ -682,7 +678,7 @@ public final class ListEventAssembler<E> {
             }
 
             // create a new block for the change
-            atomicLatestBlock = new ListEventBlock(startIndex, endIndex, type);
+            atomicLatestBlock = new Block(startIndex, endIndex, type);
             atomicChangeBlocks.add(atomicLatestBlock);
         }
 
@@ -716,7 +712,7 @@ public final class ListEventAssembler<E> {
 
         /** {@inheritDoc} */
         protected void fireEvent() {
-            ListEventBlock.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
+            Block.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
 
             try {
                 // bail on empty changes
@@ -746,10 +742,10 @@ public final class ListEventAssembler<E> {
         /**
          * Gets the list of blocks for the specified atomic change.
          *
-         * @return a List containing the sequence of {@link ListEventBlock}s modelling
+         * @return a List containing the sequence of {@link Block}s modelling
          *      the specified change. It is an error to modify this list or its contents.
          */
-        List<ListEventBlock> getBlocks() {
+        List<Block> getBlocks() {
             return atomicChangeBlocks;
         }
     }

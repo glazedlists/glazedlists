@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 /**
  * Working copy of a class to eventually become a proper replacement for
- * {@link ListEventBlock}s.
+ * {@link Block}s.
  *
  * <li>Test cases fail due to no copy constructor in {@link ListEvent}
  * <li>Logic to find appropriate index doing an extra layer of mapping isn't nice
@@ -21,7 +21,7 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class ListDeltas2 {
+class TreeDeltas {
 
     private static final String LIST_CHANGE = "*";
     private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList(new String[] { "+", "U", "X", "_" }));
@@ -137,8 +137,8 @@ class ListDeltas2 {
     /**
      * Add all the specified changes to this.
      */
-    void addAll(ListBlocksLinear blocks) {
-        for(ListBlocksLinear.Iterator i = blocks.iterator(); i.nextBlock(); ) {
+    void addAll(BlockSequence blocks) {
+        for(BlockSequence.Iterator i = blocks.iterator(); i.nextBlock(); ) {
             int blockStart = i.getBlockStart();
             int blockEnd = i.getBlockEnd();
             int type = i.getType();

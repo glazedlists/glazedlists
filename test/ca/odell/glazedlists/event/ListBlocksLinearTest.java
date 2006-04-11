@@ -14,7 +14,7 @@ public class ListBlocksLinearTest extends TestCase {
      * Test if simple changes to the linear blocks work as expected.
      */
     public void testSimpleChanges() {
-        ListBlocksLinear listBlocks = new ListBlocksLinear();
+        BlockSequence listBlocks = new BlockSequence();
         listBlocks.insert(0, 2);
         listBlocks.insert(4, 6);
         listBlocks.delete(8, 10);
@@ -22,7 +22,7 @@ public class ListBlocksLinearTest extends TestCase {
         listBlocks.update(12, 14);
         listBlocks.update(16, 18);
 
-        ListBlocksLinear.Iterator iterator = listBlocks.iterator();
+        BlockSequence.Iterator iterator = listBlocks.iterator();
         assertNext(0, ListEvent.INSERT, iterator);
         assertNext(1, ListEvent.INSERT, iterator);
         assertNext(4, ListEvent.INSERT, iterator);
@@ -42,7 +42,7 @@ public class ListBlocksLinearTest extends TestCase {
      * Test if combining changes to the linear blocks work as expected.
      */
     public void testCombiningChanges() {
-        ListBlocksLinear listBlocks = new ListBlocksLinear();
+        BlockSequence listBlocks = new BlockSequence();
         listBlocks.insert(0, 2);
         listBlocks.insert(2, 4);
         listBlocks.delete(4, 6);
@@ -54,7 +54,7 @@ public class ListBlocksLinearTest extends TestCase {
         listBlocks.insert(8, 10);
         listBlocks.update(10, 12);
 
-        ListBlocksLinear.Iterator iterator = listBlocks.iterator();
+        BlockSequence.Iterator iterator = listBlocks.iterator();
         assertNext(0, ListEvent.INSERT, iterator);
         assertNext(1, ListEvent.INSERT, iterator);
         assertNext(2, ListEvent.INSERT, iterator);
@@ -83,62 +83,62 @@ public class ListBlocksLinearTest extends TestCase {
      * out of order.
      */
     public void testOutOfOrder() {
-        ListBlocksLinear listBlocks;
+        BlockSequence listBlocks;
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.insert(0, 2));
         assertTrue(listBlocks.insert(2, 3));
         assertFalse(listBlocks.insert(2, 3));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.delete(2, 4));
         assertTrue(listBlocks.delete(2, 3));
         assertFalse(listBlocks.delete(1, 2));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.update(2, 4));
         assertTrue(listBlocks.update(4, 5));
         assertFalse(listBlocks.update(4, 5));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.insert(2, 4));
         assertFalse(listBlocks.update(3, 4));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.insert(2, 4));
         assertFalse(listBlocks.delete(3, 4));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.update(2, 4));
         assertFalse(listBlocks.delete(3, 4));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.update(2, 4));
         assertFalse(listBlocks.insert(3, 4));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.delete(2, 4));
         assertTrue(listBlocks.insert(2, 4));
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.delete(2, 4));
         assertFalse(listBlocks.insert(1, 2));
 
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.delete(2, 4));
         assertTrue(listBlocks.update(2, 4));
-        listBlocks = new ListBlocksLinear();
+        listBlocks = new BlockSequence();
         assertTrue(listBlocks.delete(2, 4));
         assertFalse(listBlocks.update(1, 2));
     }
 
-    public static final void assertNext(int index, int type, ListBlocksLinear.Iterator iterator) {
+    public static final void assertNext(int index, int type, BlockSequence.Iterator iterator) {
         assertEquals(true, iterator.hasNext());
         assertEquals(true, iterator.next());
         assertEquals(index, iterator.getIndex());
         assertEquals(type, iterator.getType());
     }
 
-    public static final void assertComplete(ListBlocksLinear.Iterator iterator) {
+    public static final void assertComplete(BlockSequence.Iterator iterator) {
         assertEquals(false, iterator.hasNext());
     }
 }

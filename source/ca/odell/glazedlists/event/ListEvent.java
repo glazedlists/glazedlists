@@ -115,7 +115,7 @@ public abstract class ListEvent<E> extends EventObject {
      *      how list events are stored internally, and this implementation has
      *      since changed.
      */
-    abstract List<ListEventBlock> getBlocks();
+    abstract List<Block> getBlocks();
 
     /**
      * Gets the number of blocks currently remaining in this atomic change.

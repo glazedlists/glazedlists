@@ -5,16 +5,13 @@ package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Manage a very simple list of list event blocks that occur in
  * increasing-only order.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class ListBlocksLinear {
+class BlockSequence {
 
     private TIntArrayList starts = new TIntArrayList();
     private TIntArrayList ends = new TIntArrayList();

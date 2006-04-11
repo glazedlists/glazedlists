@@ -9,18 +9,18 @@
     <param name="japex.runTime" value="10"/>
 
     <driver name="List Event Blocks">
-        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.ListEventBlocksDriver"/>
+        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.BlockDeltasDriver"/>
         <param name="description" value="List Event Blocks"/>
     </driver>
 
     <driver name="List Event Deltas">
-        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.ListEventDeltasDriver"/>
-        <param name="description" value="List Event Deltas"/>
+        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.BarcodeDeltasDriver"/>
+        <param name="description" value="Barcode Deltas"/>
     </driver>
 
     <driver name="List Event Deltas 2">
-        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.ListEventDeltas2Driver"/>
-        <param name="description" value="List Event Deltas 2"/>
+        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.TreeDeltasDriver"/>
+        <param name="description" value="Tree Deltas"/>
     </driver>
 
     <testCase name="List Event Performance">

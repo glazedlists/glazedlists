@@ -8,11 +8,11 @@ import ca.odell.glazedlists.impl.adt.Barcode;
 /**
  * Manage the deltas between a List and a revision of that list. This is a
  * technology preview for an approach that may ultimately replace our current
- * {@link ListEventBlock} strategy for tracking changes between Lists.
+ * {@link Block} strategy for tracking changes between Lists.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class ListDeltas {
+class BarcodeListDeltas {
 
     /**
      * This barcode is black for every element in the snapshot that hasn't

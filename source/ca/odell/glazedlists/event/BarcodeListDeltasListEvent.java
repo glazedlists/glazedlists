@@ -8,23 +8,26 @@ import ca.odell.glazedlists.EventList;
 import java.util.List;
 
 /**
- * Strictly a cut&paste of {@link ListDeltasListEvent}, see {@link ListDeltas2}.
+ * A list event that iterates {@link BarcodeListDeltas} as the
+ * datastore.
  *
  * <p><font color="#FF0000"><strong>Warning: </strong></font> this
  * class is part of an experimental new API.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class ListDeltas2ListEvent<E> extends ListEvent<E> {
+class BarcodeListDeltasListEvent<E> extends ListEvent<E> {
 
-    private ListDeltas2.Iterator deltasIterator;
-    private ListBlocksLinear.Iterator linearIterator;
+    private BarcodeListDeltas.Iterator iterator;
 
-    private ListEventAssembler.ListDeltas2Assembler deltasAssembler;
+    private ListEventAssembler.BarcodeDeltasAssembler deltasAssembler;
 
-    public ListDeltas2ListEvent(ListEventAssembler.ListDeltas2Assembler deltasAssembler, EventList<E> sourceList) {
+    public BarcodeListDeltasListEvent(ListEventAssembler.BarcodeDeltasAssembler deltasAssembler, EventList<E> sourceList) {
         super(sourceList);
         this.deltasAssembler = deltasAssembler;
+
+        // start at the beginning of the iterator
+        this.iterator = deltasAssembler.getListDeltas().iterator();
     }
 
     public ListEvent copy() {
@@ -32,26 +35,15 @@ class ListDeltas2ListEvent<E> extends ListEvent<E> {
     }
 
     public void reset() {
-        // prefer to use the linear blocks, which are faster
-        if(deltasAssembler.getUseListBlocksLinear()) {
-            this.linearIterator = deltasAssembler.getListBlocksLinear().iterator();
-            this.deltasIterator = null;
-
-        // otherwise use the deltas, which are more general
-        } else {
-            this.deltasIterator = deltasAssembler.getListDeltas().iterator();
-            this.linearIterator = null;
-        }
+        iterator = deltasAssembler.getListDeltas().iterator();
     }
 
     public boolean next() {
-        if(linearIterator != null) return linearIterator.next();
-        else return deltasIterator.next();
+        return iterator.next();
     }
 
     public boolean hasNext() {
-        if(linearIterator != null) return linearIterator.hasNext();
-        else return deltasIterator.hasNext();
+        return iterator.hasNext();
     }
 
     public boolean nextBlock() {
@@ -69,8 +61,7 @@ class ListDeltas2ListEvent<E> extends ListEvent<E> {
     }
 
     public int getIndex() {
-        if(linearIterator != null) return linearIterator.getIndex();
-        else return deltasIterator.getIndex();
+        return iterator.getIndex();
     }
 
     public int getBlockStartIndex() {
@@ -82,8 +73,7 @@ class ListDeltas2ListEvent<E> extends ListEvent<E> {
     }
 
     public int getType() {
-        if(linearIterator != null) return linearIterator.getType();
-        else return deltasIterator.getType();
+        return iterator.getType();
     }
 
     List getBlocks() {

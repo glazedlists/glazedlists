@@ -21,21 +21,21 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-final class ListEventBlocksListEvent<E> extends ListEvent<E> {
+final class BlockDeltasListEvent<E> extends ListEvent<E> {
     
     /** the number of blocks of changes seen by this view */
     private int blockCount;
     /** the current change block */
-    private ListEventBlock currentBlock = null;
+    private Block currentBlock = null;
     /** the row index into the current change */
     private int rowIndex;
 
-    private ListEventAssembler.ListEventBlocksAssembler blocksAssembler;
+    private ListEventAssembler.BlockDeltasAssembler blocksAssembler;
     /**
      * Create a new list change sequence that uses the source master list
      * for the source of changes.
      */
-    ListEventBlocksListEvent(ListEventAssembler.ListEventBlocksAssembler blocksAssembler, EventList<E> sourceList) {
+    BlockDeltasListEvent(ListEventAssembler.BlockDeltasAssembler blocksAssembler, EventList<E> sourceList) {
         super(sourceList);
         this.blocksAssembler = blocksAssembler;
 
@@ -56,7 +56,7 @@ final class ListEventBlocksListEvent<E> extends ListEvent<E> {
      * this way the existance of values in the original list guarantees that
      * such values will be visible to the clone.
      */
-    public ListEventBlocksListEvent(ListEventBlocksListEvent<E> original) {
+    public BlockDeltasListEvent(BlockDeltasListEvent<E> original) {
         super(original.sourceList);
         this.blocksAssembler = original.blocksAssembler;
         this.blockCount = original.blockCount;
@@ -67,7 +67,7 @@ final class ListEventBlocksListEvent<E> extends ListEvent<E> {
 
     /** {@inheritDoc} */
     public ListEvent copy() {
-        return new ListEventBlocksListEvent<E>(this);
+        return new BlockDeltasListEvent<E>(this);
     }
 
     /** {@inheritDoc} */
@@ -166,7 +166,7 @@ final class ListEventBlocksListEvent<E> extends ListEvent<E> {
     }
     
     /** {@inheritDoc} */
-    List<ListEventBlock> getBlocks() {
+    List<Block> getBlocks() {
         return blocksAssembler.getBlocks();
     }
     

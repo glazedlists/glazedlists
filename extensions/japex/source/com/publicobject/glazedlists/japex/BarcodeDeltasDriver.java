@@ -6,9 +6,9 @@ package com.publicobject.glazedlists.japex;
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListEventDeltasDriver extends ListEventAssemblerDriver {
+public class BarcodeDeltasDriver extends ListEventAssemblerDriver {
 
     public void initializeDriver() {
-        System.setProperty("GlazedLists.ListEventAssemblerDelegate", "deltas");
+        System.setProperty("GlazedLists.ListEventAssemblerDelegate", "barcodedeltas");
     }
 }

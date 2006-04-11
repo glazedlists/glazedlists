@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-final class ListEventBlock {
+final class Block {
     
     /** the range of indices that have changed, inclusive */
     private int startIndex;
@@ -24,7 +24,7 @@ final class ListEventBlock {
     /**
      * Create a new single-entry list change of the specified index and type.
      */
-    ListEventBlock(int index, int type) {
+    Block(int index, int type) {
         this(index, index, type);
     }
     
@@ -32,7 +32,7 @@ final class ListEventBlock {
      * Create a new single-entry list change of the specified start index, end
      * index and type.
      */
-    ListEventBlock(int startIndex, int endIndex, int type) {
+    Block(int startIndex, int endIndex, int type) {
         setData(startIndex, endIndex, type);
     }
 
@@ -134,7 +134,7 @@ final class ListEventBlock {
      *      delete, an update that is wiped away with a delete, or an insert that
      *      is later updated.
      */
-    static void sortListEventBlocks(List<ListEventBlock> changes, boolean allowContradictingEvents) {
+    static void sortListEventBlocks(List<Block> changes, boolean allowContradictingEvents) {
         // bubblesort the changes
         while(true) {
             // count the number of swaps made on this repetition
@@ -142,15 +142,15 @@ final class ListEventBlock {
             // for each adjacent pair, make any swaps necessary
             int j = 0;
             while(j < changes.size() - 1) {
-                ListEventBlock first = changes.get(j);
-                ListEventBlock second = changes.get(j+1);
+                Block first = changes.get(j);
+                Block second = changes.get(j+1);
 
                 if(blocksContradict(first, second)) {
                     if(!allowContradictingEvents) throw new IllegalStateException("Change blocks " + first + " and " + second + " intersect");
                     simplifyContradiction(changes.subList(j, j+2));
                     swapCount++;
                 } else if(requiresSplit(first, second)) {
-                    ListEventBlock third = split(first, second);
+                    Block third = split(first, second);
                     changes.add(j+2, third);
                 } else if(canBeCombined(first, second)) {
                     combine(first, second);
@@ -184,7 +184,7 @@ final class ListEventBlock {
      *
      * @return true if the blocks contradict.
      */
-    private static boolean blocksContradict(ListEventBlock first, ListEventBlock second) {
+    private static boolean blocksContradict(Block first, Block second) {
         // if the ranges intersect
         boolean rangesIntersect = (first.endIndex >= second.startIndex && first.startIndex <= second.endIndex);
         if(!rangesIntersect) return false;
@@ -201,10 +201,10 @@ final class ListEventBlock {
     /**
      * Removes the contradiction contained within the specified list of two blocks.
      */
-    private static void simplifyContradiction(List<ListEventBlock> contradictingPair) {
+    private static void simplifyContradiction(List<Block> contradictingPair) {
         if(contradictingPair.size() != 2) throw new IllegalStateException();
-        ListEventBlock first = contradictingPair.get(0);
-        ListEventBlock second = contradictingPair.get(1);
+        Block first = contradictingPair.get(0);
+        Block second = contradictingPair.get(1);
 
         // get the overlap range
         int commonStart = Math.max(first.startIndex, second.startIndex);
@@ -258,7 +258,7 @@ final class ListEventBlock {
      *
      * @return true if two adjacent blocks are out of order.
      */
-    private static boolean requiresSwap(ListEventBlock first, ListEventBlock second) {
+    private static boolean requiresSwap(Block first, Block second) {
         // verify no intersection
         /*if(first.type == ListEvent.INSERT && second.type != ListEvent.INSERT) {
             if(first.endIndex >= second.startIndex && first.startIndex <= second.endIndex) {
@@ -278,7 +278,7 @@ final class ListEventBlock {
      * Tests if the specified pair of list change blocks can be combined into
      * a single larget list change block.
      */
-    private static boolean canBeCombined(ListEventBlock first, ListEventBlock second) {
+    private static boolean canBeCombined(Block first, Block second) {
         if(first.type != second.type) return false;
         
         if(first.type == ListEvent.INSERT) {
@@ -297,7 +297,7 @@ final class ListEventBlock {
      * have been combined, the first block contains all data from the first and second
      * blocks.
      */
-    private static void combine(ListEventBlock first, ListEventBlock second) {
+    private static void combine(Block first, Block second) {
         if(first.type == ListEvent.INSERT || first.type == ListEvent.DELETE) {
             int startIndex = Math.min(first.startIndex, second.startIndex);
             int length = first.getLength() + second.getLength();
@@ -317,7 +317,7 @@ final class ListEventBlock {
      * as a consequence of the specified list change block being inserted in front
      * of it in a sequence.
      */
-    private static void shift(ListEventBlock alpha, ListEventBlock beta) {
+    private static void shift(Block alpha, Block beta) {
         int movedLength = beta.getLength();
         
         if(beta.type == ListEvent.INSERT) {
@@ -337,15 +337,15 @@ final class ListEventBlock {
      * be sorted. This is only the case when the second block is an UPDATE
      * event that spans a DELETE OR INSERT event of the first block.
      */
-    private static boolean requiresSplit(ListEventBlock first, ListEventBlock second) {
+    private static boolean requiresSplit(Block first, Block second) {
         // verify we have one update, and one non-update
         if(first.type != ListEvent.UPDATE && second.type != ListEvent.UPDATE) return false;
         if(first.type == second.type) return false;
         
         // find which block is update, which one is INSERT/DELETE
         boolean updateIsFirst = (first.type == ListEvent.UPDATE);
-        final ListEventBlock updateBlock;
-        final ListEventBlock otherBlock;
+        final Block updateBlock;
+        final Block otherBlock;
         if(updateIsFirst) {
             updateBlock = first;
             otherBlock = second;
@@ -365,11 +365,11 @@ final class ListEventBlock {
      * Breaks an update block into two smaller update blocks. One part is stored
      * in the update block parameter and the other part is returned.
      */
-    private static ListEventBlock split(ListEventBlock first, ListEventBlock second) {
+    private static Block split(Block first, Block second) {
         // find which block is update, which one is INSERT/DELETE
         boolean updateIsFirst = (first.type == ListEvent.UPDATE);
-        final ListEventBlock updateBlock;
-        final ListEventBlock otherBlock;
+        final Block updateBlock;
+        final Block otherBlock;
         if(updateIsFirst) {
             updateBlock = first;
             otherBlock = second;
@@ -388,7 +388,7 @@ final class ListEventBlock {
         }
 
         // apply the changes
-        ListEventBlock updateBlockPart2 = new ListEventBlock(splitLocation + part2Offset, updateBlock.endIndex + part2Offset, ListEvent.UPDATE);
+        Block updateBlockPart2 = new Block(splitLocation + part2Offset, updateBlock.endIndex + part2Offset, ListEvent.UPDATE);
         updateBlock.endIndex = splitLocation - 1;
         
         // return the new part
