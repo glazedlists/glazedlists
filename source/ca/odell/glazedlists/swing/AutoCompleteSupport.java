@@ -575,37 +575,41 @@ public final class AutoCompleteSupport<E> {
          * broadcast from the combo box.
          */
         private void updateComboBox(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
-            // make sure the prefix is not "" (in which case we skip the search)
-            if (prefix.length() > 0) {
-                // search the combobox model for a value that starts with our prefix
-                for (int i = 0; i < comboBoxModel.getSize(); i++) {
-                    final Object item = comboBoxModel.getElementAt(i);
-                    final String itemString = item == null ? null : item.toString();
+            // determine if our prefix is empty (in which case we cannot use our prefixMatcher to locate an autocompletion term)
+            final boolean prefixIsEmpty = "".equals(prefix);
 
-                    // if the user-specified prefix matches the itemString's prefix
-                    // we have found an appropriate itemString to select
-                    if (itemString != null && prefixMatcher.matches(itemString)) {
-                        if (filterBypass != null) {
-                            // either keep the user's prefix or replace it with the itemString's prefix
-                            // depending on whether we correct the case
-                            if (correctsCase) {
-                                filterBypass.replace(0, prefix.length(), itemString, attributeSet);
-                            } else {
-                                final String itemSuffix = itemString.substring(prefix.length());
-                                filterBypass.insertString (prefix.length(), itemSuffix, attributeSet);
-                            }
+            // search the combobox model for a value that starts with our prefix (called an autocompletion term)
+            for (int i = 0; i < comboBoxModel.getSize(); i++) {
+                final Object item = comboBoxModel.getElementAt(i);
+                final String itemString = item == null ? null : item.toString();
+
+                // if the itemString starts with the user-specified prefix
+                // we have found an appropriate autocompletion term
+                if (itemString != null) {
+                    // if itemString does not match the prefix, continue searching for an autocompletion term
+                    if (prefixIsEmpty ? !"".equals(itemString) : !prefixMatcher.matches(itemString))
+                        continue;
+
+                    if (filterBypass != null) {
+                        // either keep the user's prefix or replace it with the itemString's prefix
+                        // depending on whether we correct the case
+                        if (correctsCase) {
+                            filterBypass.replace(0, prefix.length(), itemString, attributeSet);
+                        } else {
+                            final String itemSuffix = itemString.substring(prefix.length());
+                            filterBypass.insertString (prefix.length(), itemSuffix, attributeSet);
                         }
-
-                        // select the matched itemString
-                        final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, itemString);
-                        selectItem(i, silently);
-
-                        // select the text after the prefix but before the end of the text
-                        // (it represents the autocomplete text)
-                        comboBoxEditor.select(prefix.length(), document.getLength());
-
-                        return;
                     }
+
+                    // select the autocompletion term
+                    final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, itemString);
+                    selectItem(i, silently);
+
+                    // select the text after the prefix but before the end of the text
+                    // (it represents the autocomplete text)
+                    comboBoxEditor.select(prefix.length(), document.getLength());
+
+                    return;
                 }
             }
 
