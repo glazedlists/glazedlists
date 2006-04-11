@@ -21,7 +21,7 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListDeltas2 {
+class ListDeltas2 {
 
     private static final String LIST_CHANGE = "*";
     private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList(new String[] { "+", "U", "X", "_" }));
@@ -46,7 +46,7 @@ public class ListDeltas2 {
     private boolean initialCapacityKnown = false;
 
 
-    public boolean isAllowContradictingEvents() {
+    public boolean getAllowContradictingEvents() {
         return allowContradictingEvents;
     }
     public void setAllowContradictingEvents(boolean allowContradictingEvents) {
@@ -135,6 +135,27 @@ public class ListDeltas2 {
     }
 
     /**
+     * Add all the specified changes to this.
+     */
+    void addAll(ListBlocksLinear blocks) {
+        for(ListBlocksLinear.Iterator i = blocks.iterator(); i.nextBlock(); ) {
+            int blockStart = i.getBlockStart();
+            int blockEnd = i.getBlockEnd();
+            int type = i.getType();
+
+            if(type == ListEvent.INSERT) {
+                insert(blockStart, blockEnd);
+            } else if(type == ListEvent.UPDATE) {
+                update(blockStart, blockEnd);
+            } else if(type == ListEvent.DELETE) {
+                delete(blockStart, blockEnd);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+    }
+
+    /**
      * @return <code>true</code> if this event contains no changes.
      */
     public boolean isEmpty() {
@@ -142,7 +163,7 @@ public class ListDeltas2 {
     }
 
     public Iterator iterator() {
-        return new Iterator(tree);
+        return new Iterator<String>(tree);
     }
 
     public String toString() {

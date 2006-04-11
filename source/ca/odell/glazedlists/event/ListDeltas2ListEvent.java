@@ -17,16 +17,14 @@ import java.util.List;
  */
 class ListDeltas2ListEvent<E> extends ListEvent<E> {
 
-    private ListDeltas2.Iterator iterator;
+    private ListDeltas2.Iterator deltasIterator;
+    private ListBlocksLinear.Iterator linearIterator;
 
     private ListEventAssembler.ListDeltas2Assembler deltasAssembler;
 
     public ListDeltas2ListEvent(ListEventAssembler.ListDeltas2Assembler deltasAssembler, EventList<E> sourceList) {
         super(sourceList);
         this.deltasAssembler = deltasAssembler;
-
-        // start at the beginning of the iterator
-        this.iterator = deltasAssembler.getListDeltas().iterator();
     }
 
     public ListEvent copy() {
@@ -34,15 +32,26 @@ class ListDeltas2ListEvent<E> extends ListEvent<E> {
     }
 
     public void reset() {
-        iterator = deltasAssembler.getListDeltas().iterator();
+        // prefer to use the linear blocks, which are faster
+        if(deltasAssembler.getUseListBlocksLinear()) {
+            this.linearIterator = deltasAssembler.getListBlocksLinear().iterator();
+            this.deltasIterator = null;
+
+        // otherwise use the deltas, which are more general
+        } else {
+            this.deltasIterator = deltasAssembler.getListDeltas().iterator();
+            this.linearIterator = null;
+        }
     }
 
     public boolean next() {
-        return iterator.next();
+        if(linearIterator != null) return linearIterator.next();
+        else return deltasIterator.next();
     }
 
     public boolean hasNext() {
-        return iterator.hasNext();
+        if(linearIterator != null) return linearIterator.hasNext();
+        else return deltasIterator.hasNext();
     }
 
     public boolean nextBlock() {
@@ -60,7 +69,8 @@ class ListDeltas2ListEvent<E> extends ListEvent<E> {
     }
 
     public int getIndex() {
-        return iterator.getIndex();
+        if(linearIterator != null) return linearIterator.getIndex();
+        else return deltasIterator.getIndex();
     }
 
     public int getBlockStartIndex() {
@@ -72,7 +82,8 @@ class ListDeltas2ListEvent<E> extends ListEvent<E> {
     }
 
     public int getType() {
-        return iterator.getType();
+        if(linearIterator != null) return linearIterator.getType();
+        else return deltasIterator.getType();
     }
 
     List getBlocks() {

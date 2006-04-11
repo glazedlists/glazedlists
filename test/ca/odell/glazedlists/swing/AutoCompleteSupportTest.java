@@ -12,10 +12,12 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
 
@@ -33,6 +35,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final AbstractDocument originalEditorDocument = (AbstractDocument) ((JTextField) combo.getEditor().getEditorComponent()).getDocument();
         final int originalComboBoxPropertyChangeListenerCount = combo.getPropertyChangeListeners().length;
         final int originalMaxRowCount = combo.getMaximumRowCount();
+        final ComboPopup originalComboPopup = (ComboPopup)combo.getUI().getAccessibleChild(combo, 0);
+        final MouseListener originalComboPopupMouseListener = originalComboPopup.getMouseListener();
 
         AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
 
@@ -59,15 +63,17 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         currentEditor = ((JTextField) combo.getEditor().getEditorComponent());
         currentEditorDocument = (AbstractDocument) currentEditor.getDocument();
 
-        assertTrue(originalUI == combo.getUI());
-        assertTrue(originalModel == combo.getModel());
-        assertTrue(originalEditable == combo.isEditable());
-        assertTrue(originalEditor == combo.getEditor());
-        assertTrue(originalEditorDocument == currentEditorDocument);
-        assertTrue(currentEditorDocument.getDocumentFilter() == null);
-        assertTrue(originalComboBoxPropertyChangeListenerCount == combo.getPropertyChangeListeners().length);
-        assertTrue(originalEditorPropertyChangeListenerCount == currentEditor.getPropertyChangeListeners().length);
-        assertTrue(originalMaxRowCount == combo.getMaximumRowCount());
+        assertSame(originalUI, combo.getUI());
+        assertSame(originalModel, combo.getModel());
+        assertSame(originalEditable, combo.isEditable());
+        assertSame(originalEditor, combo.getEditor());
+        assertSame(originalEditorDocument, currentEditorDocument);
+        assertSame(currentEditorDocument.getDocumentFilter(), null);
+        assertSame(originalComboBoxPropertyChangeListenerCount, combo.getPropertyChangeListeners().length);
+        assertSame(originalEditorPropertyChangeListenerCount, currentEditor.getPropertyChangeListeners().length);
+        assertSame(originalMaxRowCount, combo.getMaximumRowCount());
+        assertSame(originalComboPopup.getClass(), combo.getUI().getAccessibleChild(combo, 0).getClass());
+        assertSame(originalComboPopupMouseListener.getClass(), ((ComboPopup)combo.getUI().getAccessibleChild(combo, 0)).getMouseListener().getClass());
 
         try {
             support.uninstall();

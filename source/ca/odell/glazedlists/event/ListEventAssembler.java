@@ -30,20 +30,21 @@ public final class ListEventAssembler<E> {
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-        delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+//        delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+//        delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
 
-//        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-//        if(driver == null) {
-//            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-//        } else if(driver.equals("blocks")) {
-//            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
-//        } else if(driver.equals("deltas")) {
-//            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
-//        } else if(driver.equals("deltas2")) {
-//            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
-//        } else {
-//            throw new IllegalStateException();
-//        }
+        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
+        if(driver == null) {
+            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("blocks")) {
+            delegate = new ListEventBlocksAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("deltas")) {
+            delegate = new ListDeltasAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("deltas2")) {
+            delegate = new ListDeltas2Assembler<E>(sourceList, publisher);
+        } else {
+            throw new IllegalStateException();
+        }
     }
     
     /**
@@ -510,6 +511,11 @@ public final class ListEventAssembler<E> {
      */
     static class ListDeltas2Assembler<E> extends AssemblerHelper<E> {
 
+        /** prefer to use the linear blocks, which are more performant but handle only a subset of all cases */
+        private ListBlocksLinear listBlocksLinear = new ListBlocksLinear();
+        private boolean useListBlocksLinear = false;
+
+        /** fall back to list deltas 2, which are capable of all list changes */
         private ListDeltas2 listDeltas = new ListDeltas2();
         /** the size of the source eventlist at the end of the most recent change */
         private int sourceSize = -1;
@@ -526,10 +532,23 @@ public final class ListEventAssembler<E> {
         protected void prepareEvent() {
             //listDeltas.reset(sourceSize);
             listDeltas.setAllowContradictingEvents(this.allowContradictingEvents);
+            useListBlocksLinear = true;
         }
 
         /** {@inheritDoc} */
         public void addChange(int type, int startIndex, int endIndex) {
+            // try the linear holder first
+            if(useListBlocksLinear) {
+                boolean success = listBlocksLinear.addChange(type, startIndex, endIndex + 1);
+                if(success) {
+                    return;
+                } else {
+                    listDeltas.addAll(listBlocksLinear);
+                    useListBlocksLinear = false;
+                }
+            }
+
+            // try the good old reliable deltas 2
             if(type == ListEvent.INSERT) {
                 listDeltas.insert(startIndex, endIndex + 1);
             } else if(type == ListEvent.UPDATE) {
@@ -539,13 +558,22 @@ public final class ListEventAssembler<E> {
             }
         }
 
+        public boolean getUseListBlocksLinear() {
+            return useListBlocksLinear;
+        }
+
         public ListDeltas2 getListDeltas() {
             return listDeltas;
         }
 
+        public ListBlocksLinear getListBlocksLinear() {
+            return listBlocksLinear;
+        }
+
         /** {@inheritDoc} */
         public boolean isEventEmpty() {
-            return listDeltas.isEmpty();
+            if(useListBlocksLinear) return listBlocksLinear.isEmpty();
+            else return listDeltas.isEmpty();
         }
 
         /** {@inheritDoc} */
@@ -573,6 +601,7 @@ public final class ListEventAssembler<E> {
 
             // clear the change for the next caller
             } finally {
+                listBlocksLinear.reset();
                 listDeltas.reset(sourceList.size());
                 reorderMap = null;
                 allowContradictingEvents = false;
