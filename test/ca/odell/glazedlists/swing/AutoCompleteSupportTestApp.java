@@ -108,6 +108,7 @@ public class AutoCompleteSupportTestApp {
 
     /** The single JComboBox on which AutoCompleteSupport is repeatedly installed and uninstalled. */
     private final JComboBox autoCompleteComboBox = new JComboBox();
+    private final JComboBox regularComboBox = new JComboBox();
 
     /** The test application's frame. */
     private final JFrame frame;
@@ -115,11 +116,14 @@ public class AutoCompleteSupportTestApp {
     /** The panel which allows the user to change the behaviour of the {@link #autoCompleteComboBox}. */
     private final JPanel tweakerPanel;
 
-    private final JPanel actionPanel;
+    private final JPanel autocompleteActionPanel;
+    private final JPanel regularActionPanel;
 
-    private final DefaultListModel actionListModel = new DefaultListModel();
+    private final DefaultListModel autocompleteActionListModel = new DefaultListModel();
+    private final DefaultListModel regularActionListModel = new DefaultListModel();
 
-    private final JList actionList = new JList(actionListModel);
+    private final JList autocompleteActionList = new JList(autocompleteActionListModel);
+    private final JList regularActionList = new JList(regularActionListModel);
 
     private final JTable table = new JTable();
 
@@ -144,12 +148,17 @@ public class AutoCompleteSupportTestApp {
             table.getColumnModel().getColumn(i).setCellEditor(cellEditor);
         }
 
-        autoCompleteComboBox.addActionListener(new RecordActionHandler());
+        autocompleteActionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
+        autocompleteActionList.setPreferredSize(new Dimension(autocompleteActionList.getPreferredSize().width, 600));
+        autoCompleteComboBox.addActionListener(new RecordActionHandler(autocompleteActionListModel));
+        autocompleteActionPanel = createActionPanel("AutoComplete ActionEvent Log", autocompleteActionList);
 
-        actionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
+        regularActionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
+        regularActionList.setPreferredSize(new Dimension(regularActionList.getPreferredSize().width, 600));
+        regularComboBox.addActionListener(new RecordActionHandler(regularActionListModel));
+        regularActionPanel = createActionPanel("Normal ActionEvent Log", regularActionList);
 
         tweakerPanel = createTweakerPanel();
-        actionPanel = createActionPanel();
 
         frame = new JFrame("AutoCompleteSupport Test Application");
         frame.setJMenuBar(createLafMenuBar());
@@ -173,7 +182,8 @@ public class AutoCompleteSupportTestApp {
         frame.getContentPane().removeAll();
         frame.getContentPane().add(tweakerPanel, BorderLayout.NORTH);
         frame.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
-        frame.getContentPane().add(actionPanel, BorderLayout.WEST);
+        frame.getContentPane().add(autocompleteActionPanel, BorderLayout.WEST);
+        frame.getContentPane().add(regularActionPanel, BorderLayout.EAST);
     }
 
     /**
@@ -266,11 +276,11 @@ public class AutoCompleteSupportTestApp {
         return panel;
     }
 
-    private JPanel createActionPanel() {
+    private JPanel createActionPanel(String title, JList list) {
         final JPanel panel = new JPanel(new GridBagLayout());
 
-        panel.add(new JLabel("JComboBox ActionEvent Log"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
-        panel.add(new JScrollPane(actionList),             new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
+        panel.add(new JLabel(title),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
+        panel.add(new JScrollPane(list), new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
 
         return panel;
     }
@@ -291,7 +301,7 @@ public class AutoCompleteSupportTestApp {
         autoCompleteSupport = AutoCompleteSupport.install(autoCompleteComboBox, items, filterator);
         autoCompleteSupport.setCorrectsCase(correctsCaseCheckBox.isSelected());
 
-        final JComboBox plainComboBox = new JComboBox();
+        final JComboBox plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
         plainComboBox.setModel(new EventComboBoxModel<String>(items));
 
@@ -328,9 +338,16 @@ public class AutoCompleteSupportTestApp {
     private final class RecordActionHandler implements ActionListener {
         private int count = 0;
 
+        private final DefaultListModel model;
+
+        public RecordActionHandler(DefaultListModel model) {
+            this.model = model;
+        }
+
         public void actionPerformed(ActionEvent e) {
-            final String actionSummary = String.valueOf(++count) + ": " + autoCompleteComboBox.getSelectedItem();
-            actionListModel.add(0, actionSummary);
+            final JComboBox comboBox = (JComboBox) e.getSource();
+            final String actionSummary = String.valueOf(++count) + ": " + comboBox.getSelectedItem();
+            model.add(0, actionSummary);
         }
     }
 

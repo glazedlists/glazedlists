@@ -6,6 +6,7 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
@@ -153,6 +154,9 @@ public final class AutoCompleteSupport<E> {
     /** This matcher determines if the user-defined prefix matches the beginning of a given String. */
     private Matcher<String> prefixMatcher = Matchers.trueMatcher();
 
+    /** Controls the selection behavior of the JComboBox when it is used in a JTable DefaultCellEditor. */
+    private boolean isTableCellEditor;
+
     //
     // These listeners watch for invariant violations in the JComboBox and report them
     //
@@ -240,6 +244,9 @@ public final class AutoCompleteSupport<E> {
      */
     private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
         this.comboBox = comboBox;
+
+        // is this combo box a TableCellEditor?
+        isTableCellEditor = Boolean.TRUE.equals(comboBox.getClientProperty("JComboBox.isTableCellEditor"));
 
         // record some original settings of comboBox
         this.originalUI = comboBox.getUI();
@@ -549,9 +556,13 @@ public final class AutoCompleteSupport<E> {
             // break out early if we're flagged to not post process the Document change
             if (doNotPostProcessDocumentChanges) return;
 
+            // record the selection before post processing the Document change
+            // (we'll use this to decide whether to broadcast an ActionEvent when choosing the next selected index)
+            final Object selectedItemBeforeEdit = comboBox.getSelectedItem();
+
             updatePrefix();
             applyFilter(prefix);
-            updateComboBox(filterBypass, attributeSet);
+            updateComboBox(filterBypass, attributeSet, selectedItemBeforeEdit);
             togglePopup();
         }
 
@@ -559,9 +570,11 @@ public final class AutoCompleteSupport<E> {
          * This method will attempt to locate a reasonable autocomplete item
          * from all combo box items and select it. It will also populate the
          * combo box editor with the remaining text which matches the
-         * autocomplete item and select it.
+         * autocomplete item and select it. If the selection changes and the
+         * JComboBox is not a Table Cell Editor, an ActionEvent will be
+         * broadcast from the combo box.
          */
-        private void updateComboBox(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
+        private void updateComboBox(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
             // make sure the prefix is not "" (in which case we skip the search)
             if (prefix.length() > 0) {
                 // search the combobox model for a value that starts with our prefix
@@ -584,7 +597,8 @@ public final class AutoCompleteSupport<E> {
                         }
 
                         // select the matched itemString
-                        selectItemSilently(i);
+                        final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, itemString);
+                        selectItem(i, silently);
 
                         // select the text after the prefix but before the end of the text
                         // (it represents the autocomplete text)
@@ -597,17 +611,22 @@ public final class AutoCompleteSupport<E> {
 
             // reset the selection since we couldn't find the prefix in the model
             // (this has the side-effect of scrolling the popup to the top)
-            selectItemSilently(-1);
+            final boolean silently = isTableCellEditor || selectedItemBeforeEdit == null;
+            selectItem(-1, silently);
         }
 
         /**
-         * Select the item at the given <code>index</code> without causing the
-         * JComboBox to broadcast an ActionEvent to its listeners.
+         * Select the item at the given <code>index</code>. If
+         * <code>silent</code> is <tt>true</tt>, the JComboBox will not
+         * broadcast an ActionEvent.
          */
-        private void selectItemSilently(int index) {
+        private void selectItem(int index, boolean silently) {
             doNotChangeDocument = true;
             try {
-                comboBoxModel.setSelectedItem(index == -1 ? null : comboBoxModel.getElementAt(index));
+                if (silently)
+                    comboBoxModel.setSelectedItem(index == -1 ? null : comboBoxModel.getElementAt(index));
+                else
+                    comboBox.setSelectedIndex(index);
             } finally {
                 doNotChangeDocument = false;
             }
@@ -653,12 +672,6 @@ public final class AutoCompleteSupport<E> {
         private ArrowButtonMouseListener arrowButtonMouseListener;
 
         /**
-         * Control the selection behavior of the JComboBox when it is used in
-         * the JTable DefaultCellEditor.
-         */
-        private boolean isTableCellEditor;
-
-        /**
          * A handle to the JPopupMenu which functions as the popup of the
          * JComboBox.
          */
@@ -682,9 +695,6 @@ public final class AutoCompleteSupport<E> {
             popupMenu = (JPopupMenu) delegate.getAccessibleChild(c, 0);
             popup = (ComboPopup) popupMenu;
             arrowButton = findArrowButton(comboBox);
-
-            // is this combo box a table cell editor?
-            isTableCellEditor = Boolean.TRUE.equals(c.getClientProperty("JComboBox.isTableCellEditor"));
 
             // if an arrow button was found, decorate the ComboPopup's MouseListener
             // with logic that unfilters the ComboBoxModel when the arrow button is pressed
@@ -768,8 +778,9 @@ public final class AutoCompleteSupport<E> {
         }
 
         /**
-         * Select the item at the given index
-         * @param index
+         * Select the item at the given <code>index</code>. <code>-1</code> is
+         * interpreted as "clear the selected item". <code>-2</code> is
+         * interpreted as "the last element".
          */
         private void selectPossibleValue(int index) {
             // wrap the index from past the start to the end of the list
@@ -788,10 +799,16 @@ public final class AutoCompleteSupport<E> {
             try {
                 // select the index
                 if (isTableCellEditor) {
-                    popup.getList().setSelectedIndex(index);
-                    popup.getList().ensureIndexIsVisible(index);
+                    // while operating as a TableCellEditor, no ActionListeners must be notified
+                    // when using the arrow keys to adjust the selection
+                    final ActionListener[] listeners = unregisterAllActionListeners(comboBox);
+                    try {
+                        comboBox.setSelectedIndex(index);
+                    } finally {
+                        registerAllActionListeners(comboBox, listeners);
+                    }
                 } else {
-                    comboBoxModel.setSelectedItem(index == -1 ? null : comboBoxModel.getElementAt(index));
+                    comboBox.setSelectedIndex(index);
                 }
 
                 // if the original index wasn't valid, we've cleared the selection
@@ -1051,10 +1068,12 @@ public final class AutoCompleteSupport<E> {
         // narrow the list to just unique values within the column
         final EventList<String> uniqueColumnValues = new UniqueList<String>(allColumnValues);
 
-        // create a DefaultCellEditor backed by an autocompleting JComboBox
-        final AutoCompleteSupport support = AutoCompleteSupport.install(new JComboBox(), uniqueColumnValues);
-        final DefaultCellEditor cellEditor = new DefaultCellEditor(support.getComboBox());
+        // create a DefaultCellEditor backed by a JComboBox
+        final DefaultCellEditor cellEditor = new DefaultCellEditor(new JComboBox());
         cellEditor.setClickCountToStart(2);
+
+        // install autocompletion support on the JComboBox
+        AutoCompleteSupport.install((JComboBox) cellEditor.getComponent(), uniqueColumnValues);
 
         return cellEditor;
     }
