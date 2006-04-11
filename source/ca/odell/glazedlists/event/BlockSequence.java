@@ -13,8 +13,11 @@ import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
  */
 class BlockSequence {
 
+    /** the start indices of the change blocks, inclusive */
     private TIntArrayList starts = new TIntArrayList();
+    /** the end indices of the change blocks, exclusive */
     private TIntArrayList ends = new TIntArrayList();
+    /** the change types */
     private TIntArrayList types = new TIntArrayList();
 
     /**
