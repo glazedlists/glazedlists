@@ -143,24 +143,21 @@ final class BlockDeltasListEvent<E> extends ListEvent<E> {
 
     /** {@inheritDoc} */
     public int getBlockStartIndex() {
-        if (currentBlock == null)
-            throw new IllegalStateException("The ListEvent is not currently in a state to return a block start index");
+        if (currentBlock == null) throw new IllegalStateException();
 
         return currentBlock.getStartIndex();
     }
 
     /** {@inheritDoc} */
     public int getBlockEndIndex() {
-        if (currentBlock == null)
-            throw new IllegalStateException("The ListEvent is not currently in a state to return a block end index");
+        if (currentBlock == null) throw new IllegalStateException();
 
         return currentBlock.getEndIndex();
     }
 
     /** {@inheritDoc} */
     public int getType() {
-        if (currentBlock == null)
-            throw new IllegalStateException("The ListEvent is not currently in a state to return a type");
+        if (currentBlock == null) throw new IllegalStateException();
 
         return currentBlock.getType();
     }

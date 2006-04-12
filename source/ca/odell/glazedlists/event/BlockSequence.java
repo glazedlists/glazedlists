@@ -126,12 +126,15 @@ class BlockSequence {
             }
         }
         public int getBlockStart() {
+            if(startIndex == -1) throw new IllegalStateException("The ListEvent is not currently in a state to return a block start index");
             return startIndex;
         }
         public int getBlockEnd() {
+            if(endIndex == -1) throw new IllegalStateException("The ListEvent is not currently in a state to return a block end index");
             return endIndex;
         }
         public int getType() {
+            if(type == -1) throw new IllegalStateException("The ListEvent is not currently in a state to return a type");
             return type;
         }
 

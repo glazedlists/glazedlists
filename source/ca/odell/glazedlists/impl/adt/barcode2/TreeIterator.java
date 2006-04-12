@@ -71,6 +71,7 @@ public class TreeIterator<V> {
      * The color of the current element.
      */
     public byte color() {
+        if(node == null) throw new IllegalStateException();
         return node.color;
     }
 
@@ -105,6 +106,7 @@ public class TreeIterator<V> {
         throw new IllegalStateException();
     }
     public V value() {
+        if(node == null) throw new IllegalStateException();
         return node.get();
     }
 }

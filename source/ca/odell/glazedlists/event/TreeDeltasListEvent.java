@@ -82,8 +82,11 @@ class TreeDeltasListEvent<E> extends ListEvent<E> {
     }
 
     public int getType() {
-        if(linearIterator != null) return linearIterator.getType();
-        else return deltasIterator.getType();
+        if(linearIterator != null) {
+            return linearIterator.getType();
+        } else {
+            return deltasIterator.getType();
+        }
     }
 
     List getBlocks() {
