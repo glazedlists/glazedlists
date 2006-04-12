@@ -130,6 +130,9 @@ public class AutoCompleteSupportTestApp {
     /** A checkbox to toggle whether the {@link #autoCompleteSupport} toggles the case of the user input to match the autocomplete term. */
     private final JCheckBox correctsCaseCheckBox = new JCheckBox();
 
+    /** A checkbox to toggle whether the {@link #autoCompleteSupport} is in strict mode or not. */
+    private final JCheckBox strictModeCheckBox = new JCheckBox();
+
     /** The ButtonGroup to which all Look & Feel radio buttons belong. */
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
@@ -166,13 +169,17 @@ public class AutoCompleteSupportTestApp {
         frame.getContentPane().setLayout(new BorderLayout());
 
         rebuildContentPane();
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
 
         // initialize the tweaker panel
         correctsCaseCheckBox.addActionListener(new CorrectCaseActionHandler());
         correctsCaseCheckBox.setSelected(autoCompleteSupport.getCorrectsCase());
+
+        strictModeCheckBox.addActionListener(new StrictModeActionHandler());
+        strictModeCheckBox.setSelected(autoCompleteSupport.isStrict());
+
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     /**
@@ -267,11 +274,20 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
+    private class StrictModeActionHandler implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            autoCompleteSupport.setStrict(strictModeCheckBox.isSelected());
+        }
+    }
+
     private JPanel createTweakerPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
 
         panel.add(new JLabel("Corrects Case:"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
         panel.add(correctsCaseCheckBox,         new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+        panel.add(new JLabel("Strict:"),        new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(strictModeCheckBox,           new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         return panel;
     }
@@ -299,7 +315,6 @@ public class AutoCompleteSupportTestApp {
         // the model contents are filtered away
         autoCompleteComboBox.setPrototypeDisplayValue("http://java.sun.com/j2se/1.5.0/download.jsp");
         autoCompleteSupport = AutoCompleteSupport.install(autoCompleteComboBox, items, filterator);
-        autoCompleteSupport.setCorrectsCase(correctsCaseCheckBox.isSelected());
 
         final JComboBox plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
