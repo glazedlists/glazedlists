@@ -30,19 +30,19 @@ public final class ListEventAssembler<E> {
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-        delegate = new BlockDeltasAssembler<E>(sourceList, publisher);
+//        delegate = new BlockDeltasAssembler<E>(sourceList, publisher);
 //        delegate = new TreeDeltasAssembler<E>(sourceList, publisher);
-//
-//        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-//        if(driver == null || driver.equals("blockdeltas")) {
-//            delegate = new BlockDeltasAssembler<E>(sourceList, publisher);
-//        } else if(driver.equals("barcodedeltas")) {
-//            delegate = new BarcodeDeltasAssembler<E>(sourceList, publisher);
-//        } else if(driver.equals("treedeltas")) {
-//            delegate = new TreeDeltasAssembler<E>(sourceList, publisher);
-//        } else {
-//            throw new IllegalStateException();
-//        }
+
+        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
+        if(driver == null || driver.equals("blockdeltas")) {
+            delegate = new BlockDeltasAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("barcodedeltas")) {
+            delegate = new BarcodeDeltasAssembler<E>(sourceList, publisher);
+        } else if(driver.equals("treedeltas")) {
+            delegate = new TreeDeltasAssembler<E>(sourceList, publisher);
+        } else {
+            throw new IllegalStateException();
+        }
     }
     
     /**
