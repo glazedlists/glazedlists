@@ -17,7 +17,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListEventAssemblerDriver extends JapexDriverBase {
+public class DeltasDriver extends JapexDriverBase {
 
     private static final List<String> DISTINCT_VALUES = Arrays.asList(new String[] { "A", "B", "C", "D", "E" });
     private static final int SIZE_OF_BASE = 20000;
@@ -31,6 +31,9 @@ public class ListEventAssemblerDriver extends JapexDriverBase {
     }
 
     public void prepare(TestCase testCase) {
+        String listEventAssemblerDelegate = getParam("GlazedLists.ListEventAssemblerDelegate");
+        System.setProperty("GlazedLists.ListEventAssemblerDelegate", listEventAssemblerDelegate);
+
         base = new BasicEventList<String>();
         filteredBase = new FilterList<String>(base);
         sortedBase = new SortedList<String>(filteredBase, new FirstCharacterComparator());
@@ -47,17 +50,17 @@ public class ListEventAssemblerDriver extends JapexDriverBase {
      * Warmup is exactly the same as the run method.
      */
     public void warmup(TestCase testCase) {
-        for(Iterator<String> i = DISTINCT_VALUES.iterator(); i.hasNext(); ) {
-            String value = i.next();
-            filteredBase.setMatcher(new SameLastCharacterMatcher(value));
-        }
-        filteredBase.setMatcher((Matcher)Matchers.trueMatcher());
+        executeTestCase(testCase);
     }
 
     /**
      * Execute the specified testcase one time.
      */
     public void run(TestCase testCase) {
+        executeTestCase(testCase);
+    }
+
+    private void executeTestCase(TestCase testCase) {
         for(Iterator<String> i = DISTINCT_VALUES.iterator(); i.hasNext(); ) {
             String value = i.next();
             filteredBase.setMatcher(new SameLastCharacterMatcher(value));
@@ -76,7 +79,7 @@ public class ListEventAssemblerDriver extends JapexDriverBase {
     /**
      * Test if values are the same as the specified value.
      */
-    public static class SameLastCharacterMatcher implements Matcher<String> {
+    public static final class SameLastCharacterMatcher implements Matcher<String> {
         private final String value;
         public SameLastCharacterMatcher(String value) {
             this.value = value;
@@ -85,7 +88,7 @@ public class ListEventAssemblerDriver extends JapexDriverBase {
             return value.charAt(0) == item.charAt(1);
         }
     }
-    public static class FirstCharacterComparator implements Comparator<String> {
+    public static final class FirstCharacterComparator implements Comparator<String> {
         public int compare(String s, String s1) {
             return s.charAt(0) - s1.charAt(0);
         }
