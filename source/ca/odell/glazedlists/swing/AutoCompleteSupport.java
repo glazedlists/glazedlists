@@ -118,10 +118,16 @@ public final class AutoCompleteSupport<E> {
 
     /**
      * <tt>true</tt> if user specified text is converted into the same case as
-     * the matched element. <tt>false</tt> will leave user specified text
+     * the autocompletion term. <tt>false</tt> will leave user specified text
      * unaltered.
      */
     private boolean correctsCase = true;
+
+    /**
+     * <tt>true</tt> if the user can specified values that do not appear in the
+     * ComboBoxModel; <tt>false</tt> otherwise.
+     */
+    private boolean strict = false;
 
     //
     // These are member variables for convenience
@@ -133,7 +139,10 @@ public final class AutoCompleteSupport<E> {
     /** The model backing the comboBox. */
     private final AutoCompleteComboBoxModel comboBoxModel;
 
-    /** The FilterList which holds the items present in the comboBoxModel. */
+    /** The EventList which holds the items present in the comboBoxModel. */
+    private final EventList<E> items;
+
+    /** The FilterList which filters the items present in the comboBoxModel. */
     private final FilterList<E> filteredItems;
 
     /** The MatcherEditor driving the FilterList behind the comboBoxModel. */
@@ -244,6 +253,7 @@ public final class AutoCompleteSupport<E> {
      */
     private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
         this.comboBox = comboBox;
+        this.items = items;
 
         // is this combo box a TableCellEditor?
         isTableCellEditor = Boolean.TRUE.equals(comboBox.getClientProperty("JComboBox.isTableCellEditor"));
@@ -378,8 +388,8 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
-     * Return <tt>true</tt> if user specified strings are converted to the
-     * case of the element they match; <tt>false</tt> otherwise.
+     * Returns <tt>true</tt> if user specified strings are converted to the
+     * case of the autocompletion term they match; <tt>false</tt> otherwise.
      */
     public boolean getCorrectsCase() {
         return correctsCase;
@@ -391,6 +401,23 @@ public final class AutoCompleteSupport<E> {
      */
     public void setCorrectsCase(boolean correctCase) {
         this.correctsCase = correctCase;
+    }
+
+    /**
+     * Returns <tt>true</tt> if the user is able to specify values which do not
+     * appear in the popup list of suggestions; <tt>false</tt> otherwise.
+     */
+    public boolean isStrict() {
+        return strict;
+    }
+    /**
+     * If <code>strict</code> is <tt>true</tt>, the user can specify values not
+     * appearing within the ComboBoxModel. If it is <tt>false</tt> each
+     * keystroke must continue to match some value in the ComboBoxModel or it
+     * will be discarded.
+     */
+    public void setStrict(boolean strict) {
+        this.strict = strict;
     }
 
     /**
@@ -524,20 +551,38 @@ public final class AutoCompleteSupport<E> {
                 return;
 
             if (doNotChangeDocument) return;
+
+            // collect rollback information before performing the edit
+            final String valueBeforeEdit = comboBoxEditor.getText();
+            final int selectionStart = comboBoxEditor.getSelectionStart();
+            final int selectionEnd = comboBoxEditor.getSelectionEnd();
+
             super.replace(filterBypass, offset, length, string, attributeSet);
-            postProcessDocumentChange(filterBypass, attributeSet);
+            postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd);
         }
 
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
+
+            // collect rollback information before performing the edit
+            final String valueBeforeEdit = comboBoxEditor.getText();
+            final int selectionStart = comboBoxEditor.getSelectionStart();
+            final int selectionEnd = comboBoxEditor.getSelectionEnd();
+
             super.insertString(filterBypass, offset, string, attributeSet);
-            postProcessDocumentChange(filterBypass, attributeSet);
+            postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd);
         }
 
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
             if (doNotChangeDocument) return;
+
+            // collect rollback information before performing the edit
+            final String valueBeforeEdit = comboBoxEditor.getText();
+            final int selectionStart = comboBoxEditor.getSelectionStart();
+            final int selectionEnd = comboBoxEditor.getSelectionEnd();
+
             super.remove(filterBypass, offset, length);
-            postProcessDocumentChange(null, null);
+            postProcessDocumentChange(null, null, valueBeforeEdit, selectionStart, selectionEnd);
         }
 
         /**
@@ -552,9 +597,31 @@ public final class AutoCompleteSupport<E> {
          *   <li> try to show the popup, if possible
          * </ol>
          */
-        private void postProcessDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet) throws BadLocationException {
+        private void postProcessDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet, String valueBeforeEdit, int selectionStart, int selectionEnd) throws BadLocationException {
             // break out early if we're flagged to not post process the Document change
             if (doNotPostProcessDocumentChanges) return;
+
+            final String valueAfterEdit = comboBoxEditor.getText();
+
+            // if an autocomplete term could not be found and we're in strict mode, rollback the edit
+            if (isStrict() && !"".equals(valueAfterEdit) && !doesAutoCompleteTermExist(valueAfterEdit)) {
+                // indicate the error to the user
+                Toolkit.getDefaultToolkit().beep();
+
+                // rollback the edit
+                doNotPostProcessDocumentChanges = true;
+                try {
+                    comboBoxEditor.setText(valueBeforeEdit);
+                } finally {
+                    doNotPostProcessDocumentChanges = false;
+                }
+
+                // restore the selection as it existed
+                comboBoxEditor.select(selectionStart, selectionEnd);
+
+                // do not continue post processing changes
+                return;
+            }
 
             // record the selection before post processing the Document change
             // (we'll use this to decide whether to broadcast an ActionEvent when choosing the next selected index)
@@ -562,7 +629,7 @@ public final class AutoCompleteSupport<E> {
 
             updatePrefix();
             applyFilter(prefix);
-            updateComboBox(filterBypass, attributeSet, selectedItemBeforeEdit);
+            selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit);
             togglePopup();
         }
 
@@ -574,7 +641,7 @@ public final class AutoCompleteSupport<E> {
          * JComboBox is not a Table Cell Editor, an ActionEvent will be
          * broadcast from the combo box.
          */
-        private void updateComboBox(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
+        private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
             // determine if our prefix is empty (in which case we cannot use our prefixMatcher to locate an autocompletion term)
             final boolean prefixIsEmpty = "".equals(prefix);
 
@@ -617,6 +684,28 @@ public final class AutoCompleteSupport<E> {
             // (this has the side-effect of scrolling the popup to the top)
             final boolean silently = isTableCellEditor || selectedItemBeforeEdit == null;
             selectItem(-1, silently);
+        }
+
+        /**
+         * Returns <tt>true</tt> if the list of all possible values in the
+         * ComboBoxModel includes one which meets the criteria to be the
+         * autocompletion term for the given <code>value</code>.
+         */
+        private boolean doesAutoCompleteTermExist(String value) {
+            final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
+
+            // search the list of ALL items for an autocompletion term for the given value
+            for (int i = 0; i < items.size(); i++) {
+                final Object item = items.get(i);
+                final String itemString = item == null ? null : item.toString();
+
+                // if the itemString starts with the given value
+                // we have found an appropriate autocompletion term
+                if (itemString != null && valueMatcher.matches(itemString))
+                    return true;
+            }
+
+            return false;
         }
 
         /**
