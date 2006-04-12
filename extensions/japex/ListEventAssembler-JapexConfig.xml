@@ -26,7 +26,19 @@
         <param name="GlazedLists.ListEventAssemblerDelegate" value="treedeltas"/>
     </driver>
 
-    <testCase name="SortedList Event Performance">
+    <testCase name="SortedList Event Performance: 20000 values, 5 distinct">
+        <param name="distinctValues" value="A,B,C,D,E"/>
+        <param name="baseSize" value="20000"/>
+    </testCase>
+
+    <testCase name="SortedList Event Performance: 20000 values, 10 distinct">
+        <param name="distinctValues" value="A,B,C,D,E,F,G,H,I,J"/>
+        <param name="baseSize" value="20000"/>
+    </testCase>
+
+    <testCase name="SortedList Event Performance: 20000 values, 20 distinct">
+        <param name="distinctValues" value="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T"/>
+        <param name="baseSize" value="20000"/>
     </testCase>
 
 </testSuite>

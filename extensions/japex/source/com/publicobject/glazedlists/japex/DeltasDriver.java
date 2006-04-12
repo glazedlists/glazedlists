@@ -19,8 +19,8 @@ import java.util.*;
  */
 public class DeltasDriver extends JapexDriverBase {
 
-    private static final List<String> DISTINCT_VALUES = Arrays.asList(new String[] { "A", "B", "C", "D", "E" });
-    private static final int SIZE_OF_BASE = 20000;
+    private List<String> distinctValues;
+    private int baseSize;
 
     private EventList<String> base;
     private FilterList<String> filteredBase;
@@ -34,14 +34,18 @@ public class DeltasDriver extends JapexDriverBase {
         String listEventAssemblerDelegate = getParam("GlazedLists.ListEventAssemblerDelegate");
         System.setProperty("GlazedLists.ListEventAssemblerDelegate", listEventAssemblerDelegate);
 
+        String distinctValuesCSV = testCase.getParam("distinctValues");
+        distinctValues = Arrays.asList(distinctValuesCSV.split("\\,"));
+        baseSize = testCase.getIntParam("baseSize");
+
         base = new BasicEventList<String>();
         filteredBase = new FilterList<String>(base);
         sortedBase = new SortedList<String>(filteredBase, new FirstCharacterComparator());
 
         Random dice = new Random(0);
-        for(int i = 0; i < SIZE_OF_BASE; i++) {
-            String characterOne = DISTINCT_VALUES.get(dice.nextInt(DISTINCT_VALUES.size()));
-            String characterTwo = DISTINCT_VALUES.get(dice.nextInt(DISTINCT_VALUES.size()));
+        for(int i = 0; i < baseSize; i++) {
+            String characterOne = distinctValues.get(dice.nextInt(distinctValues.size()));
+            String characterTwo = distinctValues.get(dice.nextInt(distinctValues.size()));
             base.add(characterOne + characterTwo);
         }
     }
@@ -61,7 +65,7 @@ public class DeltasDriver extends JapexDriverBase {
     }
 
     private void executeTestCase(TestCase testCase) {
-        for(Iterator<String> i = DISTINCT_VALUES.iterator(); i.hasNext(); ) {
+        for(Iterator<String> i = distinctValues.iterator(); i.hasNext(); ) {
             String value = i.next();
             filteredBase.setMatcher(new SameLastCharacterMatcher(value));
         }
