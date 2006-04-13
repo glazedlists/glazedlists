@@ -182,6 +182,15 @@ class TreeDeltas {
             this.tree = tree;
             this.treeIterator = new TreeIterator<V>(tree);
         }
+
+        private Iterator(Tree<V> tree, TreeIterator<V> treeIterator) {
+            this.tree = tree;
+            this.treeIterator = treeIterator;
+        }
+        public Iterator<V> copy() {
+            return new Iterator<V>(tree, treeIterator.copy());
+        }
+
         public int getIndex() {
             return treeIterator.index(CURRENT_INDICES);
         }

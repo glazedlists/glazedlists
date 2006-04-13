@@ -30,6 +30,22 @@ public class TreeIterator<V> {
         this.index = 0;
     }
 
+    /**
+     * Create a {@link TreeIterator} exactly the same as this one.
+     * The iterators will be backed by the same tree but maintain
+     * separate cursors into the tree.
+     */
+    public TreeIterator<V> copy() {
+        TreeIterator<V> result = new TreeIterator<V>(tree);
+        for(int i = 0; i < tree.getCoder().getColors().size(); i++) {
+            result.counts[i] = counts[i];
+        }
+        result.node = node;
+        result.index = index;
+        result.nodeColorAsIndex = nodeColorAsIndex;
+        return result;
+    }
+
     public boolean hasNext(byte colors) {
         if(node != null && (colors & node.color) != 0) {
             return index(colors) < tree.size(colors) - 1;

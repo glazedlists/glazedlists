@@ -116,6 +116,16 @@ class BlockSequence {
         private int endIndex = -1;
         private int type = -1;
 
+        public Iterator copy() {
+            Iterator result = new Iterator();
+            result.blockIndex = blockIndex;
+            result.offset = offset;
+            result.startIndex = startIndex;
+            result.endIndex = endIndex;
+            result.type = type;
+            return result;
+        }
+
         public int getIndex() {
             if(type == ListEvent.INSERT || type == ListEvent.UPDATE) {
                 return startIndex + offset;

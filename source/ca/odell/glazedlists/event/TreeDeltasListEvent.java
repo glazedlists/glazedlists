@@ -27,8 +27,15 @@ class TreeDeltasListEvent<E> extends ListEvent<E> {
         this.deltasAssembler = deltasAssembler;
     }
 
+    /**
+     * Create a copy of this list event.
+     */
     public ListEvent copy() {
-        throw new UnsupportedOperationException();
+        TreeDeltasListEvent<E> result = new TreeDeltasListEvent<E>(deltasAssembler, sourceList);
+        result.deltasIterator = deltasIterator != null ? deltasIterator.copy() : null;
+        result.linearIterator = linearIterator != null ? linearIterator.copy() : null;
+        result.deltasAssembler = deltasAssembler;
+        return result;
     }
 
     public void reset() {
