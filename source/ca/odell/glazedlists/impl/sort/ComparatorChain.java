@@ -7,7 +7,7 @@ package ca.odell.glazedlists.impl.sort;
 import java.util.*;
 
 /**
- * A comparator chain compares objects using a list of comparators. The
+ * A comparator chain compares objects using a list of Comparators. The
  * first comparison where the objects differ is returned.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
@@ -15,37 +15,34 @@ import java.util.*;
 public final class ComparatorChain<T> implements Comparator<T> {
 
     /** the comparators to execute in sequence */
-    private List<Comparator<T>> comparators;
+    private final Comparator<T>[] comparators;
 
     /**
-     * Creates a comparator chain that views the specified comparators in
-     * sequence.
+     * Creates a comparator chain that evaluates the specified comparators in
+     * sequence. A defensive copy of the
      *
-     * @param comparators a list of classes implementing Comparator. It is
-     *      an error to modify the specified list after using it as an
-     *      argument to comparator chain.
+     * @param comparators a list of objects implementing {@link Comparator}
      */
     public ComparatorChain(List<Comparator<T>> comparators) {
-        this.comparators = comparators;
+        this.comparators = comparators.toArray(new Comparator[comparators.size()]);
     }
 
     /**
      * Compares the two objects with each comparator in sequence.
      */
     public int compare(T alpha, T beta) {
-        for(Iterator<Comparator<T>> i = comparators.iterator(); i.hasNext(); ) {
-            Comparator<T> currentComparator = i.next();
-            int compareResult = currentComparator.compare(alpha, beta);
+        for (int i = 0; i < comparators.length; i++) {
+            int compareResult = comparators[i].compare(alpha, beta);
             if(compareResult != 0) return compareResult;
         }
         return 0;
     }
 
     /**
-     * Retrieves a {@link List} of the {@link Comparator}s in this
+     * Retrieves the {@link Comparator}s composing this
      * <code>ComparatorChain</code>.
      */
-    public List<Comparator<T>> getComparators() {
+    public Comparator<T>[] getComparators() {
         return comparators;
     }
 
@@ -54,7 +51,7 @@ public final class ComparatorChain<T> implements Comparator<T> {
      */
     public boolean equals(Object other) {
         if(!(other instanceof ComparatorChain)) return false;
-        ComparatorChain chainOther = (ComparatorChain)other;
-        return comparators.equals(chainOther.comparators);
+        final ComparatorChain chainOther = (ComparatorChain) other;
+        return Arrays.equals(comparators, chainOther.comparators);
     }
 }

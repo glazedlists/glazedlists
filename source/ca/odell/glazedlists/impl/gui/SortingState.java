@@ -127,13 +127,12 @@ public final class SortingState {
             comparatorsList = Collections.EMPTY_LIST;
         } else if(foreignComparator instanceof ComparatorChain) {
             ComparatorChain chain = (ComparatorChain)foreignComparator;
-            comparatorsList = chain.getComparators();
+            comparatorsList = Arrays.asList(chain.getComparators());
         } else {
             comparatorsList = Collections.singletonList(foreignComparator);
         }
 
         // walk through the list of Comparators and assign click counts
-        walkThroughComparators:
         for(Iterator<Comparator> i = comparatorsList.iterator(); i.hasNext(); ) {
             // get the current comparator
             Comparator comparator = i.next();
