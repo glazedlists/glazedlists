@@ -25,24 +25,56 @@ public final class ListEventAssembler<E> {
 
     /** the delegate contains logic specific for the current event storage strategy */
     private final AssemblerHelper<E> delegate;
-    
+
+    /**
+     * Determine what our strategy will be for the list event assembler.
+     * We support 4 possible strategies:
+     * <li>blockdeltas: originally the only strategy, this uses a bubblesort
+     *     which causes certain sortedlist events to be very slow
+     * <li>barcodedeltas: a proof of concept based on the barcode class, this
+     *     strategy is particularly performant, although not very elegant!
+     * <li>treedeltas: uses our specially designed general tree ADT
+     * <li>tree4deltas: a fork of our treedeltas strategy that tweaks the
+     *     code in the general tree to be particularly performant for tracking
+     *     list changes
+     *
+     * <p>Ideally we will support fewer strategies in the future. In particular,
+     * we plan on keeping only treedeltas and removing the other strategies.
+     */
+    private static final String assemblerName;
+    static {
+        String assemblerProperty = null;
+        try {
+            assemblerProperty = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
+        } catch(SecurityException e) {
+            // do nothing
+        }
+        if(assemblerProperty != null) assemblerName = assemblerProperty;
+        else assemblerName = "treedeltas";
+    }
+    /**
+     * Create a delegate using the current assembler.
+     */
+    private static final <E> AssemblerHelper<E> createDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
+        if(assemblerName.equals("treedeltas")) {
+            return new TreeDeltasAssembler<E>(sourceList, publisher);
+        } else if(assemblerName.equals("blockdeltas")) {
+            return new BlockDeltasAssembler<E>(sourceList, publisher);
+//        } else if(assemblerName.equals("tree4deltas")) {
+//            return new Tree4DeltasAssembler<E>(sourceList, publisher);
+        } else if(assemblerName.equals("barcodedeltas")) {
+            return new BarcodeDeltasAssembler<E>(sourceList, publisher);
+        } else {
+            throw new IllegalStateException();
+        }
+
+    }
+
     /**
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-//        delegate = new BlockDeltasAssembler<E>(sourceList, publisher);
-//        delegate = new TreeDeltasAssembler<E>(sourceList, publisher);
-
-        String driver = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-        if(driver == null || driver.equals("blockdeltas")) {
-            delegate = new BlockDeltasAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("barcodedeltas")) {
-            delegate = new BarcodeDeltasAssembler<E>(sourceList, publisher);
-        } else if(driver.equals("treedeltas")) {
-            delegate = new TreeDeltasAssembler<E>(sourceList, publisher);
-        } else {
-            throw new IllegalStateException();
-        }
+        delegate = createDelegate(sourceList, publisher);
     }
     
     /**
@@ -405,6 +437,8 @@ public final class ListEventAssembler<E> {
 
     /**
      * ListEventAssembler using {@link BarcodeListDeltas} to store list changes.
+     *
+     * @deprecated replaced with {@link TreeDeltasAssembler}
      */
     static class BarcodeDeltasAssembler<E> extends AssemblerHelper<E> {
 
@@ -501,7 +535,6 @@ public final class ListEventAssembler<E> {
             return new BarcodeListDeltasListEvent<E>(this, sourceList);
         }
     }
-
 
 
     /**
@@ -640,7 +673,148 @@ public final class ListEventAssembler<E> {
 
 
     /**
+//     * ListEventAssembler using {@link Tree4Deltas} to store list changes.
+//     *
+//     * <p>This class is experimental and will probably be removed in a future
+//     * revision.
+//     *
+//     * @deprecated replaced with {@link TreeDeltasAssembler}
+//     */
+//    static class Tree4DeltasAssembler<E> extends AssemblerHelper<E> {
+//
+//        /** prefer to use the linear blocks, which are more performant but handle only a subset of all cases */
+//        private BlockSequence blockSequence = new BlockSequence();
+//        private boolean useListBlocksLinear = false;
+//
+//        /** fall back to list deltas 2, which are capable of all list changes */
+//        private Tree4Deltas listDeltas = new Tree4Deltas();
+//
+//        /**
+//         * Creates a new ListEventAssembler that tracks changes for the specified list.
+//         */
+//        public Tree4DeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
+//            this.sourceList = sourceList;
+//            this.publisher = publisher;
+//        }
+//
+//        /** {@inheritDoc} */
+//        protected void prepareEvent() {
+//            //listDeltas.reset(sourceSize);
+//            listDeltas.setAllowContradictingEvents(this.allowContradictingEvents);
+//            useListBlocksLinear = true;
+//        }
+//
+//        /** {@inheritDoc} */
+//        public void addChange(int type, int startIndex, int endIndex) {
+//            // try the linear holder first
+//            if(useListBlocksLinear) {
+//                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1);
+//                if(success) {
+//                    return;
+//                } else {
+//                    listDeltas.addAll(blockSequence);
+//                    useListBlocksLinear = false;
+//                }
+//            }
+//
+//            // try the good old reliable deltas 2
+//            if(type == ListEvent.INSERT) {
+//                listDeltas.insert(startIndex, endIndex + 1);
+//            } else if(type == ListEvent.UPDATE) {
+//                listDeltas.update(startIndex, endIndex + 1);
+//            } else if(type == ListEvent.DELETE) {
+//                listDeltas.delete(startIndex, endIndex + 1);
+//            }
+//        }
+//
+//        public boolean getUseListBlocksLinear() {
+//            return useListBlocksLinear;
+//        }
+//
+//        public Tree4Deltas getListDeltas() {
+//            return listDeltas;
+//        }
+//
+//        public BlockSequence getListBlocksLinear() {
+//            return blockSequence;
+//        }
+//
+//        /** {@inheritDoc} */
+//        public boolean isEventEmpty() {
+//            if(useListBlocksLinear) return blockSequence.isEmpty();
+//            else return listDeltas.isEmpty();
+//        }
+//
+//        /** {@inheritDoc} */
+//        protected void fireEvent() {
+//            try {
+//                // bail on empty changes
+//                if(isEventEmpty()) return;
+//
+//                final List<ListEventListener<E>> listenersToNotify;
+//                final List<ListEvent<E>> listenerEventsToNotify;
+//
+//                // grab a consistent snapshot of the parallel lists
+//                synchronized (this) {
+//                    listenersToNotify = listeners;
+//                    listenerEventsToNotify = listenerEvents;
+//                }
+//
+//                // reset the events before firing them
+//                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
+//                    e.next().reset();
+//                }
+//
+//                // perform the notification on the duplicate list
+//                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+//
+//            // clear the change for the next caller
+//            } finally {
+//                blockSequence.reset();
+//                listDeltas.reset(sourceList.size());
+//                reorderMap = null;
+//                allowContradictingEvents = false;
+//            }
+//        }
+//
+//        public void forwardEvent(ListEvent<?> listChanges) {
+//            // if we're not nested, we can fire the event directly
+//            if(eventLevel == 0) {
+//                // todo: optimize by reusing the existing listDeltas
+//                beginEvent(false);
+//                while(listChanges.nextBlock()) {
+//                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+//                }
+//                commitEvent();
+//
+//            // if we're nested, we have to copy this event's parts to our queue
+//            } else {
+//                beginEvent(false);
+//                this.reorderMap = null;
+//                if(isEventEmpty() && listChanges.isReordering()) {
+//                    reorder(listChanges.getReorderMap());
+//                } else {
+//                    while(listChanges.nextBlock()) {
+//                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+//                    }
+//                }
+//                commitEvent();
+//            }
+//        }
+//
+//        protected ListEvent<E> createListEvent() {
+//            return new Tree4DeltasListEvent<E>(this, sourceList);
+//        }
+//
+//        public String toString() {
+//            return listDeltas.toString();
+//        }
+//    }
+
+    /**
      * ListEventAssembler using {@link Block}s to store list changes.
+     *
+     * @deprecated replaced with {@link TreeDeltasAssembler}
      */
     static class BlockDeltasAssembler<E> extends AssemblerHelper<E> {
 

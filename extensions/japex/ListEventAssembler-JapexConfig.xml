@@ -26,6 +26,12 @@
         <param name="GlazedLists.ListEventAssemblerDelegate" value="treedeltas"/>
     </driver>
 
+    <driver name="Tree 4 Deltas">
+        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.DeltasDriver"/>
+        <param name="description" value="Tree 4 Deltas"/>
+        <param name="GlazedLists.ListEventAssemblerDelegate" value="tree4deltas"/>
+    </driver>
+
     <testCase name="SortedList Event Performance: 20000 values, 5 distinct">
         <param name="distinctValues" value="A,B,C,D,E"/>
         <param name="baseSize" value="20000"/>
