@@ -23,7 +23,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchSt
      * @param subtext the String check for as the prefix in {@link #indexOf(String)}
      */
     public void setSubtext(String subtext) {
-        if (subtext.length() == 0)
+        if (subtext.length() == 1)
             this.indexOfStrategy = new SingleCharacterIndexOfStrategy(subtext.charAt(0));
         else
             this.indexOfStrategy = new MultiCharacterIndexOfStrategy(subtext);
@@ -60,7 +60,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchSt
      * the prefix is precisely one character long.
      */
     private static class SingleCharacterIndexOfStrategy implements IndexOfStrategy {
-        /** The upper and lower case version of the prefix to match. */
+        /** The upper and lower case versions of the prefix to match. */
         private final char upperCase;
         private final char lowerCase;
 
@@ -70,6 +70,10 @@ public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchSt
         }
 
         public int indexOf(String text) {
+            // if the text is not long enough to match the subtext, bail early
+            if (text.length() < 1)
+                return -1;
+
             final char c = text.charAt(0);
             return (c == this.upperCase || c == this.lowerCase) ? 0 : -1;
         }
