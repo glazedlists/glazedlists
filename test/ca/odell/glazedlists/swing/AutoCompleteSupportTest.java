@@ -111,6 +111,13 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         } catch (IllegalArgumentException e) {
             // expected
         }
+
+        try {
+            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
+            fail("failed to throw an IllegalArgumentException on double installation of AutoCompleteSupport");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
     }
 
     public void guiTestChangeModel() {

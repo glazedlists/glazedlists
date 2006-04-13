@@ -341,6 +341,9 @@ public final class AutoCompleteSupport<E> {
         if (!(((JTextField) editorComponent).getDocument() instanceof AbstractDocument))
             throw new IllegalArgumentException("comboBox must use a JTextField backed by an AbstractDocument as its editor component");
 
+        if (comboBox.getUI().getClass() == AutoCompleteSupport.AutoCompleteComboBoxUI.class)
+            throw new IllegalArgumentException("comboBox is already configured for autocompletion");
+
         return new AutoCompleteSupport<E>(comboBox, items, filterator);
     }
 
