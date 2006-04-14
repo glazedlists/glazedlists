@@ -253,6 +253,108 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(6, listener.getCount());
     }
 
+    public void guiTestCorrectCase() throws BadLocationException {
+        final CountingActionListener listener = new CountingActionListener();
+
+        final JComboBox combo = new JComboBox();
+        combo.addActionListener(listener);
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add(null);
+        items.add("New Brunswick");
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+        items.add(null);
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        assertEquals(0, listener.getCount());
+
+        // without case correction and without strict mode
+        support.setStrict(false);
+        support.setCorrectsCase(false);
+        doc.replace(0, doc.getLength(), "NEW", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("NEW Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        // with case correction and without strict mode
+        support.setCorrectsCase(true);
+        support.setStrict(false);
+        doc.replace(0, doc.getLength(), "NEW", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        // without case correction but WITH strict mode should still cause case correction to occur
+        support.setCorrectsCase(false);
+        support.setStrict(true);
+        doc.replace(0, doc.getLength(), "NEW", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        // with case correction and strict mode
+        support.setCorrectsCase(true);
+        support.setStrict(true);
+        doc.replace(0, doc.getLength(), "NEW", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+    }
+
+    public void guiTestSwitchingToStrictMode() throws BadLocationException {
+        final CountingActionListener listener = new CountingActionListener();
+
+        final JComboBox combo = new JComboBox();
+        combo.addActionListener(listener);
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("New Brunswick");
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        assertEquals(0, listener.getCount());
+        support.setCorrectsCase(false);
+
+        // without case correction and without strict mode
+        support.setStrict(false);
+        doc.replace(0, doc.getLength(), "NEW", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("NEW Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        // switching to strict mode should correct the case
+        support.setStrict(true);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        // typing garbage in strict mode should be ignored
+        doc.replace(0, doc.getLength(), "garbage", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        // typing garbage in non-strict mode should be honoured
+        support.setStrict(false);
+        doc.replace(0, doc.getLength(), "garbage", null);
+        assertEquals(0, combo.getItemCount());
+        assertEquals("garbage", textField.getText());
+        assertEquals(2, listener.getCount());
+
+        // switching to strict mode should select the first element in the model
+        support.setStrict(true);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(3, listener.getCount());
+    }
 
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();

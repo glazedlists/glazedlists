@@ -22,10 +22,7 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -154,6 +151,9 @@ public final class AutoCompleteSupport<E> {
     /** The Document backing the comboBoxEditor. */
     private AbstractDocument document;
 
+    /** Handles the special case of the backspace key in strict mode. */
+    private final KeyListener strictModeBackspaceHandler = new StrictModeBackspaceHandler();
+
     /** A DocumentFilter that controls edits to the Document behind the comboBoxEditor. */
     private final AutoCompleteFilter documentFilter = new AutoCompleteFilter();
 
@@ -280,6 +280,9 @@ public final class AutoCompleteSupport<E> {
         this.document = (AbstractDocument) this.comboBoxEditor.getDocument();
         this.document.setDocumentFilter(this.documentFilter);
 
+        // add a KeyListener to the ComboBoxEditor which handles the special case of backspace when in strict mode
+        this.comboBoxEditor.addKeyListener(this.strictModeBackspaceHandler);
+
         // detect changes made to the key parts of JComboBox which must be controlled for autocompletion
         this.comboBox.addPropertyChangeListener("UI", this.uiWatcher);
         this.comboBox.addPropertyChangeListener("model", this.modelWatcher);
@@ -401,6 +404,11 @@ public final class AutoCompleteSupport<E> {
      * If <code>correctCase</code> is <tt>true</tt>, user specified strings
      * will be converted to the case of the element they match. Otherwise
      * they will be left unaltered.
+     *
+     * <p>Note: this flag only has meeting when strict mode is turned off.
+     * When strict mode is on, case is corrected regardless of this setting.
+     *
+     * @see #setStrict(boolean)
      */
     public void setCorrectsCase(boolean correctCase) {
         this.correctsCase = correctCase;
@@ -418,9 +426,38 @@ public final class AutoCompleteSupport<E> {
      * appearing within the ComboBoxModel. If it is <tt>false</tt> each
      * keystroke must continue to match some value in the ComboBoxModel or it
      * will be discarded.
+     *
+     * <p>Note: When strict mode is turned on then all user input is corrected
+     * to the case of the autocompletion term, regardless of the correctsCase
+     * setting.
+     *
+     * @see #setCorrectsCase(boolean)
      */
     public void setStrict(boolean strict) {
+        if (this.strict == strict) return;
+
         this.strict = strict;
+
+        // if strict mode was just turned on, ensure the comboBox contains a
+        // value from the ComboBoxModel (i.e. start being strict!)
+        if (strict) {
+            final String value = comboBoxEditor.getText();
+            String strictValue = findAutoCompleteTerm(value);
+
+            // if the value in the editor already IS the autocompletion term,
+            // short circuit to avoid broadcasting a needless ActionEvent
+            if (value.equals(strictValue) || (strictValue == null && "".equals(value)))
+                return;
+
+            // select the first element if no autocompletion term could be found
+            if (strictValue == null && !items.isEmpty()) {
+                final Object firstItem = items.get(0);
+                strictValue = firstItem == null ? null : firstItem.toString();
+            }
+
+            // adjust the editor to contain the autocompletion term
+            comboBoxEditor.setText(strictValue);
+        }
     }
 
     /**
@@ -448,14 +485,17 @@ public final class AutoCompleteSupport<E> {
         this.comboBox.setUI(this.originalUI);
         this.originalUI = null;
 
-        // 4. restore the original ComboBoxEditor to the JComboBox
+        // 4. unregister the strictModeBackspaceHandler from the comboBoxEditor
+        this.comboBoxEditor.removeKeyListener(this.strictModeBackspaceHandler);
+
+        // 5. restore the original ComboBoxEditor to the JComboBox
         this.comboBox.setEditor(this.originalComboBoxEditor);
         this.originalComboBoxEditor = null;
 
-        // 5. restore the original editable flag to the JComboBox
+        // 6. restore the original editable flag to the JComboBox
         this.comboBox.setEditable(originalComboBoxEditable);
 
-        // 6. dispose of our FilterList so that it is severed from the given items EventList
+        // 7. dispose of our FilterList so that it is severed from the given items EventList
         this.filteredItems.dispose();
 
         // null out the comboBox to indicate that this support class is uninstalled
@@ -506,6 +546,34 @@ public final class AutoCompleteSupport<E> {
 
         else if (comboBox.isShowing() && !comboBox.isPopupVisible())
             comboBox.showPopup();
+    }
+
+    /**
+     * Returns <tt>true</tt> if the list of all possible values in the
+     * ComboBoxModel includes one which meets the criteria to be the
+     * autocompletion term for the given <code>value</code>.
+     */
+    private String findAutoCompleteTerm(String value) {
+        // determine if our value is empty
+        final boolean prefixIsEmpty = "".equals(value);
+
+        final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
+
+        // search the list of ALL items for an autocompletion term for the given value
+        for (int i = 0; i < items.size(); i++) {
+            final Object item = items.get(i);
+            final String itemString = item == null ? null : item.toString();
+
+            // if the itemString starts with the given value
+            // we have found an appropriate autocompletion term
+            if (itemString != null) {
+                // if itemString matches the prefix, we know an autocompletion term exists
+                if (prefixIsEmpty ? "".equals(itemString) : valueMatcher.matches(itemString))
+                    return itemString;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -607,7 +675,7 @@ public final class AutoCompleteSupport<E> {
             final String valueAfterEdit = comboBoxEditor.getText();
 
             // if an autocomplete term could not be found and we're in strict mode, rollback the edit
-            if (isStrict() && !"".equals(valueAfterEdit) && !doesAutoCompleteTermExist(valueAfterEdit)) {
+            if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null) {
                 // indicate the error to the user
                 Toolkit.getDefaultToolkit().beep();
 
@@ -663,11 +731,11 @@ public final class AutoCompleteSupport<E> {
                     if (filterBypass != null) {
                         // either keep the user's prefix or replace it with the itemString's prefix
                         // depending on whether we correct the case
-                        if (correctsCase) {
+                        if (getCorrectsCase() || isStrict()) {
                             filterBypass.replace(0, prefix.length(), itemString, attributeSet);
                         } else {
                             final String itemSuffix = itemString.substring(prefix.length());
-                            filterBypass.insertString (prefix.length(), itemSuffix, attributeSet);
+                            filterBypass.insertString(prefix.length(), itemSuffix, attributeSet);
                         }
                     }
 
@@ -687,28 +755,6 @@ public final class AutoCompleteSupport<E> {
             // (this has the side-effect of scrolling the popup to the top)
             final boolean silently = isTableCellEditor || selectedItemBeforeEdit == null;
             selectItem(-1, silently);
-        }
-
-        /**
-         * Returns <tt>true</tt> if the list of all possible values in the
-         * ComboBoxModel includes one which meets the criteria to be the
-         * autocompletion term for the given <code>value</code>.
-         */
-        private boolean doesAutoCompleteTermExist(String value) {
-            final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
-
-            // search the list of ALL items for an autocompletion term for the given value
-            for (int i = 0; i < items.size(); i++) {
-                final Object item = items.get(i);
-                final String itemString = item == null ? null : item.toString();
-
-                // if the itemString starts with the given value
-                // we have found an appropriate autocompletion term
-                if (itemString != null && valueMatcher.matches(itemString))
-                    return true;
-            }
-
-            return false;
         }
 
         /**
@@ -1094,6 +1140,51 @@ public final class AutoCompleteSupport<E> {
         public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) { delegate.paintCurrentValueBackground(g, bounds, hasFocus); }
         public void update(Graphics g, JComponent c) { delegate.update(g, c); }
         public boolean contains(JComponent c, int x, int y) { return delegate.contains(c, x, y); }
+    }
+
+    /**
+     * This KeyListener handles the case when the user hits the backspace key
+     * and the {@link AutoCompleteSupport} is strict. Normally backspace would
+     * delete the selected text, if it existed, or delete the character
+     * immediately preceding the cursor. In strict mode the ComboBoxEditor must
+     * always contain a value from the ComboBoxModel, so the backspace key
+     * <strong>NEVER</strong> alters the Document. Rather, it alters the
+     * text selection to include one more character to the left. This is a nice
+     * compromise, since the editor continues to retain a valid value from the
+     * ComboBoxModel, but the user may type a key at any point to replace the
+     * selection with another valid entry.
+     */
+    private class StrictModeBackspaceHandler extends KeyAdapter {
+        public void keyPressed(KeyEvent e) {
+            // make sure this backspace key does not modify our comboBoxEditor's Document
+            if (isTrigger(e))
+                doNotChangeDocument = true;
+        }
+
+        public void keyTyped(KeyEvent e) {
+            if (isTrigger(e)) {
+                // calculate the current beginning of the selection
+                int selectionStart = Math.min(comboBoxEditor.getSelectionStart(), comboBoxEditor.getSelectionEnd());
+
+                // add one character to the left of the selection, if it exists
+                if (selectionStart > 0) selectionStart--;
+
+                // select the text from the end of the Document to the new selectionStart
+                // (which positions the caret at the selectionStart)
+                comboBoxEditor.setCaretPosition(comboBoxEditor.getText().length());
+                comboBoxEditor.moveCaretPosition(selectionStart);
+            }
+        }
+
+        public void keyReleased(KeyEvent e) {
+            // resume the ability to modify our comboBoxEditor's Document
+            if (isTrigger(e))
+                doNotChangeDocument = false;
+        }
+
+        private boolean isTrigger(KeyEvent e) {
+            return isStrict() && e.getKeyChar() == KeyEvent.VK_BACK_SPACE;
+        }
     }
 
     /**
