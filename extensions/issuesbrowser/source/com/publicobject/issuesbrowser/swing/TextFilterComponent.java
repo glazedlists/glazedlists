@@ -18,6 +18,10 @@ public class TextFilterComponent implements FilterComponent<Issue> {
     private JTextField filterEdit = new JTextField(15);
     private TextComponentMatcherEditor<Issue> textComponentMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, null);
 
+    public TextFilterComponent() {
+        PrototypeValueSupport.install(filterEdit, "Filter");
+    }
+
     public String getName() {
         return "Text Filter";
     }
