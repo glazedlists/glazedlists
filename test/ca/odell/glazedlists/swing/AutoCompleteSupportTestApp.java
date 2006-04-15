@@ -187,10 +187,11 @@ public class AutoCompleteSupportTestApp {
      */
     private void rebuildContentPane() {
         frame.getContentPane().removeAll();
-        frame.getContentPane().add(tweakerPanel, BorderLayout.NORTH);
-        frame.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
-        frame.getContentPane().add(autocompleteActionPanel, BorderLayout.WEST);
-        frame.getContentPane().add(regularActionPanel, BorderLayout.EAST);
+        frame.getContentPane().setLayout(new GridBagLayout());
+        frame.getContentPane().add(tweakerPanel,            new GridBagConstraints(0, 0, 3, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(autocompleteActionPanel, new GridBagConstraints(0, 1, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(createMainPanel(),       new GridBagConstraints(1, 1, 1, 1, 0.60, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(regularActionPanel,      new GridBagConstraints(2, 1, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
 
     /**
@@ -333,9 +334,9 @@ public class AutoCompleteSupportTestApp {
 
         panel.add(nameLabel,                      new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
         panel.add(autoCompleteComboBox,           new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(Box.createHorizontalStrut(5),   new GridBagConstraints(1, 2, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(Box.createHorizontalStrut(5),   new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
         panel.add(plainComboBox,                  new GridBagConstraints(2, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(tableScroller,                  new GridBagConstraints(0, 3, 3, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 0, 0, 0), 0, 0));
+        panel.add(tableScroller,                  new GridBagConstraints(0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 0, 0, 0), 0, 0));
 
         return panel;
     }
