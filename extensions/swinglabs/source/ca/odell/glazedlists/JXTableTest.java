@@ -18,11 +18,47 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.publicobject.issuesbrowser.IssuezillaXMLParser;
 import com.publicobject.issuesbrowser.Project;
 import com.publicobject.issuesbrowser.IssueTableFormat;
+import com.publicobject.issuesbrowser.Issue;
 
 /**
+ * Demonstrate sorting using JXTable's header indicator icons and Glazed Lists'
+ * {@link SortedList}.
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class JXTableTest {
+public class JXTableTest implements Runnable {
+
+    private EventList<Issue> issues;
+
+    public JXTableTest(EventList<Issue> issues) {
+        this.issues = issues;
+    }
+
+    public void run() {
+        JTextField filterEdit = new JTextField(12);
+        TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, null);
+        FilterList<Issue> textFilteredIssues = new FilterList<Issue>(issues, textMatcherEditor);
+        SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
+
+        EventTableModel<Issue> tableModel = new EventTableModel<Issue>(sortedIssues, new IssueTableFormat());
+
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        filterPanel.add(new JLabel("Filter:"));
+        filterPanel.add(filterEdit);
+
+        JXTable table = new JXTable(tableModel);
+        table.setColumnControlVisible(true);
+        table.getColumnExt(3).setComparator(new IssueStateComparator());
+        EventListJXTableSorting.install(table, sortedIssues);
+
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().setLayout(new BorderLayout());
+        frame.getContentPane().add(filterPanel, BorderLayout.NORTH);
+        frame.getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
+        frame.pack();
+        frame.setVisible(true);
+    }
 
     /**
      * Load issues asynchronously.
@@ -57,32 +93,9 @@ public class JXTableTest {
     }
 
     public static void main(String[] args) {
-        EventList issues = new BasicEventList();
+        EventList<Issue> issues = new BasicEventList<Issue>();
         new Thread(new IssueLoader(issues, args[0])).start();
-
-        JTextField filterEdit = new JTextField(12);
-        TextComponentMatcherEditor textMatcherEditor = new TextComponentMatcherEditor(filterEdit, null);
-        FilterList textFilteredIssues = new FilterList(issues, textMatcherEditor);
-        SortedList sortedIssues = new SortedList(textFilteredIssues, null);
-
-        EventTableModel tableModel = new EventTableModel(sortedIssues, new IssueTableFormat());
-
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        filterPanel.add(new JLabel("Filter:"));
-        filterPanel.add(filterEdit);
-
-        JXTable table = new JXTable(tableModel);
-        table.setColumnControlVisible(true);
-        table.getColumnExt(3).putClientProperty(TableColumnExt.SORTER_COMPARATOR, new IssueStateComparator());
-        EventListRowSorter.install(table, sortedIssues);
-
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(filterPanel, BorderLayout.NORTH);
-        frame.getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
+        SwingUtilities.invokeLater(new JXTableTest(issues));
     }
 
 }
