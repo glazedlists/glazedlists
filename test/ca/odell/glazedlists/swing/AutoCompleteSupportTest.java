@@ -356,6 +356,46 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(3, listener.getCount());
     }
 
+    public void guiTestDeleteKey() throws BadLocationException {
+        final CountingActionListener listener = new CountingActionListener();
+        final JComboBox combo = new JComboBox();
+        combo.addActionListener (listener);
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("New Brunswick");
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        assertEquals(0, listener.getCount());
+
+        support.setStrict(false);
+        doc.replace(0, doc.getLength(), "New Brunswick", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        doc.remove(3, 10);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        support.setStrict(true);
+        doc.replace(0, doc.getLength(), "New Brunswick", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(1, listener.getCount());
+
+        doc.remove(3, 10);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(" Brunswick", textField.getSelectedText());
+        assertEquals(1, listener.getCount());
+    }
+    
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
 

@@ -196,6 +196,9 @@ public final class AutoCompleteSupport<E> {
     /** <tt>true</tt> indicates attempts to change the document should be ignored. */
     private boolean doNotChangeDocument = false;
 
+    /** <tt>true</tt> indicates attempts to select an autocompletion term should be ignored. */
+    private boolean doNotAutoComplete = false;
+
     //
     // Values present when install() executed - these are restored in uninstall()
     //
@@ -653,7 +656,14 @@ public final class AutoCompleteSupport<E> {
             final int selectionEnd = comboBoxEditor.getSelectionEnd();
 
             super.remove(filterBypass, offset, length);
-            postProcessDocumentChange(null, null, valueBeforeEdit, selectionStart, selectionEnd);
+
+            // only select an autocomplete term if strict mode is on
+            doNotAutoComplete = !isStrict();
+            try {
+                postProcessDocumentChange(filterBypass, null, valueBeforeEdit, selectionStart, selectionEnd);
+            } finally {
+                doNotAutoComplete = false;
+            }
         }
 
         /**
@@ -713,6 +723,8 @@ public final class AutoCompleteSupport<E> {
          * broadcast from the combo box.
          */
         private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
+            if (doNotAutoComplete) return;
+
             // determine if our prefix is empty (in which case we cannot use our prefixMatcher to locate an autocompletion term)
             final boolean prefixIsEmpty = "".equals(prefix);
 
@@ -728,15 +740,13 @@ public final class AutoCompleteSupport<E> {
                     if (prefixIsEmpty ? !"".equals(itemString) : !prefixMatcher.matches(itemString))
                         continue;
 
-                    if (filterBypass != null) {
-                        // either keep the user's prefix or replace it with the itemString's prefix
-                        // depending on whether we correct the case
-                        if (getCorrectsCase() || isStrict()) {
-                            filterBypass.replace(0, prefix.length(), itemString, attributeSet);
-                        } else {
-                            final String itemSuffix = itemString.substring(prefix.length());
-                            filterBypass.insertString(prefix.length(), itemSuffix, attributeSet);
-                        }
+                    // either keep the user's prefix or replace it with the itemString's prefix
+                    // depending on whether we correct the case
+                    if (getCorrectsCase() || isStrict()) {
+                        filterBypass.replace(0, prefix.length(), itemString, attributeSet);
+                    } else {
+                        final String itemSuffix = itemString.substring(prefix.length());
+                        filterBypass.insertString(prefix.length(), itemSuffix, attributeSet);
                     }
 
                     // select the autocompletion term
@@ -1163,11 +1173,21 @@ public final class AutoCompleteSupport<E> {
 
         public void keyTyped(KeyEvent e) {
             if (isTrigger(e)) {
+                // if no content exists in the comboBoxEditor, bail early
+                if (comboBoxEditor.getText().length() == 0)
+                    return;
+
                 // calculate the current beginning of the selection
                 int selectionStart = Math.min(comboBoxEditor.getSelectionStart(), comboBoxEditor.getSelectionEnd());
 
-                // add one character to the left of the selection, if it exists
-                if (selectionStart > 0) selectionStart--;
+                // if we cannot extend the selection to the left, beep to indicate the error
+                if (selectionStart == 0) {
+                    Toolkit.getDefaultToolkit().beep();
+                    return;
+                }
+
+                // add one character to the left of the selection
+                selectionStart--;
 
                 // select the text from the end of the Document to the new selectionStart
                 // (which positions the caret at the selectionStart)
@@ -1247,7 +1267,7 @@ public final class AutoCompleteSupport<E> {
      *      combobox whose contents remain consistent with the data in the
      *      table column at the given <code>columnIndex</code>
      */
-    public static <E> DefaultCellEditor createTableCellEditor(TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex) {
+    public static <E> DefaultCellEditor createTableCellEditor(TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex, boolean strict) {
         // use a function to extract all values for the column
         final FunctionList.Function<E,String> columnValueFunction = new TableColumnValueFunction<E>(tableFormat, columnIndex);
         final FunctionList<E, String> allColumnValues = new FunctionList<E, String>(tableData, columnValueFunction);
@@ -1260,7 +1280,8 @@ public final class AutoCompleteSupport<E> {
         cellEditor.setClickCountToStart(2);
 
         // install autocompletion support on the JComboBox
-        AutoCompleteSupport.install((JComboBox) cellEditor.getComponent(), uniqueColumnValues);
+        final AutoCompleteSupport support = AutoCompleteSupport.install((JComboBox) cellEditor.getComponent(), uniqueColumnValues);
+        support.setStrict(strict);
 
         return cellEditor;
     }
