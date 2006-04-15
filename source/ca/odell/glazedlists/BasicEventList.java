@@ -222,8 +222,8 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      *
      * <p>As of October 3, 2005, this is the wire format of serialized
      * {@link BasicEventList}s:
-     * <li>An {@link Object[]} containing each of the list's elements
-     * <li>A {@link ListEventListener[]} containing <strong>only</strong> the
+     * <li>An <code>Object[]</code> containing each of the list's elements
+     * <li>A <code>ListEventListener[]</code> containing <strong>only</strong> the
      *     listeners that themselves implement {@link Serializable}. Those that
      *     do not will not be serialized. Note that {@link TransformedList}s
      *     such as {@link FilterList} are not {@link Serializable} and will not

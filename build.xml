@@ -52,13 +52,19 @@
         <mkdir dir="docs"/>
 		<javadoc
 			destdir="docs/api" author="true" use="true" windowtitle="Glazed Lists" source="${java.target.version}">
-			<packageset dir="source">
-				<exclude name="**/impl/**"/>
-			</packageset>
-			<doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
+			<packageset dir="source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/swt/source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/ktable/source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/jgoodiesforms/source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/nachocalendar/source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/jfreechart/source"><exclude name="**/impl/**"/></packageset>
+            <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
+            <link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
+            <link href="http://help.eclipse.org/help31/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
+            <link href="http://www.jfree.org/jfreechart/javadoc/"/>
+
+            <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
 			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2006 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
-			<link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
-			<link href="http://www.eclipse.org/documentation/html/plugins/org.eclipse.platform.doc.isv/doc/reference/api/"/>
 		</javadoc>
 	</target>
 

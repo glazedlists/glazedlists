@@ -193,7 +193,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * argument is meaningless.
      *
      * <p><strong><font color="#FF0000">Warning:</font></strong> This method
-     * breaks the contract required by {@link List#add(int, Object}.
+     * breaks the contract required by {@link List#add(int, Object)}.
      */
     public void add(int index, List<E> value) {
         source.addAll(value);

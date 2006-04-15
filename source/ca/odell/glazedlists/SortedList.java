@@ -75,7 +75,7 @@ public final class SortedList<E> extends TransformedList<E, E> {
     /** the comparator that this list uses for sorting */
     private Comparator<E> comparator = null;
 
-    /** one of {@link STRICT_SORT_ORDER} or {@link AVOID_MOVING_ELEMENTS}. */
+    /** one of {@link #STRICT_SORT_ORDER} or {@link #AVOID_MOVING_ELEMENTS}. */
     private int mode = STRICT_SORT_ORDER;
 
 
@@ -106,7 +106,7 @@ public final class SortedList<E> extends TransformedList<E, E> {
     /**
      * Modify the behaviour of this {@link SortedList} to one of the predefined modes.
      *
-     * @param mode either {@link STRICT_SORT_ORDER} or {@link AVOID_MOVING_ELEMENTS}.
+     * @param mode either {@link #STRICT_SORT_ORDER} or {@link #AVOID_MOVING_ELEMENTS}.
      */
     public void setMode(int mode) {
         if(mode != STRICT_SORT_ORDER && mode != AVOID_MOVING_ELEMENTS) throw new IllegalArgumentException("Mode must be either SortedList.STRICT_SORT_ORDER or SortedList.AVOID_MOVING_ELEMENTS");
@@ -124,8 +124,8 @@ public final class SortedList<E> extends TransformedList<E, E> {
     /**
      * Get the behaviour mode for this {@link SortedList}.
      *
-     * @return one of {@link STRICT_SORT_ORDER} (default) or
-     *     {@link AVOID_MOVING_ELEMENTS}.
+     * @return one of {@link #STRICT_SORT_ORDER} (default) or
+     *     {@link #AVOID_MOVING_ELEMENTS}.
      */
     public int getMode() {
         return this.mode;

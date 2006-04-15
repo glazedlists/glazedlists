@@ -24,7 +24,7 @@ import java.util.*;
  *        drain the queue of MatcherEvents. Subclasses may override to
  *        customize which Thread is used.
  *
- *   <li> {@link #coalesceMatcherEvents(List<Event<E>>)} is used to compress
+ *   <li> {@link #coalesceMatcherEvents(List)} is used to compress
  *        many enqueued MatcherEvents into a single representative
  *        MatcherEvent. This implies a contract between all registered
  *        MatcherEditorListeners and this {@link ThreadedMatcherEditor} that

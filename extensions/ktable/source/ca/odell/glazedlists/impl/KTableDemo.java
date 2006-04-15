@@ -1,13 +1,14 @@
-/* Glazed Lists                                                 (c) 2003-2006 */
+/* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.swt;
+package ca.odell.glazedlists.impl;
 
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import de.kupzog.ktable.*;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.swt.EventKTableModel;
 import ca.odell.glazedlists.gui.TableFormat;
 import com.publicobject.issuesbrowser.IssueLoader;
 import com.publicobject.issuesbrowser.Project;

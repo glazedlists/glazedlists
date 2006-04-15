@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
 import de.kupzog.ktable.*;
 
 /**

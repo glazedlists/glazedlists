@@ -54,7 +54,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator<E> filterator;
 
-    /** one of {@link CONTAINS} or {@link STARTS_WITH} */
+    /** one of {@link #CONTAINS} or {@link #STARTS_WITH} */
     private int mode = CONTAINS;
 
     /**
@@ -92,7 +92,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Modify the behaviour of this {@link TextMatcherEditor} to one of the
      * predefined modes.
      *
-     * @param mode either {@link CONTAINS} or {@link STARTS_WITH}.
+     * @param mode either {@link #CONTAINS} or {@link #STARTS_WITH}.
      */
     public void setMode(int mode) {
         if(mode != CONTAINS && mode != STARTS_WITH)
@@ -117,7 +117,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /**
      * Returns the behaviour mode for this {@link TextMatcherEditor}.
      *
-     * @return one of {@link CONTAINS} (default) or {@link STARTS_WITH}
+     * @return one of {@link #CONTAINS} (default) or {@link #STARTS_WITH}
      */
     public int getMode() {
         return mode;

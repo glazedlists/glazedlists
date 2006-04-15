@@ -99,7 +99,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      *
      * @param source the EventList to decorate with a function transformation
      * @param forward the function to execute on each source element
-     * @param forward the function to map elements of FunctionList back to
+     * @param reverse the function to map elements of FunctionList back to
      *      element values in the source list
      */
     public FunctionList(EventList<S> source, Function<S,E> forward, Function<E,S> reverse) {
