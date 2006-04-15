@@ -1267,7 +1267,7 @@ public final class AutoCompleteSupport<E> {
      *      combobox whose contents remain consistent with the data in the
      *      table column at the given <code>columnIndex</code>
      */
-    public static <E> DefaultCellEditor createTableCellEditor(TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex, boolean strict) {
+    public static <E> DefaultCellEditor createTableCellEditor(TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex) {
         // use a function to extract all values for the column
         final FunctionList.Function<E,String> columnValueFunction = new TableColumnValueFunction<E>(tableFormat, columnIndex);
         final FunctionList<E, String> allColumnValues = new FunctionList<E, String>(tableData, columnValueFunction);
@@ -1280,8 +1280,7 @@ public final class AutoCompleteSupport<E> {
         cellEditor.setClickCountToStart(2);
 
         // install autocompletion support on the JComboBox
-        final AutoCompleteSupport support = AutoCompleteSupport.install((JComboBox) cellEditor.getComponent(), uniqueColumnValues);
-        support.setStrict(strict);
+        AutoCompleteSupport.install((JComboBox) cellEditor.getComponent(), uniqueColumnValues);
 
         return cellEditor;
     }
