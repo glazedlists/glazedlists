@@ -878,8 +878,8 @@ public final class AutoCompleteSupport<E> {
                 // install custom actions for the arrow keys in all non-Apple L&Fs
                 actionMap.put("selectPrevious", new UpAction());
                 actionMap.put("selectNext", new DownAction());
-
-            } else if (actionMap.get("aquaSelectNext") != null) {
+            }
+            if (actionMap.get("aquaSelectNext") != null) {
                 // install custom actions for the arrow keys in the Apple Aqua L&F
                 actionMap.put("aquaSelectPrevious", new UpAction());
                 actionMap.put("aquaSelectNext", new DownAction());
