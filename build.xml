@@ -204,12 +204,11 @@
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/32966/swingx.jar"/>
             <arg value="extensions/swinglabs/lib/swingx.jar"/>
         </java>
-        <!-- uncomment the following when we have real code in the swinglabs extension -->
-        <!--<javac destdir="classes" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">-->
-            <!--<classpath>-->
-                <!--<fileset dir="extensions/swinglabs/lib/" includes="*.jar"/>-->
-            <!--</classpath>-->
-        <!--</javac>-->
+        <javac destdir="classes" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="extensions/swinglabs/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
     </target>
 
     <target name="nachocalendar" depends="core,swing">
