@@ -73,22 +73,27 @@ import java.beans.PropertyChangeListener;
  * <ol>
  *   <li> the popup is always <strong>at least</strong> as wide as the
  *        autocompleting {@link JComboBox}, but may be wider to accomodate a
- *        {@link JComboBox#getPrototypeDisplayValue()} if a non-null prototype
- *        value exists
+ *        {@link JComboBox#getPrototypeDisplayValue() prototype display value}
+ *        if a non-null value exists
  *   <li> as items are filtered in the ComboBoxModel, the popup height is
  *        adjusted to display between 0 and {@link JComboBox#getMaximumRowCount()}
  *        rows before scrolling the popup
  * </ol>
  *
  * <strong>JComboBox ActionEvents</strong>
- * A single {@link ActionEvent} is fired from the JComboBox in these situations:
+ * <p>A single {@link ActionEvent} is fired from the JComboBox in these situations:
  * <ol>
  *   <li> the user hits the enter key
- *   <li> the user selects an item from the popup
+ *   <li> the selected item within the popup is changed (which can happen due
+ *        to a mouse click, a change in the autocompletion term, or using the
+ *        arrow keys)
  * </ol>
  *
- * In order to achieve all of the autocompletion and filtering behaviour, the
- * following occurs when {@link #install} is called:
+ * <strong>ComboBoxEditor Focus</strong>
+ * <p>When the ComboBoxEditor gains focus it selects the text it contains.
+ *
+ * <p><p>In order to achieve all of the autocompletion and filtering behaviour,
+ * the following occurs when {@link #install} is called:
  *
  * <ul>
  *   <li> the JComboBox will be made editable
@@ -153,6 +158,9 @@ public final class AutoCompleteSupport<E> {
 
     /** Handles the special case of the backspace key in strict mode. */
     private final KeyListener strictModeBackspaceHandler = new StrictModeBackspaceHandler();
+
+    /** Handles selecting the text in the comboBoxEditor when it gains focus. */
+    private final FocusListener selectTextOnFocusGainHandler = new SelectTextOnFocusGainHandler();
 
     /** A DocumentFilter that controls edits to the Document behind the comboBoxEditor. */
     private final AutoCompleteFilter documentFilter = new AutoCompleteFilter();
@@ -285,6 +293,8 @@ public final class AutoCompleteSupport<E> {
 
         // add a KeyListener to the ComboBoxEditor which handles the special case of backspace when in strict mode
         this.comboBoxEditor.addKeyListener(this.strictModeBackspaceHandler);
+        // add a FocusListener to the ComboBoxEditor which selects all text when focus is gained
+        this.comboBoxEditor.addFocusListener(this.selectTextOnFocusGainHandler);
 
         // detect changes made to the key parts of JComboBox which must be controlled for autocompletion
         this.comboBox.addPropertyChangeListener("UI", this.uiWatcher);
@@ -488,8 +498,9 @@ public final class AutoCompleteSupport<E> {
         this.comboBox.setUI(this.originalUI);
         this.originalUI = null;
 
-        // 4. unregister the strictModeBackspaceHandler from the comboBoxEditor
+        // 4. unregister the Listeners from the comboBoxEditor
         this.comboBoxEditor.removeKeyListener(this.strictModeBackspaceHandler);
+        this.comboBoxEditor.removeFocusListener(this.selectTextOnFocusGainHandler);
 
         // 5. restore the original ComboBoxEditor to the JComboBox
         this.comboBox.setEditor(this.originalComboBoxEditor);
@@ -687,7 +698,7 @@ public final class AutoCompleteSupport<E> {
             // if an autocomplete term could not be found and we're in strict mode, rollback the edit
             if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null) {
                 // indicate the error to the user
-                Toolkit.getDefaultToolkit().beep();
+                UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditor);
 
                 // rollback the edit
                 doNotPostProcessDocumentChanges = true;
@@ -1180,9 +1191,9 @@ public final class AutoCompleteSupport<E> {
                 // calculate the current beginning of the selection
                 int selectionStart = Math.min(comboBoxEditor.getSelectionStart(), comboBoxEditor.getSelectionEnd());
 
-                // if we cannot extend the selection to the left, beep to indicate the error
+                // if we cannot extend the selection to the left, indicate the error
                 if (selectionStart == 0) {
-                    Toolkit.getDefaultToolkit().beep();
+                    UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditor);
                     return;
                 }
 
@@ -1204,6 +1215,16 @@ public final class AutoCompleteSupport<E> {
 
         private boolean isTrigger(KeyEvent e) {
             return isStrict() && e.getKeyChar() == KeyEvent.VK_BACK_SPACE;
+        }
+    }
+
+    /**
+     * To emulate Firefox behaviour, all text in the ComboBoxEditor is selected
+     * from beginning to end when the ComboBoxEditor gains focus.
+     */
+    private class SelectTextOnFocusGainHandler extends FocusAdapter {
+        public void focusGained(FocusEvent e) {
+            comboBoxEditor.select(0, comboBoxEditor.getText().length());
         }
     }
 
