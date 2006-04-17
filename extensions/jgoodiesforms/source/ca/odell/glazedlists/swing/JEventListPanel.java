@@ -16,11 +16,11 @@ import ca.odell.glazedlists.event.*;
  * A panel that shows the contents of an EventList containing JComponents.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
- * <tr class="tableheadingcolor"><td colspan="2"><font size="+2"><b>Extension: JGoodies Forms</b></font></td></tr>
+ * <tr class="TableHeadingColor"><td colspan="2"><font size="+2"><b>Extension: JGoodies Forms</b></font></td></tr>
  * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>JGoodies Forms</b>.</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Tested Version:</b></td><td>1.0.5</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Home page:</b></td><td><a href="http://www.jgoodies.com/freeware/forms/">http://www.jgoodies.com/freeware/forms/</a></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>License:</b></td><td><a href="http://www.opensource.org/licenses/bsd-license.html">BSD</a></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Tested Version:</b></td><td>1.0.5</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Home page:</b></td><td><a href="http://www.jgoodies.com/freeware/forms/">http://www.jgoodies.com/freeware/forms/</a></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>License:</b></td><td><a href="http://www.opensource.org/licenses/bsd-license.html">BSD</a></td></tr>
  * </td></tr>
  * </table>
  *

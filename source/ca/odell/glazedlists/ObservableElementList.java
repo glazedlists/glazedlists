@@ -22,13 +22,13 @@ import java.util.Iterator;
  * listener capable of detecting modifications to an observable list element.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
- * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe; elementChanged(), however, is thread ready</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>inserts: O(1), deletes: O(1), updates: O(1), elementChanged: O(n)</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>8 bytes per element</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>ObservableElementListTest</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr class="TableHeadingColor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Writable:</b></td><td>yes</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Concurrency:</b></td><td>thread ready, not thread safe; elementChanged(), however, is thread ready</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Performance:</b></td><td>inserts: O(1), deletes: O(1), updates: O(1), elementChanged: O(n)</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Memory:</b></td><td>8 bytes per element</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Unit Tests:</b></td><td>ObservableElementListTest</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
  * @see GlazedLists#beanConnector(Class)

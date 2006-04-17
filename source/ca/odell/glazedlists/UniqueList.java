@@ -18,13 +18,13 @@ import java.util.*;
  * the contract required by {@link List}. See {@link EventList} for an example.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
- * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ * <tr class="TableHeadingColor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Writable:</b></td><td>yes</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Performance:</b></td><td></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Memory:</b></td><td>N/A</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Issues:</b></td><td>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=27">27</a>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=34">34</a>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=35">35</a>

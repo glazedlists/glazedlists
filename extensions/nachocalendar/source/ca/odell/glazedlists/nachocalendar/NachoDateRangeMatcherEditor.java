@@ -20,11 +20,11 @@ import java.util.Date;
  * objects to edit the endpoints of the date range.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
- * <tr class="tableheadingcolor"><td colspan="2"><font size="+2"><b>Extension: NachoCalendar</b></font></td></tr>
+ * <tr class="TableHeadingColor"><td colspan="2"><font size="+2"><b>Extension: NachoCalendar</b></font></td></tr>
  * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>NachoCalendar</b>.</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Tested Version:</b></td><td>0.23</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Home page:</b></td><td><a href="http://nachocalendar.sourceforge.net/">http://nachocalendar.sourceforge.net/</a></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>License:</b></td><td><a href="http://www.gnu.org/copyleft/lesser.html">LGPL</a></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Tested Version:</b></td><td>0.23</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Home page:</b></td><td><a href="http://nachocalendar.sourceforge.net/">http://nachocalendar.sourceforge.net/</a></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>License:</b></td><td><a href="http://www.gnu.org/copyleft/lesser.html">LGPL</a></td></tr>
  * </td></tr>
  * </table>
  *

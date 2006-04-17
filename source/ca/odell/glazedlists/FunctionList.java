@@ -47,13 +47,13 @@ import java.util.List;
  * preserve the relationship of their identities after their transformation.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
- * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(1), writes O(1) amortized</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>FunctionList</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>
+ * <tr class="TableHeadingColor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Writable:</b></td><td>yes</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Performance:</b></td><td>reads: O(1), writes O(1) amortized</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Memory:</b></td><td></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Unit Tests:</b></td><td>FunctionList</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Issues:</b></td><td>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=282">282</a>
  * </td></tr>
  * </table>

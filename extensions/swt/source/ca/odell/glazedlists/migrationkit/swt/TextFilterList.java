@@ -38,13 +38,13 @@ import org.eclipse.swt.events.*;
  * for an example.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
- * <tr class="tableheadingcolor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Writable:</b></td><td>yes</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N), filter changes O(N)</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Memory:</b></td><td>O(N)</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Unit Tests:</b></td><td>N/A</td></tr>
- * <tr><td class="tablesubheadingcolor"><b>Issues:</b></td><td>N/A</td></tr>
+ * <tr class="TableHeadingColor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Writable:</b></td><td>yes</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Concurrency:</b></td><td>thread ready, not thread safe</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Performance:</b></td><td>reads: O(log N), writes O(log N), filter changes O(N)</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Memory:</b></td><td>O(N)</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Unit Tests:</b></td><td>N/A</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
  * @deprecated This class uses inheritance when composition is preferrable. Instead
