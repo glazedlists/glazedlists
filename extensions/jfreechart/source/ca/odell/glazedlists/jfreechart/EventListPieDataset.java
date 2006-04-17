@@ -20,6 +20,15 @@ import java.util.List;
  * interface. Changes to the backing {@link EventList} are rebroadcast as
  * changes to this PieDataset.
  *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan="2"><font size="+2"><b>Extension: JFreeChart</b></font></td></tr>
+ * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>JFreeChart</b>.</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Tested Version:</b></td><td>1.0.0</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Home page:</b></td><td><a href="http://www.jfree.org/jfreechart/">http://www.jfree.org/jfreechart/</a></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>License:</b></td><td><a href="http://www.jfree.org/lgpl.php">LGPL</a></td></tr>
+ * </td></tr>
+ * </table>
+ *
  * <p> Note: The DataEvents broadcasted by this class occur on the Thread the
  * ListEvents arrive on. If this PieDataset is attached to a swing component,
  * it is the responsibility of the client to ensure that the ListEvents are

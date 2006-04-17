@@ -21,6 +21,15 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
  * {@link EventList} corresponds to a row in the {@link KTableModel}. The columns
  * of the table must be specified using a {@link TableFormat}.
  *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan="2"><font size="+2"><b>Extension: KTable</b></font></td></tr>
+ * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>KTable</b>.</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Tested Version:</b></td><td>2.1.2</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Home page:</b></td><td><a href="http://ktable.sourceforge.net/">http://ktable.sourceforge.net/</a></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>License:</b></td><td><a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License</a></td></tr>
+ * </td></tr>
+ * </table>
+ *
  * <p>The EventTableModel class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the SWT event dispatch thread.
  * To do this programmatically, use {@link org.eclipse.swt.widgets.Display#asyncExec(Runnable)}.

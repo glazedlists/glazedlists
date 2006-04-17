@@ -58,6 +58,7 @@
 			<packageset dir="extensions/jgoodiesforms/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/nachocalendar/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/jfreechart/source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/swinglabs/source"><exclude name="**/impl/**"/></packageset>
             <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
             <link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
             <link href="http://help.eclipse.org/help31/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>

@@ -26,7 +26,17 @@ import java.util.*;
  *   <li> Waterfall Charts
  * </ul>
  *
- * If it is possible to create a pipeline of list transformations such that
+ *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan="2"><font size="+2"><b>Extension: JFreeChart</b></font></td></tr>
+ * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>JFreeChart</b>.</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Tested Version:</b></td><td>1.0.0</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Home page:</b></td><td><a href="http://www.jfree.org/jfreechart/">http://www.jfree.org/jfreechart/</a></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>License:</b></td><td><a href="http://www.jfree.org/lgpl.php">LGPL</a></td></tr>
+ * </td></tr>
+ * </table>
+ *
+ * <p>If it is possible to create a pipeline of list transformations such that
  * your source is an {@link EventList} of {@link ValueSegment} objects then
  * this class can aid you in showing and maintaining that data within a
  * JFreeChart. It handles the maintenance of efficient data structures for

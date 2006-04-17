@@ -22,6 +22,15 @@ import ca.odell.glazedlists.GlazedLists;
 /**
  * Sort a {@link JXTable} using {@link ca.odell.glazedlists.SortedList}.
  *
+ * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
+ * <tr class="tableheadingcolor"><td colspan="2"><font size="+2"><b>Extension: SwingX</b></font></td></tr>
+ * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>SwingX</b>.</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Tested Version:</b></td><td>CVS Head, April 15, 2006</td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>Home page:</b></td><td><a href="https://swingx.dev.java.net/">https://swingx.dev.java.net/</a></td></tr>
+ * <tr><td class="tablesubheadingcolor"><b>License:</b></td><td><a href="http://www.gnu.org/copyleft/lesser.html">LGPL</a></td></tr>
+ * </td></tr>
+ * </table>
+ *
  * <p>To prepare a {@link JXTable} to be sorted using a {@link ca.odell.glazedlists.SortedList}:
  *     <li>Create a {@link ca.odell.glazedlists.SortedList} and {@link EventTableModel} that depends
  *         on that {@link ca.odell.glazedlists.SortedList}.
