@@ -207,6 +207,9 @@ public final class AutoCompleteSupport<E> {
     /** <tt>true</tt> indicates attempts to select an autocompletion term should be ignored. */
     private boolean doNotAutoComplete = false;
 
+    /** <tt>true</tt> indicates attempts to toggle the state of the popup should be ignored. */
+    private boolean doNotTogglePopup = false;
+
     //
     // Values present when install() executed - these are restored in uninstall()
     //
@@ -459,7 +462,7 @@ public final class AutoCompleteSupport<E> {
 
             // if the value in the editor already IS the autocompletion term,
             // short circuit to avoid broadcasting a needless ActionEvent
-            if (value.equals(strictValue) || (strictValue == null && "".equals(value)))
+            if (value.equals(strictValue))
                 return;
 
             // select the first element if no autocompletion term could be found
@@ -469,7 +472,12 @@ public final class AutoCompleteSupport<E> {
             }
 
             // adjust the editor to contain the autocompletion term
-            comboBoxEditor.setText(strictValue);
+            doNotTogglePopup = true;
+            try {
+                comboBoxEditor.setText(strictValue);
+            } finally {
+                doNotTogglePopup = false;
+            }
         }
     }
 
@@ -555,6 +563,9 @@ public final class AutoCompleteSupport<E> {
      * A small convenience method to try showing the combo box popup.
      */
     private void togglePopup() {
+        // break out early if we're flagged to ignore attempts to toggle the popup state
+        if (doNotTogglePopup) return;
+
         if (comboBoxModel.getSize() == 0)
             comboBox.hidePopup();
 
@@ -734,6 +745,7 @@ public final class AutoCompleteSupport<E> {
          * broadcast from the combo box.
          */
         private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
+            // break out early if we're flagged to ignore attempts to autocomplete
             if (doNotAutoComplete) return;
 
             // determine if our prefix is empty (in which case we cannot use our prefixMatcher to locate an autocompletion term)
