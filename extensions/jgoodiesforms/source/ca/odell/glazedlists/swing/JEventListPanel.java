@@ -42,7 +42,7 @@ public final class JEventListPanel<E> extends JPanel {
     private final ListLayout listLayout;
 
     /** the format specifies what an element cell looks like */
-    private final Format format;
+    private final Format<E> format;
 
     /** handle changes to the source {@link EventList} */
     private final SourceChangeHandler sourceChangeHandler = new SourceChangeHandler();
@@ -66,11 +66,33 @@ public final class JEventListPanel<E> extends JPanel {
         swingSource.addListEventListener(sourceChangeHandler);
     }
 
+    /**
+     * Limit the number of list elements will be layed out along the X axis.
+     * This is the number of logical columns, which may differ from the layout
+     * columns used within each cell.
+     *
+     * <p>Note that when the columns are limited, rows are automatically unlimited.
+     *
+     * @param elementColumns the number of logical columns, between 1 and
+     *      {@link Integer#MAX_VALUE}.
+     */
     public void setElementColumns(int elementColumns) {
+        if(elementColumns < 1) throw new IllegalArgumentException("elementColumns must be in the range [1, " + Integer.MAX_VALUE + "]");
         listLayout.setElementColumns(elementColumns);
     }
 
+    /**
+     * Limit the number of list elements will be layed out along the Y axis.
+     * This is the number of logical rows, which may differ from the layout
+     * rows used within each cell.
+     *
+     * <p>Note that when the rows are limited, columns are automatically unlimited.
+     *
+     * @param elementRows the number of logical rows, between 1 and
+     *      {@link Integer#MAX_VALUE}.
+     */
     public void setElementRows(int elementRows) {
+        if(elementRows < 1) throw new IllegalArgumentException("elementRows must be in the range [1, " + Integer.MAX_VALUE + "]");
         listLayout.setElementRows(elementRows);
     }
 

@@ -1,10 +1,9 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.swing;
 
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.table.TableColumnExt;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +14,11 @@ import java.util.List;
 
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import ca.odell.glazedlists.swing.EventListJXTableSorting;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.BasicEventList;
 import com.publicobject.issuesbrowser.IssuezillaXMLParser;
 import com.publicobject.issuesbrowser.Project;
 import com.publicobject.issuesbrowser.IssueTableFormat;
@@ -22,11 +26,11 @@ import com.publicobject.issuesbrowser.Issue;
 
 /**
  * Demonstrate sorting using JXTable's header indicator icons and Glazed Lists'
- * {@link SortedList}.
+ * {@link ca.odell.glazedlists.SortedList}.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class JXTableTest implements Runnable {
+class JXTableTest implements Runnable {
 
     private EventList<Issue> issues;
 

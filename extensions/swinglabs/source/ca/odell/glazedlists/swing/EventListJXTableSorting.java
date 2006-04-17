@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.swing;
 
 import org.jdesktop.swingx.decorator.SortController;
 import org.jdesktop.swingx.decorator.SortKey;
@@ -16,22 +16,30 @@ import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.impl.sort.TableColumnComparator;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.GlazedLists;
 
 /**
- * Sort a {@link JXTable} using {@link SortedList}.
+ * Sort a {@link JXTable} using {@link ca.odell.glazedlists.SortedList}.
  *
- * <p>To prepare a {@link JXTable} to be sorted using a {@link SortedList}:
- *     <li>Create a {@link SortedList} and {@link EventTableModel} that depends
- *         on that {@link SortedList}.
+ * <p>To prepare a {@link JXTable} to be sorted using a {@link ca.odell.glazedlists.SortedList}:
+ *     <li>Create a {@link ca.odell.glazedlists.SortedList} and {@link EventTableModel} that depends
+ *         on that {@link ca.odell.glazedlists.SortedList}.
  *     <li>Create a {@link JXTable} using the {@link EventTableModel} as its model.
  *     <li>Run the {@link EventListJXTableSorting#install} method to bind the
- *         {@link JXTable}'s headers to the {@link SortedList}'s {@link Comparator}.
+ *         {@link JXTable}'s headers to the {@link ca.odell.glazedlists.SortedList}'s {@link Comparator}.
  *
  * <p>Note that your {@link FilterPipeline} will be changed as a consequence of
  * using {@link EventListJXTableSorting}. This is due to API limitations in
  * SwingX which will hopefully be eventually resolved. For this reason it is
  * recommended that you not use {@link FilterPipeline} with this class. Instead,
- * consider using {@link FilterList} for filtering your {@link JXTable}.
+ * consider using {@link ca.odell.glazedlists.FilterList} for filtering your {@link JXTable}.
+ *
+ * <p>Since this class works with the <a href="https://swing.dev.java.net/">SwingX</a>
+ * project, it is likely to change as SwingX continues to evolve and mature.
+ * We will attempt to maintain source and binary compatibility as SwingX changes,
+ * but it is highly recommended that you test your table sorting each time you
+ * update your SwingX.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */

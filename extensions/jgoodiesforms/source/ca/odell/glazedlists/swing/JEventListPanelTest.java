@@ -17,7 +17,7 @@ import ca.odell.glazedlists.swing.JEventListPanel;
  *
  * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
  */
-public class JEventListPanelTest {
+class JEventListPanelTest {
 
     private final EventList sillyObjects = new BasicEventList();
 
