@@ -247,7 +247,7 @@ class ListLayout extends LayoutDecorator {
         int logicalColumnCountBefore = logicalColumnCount();
         int logicalRowCountBefore = logicalRowCount();
 
-        gridComponents.add(new CellComponents());
+        gridComponents.add(index, new CellComponents());
 
         fixCellCount(logicalRowCountBefore, logicalColumnCountBefore);
     }

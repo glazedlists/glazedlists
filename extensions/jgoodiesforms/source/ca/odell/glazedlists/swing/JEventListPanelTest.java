@@ -67,6 +67,7 @@ class JEventListPanelTest {
 
         JEventListPanel panel = new JEventListPanel(sillyObjects, new SillyObjectFormat());
         panel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.RED));
+        panel.setElementColumns(1);
 
         JButton addButton = new JButton("ADD");
         addButton.addActionListener(new AddAction(sillyObjects));
@@ -87,9 +88,11 @@ class JEventListPanelTest {
     static class AddAction implements ActionListener {
         private Random dice = new Random();
         private EventList target;
-        public AddAction(EventList target) { this.target = target; }
+        public AddAction(EventList target) {
+            this.target = target;
+        }
         public void actionPerformed(ActionEvent e) {
-            target.add("X " + (dice.nextInt(100)));
+            target.add(3, "X " + (dice.nextInt(100)));
         }
     }
 }
