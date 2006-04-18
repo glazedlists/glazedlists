@@ -395,7 +395,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(" Brunswick", textField.getSelectedText());
         assertEquals(1, listener.getCount());
     }
-    
+
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
 
