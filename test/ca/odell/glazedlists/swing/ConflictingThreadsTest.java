@@ -24,6 +24,14 @@ public class ConflictingThreadsTest extends SwingTestCase {
 	/** the table of labels */
 	private EventTableModel labelsTable;
 
+
+    /**
+     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
+     */
+    public void testGui() {
+        super.testGui();
+    }
+
 	/**
 	 * Prepare for the test.
 	 */
@@ -45,13 +53,6 @@ public class ConflictingThreadsTest extends SwingTestCase {
 	 * Clean up after the test.
 	 */
 	public void guiTearDown() {
-	}
-
-	/**
-	 * Tests the user interface. This is a mandatory method in SwingTestCase classes.
-	 */
-	public void testGui() {
-		super.testGui();
 	}
 
 	/**
