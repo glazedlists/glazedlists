@@ -4,6 +4,7 @@
 package com.publicobject.issuesbrowser.swing;
 
 import ca.odell.glazedlists.Filterator;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.nachocalendar.NachoDateRangeMatcherEditor;
 import com.publicobject.issuesbrowser.Issue;
@@ -22,7 +23,7 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
     /** A Filterator which extracts the creation date from Issue objects. */
     private static final Filterator<Date,Issue> ISSUE_DATE_FILTERATOR = new IssueDateFilterator();
 
-    public CreationDateMatcherEditor() {
+    public CreationDateMatcherEditor(EventList<Issue> issues) {
         super(ISSUE_DATE_FILTERATOR);
     }
 
@@ -41,5 +42,9 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
         public void getFilterValues(List<Date> baseList, Issue element) {
             baseList.add(element.getCreationTimestamp());
         }
+    }
+
+    public void dispose() {
+        // do nothing
     }
 }

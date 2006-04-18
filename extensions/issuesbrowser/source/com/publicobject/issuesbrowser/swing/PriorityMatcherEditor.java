@@ -7,6 +7,7 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.RangeMatcherEditor;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.Filterator;
+import ca.odell.glazedlists.EventList;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -28,7 +29,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
     private final RangeMatcherEditor<Integer,Issue> rangeMatcherEditor;
     private final JSlider slider;
 
-    public PriorityMatcherEditor() {
+    public PriorityMatcherEditor(EventList<Issue> issues) {
         slider = new JSlider(new DefaultBoundedRangeModel(0, 0, 0, 100));
         slider.addChangeListener(this);
 
@@ -62,5 +63,9 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
 
     public void stateChanged(ChangeEvent changeEvent) {
         rangeMatcherEditor.setRange(new Integer(slider.getValue()), null);
+    }
+
+    public void dispose() {
+        // dispose
     }
 }

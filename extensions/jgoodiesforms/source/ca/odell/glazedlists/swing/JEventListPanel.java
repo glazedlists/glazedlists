@@ -146,6 +146,7 @@ public final class JEventListPanel<E> extends JPanel {
             // forget the components
             components.remove(index);
 
+            // collapse the row from the layout
             listLayout.removeIndex(index);
         }
 
@@ -176,6 +177,9 @@ public final class JEventListPanel<E> extends JPanel {
 
             // save the latest components
             components.set(index, newElementComponents);
+
+            // update the row in the layout
+            listLayout.updateIndex(index);
         }
 
 

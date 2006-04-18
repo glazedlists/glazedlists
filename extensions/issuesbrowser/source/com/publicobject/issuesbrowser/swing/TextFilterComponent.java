@@ -5,6 +5,7 @@ package com.publicobject.issuesbrowser.swing;
 
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import ca.odell.glazedlists.EventList;
 
 import javax.swing.*;
 
@@ -18,7 +19,7 @@ public class TextFilterComponent implements FilterComponent<Issue> {
     private JTextField filterEdit = new JTextField(15);
     private TextComponentMatcherEditor<Issue> textComponentMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, null);
 
-    public TextFilterComponent() {
+    public TextFilterComponent(EventList<Issue> issues) {
         PrototypeValueSupport.install(filterEdit, "Filter");
     }
 
@@ -32,5 +33,9 @@ public class TextFilterComponent implements FilterComponent<Issue> {
 
     public MatcherEditor<Issue> getMatcherEditor() {
         return textComponentMatcherEditor;
+    }
+
+    public void dispose() {
+        // do nothing
     }
 }

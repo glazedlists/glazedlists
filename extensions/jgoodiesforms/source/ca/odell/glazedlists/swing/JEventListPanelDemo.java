@@ -17,7 +17,7 @@ import ca.odell.glazedlists.swing.JEventListPanel;
  *
  * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
  */
-class JEventListPanelTest {
+class JEventListPanelDemo {
 
     private final EventList sillyObjects = new BasicEventList();
 
@@ -82,7 +82,7 @@ class JEventListPanelTest {
     }
 
     public static void main(String[] args) {
-        new JEventListPanelTest().start();
+        new JEventListPanelDemo().start();
     }
 
     static class AddAction implements ActionListener {

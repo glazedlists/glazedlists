@@ -26,7 +26,8 @@ import java.util.Set;
 public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
 
     /** a list of users */
-    private EventList<String> allUsers = null;
+    private CollectionList<Issue, String> usersForIssues;
+    private UniqueList<String> allUsers = null;
 
     /** a list that maintains selection */
     private EventList<String> selectedUsers = null;
@@ -37,7 +38,8 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
      */
     public UsersMatcherEditor(EventList<Issue> source) {
         // create a unique users list from the source issues list
-        allUsers = new UniqueList<String>(new CollectionList<Issue, String>(source, new IssueUserator()));
+        usersForIssues = new CollectionList<Issue, String>(source, new IssueUserator());
+        allUsers = new UniqueList<String>(usersForIssues);
     }
 
     /**
@@ -53,6 +55,11 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
      */
     public EventList<String> getUsersList() {
         return allUsers;
+    }
+
+    public void dispose() {
+        allUsers.dispose();
+        usersForIssues.dispose();
     }
 
     /**

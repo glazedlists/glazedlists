@@ -37,7 +37,8 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
     private final Map<String, JCheckBox> statusCheckBoxes = new LinkedHashMap<String, JCheckBox>();
 
     /** Issues grouped together by status. */
-    private final EventList<List<Issue>> issuesByStatus;
+    private final GroupingList<Issue> issuesByStatus;
+    private final EventList<List<Issue>> issuesByStatusSwingThread;
 
     /**
      * A cache of the list of statuses that mirrors the statuses of the issuesByStatus List.
@@ -47,8 +48,9 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
 
     public StatusMatcherEditor(EventList<Issue> issues) {
         // group the issues according to their status
-        this.issuesByStatus = GlazedListsSwing.swingThreadProxyList(new GroupingList<Issue>(issues, new IssueStatusComparator()));
-        this.issuesByStatus.addListEventListener(this);
+        issuesByStatus = new GroupingList<Issue>(issues, new IssueStatusComparator());
+        this.issuesByStatusSwingThread = GlazedListsSwing.swingThreadProxyList(issuesByStatus);
+        this.issuesByStatusSwingThread.addListEventListener(this);
 
         this.statusCheckBoxes.put("NEW", buildCheckBox("New"));
         this.statusCheckBoxes.put("UNCONFIRMED", buildCheckBox("Unconfirmed"));
@@ -81,6 +83,10 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
 
     public MatcherEditor<Issue> getMatcherEditor() {
         return this;
+    }
+
+    public void dispose() {
+        issuesByStatus.dispose();
     }
 
     /**
@@ -121,12 +127,12 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
             final String status;
             final int count;
             if (type == ListEvent.INSERT) {
-                List issuesOfThisStatus = (List)issuesByStatus.get(index);
+                List issuesOfThisStatus = (List)issuesByStatusSwingThread.get(index);
                 status = ((Issue)issuesOfThisStatus.get(0)).getStatus();
                 statuses.add(index, status);
                 count = issuesOfThisStatus.size();
             } else if (type == ListEvent.UPDATE) {
-                List issuesOfThisStatus = (List)issuesByStatus.get(index);
+                List issuesOfThisStatus = (List)issuesByStatusSwingThread.get(index);
                 status = (String)statuses.get(index);
                 count = issuesOfThisStatus.size();
             } else if (type == ListEvent.DELETE) {

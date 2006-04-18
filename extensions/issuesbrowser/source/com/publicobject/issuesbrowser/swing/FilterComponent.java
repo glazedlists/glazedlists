@@ -30,4 +30,6 @@ public interface FilterComponent<E> {
     JComponent getComponent();
 
     MatcherEditor<E> getMatcherEditor();
+
+    void dispose(); 
 }

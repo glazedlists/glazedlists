@@ -11,6 +11,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import java.util.List;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * Layout list elements by delegating to a {@link FormLayout}. This layout manages
@@ -263,6 +265,25 @@ class ListLayout extends LayoutDecorator {
 
         fixCellCount(logicalRowCountBefore, logicalColumnCountBefore);
     }
+
+    /**
+     * Handle a list element being updated by adjusting the layout.
+     */
+    public void updateIndex(int index) {
+        // remove all cached component constraints that aren't in the layout anymore
+        CellComponents cellComponents = gridComponents.get(index);
+        List activeComponents = Arrays.asList(container.getComponents());
+        for(int i = 0; i < cellComponents.components.size(); ) {
+            Component component = cellComponents.components.get(i);
+            if(!activeComponents.contains(component)) {
+                cellComponents.components.remove(i);
+                cellComponents.constraints.remove(i);
+            } else {
+                i++;
+            }
+        }
+    }
+
     private void reassignConstraints() {
         formLayout.invalidateLayout(container);
 
@@ -340,4 +361,3 @@ class ListLayout extends LayoutDecorator {
         }
     }
 }
-

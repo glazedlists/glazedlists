@@ -67,6 +67,7 @@ public class IssuesBrowser implements Runnable {
     public static final ImageIcon[] x_icons = loadIcons("x");
     public static final ImageIcon[] plus_icons = loadIcons("plus");
     public static final ImageIcon[] down_icons = loadIcons("down");
+    public static final ImageIcon[] left_icons = loadIcons("left");
     public static final ImageIcon[] right_icons = loadIcons("right");
 
     /** a label to display the count of issues in the issue table */
@@ -120,15 +121,17 @@ public class IssuesBrowser implements Runnable {
         return new ImageIcon(url);
     }
     private static ImageIcon[] loadIcons(String name) {
-        String[] iconStates = new String[] { "up", "over", "down" };
-        ImageIcon[] icons = new ImageIcon[3];
-        for(int i = 0; i < icons.length; i++) {
-            for(int s = 0; s < iconStates.length; s++) {
-                String state = iconStates[s];
-                icons[s] = loadIcon("resources/" + name + "_" + state + ".png");
-            }
-        }
-        return icons;
+//        String[] iconStates = new String[] { "up", "over", "down" };
+//        ImageIcon[] icons = new ImageIcon[3];
+//        for(int i = 0; i < icons.length; i++) {
+//            for(int s = 0; s < iconStates.length; s++) {
+//                String state = iconStates[s];
+//                icons[s] = loadIcon("resources/" + name + "_" + state + ".png");
+//            }
+//        }
+//        return icons;
+        ImageIcon icon = loadIcon("resources/" + name + ".png");
+        return new ImageIcon[] { icon, icon, icon };
     }
 
     /**
