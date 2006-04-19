@@ -44,6 +44,12 @@ public class IssuesBrowser implements Runnable {
     /** for displaying dates */
     static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 
+    public static final Border EMPTY_ONE_PIXEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+    public static final Border EMPTY_TWO_PIXEL_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
+    public static final Icon X_ICON = Icons.x(10, 5, Color.WHITE);
+    private static final Icon EXPANDED_ICON = Icons.triangle(9, SwingConstants.EAST, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
+    private static final Icon COLLAPSED_ICON = Icons.triangle(9, SwingConstants.SOUTH, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
+
     /** an event list to host the issues */
     private EventList<Issue> issuesEventList = new BasicEventList<Issue>();
 
@@ -65,11 +71,6 @@ public class IssuesBrowser implements Runnable {
     /** application-wide icons */
     public static final ImageIcon throbberActive = loadIcon("resources/throbber-active.gif");
     public static final ImageIcon throbberStatic = loadIcon("resources/throbber-static.gif");
-    public static final ImageIcon[] x_icons = loadIcons("x");
-    public static final ImageIcon[] plus_icons = loadIcons("plus");
-    public static final ImageIcon[] down_icons = loadIcons("down");
-    public static final ImageIcon[] left_icons = loadIcons("left");
-    public static final ImageIcon[] right_icons = loadIcons("right");
 
     /** a label to display the count of issues in the issue table */
     private IssueCounterLabel issueCounter = null;
@@ -560,7 +561,6 @@ public class IssuesBrowser implements Runnable {
         }
     }
 
-
     /**
      * Render the issues separator.
      */
@@ -571,13 +571,19 @@ public class IssuesBrowser implements Runnable {
         private final SeparatorList separatorList;
 
         private final JPanel panel = new JPanel(new BorderLayout());
-        private final IconButton expandButton = new IconButton(right_icons);
+        private final JButton expandButton;
         private final JLabel nameLabel = new JLabel();
 
         private SeparatorList.Separator<Issue> separator;
 
         public IssueSeparatorTableCell(SeparatorList separatorList) {
             this.separatorList = separatorList;
+
+            this.expandButton = new JButton(EXPANDED_ICON);
+            this.expandButton.setOpaque(false);
+            this.expandButton.setBorder(EMPTY_TWO_PIXEL_BORDER);
+            this.expandButton.setIcon(EXPANDED_ICON);
+            this.expandButton.setContentAreaFilled(false);
 
             this.nameLabel.setFont(nameLabel.getFont().deriveFont(10.0f));
             this.nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
@@ -607,7 +613,7 @@ public class IssuesBrowser implements Runnable {
             this.separator = (SeparatorList.Separator<Issue>)value;
             Issue issue = separator.first();
             if(issue == null) return; // handle 'late' rendering calls after this separator is invalid
-            expandButton.setIcons(separator.getLimit() == 0 ? right_icons : down_icons);
+            expandButton.setIcon(separator.getLimit() == 0 ? EXPANDED_ICON : COLLAPSED_ICON);
             nameLabel.setText(nameFormat.format(new Object[] {issue.getSubcomponent(), new Integer(separator.size())}));
         }
 
@@ -620,7 +626,7 @@ public class IssuesBrowser implements Runnable {
             } finally {
                 separatorList.getReadWriteLock().writeLock().unlock();
             }
-            expandButton.setIcons(collapsed ? down_icons : right_icons);
+            expandButton.setIcon(collapsed ? COLLAPSED_ICON : EXPANDED_ICON);
         }
     }
 

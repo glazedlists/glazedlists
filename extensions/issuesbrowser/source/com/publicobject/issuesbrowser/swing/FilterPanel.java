@@ -12,13 +12,13 @@ import ca.odell.glazedlists.swing.JEventListPanel;
 import com.publicobject.issuesbrowser.Issue;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.util.*;
-import java.util.List;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -92,9 +92,12 @@ class FilterPanel {
         private JPanel headerPanel;
 
         public CloseableFilterComponent(FilterComponent filterComponent) {
-            this.closeButton = new IssuesBrowser.IconButton(IssuesBrowser.x_icons);
+            this.closeButton = new JButton();
             this.closeButton.addActionListener(this);
             this.closeButton.setOpaque(false);
+            this.closeButton.setBorder(IssuesBrowser.EMPTY_ONE_PIXEL_BORDER);
+            this.closeButton.setIcon(IssuesBrowser.X_ICON);
+            this.closeButton.setContentAreaFilled(false);
 
             this.headerLabel = new JLabel();
             this.headerLabel.setHorizontalAlignment(JLabel.CENTER);
