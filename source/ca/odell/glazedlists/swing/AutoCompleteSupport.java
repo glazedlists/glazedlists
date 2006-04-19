@@ -110,6 +110,18 @@ import java.beans.PropertyChangeListener;
  * achieved, it greatly reduces the cross-functional communication required to
  * customize the behaviour of JComboBox for filtering and autocompletion.
  *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class must be
+ * mutated from the Swing Event Dispatch Thread. Failure to do so will result in
+ * an {@link IllegalStateException} thrown from any one of:
+ *
+ * <ul>
+ *   <li> {@link #install(JComboBox, EventList)}
+ *   <li> {@link #install(JComboBox, EventList, TextFilterator)}
+ *   <li> {@link #uninstall()}
+ *   <li> {@link #setCorrectsCase(boolean)}
+ *   <li> {@link #setStrict(boolean)}
+ * </ul>
+ *
  * @author James Lemieux
  */
 public final class AutoCompleteSupport<E> {
@@ -319,6 +331,8 @@ public final class AutoCompleteSupport<E> {
      * @param items the objects to display in the <code>comboBox</code>
      * @return an instance of the support class that is providing autocomplete
      *      features
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
      */
     public static <E> AutoCompleteSupport install(JComboBox comboBox, EventList<E> items) {
         return install(comboBox, items, GlazedLists.toStringTextFilterator());
@@ -348,8 +362,12 @@ public final class AutoCompleteSupport<E> {
      * @param filterator extracts searchable text strings from each item
      * @return an instance of the support class that is providing autocomplete
      *      features
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
      */
     public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
+        checkAccessThread();
+
         if (!(comboBox.getUI() instanceof BasicComboBoxUI))
             throw new IllegalArgumentException("comboBox UI must be a subclass of " + BasicComboBoxUI.class);
 
@@ -364,6 +382,15 @@ public final class AutoCompleteSupport<E> {
             throw new IllegalArgumentException("comboBox is already configured for autocompletion");
 
         return new AutoCompleteSupport<E>(comboBox, items, filterator);
+    }
+
+    /**
+     * A convenience method to ensure {@link AutoCompleteSupport} is being
+     * accessed from the Event Dispatch Thread.
+     */
+    private static void checkAccessThread() {
+        if (!SwingUtilities.isEventDispatchThread())
+            throw new IllegalStateException("AutoCompleteSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \"" + Thread.currentThread().getName() + "\"");
     }
 
     /**
@@ -425,8 +452,12 @@ public final class AutoCompleteSupport<E> {
      * When strict mode is on, case is corrected regardless of this setting.
      *
      * @see #setStrict(boolean)
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
      */
     public void setCorrectsCase(boolean correctCase) {
+        checkAccessThread();
         this.correctsCase = correctCase;
     }
 
@@ -448,8 +479,13 @@ public final class AutoCompleteSupport<E> {
      * setting.
      *
      * @see #setCorrectsCase(boolean)
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
      */
     public void setStrict(boolean strict) {
+        checkAccessThread();
+
         if (this.strict == strict) return;
 
         this.strict = strict;
@@ -488,8 +524,13 @@ public final class AutoCompleteSupport<E> {
      * Calling this method will return the combo box to its original state
      * before autocompletion was installed, and it will be available for
      * garbage collection independently of the {@link EventList} of items.
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
      */
     public void uninstall() {
+        checkAccessThread();
+
         if (this.comboBox == null)
             throw new IllegalStateException("This AutoCompleteSupport has already been uninstalled");
 
