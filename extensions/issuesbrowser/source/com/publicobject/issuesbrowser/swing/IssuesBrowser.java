@@ -39,6 +39,7 @@ public class IssuesBrowser implements Runnable {
     public static final Color GLAZED_LISTS_MEDIUM_BROWN = new Color(69, 64, 56);
     public static final Color GLAZED_LISTS_MEDIUM_LIGHT_BROWN = new Color(150, 140, 130);
     public static final Color GLAZED_LISTS_LIGHT_BROWN = new Color(246, 237, 220);
+    public static final Color GLAZED_LISTS_LIGHT_BROWN_DARKER = new Color(231, 222, 205);
 
     /** for displaying dates */
     static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
