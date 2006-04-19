@@ -359,4 +359,28 @@ public class GroupingListTest extends TestCase {
         groupingList.dispose();
         assertEquals(0, source.updates.getListEventListeners().size());
     }
+
+    /**
+     * Make sure a GroupingList group is still sane after its elements have
+     * all been removed.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=326">Issue 326</a>
+     */
+    public void testStaleGroupHandling() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        final GroupingList<String> groupingList = new GroupingList<String>(source);
+
+        source.addAll(GlazedListsTests.stringToList("AAABBBCCC"));
+        List<String> as = groupingList.get(0);
+        List<String> bs = groupingList.get(1);
+        List<String> cs = groupingList.get(2);
+        assertEquals(3, as.size());
+        assertEquals(3, bs.size());
+        assertEquals(3, cs.size());
+
+        source.removeAll(GlazedListsTests.stringToList("B"));
+        assertEquals(3, as.size());
+        assertEquals(0, bs.size());
+        assertEquals(3, cs.size());
+    }
 }
