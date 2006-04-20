@@ -5,6 +5,7 @@ package com.publicobject.issuesbrowser.swing;
 
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.Description;
+import com.publicobject.misc.swing.WebStart;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -19,7 +20,7 @@ import java.util.Iterator;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class IssueDetailComponent {
+class IssueDescriptionsPanel {
 
     private JScrollPane scrollPane;
     private JTextPane descriptionsTextPane = new JTextPane();
@@ -29,7 +30,7 @@ class IssueDetailComponent {
     private LinkAction linkAction;
     private Issue issue = null;
 
-    public IssueDetailComponent() {
+    public IssueDescriptionsPanel() {
         descriptionsTextPane = new JTextPane();
         descriptionsTextPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         descriptionsTextPane.setEditable(false);

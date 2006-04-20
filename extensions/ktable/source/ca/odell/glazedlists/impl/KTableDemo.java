@@ -12,7 +12,7 @@ import ca.odell.glazedlists.swt.EventKTableModel;
 import ca.odell.glazedlists.gui.TableFormat;
 import com.publicobject.issuesbrowser.IssueLoader;
 import com.publicobject.issuesbrowser.Project;
-import com.publicobject.issuesbrowser.Throbber;
+import com.publicobject.misc.Throbber;
 import com.publicobject.issuesbrowser.Issue;
 
 /**

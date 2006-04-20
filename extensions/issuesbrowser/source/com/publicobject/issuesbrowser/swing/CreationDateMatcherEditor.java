@@ -23,11 +23,11 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
     /** A Filterator which extracts the creation date from Issue objects. */
     private static final Filterator<Date,Issue> ISSUE_DATE_FILTERATOR = new IssueDateFilterator();
 
-    public CreationDateMatcherEditor(EventList<Issue> issues) {
+    public CreationDateMatcherEditor() {
         super(ISSUE_DATE_FILTERATOR);
     }
 
-    public String getName() {
+    public String toString() {
         return "Creation Date";
     }
 
@@ -42,9 +42,5 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
         public void getFilterValues(List<Date> baseList, Issue element) {
             baseList.add(element.getCreationTimestamp());
         }
-    }
-
-    public void dispose() {
-        // do nothing
     }
 }

@@ -77,16 +77,12 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
         return this.checkBoxPanel;
     }
 
-    public String getName() {
+    public String toString() {
         return "Status";
     }
 
     public MatcherEditor<Issue> getMatcherEditor() {
         return this;
-    }
-
-    public void dispose() {
-        issuesByStatus.dispose();
     }
 
     /**

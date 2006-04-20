@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package com.publicobject.issuesbrowser.swing;
+package com.publicobject.misc.swing;
 
 import javax.swing.table.TableCellRenderer;
 import javax.swing.*;

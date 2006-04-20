@@ -13,6 +13,9 @@ import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.security.AccessControlException;
 
+import com.publicobject.misc.Throbber;
+import com.publicobject.misc.Exceptions;
+
 /**
  * This loads issues by project as they are requested. When a new project is
  * requested, a working project may be interrupted. This may have violent side

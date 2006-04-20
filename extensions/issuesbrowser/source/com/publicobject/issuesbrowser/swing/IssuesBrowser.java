@@ -9,6 +9,11 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.*;
 import com.publicobject.issuesbrowser.*;
+import com.publicobject.misc.Throbber;
+import com.publicobject.misc.Exceptions;
+import com.publicobject.misc.swing.Icons;
+import com.publicobject.misc.swing.JSeparatorTable;
+import com.publicobject.misc.swing.NoFocusRenderer;
 
 import javax.swing.*;
 import javax.swing.border.Border;

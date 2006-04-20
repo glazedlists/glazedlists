@@ -1,15 +1,16 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package com.publicobject.issuesbrowser.swing;
+package com.publicobject.misc.swing;
 
-import ca.odell.glazedlists.SeparatorList;
 import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.SeparatorList;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.*;
+
 import java.awt.*;
 
 /**
@@ -137,59 +138,6 @@ public class JSeparatorTable extends JTable {
         super.tableChanged(e);
     }
 }
-
-///**
-// * Delegate table look & feel to another {@link BasicTableUI}. This is useful
-// * to make minor tweaks to existing look & feels.
-// */
-//class DelegatingTableUI extends BasicTableUI {
-//
-//    private final BasicTableUI delegate;
-//
-//    public DelegatingTableUI(BasicTableUI delegate) {
-//        this.delegate = delegate;
-//    }
-//
-//    public void installUI(JComponent c) {
-//        delegate.installUI(c);
-//    }
-//
-//    public void uninstallUI(JComponent c) {
-//        delegate.uninstallUI(c);
-//    }
-//
-//    public Dimension getMinimumSize(JComponent c) {
-//        return delegate.getMinimumSize(c);
-//    }
-//
-//    public Dimension getPreferredSize(JComponent c) {
-//        return delegate.getPreferredSize(c);
-//    }
-//
-//    public Dimension getMaximumSize(JComponent c) {
-//        return delegate.getMaximumSize(c);
-//    }
-//
-//    public void paint(Graphics g, JComponent c) {
-//        delegate.paint(g, c);
-//    }
-//
-//    public void update(Graphics g, JComponent c) {
-//        paint(g, c);
-//    }
-//
-//    public boolean contains(JComponent c, int x, int y) {
-//        return delegate.contains(c, x, y);
-//    }
-//
-//    public int getAccessibleChildrenCount(JComponent c) {
-//        return delegate.getAccessibleChildrenCount(c);
-//    }
-//
-//    public Accessible getAccessibleChild(JComponent c, int i) {
-//        return delegate.getAccessibleChild(c, i);
-//    }
-//}
 
 /**
  * Modified from BasicTableUI to allow for spanning cells.

@@ -29,7 +29,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
     private final RangeMatcherEditor<Integer,Issue> rangeMatcherEditor;
     private final JSlider slider;
 
-    public PriorityMatcherEditor(EventList<Issue> issues) {
+    public PriorityMatcherEditor() {
         slider = new JSlider(new DefaultBoundedRangeModel(0, 0, 0, 100));
         slider.addChangeListener(this);
 
@@ -49,7 +49,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         slider.setLabelTable(prioritySliderLabels);
     }
 
-    public String getName() {
+    public String toString() {
         return "Priority";
     }
 
@@ -63,9 +63,5 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
 
     public void stateChanged(ChangeEvent changeEvent) {
         rangeMatcherEditor.setRange(new Integer(slider.getValue()), null);
-    }
-
-    public void dispose() {
-        // dispose
     }
 }

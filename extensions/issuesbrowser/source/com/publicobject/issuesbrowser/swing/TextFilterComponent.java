@@ -19,14 +19,6 @@ public class TextFilterComponent implements FilterComponent<Issue> {
     private JTextField filterEdit = new JTextField(15);
     private TextComponentMatcherEditor<Issue> textComponentMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, null);
 
-    public TextFilterComponent(EventList<Issue> issues) {
-        PrototypeValueSupport.install(filterEdit, "Filter");
-    }
-
-    public String getName() {
-        return "Text Filter";
-    }
-
     public JComponent getComponent() {
         return filterEdit;
     }
@@ -35,7 +27,7 @@ public class TextFilterComponent implements FilterComponent<Issue> {
         return textComponentMatcherEditor;
     }
 
-    public void dispose() {
-        // do nothing
+    public String toString() {
+        return "Text Filter";
     }
 }

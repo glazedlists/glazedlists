@@ -20,7 +20,7 @@ import java.awt.*;
 class IssueDetailsComponent extends JComponent {
 
     /** Shown when an Issue is selected. */
-    private final IssueDetailComponent issueDetailComponent;
+    private final IssueDescriptionsPanel issueDetailComponent;
 
     /** Shown when no Issue is selected. */
     private final IssueSummaryChartsComponent issueSummaryChartsComponent;
@@ -29,7 +29,7 @@ class IssueDetailsComponent extends JComponent {
      * Display details for the given <code>issuesList</code>.
      */
     public IssueDetailsComponent(EventList<Issue> issuesList) {
-        this.issueDetailComponent = new IssueDetailComponent();
+        this.issueDetailComponent = new IssueDescriptionsPanel();
         this.issueSummaryChartsComponent = new IssueSummaryChartsComponent(issuesList);
 
         this.setLayout(new BorderLayout());

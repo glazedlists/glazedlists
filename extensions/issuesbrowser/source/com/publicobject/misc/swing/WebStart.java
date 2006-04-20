@@ -1,12 +1,11 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package com.publicobject.issuesbrowser.swing;
+package com.publicobject.misc.swing;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.net.MalformedURLException;
 
 /**
  * Provide access to webstart services if they're available at runtime. If they're
@@ -14,7 +13,7 @@ import java.net.MalformedURLException;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class WebStart {
+public class WebStart {
 
     private final Object basicService;
     private final Method showDocument;

@@ -9,6 +9,7 @@ import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 import com.publicobject.issuesbrowser.UsersMatcherEditor;
 import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.misc.swing.NoFocusRenderer;
 
 import javax.swing.*;
 
@@ -57,7 +58,7 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
     }
 
 
-    public String getName() {
+    public String toString() {
         return "Users";
     }
 
