@@ -108,6 +108,88 @@ public class FilterListTest extends TestCase {
 		matcher.showAll(true);
 		assertEquals(5, filterList.size());
 	}
+
+    public void testConstructorLocking_Matcher() throws InterruptedException {
+        // create a list which will record our multithreaded interactions with a list
+        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
+
+        // start a thread which adds new Integers every 50 ms
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
+        writerThread.start();
+
+        // make sure the writerThread has started writing
+        Thread.sleep(200);
+
+        // create a list whose get() method pauses for 50 ms before returning the value
+        final EventList<Integer> delayList = GlazedListsTests.delayList(atomicList, 50);
+
+        // the test: creating the FilterList should be atomic and pause the writerThread while it initializes its internal state
+        new FilterList(delayList, Matchers.trueMatcher());
+
+        // wait until the writerThread finishes before asserting the recorded state
+        writerThread.join();
+
+        // correct locking should have produced a thread log like: WriterThread(n) main(n) ...
+        // correct locking should have produced a read/write pattern like: n Writes n Reads ...
+
+        // count the number of initial writes
+        int startingWrites = 0;
+        for (Iterator<String> i = atomicList.getReadWriteLog().iterator(); i.hasNext(); startingWrites++) {
+            if (!"W".equals(i.next()))
+                break;
+        }
+
+        // check if the number of reads following the initial writes matches 1 for 1
+        // (which indicates we locked the pipeline during the initialization of FilterList)
+        int i = startingWrites;
+        for (; i < startingWrites * 2; i++) {
+            assertEquals("R", atomicList.getReadWriteLog().get(i));
+        }
+
+        // the next operation should be a Write occurring after the initialization
+        assertEquals("W", atomicList.getReadWriteLog().get(i));
+    }
+
+    public void testConstructorLocking_MatcherEditor() throws InterruptedException {
+        // create a list which will record our multithreaded interactions with a list
+        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
+
+        // start a thread which adds new Integers every 50 ms
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, new Integer(0), 2000, 50), "WriterThread");
+        writerThread.start();
+
+        // make sure the writerThread has started writing
+        Thread.sleep(200);
+
+        // create a list whose get() method pauses for 50 ms before returning the value
+        final EventList<Integer> delayList = GlazedListsTests.delayList(atomicList, 50);
+
+        // the test: creating the FilterList should be atomic and pause the writerThread while it initializes its internal state
+        new FilterList(delayList, new RangeMatcherEditor());
+
+        // wait until the writerThread finishes before asserting the recorded state
+        writerThread.join();
+
+        // correct locking should have produced a thread log like: WriterThread(n) main(n) ...
+        // correct locking should have produced a read/write pattern like: n Writes n Reads ...
+
+        // count the number of initial writes
+        int startingWrites = 0;
+        for (Iterator<String> i = atomicList.getReadWriteLog().iterator(); i.hasNext(); startingWrites++) {
+            if (!"W".equals(i.next()))
+                break;
+        }
+
+        // check if the number of reads following the initial writes matches 1 for 1
+        // (which indicates we locked the pipeline during the initialization of FilterList)
+        int i = startingWrites;
+        for (; i < startingWrites * 2; i++) {
+            assertEquals("R", atomicList.getReadWriteLog().get(i));
+        }
+
+        // the next operation should be a Write occurring after the initialization
+        assertEquals("W", atomicList.getReadWriteLog().get(i));
+    }
 }
 
 
