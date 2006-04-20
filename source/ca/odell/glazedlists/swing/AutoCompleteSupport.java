@@ -168,8 +168,8 @@ public final class AutoCompleteSupport<E> {
     /** The Document backing the comboBoxEditor. */
     private AbstractDocument document;
 
-    /** Handles the special case of the backspace key in strict mode. */
-    private final KeyListener strictModeBackspaceHandler = new StrictModeBackspaceHandler();
+    /** Handles the special case of the backspace key in strict mode and the enter key. */
+    private final KeyListener strictModeBackspaceHandler = new AutoCompleteKeyHandler();
 
     /** Handles selecting the text in the comboBoxEditor when it gains focus. */
     private final FocusListener selectTextOnFocusGainHandler = new SelectTextOnFocusGainHandler();
@@ -187,7 +187,7 @@ public final class AutoCompleteSupport<E> {
     private boolean isTableCellEditor;
 
     //
-    // These listeners watch for invariant violations in the JComboBox and report them
+    // These listeners watch for invalid changes to the JComboBox which break our autocompletion and report them
     //
 
     /**
@@ -591,8 +591,8 @@ public final class AutoCompleteSupport<E> {
      * This method updates the {@link #prefix} to be the current value in the
      * combo box editor.
      */
-    private void updatePrefix() throws BadLocationException {
-        prefix = document.getText(0, document.getLength());
+    private void updatePrefix() {
+        prefix = comboBoxEditor.getText();
 
         if (prefix.length() == 0)
             prefixMatcher = Matchers.trueMatcher();
@@ -887,10 +887,7 @@ public final class AutoCompleteSupport<E> {
          */
         private ArrowButtonMouseListener arrowButtonMouseListener;
 
-        /**
-         * A handle to the JPopupMenu which functions as the popup of the
-         * JComboBox.
-         */
+        /** The JPopupMenu which functions as the popup of the JComboBox. */
         private JPopupMenu popupMenu;
 
         /**
@@ -978,19 +975,19 @@ public final class AutoCompleteSupport<E> {
         }
 
         /**
-         * Selects the next item in the list.  It won't change the selection if the
-         * currently selected item is already the last item.
+         * Selects the next item in the list. If the last item is currently
+         * selected, selection wraps around to the first element.
          */
         protected void selectNextPossibleValue() {
-            selectPossibleValue((isTableCellEditor ? popup.getList().getSelectedIndex() : comboBox.getSelectedIndex()) + 1);
+            selectPossibleValue(comboBox.getSelectedIndex() + 1);
         }
 
         /**
-         * Selects the previous item in the list.  It won't change the selection if the
-         * currently selected item is already the first item.
+         * Selects the previous item in the list. If the first item is
+         * currently selected, selection wraps around to the last element.
          */
         protected void selectPreviousPossibleValue() {
-            selectPossibleValue((isTableCellEditor ? popup.getList().getSelectedIndex() : comboBox.getSelectedIndex()) - 1);
+            selectPossibleValue(comboBox.getSelectedIndex() - 1);
         }
 
         /**
@@ -1228,7 +1225,7 @@ public final class AutoCompleteSupport<E> {
      * ComboBoxModel, but the user may type a key at any point to replace the
      * selection with another valid entry.
      */
-    private class StrictModeBackspaceHandler extends KeyAdapter {
+    private class AutoCompleteKeyHandler extends KeyAdapter {
         public void keyPressed(KeyEvent e) {
             // make sure this backspace key does not modify our comboBoxEditor's Document
             if (isTrigger(e))
@@ -1264,6 +1261,9 @@ public final class AutoCompleteSupport<E> {
             // resume the ability to modify our comboBoxEditor's Document
             if (isTrigger(e))
                 doNotChangeDocument = false;
+
+            if (e.getKeyChar() == KeyEvent.VK_ENTER)
+                updatePrefix();
         }
 
         private boolean isTrigger(KeyEvent e) {
