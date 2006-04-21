@@ -35,7 +35,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     private int minimumSizeForSeparator;
 
     /** manage collapsed elements */
-    private Barcode collapsedElements = new Barcode();
+    private Barcode collapsedElements;
 
 
     /**
@@ -47,16 +47,22 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         this.minimumSizeForSeparator = minimumSizeForSeparator;
 
         // prepare the collapsed elements
-        collapsedElements.addBlack(0, separatorSource.size());
-        updates.beginEvent();
-        int groupCount = separatorSource.insertedSeparators.colourSize(SEPARATOR);
-        for(int i = 0; i < groupCount; i++) {
-            updateGroup(i, groupCount);
-        }
-        updates.commitEvent();
+        rebuildCollapsedElements();
 
         // handle changes to the separators list
         this.separatorSource.addListEventListener(this);
+    }
+
+    /**
+     * Rebuild the entire collapsed elements barcode.
+     */
+    private void rebuildCollapsedElements() {
+        collapsedElements = new Barcode();
+        collapsedElements.addBlack(0, separatorSource.size());
+        int groupCount = separatorSource.insertedSeparators.colourSize(SEPARATOR);
+        for(int i = 0; i < groupCount; i++) {
+            updateGroup(i, groupCount, false);
+        }
     }
 
     /** {@inheritDoc} */
@@ -69,6 +75,39 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         return collapsedElements.getIndex(mutationIndex, Barcode.BLACK);
     }
 
+    /**
+     * Set the {@link Comparator} used to determine how elements are split
+     * into groups.
+     *
+     * <p>Performance Note: sorting will take <code>O(N * Log N)</code> time.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
+     * thread ready but not thread safe. See {@link EventList} for an example
+     * of thread safe code.
+     */
+    public void setComparator(Comparator<E> comparator) {
+        // this implementation loses selection, but that's the best we can do
+        // with the current limitations of the Glazed Lists ListEventAssembler.
+        // What we really need here is the ability to fire an event that contains
+        // both reordering and structure change information.
+        updates.beginEvent(false);
+
+        // remove all
+        updates.addDelete(0, size() - 1);
+
+        // make the change to the sorted source, the grouper will respond but
+        // the {@link SeparatorInjectorList} doesn't fire any events forward when
+        // its main Comparator is changed
+        SortedList<E> sortedList = (SortedList<E>)separatorSource.source;
+        sortedList.setComparator(comparator);
+
+        // rebuild which elements are collapsed out
+        rebuildCollapsedElements();
+
+        // insert all again
+        updates.addInsert(0, size() - 1);
+        updates.commitEvent();
+    }
 
     /**
      * Go from the current group (assumed to be black) to the next black group
@@ -209,20 +248,20 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
                 if(changeType == ListEvent.INSERT) {
                     int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
-                    updateGroup(group, groupCount);
+                    updateGroup(group, groupCount, true);
                 } else if(changeType == ListEvent.UPDATE) {
                     int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
                     // it's possible that this impacts the previous group!
-                    if(group > 0) updateGroup(group - 1, groupCount);
-                    updateGroup(group, groupCount);
+                    if(group > 0) updateGroup(group - 1, groupCount, true);
+                    updateGroup(group, groupCount, true);
                     // it's possible that this impacts the next group
-                    if(group < groupCount - 1) updateGroup(group + 1, groupCount);
+                    if(group < groupCount - 1) updateGroup(group + 1, groupCount, true);
 
                 } else if(changeType == ListEvent.DELETE) {
                     // if there is a group that this came from, update it
                     if(changeIndex < separatorSource.insertedSeparators.size()) {
                         int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
-                        updateGroup(group, groupCount);
+                        updateGroup(group, groupCount, true);
                     }
                 }
             }
@@ -236,7 +275,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
      * since currently it does a linear scan through the group's elements, and
      * that just won't do for performance requirements.
      */
-    private void updateGroup(int group, int groupCount) {
+    private void updateGroup(int group, int groupCount, boolean fireEvents) {
         Separator separator = separatorSource.separators.get(group);
         int limit = separator.getLimit();
 
@@ -249,20 +288,20 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         // if this is too small to show a separator
         if(size < minimumSizeForSeparator) {
             // remove the separator
-            setVisible(separatorStart, Barcode.WHITE);
+            setVisible(separatorStart, Barcode.WHITE, fireEvents);
             // everything else must be visible
             for(int i = separatorStart + 1; i < separatorEnd; i++) {
-                setVisible(i, Barcode.BLACK);
+                setVisible(i, Barcode.BLACK, fireEvents);
             }
 
         // if this is different than the limit
         } else {
             // show the separator
-            setVisible(separatorStart, Barcode.BLACK);
+            setVisible(separatorStart, Barcode.BLACK, fireEvents);
             // show everything up to the limit and nothing after
             for(int i = separatorStart + 1; i < separatorEnd; i++) {
                 boolean withinLimit = i - separatorStart <= limit;
-                setVisible(i, withinLimit ? Barcode.BLACK : Barcode.WHITE);
+                setVisible(i, withinLimit ? Barcode.BLACK : Barcode.WHITE, fireEvents);
             }
         }
     }
@@ -270,7 +309,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     /**
      * Update the visible state of the specified element.
      */
-    private void setVisible(int index, Object colour) {
+    private void setVisible(int index, Object colour, boolean fireEvents) {
         Object previousColour = collapsedElements.get(index);
 
         // no change
@@ -280,14 +319,14 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         // hide this element
         } else if(colour == Barcode.WHITE) {
             int viewIndex = collapsedElements.getColourIndex(index, Barcode.BLACK);
-            updates.addDelete(viewIndex);
+            if(fireEvents) updates.addDelete(viewIndex);
             collapsedElements.set(index, Barcode.WHITE, 1);
 
         // show this element
         } else if(colour == Barcode.BLACK) {
             collapsedElements.set(index, Barcode.BLACK, 1);
             int viewIndex = collapsedElements.getColourIndex(index, Barcode.BLACK);
-            updates.addInsert(viewIndex);
+            if(fireEvents) updates.addInsert(viewIndex);
 
         } else {
             throw new IllegalArgumentException();
@@ -373,10 +412,10 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          * (by removing the number of preceding "X" elements) and the element is
          * retrieved from the source list.
          */
-        private Barcode insertedSeparators = new Barcode();
+        private Barcode insertedSeparators;
 
         /** a list of {@link Separator}s, one for each separator in the list */
-        private IndexedTree<GroupSeparator> separators = new IndexedTree<GroupSeparator>();
+        private IndexedTree<GroupSeparator> separators;
 
         /** the number of elements to show in each group, such as 0, 5, or {@link Integer.MAX_VALUE} */
         private int defaultLimit;
@@ -396,6 +435,21 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             GrouperClient grouperClient = new GrouperClient();
             this.grouper = new Grouper<E>(source, grouperClient);
 
+            // initialize separators state
+            rebuildSeparators();
+
+            // handle changes via the grouper
+            source.addListEventListener(this);
+        }
+
+        /**
+         * Statically build the separators data structures.
+         */
+        private void rebuildSeparators() {
+            // clear the initial state of these separators
+            insertedSeparators = new Barcode();
+            separators = new IndexedTree<GroupSeparator>();
+
             // prepare the separator list
             insertedSeparators.add(0, SOURCE_ELEMENT, source.size());
             for(BarcodeIterator i = grouper.getBarcode().iterator(); i.hasNextColour(Grouper.UNIQUE); ) {
@@ -411,9 +465,6 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             for(int i = 0; i < separators.size(); i++) {
                 separators.get(i).updateCachedValues();
             }
-
-            // handle changes via the grouper
-            source.addListEventListener(this);
         }
 
         /** {@inheritDoc} */
@@ -446,6 +497,17 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
         /** {@inheritDoc} */
         public void listChanged(ListEvent<E> listChanges) {
+            // when the separator comparator is changed in the source list, let
+            // the grouper know so we can rebuild our groups, then bail since
+            // the {@link SeparatorList} already knows about this event
+            SortedList<E> sortedSource = (SortedList<E>) source;
+            Comparator<E> sourceComparator = sortedSource.getComparator();
+            if(sourceComparator != grouper.getComparator()) {
+                grouper.setComparator(sourceComparator);
+                rebuildSeparators();
+                return;
+            }
+
             updates.beginEvent(true);
 
             // reorderings should be contained within the existing groups, we

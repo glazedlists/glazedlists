@@ -369,10 +369,10 @@ public final class SortedList<E> extends TransformedList<E, E> {
      * of thread safe code.
      *
      * @param comparator the {@link Comparator} to specify how to sort the list. If
-     *      the source {@link ca.odell.glazedlists.EventList} elements implement {@link Comparable},
-     *      you may use a {@link ca.odell.glazedlists.impl.sort.ComparableComparator} to sort them in their
-     *      natural order. You may also specify <code>null</code> to put this
-     *      {@link SortedList} in unsorted order.
+     *      the source {@link EventList} elements implement {@link Comparable},
+     *      you may use a {@link GlazedLists#comparableComparator()} to sort them
+     *      in their natural order. You may also specify <code>null</code> to put
+     *      this {@link SortedList} in unsorted order.
      */
     public void setComparator(Comparator<E> comparator) {
         // save this comparator

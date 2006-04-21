@@ -52,7 +52,7 @@ public class Grouper<E> {
      * The data structure which tracks which source elements are considered UNIQUE
      * (the first element of a group) and which are DUPLICATE (any group element NOT the first).
      */
-    private Barcode barcode = new Barcode();
+    private Barcode barcode;
 
     /**
      * Create a new {@link ca.odell.glazedlists.impl.Grouper} that manages groups for the
@@ -60,14 +60,31 @@ public class Grouper<E> {
      */
     public Grouper(SortedList<E> sortedList, Client client) {
         this.sortedList = sortedList;
-        this.comparator = sortedList.getComparator();
         this.client = client;
+        setComparator(sortedList.getComparator());
+    }
+
+    /**
+     * Set the comparator used to determine which elements are grouped together. As
+     * a consequence this will rebuild the grouping state.
+     */
+    public void setComparator(Comparator<E> comparator) {
+        if(this.comparator == comparator) return;
+        this.comparator = comparator;
 
         // Populate the barcode by examining adjacent entries within the
         // source SortedList to check if they belong to the same group.
+        barcode = new Barcode();
         for (int i = 0; i < sortedList.size(); i++) {
             barcode.add(i, groupTogether(i, i-1) ? DUPLICATE : UNIQUE, 1);
         }
+    }
+
+    /**
+     * Get the comparator used to determine which elements are grouped together.
+     */
+    public Comparator<E> getComparator() {
+        return comparator;
     }
 
     /**

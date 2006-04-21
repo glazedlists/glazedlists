@@ -311,24 +311,24 @@ public class IteratorTest extends TestCase {
 
     /**
      * This manually executed test runs forever creating iterators and
-     * sublists of a source list, and modifying that list.
+     * testing how memory responds.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=316">Issue 316</a>
      */
     public static void main(String[] args) {
-        final List<Integer> list = new BasicEventList<Integer>();
+        final List<String> list = new BasicEventList<String>();
+        list.addAll(GlazedListsTests.stringToList("ABCDEFGHIJK"));
+
         long memoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);
         int repetitions = 0;
-        Random random = new Random();
 
         while (true) {
-            // perform a random operation on this list
-            int operation = random.nextInt(3);
-            int index = list.isEmpty() ? 0 : random.nextInt(list.size());
-            if(operation <= 1 || list.isEmpty()) {
-                list.add(index, new Integer(random.nextInt()));
-            } else if(operation == 2) {
-                list.remove(index);
-            } else if(operation == 3) {
-                list.set(index, new Integer(random.nextInt()));
+            // iterate the list a few times, with each iterator type
+            for(Iterator regularIterator = list.iterator(); regularIterator.hasNext(); ) {
+                regularIterator.next();
+            }
+            for(ListIterator listIterator = list.listIterator(); listIterator.hasNext(); ) {
+                listIterator.next();
             }
 
             // test and output memory usage
