@@ -8,7 +8,6 @@ import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.matchers.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
 
 /**
  * An {@link EventList} that shows a subset of the elements of a source
@@ -36,10 +35,12 @@ import ca.odell.glazedlists.impl.adt.*;
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=46">46</a>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=187">187</a>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=254">254</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=254">312</a>
  * </td></tr>
  * </table>
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author James Lemieux
  */
 public final class FilterList<E> extends TransformedList<E, E> {
 
@@ -53,7 +54,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
     private MatcherEditor<E> currentEditor = null;
 
     /** listener handles changes to the matcher */
-    protected PrivateMatcherEditorListener listener = new PrivateMatcherEditorListener();
+    private final MatcherEditor.Listener<E> listener = new PrivateMatcherEditorListener();
 
     /**
      * Creates a {@link FilterList} that includes a subset of the specified
@@ -62,7 +63,11 @@ public final class FilterList<E> extends TransformedList<E, E> {
     public FilterList(EventList<E> source) {
         super(source);
 
-        init(null, null);
+        // build a list of what is filtered and what's not
+        flagList.addBlack(0, source.size());
+
+        // listen for changes to the source list
+        source.addListEventListener(this);
     }
 
     /**
@@ -70,9 +75,13 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * {@link Matcher}.
      */
     public FilterList(EventList<E> source, Matcher<E> matcher) {
-        super(source);
+        this(source);
 
-        init(null, matcher);
+        // if no matcher was given, we have no further initialization work
+        if (matcher == null) return;
+
+        currentMatcher = matcher;
+        changed();
     }
 
     /**
@@ -80,53 +89,15 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * {@link MatcherEditor}.
      */
     public FilterList(EventList<E> source, MatcherEditor<E> matcherEditor) {
-        super(source);
+        this(source);
 
-        init(matcherEditor, null);
-    }
+        // if no matcherEditor was given, we have no further initialization work
+        if (matcherEditor == null) return;
 
-    /**
-     * This method is only called from the constructors. It ensures that the
-     * read lock is held while the FilterList initializes itself atomically.
-     * In practice, at most one of the arguments to this method is ever
-     * non-null.
-     *
-     * @param matcherEditor the {@link MatcherEditor} to initialize this
-     *      FilterList with or <code>null</code>
-     * @param matcher the {@link Matcher} to initialize this FilterList with or
-     *      <code>null</code>
-     */
-    private void init(MatcherEditor<E> matcherEditor, Matcher<E> matcher) {
-        // acquire the read lock to ensure atomic initialization of this FilterList
-        getReadWriteLock().readLock().lock();
-        try {
-            // build a list of what is filtered and what's not
-            flagList.addBlack(0, source.size());
-
-            // we initialize the member variables directly rather than using
-            // setMatcher or setMatcherEditor to avoid acquiring write locks
-            // which cause a potential deadlock
-            if (matcherEditor != null) {
-                currentEditor = matcherEditor;
-                currentEditor.addMatcherEditorListener(listener);
-                currentMatcher = currentEditor.getMatcher();
-
-                // use this version of changedMatcher which acquires no locks
-                listener.changedMatcher(currentEditor, currentMatcher, MatcherEditor.Event.CHANGED);
-
-            } else if (matcher != null) {
-                currentMatcher = matcher;
-
-                // use this version of changedMatcher which acquires no locks
-                listener.changedMatcher(currentEditor, currentMatcher, MatcherEditor.Event.CHANGED);
-            }
-
-            // listen for changes to the source list
-            source.addListEventListener(this);
-
-        } finally {
-            getReadWriteLock().readLock().unlock();
-        }
+        currentEditor = matcherEditor;
+        currentEditor.addMatcherEditorListener(listener);
+        currentMatcher = currentEditor.getMatcher();
+        changed();
     }
 
     /**
@@ -142,8 +113,10 @@ public final class FilterList<E> extends TransformedList<E, E> {
             currentEditor = null;
         }
 
-        // refilter
-        listener.changedMatcher(new MatcherEditor.Event<E>(this, MatcherEditor.Event.CHANGED, matcher));
+        if (matcher != null)
+            changeMatcherWithLocks(currentEditor, matcher, MatcherEditor.Event.CHANGED);
+        else
+            changeMatcherWithLocks(currentEditor, null, MatcherEditor.Event.MATCH_ALL);
     }
 
     /**
@@ -155,19 +128,17 @@ public final class FilterList<E> extends TransformedList<E, E> {
      */
     public void setMatcherEditor(MatcherEditor<E> editor) {
         // cancel the previous editor
-        if(currentEditor != null) {
+        if (currentEditor != null)
             currentEditor.removeMatcherEditorListener(listener);
-        }
 
         // use the new editor
         currentEditor = editor;
-        if(currentEditor != null) {
+
+        if (currentEditor != null) {
             currentEditor.addMatcherEditorListener(listener);
-            currentMatcher = currentEditor.getMatcher();
-            listener.changedMatcher(new MatcherEditor.Event<E>(currentEditor, MatcherEditor.Event.CHANGED, currentMatcher));
+            changeMatcherWithLocks(currentEditor, currentEditor.getMatcher(), MatcherEditor.Event.CHANGED);
         } else {
-            currentMatcher = Matchers.trueMatcher();
-            listener.changedMatcher(new MatcherEditor.Event<E>(this, MatcherEditor.Event.CHANGED, currentMatcher));
+            changeMatcherWithLocks(currentEditor, null, MatcherEditor.Event.MATCH_ALL);
         }
     }
 
@@ -266,13 +237,172 @@ public final class FilterList<E> extends TransformedList<E, E> {
     }
 
     /**
+     * This method acquires the write lock for the FilterList and then selects
+     * an appropriate delegate method to perform the correct work for each of
+     * the possible <code>changeType</code>s.
+     */
+    private void changeMatcherWithLocks(MatcherEditor<E> matcherEditor, Matcher<E> matcher, int changeType) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            changeMatcher(matcherEditor, matcher, changeType);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /**
+     * This method selects an appropriate delegate method to perform the
+     * correct work for each of the possible <code>changeType</code>s. This
+     * method does <strong>NOT</strong> acquire any locks and is thus used
+     * during initialization of FilterList.
+     */
+    private void changeMatcher(MatcherEditor<E> matcherEditor, Matcher<E> matcher, int changeType) {
+        // ensure the MatcherEvent is from OUR MatcherEditor
+        if (currentEditor != matcherEditor) throw new IllegalStateException();
+
+        switch (changeType) {
+            case MatcherEditor.Event.CONSTRAINED: currentMatcher = matcher; this.constrained(); break;
+            case MatcherEditor.Event.RELAXED: currentMatcher = matcher; this.relaxed(); break;
+            case MatcherEditor.Event.CHANGED: currentMatcher = matcher; this.changed(); break;
+            case MatcherEditor.Event.MATCH_ALL: currentMatcher = Matchers.trueMatcher(); this.matchAll(); break;
+            case MatcherEditor.Event.MATCH_NONE: currentMatcher = Matchers.falseMatcher(); this.matchNone(); break;
+        }
+    }
+
+    /**
+     * Handles a constraining of the filter to a degree that guarantees no
+     * values can be matched. That is, the filter list will act as a total
+     * filter and not match any of the elements of the wrapped source list.
+     */
+    private void matchNone() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // filter out all remaining items in this list
+        if(size() > 0) updates.addDelete(0, size() - 1);
+
+        // reset the flaglist to all white (which matches nothing)
+        flagList.clear();
+        flagList.addWhite(0, source.size());
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
+     * Handles a clearing of the filter. That is, the filter list will act as
+     * a passthrough and not discriminate any of the elements of the wrapped
+     * source list.
+     */
+    private void matchAll() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // for all filtered items, add them.
+        // this code exploits the fact that all flags before
+        // the current index are all conceptually black. we don't change
+        // the flag to black immediately as a performance optimization
+        // because the current implementation of barcode is faster for
+        // batch operations. The call to i.getIndex() is exploiting the
+        // fact that i.getIndex() == i.blackIndex() when all flags before
+        // are conceptually black. Otherwise we would need to change flags
+        // to black as we go so that flag offsets are correct
+        for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite();) {
+            i.nextWhite();
+            updates.addInsert(i.getIndex());
+        }
+        flagList.clear();
+        flagList.addBlack(0, source.size());
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
+     * Handles a relaxing or widening of the filter. This may change the
+     * contents of this {@link EventList} as filtered elements are unfiltered
+     * due to the relaxation of the filter.
+     */
+    private void relaxed() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // for all filtered items, see what the change is
+        for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite();) {
+            i.nextWhite();
+            if(currentMatcher.matches(source.get(i.getIndex()))) {
+                updates.addInsert(i.setBlack());
+            }
+        }
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
+     * Handles a constraining or narrowing of the filter. This may change the
+     * contents of this {@link EventList} as elements are further filtered due
+     * to the constraining of the filter.
+     */
+    private void constrained() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // for all unfiltered items, see what the change is
+        for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack();) {
+            i.nextBlack();
+            if(!currentMatcher.matches(source.get(i.getIndex()))) {
+                int blackIndex = i.getBlackIndex();
+                i.setWhite();
+                updates.addDelete(blackIndex);
+            }
+        }
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
+     * Handles changes to the behavior of the filter. This may change the contents
+     * of this {@link EventList} as elements are filtered and unfiltered.
+     */
+    private void changed() {
+        // all of these changes to this list happen "atomically"
+        updates.beginEvent();
+
+        // for all source items, see what the change is
+        for(BarcodeIterator i = flagList.iterator();i.hasNext();) {
+            i.next();
+
+            // determine if this value was already filtered out or not
+            int filteredIndex = i.getBlackIndex();
+            boolean wasIncluded = filteredIndex != -1;
+            // whether we should add this item
+            boolean include = currentMatcher.matches(source.get(i.getIndex()));
+
+            // this element is being removed as a result of the change
+            if(wasIncluded && !include) {
+                i.setWhite();
+                updates.addDelete(filteredIndex);
+
+            // this element is being added as a result of the change
+            } else if(!wasIncluded && include) {
+                updates.addInsert(i.setBlack());
+            }
+        }
+
+        // commit the changes and notify listeners
+        updates.commitEvent();
+    }
+
+    /**
      * Listens to changes from the current {@link MatcherEditor} and handles them.
      */
     private class PrivateMatcherEditorListener implements MatcherEditor.Listener<E> {
-
         /**
-         * This implementation of this method simply acquires the write locks
-         * for the FilterList before processing the <code>matcherEvent</code>.
+         * This method changes the current Matcher controlling the filtering on
+         * the FilterList. It does so in a thread-safe manner by acquiring the
+         * write lock.
          *
          * @param matcherEvent a MatcherEvent describing the change in the
          *      Matcher produced by the MatcherEditor
@@ -282,186 +412,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
             final Matcher<E> matcher = matcherEvent.getMatcher();
             final int changeType = matcherEvent.getType();
 
-            getReadWriteLock().writeLock().lock();
-            try {
-                changedMatcher(matcherEditor, matcher, changeType);
-            } finally {
-                getReadWriteLock().writeLock().unlock();
-            }
-        }
-
-        /**
-         * This method selects an appropriate delegate method to perform the
-         * correct work for each of the possible <code>changeType</code>s. This
-         * method does <strong>NOT</strong> acquire any locks and is thus used
-         * during initialization of FilterList.
-         */
-        private void changedMatcher(MatcherEditor<E> matcherEditor, Matcher<E> matcher, int changeType) {
-            switch (changeType) {
-                case MatcherEditor.Event.CONSTRAINED: this.constrained(matcherEditor, matcher); break;
-                case MatcherEditor.Event.RELAXED: this.relaxed(matcherEditor, matcher); break;
-                case MatcherEditor.Event.CHANGED: this.changed(matcherEditor, matcher); break;
-                case MatcherEditor.Event.MATCH_ALL: this.matchAll(matcherEditor); break;
-                case MatcherEditor.Event.MATCH_NONE: this.matchNone(matcherEditor); break;
-            }
-        }
-
-        /**
-         * Handles a constraining of the filter to a degree that guarantees no
-         * values can be matched. That is, the filter list will act as a total
-         * filter and not match any of the elements of the wrapped source list.
-         */
-        private void matchNone(MatcherEditor<E> editor) {
-            // update my matchers
-            if(currentEditor != editor) throw new IllegalStateException();
-            currentMatcher = Matchers.falseMatcher();
-
-            // all of these changes to this list happen "atomically"
-            updates.beginEvent();
-
-            // filter out all remaining items in this list
-            if(size() > 0) updates.addDelete(0, size() - 1);
-
-            // reset the flaglist to all white (which matches nothing)
-            flagList.clear();
-            flagList.addWhite(0, source.size());
-
-            // commit the changes and notify listeners
-            updates.commitEvent();
-        }
-
-        /**
-         * Handles a clearing of the filter. That is, the filter list will act as
-         * a passthrough and not discriminate any of the elements of the wrapped
-         * source list.
-         */
-        private void matchAll(MatcherEditor<E> editor) {
-            // update my matchers
-            if(currentEditor != editor) throw new IllegalStateException();
-            currentMatcher = Matchers.trueMatcher();
-
-            // all of these changes to this list happen "atomically"
-            updates.beginEvent();
-
-            // for all filtered items, add them.
-            // this code exploits the fact that all flags before
-            // the current index are all conceptually black. we don't change
-            // the flag to black immediately as a performance optimization
-            // because the current implementation of barcode is faster for
-            // batch operations. The call to i.getIndex() is exploiting the
-            // fact that i.getIndex() == i.blackIndex() when all flags before
-            // are conceptually black. Otherwise we would need to change flags
-            // to black as we go so that flag offsets are correct
-            for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite(); ) {
-                i.nextWhite();
-                updates.addInsert(i.getIndex());
-            }
-            flagList.clear();
-            flagList.addBlack(0, source.size());
-
-            // commit the changes and notify listeners
-            updates.commitEvent();
-        }
-
-        /**
-         * Handles a relaxing or widening of the filter. This may change the
-         * contents of this {@link EventList} as filtered elements are unfiltered
-         * due to the relaxation of the filter.
-         *
-         * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
-         * thread ready but not thread safe. See {@link EventList} for an example
-         * of thread safe code.
-         */
-        private void relaxed(MatcherEditor<E> editor, Matcher<E> matcher) {
-            // update my matchers
-            if(currentEditor != editor) throw new IllegalStateException();
-            currentMatcher = matcher;
-
-            // all of these changes to this list happen "atomically"
-            updates.beginEvent();
-
-            // for all filtered items, see what the change is
-            for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite(); ) {
-                i.nextWhite();
-                if(currentMatcher.matches(source.get(i.getIndex()))) {
-                    updates.addInsert(i.setBlack());
-                }
-            }
-
-            // commit the changes and notify listeners
-            updates.commitEvent();
-        }
-
-        /**
-         * Handles a constraining or narrowing of the filter. This may change the
-         * contents of this {@link EventList} as elements are further filtered due
-         * to the constraining of the filter.
-         *
-         * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
-         * thread ready but not thread safe. See {@link EventList} for an example
-         * of thread safe code.
-         */
-        private void constrained(MatcherEditor<E> editor, Matcher<E> matcher) {
-            // update my matchers
-            if(currentEditor != editor) throw new IllegalStateException();
-            currentMatcher = matcher;
-
-            // all of these changes to this list happen "atomically"
-            updates.beginEvent();
-
-            // for all unfiltered items, see what the change is
-            for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack(); ) {
-                i.nextBlack();
-                if(!currentMatcher.matches(source.get(i.getIndex()))) {
-                    int blackIndex = i.getBlackIndex();
-                    i.setWhite();
-                    updates.addDelete(blackIndex);
-                }
-            }
-
-            // commit the changes and notify listeners
-            updates.commitEvent();
-        }
-
-        /**
-         * Handles changes to the behavior of the filter. This may change the contents
-         * of this {@link EventList} as elements are filtered and unfiltered.
-         *
-         * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
-         * thread ready but not thread safe. See {@link EventList} for an example
-         * of thread safe code.
-         */
-        private void changed(MatcherEditor<E> editor, Matcher<E> matcher) {
-            // update my matchers
-            if(currentEditor != editor) throw new IllegalStateException();
-            currentMatcher = matcher;
-
-            // all of these changes to this list happen "atomically"
-            updates.beginEvent();
-
-            // for all source items, see what the change is
-            for(BarcodeIterator i = flagList.iterator();i.hasNext(); ) {
-                i.next();
-
-                // determine if this value was already filtered out or not
-                int filteredIndex = i.getBlackIndex();
-                boolean wasIncluded = filteredIndex != -1;
-                // whether we should add this item
-                boolean include = currentMatcher.matches(source.get(i.getIndex()));
-
-                // this element is being removed as a result of the change
-                if(wasIncluded && !include) {
-                    i.setWhite();
-                    updates.addDelete(filteredIndex);
-
-                // this element is being added as a result of the change
-                } else if(!wasIncluded && include) {
-                    updates.addInsert(i.setBlack());
-                }
-            }
-
-            // commit the changes and notify listeners
-            updates.commitEvent();
+            changeMatcherWithLocks(matcherEditor, matcher, changeType);
         }
     }
 
