@@ -15,6 +15,7 @@ import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.swt.*;
 import ca.odell.glazedlists.matchers.*;
 import com.publicobject.issuesbrowser.*;
+import com.publicobject.misc.Throbber;
 
 
 /**
