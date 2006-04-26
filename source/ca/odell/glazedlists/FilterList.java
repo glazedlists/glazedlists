@@ -35,7 +35,7 @@ import ca.odell.glazedlists.impl.adt.*;
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=46">46</a>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=187">187</a>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=254">254</a>
- *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=254">312</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=312">312</a>
  * </td></tr>
  * </table>
  *
