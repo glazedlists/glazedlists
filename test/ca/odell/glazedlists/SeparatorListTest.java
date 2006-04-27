@@ -7,6 +7,9 @@ import junit.framework.TestCase;
 
 import java.util.*;
 
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
+
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -552,6 +555,65 @@ public class SeparatorListTest extends TestCase {
             boolean aIsUpperCase = Character.isUpperCase(a.charAt(0));
             boolean bIsUpperCase = Character.isUpperCase(b.charAt(0));
             return Boolean.valueOf(aIsUpperCase).compareTo(Boolean.valueOf(bIsUpperCase));
+        }
+    }
+
+    /**
+     * Test that certain weird changes are handled correctly by the
+     * {@link SeparatorList}.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=322">Issue 322</a>
+     */
+    public void testHandleChange() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        FilterList<String> filtered = new FilterList<String>(source);
+        SeparatorList<String> separated = new SeparatorList<String>(filtered, (Comparator)GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separated);
+
+        // test clearing the separatorlist
+        source.addAll(GlazedListsTests.stringToList("AAA"));
+        source.clear();
+
+        source.addAll(GlazedListsTests.stringToList("ABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCDEFFFFFFFFFGGGGGGGGGGGGGGGGGHHHHHHHHHHHHHHHHHHHH"));
+        filtered.setMatcher(new SubstringMatcher("BCDEFGH"));
+
+        assertEquals(94, separated.size());
+        filtered.setMatcher(new SubstringMatcher("A"));
+        assertEquals(2, separated.size());
+        filtered.setMatcher(new SubstringMatcher("ABCDEFGH"));
+        assertEquals(96, separated.size());
+        filtered.setMatcher(new SubstringMatcher("AEFGH"));
+        assertEquals(53, separated.size());
+        filtered.setMatcher(new SubstringMatcher("ABCDEFGH"));
+        filtered.setMatcher(new SubstringMatcher("ABCDEFG"));
+        filtered.setMatcher(new SubstringMatcher("ABCD"));
+        assertEquals(45, separated.size());
+        filtered.setMatcher(new SubstringMatcher("BD"));
+        assertEquals(36, separated.size());
+
+        filtered.setMatcher((Matcher)Matchers.trueMatcher());
+
+        source.clear();
+        source.addAll(GlazedListsTests.stringToList("CCS"));
+
+        source.beginEvent(true);
+        source.addAll(0, GlazedListsTests.stringToList("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCDDDDDDFNSSSSSSS"));
+        source.remove(48);
+        source.remove(48);
+        source.addAll(49, GlazedListsTests.stringToList("STTTTTTTTTTTTTTTTTWWWWWWWWWWWWWWWWWWWW"));
+        source.commitEvent();
+    }
+
+    /**
+     * Match strings that are a substring of the specified String.
+     */
+    private class SubstringMatcher implements Matcher<String> {
+        private String enclosing;
+        public SubstringMatcher(String enclosing) {
+            this.enclosing = enclosing;
+        }
+        public boolean matches(String contained) {
+            return enclosing.indexOf(contained) != -1;
         }
     }
 }
