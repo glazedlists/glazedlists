@@ -105,6 +105,10 @@ class TreeDeltasListEvent<E> extends ListEvent<E> {
     }
 
     public String toString() {
-        return "ListEvent: " + deltasAssembler.getListDeltas().toString();
+        if(linearIterator != null) {
+            return "ListEvent: " + deltasAssembler.getListBlocksLinear().toString();
+        } else {
+            return "ListEvent: " + deltasAssembler.getListDeltas().toString();
+        }
     }
 }

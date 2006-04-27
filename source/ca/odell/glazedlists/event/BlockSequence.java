@@ -104,6 +104,33 @@ class BlockSequence {
         return new Iterator();
     }
 
+    /** {@inheritDoc} */
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        for(int i = 0; i < types.size(); i++) {
+            if(i != 0) {
+                result.append(", ");
+            }
+
+            // write the type
+            int type = types.get(i);
+            if(type == ListEvent.INSERT) result.append("+");
+            else if(type == ListEvent.UPDATE) result.append("U");
+            else if(type == ListEvent.DELETE) result.append("X");
+
+            // write the range
+            int start = starts.get(i);
+            int end = ends.get(i);
+            result.append(start);
+            if(end != start) {
+                result.append("-");
+                result.append(end);
+            }
+        }
+
+        return result.toString();
+    }
+
     /**
      * Iterate through the list of changes in this sequence.
      */

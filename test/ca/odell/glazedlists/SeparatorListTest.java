@@ -602,6 +602,17 @@ public class SeparatorListTest extends TestCase {
         source.remove(48);
         source.addAll(49, GlazedListsTests.stringToList("STTTTTTTTTTTTTTTTTWWWWWWWWWWWWWWWWWWWW"));
         source.commitEvent();
+
+        // adjust using an event known to put the separator in the wrong place
+        source.clear();
+        source.addAll(0, GlazedListsTests.stringToList("CSC"));
+        source.beginEvent(true);
+        source.addAll(0, GlazedListsTests.stringToList("WWWWCWWWWWWWWWWWWFSCCWSCTTTTCCSTTWTCSSCDTSWNSCCDDTCDCCDCTCTDCTCTCCCCCCWCCCCCC"));
+        source.remove(77);
+        source.remove(78);
+        source.addAll(77, GlazedListsTests.stringToList("TSTTCCCCT"));
+        source.commitEvent();
+        assertEqualsIgnoreSeparators(source, separated, GlazedLists.comparableComparator());
     }
 
     /**
