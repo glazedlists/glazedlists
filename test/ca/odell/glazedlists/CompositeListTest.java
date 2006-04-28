@@ -6,6 +6,8 @@ package ca.odell.glazedlists;
 import java.util.*;
 // for being a JUnit test case
 import junit.framework.*;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
 
 /**
  * A CompositeListTest tests the functionality of the CompositeList.
@@ -15,7 +17,7 @@ import junit.framework.*;
 public class CompositeListTest extends TestCase {
 
     /**
-     * Verifies that the a single source works.
+     * Verifies that a single source works.
      */
     public void testSingleSource() {
         EventList<String> wendys = new BasicEventList<String>();
@@ -23,22 +25,22 @@ public class CompositeListTest extends TestCase {
         wendys.add("Chili");
         wendys.add("Frosty");
         wendys.add("Junior Bacon Cheeseburger");
-        
+
         CompositeList<String> fastFood = new CompositeList<String>();
         ListConsistencyListener.install(fastFood);
         fastFood.addMemberList(wendys);
-        
+
         assertEquals(wendys, fastFood);
-        
+
         wendys.add("Sour Cream 'n' Onion Baked Potato");
         wendys.add("Taco Supremo Salad");
-        
+
         assertEquals(wendys, fastFood);
-        
+
         wendys.remove(1);
         fastFood.set(0, "Big Bacon Classic");
         fastFood.remove(1);
-        
+
         assertEquals(wendys, fastFood);
     }
 
@@ -53,7 +55,7 @@ public class CompositeListTest extends TestCase {
         wendys.add("Chili");
         wendys.add("Frosty");
         wendys.add("Junior Bacon Cheeseburger");
-        
+
         EventList<String> mcDonalds = new BasicEventList<String>();
         mcDonalds.add("McDLT");
         mcDonalds.add("McPizza");
@@ -63,22 +65,22 @@ public class CompositeListTest extends TestCase {
         EventList<String> tacoBell = new BasicEventList<String>();
         tacoBell.add("Fries Supreme");
         tacoBell.add("Bean Burrito");
-        
+
         CompositeList<String> fastFood = new CompositeList<String>();
         ListConsistencyListener.install(fastFood);
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
         fastFood.addMemberList(tacoBell);
-        
+
         fastFoodVerify.clear();
         fastFoodVerify.addAll(wendys);
         fastFoodVerify.addAll(mcDonalds);
         fastFoodVerify.addAll(tacoBell);
         assertEquals(fastFoodVerify, fastFood);
-        
+
         wendys.add("Sour Cream 'n' Onion Baked Potato");
         wendys.add("Taco Supremo Salad");
-        
+
         fastFoodVerify.clear();
         fastFoodVerify.addAll(wendys);
         fastFoodVerify.addAll(mcDonalds);
@@ -88,22 +90,22 @@ public class CompositeListTest extends TestCase {
         wendys.remove(1);
         fastFood.set(0, "Big Bacon Classic");
         fastFood.remove(1);
-        
+
         fastFoodVerify.clear();
         fastFoodVerify.addAll(wendys);
         fastFoodVerify.addAll(mcDonalds);
         fastFoodVerify.addAll(tacoBell);
         assertEquals(fastFoodVerify, fastFood);
-        
+
         mcDonalds.add("Big Mac");
         fastFoodVerify.clear();
         fastFoodVerify.addAll(wendys);
         fastFoodVerify.addAll(mcDonalds);
         fastFoodVerify.addAll(tacoBell);
         assertEquals(fastFoodVerify, fastFood);
-        
+
         fastFood.removeMemberList(mcDonalds);
-        
+
         fastFoodVerify.clear();
         fastFoodVerify.addAll(wendys);
         fastFoodVerify.addAll(tacoBell);
@@ -117,7 +119,7 @@ public class CompositeListTest extends TestCase {
         EventList<String> wendys = new BasicEventList<String>();
         EventList<String> mcDonalds = new BasicEventList<String>();
         EventList<String> tacoBell = new BasicEventList<String>();
-        
+
         CompositeList<String> fastFood = new CompositeList<String>();
         ListConsistencyListener.install(fastFood);
         fastFood.addMemberList(wendys);
@@ -126,15 +128,15 @@ public class CompositeListTest extends TestCase {
 
         fastFood.removeMemberList(tacoBell);
         fastFood.removeMemberList(wendys);
-        
+
         assertEquals(mcDonalds, fastFood);
-        
+
         mcDonalds.add("Arch Deluxe");
         assertEquals(mcDonalds, fastFood);
     }
 
     /**
-     * Verifies that multiple copies of the same list can  be added.
+     * Verifies that multiple copies of the same list can be added.
      */
     public void testMultipleCopies() {
         List<String> fastFoodVerify = new ArrayList<String>();
@@ -144,7 +146,7 @@ public class CompositeListTest extends TestCase {
         EventList<String> mcDonalds = new BasicEventList<String>();
         mcDonalds.add("Arch Deluxe");
         mcDonalds.add("McLean Deluxe");
-        
+
         CompositeList<String> fastFood = new CompositeList<String>();
         fastFood.addMemberList(wendys);
         fastFood.addMemberList(mcDonalds);
@@ -188,5 +190,28 @@ public class CompositeListTest extends TestCase {
         aToB.addMemberList(alpha);
         aToB.removeMemberList(alpha);
         aToB.addMemberList(beta);
+    }
+
+    /**
+     * Test that when {@link CompositeList} is constructed with a read/write
+     * lock, it uses it and produces member lists which also use it.
+     */
+    public void testReadWriteLockConstructor() {
+        final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
+
+        final EventList<Object> alpha = new BasicEventList<Object>(sharedLock);
+        final EventList<Object> beta = new BasicEventList<Object>(sharedLock);
+
+        final CompositeList<Object> uber = new CompositeList<Object>(sharedLock);
+        uber.addMemberList(alpha);
+        uber.addMemberList(beta);
+
+        final EventList<Object> gamma = uber.createMemberList();
+        uber.addMemberList(gamma);
+
+        assertSame(sharedLock, alpha.getReadWriteLock());
+        assertSame(sharedLock, beta.getReadWriteLock());
+        assertSame(sharedLock, gamma.getReadWriteLock());
+        assertSame(sharedLock, uber.getReadWriteLock());
     }
 }

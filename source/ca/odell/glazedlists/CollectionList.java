@@ -57,8 +57,8 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     private final IndexedTree<ChildElement<E>> childElements = new IndexedTree<ChildElement<E>>();
 
     /**
-     * Create a {@link CollectionList} that's contents will be the children of the
-     * elements in the specified source {@link EventList}.
+     * Create a {@link CollectionList} with its contents being the children of
+     * the elements in the specified source {@link EventList}.
      */
     public CollectionList(EventList<S> source, Model<S,E> model) {
         super(source);

@@ -40,6 +40,22 @@ public class CompositeList<E> extends CollectionList<EventList<E>, E> {
     public CompositeList() {
         super(new BasicEventList<EventList<E>>(), (Model)GlazedLists.listCollectionListModel());
     }
+
+    /**
+     * Create a {@link CompositeList} that uses the given <code>lock</code>.
+     * Note that this lock will also be used when {@link #createMemberList
+     * building new member lists}.
+     *
+     * <p>This can be a convenient constructor to use when the member lists
+     * are prebuilt ahead of time with a common {@link ReadWriteLock} and it
+     * is desirable to compose their union with a {@link CompositeList}.
+     *
+     * @param lock the {@link ReadWriteLock} to use within the {@link CompositeList}
+     */
+    public CompositeList(ReadWriteLock lock) {
+        this();
+        readWriteLock = lock;
+    }
     
     /**
      * Adds the specified {@link EventList} as a source to this {@link CompositeList}.
@@ -74,4 +90,3 @@ public class CompositeList<E> extends CollectionList<EventList<E>, E> {
         throw new IllegalArgumentException("Cannot remove list " + list + " which is not in this CompositeList");
     }
 }
-
