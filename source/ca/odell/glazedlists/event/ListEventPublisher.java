@@ -38,7 +38,7 @@ public final class ListEventPublisher {
     private List<DependentListener> unsatisfiedListeners = new ArrayList<DependentListener>();
     
     /** the first event to change in a sequence of events */
-    private EventList eventCause  = null;
+    private EventList eventCause = null;
     
     /**
      * Creates a {@link ListEventPublisher}.
@@ -234,7 +234,7 @@ public final class ListEventPublisher {
 
         return true;
     }
-    
+
     /**
      * A {@link ListEventListener} and the {@link EventList}s that it depends on.
      */

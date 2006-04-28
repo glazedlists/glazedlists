@@ -15,7 +15,6 @@ import javax.swing.*;
 
 /**
  * A UsersMatcherEditor with Swing support.
- *
  */
 class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterComponent<Issue> {
 
@@ -33,8 +32,8 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
         super(source);
 
         // create a JList that contains users
-        EventList allUsers = getUsersList();
-        EventListModel<String> usersListModel = new EventListModel<String>(allUsers);
+        final EventList<String> allUsers = getUsersList();
+        final EventListModel<String> usersListModel = new EventListModel<String>(allUsers);
         userSelect = new JList(usersListModel);
         userSelect.setPrototypeCellValue("jessewilson");
         userSelect.setVisibleRowCount(10);
@@ -42,7 +41,7 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
         userSelect.setCellRenderer(new NoFocusRenderer(userSelect.getCellRenderer()));
 
         // create an EventList containing the JList's selection
-        EventSelectionModel<String> userSelectionModel = new EventSelectionModel<String>(allUsers);
+        final EventSelectionModel<String> userSelectionModel = new EventSelectionModel<String>(allUsers);
         userSelect.setSelectionModel(userSelectionModel);
         setSelectionList(userSelectionModel.getSelected());
 
@@ -56,7 +55,6 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
     public JList getUserSelect() {
         return userSelect;
     }
-
 
     public String toString() {
         return "Users";

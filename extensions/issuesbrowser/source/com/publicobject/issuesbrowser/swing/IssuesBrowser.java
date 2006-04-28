@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-// demo
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -52,6 +51,10 @@ public class IssuesBrowser implements Runnable {
     public static final Border EMPTY_ONE_PIXEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
     public static final Border EMPTY_TWO_PIXEL_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
     public static final Icon X_ICON = Icons.x(10, 5, Color.WHITE);
+
+    /** application-wide icons */
+    private static final Icon THROBBER_ACTIVE = loadIcon("resources/throbber-active.gif");
+    private static final Icon THROBBER_STATIC = loadIcon("resources/throbber-static.gif");
     private static final Icon EXPANDED_ICON = Icons.triangle(9, SwingConstants.EAST, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
     private static final Icon COLLAPSED_ICON = Icons.triangle(9, SwingConstants.SOUTH, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
 
@@ -72,10 +75,6 @@ public class IssuesBrowser implements Runnable {
 
     /** monitor loading the issues */
     private JLabel throbber = null;
-
-    /** application-wide icons */
-    public static final ImageIcon throbberActive = loadIcon("resources/throbber-active.gif");
-    public static final ImageIcon throbberStatic = loadIcon("resources/throbber-static.gif");
 
     /** a label to display the count of issues in the issue table */
     private IssueCounterLabel issueCounter = null;
@@ -126,19 +125,6 @@ public class IssuesBrowser implements Runnable {
         URL url = jarLoader.getResource(pathname);
         if (url == null) return null;
         return new ImageIcon(url);
-    }
-    private static ImageIcon[] loadIcons(String name) {
-//        String[] iconStates = new String[] { "up", "over", "down" };
-//        ImageIcon[] icons = new ImageIcon[3];
-//        for(int i = 0; i < icons.length; i++) {
-//            for(int s = 0; s < iconStates.length; s++) {
-//                String state = iconStates[s];
-//                icons[s] = loadIcon("resources/" + name + "_" + state + ".png");
-//            }
-//        }
-//        return icons;
-        ImageIcon icon = loadIcon("resources/" + name + ".png");
-        return new ImageIcon[] { icon, icon, icon };
     }
 
     /**
@@ -211,7 +197,7 @@ public class IssuesBrowser implements Runnable {
         issueCounter.setForeground(Color.WHITE);
 
         // throbber
-        throbber = new JLabel(throbberStatic);
+        throbber = new JLabel(THROBBER_STATIC);
         throbber.setHorizontalAlignment(SwingConstants.RIGHT);
 
         // header bar
@@ -333,8 +319,8 @@ public class IssuesBrowser implements Runnable {
         }
 
         public synchronized void run() {
-            if(on) throbber.setIcon(throbberActive);
-            else throbber.setIcon(throbberStatic);
+            if(on) throbber.setIcon(THROBBER_ACTIVE);
+            else throbber.setIcon(THROBBER_STATIC);
         }
     }
 
@@ -411,7 +397,7 @@ public class IssuesBrowser implements Runnable {
 
     /**
      * An abstract Exceptions.Handler for all types of Exceptions that indicate
-     * a connection to the internet could not be establishedd. It displays an
+     * a connection to the internet could not be established. It displays an
      * informative message stating how to configure Java to use a proxy
      * server.
      */
