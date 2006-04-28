@@ -13,6 +13,7 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.JEventListPanel;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
 import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.misc.swing.RoundedBorder;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -59,7 +60,8 @@ class FilterPanel {
 
         // create the filters panel
         this.filtersPanel = new JEventListPanel<CloseableFilterComponent>(selectedFilterComponents, new CloseableFilterComponentPanelFormat<Issue>());
-        this.filtersPanel.setBackground(IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN);
+        this.filtersPanel.setBackground(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
+        this.filtersPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         // create a wrapped panel that adds the 'add' button
         this.filtersPanelPlusAddButton = new JPanel(new BorderLayout());
         this.filtersPanelPlusAddButton.add(filtersPanel, BorderLayout.NORTH);
@@ -98,6 +100,7 @@ class FilterPanel {
         private JButton closeButton;
         private JLabel headerLabel;
         private JPanel headerPanel;
+        private JPanel wrapPanel;
 
         public CloseableFilterComponent(FilterComponent filterComponent) {
             this.closeButton = new JButton();
@@ -110,12 +113,23 @@ class FilterPanel {
             this.headerLabel = new JLabel();
             this.headerLabel.setHorizontalAlignment(JLabel.CENTER);
             this.headerLabel.setFont(headerLabel.getFont().deriveFont(10.0f));
-            this.headerLabel.setForeground(Color.WHITE);
+            this.headerLabel.setForeground(IssuesBrowser.GLAZED_LISTS_DARK_BROWN);
 
-            this.headerPanel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
+            this.headerPanel = new JPanel();
+            this.headerPanel.setOpaque(false);
+            //this.headerPanel = new IssuesBrowser.GradientPanel(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN, true);
             this.headerPanel.setLayout(new BorderLayout());
             this.headerPanel.add(headerLabel, BorderLayout.CENTER);
             this.headerPanel.add(closeButton, BorderLayout.EAST);
+
+            this.wrapPanel = new JPanel();
+//            Border border = BorderFactory.createCompoundBorder(
+//                    BorderFactory.createLineBorder(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, 1),
+//                    BorderFactory.createLineBorder(IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN, 2)
+//            );
+            Border border = new RoundedBorder(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN, 5, 0);
+            this.wrapPanel.setBorder(border);
+            this.wrapPanel.setBackground(IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN);
 
             setFilterComponent(filterComponent);
         }
@@ -145,6 +159,9 @@ class FilterPanel {
         public JComponent getComponent() {
             return filterComponent.getComponent();
         }
+        public JPanel getWrapPanel() {
+            return wrapPanel;
+        }
         public String toString() {
             return filterComponent.toString();
         }
@@ -163,13 +180,14 @@ class FilterPanel {
             filterSelect.setFont(filterSelect.getFont().deriveFont(10.0f));
             filterSelect.setOpaque(false);
 
-            selectLabel = new JLabel("Add a filter:");
+            selectLabel = new JLabel("Add a filter: ");
+            selectLabel.setForeground(Color.BLACK);
             selectLabel.setFont(selectLabel.getFont().deriveFont(10.0f));
-            selectLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+            selectLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
             panel = new JPanel();
-            panel.setBorder(BorderFactory.createMatteBorder(10, 0, 0, 0, IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN));
-            panel.setBackground(IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN_DARKER);
+            panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+            panel.setBackground(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
             panel.setLayout(new GridBagLayout());
             panel.add(selectLabel,              new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,   GridBagConstraints.NONE,       new Insets(0, 0, 0, 0), 0, 0));
             panel.add(filterSelect,             new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
@@ -192,7 +210,7 @@ class FilterPanel {
         public void listChanged(ListEvent listChanges) {
             boolean enabled = !remainingFilterComponents.isEmpty();
             filterSelect.setEnabled(enabled);
-            selectLabel.setForeground(enabled ? Color.BLACK : Color.GRAY);
+            selectLabel.setForeground(enabled ? Color.BLACK : IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN);
         }
 
         /** {@inheritDoc} */
@@ -212,14 +230,15 @@ class FilterPanel {
      */
     private class CloseableFilterComponentPanelFormat<E> extends JEventListPanel.AbstractFormat<CloseableFilterComponent> {
         protected CloseableFilterComponentPanelFormat() {
-            setElementCells("min, 3px, pref", "3px, fill:pref:grow, 3px");
-            setGaps("6px", null);
-            setCellConstraints(new String[] { "1, 1, 3, 1", "2, 3" });
+            setElementCells("4px, min, 3px, pref, 4px", "4px, fill:pref:grow, 4px");
+            setGaps("4px", null);
+            setCellConstraints(new String[] { "2, 2", "2, 4", "1, 1, 3, 5" });
         }
 
         public JComponent getComponent(CloseableFilterComponent element, int component) {
             if(component == 0) return element.getHeader();
             else if(component == 1) return element.getComponent();
+            else if(component == 2) return element.getWrapPanel();
             else throw new IllegalStateException();
         }
     }

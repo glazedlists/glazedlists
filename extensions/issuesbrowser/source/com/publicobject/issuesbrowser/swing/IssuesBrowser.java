@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+// demo
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -217,7 +218,8 @@ public class IssuesBrowser implements Runnable {
 
         // draw lines between components
         JComponent filtersPanel = filterPanel.getComponent();
-        filtersPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, IssuesBrowser.GLAZED_LISTS_DARK_BROWN));
+        filtersPanel.setBorder(BorderFactory.createEmptyBorder());
+        //filtersPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, IssuesBrowser.GLAZED_LISTS_DARK_BROWN));
         issueDetailsComponent.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
 
         // the outermost panel to layout the icon bar with the other panels
