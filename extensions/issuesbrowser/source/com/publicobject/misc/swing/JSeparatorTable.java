@@ -24,7 +24,7 @@ public class JSeparatorTable extends JTable {
 
     public JSeparatorTable(EventTableModel tableModel) {
         super(tableModel);
-        setUI(new SpanTableUI((BasicTableUI)getUI(), this));
+        setUI(new SpanTableUI());
 
         // use a toString() renderer for the separator
         this.separatorRenderer = getDefaultRenderer(Object.class);
@@ -146,8 +146,9 @@ class SpanTableUI extends BasicTableUI {
 
     private JSeparatorTable separatorTable;
 
-    public SpanTableUI(BasicTableUI delegate, JSeparatorTable separatorTable) {
-        this.separatorTable = separatorTable;
+    public void installUI(JComponent c) {
+        this.separatorTable = (JSeparatorTable) c;
+        super.installUI(c);
     }
 
     /** Paint a representation of the <code>table</code> instance
@@ -296,15 +297,13 @@ class SpanTableUI extends BasicTableUI {
             if (table.getComponentOrientation().isLeftToRight()) {
                 x = damagedArea.x;
                 for (int column = cMin; column <= cMax; column++) {
-                    int w = cm.getColumn(column).getWidth();
-                    x += w;
+                    x += cm.getColumn(column).getWidth();
                     g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
                 }
             } else {
                 x = damagedArea.x + damagedArea.width;
                 for (int column = cMin; column < cMax; column++) {
-                    int w = cm.getColumn(column).getWidth();
-                    x -= w;
+                    x -= cm.getColumn(column).getWidth();
                     g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
                 }
                 x -= cm.getColumn(cMax).getWidth();
@@ -325,10 +324,6 @@ class SpanTableUI extends BasicTableUI {
 
     private void paintDraggedArea(Graphics g, int rMin, int rMax, TableColumn draggedColumn, int distance) {
         int draggedColumnIndex = viewIndexForColumn(draggedColumn);
-
-        Rectangle minCell = separatorTable.getCellRectWithoutSpanning(rMin, draggedColumnIndex, true);
-    	Rectangle maxCell = separatorTable.getCellRectWithoutSpanning(rMax, draggedColumnIndex, true);
-        Rectangle vacatedColumnRect = minCell.union(maxCell);
 
         for(int row = rMin; row <= rMax; row++) {
             // skip separator rows

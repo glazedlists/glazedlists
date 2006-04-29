@@ -9,7 +9,6 @@ import ca.odell.glazedlists.TextFilterable;
 import java.util.Date;
 import java.util.List;
 
-
 /**
  * Models the description of a particular Issue.
  *
@@ -56,7 +55,7 @@ public class Description implements TextFilterable {
 	/**
 	 * Gets the strings to filter this issue by.
 	 */
-	public void getFilterStrings(List baseList) {
+	public void getFilterStrings(List<String> baseList) {
 		baseList.add(text);
 		baseList.add(who);
 	}

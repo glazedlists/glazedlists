@@ -7,7 +7,6 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.RangeMatcherEditor;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.Filterator;
-import ca.odell.glazedlists.EventList;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;

@@ -112,7 +112,7 @@ public class IssuezillaXMLParser {
             return;
         }
 
-        BasicEventList issuesList = new BasicEventList();
+        EventList<Issue> issuesList = new BasicEventList<Issue>();
         loadIssues(issuesList, new FileInputStream(args[0]), new Project(null, null));
         System.out.println(issuesList);
     }
@@ -120,7 +120,7 @@ public class IssuezillaXMLParser {
     /**
      * Loads issues from the specified URL.
      */
-    public static void loadIssues(EventList target, String baseUrl, Project owner) throws IOException {
+    public static void loadIssues(EventList<Issue> target, String baseUrl, Project owner) throws IOException {
         int issuesPerRequest = 100;
 
         // continuously load issues until there's no more
@@ -154,7 +154,7 @@ public class IssuezillaXMLParser {
      * commands to reproduce a lightweight version of this list. This is useful
      * to load the issues as code rather than XML.
      */
-    public static void loadIssues(EventList target, InputStream source, Project owner) throws IOException {
+    public static void loadIssues(EventList<Issue> target, InputStream source, Project owner) throws IOException {
         try {
             // configure a SAX parser
             XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();

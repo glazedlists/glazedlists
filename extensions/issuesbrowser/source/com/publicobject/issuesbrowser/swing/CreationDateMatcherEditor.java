@@ -4,7 +4,6 @@
 package com.publicobject.issuesbrowser.swing;
 
 import ca.odell.glazedlists.Filterator;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.nachocalendar.NachoDateRangeMatcherEditor;
 import com.publicobject.issuesbrowser.Issue;

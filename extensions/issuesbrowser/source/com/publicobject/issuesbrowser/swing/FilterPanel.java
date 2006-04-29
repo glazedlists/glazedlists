@@ -22,8 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
-import java.util.*;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Manage a bunch of issue filters in a panel.
@@ -32,21 +30,17 @@ import java.lang.reflect.InvocationTargetException;
  */
 class FilterPanel {
 
-    private EventList issues;
-
     /** the currently applied filters */
-    private EventList<CloseableFilterComponent> selectedFilterComponents = new BasicEventList<CloseableFilterComponent>();
-    private EventList<CloseableFilterComponent> remainingFilterComponents = new BasicEventList<CloseableFilterComponent>();
+    private final EventList<CloseableFilterComponent> selectedFilterComponents = new BasicEventList<CloseableFilterComponent>();
+    private final EventList<CloseableFilterComponent> remainingFilterComponents = new BasicEventList<CloseableFilterComponent>();
 
-    private CompositeMatcherEditor<Issue> matcherEditor;
+    private final CompositeMatcherEditor<Issue> matcherEditor;
 
-    private JPanel filtersPanel;
-    private JPanel filtersPanelPlusAddButton;
-    private JScrollPane filtersScrollPane;
+    private final JPanel filtersPanel;
+    private final JPanel filtersPanelPlusAddButton;
+    private final JScrollPane filtersScrollPane;
 
     public FilterPanel(EventList<Issue> issues) {
-        this.issues = issues;
-
         // select some initial filters
         this.selectedFilterComponents.add(new CloseableFilterComponent(new TextFilterComponent()));
         this.selectedFilterComponents.add(new CloseableFilterComponent(new SwingUsersMatcherEditor(issues)));
@@ -76,20 +70,6 @@ class FilterPanel {
 
     public JComponent getComponent() {
         return filtersScrollPane;
-    }
-
-    private FilterComponent createFilterComponent(Class filterComponentClass) {
-        try {
-            return (FilterComponent)filterComponentClass.getConstructor(EventList.class).newInstance(issues);
-        } catch (InstantiationException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     /**
@@ -176,7 +156,7 @@ class FilterPanel {
         private JComponent panel;
 
         public AddFilterControl() {
-            filterSelect = new JComboBox(new EventComboBoxModel(remainingFilterComponents));
+            filterSelect = new JComboBox(new EventComboBoxModel<CloseableFilterComponent>(remainingFilterComponents));
             filterSelect.setFont(filterSelect.getFont().deriveFont(10.0f));
             filterSelect.setOpaque(false);
 
