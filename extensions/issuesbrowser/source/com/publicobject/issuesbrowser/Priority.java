@@ -44,7 +44,6 @@ public final class Priority implements Comparable {
 		return 125 - (value * 25);
 	}
 
-
 	private Priority(int value) {
 		this.value = value;
 	}
