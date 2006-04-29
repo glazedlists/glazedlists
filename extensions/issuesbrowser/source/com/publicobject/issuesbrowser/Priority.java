@@ -16,10 +16,11 @@ public final class Priority implements Comparable {
 	public static final Priority P4 = new Priority(4);
 	public static final Priority P5 = new Priority(5);
 
-	/**
-	 * the name of this particular priority
-	 */
-	private int value;
+	private final int value;
+
+	private final int rating;
+
+    private final String name;
 
 	/**
 	 * Lookup the correct static instance based on the given input string.
@@ -33,37 +34,24 @@ public final class Priority implements Comparable {
 		if (priority_name.equals("P4")) return P4;
 		if (priority_name.equals("P5")) return P5;
 
-		throw new IllegalArgumentException("Priority \"" + priority_name +
-			"\" not found.");
+		throw new IllegalArgumentException("Priority \"" + priority_name + "\" not found.");
 	}
+
+    private Priority(int value) {
+        this.value = value;
+        this.rating = 125 - (value * 25);
+        this.name = "P" + value;
+    }
 
 	/**
-	 * Gets this priority as an integer between zero and one hundred
-	 */
+     * Returns this priority as an int between 0 and 100.
+     */
 	public int getRating() {
-		return 125 - (value * 25);
-	}
-
-	private Priority(int value) {
-		this.value = value;
+		return rating;
 	}
 
 	public String toString() {
-		return "P" + value;
-	}
-
-	public int hashCode() {
-		return value;
-	}
-
-	public boolean equals(Object obj) {
-		if (obj == this) return true;
-
-		if (obj == null || !getClass().equals(obj.getClass())) return false;
-
-		Priority other = (Priority) obj;
-
-		return value == other.value;
+		return name;
 	}
 
 	public int compareTo(Object o) {
