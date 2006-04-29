@@ -5,7 +5,6 @@ package com.publicobject.issuesbrowser.swing;
 
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-import ca.odell.glazedlists.EventList;
 
 import javax.swing.*;
 

@@ -41,6 +41,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         slider.setPaintTicks(true);
         slider.setMajorTickSpacing(25);
         slider.setForeground(Color.BLACK);
+        slider.setFocusable(false);
         
         final Hashtable<Integer,JLabel> prioritySliderLabels = new Hashtable<Integer,JLabel>();
         prioritySliderLabels.put(MIN_PRIORITY, new JLabel("Low"));
