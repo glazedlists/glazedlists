@@ -18,26 +18,26 @@ public class Icons {
     /**
      * An 'x' icon.
      */
-    public static final Icon x(int size, int fraction, Color foreground) {
+    public static Icon x(int size, int fraction, Color foreground) {
         return new X(size, fraction, foreground);
     }
 
     /**
      * A '+' icon.
      */
-    public static final Icon plus(int size, int width, Color foreground) {
+    public static Icon plus(int size, int width, Color foreground) {
         return new Plus(size, width, foreground);
     }
 
     /**
      * A triangle icon.
      */
-    public static final Icon triangle(int size, int direction, Color foreground) {
+    public static Icon triangle(int size, int direction, Color foreground) {
         return new Triangle(size, direction, foreground);
     }
 
     /** all icons are drawn in high quality */
-    public static final Map RENDERING_HINTS = new HashMap();
+    public static final Map<RenderingHints.Key,Object> RENDERING_HINTS = new HashMap<RenderingHints.Key,Object>();
     static {
         RENDERING_HINTS.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     }
@@ -191,5 +191,4 @@ public class Icons {
             frame.setVisible(true);
         }});
     }
-
 }
