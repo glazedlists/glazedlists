@@ -48,6 +48,7 @@ class FilterPanel {
         this.remainingFilterComponents.add(new CloseableFilterComponent(new StatusMatcherEditor(issues)));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new PriorityMatcherEditor()));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new CreationDateMatcherEditor()));
+        this.remainingFilterComponents.add(new CloseableFilterComponent(new ModificationDateMatcherEditor()));
         // make 'em into matcher editors
         EventList<MatcherEditor<Issue>> matcherEditors = new FunctionList<CloseableFilterComponent,MatcherEditor<Issue>>(selectedFilterComponents, new CloseableFilterComponentToMatcherEditor<Issue>());
         this.matcherEditor = new CompositeMatcherEditor<Issue>(matcherEditors);

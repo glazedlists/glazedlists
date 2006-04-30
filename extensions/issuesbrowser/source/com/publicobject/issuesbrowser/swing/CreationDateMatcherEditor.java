@@ -20,10 +20,10 @@ import java.util.List;
  */
 public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue> implements FilterComponent<Issue> {
     /** A Filterator which extracts the creation date from Issue objects. */
-    private static final Filterator<Date,Issue> ISSUE_DATE_FILTERATOR = new IssueDateFilterator();
+    private static final Filterator<Date,Issue> ISSUE_CREATION_DATE_FILTERATOR = new IssueCreationDateFilterator();
 
     public CreationDateMatcherEditor() {
-        super(ISSUE_DATE_FILTERATOR);
+        super(ISSUE_CREATION_DATE_FILTERATOR);
     }
 
     public String toString() {
@@ -37,7 +37,7 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
     /**
      * This Filterator extracts the creation date from each Issue object.
      */
-    private static final class IssueDateFilterator implements Filterator<Date,Issue> {
+    private static final class IssueCreationDateFilterator implements Filterator<Date,Issue> {
         public void getFilterValues(List<Date> baseList, Issue element) {
             baseList.add(element.getCreationTimestamp());
         }

@@ -20,7 +20,7 @@ import java.util.Date;
 public class IssueTableFormat implements WritableTableFormat, AdvancedTableFormat {
 
     public int getColumnCount() {
-        return 7;
+        return 8;
     }
 
     public String getColumnName(int column) {
@@ -28,10 +28,11 @@ public class IssueTableFormat implements WritableTableFormat, AdvancedTableForma
             case 0: return "ID";
             case 1: return "Type";
             case 2: return "Created";
-            case 3: return "Priority";
-            case 4: return "Status";
-            case 5: return "Result";
-            case 6: return "Summary";
+            case 3: return "Modified";
+            case 4: return "Priority";
+            case 5: return "Status";
+            case 6: return "Result";
+            case 7: return "Summary";
         }
 
         return null;
@@ -41,7 +42,8 @@ public class IssueTableFormat implements WritableTableFormat, AdvancedTableForma
         switch(column) {
             case 0: return Integer.class;
             case 2: return Date.class;
-            case 3: return Priority.class;
+            case 3: return Date.class;
+            case 4: return Priority.class;
             default: return String.class;
         }
     }
@@ -69,15 +71,17 @@ public class IssueTableFormat implements WritableTableFormat, AdvancedTableForma
             if(column == 5) return separator.first().getSubcomponent();
             else return "------";
         }
-        Issue issue = (Issue) baseObject;
+        
+        final Issue issue = (Issue) baseObject;
         switch (column) {
             case 0: return issue.getId();
             case 1: return issue.getIssueType();
             case 2: return issue.getCreationTimestamp();
-            case 3: return issue.getPriority();
-            case 4: return issue.getStatus();
-            case 5: return issue.getResolution();
-            case 6: return issue.getShortDescription();
+            case 3: return issue.getDeltaTimestamp();
+            case 4: return issue.getPriority();
+            case 5: return issue.getStatus();
+            case 6: return issue.getResolution();
+            case 7: return issue.getShortDescription();
         }
 
         return null;

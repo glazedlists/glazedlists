@@ -21,7 +21,7 @@ import java.util.List;
  * @author James Lemieux
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public class Issue implements TextFilterable, Comparable {
+public class Issue implements Comparable {
 
     // the project that this issue is attached to
     private Project owner;
@@ -232,7 +232,7 @@ public class Issue implements TextFilterable, Comparable {
     public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
 
     /**
-     * Last modified timestamp ('yyyy-mm-dd hh:mm:ss').
+     * Last modified timestamp ('yyyyMMddhhmmss').
      */
     public Date getDeltaTimestamp() { return deltaTimestamp; }
     public void setDeltaTimestamp(Date deltaTimestamp) { this.deltaTimestamp = deltaTimestamp; }
@@ -371,28 +371,6 @@ public class Issue implements TextFilterable, Comparable {
         if (other == null) return -1;
         Issue otherIssue = (Issue) other;
         return id.compareTo(otherIssue.id);
-    }
-
-    /**
-     * Gets the strings to filter this issue by.
-     */
-    public void getFilterStrings(List<String> baseList) {
-        // the displayed strings
-        baseList.add(id.toString());
-        baseList.add(issueType);
-        baseList.add(priority.toString());
-        baseList.add(status);
-        baseList.add(resolution);
-        baseList.add(shortDescription);
-
-        // extra strings
-        baseList.add(component);
-        baseList.add(subcomponent);
-
-        // recursively get filter strings from the descriptions
-        for(Iterator<Description> d = descriptions.iterator(); d.hasNext(); ) {
-            d.next().getFilterStrings(baseList);
-        }
     }
 }
 

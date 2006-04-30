@@ -48,6 +48,9 @@ public class NachoDateRangeMatcherEditor<E> extends RangeMatcherEditor<Date,E> {
     public NachoDateRangeMatcherEditor(Filterator<Date,E> filterator) {
         super(filterator);
 
+        fromDateField.setAntiAliased(true);
+        toDateField.setAntiAliased(true);
+
         // initialize the pickers to have no values
         fromDateField.setValue(null);
         toDateField.setValue(null);

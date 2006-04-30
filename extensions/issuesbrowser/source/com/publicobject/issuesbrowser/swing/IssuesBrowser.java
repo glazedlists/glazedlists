@@ -28,6 +28,7 @@ import java.net.ConnectException;
 import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.IOException;
@@ -47,7 +48,8 @@ public class IssuesBrowser implements Runnable {
     public static final Color GLAZED_LISTS_LIGHT_BROWN_DARKER = new Color(231, 222, 205);
 
     /** for displaying dates */
-    static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
+    static final DateFormat TABLE_DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy");
+    static final DateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 
     public static final Border EMPTY_ONE_PIXEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
     public static final Border EMPTY_TWO_PIXEL_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
@@ -163,13 +165,14 @@ public class IssuesBrowser implements Runnable {
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
-        issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(300);
-        issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(300);
-        issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(400);
-        issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(400);
-        issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        issuesJTable.getColumnModel().getColumn(1).setPreferredWidth(400);
+        issuesJTable.getColumnModel().getColumn(2).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(3).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(4).setPreferredWidth(250);
         issuesJTable.getColumnModel().getColumn(5).setPreferredWidth(300);
-        issuesJTable.getColumnModel().getColumn(6).setPreferredWidth(1000);
+        issuesJTable.getColumnModel().getColumn(6).setPreferredWidth(300);
+        issuesJTable.getColumnModel().getColumn(7).setPreferredWidth(1000);
         // turn off cell focus painting
         issuesJTable.setDefaultRenderer(String.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(String.class)));
         issuesJTable.setDefaultRenderer(Integer.class, new NoFocusRenderer(issuesJTable.getDefaultRenderer(Integer.class)));
