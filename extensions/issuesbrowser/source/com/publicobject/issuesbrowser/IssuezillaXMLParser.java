@@ -39,9 +39,12 @@ public class IssuezillaXMLParser {
     private static final SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyyMMddHHmmss");
 
     // hardcode the servers in California
-    static { dateFormat1.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles")); }
+    static {
+        dateFormat1.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
+        dateFormat2.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
+    }
 
-    private static SortedSet<String> ISSUE_SIMPLE_FIELDS = new TreeSet<String>();
+    private static Set<String> ISSUE_SIMPLE_FIELDS = new HashSet<String>();
     static {
         ISSUE_SIMPLE_FIELDS.add("issue_id");
         ISSUE_SIMPLE_FIELDS.add("issue_status");
