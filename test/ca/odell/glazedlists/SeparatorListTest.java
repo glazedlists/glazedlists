@@ -4,6 +4,7 @@
 package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
+import junit.framework.AssertionFailedError;
 
 import java.util.*;
 
@@ -532,7 +533,7 @@ public class SeparatorListTest extends TestCase {
                 if(s > 0) {
                     Object before = separatorList.get(s - 1);
                     Object after = separatorList.get(s + 1);
-                    assertTrue(separatorComparator.compare(before, after) < 0);
+                    assertTrue("Misplaced separator in " + separatorList.toString(), separatorComparator.compare(before, after) < 0);
                 }
                 s++;
                 continue;
@@ -610,7 +611,26 @@ public class SeparatorListTest extends TestCase {
         source.addAll(0, GlazedListsTests.stringToList("WWWWCWWWWWWWWWWWWFSCCWSCTTTTCCSTTWTCSSCDTSWNSCCDDTCDCCDCTCTDCTCTCCCCCCWCCCCCC"));
         source.remove(77);
         source.remove(78);
-        source.addAll(77, GlazedListsTests.stringToList("TSTTCCCCT"));
+        source.addAll(0, GlazedListsTests.stringToList("TSTTCCCCT"));
+        source.commitEvent();
+        assertEqualsIgnoreSeparators(source, separated, GlazedLists.comparableComparator());
+    }
+
+    /**
+     * A mechanically simplified version of {@link #testHandleChange()}.
+     */
+    public void testHandleChangeSimplified() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        SeparatorList<String> separated = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separated);
+
+        // adjust using an event known to put the separator in the wrong place
+        source.addAll(0, GlazedListsTests.stringToList("CSC"));
+        System.out.println();
+        source.beginEvent(true);
+        source.remove(0);
+        source.remove(1);
+        source.addAll(0, GlazedListsTests.stringToList("SC"));
         source.commitEvent();
         assertEqualsIgnoreSeparators(source, separated, GlazedLists.comparableComparator());
     }
