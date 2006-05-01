@@ -153,7 +153,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      */
     protected void fireListDataEvent(ListDataEvent listDataEvent) {
         // notify all listeners about the event
-        for(int i = 0; i < listeners.size(); i++) {
+        for(int i = 0, n = listeners.size(); i < n; i++) {
             ListDataListener listDataListener = listeners.get(i);
             if(listDataEvent.getType() == ListDataEvent.CONTENTS_CHANGED) {
                 listDataListener.contentsChanged(listDataEvent);

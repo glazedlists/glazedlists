@@ -356,7 +356,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
      */
     public void dispose() {
         // remove all listeners from all list elements
-        for (int i = 0; i < this.observedElements.size(); i++) {
+        for (int i = 0, n = this.observedElements.size(); i < n; i++) {
             final E element = this.observedElements.get(i);
             final EventListener listener = this.getListener(i);
             this.disconnectElement(element, listener);
@@ -400,7 +400,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
             this.updates.beginEvent();
 
             // locate all indexes containing the given listElement
-            for (int i = 0; i < size(); i++) {
+            for (int i = 0, n = size(); i < n; i++) {
                 if (listElement == get(i))
                     this.updates.addUpdate(i);
             }

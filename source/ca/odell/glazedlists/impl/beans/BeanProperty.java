@@ -14,9 +14,9 @@ import java.lang.reflect.*;
 public class BeanProperty<T> {
 
     /** the target class */
-    private Class<T> beanClass = null;
+    private final Class<T> beanClass;
     /** the property name */
-    private String propertyName = null;
+    private final String propertyName;
     
     /** the value class */
     private Class valueClass = null;
@@ -28,8 +28,8 @@ public class BeanProperty<T> {
     private List<Method> setterChain = null;
 
     /** commonly used paramters */
-    private static Object[] EMPTY_ARGUMENTS = new Object[0];
-    private static Class[] EMPTY_PARAMETER_TYPES = new Class[0];
+    private static final Object[] EMPTY_ARGUMENTS = new Object[0];
+    private static final Class[] EMPTY_PARAMETER_TYPES = new Class[0];
 
     /**
      * Creates a new {@link BeanProperty} that gets the specified property from the
@@ -219,7 +219,7 @@ public class BeanProperty<T> {
         try {
             // do all the getters in sequence
             Object currentMember = member;
-            for(int i = 0; i < getterChain.size(); i++) {
+            for(int i = 0, n = getterChain.size(); i < n; i++) {
                 Method currentMethod = getterChain.get(i);
                 currentMember = currentMethod.invoke(currentMember, EMPTY_ARGUMENTS);
                 if(currentMember == null) return null;
@@ -243,7 +243,7 @@ public class BeanProperty<T> {
         try {
             // everything except the last setter chain element is a getter
             Object currentMember = member;
-            for(int i = 0; i < setterChain.size() - 1; i++) {
+            for(int i = 0, n = setterChain.size() - 1; i < n; i++) {
                 Method currentMethod = setterChain.get(i);
                 currentMember = currentMethod.invoke(currentMember, EMPTY_ARGUMENTS);
                 if(currentMember == null) return null;

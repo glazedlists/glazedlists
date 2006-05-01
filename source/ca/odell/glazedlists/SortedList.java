@@ -389,7 +389,7 @@ public final class SortedList<E> extends TransformedList<E, E> {
         if(previousSorted == null && unsorted == null) {
             unsorted = new IndexedTree<IndexedTreeNode>();
             // add all elements in the source list, in order
-            for(int i = 0; i < source.size(); i++) {
+            for(int i = 0, n = source.size(); i < n; i++) {
                 IndexedTreeNode unsortedNode = unsorted.addByNode(i, IndexedTreeNode.EMPTY_NODE);
                 insertByUnsortedNode(unsortedNode);
             }

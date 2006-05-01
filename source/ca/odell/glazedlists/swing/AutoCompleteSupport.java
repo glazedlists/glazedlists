@@ -626,7 +626,7 @@ public final class AutoCompleteSupport<E> {
         final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
 
         // search the list of ALL items for an autocompletion term for the given value
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0, n = items.size(); i < n; i++) {
             final Object item = items.get(i);
             final String itemString = item == null ? null : item.toString();
 
@@ -793,7 +793,7 @@ public final class AutoCompleteSupport<E> {
             final boolean prefixIsEmpty = "".equals(prefix);
 
             // search the combobox model for a value that starts with our prefix (called an autocompletion term)
-            for (int i = 0; i < comboBoxModel.getSize(); i++) {
+            for (int i = 0, n = comboBoxModel.getSize(); i < n; i++) {
                 final Object item = comboBoxModel.getElementAt(i);
                 final String itemString = item == null ? null : item.toString();
 
@@ -941,7 +941,7 @@ public final class AutoCompleteSupport<E> {
          * JButton which toggles the popup up open and closed.
          */
         private JButton findArrowButton(JComponent c) {
-            for (int i = 0; i < c.getComponentCount(); i++) {
+            for (int i = 0, n = c.getComponentCount(); i < n; i++) {
                 final Component comp = c.getComponent(i);
                 if (comp instanceof JButton)
                     return (JButton) comp;

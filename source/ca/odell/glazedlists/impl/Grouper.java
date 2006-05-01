@@ -75,7 +75,7 @@ public class Grouper<E> {
         // Populate the barcode by examining adjacent entries within the
         // source SortedList to check if they belong to the same group.
         barcode = new Barcode();
-        for (int i = 0; i < sortedList.size(); i++) {
+        for (int i = 0, n = sortedList.size(); i < n; i++) {
             barcode.add(i, groupTogether(i, i-1) ? DUPLICATE : UNIQUE, 1);
         }
     }
