@@ -228,7 +228,7 @@ public class BeanProperty<T> {
             // return the result of the last getter
             return currentMember;
         } catch(IllegalAccessException e) {
-            throw new SecurityException(e.getMessage());
+            throw new SecurityException(e);
         } catch(InvocationTargetException e) {
             throw new UndeclaredThrowableException(e.getCause());
         }
@@ -253,7 +253,7 @@ public class BeanProperty<T> {
             Method setterMethod = setterChain.get(setterChain.size() - 1);
             return setterMethod.invoke(currentMember, new Object[] { newValue });
         } catch(IllegalAccessException e) {
-            throw new SecurityException(e.getMessage());
+            throw new SecurityException(e);
         } catch(InvocationTargetException e) {
             throw new UndeclaredThrowableException(e.getCause());
         }
