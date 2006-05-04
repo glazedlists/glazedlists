@@ -33,7 +33,7 @@ import javax.swing.table.*;
 public class EventTableModel<E> extends AbstractTableModel implements ListEventListener<E> {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private final TransformedList<E, E> swingThreadSource;
+    private final TransformedList<E,E> swingThreadSource;
 
     /** Specifies how to render table headers and sort */
     private TableFormat<E> tableFormat;
@@ -111,7 +111,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * <p>This may be used by renderers to paint the cells of a row differently
      * based on the entire value for that row. 
      *
-     * @see ca.odell.glazedlists.swing.EventTableModel#getValueAt(int,int) ListTable
+     * @see #getValueAt(int,int)
      */
     public E getElementAt(int index) {
         swingThreadSource.getReadWriteLock().readLock().lock();
@@ -124,14 +124,9 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
 
     /**
      * For implementing the ListEventListener interface. This sends changes
-     * to the table which can repaint the table cells. Because this class uses
-     * a EventThreadProxy, it is guaranteed that all natural
-     * calls to this method use the Swing thread.
-     *
-     * <p>This tests the size of the change to determine how to handle it. If the
-     * size of the change is greater than the changeSizeRepaintAllThreshhold,
-     * then the entire table is notified as changed. Otherwise only the descrete
-     * areas that changed are notified.
+     * to the table which repaint the table cells. Because this class is backed
+     * by a {@link ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList},
+     * all natural calls to this method are guaranteed to occur on the Swing EDT.
      */
     public void listChanged(ListEvent<E> listChanges) {
         swingThreadSource.getReadWriteLock().readLock().lock();
@@ -223,7 +218,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
             WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
             swingThreadSource.getReadWriteLock().readLock().lock();
             try {
-                E toEdit = swingThreadSource.get(row);
+                final E toEdit = swingThreadSource.get(row);
                 return writableTableFormat.isEditable(toEdit, column);
             } finally {
                 swingThreadSource.getReadWriteLock().readLock().unlock();
