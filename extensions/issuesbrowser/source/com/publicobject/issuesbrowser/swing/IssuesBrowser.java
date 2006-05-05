@@ -40,26 +40,21 @@ import java.io.IOException;
  */
 public class IssuesBrowser implements Runnable {
 
-    /** these don't belong here at all */
+    /** application appearance */
     public static final Color GLAZED_LISTS_DARK_BROWN = new Color(36, 23, 10);
     public static final Color GLAZED_LISTS_MEDIUM_BROWN = new Color(69, 64, 56);
     public static final Color GLAZED_LISTS_MEDIUM_LIGHT_BROWN = new Color(150, 140, 130);
     public static final Color GLAZED_LISTS_LIGHT_BROWN = new Color(246, 237, 220);
     public static final Color GLAZED_LISTS_LIGHT_BROWN_DARKER = new Color(231, 222, 205);
-
-    /** for displaying dates */
-    static final DateFormat TABLE_DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy");
-    static final DateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
-
+    public static final Icon THROBBER_ACTIVE = loadIcon("resources/throbber-active.gif");
+    public static final Icon THROBBER_STATIC = loadIcon("resources/throbber-static.gif");
+    public static final Icon EXPANDED_ICON = Icons.triangle(9, SwingConstants.EAST, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
+    public static final Icon COLLAPSED_ICON = Icons.triangle(9, SwingConstants.SOUTH, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
+    public static final Icon X_ICON = Icons.x(10, 5, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
     public static final Border EMPTY_ONE_PIXEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
     public static final Border EMPTY_TWO_PIXEL_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
-    public static final Icon X_ICON = Icons.x(10, 5, Color.WHITE);
-
-    /** application-wide icons */
-    private static final Icon THROBBER_ACTIVE = loadIcon("resources/throbber-active.gif");
-    private static final Icon THROBBER_STATIC = loadIcon("resources/throbber-static.gif");
-    private static final Icon EXPANDED_ICON = Icons.triangle(9, SwingConstants.EAST, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
-    private static final Icon COLLAPSED_ICON = Icons.triangle(9, SwingConstants.SOUTH, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
+    public static final DateFormat TABLE_DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy");
+    public static final DateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 
     /** an event list to host the issues */
     private EventList<Issue> issuesEventList = new BasicEventList<Issue>();
