@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class GroupingListTest extends TestCase {
 
@@ -382,5 +383,25 @@ public class GroupingListTest extends TestCase {
         assertEquals(3, as.size());
         assertEquals(0, bs.size());
         assertEquals(3, cs.size());
+    }
+
+    /**
+     * Make sure a simple test case that breaks the {@link SeparatorList} doesn't
+     * impact the {@link GroupingList}.
+     */ 
+    public void testSeparatorListBreaks() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        GroupingList<String> grouped = new GroupingList<String>(source, (Comparator)GlazedLists.comparableComparator());
+        ListConsistencyListener.install(grouped);
+
+        // adjust using an event known to put the separator in the wrong place
+        source.addAll(0, GlazedListsTests.stringToList("CSC"));
+        source.beginEvent(true);
+        source.remove(0);
+        source.remove(1);
+        source.addAll(0, GlazedListsTests.stringToList("SC"));
+        source.commitEvent();
+        assertEquals(GlazedListsTests.stringToList("C"), grouped.get(0));
+        assertEquals(GlazedListsTests.stringToList("SS"), grouped.get(1));
     }
 }
