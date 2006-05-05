@@ -125,8 +125,8 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     /**
      * For implementing the ListEventListener interface. This sends changes
      * to the table which repaint the table cells. Because this class is backed
-     * by a {@link ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList},
-     * all natural calls to this method are guaranteed to occur on the Swing EDT.
+     * by {@link GlazedListsSwing#swingThreadProxyList}, all natural calls to
+     * this method are guaranteed to occur on the Swing EDT.
      */
     public void listChanged(ListEvent<E> listChanges) {
         swingThreadSource.getReadWriteLock().readLock().lock();
