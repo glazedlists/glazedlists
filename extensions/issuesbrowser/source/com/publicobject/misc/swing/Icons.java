@@ -153,7 +153,11 @@ public class Icons {
 
     /** test the icons */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new TestRunnable());
+    }
+
+    private static class TestRunnable implements Runnable {
+        public void run() {
             JPanel panel = new JPanel(new FlowLayout());
             for(int size = 10; size <= 15; size += 1) {
                 for(int fraction = 10; fraction >= 5; fraction--) {
@@ -189,6 +193,6 @@ public class Icons {
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
-        }});
+        }
     }
 }

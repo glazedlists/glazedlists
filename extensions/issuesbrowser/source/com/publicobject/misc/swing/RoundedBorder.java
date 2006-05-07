@@ -77,7 +77,11 @@ public class RoundedBorder implements Border {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new TestRunnable());
+    }
+
+    private static class TestRunnable implements Runnable { 
+        public void run() {
             JPanel panel = new JPanel(new FlowLayout());
             panel.setBackground(Color.BLUE);
 
@@ -97,6 +101,6 @@ public class RoundedBorder implements Border {
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
-        }});
+        }
     }
 }
