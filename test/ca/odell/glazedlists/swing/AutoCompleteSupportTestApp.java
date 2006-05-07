@@ -250,8 +250,6 @@ public class AutoCompleteSupportTestApp {
      */
     private class ChangeLookAndFeelAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            autoCompleteSupport.uninstall();
-
             JRadioButtonMenuItem selectedMenuItem = (JRadioButtonMenuItem) e.getSource();
 
             currentLookAndFeel = selectedMenuItem.getText();
@@ -260,8 +258,6 @@ public class AutoCompleteSupportTestApp {
                 // set the LookAndFeel
                 UIManager.setLookAndFeel(currentLookAndFeel);
                 SwingUtilities.updateComponentTreeUI(frame);
-
-                rebuildContentPane();
             } catch (Exception ex) {
                 System.err.println("Failed loading L&F: " + currentLookAndFeel);
                 System.err.println(ex);
@@ -321,22 +317,18 @@ public class AutoCompleteSupportTestApp {
         plainComboBox.setEditable(true);
         plainComboBox.setModel(new EventComboBoxModel<String>(items));
 
-        final String[] lookAndFeelNameParts = currentLookAndFeel.split("\\p{Punct}");
-        final String lookAndFeelName = lookAndFeelNameParts[lookAndFeelNameParts.length - 1];
-
-        final JLabel nameLabel = new JLabel(lookAndFeelName);
-
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));
 
         if (comboBoxCount > 1)
             panel.add(Box.createVerticalStrut(1), new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(nameLabel,                      new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(autoCompleteComboBox,           new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(Box.createHorizontalStrut(5),   new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(plainComboBox,                  new GridBagConstraints(2, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(tableScroller,                  new GridBagConstraints(0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("AutoComplete ComboBox"),  new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(autoCompleteComboBox,                 new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(Box.createHorizontalStrut(5),         new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Normal JComboBox"),       new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(plainComboBox,                        new GridBagConstraints(2, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(tableScroller,                        new GridBagConstraints(0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 0, 0, 0), 0, 0));
 
         return panel;
     }

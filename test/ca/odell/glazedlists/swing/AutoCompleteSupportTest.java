@@ -11,13 +11,10 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
-import javax.swing.plaf.basic.BasicComboBoxUI;
-import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
 
@@ -32,31 +29,47 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final boolean originalEditable = combo.isEditable();
         final ComboBoxEditor originalEditor = combo.getEditor();
         final int originalEditorPropertyChangeListenerCount = originalEditor.getEditorComponent().getPropertyChangeListeners().length;
+        final int originalEditorKeyListenerCount = originalEditor.getEditorComponent().getKeyListeners().length;
         final AbstractDocument originalEditorDocument = (AbstractDocument) ((JTextField) combo.getEditor().getEditorComponent()).getDocument();
         final int originalComboBoxPropertyChangeListenerCount = combo.getPropertyChangeListeners().length;
         final int originalMaxRowCount = combo.getMaximumRowCount();
-        final ComboPopup originalComboPopup = (ComboPopup)combo.getUI().getAccessibleChild(combo, 0);
-        final MouseListener originalComboPopupMouseListener = originalComboPopup.getMouseListener();
+        final int originalComboBoxPopupMenuListenerCount = ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length;
+        final Action originalSelectNextAction = combo.getActionMap().get("selectNext");
+        final Action originalSelectPreviousAction = combo.getActionMap().get("selectPrevious");
+        final Action originalAquaSelectNextAction = combo.getActionMap().get("aquaSelectNext");
+        final Action originalAquaSelectPreviousAction = combo.getActionMap().get("aquaSelectPrevious");
 
         AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
 
         JTextField currentEditor = ((JTextField) combo.getEditor().getEditorComponent());
         AbstractDocument currentEditorDocument = (AbstractDocument) currentEditor.getDocument();
 
-        assertTrue(originalUI != combo.getUI());
-        assertTrue(originalModel != combo.getModel());
-        assertTrue(originalEditable != combo.isEditable());
-        assertTrue(originalEditor != combo.getEditor());
-        assertTrue(currentEditorDocument != originalEditorDocument);
-        assertTrue(currentEditorDocument.getDocumentFilter() != null);
+        assertSame(originalUI, combo.getUI());
+        assertSame(originalEditor, combo.getEditor());
+        assertSame(currentEditorDocument, originalEditorDocument);
+        assertNotSame(originalModel, combo.getModel());
+        assertNotSame(originalEditable, combo.isEditable());
+        assertNotSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
+        assertNotSame(originalSelectPreviousAction, combo.getActionMap().get("selectPrevious"));
+        assertNotSame(originalAquaSelectNextAction, combo.getActionMap().get("aquaSelectNext"));
+        assertNotSame(originalAquaSelectPreviousAction, combo.getActionMap().get("aquaSelectPrevious"));
+        assertNotNull(currentEditorDocument.getDocumentFilter());
+
 
         // two PropertyChangeListeners are added to the JComboBox:
         // * one to watch for ComboBoxUI changes
         // * one to watch for Model changes
-        assertTrue(originalComboBoxPropertyChangeListenerCount + 2 == combo.getPropertyChangeListeners().length);
+        assertEquals(originalComboBoxPropertyChangeListenerCount + 2, combo.getPropertyChangeListeners().length);
+
+        // one getPopupMenuListener is added to the JComboBox to size the popup before it is shown on the screen
+        assertEquals(originalComboBoxPopupMenuListenerCount + 1, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
 
         // one PropertyChangeListener is added to the ComboBoxEditor to watch for Document changes
-        assertTrue(originalEditorPropertyChangeListenerCount + 1 == currentEditor.getPropertyChangeListeners().length);
+        assertEquals(originalEditorPropertyChangeListenerCount + 1, currentEditor.getPropertyChangeListeners().length);
+
+        // one KeyListener is added to the ComboBoxEditor to watch for Backspace in strict mode
+        assertEquals(originalEditorKeyListenerCount + 1, currentEditor.getKeyListeners().length);
+
 
         support.uninstall();
 
@@ -71,9 +84,13 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(currentEditorDocument.getDocumentFilter(), null);
         assertSame(originalComboBoxPropertyChangeListenerCount, combo.getPropertyChangeListeners().length);
         assertSame(originalEditorPropertyChangeListenerCount, currentEditor.getPropertyChangeListeners().length);
+        assertSame(originalEditorKeyListenerCount, currentEditor.getKeyListeners().length);
         assertSame(originalMaxRowCount, combo.getMaximumRowCount());
-        assertSame(originalComboPopup.getClass(), combo.getUI().getAccessibleChild(combo, 0).getClass());
-        assertSame(originalComboPopupMouseListener.getClass(), ((ComboPopup)combo.getUI().getAccessibleChild(combo, 0)).getMouseListener().getClass());
+        assertSame(originalComboBoxPopupMenuListenerCount, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
+        assertSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
+        assertSame(originalSelectPreviousAction, combo.getActionMap().get("selectPrevious"));
+        assertSame(originalAquaSelectNextAction, combo.getActionMap().get("aquaSelectNext"));
+        assertSame(originalAquaSelectPreviousAction, combo.getActionMap().get("aquaSelectPrevious"));
 
         try {
             support.uninstall();
@@ -126,18 +143,6 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         try {
             combo.setModel(new DefaultComboBoxModel());
-            fail("Expected to trigger environmental invariant violation");
-        } catch (IllegalStateException e) {
-            // expected
-        }
-    }
-
-    public void guiTestChangeUI() {
-        final JComboBox combo = new JComboBox();
-        AutoCompleteSupport.install(combo, new BasicEventList<Object>());
-
-        try {
-            combo.setUI(new BasicComboBoxUI());
             fail("Expected to trigger environmental invariant violation");
         } catch (IllegalStateException e) {
             // expected
