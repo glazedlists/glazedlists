@@ -350,7 +350,7 @@
         <mkdir dir="java14_glazedlists/test"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="test"/>
-            <arg value="classes${path.separator}${ant.home}/lib/junit.jar"/>
+            <arg value="classes${path.separator}${ant.home}/lib/junit.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar"/>
             <arg value="java14_glazedlists/test"/>
         </java>
 
