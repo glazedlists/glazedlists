@@ -501,7 +501,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             // the grouper know so we can rebuild our groups, then bail since
             // the {@link SeparatorList} already knows about this event
             SortedList<E> sortedSource = (SortedList<E>) source;
-            Comparator<E> sourceComparator = sortedSource.getComparator();
+            Comparator<? super E> sourceComparator = sortedSource.getComparator();
             if(sourceComparator != grouper.getComparator()) {
                 grouper.setComparator(sourceComparator);
                 rebuildSeparators();

@@ -16,10 +16,10 @@ import java.util.*;
 public class SortedListTest extends TestCase {
 
     /** the source list */
-    private BasicEventList unsortedList = null;
+    private BasicEventList<Comparable> unsortedList = null;
 
     /** the sorted list */
-    private SortedList sortedList = null;
+    private SortedList<Comparable> sortedList = null;
 
     /** for randomly choosing list indices */
     private Random random = new Random(2);
@@ -28,8 +28,8 @@ public class SortedListTest extends TestCase {
      * Prepare for the test.
      */
     public void setUp() {
-        unsortedList = new BasicEventList();
-        sortedList = new SortedList(unsortedList);
+        unsortedList = new BasicEventList<Comparable>();
+        sortedList = new SortedList<Comparable>(unsortedList);
     }
 
     /**
@@ -45,8 +45,8 @@ public class SortedListTest extends TestCase {
      * if sort order is not enforced on the list.
      */
     public void testSimpleMovesSortNotEnforced() {
-        unsortedList = new BasicEventList();
-        sortedList = new SortedList(unsortedList);
+        unsortedList = new BasicEventList<Comparable>();
+        sortedList = new SortedList<Comparable>(unsortedList);
         sortedList.setMode(SortedList.AVOID_MOVING_ELEMENTS);
         ListConsistencyListener.install(sortedList);
 
@@ -112,8 +112,8 @@ public class SortedListTest extends TestCase {
      * Tests that elements are properly moved when value changes require that.
      */
     public void testSimpleMoves() {
-        unsortedList = new BasicEventList();
-        sortedList = new SortedList(unsortedList);
+        unsortedList = new BasicEventList<Comparable>();
+        sortedList = new SortedList<Comparable>(unsortedList);
         ListConsistencyListener.install(sortedList);
 
         unsortedList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
@@ -130,9 +130,9 @@ public class SortedListTest extends TestCase {
      * Test that updates, inserts and deletes all in one even are handled succesfully.
      */
     public void testComplexEvents() {
-        unsortedList = new BasicEventList();
-        ExternalNestingEventList nestableList = new ExternalNestingEventList(unsortedList);
-        sortedList = new SortedList(nestableList);
+        unsortedList = new BasicEventList<Comparable>();
+        ExternalNestingEventList<Comparable> nestableList = new ExternalNestingEventList<Comparable>(unsortedList);
+        sortedList = new SortedList<Comparable>(nestableList);
         ListConsistencyListener.install(sortedList);
 
         nestableList.beginEvent(true);
@@ -194,7 +194,7 @@ public class SortedListTest extends TestCase {
         }
 
         // build a control list of the desired results
-        ArrayList controlList = new ArrayList();
+        final List<Comparable> controlList = new ArrayList<Comparable>();
         controlList.addAll(unsortedList);
         Collections.sort(controlList);
 
@@ -202,7 +202,7 @@ public class SortedListTest extends TestCase {
         assertEquals(controlList, sortedList);
 
         // re-sort the list
-        sortedList = new SortedList(unsortedList);
+        sortedList = new SortedList<Comparable>(unsortedList);
 
         // verify the lists are equal
         assertEquals(controlList, sortedList);
@@ -228,7 +228,7 @@ public class SortedListTest extends TestCase {
         }
 
         // build a control list of the desired results
-        ArrayList controlList = new ArrayList();
+        List<Comparable> controlList = new ArrayList<Comparable>();
         controlList.addAll(unsortedList);
         Collections.sort(controlList);
 
@@ -246,7 +246,7 @@ public class SortedListTest extends TestCase {
     public void testSortedListWritable() {
         // apply various operations to the either list
         for(int i = 0; i < 4000; i++) {
-            List list;
+            List<Comparable> list;
             if(random.nextBoolean()) list = sortedList;
             else list = unsortedList;
             int operation = random.nextInt(4);
@@ -262,7 +262,7 @@ public class SortedListTest extends TestCase {
         }
 
         // build a control list of the desired results
-        ArrayList controlList = new ArrayList();
+        List<Comparable> controlList = new ArrayList<Comparable>();
         controlList.addAll(unsortedList);
         Collections.sort(controlList);
 
@@ -275,10 +275,10 @@ public class SortedListTest extends TestCase {
      * Tests that sorting works on a large set of filter changes.
      */
     public void testAgressiveFiltering() {
-        BasicEventList source = new BasicEventList();
+        BasicEventList<Object> source = new BasicEventList<Object>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source);
-        SortedList sorted = new SortedList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<Object> filterList = new FilterList<Object>(source);
+        SortedList<Object> sorted = new SortedList<Object>(filterList, GlazedListsTests.intArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {
@@ -294,7 +294,7 @@ public class SortedListTest extends TestCase {
             matcherEditor.setFilter(filterColumn + 1, 1);
 
             // construct the control list
-            ArrayList controlList = new ArrayList();
+            List<Object> controlList = new ArrayList<Object>();
             controlList.addAll(filterList);
             Collections.sort(controlList, GlazedListsTests.intArrayComparator(0));
 
@@ -310,8 +310,8 @@ public class SortedListTest extends TestCase {
      * Test indexOf() consistency
      */
     public void testIndexOf() {
-        BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source);
+        BasicEventList<Integer> source = new BasicEventList<Integer>();
+        SortedList sorted = new SortedList<Integer>(source);
 
         // Test containment of a 10 on an empty list
         Integer ten = new Integer(10);
@@ -359,8 +359,8 @@ public class SortedListTest extends TestCase {
      * .equals() would return false.
      */
     public void testIndexOfWithWeakComparator() {
-        BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source, GlazedLists.comparableComparator());
+        BasicEventList<Comparable> source = new BasicEventList<Comparable>();
+        SortedList<Comparable> sorted = new SortedList<Comparable>(source, GlazedLists.comparableComparator());
 
         final Song enterSandman = new Song("Metallica", "Enter Sandman");
         final Song masterOfPuppets = new Song("Metallica", "Master of Puppets");
@@ -385,8 +385,8 @@ public class SortedListTest extends TestCase {
      * Test lastIndexOf() consistency
      */
     public void testLastIndexOf() {
-        BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source);
+        BasicEventList<Integer> source = new BasicEventList<Integer>();
+        SortedList<Integer> sorted = new SortedList<Integer>(source);
 
         // Test containment of a 10 on an empty list
         Integer ten = new Integer(10);
@@ -434,8 +434,8 @@ public class SortedListTest extends TestCase {
       * .equals() would return false.
       */
     public void testLastIndexOfWithWeakComparator() {
-        BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source, GlazedLists.comparableComparator());
+        BasicEventList<Comparable> source = new BasicEventList<Comparable>();
+        SortedList<Comparable> sorted = new SortedList<Comparable>(source, GlazedLists.comparableComparator());
 
         final Song enterSandman = new Song("Metallica", "Enter Sandman");
         final Song masterOfPuppets = new Song("Metallica", "Master of Puppets");
@@ -468,8 +468,8 @@ public class SortedListTest extends TestCase {
      * Test containment accuracy
      */
     public void testContains() {
-        BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source);
+        BasicEventList<Comparable> source = new BasicEventList<Comparable>();
+        SortedList<Comparable> sorted = new SortedList<Comparable>(source);
 
         // Test containment of a 10 on an empty list
         Integer ten = new Integer(10);
@@ -518,8 +518,8 @@ public class SortedListTest extends TestCase {
      * .equals() would return false.
      */
     public void testContainsWithWeakComparator() {
-        BasicEventList source = new BasicEventList();
-        SortedList sorted = new SortedList(source, GlazedLists.comparableComparator());
+        BasicEventList<Comparable> source = new BasicEventList<Comparable>();
+        SortedList<Comparable> sorted = new SortedList<Comparable>(source, GlazedLists.comparableComparator());
 
         final Song enterSandman = new Song("Metallica", "Enter Sandman");
         final Song masterOfPuppets = new Song("Metallica", "Master of Puppets");
@@ -604,8 +604,8 @@ public class SortedListTest extends TestCase {
      * equals() the specified element.
      */
     public void testRemoveWithNoComparator() {
-        EventList basic = new BasicEventList();
-        SortedList sorted = new SortedList(basic, null);
+        EventList<Comparable> basic = new BasicEventList<Comparable>();
+        SortedList<Comparable> sorted = new SortedList<Comparable>(basic, null);
         basic.addAll(GlazedListsTests.stringToList("JamesLemieux"));
         sorted.remove("e");
         assertEquals(GlazedListsTests.stringToList("JamsLemieux"), sorted);
@@ -635,8 +635,8 @@ public class SortedListTest extends TestCase {
      * equals() the specified element.
      */
     public void testRemoveWithWeakComparator() {
-        EventList basic = new BasicEventList();
-        SortedList sorted = new SortedList(basic, GlazedLists.caseInsensitiveComparator());
+        EventList<String> basic = new BasicEventList<String>();
+        SortedList sorted = new SortedList<String>(basic, GlazedLists.caseInsensitiveComparator());
         basic.addAll(GlazedListsTests.stringToList("aAaBbBcCC"));
         sorted.remove("A");
         assertEquals(GlazedListsTests.stringToList("aaBbBcCC"), sorted);
@@ -693,8 +693,8 @@ public class SortedListTest extends TestCase {
      * equals() the specified element.
      */
     public void testRemoveWithComparator() {
-        EventList basic = new BasicEventList();
-        SortedList sorted = new SortedList(basic, GlazedLists.comparableComparator());
+        EventList<Comparable> basic = new BasicEventList<Comparable>();
+        SortedList sorted = new SortedList<Comparable>(basic, GlazedLists.comparableComparator());
         basic.addAll(GlazedListsTests.stringToList("ABBCaabcc"));
         sorted.remove("a");
         assertEquals(GlazedListsTests.stringToList("ABBCabcc"), basic);
@@ -789,17 +789,17 @@ public class SortedListTest extends TestCase {
      */
     public void testReorder() {
         // prepare a source list
-        SortedList source = new SortedList(new BasicEventList());
+        SortedList<String> source = new SortedList<String>(new BasicEventList<String>());
         source.add("CB");
         source.add("BC");
         source.add("DD");
         source.add("AA");
 
         // create a sorted view of that list
-        SortedList sorted = new SortedList(source, GlazedLists.reverseComparator());
+        SortedList<String> sorted = new SortedList<String>(source, GlazedLists.reverseComparator());
 
         // create a consistency test
-        List consistencyTestList = new ArrayList();
+        List<String> consistencyTestList = new ArrayList<String>();
         consistencyTestList.addAll(sorted);
 
         // change the source, this should not impact its listener
@@ -815,12 +815,12 @@ public class SortedListTest extends TestCase {
      * Verify that the sorted list works with no compatator.
      */
     public void testNoComparator() {
-        List consistencyTestList = new ArrayList();
+        List<String> consistencyTestList = new ArrayList<String>();
         consistencyTestList.add("A");
         consistencyTestList.add("C");
         consistencyTestList.add("B");
 
-        SortedList sorted = new SortedList(new BasicEventList(), null);
+        SortedList<String> sorted = new SortedList<String>(new BasicEventList<String>(), null);
         sorted.addAll(consistencyTestList);
         assertEquals(consistencyTestList, sorted);
 
@@ -835,7 +835,7 @@ public class SortedListTest extends TestCase {
      */
     public void testEqualValuesOrderedByIndex() {
         // create a sorted list that cannot distinguish between the data items
-        Comparator intCompareAt0 = new StringLengthComparator();
+        Comparator<String> intCompareAt0 = new StringLengthComparator();
         sortedList.dispose();
         sortedList = new SortedList(unsortedList, intCompareAt0);
 
@@ -1041,12 +1041,12 @@ public class SortedListTest extends TestCase {
      * order, then by the order in the source list.
      */
     public void testSortedListHandlesSortEvents() {
-        Comparator<Song> artistComparator = GlazedLists.beanPropertyComparator(Song.class, "artist");
-        Comparator<Song> songComparator = GlazedLists.beanPropertyComparator(Song.class, "song");
-        List expectedOrder;
+        Comparator artistComparator = GlazedLists.beanPropertyComparator(Song.class, "artist");
+        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "song");
+        List<Comparable> expectedOrder;
         sortedList.setComparator(null);
 
-        SortedList sortedAgain = new SortedList(sortedList, artistComparator);
+        SortedList sortedAgain = new SortedList<Comparable>(sortedList, artistComparator);
         ListConsistencyListener.install(sortedAgain);
 
         unsortedList.add(new Song("Limp Bizkit", "Nookie"));
@@ -1062,19 +1062,19 @@ public class SortedListTest extends TestCase {
         unsortedList.add(new Song("Godsmack", "Running Blind"));
 
         // sorted just by artist
-        expectedOrder = new ArrayList(unsortedList);
+        expectedOrder = new ArrayList<Comparable>(unsortedList);
         Collections.sort(expectedOrder, artistComparator);
         assertEquals(expectedOrder, sortedAgain);
 
         // sorted by artist, then by song
         sortedList.setComparator(songComparator);
-        expectedOrder = new ArrayList(unsortedList);
+        expectedOrder = new ArrayList<Comparable>(unsortedList);
         Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(new Comparator[] { artistComparator, songComparator })));
         assertEquals(expectedOrder, sortedAgain);
 
         // sorted just by artist again
         sortedList.setComparator(null);
-        expectedOrder = new ArrayList(unsortedList);
+        expectedOrder = new ArrayList<Comparable>(unsortedList);
         Collections.sort(expectedOrder, artistComparator);
         assertEquals(expectedOrder, sortedAgain);
 
@@ -1091,13 +1091,13 @@ public class SortedListTest extends TestCase {
 
         // sorted by artist, then by song
         sortedList.setComparator(songComparator);
-        expectedOrder = new ArrayList(unsortedList);
+        expectedOrder = new ArrayList<Comparable>(unsortedList);
         Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(new Comparator[] { artistComparator, songComparator })));
         assertEquals(expectedOrder, sortedAgain);
 
         // sorted just by artist again
         sortedList.setComparator(null);
-        expectedOrder = new ArrayList(unsortedList);
+        expectedOrder = new ArrayList<Comparable>(unsortedList);
         Collections.sort(expectedOrder, artistComparator);
         assertEquals(expectedOrder, sortedAgain);
 
@@ -1105,13 +1105,13 @@ public class SortedListTest extends TestCase {
     }
 
     public void testSortedSource() {
-        Comparator<String> alphabetical = (Comparator)GlazedLists.comparableComparator();
+        Comparator<Comparable> alphabetical = GlazedLists.comparableComparator();
         Comparator<String> length = new StringLengthComparator();
 
         sortedList.setComparator(null);
         unsortedList.addAll(Arrays.asList(new String[] { "dddd", "aaa", "c", "bb" }));
 
-        SortedList<String> resortedList = new SortedList<String>(sortedList, length);
+        SortedList<String> resortedList = new SortedList(sortedList, length);
         ListConsistencyListener.install(resortedList);
 
         sortedList.setComparator(alphabetical);
@@ -1126,10 +1126,29 @@ public class SortedListTest extends TestCase {
         assertSortedEquals(sortedList, resortedList);
     }
 
+    /**
+     * This test ensures SortedList's generic arguments are correct.
+     * Specifically, a SortedList<E> should be able to accept any Comparator<? super E>.
+     * In other words:
+     *
+     * <p>SortedList<Number> can accept a Comparator<Number> or Comparator<Object>, but not
+     * a Comparator<Integer>.
+     */
+    public void testCompilingWithGenerics() {
+        SortedList<Integer> integers = new SortedList<Integer>(new BasicEventList<Integer>());
+
+        // all of these Comparators should compile just fine
+        integers.setComparator(GlazedLists.comparableComparator());
+        integers.setComparator(new AlwaysEqualComparator());
+
+        new SortedList<Integer>(new BasicEventList<Integer>(), GlazedLists.comparableComparator());
+        new SortedList<Integer>(new BasicEventList<Integer>(), new AlwaysEqualComparator());
+    }
+
     /** test a sorted list for equality */
-    public void assertSortedEquals(List unsorted, SortedList sorted) {
+    public void assertSortedEquals(List<Comparable> unsorted, SortedList sorted) {
         // create a protective copy to muck with
-        unsorted = new ArrayList(unsorted);
+        unsorted = new ArrayList<Comparable>(unsorted);
         if(sorted.getComparator() != null) Collections.sort(unsorted, sorted.getComparator());
         assertEquals(unsorted, sorted);
     }
@@ -1138,7 +1157,7 @@ public class SortedListTest extends TestCase {
     /**
      * Compares two objects to be equal.
      */
-    class AlwaysEqualComparator implements Comparator {
+    class AlwaysEqualComparator implements Comparator<Object> {
         public int compare(Object a, Object b) {
             return 0;
         }

@@ -43,7 +43,7 @@ public class Grouper<E> {
     private SortedList<E> sortedList;
 
     /** The comparator used to determine the groups. */
-    private Comparator<E> comparator;
+    private Comparator<? super E> comparator;
 
     /** the grouping list client to notify of group changes */
     private Client client;
@@ -68,7 +68,7 @@ public class Grouper<E> {
      * Set the comparator used to determine which elements are grouped together. As
      * a consequence this will rebuild the grouping state.
      */
-    public void setComparator(Comparator<E> comparator) {
+    public void setComparator(Comparator<? super E> comparator) {
         if(this.comparator == comparator) return;
         this.comparator = comparator;
 
@@ -83,7 +83,7 @@ public class Grouper<E> {
     /**
      * Get the comparator used to determine which elements are grouped together.
      */
-    public Comparator<E> getComparator() {
+    public Comparator<? super E> getComparator() {
         return comparator;
     }
 

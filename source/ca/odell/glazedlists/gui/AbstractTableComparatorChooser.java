@@ -86,7 +86,7 @@ public abstract class AbstractTableComparatorChooser<E> {
     private TableFormat<E> tableFormat;
 
     /** the potentially foreign comparator associated with the sorted list */
-    protected Comparator<E> sortedListComparator = null;
+    protected Comparator<? super E> sortedListComparator = null;
 
     /** manage which columns are sorted and in which order */
     protected final SortingState sortingState = new SortingState(this);
@@ -223,7 +223,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.
      */
-    protected void redetectComparator(Comparator<E> currentComparator) {
+    protected void redetectComparator(Comparator<? super E> currentComparator) {
         sortedListComparator = currentComparator;
         sortingState.detectStateFromComparator(currentComparator);
     }

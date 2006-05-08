@@ -154,7 +154,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.
      */
-    protected void redetectComparator(Comparator<E> currentComparator) {
+    protected void redetectComparator(Comparator<? super E> currentComparator) {
         super.redetectComparator(currentComparator);
 
         // force the table header to redraw itself
@@ -264,7 +264,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             }
 
             // if the comparator has changed
-            final Comparator<E> currentComparator = sortedList.getComparator();
+            final Comparator<? super E> currentComparator = sortedList.getComparator();
             if(currentComparator != sortedListComparator) {
                 redetectComparator(currentComparator);
             }
