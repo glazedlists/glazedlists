@@ -42,19 +42,19 @@ import ca.odell.glazedlists.impl.adt.*;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  * @author James Lemieux
  */
-public final class FilterList<E> extends TransformedList<E, E> {
+public final class FilterList<E> extends TransformedList<E,E> {
 
     /** the flag list contains Barcode.BLACK for items that match the current filter and Barcode.WHITE for others */
     private Barcode flagList = new Barcode();
 
     /** the matcher determines whether elements get filtered in or out */
-    private Matcher<E> currentMatcher = Matchers.trueMatcher();
+    private Matcher<? super E> currentMatcher = Matchers.trueMatcher();
 
     /** the editor changes the matcher and fires events */
-    private MatcherEditor<E> currentEditor = null;
+    private MatcherEditor<? super E> currentEditor = null;
 
     /** listener handles changes to the matcher */
-    private final MatcherEditor.Listener<E> listener = new PrivateMatcherEditorListener();
+    private final MatcherEditor.Listener listener = new PrivateMatcherEditorListener();
 
     /**
      * Creates a {@link FilterList} that includes a subset of the specified
@@ -74,7 +74,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * Convenience constructor for creating a {@link FilterList} and setting its
      * {@link Matcher}.
      */
-    public FilterList(EventList<E> source, Matcher<E> matcher) {
+    public FilterList(EventList<E> source, Matcher<? super E> matcher) {
         this(source);
 
         // if no matcher was given, we have no further initialization work
@@ -88,7 +88,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * Convenience constructor for creating a {@link FilterList} and setting its
      * {@link MatcherEditor}.
      */
-    public FilterList(EventList<E> source, MatcherEditor<E> matcherEditor) {
+    public FilterList(EventList<E> source, MatcherEditor<? super E> matcherEditor) {
         this(source);
 
         // if no matcherEditor was given, we have no further initialization work
@@ -106,7 +106,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * <p>This will remove the current {@link Matcher} or {@link MatcherEditor}
      * and refilter the entire list.
      */
-    public void setMatcher(Matcher<E> matcher) {
+    public void setMatcher(Matcher<? super E> matcher) {
         // cancel the previous editor
         if(currentEditor != null) {
             currentEditor.removeMatcherEditorListener(listener);
@@ -126,7 +126,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * <p>This will remove the current {@link Matcher} or {@link MatcherEditor}
      * and refilter the entire list.
      */
-    public void setMatcherEditor(MatcherEditor<E> editor) {
+    public void setMatcherEditor(MatcherEditor<? super E> editor) {
         // cancel the previous editor
         if (currentEditor != null)
             currentEditor.removeMatcherEditorListener(listener);
@@ -241,7 +241,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * an appropriate delegate method to perform the correct work for each of
      * the possible <code>changeType</code>s.
      */
-    private void changeMatcherWithLocks(MatcherEditor<E> matcherEditor, Matcher<E> matcher, int changeType) {
+    private void changeMatcherWithLocks(MatcherEditor<? super E> matcherEditor, Matcher<? super E> matcher, int changeType) {
         getReadWriteLock().writeLock().lock();
         try {
             changeMatcher(matcherEditor, matcher, changeType);
@@ -256,7 +256,7 @@ public final class FilterList<E> extends TransformedList<E, E> {
      * method does <strong>NOT</strong> acquire any locks and is thus used
      * during initialization of FilterList.
      */
-    private void changeMatcher(MatcherEditor<E> matcherEditor, Matcher<E> matcher, int changeType) {
+    private void changeMatcher(MatcherEditor<? super E> matcherEditor, Matcher<? super E> matcher, int changeType) {
         // ensure the MatcherEvent is from OUR MatcherEditor
         if (currentEditor != matcherEditor) throw new IllegalStateException();
 
@@ -408,8 +408,8 @@ public final class FilterList<E> extends TransformedList<E, E> {
          *      Matcher produced by the MatcherEditor
          */
         public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
-            final MatcherEditor<E> matcherEditor = matcherEvent.getMatcherEditor();
-            final Matcher<E> matcher = matcherEvent.getMatcher();
+            final MatcherEditor<? super E> matcherEditor = matcherEvent.getMatcherEditor();
+            final Matcher<? super E> matcher = matcherEvent.getMatcher();
             final int changeType = matcherEvent.getType();
 
             changeMatcherWithLocks(matcherEditor, matcher, changeType);

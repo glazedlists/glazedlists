@@ -127,7 +127,7 @@ public final class Matchers {
      * @return <code>true</code> if any elements were removed from the specified
      *      {@link Collection}.
      */
-    public static <E> boolean filter(Collection<E> collection, Matcher<E> matcher) {
+    public static <E> boolean filter(Collection<E> collection, Matcher<? super E> matcher) {
         boolean changed = false;
         for(Iterator<E> i = collection.iterator(); i.hasNext(); ) {
             E element = i.next();
