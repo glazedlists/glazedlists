@@ -40,31 +40,38 @@ public class RoundedBorder implements Border {
         g2d.fillRect(0, height - this.width, this.width, this.width);
         g2d.fillRect(width - this.width, height - this.width, this.width, this.width);
 
-        // fill foreground
+        // fill foreground - corner arcs
         g2d.setColor(foreground);
-        g2d.fillArc(0, 0, diameter, diameter, 90, 90);
-        g2d.fillArc(width - diameter - stroke, 0, diameter, diameter, 0, 90);
-        g2d.fillArc(0, height - diameter - stroke, diameter, diameter, 180, 90);
-        g2d.fillArc(width - diameter - stroke, height - diameter - stroke, diameter, diameter, 270, 90);
+        g2d.fillArc(0,                    0,                     diameter, diameter, 90, 90);
+        g2d.fillArc(width - diameter - 1, 0,                     diameter, diameter, 0, 90);
+        g2d.fillArc(0,                    height - diameter - 1, diameter, diameter, 180, 90);
+        g2d.fillArc(width - diameter - 1, height - diameter - 1, diameter, diameter, 270, 90);
+        // fill foreground - top, bottom, left, right
+        g2d.fillRect(this.width,         0,                   width - diameter + 1, this.width);
+        g2d.fillRect(this.width,         height - this.width, width - diameter + 1, this.width);
+        g2d.fillRect(0,                  this.width,          this.width,           height - diameter + 1);
+        g2d.fillRect(width - this.width, this.width,          this.width,           height - diameter + 1);
 
         // prepare the arc lines
         if(stroke > 0) {
             g2d.setColor(outline);
             g2d.setStroke(new BasicStroke(stroke));
+            int halfStrokeU = (stroke + 1) / 2;
+            int halfStrokeD = (stroke) / 2;
 
             // top
-            g2d.drawArc(0, 0, diameter, diameter, 90, 90);
-            g2d.drawArc(width - diameter - stroke, 0, diameter, diameter, 0, 90);
-            g2d.drawLine(this.width, 0, width - this.width, 0);
+            g2d.drawArc(halfStrokeD,                    halfStrokeD, diameter - stroke, diameter - stroke, 90, 90);
+            g2d.drawArc(width - diameter + halfStrokeD, halfStrokeD, diameter - stroke, diameter - stroke, 0,  90);
+            g2d.fillRect(this.width, 0, width - diameter, stroke);
 
             // sides
-            g2d.drawLine(0, this.width, 0, height - this.width);
-            g2d.drawLine(width - stroke, this.width, width - stroke, height - this.width);
+            g2d.fillRect(0,              this.width, stroke, height - diameter);
+            g2d.fillRect(width - stroke, this.width, stroke, height - diameter);
 
             // bottom
-            g2d.drawArc(0, height - diameter - stroke, diameter, diameter, 180, 90);
-            g2d.drawArc(width - diameter - stroke, height - diameter - stroke, diameter, diameter, 270, 90);
-            g2d.drawLine(this.width, height - stroke, width - this.width, height - stroke);
+            g2d.drawArc(halfStrokeD,                    height - diameter + halfStrokeD, diameter - stroke, diameter - stroke, 180, 90);
+            g2d.drawArc(width - diameter + halfStrokeD, height - diameter + halfStrokeD, diameter - stroke, diameter - stroke, 270, 90);
+            g2d.fillRect(this.width, height - stroke, width - diameter, stroke);
         }
     }
 
@@ -86,11 +93,11 @@ public class RoundedBorder implements Border {
             panel.setBackground(Color.BLUE);
 
             for(int p = 2; p < 20; p++) {
-                for(int s = 0; s <= 3; s++) {
+                for(int s = 0; s <= p; s++) {
                     JPanel cell = new JPanel();
                     cell.add(new JLabel("<html>WIDTH: " + p + "<br>STROKE: " + s));
                     cell.setBorder(new RoundedBorder(Color.BLUE, Color.BLACK, Color.WHITE, p, s));
-                    cell.setBackground(Color.WHITE);
+                    cell.setBackground(Color.WHITE.darker());
                     panel.add(cell);
                 }
             }
