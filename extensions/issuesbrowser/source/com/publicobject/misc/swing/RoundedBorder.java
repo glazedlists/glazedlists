@@ -17,66 +17,79 @@ public class RoundedBorder implements Border {
     private Color background;
     private Color outline;
     private Color foreground;
-    private int width;
+    private int radius;
     private int stroke;
 
-    public RoundedBorder(Color background, Color outline, Color foreground, int width, int stroke) {
+    public RoundedBorder(Color background, Color outline, Color foreground, int radius, int stroke) {
         this.background = background;
         this.outline = outline;
         this.foreground = foreground;
-        this.width = width;
+        this.radius = radius;
         this.stroke = stroke;
     }
 
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
         Graphics2D g2d = (Graphics2D)g.create();
         g2d.addRenderingHints(Icons.RENDERING_HINTS);
-        int diameter = this.width * 2;
+        int diameter = this.radius * 2;
 
-        // fill background
+        // background in corners
         g2d.setColor(background);
-        g2d.fillRect(0, 0, this.width, this.width);
-        g2d.fillRect(width - this.width, 0, this.width, this.width);
-        g2d.fillRect(0, height - this.width, this.width, this.width);
-        g2d.fillRect(width - this.width, height - this.width, this.width, this.width);
+        g2d.fillRect(0,              0,                    radius, this.radius);
+        g2d.fillRect(width - radius, 0,                    radius, radius);
+        g2d.fillRect(0,              height - this.radius, radius, radius);
+        g2d.fillRect(width - radius, height - radius,      radius, radius);
 
-        // fill foreground - corner arcs
+        // fill corners
+        int arcLeft = 0;
+        int arcTop = 0;
+        int arcRight = width - diameter - 1;
+        int arcBottom = height - diameter - 1;
+        int arcDiameter = diameter;
+        int sideWidth = width - diameter; // + 1;
+        int sideHeight = height - diameter; // + 1;
         g2d.setColor(foreground);
-        g2d.fillArc(0,                    0,                     diameter, diameter, 90, 90);
-        g2d.fillArc(width - diameter - 1, 0,                     diameter, diameter, 0, 90);
-        g2d.fillArc(0,                    height - diameter - 1, diameter, diameter, 180, 90);
-        g2d.fillArc(width - diameter - 1, height - diameter - 1, diameter, diameter, 270, 90);
-        // fill foreground - top, bottom, left, right
-        g2d.fillRect(this.width,         0,                   width - diameter + 1, this.width);
-        g2d.fillRect(this.width,         height - this.width, width - diameter + 1, this.width);
-        g2d.fillRect(0,                  this.width,          this.width,           height - diameter + 1);
-        g2d.fillRect(width - this.width, this.width,          this.width,           height - diameter + 1);
+        g2d.fillArc(arcLeft,  arcTop,    arcDiameter, arcDiameter, 90, 90);
+        g2d.fillArc(arcRight, arcTop,    arcDiameter, arcDiameter, 0, 90);
+        g2d.fillArc(arcLeft,  arcBottom, arcDiameter, arcDiameter, 180, 90);
+        g2d.fillArc(arcRight, arcBottom, arcDiameter, arcDiameter, 270, 90);
+        // fill sides
+        g2d.fillRect(radius,         0,               sideWidth, radius);
+        g2d.fillRect(radius,         height - radius, sideWidth, radius);
+        g2d.fillRect(0,              radius,          radius,    sideHeight);
+        g2d.fillRect(width - radius, radius,          radius,    sideHeight);
 
         // prepare the arc lines
         if(stroke > 0) {
             g2d.setColor(outline);
             g2d.setStroke(new BasicStroke(stroke));
-            int halfStrokeU = (stroke + 1) / 2;
-            int halfStrokeD = (stroke) / 2;
+            int halfStroke = (stroke) / 2;
 
-            // top
-            g2d.drawArc(halfStrokeD,                    halfStrokeD, diameter - stroke, diameter - stroke, 90, 90);
-            g2d.drawArc(width - diameter + halfStrokeD, halfStrokeD, diameter - stroke, diameter - stroke, 0,  90);
-            g2d.fillRect(this.width, 0, width - diameter, stroke);
+            // stroke corners
+            int strokeDiameter = diameter - stroke;
+            int leftStroke = halfStroke;
+            int rightStroke = width - diameter + halfStroke;
+            int topStroke = halfStroke;
+            int bottomStroke = height - diameter + halfStroke;
+            g2d.drawArc(leftStroke,  topStroke,    strokeDiameter, strokeDiameter, 90, 90);
+            g2d.drawArc(rightStroke, topStroke,    strokeDiameter, strokeDiameter, 0,  90);
+            g2d.drawArc(leftStroke,  bottomStroke, strokeDiameter, strokeDiameter, 180, 90);
+            g2d.drawArc(rightStroke, bottomStroke, strokeDiameter, strokeDiameter, 270, 90);
 
-            // sides
-            g2d.fillRect(0,              this.width, stroke, height - diameter);
-            g2d.fillRect(width - stroke, this.width, stroke, height - diameter);
-
-            // bottom
-            g2d.drawArc(halfStrokeD,                    height - diameter + halfStrokeD, diameter - stroke, diameter - stroke, 180, 90);
-            g2d.drawArc(width - diameter + halfStrokeD, height - diameter + halfStrokeD, diameter - stroke, diameter - stroke, 270, 90);
-            g2d.fillRect(this.width, height - stroke, width - diameter, stroke);
+            // stroke sides
+            int sideBottom = height - stroke;
+            int sideTop = 0;
+            int sideLeft = 0;
+            int sideRight = width - stroke;
+            g2d.fillRect(radius,    sideTop,    sideWidth, stroke);
+            g2d.fillRect(radius,    sideBottom, sideWidth, stroke);
+            g2d.fillRect(sideLeft,  radius,     stroke,    sideHeight);
+            g2d.fillRect(sideRight, radius,     stroke,    sideHeight);
         }
     }
 
     public Insets getBorderInsets(Component c) {
-        return new Insets(width, width, width, width);
+        return new Insets(radius, radius, radius, radius);
     }
 
     public boolean isBorderOpaque() {
@@ -90,14 +103,17 @@ public class RoundedBorder implements Border {
     private static class TestRunnable implements Runnable { 
         public void run() {
             JPanel panel = new JPanel(new FlowLayout());
-            panel.setBackground(Color.BLUE);
+            final Color background = new Color(204, 204, 255);
+            final Color border = Color.BLACK;
+            final Color foreground = Color.WHITE;
+            panel.setBackground(background);
 
             for(int p = 2; p < 20; p++) {
                 for(int s = 0; s <= p; s++) {
                     JPanel cell = new JPanel();
-                    cell.add(new JLabel("<html>WIDTH: " + p + "<br>STROKE: " + s));
-                    cell.setBorder(new RoundedBorder(Color.BLUE, Color.BLACK, Color.WHITE, p, s));
-                    cell.setBackground(Color.WHITE.darker());
+                    cell.add(new JLabel("<html><i>radius</i>: " + p + "<br><i>stroke</i>: " + s));
+                    cell.setBorder(new RoundedBorder(background, border, foreground, p, s));
+                    cell.setBackground(Color.WHITE);
                     panel.add(cell);
                 }
             }
