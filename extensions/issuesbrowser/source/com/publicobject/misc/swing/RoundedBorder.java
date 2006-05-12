@@ -14,11 +14,11 @@ import java.awt.*;
  */
 public class RoundedBorder implements Border {
 
-    private Color background;
-    private Color outline;
-    private Color foreground;
-    private int radius;
-    private int stroke;
+    private final Color background;
+    private final Color outline;
+    private final Color foreground;
+    private final int radius;
+    private final int stroke;
 
     public RoundedBorder(Color background, Color outline, Color foreground, int radius, int stroke) {
         this.background = background;
@@ -31,13 +31,13 @@ public class RoundedBorder implements Border {
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
         Graphics2D g2d = (Graphics2D)g.create();
         g2d.addRenderingHints(Icons.RENDERING_HINTS);
-        int diameter = this.radius * 2;
+        int diameter = radius * 2;
 
         // background in corners
         g2d.setColor(background);
-        g2d.fillRect(0,              0,                    radius, this.radius);
+        g2d.fillRect(0,              0,                    radius, radius);
         g2d.fillRect(width - radius, 0,                    radius, radius);
-        g2d.fillRect(0,              height - this.radius, radius, radius);
+        g2d.fillRect(0,              height - radius,      radius, radius);
         g2d.fillRect(width - radius, height - radius,      radius, radius);
 
         // fill corners
