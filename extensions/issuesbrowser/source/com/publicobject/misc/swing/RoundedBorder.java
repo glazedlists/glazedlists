@@ -100,7 +100,7 @@ public class RoundedBorder implements Border {
         SwingUtilities.invokeLater(new TestRunnable());
     }
 
-    private static class TestRunnable implements Runnable { 
+    private static class TestRunnable implements Runnable {
         public void run() {
             JPanel panel = new JPanel(new FlowLayout());
             final Color background = new Color(204, 204, 255);
@@ -108,9 +108,17 @@ public class RoundedBorder implements Border {
             final Color foreground = Color.WHITE;
             panel.setBackground(background);
 
-            for(int p = 2; p < 20; p++) {
-                for(int s = 0; s <= p; s++) {
-                    JPanel cell = new JPanel();
+            int p = 50;
+            int s = 30;
+            JPanel cell = new JPanel();
+            cell.add(new JLabel("<html><i>radius</i>: " + p + "<br><i>stroke</i>: " + s));
+            cell.setBorder(new RoundedBorder(background, border, foreground, p, s));
+            cell.setBackground(Color.WHITE);
+            panel.add(cell);
+
+            for(p = 2; p < 20; p++) {
+                for(s = 0; s <= p; s++) {
+                    cell = new JPanel();
                     cell.add(new JLabel("<html><i>radius</i>: " + p + "<br><i>stroke</i>: " + s));
                     cell.setBorder(new RoundedBorder(background, border, foreground, p, s));
                     cell.setBackground(Color.WHITE);

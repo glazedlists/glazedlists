@@ -582,7 +582,6 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     IndexedTreeNode<GroupSeparator> node = separators.removeByIndex(groupIndex);
                     node.getValue().setNode(null);
                     node.getValue().updateCachedValues();
-                    // this group has gone away, make sure the other changes fired reflect that
                     groupIndex--;
                 }
 
@@ -598,6 +597,31 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     int expandedIndex = index + groupIndex + 1;
                     insertedSeparators.remove(expandedIndex, 1);
                     updates.addDelete(expandedIndex);
+                }
+
+                // Special case out the shift operation. The Grouper automatically
+                // handles shifts, but SeparatorList needs to manage them independently.
+                // Here we respond to the grouper and the separators barcode getting
+                // out of sync, and resolve that problem.
+                // If this fix poses a problem, we might want to change the way
+                // Grouper works to fire a special flag called 'shift' with the
+                // value true whenever the group joined is a RIGHT_GROUP
+                int shiftGroupIndex = groupIndex + 1;
+                if(groupChangeType == ListEvent.DELETE && elementChangeType == ListEvent.DELETE
+                        && shiftGroupIndex < insertedSeparators.colourSize(SEPARATOR)
+                        && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)) {
+                    int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
+                    int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex , SEPARATOR);
+                    //String was = insertedSeparators.toString();
+                    if(collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
+                        insertedSeparators.remove(separatorsIndex, 1);
+                        updates.addDelete(separatorsIndex);
+                        insertedSeparators.add(collapsedGroupStartIndex + shiftGroupIndex, SEPARATOR, 1);
+                        updates.addInsert(collapsedGroupStartIndex + shiftGroupIndex);
+                        //String now = insertedSeparators.toString();
+                        index++;
+                        //System.out.println("Changed from " + was + " to " + now);
+                    }
                 }
             }
         }
