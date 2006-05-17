@@ -16,7 +16,6 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 import java.awt.*;
@@ -88,7 +87,9 @@ import java.beans.PropertyChangeListener;
  * </ol>
  *
  * <strong>ComboBoxEditor Focus</strong>
- * <p>When the ComboBoxEditor gains focus it selects the text it contains.
+ * <p>When the ComboBoxEditor gains focus it selects the text it contains if
+ * {@link #getSelectsTextOnFocusGain()} returns <tt>true</tt>; otherwise it
+ * does nothing.
  *
  * <p><p>In order to achieve all of the autocompletion and filtering behaviour,
  * the following occurs when {@link #install} is called:
@@ -138,6 +139,12 @@ public final class AutoCompleteSupport<E> {
      * ComboBoxModel; <tt>false</tt> otherwise.
      */
     private boolean strict = false;
+
+    /**
+     * <tt>true</tt> if the text in the combobox editor is selected when the
+     * editor gains focus; <tt>false</tt> otherwise.
+     */
+    private boolean selectsTextOnFocusGain = true;
 
     //
     // These are member variables for convenience
@@ -498,7 +505,6 @@ public final class AutoCompleteSupport<E> {
      * <ul>
      *   <li> The JComboBox must use a {@link JTextField} as its editor
      *   <li> The JTextField must use an {@link AbstractDocument} as its model
-     *   <li> The JComboBox UI delegate must be a subclass of {@link BasicComboBoxUI}
      * </ul>
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
@@ -511,9 +517,6 @@ public final class AutoCompleteSupport<E> {
      */
     public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
         checkAccessThread();
-
-        if (!(comboBox.getUI() instanceof BasicComboBoxUI))
-            throw new IllegalArgumentException("comboBox UI must be a subclass of " + BasicComboBoxUI.class);
 
         final Component editorComponent = comboBox.getEditor().getEditorComponent();
         if (!(editorComponent instanceof JTextField))
@@ -649,6 +652,28 @@ public final class AutoCompleteSupport<E> {
                 doNotTogglePopup = false;
             }
         }
+    }
+
+    /**
+     * Returns <tt>true</tt> if the combo box editor text is selected when it
+     * gains focus; <tt>false</tt> otherwise.
+     */
+    public boolean getSelectsTextOnFocusGain() {
+        return selectsTextOnFocusGain;
+    }
+    /**
+     * If <code>selectsTextOnFocusGain</code> is <tt>true</tt>, all text in the
+     * editor is selected when the combo box editor gains focus. If it is
+     * <tt>false</tt> the selection state of the editor is not effected by
+     * focus changes.
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     */
+    public void setSelectsTextOnFocusGain(boolean selectsTextOnFocusGain) {
+        checkAccessThread();
+
+        this.selectsTextOnFocusGain = selectsTextOnFocusGain;
     }
 
     /**
@@ -1235,11 +1260,14 @@ public final class AutoCompleteSupport<E> {
 
     /**
      * To emulate Firefox behaviour, all text in the ComboBoxEditor is selected
-     * from beginning to end when the ComboBoxEditor gains focus.
+     * from beginning to end when the ComboBoxEditor gains focus if the value
+     * returned from {@link AutoCompleteSupport#getSelectsTextOnFocusGain()}
+     * allows this behaviour.
      */
     private class SelectTextOnFocusGainHandler extends FocusAdapter {
         public void focusGained(FocusEvent e) {
-            comboBoxEditor.select(0, comboBoxEditor.getText().length());
+            if (getSelectsTextOnFocusGain())
+                comboBoxEditor.select(0, comboBoxEditor.getText().length());
         }
     }
 

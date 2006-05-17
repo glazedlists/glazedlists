@@ -133,6 +133,9 @@ public class AutoCompleteSupportTestApp {
     /** A checkbox to toggle whether the {@link #autoCompleteSupport} is in strict mode or not. */
     private final JCheckBox strictModeCheckBox = new JCheckBox();
 
+    /** A checkbox to toggle whether the {@link #autoCompleteSupport} selects the editors text when gaining focus. */
+    private final JCheckBox selectTextOnFocusGainCheckBox = new JCheckBox();
+
     /** The ButtonGroup to which all Look & Feel radio buttons belong. */
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
@@ -176,6 +179,9 @@ public class AutoCompleteSupportTestApp {
 
         strictModeCheckBox.addActionListener(new StrictModeActionHandler());
         strictModeCheckBox.setSelected(autoCompleteSupport.isStrict());
+
+        selectTextOnFocusGainCheckBox.addActionListener(new SelectTextOnFocusGainActionHandler());
+        selectTextOnFocusGainCheckBox.setSelected(autoCompleteSupport.getSelectsTextOnFocusGain());
 
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -277,15 +283,24 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
+    private class SelectTextOnFocusGainActionHandler implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            autoCompleteSupport.setSelectsTextOnFocusGain(selectTextOnFocusGainCheckBox.isSelected());
+        }
+    }
+
     private JPanel createTweakerPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
 
-        panel.add(new JLabel("Corrects Case:"), new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(correctsCaseCheckBox,         new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Corrects Case:"),             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(correctsCaseCheckBox,                     new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Strict:"),        new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(strictModeCheckBox,           new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Strict:"),                    new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(strictModeCheckBox,                       new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
+        panel.add(new JLabel("Select Text on Focus Gain:"), new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(selectTextOnFocusGainCheckBox,            new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        
         return panel;
     }
 
