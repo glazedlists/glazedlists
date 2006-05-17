@@ -35,10 +35,10 @@ public class RoundedBorder implements Border {
 
         // background in corners
         g2d.setColor(background);
-        g2d.fillRect(0,              0,                    radius, radius);
-        g2d.fillRect(width - radius, 0,                    radius, radius);
-        g2d.fillRect(0,              height - radius,      radius, radius);
-        g2d.fillRect(width - radius, height - radius,      radius, radius);
+        g2d.fillRect(0,              0,               radius, radius);
+        g2d.fillRect(width - radius, 0,               radius, radius);
+        g2d.fillRect(0,              height - radius, radius, radius);
+        g2d.fillRect(width - radius, height - radius, radius, radius);
 
         // fill corners
         int arcLeft = 0;
