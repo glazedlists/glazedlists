@@ -289,6 +289,20 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
+    private static class SetValueProgrammaticallyActionHandler extends AbstractAction {
+        private final JComboBox comboBox;
+
+        public SetValueProgrammaticallyActionHandler(JComboBox comboBox) {
+            super("Set Value Programmatically");
+            this.comboBox = comboBox;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            final ComboBoxModel model = this.comboBox.getModel();
+            this.comboBox.setSelectedItem(model.getElementAt(model.getSize()-1));
+        }
+    }
+
     private JPanel createTweakerPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
 
@@ -335,15 +349,20 @@ public class AutoCompleteSupportTestApp {
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));
 
+        final JButton setSelectedItemProgrammaticallyAutoComplete = new JButton(new SetValueProgrammaticallyActionHandler(autoCompleteComboBox));
+        final JButton setSelectedItemProgrammaticallyPlain = new JButton(new SetValueProgrammaticallyActionHandler(plainComboBox));
+
         if (comboBoxCount > 1)
             panel.add(Box.createVerticalStrut(1), new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("AutoComplete ComboBox"),  new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(autoCompleteComboBox,                 new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(Box.createHorizontalStrut(5),         new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(new JLabel("Normal JComboBox"),       new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(plainComboBox,                        new GridBagConstraints(2, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        panel.add(tableScroller,                        new GridBagConstraints(0, 3, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("AutoComplete ComboBox"),          new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(autoCompleteComboBox,                         new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(setSelectedItemProgrammaticallyAutoComplete,  new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(Box.createHorizontalStrut(5),                 new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Normal JComboBox"),               new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(plainComboBox,                                new GridBagConstraints(2, 2, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(setSelectedItemProgrammaticallyPlain,         new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(tableScroller,                                new GridBagConstraints(0, 4, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 0, 0, 0), 0, 0));
 
         return panel;
     }

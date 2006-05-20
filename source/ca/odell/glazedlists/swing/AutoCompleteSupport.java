@@ -257,8 +257,9 @@ public final class AutoCompleteSupport<E> {
     /** <tt>true</tt> indicates attempts to select an autocompletion term should be ignored. */
     private boolean doNotAutoComplete = false;
 
-    /** <tt>true</tt> indicates attempts to toggle the state of the popup should be ignored. */
-    private boolean doNotTogglePopup = false;
+    /** <tt>true</tt> indicates attempts to toggle the state of the popup should be ignored.
+     * In general, the only time we should toggle the state of a popup is due to a users keystroke. */
+    private boolean doNotTogglePopup = true;
 
     //
     // Values present when {@link #install} executes - and are restored when {@link @uninstall} executes
@@ -645,12 +646,7 @@ public final class AutoCompleteSupport<E> {
             }
 
             // adjust the editor to contain the autocompletion term
-            doNotTogglePopup = true;
-            try {
-                comboBoxEditor.setText(strictValue);
-            } finally {
-                doNotTogglePopup = false;
-            }
+            comboBoxEditor.setText(strictValue);
         }
     }
 
@@ -831,13 +827,12 @@ public final class AutoCompleteSupport<E> {
      */
     private class AutoCompleteFilter extends DocumentFilter {
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
+            if (doNotChangeDocument) return;
+
             // this short-circuit corrects the PlasticLookAndFeel behaviour. Hitting the enter key in Plastic
             // will cause the popup to reopen because the Plastic ComboBoxEditor forwards on unnecessary updates
             // to the document, including ones where the text isn't really changing
-            if (offset == 0 && document.getLength() == length && string != null && string.equals(comboBoxEditor.getText()))
-                return;
-
-            if (doNotChangeDocument) return;
+            if (offset == 0 && document.getLength() == length && string != null && string.equals(comboBoxEditor.getText())) return;
 
             // collect rollback information before performing the edit
             final String valueBeforeEdit = comboBoxEditor.getText();
@@ -1213,7 +1208,21 @@ public final class AutoCompleteSupport<E> {
      * selection with another valid entry.
      */
     private class AutoCompleteKeyHandler extends KeyAdapter {
+
+        private ActionListener[] actionListeners;
+
         public void keyPressed(KeyEvent e) {
+            doNotTogglePopup = false;
+
+            // this KeyHandler performs ALL processing of the ENTER key otherwise multiple
+            // ActionEvents are fired to ActionListeners by the default JComboBox processing.
+            // To control processing of the enter key, we set a flag to avoid changing the
+            // editor's Document in any way, and also unregister the ActionListeners temporarily.
+            if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                doNotChangeDocument = true;
+                this.actionListeners = unregisterAllActionListeners(comboBox);
+            }
+
             // make sure this backspace key does not modify our comboBoxEditor's Document
             if (isTrigger(e))
                 doNotChangeDocument = true;
@@ -1249,8 +1258,24 @@ public final class AutoCompleteSupport<E> {
             if (isTrigger(e))
                 doNotChangeDocument = false;
 
-            if (e.getKeyChar() == KeyEvent.VK_ENTER)
+            // keyPressed(e) has disabled the JComboBox's normal processing of the enter key
+            // so now it is time to perform our own processing. We reattach all ActionListeners
+            // and simulate exactly ONE ActionEvent in the JComboBox and then reenable Document changes.
+            if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                 updatePrefix();
+
+                // reregister all ActionListeners and then notify them due to the ENTER key
+                registerAllActionListeners(comboBox, this.actionListeners);
+                comboBox.actionPerformed(new ActionEvent(e.getSource(), e.getID(), null));
+
+                // null out our own reference to the ActionListeners
+                this.actionListeners = null;
+
+                // reenable Document changes once more
+                doNotChangeDocument = false;
+            }
+
+            doNotTogglePopup = true;
         }
 
         private boolean isTrigger(KeyEvent e) {
