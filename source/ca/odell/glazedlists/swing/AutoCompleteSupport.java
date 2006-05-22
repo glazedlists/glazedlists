@@ -84,14 +84,21 @@ import java.beans.PropertyChangeListener;
  *   <li> the selected item within the popup is changed (which can happen due
  *        to a mouse click, a change in the autocompletion term, or using the
  *        arrow keys)
+ *   <li> the JComboBox loses focus and contains a value that does not appear
+ *        in the ComboBoxModel
  * </ol>
+ *
+ * <strong>Null Values in the ComboBoxModel</strong>
+ * <p><code>null</code> values located in the ComboBoxModel are considered
+ * identical to empty Strings ("") for the purposes of locating autocompletion
+ * terms.<br><br></p>
  *
  * <strong>ComboBoxEditor Focus</strong>
  * <p>When the ComboBoxEditor gains focus it selects the text it contains if
  * {@link #getSelectsTextOnFocusGain()} returns <tt>true</tt>; otherwise it
- * does nothing.
+ * does nothing.</p>
  *
- * <p><p>In order to achieve all of the autocompletion and filtering behaviour,
+ * <p>In order to achieve all of the autocompletion and filtering behaviour,
  * the following occurs when {@link #install} is called:
  *
  * <ul>
@@ -642,7 +649,7 @@ public final class AutoCompleteSupport<E> {
             // select the first element if no autocompletion term could be found
             if (strictValue == null && !items.isEmpty()) {
                 final Object firstItem = items.get(0);
-                strictValue = firstItem == null ? null : firstItem.toString();
+                strictValue = firstItem == null ? "" : firstItem.toString();
             }
 
             // adjust the editor to contain the autocompletion term
@@ -774,15 +781,12 @@ public final class AutoCompleteSupport<E> {
         // search the list of ALL items for an autocompletion term for the given value
         for (int i = 0, n = items.size(); i < n; i++) {
             final Object item = items.get(i);
-            final String itemString = item == null ? null : item.toString();
+            final String itemString = item == null ? "" : item.toString();
 
             // if the itemString starts with the given value
             // we have found an appropriate autocompletion term
-            if (itemString != null) {
-                // if itemString matches the prefix, we know an autocompletion term exists
-                if (prefixIsEmpty ? "".equals(itemString) : valueMatcher.matches(itemString))
-                    return itemString;
-            }
+            if (prefixIsEmpty ? "".equals(itemString) : valueMatcher.matches(itemString))
+                return itemString;
         }
 
         return null;
@@ -940,34 +944,30 @@ public final class AutoCompleteSupport<E> {
             // search the combobox model for a value that starts with our prefix (called an autocompletion term)
             for (int i = 0, n = comboBoxModel.getSize(); i < n; i++) {
                 final Object item = comboBoxModel.getElementAt(i);
-                final String itemString = item == null ? null : item.toString();
+                final String itemString = item == null ? "" : item.toString();
 
-                // if the itemString starts with the user-specified prefix
-                // we have found an appropriate autocompletion term
-                if (itemString != null) {
-                    // if itemString does not match the prefix, continue searching for an autocompletion term
-                    if (prefixIsEmpty ? !"".equals(itemString) : !prefixMatcher.matches(itemString))
-                        continue;
+                // if itemString does not match the prefix, continue searching for an autocompletion term
+                if (prefixIsEmpty ? !"".equals(itemString) : !prefixMatcher.matches(itemString))
+                    continue;
 
-                    // either keep the user's prefix or replace it with the itemString's prefix
-                    // depending on whether we correct the case
-                    if (getCorrectsCase() || isStrict()) {
-                        filterBypass.replace(0, prefix.length(), itemString, attributeSet);
-                    } else {
-                        final String itemSuffix = itemString.substring(prefix.length());
-                        filterBypass.insertString(prefix.length(), itemSuffix, attributeSet);
-                    }
-
-                    // select the autocompletion term
-                    final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, itemString);
-                    selectItem(i, silently);
-
-                    // select the text after the prefix but before the end of the text
-                    // (it represents the autocomplete text)
-                    comboBoxEditor.select(prefix.length(), document.getLength());
-
-                    return;
+                // either keep the user's prefix or replace it with the itemString's prefix
+                // depending on whether we correct the case
+                if (getCorrectsCase() || isStrict()) {
+                    filterBypass.replace(0, prefix.length(), itemString, attributeSet);
+                } else {
+                    final String itemSuffix = itemString.substring(prefix.length());
+                    filterBypass.insertString(prefix.length(), itemSuffix, attributeSet);
                 }
+
+                // select the autocompletion term
+                final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, itemString);
+                selectItem(i, silently);
+
+                // select the text after the prefix but before the end of the text
+                // (it represents the autocomplete text)
+                comboBoxEditor.select(prefix.length(), document.getLength());
+
+                return;
             }
 
             // reset the selection since we couldn't find the prefix in the model
