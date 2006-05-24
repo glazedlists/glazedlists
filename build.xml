@@ -62,7 +62,10 @@
             <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
             <link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
             <link href="http://help.eclipse.org/help31/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
+            <link href="http://www.jdocs.com/formlayout/1.0.4/api/" packagelistloc="extensions/jgoodiesforms/lib"/>
+            <link href="http://nachocalendar.sourceforge.net/doc/"/>
             <link href="http://www.jfree.org/jfreechart/javadoc/"/>
+            <link href="http://download.java.net/javadesktop/swinglabs/releases/0.8/docs/api/"/>
 
             <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
 			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2006 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>

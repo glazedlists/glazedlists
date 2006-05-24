@@ -20,7 +20,7 @@ import ca.odell.glazedlists.GlazedLists;
  *
  * @author James Lemieux
  */
-public class TreePair<V extends Comparable> {
+final class TreePair<V extends Comparable> {
     /** The tree which orders the start indices of all ValueSegments. */
     private IndexedTree<V> start = new IndexedTree<V>(GlazedLists.comparableComparator());
 

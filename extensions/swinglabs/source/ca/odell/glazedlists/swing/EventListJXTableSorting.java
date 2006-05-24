@@ -44,11 +44,11 @@ import ca.odell.glazedlists.GlazedLists;
  * recommended that you not use {@link FilterPipeline} with this class. Instead,
  * consider using {@link ca.odell.glazedlists.FilterList} for filtering your {@link JXTable}.
  *
- * <p>Since this class works with the <a href="https://swing.dev.java.net/">SwingX</a>
+ * <p>Since this class works with the <a href="https://swingx.dev.java.net/">SwingX</a>
  * project, it is likely to change as SwingX continues to evolve and mature.
  * We will attempt to maintain source and binary compatibility as SwingX changes,
  * but it is highly recommended that you test your table sorting each time you
- * update your SwingX.
+ * update your SwingX jar file.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
