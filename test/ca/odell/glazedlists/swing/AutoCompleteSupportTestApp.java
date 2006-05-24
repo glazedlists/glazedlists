@@ -29,7 +29,6 @@ public class AutoCompleteSupportTestApp {
 
     private static final String[] URL_SAMPLE_DATA = {
         null,
-        "",
         "http://mail.google.com/mail/",
         "http://slashdot.org/",
         "http://www.clientjava.com/blog",
@@ -194,10 +193,20 @@ public class AutoCompleteSupportTestApp {
     private void rebuildContentPane() {
         frame.getContentPane().removeAll();
         frame.getContentPane().setLayout(new GridBagLayout());
-        frame.getContentPane().add(tweakerPanel,            new GridBagConstraints(0, 0, 3, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        frame.getContentPane().add(autocompleteActionPanel, new GridBagConstraints(0, 1, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        frame.getContentPane().add(createMainPanel(),       new GridBagConstraints(1, 1, 1, 1, 0.60, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        frame.getContentPane().add(regularActionPanel,      new GridBagConstraints(2, 1, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+
+        final JPanel mainPanel = createMainPanel();
+
+        final JPanel autoCompleteModelPanel = createComboBoxModelPanel("AutoComplete ComboBoxModel", autoCompleteComboBox.getModel());
+
+        final JPanel regularModelPanel = createComboBoxModelPanel("Normal ComboBoxModel", regularComboBox.getModel());
+
+        frame.getContentPane().add(tweakerPanel,                 new GridBagConstraints(0, 0, 3, 1, 1.00, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(autocompleteActionPanel,      new GridBagConstraints(0, 1, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(mainPanel,                    new GridBagConstraints(1, 1, 1, 1, 0.60, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(regularActionPanel,           new GridBagConstraints(2, 1, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(autoCompleteModelPanel,       new GridBagConstraints(0, 2, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(Box.createHorizontalStrut(1), new GridBagConstraints(1, 2, 1, 1, 0.60, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().add(regularModelPanel,            new GridBagConstraints(2, 2, 1, 1, 0.20, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
 
     /**
@@ -320,6 +329,18 @@ public class AutoCompleteSupportTestApp {
 
     private JPanel createActionPanel(String title, JList list) {
         final JPanel panel = new JPanel(new GridBagLayout());
+
+        panel.add(new JLabel(title),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
+        panel.add(new JScrollPane(list), new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
+
+        return panel;
+    }
+
+    private JPanel createComboBoxModelPanel(String title, ComboBoxModel model) {
+        final JPanel panel = new JPanel(new GridBagLayout());
+
+        final JList list = new JList(model);
+        list.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
 
         panel.add(new JLabel(title),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
         panel.add(new JScrollPane(list), new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));

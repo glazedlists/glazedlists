@@ -268,6 +268,9 @@ public final class AutoCompleteSupport<E> {
      * In general, the only time we should toggle the state of a popup is due to a users keystroke. */
     private boolean doNotTogglePopup = true;
 
+    /** <tt>true</tt> indicates attempts to clear the filter when hiding the popup should be ignored. */
+    private boolean doNotClearFilterOnPopupHide = false;
+
     //
     // Values present when {@link #install} executes - and are restored when {@link @uninstall} executes
     //
@@ -643,8 +646,7 @@ public final class AutoCompleteSupport<E> {
 
             // if the value in the editor already IS the autocompletion term,
             // short circuit to avoid broadcasting a needless ActionEvent
-            if (value.equals(strictValue))
-                return;
+            if (value.equals(strictValue)) return;
 
             // select the first element if no autocompletion term could be found
             if (strictValue == null && !items.isEmpty()) {
@@ -1092,8 +1094,7 @@ public final class AutoCompleteSupport<E> {
             final int newItemCount = comboBox.getItemCount();
 
             // if the size of the model didn't change, the popup size won't change
-            if (previousItemCount == newItemCount)
-                return;
+            if (previousItemCount == newItemCount) return;
 
             final int maxPopupItemCount = comboBox.getMaximumRowCount();
 
@@ -1102,7 +1103,13 @@ public final class AutoCompleteSupport<E> {
                 // if either the previous or new item count is less than the max,
                 // hide and show the popup to recalculate its new height
                 if (newItemCount < maxPopupItemCount || previousItemCount < maxPopupItemCount) {
-                    comboBox.setPopupVisible(false);
+                    // don't both unfiltering the popup since we'll redisplay the popup immediately
+                    doNotClearFilterOnPopupHide = true;
+                    try {
+                        comboBox.setPopupVisible(false);
+                    } finally {
+                        doNotClearFilterOnPopupHide = false;
+                    }
                     comboBox.setPopupVisible(true);
                 }
             }
@@ -1123,8 +1130,7 @@ public final class AutoCompleteSupport<E> {
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             // if the combo box does not contain a prototype display value, skip our sizing logic
             final Object prototypeValue = comboBox.getPrototypeDisplayValue();
-            if (prototypeValue == null)
-                return;
+            if (prototypeValue == null) return;
 
             // attempt to extract the JScrollPane that scrolls the popup
             final JComponent popupComponent = (JComponent) e.getSource();
@@ -1166,7 +1172,14 @@ public final class AutoCompleteSupport<E> {
             return comp.getPreferredSize();
         }
 
-        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+            if (doNotClearFilterOnPopupHide) return;
+
+            // the popup menu is being hidden, so clear the filter to return
+            // the ComboBoxModel to its unfiltered state
+            applyFilter("");
+        }
+
         public void popupMenuCanceled(PopupMenuEvent e) {}
     }
 
@@ -1231,8 +1244,7 @@ public final class AutoCompleteSupport<E> {
         public void keyTyped(KeyEvent e) {
             if (isTrigger(e)) {
                 // if no content exists in the comboBoxEditor, bail early
-                if (comboBoxEditor.getText().length() == 0)
-                    return;
+                if (comboBoxEditor.getText().length() == 0) return;
 
                 // calculate the current beginning of the selection
                 int selectionStart = Math.min(comboBoxEditor.getSelectionStart(), comboBoxEditor.getSelectionEnd());
