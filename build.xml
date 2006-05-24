@@ -53,7 +53,7 @@
 		<javadoc
 			destdir="docs/api" author="true" use="true" windowtitle="Glazed Lists" source="${java.target.version}">
 			<packageset dir="source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>
-			<packageset dir="extensions/swt/source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/swt/source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>
 			<packageset dir="extensions/ktable/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/jgoodiesforms/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/nachocalendar/source"><exclude name="**/impl/**"/></packageset>
