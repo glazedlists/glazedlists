@@ -200,7 +200,7 @@ public final class AutoCompleteSupport<E> {
     private boolean isTableCellEditor;
 
     //
-    // These listeners work togetherh to enforce different aspects of the autocompletion behaviour
+    // These listeners work together to enforce different aspects of the autocompletion behaviour
     //
 
     /**
@@ -655,7 +655,12 @@ public final class AutoCompleteSupport<E> {
             }
 
             // adjust the editor to contain the autocompletion term
-            comboBoxEditor.setText(strictValue);
+            doNotFilter = true;
+            try {
+                comboBoxEditor.setText(strictValue);
+            } finally {
+                doNotFilter = false;
+            }
         }
     }
 
@@ -997,14 +1002,33 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
-     * Select the item at the given <code>index</code>. <code>-1</code> is
-     * interpreted as "clear the selected item". <code>-2</code> is
-     * interpreted as "the last element".
+     * Select the item at the given <code>index</code>. This method behaves
+     * differently in strict mode vs. non-strict mode.
+     *
+     * <p>In strict mode, the selected index must always be valid, so using the
+     * down arrow key on the last item or the up arrow key on the first item
+     * simply wraps the selection to the opposite end of the model.
+     *
+     * <p>In strict mode, the selected index can be -1 (no selection), so we
+     * allow -1 to mean "adjust the value of the ComboBoxEditor to be the users
+     * text" and only wrap to the end of the model when -2 is reached. In short,
+     * <code>-1</code> is interpreted as "clear the selected item".
+     * <code>-2</code> is interpreted as "the last element".
      */
     private void selectPossibleValue(int index) {
-        // wrap the index from past the start to the end of the list
-        if (index == -2)
-            index = comboBox.getModel().getSize()-1;
+        if (isStrict()) {
+            // wrap the index from past the start to the end of the model
+            if (index < 0)
+                index = comboBox.getModel().getSize()-1;
+
+            // wrap the index from past the end to the start of the model
+            if (index > comboBox.getModel().getSize()-1)
+                index = 0;
+        } else {
+            // wrap the index from past the start to the end of the model
+            if (index == -2)
+                index = comboBox.getModel().getSize()-1;
+        }
 
         // check if the index is within a valid range
         final boolean validIndex = index >= 0 && index < comboBox.getModel().getSize();
@@ -1035,11 +1059,14 @@ public final class AutoCompleteSupport<E> {
             if (!validIndex) {
                 comboBoxEditor.setText(prefix);
 
-                if (popupMenu.isShowing()) {
-                    // clear the selected value from the popup's display
+                // don't bother unfiltering the popup since we'll redisplay the popup immediately
+                doNotClearFilterOnPopupHide = true;
+                try {
                     comboBox.setPopupVisible(false);
-                    comboBox.setPopupVisible(true);
+                } finally {
+                    doNotClearFilterOnPopupHide = false;
                 }
+                comboBox.setPopupVisible(true);
             }
         } finally {
             doNotPostProcessDocumentChanges = false;
@@ -1103,7 +1130,7 @@ public final class AutoCompleteSupport<E> {
                 // if either the previous or new item count is less than the max,
                 // hide and show the popup to recalculate its new height
                 if (newItemCount < maxPopupItemCount || previousItemCount < maxPopupItemCount) {
-                    // don't both unfiltering the popup since we'll redisplay the popup immediately
+                    // don't bother unfiltering the popup since we'll redisplay the popup immediately
                     doNotClearFilterOnPopupHide = true;
                     try {
                         comboBox.setPopupVisible(false);
