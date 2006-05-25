@@ -1009,7 +1009,7 @@ public final class AutoCompleteSupport<E> {
      * down arrow key on the last item or the up arrow key on the first item
      * simply wraps the selection to the opposite end of the model.
      *
-     * <p>In strict mode, the selected index can be -1 (no selection), so we
+     * <p>In non-strict mode, the selected index can be -1 (no selection), so we
      * allow -1 to mean "adjust the value of the ComboBoxEditor to be the users
      * text" and only wrap to the end of the model when -2 is reached. In short,
      * <code>-1</code> is interpreted as "clear the selected item".
