@@ -36,6 +36,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final int originalComboBoxPopupMenuListenerCount = ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length;
         final Action originalSelectNextAction = combo.getActionMap().get("selectNext");
         final Action originalSelectPreviousAction = combo.getActionMap().get("selectPrevious");
+        final Action originalSelectNext2Action = combo.getActionMap().get("selectNext2");
+        final Action originalSelectPrevious2Action = combo.getActionMap().get("selectPrevious2");
         final Action originalAquaSelectNextAction = combo.getActionMap().get("aquaSelectNext");
         final Action originalAquaSelectPreviousAction = combo.getActionMap().get("aquaSelectPrevious");
 
@@ -51,6 +53,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertNotSame(originalEditable, combo.isEditable());
         assertNotSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
         assertNotSame(originalSelectPreviousAction, combo.getActionMap().get("selectPrevious"));
+        assertNotSame(originalSelectNext2Action, combo.getActionMap().get("selectNext2"));
+        assertNotSame(originalSelectPrevious2Action, combo.getActionMap().get("selectPrevious2"));
         assertNotSame(originalAquaSelectNextAction, combo.getActionMap().get("aquaSelectNext"));
         assertNotSame(originalAquaSelectPreviousAction, combo.getActionMap().get("aquaSelectPrevious"));
         assertNotNull(currentEditorDocument.getDocumentFilter());
@@ -89,6 +93,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(originalComboBoxPopupMenuListenerCount, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
         assertSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
         assertSame(originalSelectPreviousAction, combo.getActionMap().get("selectPrevious"));
+        assertSame(originalSelectNext2Action, combo.getActionMap().get("selectNext2"));
+        assertSame(originalSelectPrevious2Action, combo.getActionMap().get("selectPrevious2"));
         assertSame(originalAquaSelectNextAction, combo.getActionMap().get("aquaSelectNext"));
         assertSame(originalAquaSelectPreviousAction, combo.getActionMap().get("aquaSelectPrevious"));
 
@@ -103,15 +109,6 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     public void guiTestInstall() {
         JComboBox combo = new JComboBox();
         combo.setEditor(new NoopComboBoxEditor());
-        try {
-            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
-            fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-
-        combo = new JComboBox();
-        combo.setUI(new NoopComboBoxUI());
         try {
             AutoCompleteSupport.install(combo, new BasicEventList<Object>());
             fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
@@ -337,13 +334,13 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         // switching to strict mode should correct the case
         support.setStrict(true);
-        assertEquals(1, combo.getItemCount());
+        assertEquals(4, combo.getItemCount());
         assertEquals("New Brunswick", textField.getText());
         assertEquals(1, listener.getCount());
 
         // typing garbage in strict mode should be ignored
         doc.replace(0, doc.getLength(), "garbage", null);
-        assertEquals(1, combo.getItemCount());
+        assertEquals(4, combo.getItemCount());
         assertEquals("New Brunswick", textField.getText());
         assertEquals(1, listener.getCount());
 
@@ -356,7 +353,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         // switching to strict mode should select the first element in the model
         support.setStrict(true);
-        assertEquals(1, combo.getItemCount());
+        assertEquals(4, combo.getItemCount());
         assertEquals("New Brunswick", textField.getText());
         assertEquals(3, listener.getCount());
     }
@@ -390,7 +387,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         support.setStrict(true);
         doc.replace(0, doc.getLength(), "New Brunswick", null);
-        assertEquals(1, combo.getItemCount());
+        assertEquals(4, combo.getItemCount());
         assertEquals("New Brunswick", textField.getText());
         assertEquals(1, listener.getCount());
 

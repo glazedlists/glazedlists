@@ -291,6 +291,8 @@ public final class AutoCompleteSupport<E> {
     /** The original Actions associated with the up and down arrow keys. */
     private Action originalSelectNextAction;
     private Action originalSelectPreviousAction;
+    private Action originalSelectNext2Action;
+    private Action originalSelectPrevious2Action;
     private Action originalAquaSelectNextAction;
     private Action originalAquaSelectPreviousAction;
 
@@ -412,16 +414,23 @@ public final class AutoCompleteSupport<E> {
         final ActionMap actionMap = comboBox.getActionMap();
         this.originalSelectNextAction = actionMap.get("selectNext");
         this.originalSelectPreviousAction = actionMap.get("selectPrevious");
+        this.originalSelectNext2Action = actionMap.get("selectNext2");
+        this.originalSelectPrevious2Action = actionMap.get("selectPrevious2");
         this.originalAquaSelectNextAction = actionMap.get("aquaSelectNext");
         this.originalAquaSelectPreviousAction = actionMap.get("aquaSelectPrevious");
 
+        final UpAction upAction = new UpAction();
+        final DownAction downAction = new DownAction();
+
         // install custom actions for the arrow keys in all non-Apple L&Fs
-        actionMap.put("selectPrevious", new UpAction());
-        actionMap.put("selectNext", new DownAction());
+        actionMap.put("selectPrevious", upAction);
+        actionMap.put("selectNext", downAction);
+        actionMap.put("selectPrevious2", upAction);
+        actionMap.put("selectNext2", downAction);
 
         // install custom actions for the arrow keys in the Apple Aqua L&F
-        actionMap.put("aquaSelectPrevious", new UpAction());
-        actionMap.put("aquaSelectNext", new DownAction());
+        actionMap.put("aquaSelectPrevious", upAction);
+        actionMap.put("aquaSelectNext", downAction);
 
         // add a DocumentFilter to the Document backing the editor JTextField
         this.comboBoxEditor = (JTextField) comboBox.getEditor().getEditorComponent();
@@ -457,6 +466,8 @@ public final class AutoCompleteSupport<E> {
         // restore the original actions for the arrow keys in all non-Apple L&Fs
         actionMap.put("selectPrevious", originalSelectPreviousAction);
         actionMap.put("selectNext", originalSelectNextAction);
+        actionMap.put("selectPrevious2", originalSelectPrevious2Action);
+        actionMap.put("selectNext2", originalSelectNext2Action);
 
         // restore the original actions for the arrow keys in the Apple Aqua L&F
         actionMap.put("aquaSelectPrevious", originalAquaSelectPreviousAction);
@@ -653,6 +664,9 @@ public final class AutoCompleteSupport<E> {
                 final Object firstItem = items.get(0);
                 strictValue = firstItem == null ? "" : firstItem.toString();
             }
+
+            // return all elements to the ComboBoxModel
+            applyFilter("");
 
             // adjust the editor to contain the autocompletion term
             doNotFilter = true;
