@@ -61,6 +61,16 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /**
+     * Creates an empty {@link BasicEventList} with the given
+     * <code>initialCapacity</code>.
+     */
+    public BasicEventList(int initalCapacity) {
+        super(null);
+        this.data = new ArrayList<E>(initalCapacity);
+        this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
+    }
+
+    /**
      * Creates a {@link BasicEventList} that uses the specified {@link List} as
      * the underlying implementation.
      *

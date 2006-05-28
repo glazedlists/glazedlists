@@ -24,6 +24,20 @@ public class GlazedListsTests {
 
 
     /**
+     * Convert a String like "Apple Banana Cat" into a single list:
+     * { "Apple", "Banana", "Cat" }
+     */
+    public static List<String> delimitedStringToList(String delimited) {
+        final String[] strings = delimited.split("\\s");
+
+        List<String> result = new ArrayList<String>(strings.length);
+        for (int i = 0; i < strings.length; i++) {
+            result.add(strings[i]);
+        }
+        return result;
+    }
+
+    /**
      * Convert the characters of the specified String to a list.
      */
     public static List<String> stringToList(CharSequence chars) {

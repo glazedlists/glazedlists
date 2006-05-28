@@ -304,7 +304,7 @@ public final class GlazedLists {
      * {@link Collection#iterator() contents.iterator()}.
      */
     public static <E> EventList<E> eventList(Collection<? extends E> contents) {
-        final EventList<E> result = new BasicEventList<E>();
+        final EventList<E> result = new BasicEventList<E>(contents == null ? 0 : contents.size());
         if(contents != null) result.addAll(contents);
         return result;
     }
@@ -494,6 +494,63 @@ public final class GlazedLists {
      */
     public static <E> ListEventListener<E> syncEventListToList(EventList<E> source, List<E> target) {
         return new SyncListener<E>(source, target);
+    }
+
+    /**
+     * Synchronize the specified {@link EventList} to a MultiMap that is
+     * returned from this method. Each time the {@link EventList} is changed
+     * the MultiMap is updated to reflect the change.
+     *
+     * <p>This can be useful when it is known that an <code>EventList</code>
+     * will experience very few mutations compared to read operation and wants
+     * provide a data structure that guarantees fast O(1) reads.
+     *
+     * <p>The keys of the MultiMap are determined by evaluating each
+     * <code>source</code> element with the <code>keyMaker</code> function. If
+     * two distinct values, say <code>v1</code> and <code>v2</code> each
+     * produce the key <code>k</code> when they are evaluated by the
+     * <code>keyMaker</code> function, then a corresponding entry in the
+     * MultiMap will resemble:
+     *
+     * <p><code>k -> {v1, v2}</code>
+     *
+     * <p>For example, assume the <code>keyMaker</code> function returns the
+     * first letter of a name and the <code>source</code> {@link EventList}
+     * contains the names:
+     *
+     * <p><code>{"Andy", "Arthur", "Jesse", "Holger", "James"}</code>
+     *
+     * <p>The MultMap returned by this method would thus resemble:
+     *
+     * <p><code>
+     * "A" -> {"Andy", "Arthur"}<br>
+     * "H" -> {"Holger"}<br>
+     * "J" -> {"Jesse", "James"}<br>
+     * </code>
+     *
+     * <p>It is important to note that all mutating methods on the {@link Map}
+     * interface "write through" to the backing {@link EventList} as expected.
+     * These mutating methods include:
+     *
+     * <ul>
+     *   <li>the mutating methods of {@link Map#keySet()} and its {@link Iterator}
+     *   <li>the mutating methods of {@link Map#values()} and its {@link Iterator}
+     *   <li>the mutating methods of {@link Map#entrySet()} and its {@link Iterator}
+     *   <li>the {@link Map.Entry#setValue} method
+     * </ul>
+     *
+     * For information on MultiMaps go <a href="http://en.wikipedia.org/wiki/Multimap"/>here</a>.
+     *
+     * @param source the {@link EventList} which provides the master view.
+     *      Each change to this {@link EventList} will be applied to the
+     *      MultiMap
+     * @param keyMaker the {@link FunctionList.Function} which produces a key
+     *      for each value in the <code>source</code>
+     * @return a MultiMap which remains in sync with changes that occur to the
+     *      underlying <code>source</code> {@link EventList}
+     */
+    public static <K, V> Map<Comparable<K>, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, Comparable<K>> keyMaker) {
+        return new GroupingListMultiMap<K, V>(source, keyMaker);
     }
 
     /**
