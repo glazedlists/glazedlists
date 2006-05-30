@@ -192,7 +192,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
             final int changeType = listChanges.getType();
 
             if (changeType == ListEvent.INSERT) {
-                final List<V> inserted = groupingList.get(changeIndex);
+                final List<V> inserted = (List<V>) groupingList.get(changeIndex);
                 final Comparable<K> key = key(inserted);
                 this.keyValues.add(changeIndex, key);
                 this.delegate.put(key, inserted);
@@ -251,7 +251,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
             final Comparable<K> key = e.getKey();
             final List<V> value = e.getValue();
 
-            final List<V> mapValue = GroupingListMultiMap.this.get(key);
+            final List<V> mapValue = (List<V>) GroupingListMultiMap.this.get(key);
 
             return GlazedListsImpl.equal(value, mapValue);
         }
@@ -305,7 +305,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
          */
         public Entry<Comparable<K>, List<V>> next() {
             final Comparable<K> key = keyIter.next();
-            return new MultiMapEntry(key, get(key));
+            return new MultiMapEntry(key, (List<V>) get(key));
         }
 
         /** {@inheritDoc} */
@@ -364,7 +364,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
          */
         public List<V> setValue(List<V> newValue) {
             // ensure all of the newValue elements agree with the key of this Entry
-            checkKeyValueAgreement(getKey(), newValue);
+            checkKeyValueAgreement((Comparable<K>) getKey(), newValue);
 
             // record the old value List elements (to return)
             final List<V> oldValue = new ArrayList<V>(value);
