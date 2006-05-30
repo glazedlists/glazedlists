@@ -11,7 +11,7 @@ public class GroupingListMultiMapTest extends TestCase {
         // 1. test constructor with filled source list
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("Jesse Wilson James Lemieux Katie Jiries"));
-        Map<? extends Comparable, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
+        Map<? extends Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
 
         assertEquals(4, eventMap.size());
         assertEquals(GlazedListsTests.delimitedStringToList("Jesse James Jiries"), eventMap.get("J"));
@@ -43,8 +43,8 @@ public class GroupingListMultiMapTest extends TestCase {
         // 4. test constructor with null key function
         try {
             GlazedLists.syncEventListToMultiMap(source, null);
-            fail("Failed to received NullPointerException on null key function");
-        } catch (NullPointerException npe) {
+            fail("Failed to received IllegalArgumentException on null key function");
+        } catch (IllegalArgumentException npe) {
             // expected
         }
     }

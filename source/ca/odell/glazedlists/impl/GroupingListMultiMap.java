@@ -39,7 +39,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     private final List<Comparable<K>> keyValues;
 
     /** The function which produces keys for this multimap. */
-    private final FunctionList.Function<V, Comparable<K>> keyFunction;
+    private final FunctionList.Function<V, ? extends Comparable<K>> keyFunction;
 
     /** The delegate Map which is kept in synch with {@link #groupingList} changes. */
     private final Map<Comparable<K>, List<V>> delegate;
@@ -61,7 +61,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      *      also determine the content of the {@link List}s which are the
      *      values of this {@link Map}.
      */
-    public GroupingListMultiMap(EventList<V> source, FunctionList.Function<V, Comparable<K>> keyFunction) {
+    public GroupingListMultiMap(EventList<V> source, FunctionList.Function<V, ? extends Comparable<K>> keyFunction) {
         this.keyFunction = keyFunction;
 
         // construct a GroupingList which groups together the source elements for common keys
@@ -487,14 +487,14 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         private final Comparator<Comparable> delegate = GlazedLists.comparableComparator();
 
         /** A function that extracts {@link Comparable} values from given objects. */
-        private final FunctionList.Function<V, Comparable<K>> function;
+        private final FunctionList.Function<V, ? extends Comparable<K>> function;
 
         /**
          * Construct a new FunctionComparator that uses the given
          * <code>function</code> to extract {@link Comparable} values from
          * given objects.
          */
-        FunctionComparator(FunctionList.Function<V, Comparable<K>> function) {
+        FunctionComparator(FunctionList.Function<V, ? extends Comparable<K>> function) {
             if (function == null) throw new IllegalArgumentException("function may not be null");
             this.function = function;
         }

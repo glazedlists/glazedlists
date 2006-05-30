@@ -423,7 +423,7 @@ public final class GlazedLists {
         return new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener);
     }
 
-    // Matchers // // // // // // // // // // // // // // // // // // // // // // //
+    // Matchers // // // // // // // // // // // // // // // // // // // // //
 
     /**
      * Create a new Matcher which uses reflection to read properties with the
@@ -549,7 +549,7 @@ public final class GlazedLists {
      * @return a MultiMap which remains in sync with changes that occur to the
      *      underlying <code>source</code> {@link EventList}
      */
-    public static <K, V> Map<Comparable<K>, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, Comparable<K>> keyMaker) {
+    public static <K, V> Map<Comparable<K>, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends Comparable<K>> keyMaker) {
         return new GroupingListMultiMap<K, V>(source, keyMaker);
     }
 
