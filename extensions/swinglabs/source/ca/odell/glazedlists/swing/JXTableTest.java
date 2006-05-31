@@ -15,14 +15,8 @@ import java.util.List;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import ca.odell.glazedlists.swing.EventListJXTableSorting;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.BasicEventList;
-import com.publicobject.issuesbrowser.IssuezillaXMLParser;
-import com.publicobject.issuesbrowser.Project;
-import com.publicobject.issuesbrowser.IssueTableFormat;
-import com.publicobject.issuesbrowser.Issue;
+import ca.odell.glazedlists.*;
+import com.publicobject.issuesbrowser.*;
 
 /**
  * Demonstrate sorting using JXTable's header indicator icons and Glazed Lists'
@@ -39,29 +33,34 @@ class JXTableTest implements Runnable {
     }
 
     public void run() {
-        JTextField filterEdit = new JTextField(12);
-        TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, null);
-        FilterList<Issue> textFilteredIssues = new FilterList<Issue>(issues, textMatcherEditor);
-        SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
+        issues.getReadWriteLock().writeLock().lock();
+        try {
+            JTextField filterEdit = new JTextField(12);
+            TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, new IssueTextFilterator());
+            FilterList<Issue> textFilteredIssues = new FilterList<Issue>(issues, textMatcherEditor);
+            SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
 
-        EventTableModel<Issue> tableModel = new EventTableModel<Issue>(sortedIssues, new IssueTableFormat());
+            EventTableModel<Issue> tableModel = new EventTableModel<Issue>(sortedIssues, new IssueTableFormat());
 
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        filterPanel.add(new JLabel("Filter:"));
-        filterPanel.add(filterEdit);
+            JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            filterPanel.add(new JLabel("Filter:"));
+            filterPanel.add(filterEdit);
 
-        JXTable table = new JXTable(tableModel);
-        table.setColumnControlVisible(true);
-        table.getColumnExt(3).setComparator(new IssueStateComparator());
-        EventListJXTableSorting.install(table, sortedIssues);
+            JXTable table = new JXTable(tableModel);
+            table.setColumnControlVisible(true);
+            table.getColumnExt(3).setComparator(new IssueStateComparator());
+            EventListJXTableSorting.install(table, sortedIssues);
 
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(filterPanel, BorderLayout.NORTH);
-        frame.getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
+            JFrame frame = new JFrame();
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.getContentPane().setLayout(new BorderLayout());
+            frame.getContentPane().add(filterPanel, BorderLayout.NORTH);
+            frame.getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
+            frame.pack();
+            frame.setVisible(true);
+        } finally {
+            issues.getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -78,7 +77,8 @@ class JXTableTest implements Runnable {
         }
         public void run() {
             try {
-                IssuezillaXMLParser.loadIssues(issues, new FileInputStream(project.getFileName()), project);
+
+                IssuezillaXMLParser.loadIssues(GlazedLists.threadSafeList(issues), new FileInputStream(project.getFileName()), project);
             } catch (IOException e) {
                 e.printStackTrace();
                 return;

@@ -244,6 +244,8 @@ public final class ListEventAssembler<E> {
      */
     static abstract class AssemblerHelper<E> {
 
+        Thread eventThread;
+
         /** the list that this tracks changes for */
         protected EventList<E> sourceList;
         /** the current reordering array if this change is a reorder */
@@ -270,13 +272,14 @@ public final class ListEventAssembler<E> {
         public synchronized void beginEvent(boolean allowNestedEvents) {
             // complain if we cannot nest any further
             if(!this.allowNestedEvents) {
-                throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress");
+                throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress by thread, "  + eventThread.getName());
             }
             this.allowNestedEvents = allowNestedEvents;
             if(allowNestedEvents) allowContradictingEvents = true;
 
             // prepare for a new event if we haven't already
             if(eventLevel == 0) {
+                this.eventThread = Thread.currentThread();
                 prepareEvent();
             }
 

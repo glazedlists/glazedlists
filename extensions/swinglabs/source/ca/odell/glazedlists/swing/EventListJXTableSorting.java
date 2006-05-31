@@ -153,6 +153,7 @@ public class EventListJXTableSorting {
         /** {@inheritDoc} */
         public void setSortKeys(List<? extends SortKey> sortKeys) {
             if(sortKeys == sortKeysReadOnly) return;
+            if(sortKeys == null) sortKeys = Collections.emptyList();
 
             this.sortKeys.clear();
             this.sortKeys.addAll(sortKeys);

@@ -10,10 +10,7 @@ import ca.odell.glazedlists.TextFilterator;
 import javax.swing.*;
 
 import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.issuesbrowser.Description;
-
-import java.util.List;
-import java.util.Iterator;
+import com.publicobject.issuesbrowser.IssueTextFilterator;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -37,25 +34,4 @@ public class TextFilterComponent implements FilterComponent<Issue> {
         return "Text Filter";
     }
 
-    private static class IssueTextFilterator implements TextFilterator<Issue> {
-        public void getFilterStrings(List<String> baseList, Issue i) {
-            // the displayed strings
-            baseList.add(i.getId().toString());
-            baseList.add(i.getIssueType());
-            baseList.add(IssuesBrowser.TABLE_DATE_FORMAT.format(i.getCreationTimestamp()));
-            baseList.add(i.getPriority().toString());
-            baseList.add(IssuesBrowser.TABLE_DATE_FORMAT.format(i.getDeltaTimestamp()));
-            baseList.add(i.getStatus());
-            baseList.add(i.getResolution());
-            baseList.add(i.getShortDescription());
-
-            // extra strings
-            baseList.add(i.getComponent());
-            baseList.add(i.getSubcomponent());
-
-            // filter strings from the descriptions
-            for(Iterator<Description> d = i.getDescriptions().iterator(); d.hasNext(); )
-                d.next().getFilterStrings(baseList);
-        }
-    }
 }
