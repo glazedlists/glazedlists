@@ -3,17 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.gui;
 
-// Primary GlazedList package
-import ca.odell.glazedlists.*;
-// To track clicks
-import java.util.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-// For Comparators
-import ca.odell.glazedlists.impl.sort.*;
-import ca.odell.glazedlists.impl.gui.SortingState;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.impl.gui.MouseKeyboardSortingStrategy;
 import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
+import ca.odell.glazedlists.impl.gui.SortingState;
+import ca.odell.glazedlists.impl.sort.TableColumnComparator;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a table
@@ -60,7 +59,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * <p>This is not a direct adaptation since we choose to support potentially
      * many Comparators per column, wheras TableSorter is limited to one.
      *
-     * <p>For reverence, this is TableSorter's behaviour, copied shamelessly
+     * <p>For reference, this is TableSorter's behaviour, copied shamelessly
      * from that project's source file:
      *
      * <li>Mouse-click: Clears the sorting gui of all other columns and advances
@@ -289,6 +288,4 @@ public abstract class AbstractTableComparatorChooser<E> {
         this.tableFormat = null;
         this.sortedListComparator = null;
     }
-
-
 }

@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.issuesbrowser.Description;
-import com.publicobject.issuesbrowser.swing.IssuesBrowser;
 import ca.odell.glazedlists.TextFilterator;
 
 import java.util.List;
@@ -22,9 +19,9 @@ public class IssueTextFilterator implements TextFilterator<Issue> {
         // the displayed strings
         baseList.add(i.getId().toString());
         baseList.add(i.getIssueType());
-        baseList.add(IssuesBrowser.TABLE_DATE_FORMAT.format(i.getCreationTimestamp()));
+        baseList.add(Issue.TABLE_DATE_FORMAT.format(i.getCreationTimestamp()));
         baseList.add(i.getPriority().toString());
-        baseList.add(IssuesBrowser.TABLE_DATE_FORMAT.format(i.getDeltaTimestamp()));
+        baseList.add(Issue.TABLE_DATE_FORMAT.format(i.getDeltaTimestamp()));
         baseList.add(i.getStatus());
         baseList.add(i.getResolution());
         baseList.add(i.getShortDescription());

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * An issue models a work effort either due to an existing problem or a desired
@@ -22,6 +24,9 @@ import java.util.List;
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public class Issue implements Comparable {
+
+    public static final DateFormat TABLE_DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM);
+    public static final DateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 
     // the project that this issue is attached to
     private Project owner;

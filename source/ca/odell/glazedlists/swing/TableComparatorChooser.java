@@ -93,7 +93,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *
      * @param table the table with headers that can be clicked on
      * @param sortedList the sorted list to update
-     * @param strategy one of
+     * @param strategy an implementations of {@link SortingStrategy}, typically one of
      *      <ul>
      *          <li> {@link AbstractTableComparatorChooser#SINGLE_COLUMN}
      *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
@@ -120,15 +120,16 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     }
 
     /**
-     * Ensures the given <code>strategy</code> is an accepted value.
+     * Ensures the given <code>strategy</code> is an accepted value. It is
+     * possible for people to define their own sorting strategies, so this
+     * validation can only ensure that the given <code>strategy</code>
+     * implements the {@link SortingStrategy} interface.
      *
      * @throws IllegalArgumentException if <code>strategy</code> is not an
      *      accepted value
      */
     private static void validateSortingStrategy(Object strategy) {
-        if (strategy != AbstractTableComparatorChooser.SINGLE_COLUMN &&
-            strategy != AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE &&
-            strategy != AbstractTableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD)
+        if (!(strategy instanceof SortingStrategy))
             throw new IllegalArgumentException("Unrecognized sorting strategy, \"" + strategy + "\", use one of AbstractTableComparatorChooser.SINGLE_COLUMN, AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE, or AbstractTableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD");
     }
 

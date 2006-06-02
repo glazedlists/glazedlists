@@ -7,31 +7,34 @@ package com.publicobject.issuesbrowser.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.*;
+import ca.odell.glazedlists.swing.EventComboBoxModel;
+import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
 import com.publicobject.issuesbrowser.*;
-import com.publicobject.misc.Throbber;
 import com.publicobject.misc.Exceptions;
+import com.publicobject.misc.Throbber;
 import com.publicobject.misc.swing.Icons;
 import com.publicobject.misc.swing.JSeparatorTable;
 import com.publicobject.misc.swing.NoFocusRenderer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.event.*;
-import javax.swing.table.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.net.ConnectException;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.net.ConnectException;
 import java.security.AccessControlException;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.text.DateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.IOException;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -53,8 +56,6 @@ public class IssuesBrowser implements Runnable {
     public static final Icon X_ICON = Icons.x(10, 5, GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
     public static final Border EMPTY_ONE_PIXEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
     public static final Border EMPTY_TWO_PIXEL_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
-    public static final DateFormat TABLE_DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy");
-    public static final DateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 
     /** an event list to host the issues */
     private EventList<Issue> issuesEventList = new BasicEventList<Issue>();

@@ -107,7 +107,7 @@ class IssueDescriptionsPanel {
         // write who
         append(doc, description.getWho(), whoStyle);
         append(doc, " - ", whoStyle);
-        append(doc, IssuesBrowser.DETAILS_DATE_FORMAT.format(description.getWhen()), whoStyle);
+        append(doc, Issue.DETAILS_DATE_FORMAT.format(description.getWhen()), whoStyle);
         append(doc, "\n", whoStyle);
 
         // write the body
