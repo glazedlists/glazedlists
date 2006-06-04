@@ -93,7 +93,8 @@ final class ListEventPublisher2 {
             //     2. Pop
 
             // Mark the listeners who need this event
-            for(SubjectAndListener subjectAndListener : subjectAndListeners) {
+            for (Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext();) {
+                SubjectAndListener subjectAndListener = i.next();
                 if(subjectAndListener.getSubject() != subject) continue;
                 subjectAndListener.addPendingEvent(event);
             }
@@ -106,7 +107,8 @@ final class ListEventPublisher2 {
                 SubjectAndListener nextToFire = null;
 
                 // find the next listener still pending
-                for(SubjectAndListener subjectAndListener : subjectAndListeners) {
+                for (Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext();) {
+                    SubjectAndListener subjectAndListener = i.next();
                     if(subjectAndListener.hasPendingEvent()) {
                         nextToFire = subjectAndListener;
                         break;
