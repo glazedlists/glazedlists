@@ -780,7 +780,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testUpdatingAtLowerThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
-        // the list contains only 3 values
+        // the list contains only 3 distinct values
         source.add(0, new Integer(5));
         for(int i = 0; i < 5; i ++) {
             source.add(i, new Integer(0));

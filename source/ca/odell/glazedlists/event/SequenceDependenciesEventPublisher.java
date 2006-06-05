@@ -5,9 +5,7 @@ package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.EventList;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Manage listeners, firing events, and making sure that events arrive in order.
@@ -23,6 +21,8 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
     /** keep track of how many times the fireEvent() method is on the stack */
     private int reentrantFireEventCount = 0;
+    /** subject to cleanup when this event is completely distributed */
+    private Map<Object,EventFormat> subjectsToCleanUp = new IdentityHashMap<Object,EventFormat>();
 
     /** a mix of different subjects and listeners pairs in a deliberate order */
     private List<SubjectAndListener> subjectAndListeners = new ArrayList<SubjectAndListener>(5);
@@ -31,7 +31,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      * Register the specified listener to receive events from the specified
      * subject whenever they are fired.
      */
-    public <Subject,Listener,Event> void addListener(Subject subject, Listener listener, EventFormat<Listener,Event> format) {
+    public <Subject,Listener,Event> void addListener(Subject subject, Listener listener, EventFormat<Subject,Listener,Event> format) {
         // find the latest occurrence where our intended subject acts as a listener
         int latestIndexOfSubjectAsListener = -1;
         for(int i = subjectAndListeners.size() - 1; i >= 0; i--) {
@@ -106,8 +106,13 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
     /**
      * Notify all listeners of the specified subject of the specified event.
+     *
+     * @param subject the event's source
+     * @param event the event to send to all listeners
+     * @param eventFormat the mechanism to notify listeners of the event, also
+     *     used for a callback when this event is complete
      */
-    public <Subject,Event> void fireEvent(Subject subject, Event event) {
+    public <Subject,Listener,Event> void fireEvent(Subject subject, Event event, EventFormat<Subject,Listener,Event> eventFormat) {
         reentrantFireEventCount++;
         try {
             // this is where fancy reentrancy has to happen
@@ -118,6 +123,10 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             //     1. Mark the listeners
             //     2. Pop
 
+            // record this subject as firing an event, so we can clean up later
+            EventFormat previous = subjectsToCleanUp.put(subject, eventFormat);
+            if(previous != null) throw new IllegalStateException("Reentrant fireEvent() by \"" + subject + "\"");
+
             // Mark the listeners who need this event
             for(SubjectAndListener subjectAndListener : subjectAndListeners) {
                 if(subjectAndListener.subject != subject) continue;
@@ -127,7 +136,10 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             // If this method is reentrant, let someone higher up the stack handle this
             if(reentrantFireEventCount != 1) return;
 
-            // We're the top call, fire events to listeners in order
+            // remember any runtime exceptions thrown to rethrow later
+            RuntimeException toRethrow = null;
+
+            // fire events to listeners in order
             while(true) {
                 SubjectAndListener nextToFire = null;
 
@@ -139,12 +151,30 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
                     }
                 }
 
-                // there's nobody to notify, we're done
-                if(nextToFire == null) return;
+                // there's nobody to notify, we're done firing events
+                if(nextToFire == null) break;
 
                 // notify this listener
-                nextToFire.firePendingEvent();
+                try {
+                    nextToFire.firePendingEvent();
+                } catch(RuntimeException e) {
+                    if(toRethrow != null) toRethrow = e;
+                }
             }
+
+            // clean up all the subjects now that we're done firing events
+            for(Map.Entry<Object,EventFormat> subjectAndEventFormat : subjectsToCleanUp.entrySet()) {
+                try {
+                    subjectAndEventFormat.getValue().postEvent(subjectAndEventFormat.getKey());
+                } catch(RuntimeException e) {
+                    if(toRethrow != null) toRethrow = e;
+                }
+            }
+            subjectsToCleanUp.clear();
+
+            // rethrow any exceptions
+            if(toRethrow != null) throw toRethrow;
+
         } finally {
             reentrantFireEventCount--;
         }
@@ -153,8 +183,19 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
     /**
      * Adapt any observer-style interface to a common format.
      */
-    public interface EventFormat<Listener,Event> {
-        void fire(Event event, Listener listener);
+    public interface EventFormat<Subject,Listener,Event> {
+
+        /**
+         * Fire the specified event to the specified listener.
+         */
+        void fire(Subject subject, Event event, Listener listener);
+
+        /**
+         * A callback made only after all listeners of the specified subject
+         * have been notified of the specified event. This can be used as
+         * a hook to clean up temporary datastructures for that event.
+         */
+        void postEvent(Subject subject);
     }
 
     /**
@@ -165,9 +206,9 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
         private Subject subject;
         private Listener listener;
         private Event pendingEvent;
-        private EventFormat<Listener,Event> eventFormat;
+        private EventFormat<Subject,Listener,Event> eventFormat;
 
-        public SubjectAndListener(Subject subject, Listener listener, EventFormat<Listener,Event> eventFormat) {
+        public SubjectAndListener(Subject subject, Listener listener, EventFormat<Subject,Listener,Event> eventFormat) {
             this.subject = subject;
             this.listener = listener;
             this.eventFormat = eventFormat;
@@ -185,7 +226,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
         public void firePendingEvent() {
             assert(pendingEvent != null);
             try {
-                eventFormat.fire(pendingEvent, listener);
+                eventFormat.fire(subject, pendingEvent, listener);
             } finally {
                 pendingEvent = null;
             }

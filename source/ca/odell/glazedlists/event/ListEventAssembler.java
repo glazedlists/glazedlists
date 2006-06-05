@@ -62,7 +62,7 @@ public final class ListEventAssembler<E> {
         String publisherProperty = null;
         try {
             assemblerProperty = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-            publisherProperty = System.getProperty("GlazedLists.ListEventPublisherDelegate");
+            publisherProperty = System.getProperty("GlazedLists.ListEventPublisher");
         } catch(SecurityException e) {
             // do nothing
         }
@@ -84,19 +84,6 @@ public final class ListEventAssembler<E> {
 //            return new Tree4DeltasAssembler<E>(sourceList, publisher);
         } else if(assemblerName.equals("barcodedeltas")) {
             return new BarcodeDeltasAssembler<E>(sourceList, publisher);
-        } else {
-            throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Create a {@link PublisherDelegate} using the current strategy.
-     */
-    private static final <E> PublisherDelegate<E> createPublisherDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
-        if(publisherName.equals("graphdependencies")) {
-            return new GraphSequencePublisherDelegate<E>(sourceList, publisher);
-        } else if(publisherName.equals("sequencedependencies")) {
-            return new ListSequencePublisherDelegate<E>(sourceList, publisher);
         } else {
             throw new IllegalStateException();
         }
@@ -150,7 +137,7 @@ public final class ListEventAssembler<E> {
      *      multiple method's events to be composed into a single
      *      event.
      */
-    public synchronized void beginEvent(boolean allowNestedEvents) {
+    public void beginEvent(boolean allowNestedEvents) {
         delegate.beginEvent(allowNestedEvents);
     }
 
@@ -237,7 +224,7 @@ public final class ListEventAssembler<E> {
      * change the nesting level so that further changes are applied directly to the
      * parent change.
      */
-    public synchronized void commitEvent() {
+    public void commitEvent() {
         delegate.commitEvent();
     }
 
@@ -262,8 +249,10 @@ public final class ListEventAssembler<E> {
      * listener, so if a listener does not process a set of changes, those
      * changes will persist in the next notification.
      */
-    public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
-        delegate.addListEventListener(listChangeListener);
+    public void addListEventListener(ListEventListener<E> listChangeListener) {
+        synchronized(delegate) {
+            delegate.publisherAdapter.addListEventListener(listChangeListener, delegate.createListEvent());
+        }
     }
     /**
      * Removes the specified listener from receiving notification when new
@@ -273,8 +262,10 @@ public final class ListEventAssembler<E> {
      * instead of <code>equals()</code>. This is because multiple Lists may be
      * listening and therefore <code>equals()</code> may be ambiguous.
      */
-    public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
-        delegate.removeListEventListener(listChangeListener);
+    public void removeListEventListener(ListEventListener<E> listChangeListener) {
+        synchronized(delegate) {
+            delegate.publisherAdapter.removeListEventListener(listChangeListener);
+        }
     }
 
     /**
@@ -290,7 +281,7 @@ public final class ListEventAssembler<E> {
      */
     static abstract class AssemblerHelper<E> {
 
-        Thread eventThread;
+        private Thread eventThread;
 
         /** the list that this tracks changes for */
         protected EventList<E> sourceList;
@@ -298,7 +289,7 @@ public final class ListEventAssembler<E> {
         protected int[] reorderMap = null;
 
         /** the active implementation of {@link ListEventPublisher} */
-        protected PublisherDelegate<E> publisherDelegate;
+        protected PublisherAdapter<E> publisherAdapter;
 
         /** the event level is the number of nested events */
         protected int eventLevel = 0;
@@ -309,13 +300,26 @@ public final class ListEventAssembler<E> {
 
         protected AssemblerHelper(EventList<E> sourceList, ListEventPublisher publisher) {
             this.sourceList = sourceList;
-            this.publisherDelegate = createPublisherDelegate(sourceList, publisher);
+            this.publisherAdapter = createPublisherDelegate(publisher);
+        }
+
+        /**
+         * Create a {@link PublisherAdapter} using the current strategy.
+         */
+        private final PublisherAdapter<E> createPublisherDelegate(ListEventPublisher publisher) {
+            if(publisherName.equals("graphdependencies")) {
+                return new GraphSequencePublisherAdapter<E>(this, publisher);
+            } else if(publisherName.equals("sequencedependencies")) {
+                return new ListSequencePublisherAdapter<E>(this, publisher);
+            } else {
+                throw new IllegalStateException();
+            }
         }
 
         /**
          * Starts a new atomic change to this list change queue.
          */
-        public synchronized void beginEvent(boolean allowNestedEvents) {
+        public final synchronized void beginEvent(boolean allowNestedEvents) {
             // complain if we cannot nest any further
             if(!this.allowNestedEvents) {
                 throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress by thread, "  + eventThread.getName());
@@ -364,7 +368,7 @@ public final class ListEventAssembler<E> {
         /**
          * Commits the current atomic change to this list change queue.
          */
-        public synchronized void commitEvent() {
+        public final synchronized void commitEvent() {
             // complain if we have no event to commit
             if(eventLevel == 0) throw new IllegalStateException("Cannot commit without an event in progress");
 
@@ -374,34 +378,43 @@ public final class ListEventAssembler<E> {
 
             // if this is the last stage, sort and fire
             if(eventLevel == 0) {
-                fireEvent();
+                beforeFireEvent();
+                if(!isEventEmpty()) {
+                    publisherAdapter.fireEvent();
+                } else {
+                    cleanup();
+                }
             }
         }
 
         /**
-         * Fires the current event. This needs to be called for each fired
-         * event exactly once, even if that event includes nested events.
+         * Hook method to prepare for a fire event. This method may be called
+         * multiple times.
          */
-        protected abstract void fireEvent();
+        protected void beforeFireEvent() {
+            // do nothing
+        }
 
         /**
          * Forward the specified event to listeners.
          */
-        public abstract void forwardEvent(ListEvent<?> listChanges);
-
-        /**
-         * Adds the specified listener.
-         */
-        public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
-            publisherDelegate.addListEventListener(listChangeListener, createListEvent());
+        public final synchronized void forwardEvent(ListEvent<?> listChanges) {
+            beginEvent(false);
+            this.reorderMap = null;
+            if(isEventEmpty() && listChanges.isReordering()) {
+                reorder(listChanges.getReorderMap());
+            } else {
+                while(listChanges.nextBlock()) {
+                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                }
+            }
+            commitEvent();
         }
 
         /**
-         * Removes the specified listener.
+         * Cleanup all temporary variables necessary while events are being fired.
          */
-        public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
-            publisherDelegate.removeListEventListener(listChangeListener);
-        }
+        public abstract void cleanup();
 
         /**
          * Gets the reorder map for the specified atomic change or null if that
@@ -417,7 +430,7 @@ public final class ListEventAssembler<E> {
          * Get all {@link ListEventListener}s observing the {@link EventList}.
          */
         public List<ListEventListener<E>> getListEventListeners() {
-            return publisherDelegate.getListEventListeners();
+            return publisherAdapter.getListEventListeners();
         }
     }
 
@@ -461,44 +474,11 @@ public final class ListEventAssembler<E> {
             return listDeltas.isEmpty();
         }
 
-        protected void fireEvent() {
-            try {
-                // bail on empty changes
-                if(isEventEmpty()) return;
-
-                publisherDelegate.fireEvent();
-
-            // clear the change for the next caller
-            } finally {
-                listDeltas.reset(0);
-                reorderMap = null;
-                allowContradictingEvents = false;
-            }
-        }
-
-        public void forwardEvent(ListEvent<?> listChanges) {
-            // if we're not nested, we can fire the event directly
-            if(eventLevel == 0) {
-                // todo: optimize by reusing the existing listDeltas
-                beginEvent(false);
-                while(listChanges.nextBlock()) {
-                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-                }
-                commitEvent();
-
-            // if we're nested, we have to copy this event's parts to our queue
-            } else {
-                beginEvent(false);
-                this.reorderMap = null;
-                if(isEventEmpty() && listChanges.isReordering()) {
-                    reorder(listChanges.getReorderMap());
-                } else {
-                    while(listChanges.nextBlock()) {
-                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-                    }
-                }
-                commitEvent();
-            }
+        /** {@inheritDoc} */
+        public void cleanup() {
+            listDeltas.reset(0);
+            reorderMap = null;
+            allowContradictingEvents = false;
         }
 
         protected ListEvent<E> createListEvent() {
@@ -575,45 +555,11 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        protected void fireEvent() {
-            try {
-                // bail on empty changes
-                if(isEventEmpty()) return;
-
-                publisherDelegate.fireEvent();
-
-            // clear the change for the next caller
-            } finally {
-                blockSequence.reset();
-                listDeltas.reset(sourceList.size());
-                reorderMap = null;
-                allowContradictingEvents = false;
-            }
-        }
-
-        public void forwardEvent(ListEvent<?> listChanges) {
-            // if we're not nested, we can fire the event directly
-            if(eventLevel == 0) {
-                // todo: optimize by reusing the existing listDeltas
-                beginEvent(false);
-                while(listChanges.nextBlock()) {
-                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-                }
-                commitEvent();
-
-            // if we're nested, we have to copy this event's parts to our queue
-            } else {
-                beginEvent(false);
-                this.reorderMap = null;
-                if(isEventEmpty() && listChanges.isReordering()) {
-                    reorder(listChanges.getReorderMap());
-                } else {
-                    while(listChanges.nextBlock()) {
-                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-                    }
-                }
-                commitEvent();
-            }
+        public void cleanup() {
+            blockSequence.reset();
+            listDeltas.reset(sourceList.size());
+            reorderMap = null;
+            allowContradictingEvents = false;
         }
 
         protected ListEvent<E> createListEvent() {
@@ -624,146 +570,6 @@ public final class ListEventAssembler<E> {
             return listDeltas.toString();
         }
     }
-
-
-    /**
-//     * ListEventAssembler using {@link Tree4Deltas} to store list changes.
-//     *
-//     * <p>This class is experimental and will probably be removed in a future
-//     * revision.
-//     *
-//     * @deprecated replaced with {@link TreeDeltasAssembler}
-//     */
-//    static class Tree4DeltasAssembler<E> extends AssemblerHelper<E> {
-//
-//        /** prefer to use the linear blocks, which are more performant but handle only a subset of all cases */
-//        private BlockSequence blockSequence = new BlockSequence();
-//        private boolean useListBlocksLinear = false;
-//
-//        /** fall back to list deltas 2, which are capable of all list changes */
-//        private Tree4Deltas listDeltas = new Tree4Deltas();
-//
-//        /**
-//         * Creates a new ListEventAssembler that tracks changes for the specified list.
-//         */
-//        public Tree4DeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-//            this.sourceList = sourceList;
-//            this.publisher = publisher;
-//        }
-//
-//        /** {@inheritDoc} */
-//        protected void prepareEvent() {
-//            //listDeltas.reset(sourceSize);
-//            listDeltas.setAllowContradictingEvents(this.allowContradictingEvents);
-//            useListBlocksLinear = true;
-//        }
-//
-//        /** {@inheritDoc} */
-//        public void addChange(int type, int startIndex, int endIndex) {
-//            // try the linear holder first
-//            if(useListBlocksLinear) {
-//                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1);
-//                if(success) {
-//                    return;
-//                } else {
-//                    listDeltas.addAll(blockSequence);
-//                    useListBlocksLinear = false;
-//                }
-//            }
-//
-//            // try the good old reliable deltas 2
-//            if(type == ListEvent.INSERT) {
-//                listDeltas.insert(startIndex, endIndex + 1);
-//            } else if(type == ListEvent.UPDATE) {
-//                listDeltas.update(startIndex, endIndex + 1);
-//            } else if(type == ListEvent.DELETE) {
-//                listDeltas.delete(startIndex, endIndex + 1);
-//            }
-//        }
-//
-//        public boolean getUseListBlocksLinear() {
-//            return useListBlocksLinear;
-//        }
-//
-//        public Tree4Deltas getListDeltas() {
-//            return listDeltas;
-//        }
-//
-//        public BlockSequence getListBlocksLinear() {
-//            return blockSequence;
-//        }
-//
-//        /** {@inheritDoc} */
-//        public boolean isEventEmpty() {
-//            if(useListBlocksLinear) return blockSequence.isEmpty();
-//            else return listDeltas.isEmpty();
-//        }
-//
-//        /** {@inheritDoc} */
-//        protected void fireEvent() {
-//            try {
-//                // bail on empty changes
-//                if(isEventEmpty()) return;
-//
-//                final List<ListEventListener<E>> listenersToNotify;
-//                final List<ListEvent<E>> listenerEventsToNotify;
-//
-//                // grab a consistent snapshot of the parallel lists
-//                synchronized (this) {
-//                    listenersToNotify = listeners;
-//                    listenerEventsToNotify = listenerEvents;
-//                }
-//
-//                // reset the events before firing them
-//                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
-//                    e.next().reset();
-//                }
-//
-//                // perform the notification on the duplicate list
-//                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
-//
-//            // clear the change for the next caller
-//            } finally {
-//                blockSequence.reset();
-//                listDeltas.reset(sourceList.size());
-//                reorderMap = null;
-//                allowContradictingEvents = false;
-//            }
-//        }
-//
-//        public void forwardEvent(ListEvent<?> listChanges) {
-//            // if we're not nested, we can fire the event directly
-//            if(eventLevel == 0) {
-//                // todo: optimize by reusing the existing listDeltas
-//                beginEvent(false);
-//                while(listChanges.nextBlock()) {
-//                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-//                }
-//                commitEvent();
-//
-//            // if we're nested, we have to copy this event's parts to our queue
-//            } else {
-//                beginEvent(false);
-//                this.reorderMap = null;
-//                if(isEventEmpty() && listChanges.isReordering()) {
-//                    reorder(listChanges.getReorderMap());
-//                } else {
-//                    while(listChanges.nextBlock()) {
-//                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-//                    }
-//                }
-//                commitEvent();
-//            }
-//        }
-//
-//        protected ListEvent<E> createListEvent() {
-//            return new Tree4DeltasListEvent<E>(this, sourceList);
-//        }
-//
-//        public String toString() {
-//            return listDeltas.toString();
-//        }
-//    }
 
     /**
      * ListEventAssembler using {@link Block}s to store list changes.
@@ -810,49 +616,21 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void forwardEvent(ListEvent<?> listChanges) {
-            // if we're not nested, we can fire the event directly
-            if(eventLevel == 0) {
-                atomicChangeBlocks = listChanges.getBlocks();
-                reorderMap = listChanges.isReordering() ? listChanges.getReorderMap() : null;
-                fireEvent();
-
-            // if we're nested, we have to copy this event's parts to our queue
-            } else {
-                beginEvent(false);
-                this.reorderMap = null;
-                if(isEventEmpty() && listChanges.isReordering()) {
-                    reorder(listChanges.getReorderMap());
-                } else {
-                    while(listChanges.nextBlock()) {
-                        addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
-                    }
-                }
-                commitEvent();
-            }
-        }
-
-        /** {@inheritDoc} */
         public boolean isEventEmpty() {
             return this.atomicChangeBlocks == null || this.atomicChangeBlocks.isEmpty();
         }
 
         /** {@inheritDoc} */
-        protected void fireEvent() {
+        protected void beforeFireEvent() {
             Block.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
-            try {
-                // bail on empty changes
-                if(isEventEmpty()) return;
+        }
 
-                publisherDelegate.fireEvent();
-
-            // clear the change for the next caller
-            } finally {
-                atomicChangeBlocks = null;
-                atomicLatestBlock = null;
-                reorderMap = null;
-                allowContradictingEvents = false;
-            }
+        /** {@inheritDoc} */
+        public void cleanup() {
+            atomicChangeBlocks = null;
+            atomicLatestBlock = null;
+            reorderMap = null;
+            allowContradictingEvents = false;
         }
 
         /**
@@ -867,9 +645,10 @@ public final class ListEventAssembler<E> {
     }
 
     /**
-     * Manage listeners and firing events in a safe order.
+     * Manage listeners and firing events in a safe order in which dependencies
+     * are always satisfied before listeners are notified.
      */
-    public interface PublisherDelegate<E> {
+    private interface PublisherAdapter<E> {
 
         /**
          * Adds the specified listener.
@@ -895,19 +674,23 @@ public final class ListEventAssembler<E> {
     /**
      * Delegate to the classic {@link ListEventPublisher}.
      */
-    public static class GraphSequencePublisherDelegate<E> implements PublisherDelegate<E> {
+    private static class GraphSequencePublisherAdapter<E> implements PublisherAdapter<E> {
+
+        /** the list event assembler being acted upon */
+        private AssemblerHelper<E> assemblerHelper;
+        /** the list that this tracks changes for */
+        private final EventList<E> sourceList;
 
         /** the sequences that provide a view on this queue */
         private List<ListEventListener<E>> listeners = new ArrayList<ListEventListener<E>>();
         private List<ListEvent<E>> listenerEvents = new ArrayList<ListEvent<E>>();
-        /** the list that this tracks changes for */
-        private final EventList<E> sourceList;
 
         private final GraphDependenciesListEventPublisher publisher;
 
-        public GraphSequencePublisherDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
+        public GraphSequencePublisherAdapter(AssemblerHelper<E> assemblerDelegate, ListEventPublisher publisher) {
+            this.assemblerHelper = assemblerDelegate;
+            this.sourceList = assemblerDelegate.sourceList;
             this.publisher = (GraphDependenciesListEventPublisher)publisher;
-            this.sourceList = sourceList;
         }
 
         /** {@inheritDoc} */
@@ -994,7 +777,7 @@ public final class ListEventAssembler<E> {
             final List<ListEvent<E>> listenerEventsToNotify;
 
             // grab a consistent snapshot of the parallel lists
-            synchronized (this) {
+            synchronized(this) {
                 listenersToNotify = listeners;
                 listenerEventsToNotify = listenerEvents;
             }
@@ -1005,27 +788,33 @@ public final class ListEventAssembler<E> {
             }
 
             // perform the notification on the duplicate list
-            publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+            try {
+                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+            } finally {
+                assemblerHelper.cleanup();
+            }
         }
     }
 
     /**
      * Delegate to the improved {@link SequenceDependenciesEventPublisher}.
      */
-    public static class ListSequencePublisherDelegate<E> implements PublisherDelegate<E> {
+    private static class ListSequencePublisherAdapter<E> implements PublisherAdapter<E> {
 
         private final EventList<E> sourceList;
         private final SequenceDependenciesEventPublisher publisherSequenceDependencies;
         private ListEvent<E> listEvent = null;
+        private final SequenceDependenciesEventPublisher.EventFormat<EventList<E>,ListEventListener<E>,ListEvent<E>> eventFormat;
 
-        public ListSequencePublisherDelegate(EventList<E> sourceList, ListEventPublisher publisherSequenceDependencies) {
-            this.sourceList = sourceList;
+        public ListSequencePublisherAdapter(AssemblerHelper<E> assemblerDelegate, ListEventPublisher publisherSequenceDependencies) {
+            this.sourceList = assemblerDelegate.sourceList;
+            this.eventFormat = new ListEventFormat<E>(assemblerDelegate);
             this.publisherSequenceDependencies = (SequenceDependenciesEventPublisher)publisherSequenceDependencies;
         }
 
         /** {@inheritDoc} */
         public void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent) {
-            publisherSequenceDependencies.addListener(sourceList, listChangeListener, ListEventFormat.INSTANCE);
+            publisherSequenceDependencies.addListener(sourceList, listChangeListener, eventFormat);
             if(this.listEvent == null) this.listEvent = listEvent;
         }
 
@@ -1041,18 +830,25 @@ public final class ListEventAssembler<E> {
 
         /** {@inheritDoc} */
         public void fireEvent() {
-            publisherSequenceDependencies.fireEvent(sourceList, listEvent);
+            publisherSequenceDependencies.fireEvent(sourceList, listEvent, eventFormat);
         }
-    }
 
-    /**
-     * Adapt {@link SequenceDependenciesEventPublisher.EventFormat} for use with {@link ListEvent}s.
-     */
-    private static class ListEventFormat<E> implements SequenceDependenciesEventPublisher.EventFormat<ListEventListener<E>,ListEvent<E>> {
-        private static SequenceDependenciesEventPublisher.EventFormat<ListEventListener,ListEvent> INSTANCE = new ListEventFormat();
-        public void fire(ListEvent<E> event, ListEventListener<E> listener) {
-            event.reset();
-            listener.listChanged(event);
+        /**
+         * Adapt {@link SequenceDependenciesEventPublisher.EventFormat} for use with {@link ListEvent}s.
+         */
+        private static class ListEventFormat<E> implements SequenceDependenciesEventPublisher.EventFormat<EventList<E>,ListEventListener<E>,ListEvent<E>> {
+            private AssemblerHelper<E> assemblerDelegate;
+
+            public ListEventFormat(AssemblerHelper<E> assemblerDelegate) {
+                this.assemblerDelegate = assemblerDelegate;
+            }
+            public void fire(EventList<E> subject, ListEvent<E> event, ListEventListener<E> listener) {
+                event.reset();
+                listener.listChanged(event);
+            }
+            public void postEvent(EventList<E> subject) {
+                 assemblerDelegate.cleanup();
+            }
         }
     }
 }

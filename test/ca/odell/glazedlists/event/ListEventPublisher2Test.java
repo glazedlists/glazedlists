@@ -97,7 +97,7 @@ public class ListEventPublisher2Test extends TestCase {
         }
         public void setValue(String value) {
             this.value = value;
-            publisher.fireEvent(this, "[" + name + ":" + this.value + "]");
+            publisher.fireEvent(this, "[" + name + ":" + this.value + "]", SimpleSubjectListenerEventformat.INSTANCE);
         }
         public String toString() {
             return name;
@@ -107,10 +107,13 @@ public class ListEventPublisher2Test extends TestCase {
     /**
      * Adapt {@link SimpleSubjectListener} for firing events.
      */
-    private static class SimpleSubjectListenerEventformat implements SequenceDependenciesEventPublisher.EventFormat<SimpleSubjectListener,String> {
+    private static class SimpleSubjectListenerEventformat implements SequenceDependenciesEventPublisher.EventFormat<SimpleSubjectListener,SimpleSubjectListener,String> {
         public static final SimpleSubjectListenerEventformat INSTANCE = new SimpleSubjectListenerEventformat();
-        public void fire(String event, SimpleSubjectListener listener) {
+        public void fire(SimpleSubjectListener subject, String event, SimpleSubjectListener listener) {
             listener.handleChange(event);
+        }
+        public void postEvent(SimpleSubjectListener subject) {
+            // do nothing
         }
     }
 }
