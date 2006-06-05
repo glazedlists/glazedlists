@@ -117,7 +117,7 @@ public class ForwardEventTest extends TestCase {
             list.add("this should throw an IllegalStateException");
             fail("failed to throw an expected IllegalStateException for a bad ListEventListener implementation");
         } catch (IllegalStateException ise) {
-
+            // expected, do nothing
         }
         list.removeListEventListener(listener);
     }

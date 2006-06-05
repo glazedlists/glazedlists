@@ -6,7 +6,7 @@ package ca.odell.glazedlists.event;
 import junit.framework.TestCase;
 
 /**
- * Make sure that the {@link ListEventPublisher2} class fires events properly.
+ * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.
  *
  * @author jessewilson
  */
@@ -16,7 +16,7 @@ public class ListEventPublisher2Test extends TestCase {
      * Make sure that all events get fired to all listeners.
      */
     public void testVeryBasicChain() {
-        ListEventPublisher2 publisher = new ListEventPublisher2();
+        SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
         SimpleSubjectListener b = new SimpleSubjectListener("B", publisher);
         SimpleSubjectListener c = new SimpleSubjectListener("C", publisher);
@@ -74,12 +74,12 @@ public class ListEventPublisher2Test extends TestCase {
      */
     private static class SimpleSubjectListener {
         private final String name;
-        private final ListEventPublisher2 publisher;
+        private final SequenceDependenciesEventPublisher publisher;
 
         /** a string, automatically set when events are received */
         private String value = null;
 
-        public SimpleSubjectListener(String name, ListEventPublisher2 publisher) {
+        public SimpleSubjectListener(String name, SequenceDependenciesEventPublisher publisher) {
             this.name = name;
             this.publisher = publisher;
         }
@@ -107,7 +107,7 @@ public class ListEventPublisher2Test extends TestCase {
     /**
      * Adapt {@link SimpleSubjectListener} for firing events.
      */
-    private static class SimpleSubjectListenerEventformat implements ListEventPublisher2.EventFormat<SimpleSubjectListener,String> {
+    private static class SimpleSubjectListenerEventformat implements SequenceDependenciesEventPublisher.EventFormat<SimpleSubjectListener,String> {
         public static final SimpleSubjectListenerEventformat INSTANCE = new SimpleSubjectListenerEventformat();
         public void fire(String event, SimpleSubjectListener listener) {
             listener.handleChange(event);

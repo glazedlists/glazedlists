@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
+import ca.odell.glazedlists.EventList;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,7 +19,7 @@ import java.util.Iterator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-final class ListEventPublisher2 {
+final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
     /** keep track of how many times the fireEvent() method is on the stack */
     private int reentrantFireEventCount = 0;
@@ -34,7 +36,7 @@ final class ListEventPublisher2 {
         int latestIndexOfSubjectAsListener = -1;
         for(int i = subjectAndListeners.size() - 1; i >= 0; i--) {
             SubjectAndListener anotherSubjectAndListener = subjectAndListeners.get(i);
-            if(anotherSubjectAndListener.getListener() == subject) {
+            if(anotherSubjectAndListener.listener == subject) {
                 latestIndexOfSubjectAsListener = i;
                 break;
             }
@@ -44,7 +46,7 @@ final class ListEventPublisher2 {
         int earliestIndexOfListenerAsSubject = subjectAndListeners.size();
         for(int i = 0; i < subjectAndListeners.size(); i++) {
             SubjectAndListener anotherSubjectAndListener = subjectAndListeners.get(i);
-            if(anotherSubjectAndListener.getSubject() == listener) {
+            if(anotherSubjectAndListener.subject == listener) {
                 earliestIndexOfListenerAsSubject = i;
                 break;
             }
@@ -71,11 +73,35 @@ final class ListEventPublisher2 {
         // remove by identity (==), not equals()
         for(Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext(); ) {
             SubjectAndListener subjectAndListener = i.next();
-            if(subjectAndListener.getSubject() != subject) continue;
-            if(subjectAndListener.getListener() != listener) continue;
+            if(subjectAndListener.subject != subject) continue;
+            if(subjectAndListener.listener != listener) continue;
             i.remove();
             break;
         }
+    }
+
+    /** {@inheritDoc} */
+    public void addDependency(EventList dependency, ListEventListener listener) {
+        // unsupported, do nothing
+        // todo: resolve
+    }
+
+    /** {@inheritDoc} */
+    public void removeDependency(EventList dependency, ListEventListener listener) {
+        // unsupported, do nothing
+        // todo: resolve
+    }
+
+    /**
+     * Get all listeners of the specified object.
+     */
+    public <Listener> List<Listener> getListeners(Object subject) {
+        List<Listener> result = new ArrayList<Listener>();
+        for(SubjectAndListener<?,Listener,?> subjectAndListener : subjectAndListeners) {
+            if(subjectAndListener.subject != subject) continue;
+            result.add(subjectAndListener.listener);
+        }
+        return result;
     }
 
     /**
@@ -93,9 +119,8 @@ final class ListEventPublisher2 {
             //     2. Pop
 
             // Mark the listeners who need this event
-            for (Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext();) {
-                SubjectAndListener subjectAndListener = i.next();
-                if(subjectAndListener.getSubject() != subject) continue;
+            for(SubjectAndListener subjectAndListener : subjectAndListeners) {
+                if(subjectAndListener.subject != subject) continue;
                 subjectAndListener.addPendingEvent(event);
             }
 
@@ -107,8 +132,7 @@ final class ListEventPublisher2 {
                 SubjectAndListener nextToFire = null;
 
                 // find the next listener still pending
-                for (Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext();) {
-                    SubjectAndListener subjectAndListener = i.next();
+                for(SubjectAndListener subjectAndListener : subjectAndListeners) {
                     if(subjectAndListener.hasPendingEvent()) {
                         nextToFire = subjectAndListener;
                         break;
@@ -137,7 +161,7 @@ final class ListEventPublisher2 {
      * Manage a subject/listener pair, plus a possible event that is queued to
      * be fired to the listener from the subject.
      */
-    private class SubjectAndListener<Subject,Listener,Event> {
+    private static class SubjectAndListener<Subject,Listener,Event> {
         private Subject subject;
         private Listener listener;
         private Event pendingEvent;
@@ -165,14 +189,6 @@ final class ListEventPublisher2 {
             } finally {
                 pendingEvent = null;
             }
-        }
-
-        public Subject getSubject() {
-            return subject;
-        }
-
-        public Listener getListener() {
-            return listener;
         }
 
         public String toString() {

@@ -43,7 +43,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *      then a new {@link ListEventPublisher} will be created.
      */
     protected AbstractEventList(ListEventPublisher publisher) {
-        if(publisher == null) publisher = new ListEventPublisher();
+        if(publisher == null) publisher = ListEventAssembler.createListEventPublisher();
         this.publisher = publisher;
         updates = new ListEventAssembler<E>(this, publisher);
     }

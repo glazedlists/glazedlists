@@ -27,7 +27,7 @@ public final class ListEventAssembler<E> {
     private final AssemblerHelper<E> delegate;
 
     /**
-     * Determine what our strategy will be for the list event assembler.
+     * Our strategy will be for the list event assembler.
      * We support 4 possible strategies:
      * <li>blockdeltas: originally the only strategy, this uses a bubblesort
      *     which causes certain sortedlist events to be very slow
@@ -42,20 +42,40 @@ public final class ListEventAssembler<E> {
      * we plan on keeping only treedeltas and removing the other strategies.
      */
     private static final String assemblerName;
+
+    /**
+     * Our strategy for managing dependencies, which we call "publishing".
+     * We support 2 possible strategies:
+     * <li>graphdependencies: for each change, a graph is crawled of listeners
+     *     who require notification and who can be notified. The order of
+     *     notification is done by dynamically analyzing this graph at change
+     *     time.
+     * <li>sequencedependencies: a list is precomputed of the order of notification,
+     *     and listeners are always notified in sequence corresponding to order
+     *     in this list.
+     */
+    private static final String publisherName;
+
+    // look up strategies using System properties
     static {
         String assemblerProperty = null;
+        String publisherProperty = null;
         try {
             assemblerProperty = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
+            publisherProperty = System.getProperty("GlazedLists.ListEventPublisherDelegate");
         } catch(SecurityException e) {
             // do nothing
         }
         if(assemblerProperty != null) assemblerName = assemblerProperty;
         else assemblerName = "treedeltas";
+        if(publisherProperty != null) publisherName = publisherProperty;
+        else publisherName = "graphdependencies";
     }
+
     /**
      * Create a delegate using the current assembler.
      */
-    private static final <E> AssemblerHelper<E> createDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
+    private static final <E> AssemblerHelper<E> createAssemblerDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
         if(assemblerName.equals("treedeltas")) {
             return new TreeDeltasAssembler<E>(sourceList, publisher);
         } else if(assemblerName.equals("blockdeltas")) {
@@ -67,14 +87,40 @@ public final class ListEventAssembler<E> {
         } else {
             throw new IllegalStateException();
         }
+    }
 
+    /**
+     * Create a {@link PublisherDelegate} using the current strategy.
+     */
+    private static final <E> PublisherDelegate<E> createPublisherDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
+        if(publisherName.equals("graphdependencies")) {
+            return new GraphSequencePublisherDelegate<E>(sourceList, publisher);
+        } else if(publisherName.equals("sequencedependencies")) {
+            return new ListSequencePublisherDelegate<E>(sourceList, publisher);
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Create a new {@link ListEventPublisher} for an {@link EventList} not attached
+     * to any other {@link EventList}s.
+     */
+    public static final ListEventPublisher createListEventPublisher() {
+        if(publisherName.equals("graphdependencies")) {
+            return new GraphDependenciesListEventPublisher();
+        } else if(publisherName.equals("sequencedependencies")) {
+            return new SequenceDependenciesEventPublisher();
+        } else {
+            throw new IllegalStateException();
+        }
     }
 
     /**
      * Creates a new ListEventAssembler that tracks changes for the specified list.
      */
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-        delegate = createDelegate(sourceList, publisher);
+        delegate = createAssemblerDelegate(sourceList, publisher);
     }
     
     /**
@@ -251,12 +297,8 @@ public final class ListEventAssembler<E> {
         /** the current reordering array if this change is a reorder */
         protected int[] reorderMap = null;
 
-        /** the sequences that provide a view on this queue */
-        protected List<ListEventListener<E>> listeners = new ArrayList<ListEventListener<E>>();
-        protected List<ListEvent<E>> listenerEvents = new ArrayList<ListEvent<E>>();
-
-        /** the pipeline manages the distribution of events */
-        protected ListEventPublisher publisher = null;
+        /** the active implementation of {@link ListEventPublisher} */
+        protected PublisherDelegate<E> publisherDelegate;
 
         /** the event level is the number of nested events */
         protected int eventLevel = 0;
@@ -265,6 +307,10 @@ public final class ListEventAssembler<E> {
         /** whether to allow contradicting events */
         protected boolean allowContradictingEvents = false;
 
+        protected AssemblerHelper(EventList<E> sourceList, ListEventPublisher publisher) {
+            this.sourceList = sourceList;
+            this.publisherDelegate = createPublisherDelegate(sourceList, publisher);
+        }
 
         /**
          * Starts a new atomic change to this list change queue.
@@ -347,77 +393,14 @@ public final class ListEventAssembler<E> {
          * Adds the specified listener.
          */
         public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
-            updateListEventListeners(listChangeListener, null);
-            publisher.addDependency(sourceList, listChangeListener);
+            publisherDelegate.addListEventListener(listChangeListener, createListEvent());
         }
 
         /**
          * Removes the specified listener.
          */
         public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
-            updateListEventListeners(null, listChangeListener);
-            publisher.removeDependency(sourceList, listChangeListener);
-        }
-
-        /**
-         * This method does three things:
-         *
-         * <ol>
-         *   <li> adds the listener <code>toAdd</code> if it is non-null
-         *   <li> removes the listener <code>toRemove</code> if it is non-null
-         *   <li> tests each WeakReferenceProxy to see if its referent
-         *        ListEventListener has been garbage collected, and thus the
-         *        WeakReferenceProxy is able to be unregistered
-         * </ol>
-         *
-         * @param toAdd a ListEventListener to be added, or <code>null</code>
-         * @param toRemove a ListEventListener to be removed, or <code>null</code>
-         */
-        private void updateListEventListeners(ListEventListener<E> toAdd, ListEventListener<E> toRemove) {
-            // only work on copies of the Lists and swap them in place at the end
-            final List<ListEventListener<E>> listenersCopy = new ArrayList<ListEventListener<E>>(listeners);
-            final List<ListEvent<E>> listenerEventsCopy = new ArrayList<ListEvent<E>>(listenerEvents);
-
-            // a flag to determine whether we found the ListEventListener toRemove
-            boolean toRemoveFound = (toRemove == null);
-
-            for (int i = listenersCopy.size()-1; i >= 0; i--) {
-                final ListEventListener<E> listener = listenersCopy.get(i);
-
-                // if we're supposed to remove this ListEventListener, do so
-                if (listener == toRemove) {
-                    toRemoveFound = true;
-
-                // if the ListEventListener is a WeakReferenceProxy with a null
-                // (i.e. garbage collected) referent, also remove it
-                } else if (listener instanceof WeakReferenceProxy) {
-                    final WeakReferenceProxy weakReferenceProxy = (WeakReferenceProxy) listener;
-                    if (weakReferenceProxy.getReferent() != null) continue;
-                    weakReferenceProxy.dispose();
-
-                // otherwise we should not remove this listener
-                } else {
-                    continue;
-                }
-
-                // remove the listener
-                listenersCopy.remove(i);
-                listenerEventsCopy.remove(i);
-            }
-
-            // sanity check to ensure we found the listener we were asked to remove, if any
-            if (!toRemoveFound)
-                throw new IllegalArgumentException("Cannot remove nonexistent listener " + toRemove);
-
-            // add the listener we were asked to add, if any
-            if (toAdd != null) {
-                listenersCopy.add(toAdd);
-                listenerEventsCopy.add(createListEvent());
-            }
-
-            // swap the copies overtop of the real thing
-            listeners = listenersCopy;
-            listenerEvents = listenerEventsCopy;
+            publisherDelegate.removeListEventListener(listChangeListener);
         }
 
         /**
@@ -434,7 +417,7 @@ public final class ListEventAssembler<E> {
          * Get all {@link ListEventListener}s observing the {@link EventList}.
          */
         public List<ListEventListener<E>> getListEventListeners() {
-            return Collections.unmodifiableList(listeners);
+            return publisherDelegate.getListEventListeners();
         }
     }
 
@@ -451,8 +434,7 @@ public final class ListEventAssembler<E> {
          * Creates a new ListEventAssembler that tracks changes for the specified list.
          */
         public BarcodeDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-            this.sourceList = sourceList;
-            this.publisher = publisher;
+            super(sourceList, publisher);
         }
 
         protected void prepareEvent() {
@@ -484,22 +466,7 @@ public final class ListEventAssembler<E> {
                 // bail on empty changes
                 if(isEventEmpty()) return;
 
-                final List<ListEventListener<E>> listenersToNotify;
-                final List<ListEvent<E>> listenerEventsToNotify;
-
-                // grab a consistent snapshot of the parallel lists
-                synchronized (this) {
-                    listenersToNotify = listeners;
-                    listenerEventsToNotify = listenerEvents;
-                }
-
-                // reset the events before firing them
-                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
-                    e.next().reset();
-                }
-
-                // perform the notification on the duplicate list
-                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+                publisherDelegate.fireEvent();
 
             // clear the change for the next caller
             } finally {
@@ -556,8 +523,7 @@ public final class ListEventAssembler<E> {
          * Creates a new ListEventAssembler that tracks changes for the specified list.
          */
         public TreeDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-            this.sourceList = sourceList;
-            this.publisher = publisher;
+            super(sourceList, publisher);
         }
 
         /** {@inheritDoc} */
@@ -614,22 +580,7 @@ public final class ListEventAssembler<E> {
                 // bail on empty changes
                 if(isEventEmpty()) return;
 
-                final List<ListEventListener<E>> listenersToNotify;
-                final List<ListEvent<E>> listenerEventsToNotify;
-
-                // grab a consistent snapshot of the parallel lists
-                synchronized (this) {
-                    listenersToNotify = listeners;
-                    listenerEventsToNotify = listenerEvents;
-                }
-
-                // reset the events before firing them
-                for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
-                    e.next().reset();
-                }
-
-                // perform the notification on the duplicate list
-                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+                publisherDelegate.fireEvent();
 
             // clear the change for the next caller
             } finally {
@@ -830,8 +781,7 @@ public final class ListEventAssembler<E> {
          * Creates a new ListEventAssembler that tracks changes for the specified list.
          */
         public BlockDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-            this.sourceList = sourceList;
-            this.publisher = publisher;
+            super(sourceList, publisher);
         }
 
         /** {@inheritDoc} */
@@ -890,22 +840,11 @@ public final class ListEventAssembler<E> {
         /** {@inheritDoc} */
         protected void fireEvent() {
             Block.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
-
             try {
                 // bail on empty changes
                 if(isEventEmpty()) return;
 
-                final List<ListEventListener<E>> listenersToNotify;
-                final List<ListEvent<E>> listenerEventsToNotify;
-
-                // grab a consistent snapshot of the parallel lists
-                synchronized (this) {
-                    listenersToNotify = listeners;
-                    listenerEventsToNotify = listenerEvents;
-                }
-
-                // perform the notification on the duplicate list
-                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+                publisherDelegate.fireEvent();
 
             // clear the change for the next caller
             } finally {
@@ -924,6 +863,196 @@ public final class ListEventAssembler<E> {
          */
         List<Block> getBlocks() {
             return atomicChangeBlocks;
+        }
+    }
+
+    /**
+     * Manage listeners and firing events in a safe order.
+     */
+    public interface PublisherDelegate<E> {
+
+        /**
+         * Adds the specified listener.
+         */
+        void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent);
+
+        /**
+         * Removes the specified listener.
+         */
+        void removeListEventListener(ListEventListener<E> listener);
+
+        /**
+         * Get all list event listeners.
+         */
+        List<ListEventListener<E>> getListEventListeners();
+
+        /**
+         * Notify the listeners of the list's changes.
+         */
+        void fireEvent();
+    }
+
+    /**
+     * Delegate to the classic {@link ListEventPublisher}.
+     */
+    public static class GraphSequencePublisherDelegate<E> implements PublisherDelegate<E> {
+
+        /** the sequences that provide a view on this queue */
+        private List<ListEventListener<E>> listeners = new ArrayList<ListEventListener<E>>();
+        private List<ListEvent<E>> listenerEvents = new ArrayList<ListEvent<E>>();
+        /** the list that this tracks changes for */
+        private final EventList<E> sourceList;
+
+        private final GraphDependenciesListEventPublisher publisher;
+
+        public GraphSequencePublisherDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
+            this.publisher = (GraphDependenciesListEventPublisher)publisher;
+            this.sourceList = sourceList;
+        }
+
+        /** {@inheritDoc} */
+        public void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent) {
+            updateListEventListeners(listChangeListener, null, listEvent);
+            publisher.addDependency(sourceList, listChangeListener);
+        }
+
+        /** {@inheritDoc} */
+        public void removeListEventListener(ListEventListener<E> listChangeListener) {
+            updateListEventListeners(null, listChangeListener, null);
+            publisher.removeDependency(sourceList, listChangeListener);
+        }
+
+        /** {@inheritDoc} */
+        public List<ListEventListener<E>> getListEventListeners() {
+            return Collections.unmodifiableList(listeners);
+        }
+
+        /**
+         * This method does three things:
+         *
+         * <ol>
+         *   <li> adds the listener <code>toAdd</code> if it is non-null
+         *   <li> removes the listener <code>toRemove</code> if it is non-null
+         *   <li> tests each WeakReferenceProxy to see if its referent
+         *        ListEventListener has been garbage collected, and thus the
+         *        WeakReferenceProxy is able to be unregistered
+         * </ol>
+         *
+         * @param toAdd a ListEventListener to be added, or <code>null</code>
+         * @param toRemove a ListEventListener to be removed, or <code>null</code>
+         */
+        private void updateListEventListeners(ListEventListener<E> toAdd, ListEventListener<E> toRemove, ListEvent listEvent) {
+            // only work on copies of the Lists and swap them in place at the end
+            final List<ListEventListener<E>> listenersCopy = new ArrayList<ListEventListener<E>>(listeners);
+            final List<ListEvent<E>> listenerEventsCopy = new ArrayList<ListEvent<E>>(listenerEvents);
+
+            // a flag to determine whether we found the ListEventListener toRemove
+            boolean toRemoveFound = (toRemove == null);
+
+            for (int i = listenersCopy.size()-1; i >= 0; i--) {
+                final ListEventListener<E> listener = listenersCopy.get(i);
+
+                // if we're supposed to remove this ListEventListener, do so
+                if (listener == toRemove) {
+                    toRemoveFound = true;
+
+                // if the ListEventListener is a WeakReferenceProxy with a null
+                // (i.e. garbage collected) referent, also remove it
+                } else if (listener instanceof WeakReferenceProxy) {
+                    final WeakReferenceProxy weakReferenceProxy = (WeakReferenceProxy) listener;
+                    if (weakReferenceProxy.getReferent() != null) continue;
+                    weakReferenceProxy.dispose();
+
+                // otherwise we should not remove this listener
+                } else {
+                    continue;
+                }
+
+                // remove the listener
+                listenersCopy.remove(i);
+                listenerEventsCopy.remove(i);
+            }
+
+            // sanity check to ensure we found the listener we were asked to remove, if any
+            if (!toRemoveFound)
+                throw new IllegalArgumentException("Cannot remove nonexistent listener " + toRemove);
+
+            // add the listener we were asked to add, if any
+            if (toAdd != null) {
+                listenersCopy.add(toAdd);
+                listenerEventsCopy.add(listEvent);
+            }
+
+            // swap the copies overtop of the real thing
+            listeners = listenersCopy;
+            listenerEvents = listenerEventsCopy;
+        }
+
+        /** {@inheritDoc} */
+        public void fireEvent() {
+            final List<ListEventListener<E>> listenersToNotify;
+            final List<ListEvent<E>> listenerEventsToNotify;
+
+            // grab a consistent snapshot of the parallel lists
+            synchronized (this) {
+                listenersToNotify = listeners;
+                listenerEventsToNotify = listenerEvents;
+            }
+
+            // reset the events before firing them
+            for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
+                e.next().reset();
+            }
+
+            // perform the notification on the duplicate list
+            publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
+        }
+    }
+
+    /**
+     * Delegate to the improved {@link SequenceDependenciesEventPublisher}.
+     */
+    public static class ListSequencePublisherDelegate<E> implements PublisherDelegate<E> {
+
+        private final EventList<E> sourceList;
+        private final SequenceDependenciesEventPublisher publisherSequenceDependencies;
+        private ListEvent<E> listEvent = null;
+
+        public ListSequencePublisherDelegate(EventList<E> sourceList, ListEventPublisher publisherSequenceDependencies) {
+            this.sourceList = sourceList;
+            this.publisherSequenceDependencies = (SequenceDependenciesEventPublisher)publisherSequenceDependencies;
+        }
+
+        /** {@inheritDoc} */
+        public void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent) {
+            publisherSequenceDependencies.addListener(sourceList, listChangeListener, ListEventFormat.INSTANCE);
+            if(this.listEvent == null) this.listEvent = listEvent;
+        }
+
+        /** {@inheritDoc} */
+        public void removeListEventListener(ListEventListener<E> listener) {
+            publisherSequenceDependencies.removeListener(sourceList, listener);
+        }
+
+        /** {@inheritDoc} */
+        public List<ListEventListener<E>> getListEventListeners() {
+            return publisherSequenceDependencies.getListeners(sourceList);
+        }
+
+        /** {@inheritDoc} */
+        public void fireEvent() {
+            publisherSequenceDependencies.fireEvent(sourceList, listEvent);
+        }
+    }
+
+    /**
+     * Adapt {@link SequenceDependenciesEventPublisher.EventFormat} for use with {@link ListEvent}s.
+     */
+    private static class ListEventFormat<E> implements SequenceDependenciesEventPublisher.EventFormat<ListEventListener<E>,ListEvent<E>> {
+        private static SequenceDependenciesEventPublisher.EventFormat<ListEventListener,ListEvent> INSTANCE = new ListEventFormat();
+        public void fire(ListEvent<E> event, ListEventListener<E> listener) {
+            event.reset();
+            listener.listChanged(event);
         }
     }
 }
