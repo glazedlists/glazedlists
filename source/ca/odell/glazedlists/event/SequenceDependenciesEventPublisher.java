@@ -158,7 +158,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
                 try {
                     nextToFire.firePendingEvent();
                 } catch(RuntimeException e) {
-                    if(toRethrow != null) toRethrow = e;
+                    if(toRethrow == null) toRethrow = e;
                 }
             }
 
@@ -167,7 +167,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
                 try {
                     subjectAndEventFormat.getValue().postEvent(subjectAndEventFormat.getKey());
                 } catch(RuntimeException e) {
-                    if(toRethrow != null) toRethrow = e;
+                    if(toRethrow == null) toRethrow = e;
                 }
             }
             subjectsToCleanUp.clear();
