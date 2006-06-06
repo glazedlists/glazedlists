@@ -169,7 +169,8 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             }
 
             // clean up all the subjects now that we're done firing events
-            for(Map.Entry<Object,EventFormat> subjectAndEventFormat : subjectsToCleanUp.entrySet()) {
+            for (Iterator<Map.Entry<Object, EventFormat>> i = subjectsToCleanUp.entrySet().iterator(); i.hasNext();) {
+                Map.Entry<Object, EventFormat> subjectAndEventFormat = i.next();
                 try {
                     subjectAndEventFormat.getValue().postEvent(subjectAndEventFormat.getKey());
                 } catch(RuntimeException e) {
