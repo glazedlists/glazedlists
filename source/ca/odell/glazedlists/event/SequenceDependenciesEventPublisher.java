@@ -97,7 +97,8 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      */
     public <Listener> List<Listener> getListeners(Object subject) {
         List<Listener> result = new ArrayList<Listener>();
-        for(SubjectAndListener<?,Listener,?> subjectAndListener : subjectAndListeners) {
+        for (Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext();) {
+            SubjectAndListener<?,Listener,?> subjectAndListener = i.next();
             if(subjectAndListener.subject != subject) continue;
             result.add(subjectAndListener.listener);
         }
