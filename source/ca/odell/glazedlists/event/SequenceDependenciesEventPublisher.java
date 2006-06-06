@@ -128,7 +128,10 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             if(previous != null) throw new IllegalStateException("Reentrant fireEvent() by \"" + subject + "\"");
 
             // Mark the listeners who need this event
-            for(SubjectAndListener subjectAndListener : subjectAndListeners) {
+            //for(SubjectAndListener subjectAndListener : subjectAndListeners) {
+            int subjectAndListenersSize = subjectAndListeners.size();
+            for(int i = 0; i < subjectAndListenersSize; i++) {
+                SubjectAndListener subjectAndListener = subjectAndListeners.get(i);
                 if(subjectAndListener.subject != subject) continue;
                 subjectAndListener.addPendingEvent(event);
             }
@@ -144,7 +147,9 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
                 SubjectAndListener nextToFire = null;
 
                 // find the next listener still pending
-                for(SubjectAndListener subjectAndListener : subjectAndListeners) {
+//                for(SubjectAndListener subjectAndListener : subjectAndListeners) {
+                for(int i = 0; i < subjectAndListenersSize; i++) {
+                    SubjectAndListener subjectAndListener = subjectAndListeners.get(i);
                     if(subjectAndListener.hasPendingEvent()) {
                         nextToFire = subjectAndListener;
                         break;

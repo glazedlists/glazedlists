@@ -257,7 +257,8 @@
             </classpath>
         </javac>
         <!-- execute the Japex performance tests -->
-        <property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>
+        <!--<property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>-->
+        <property name="config" value="extensions/japex/ListEventPublisher-JapexConfig.xml"/>
         <java dir="." fork="true" classname="com.sun.japex.Japex">
             <classpath>
                 <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
