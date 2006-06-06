@@ -240,7 +240,11 @@ public class GroupingListMultiMapTest extends TestCase {
         // try inserting a multi element list
         eventMap.put("J", GlazedListsTests.delimitedStringToList("Jesse Jiries"));
         assertEquals(1, eventMap.size());
-        assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jiries"), eventMap.get("J"));
+        assertEquals(GlazedListsTests.delimitedStringToList("Jesse Jiries"), eventMap.get("J"));
+
+        // try inserting an empty list
+        eventMap.put("J", new ArrayList<String>());
+        assertTrue(eventMap.isEmpty());
 
         // try inserting a bad list
         try {
@@ -280,7 +284,7 @@ public class GroupingListMultiMapTest extends TestCase {
         values.put("W", GlazedListsTests.delimitedStringToList("Wilson"));
         eventMap.putAll(values);
         assertEquals(3, eventMap.size());
-        assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jiries"), eventMap.get("J"));
+        assertEquals(GlazedListsTests.delimitedStringToList("Jesse Jiries"), eventMap.get("J"));
         assertEquals(GlazedListsTests.delimitedStringToList("Katie"), eventMap.get("K"));
         assertEquals(GlazedListsTests.delimitedStringToList("Wilson"), eventMap.get("W"));
 
@@ -630,6 +634,100 @@ public class GroupingListMultiMapTest extends TestCase {
         assertNotSame(entry.getKey(), entry2Next.getKey());
         assertNotSame(entry.getValue(), entry2Next.getValue());
         assertFalse(entry.equals(entry2Next));
+    }
+
+    public void testWriteThroughValues() {
+        final EventList<String> source = new BasicEventList<String>();
+        FirstLetterFunction f = new FirstLetterFunction();
+        final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, f);
+
+        source.addAll(GlazedListsTests.delimitedStringToList("James Lemieux Jesse Wilson"));
+
+        List<String> jNames = eventMap.get("J");
+        runListMutationTest(jNames, "J");
+        runListMutationTest(jNames.subList(2, 4), "J");
+
+        runListIteratorMutationTest(jNames.listIterator(), "J");
+        runListIteratorMutationTest(jNames.listIterator(3), "J");
+    }
+
+    public void testWriteThroughValues2() {
+        final EventList<String> source = new BasicEventList<String>();
+        FirstLetterFunction f = new FirstLetterFunction();
+        final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, f);
+
+        source.addAll(GlazedListsTests.delimitedStringToList("James Jesse"));
+
+        List<String> jNames = eventMap.get("J");
+        assertEquals(GlazedListsTests.delimitedStringToList("James Jesse"), jNames);
+        jNames.add("Jordan");
+        assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jordan"), jNames);
+        jNames.add(2, "Jordache");
+        assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jordache Jordan"), jNames);
+    }
+
+    private void runListIteratorMutationTest(ListIterator<String> listIterator, String key) {
+        listIterator.next();
+
+        try {
+            listIterator.set("****");
+            fail("failed to receive IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            listIterator.add("****");
+            fail("failed to receive IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        listIterator.set(key + "****");
+        listIterator.add(key + "****");
+    }
+
+    private void runListMutationTest(List<String> names, String key) {
+        try {
+            names.add("****");
+            fail("failed to receive IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            names.add(0, "****");
+            fail("failed to receive IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            names.addAll(Arrays.asList(new String[] {"****"}));
+            fail("failed to receive IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            names.addAll(0, Arrays.asList(new String[] {"****"}));
+            fail("failed to receive IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            names.set(0, "****");
+            fail("failed to receive IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        names.add(key + "****");
+        names.add(0, key + "****");
+        names.addAll(Arrays.asList(new String[] {key + "****"}));
+        names.addAll(0, Arrays.asList(new String[] {key + "****"}));
+        names.set(0, key + "****");
     }
 
     private final class FirstLetterFunction implements FunctionList.Function<String,Comparable<String>> {

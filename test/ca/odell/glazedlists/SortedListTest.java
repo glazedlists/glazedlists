@@ -1036,6 +1036,31 @@ public class SortedListTest extends TestCase {
         assertEquals(-1, sortedList.lastIndexOf("B"));
     }
 
+    public void testAddAtIndex() {
+        final EventList<String> source = new BasicEventList<String>();
+        final SortedList<String> sortedList = new SortedList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        source.addAll(GlazedListsTests.stringToList("babac"));
+
+        assertEquals(GlazedListsTests.stringToList("babac"), source);
+        assertEquals(GlazedListsTests.stringToList("aabbc"), sortedList);
+
+        sortedList.add(2, "c");
+        assertEquals(GlazedListsTests.stringToList("cbabac"), source);
+        assertEquals(GlazedListsTests.stringToList("aabbcc"), sortedList);
+
+        sortedList.add(3, "d");
+        assertEquals(GlazedListsTests.stringToList("cbadbac"), source);
+        assertEquals(GlazedListsTests.stringToList("aabbccd"), sortedList);
+
+        sortedList.add(sortedList.size()-1, "a");
+        assertEquals(GlazedListsTests.stringToList("cbaadbac"), source);
+        assertEquals(GlazedListsTests.stringToList("aaabbccd"), sortedList);
+
+        sortedList.add(sortedList.size(), "e");
+        assertEquals(GlazedListsTests.stringToList("cbaadbace"), source);
+        assertEquals(GlazedListsTests.stringToList("aaabbccde"), sortedList);
+    }
+
     /**
      * This test ensures that the SortedList sorts by its own
      * order, then by the order in the source list.

@@ -229,7 +229,8 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          * within the source {@link SortedList}.
          */
         private int getStartIndex() {
-            final int groupIndex = this.treeNode.getIndex();
+            if (treeNode == null) return -1;
+            final int groupIndex = treeNode.getIndex();
             return GroupingList.this.getSourceIndex(groupIndex);
         }
 
@@ -238,7 +239,8 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          * within the source {@link SortedList}.
          */
         private int getEndIndex() {
-            final int groupIndex = this.treeNode.getIndex();
+            if (treeNode == null) return -1;
+            final int groupIndex = treeNode.getIndex();
 
             // if this is before the end, its everything up to the first different element
             if(groupIndex < grouper.getBarcode().blackSize() - 1) {
@@ -283,5 +285,4 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
             source.add(this.getSourceIndex(index), element);
         }
     }
-
 }

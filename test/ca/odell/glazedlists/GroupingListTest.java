@@ -351,8 +351,8 @@ public class GroupingListTest extends TestCase {
     }
 
     public void testDispose() {
-        final BasicEventList source = new BasicEventList();
-        final GroupingList groupingList = new GroupingList(source);
+        final BasicEventList<Object> source = new BasicEventList<Object>();
+        final GroupingList<Object> groupingList = new GroupingList<Object>(source);
 
         assertEquals(1, source.updates.getListEventListeners().size());
 
@@ -382,7 +382,31 @@ public class GroupingListTest extends TestCase {
         source.removeAll(GlazedListsTests.stringToList("B"));
         assertEquals(3, as.size());
         assertEquals(0, bs.size());
+        assertTrue(bs.isEmpty());
         assertEquals(3, cs.size());
+    }
+
+    public void testWriteThroughGroupListElement() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        final GroupingList<String> groupingList = new GroupingList<String>(source, new FirstLetterComparator());
+
+        source.addAll(GlazedListsTests.delimitedStringToList("Jesse James Jodie Mark Mariusz"));
+
+        List<String> jNames = groupingList.get(0);
+        List<String> mNames = groupingList.get(1);
+
+        assertEquals(GlazedListsTests.delimitedStringToList("Jesse James Jodie"), jNames);
+        assertEquals(GlazedListsTests.delimitedStringToList("Mark Mariusz"), mNames);
+
+        jNames.add("Jekyll");
+        assertEquals(GlazedListsTests.delimitedStringToList("Jesse James Jodie Jekyll"), jNames);
+        jNames.add(2, "Jamal");
+        assertEquals(GlazedListsTests.delimitedStringToList("Jesse James Jamal Jodie Jekyll"), jNames);
+
+        mNames.addAll(GlazedListsTests.delimitedStringToList("Mya"));
+        assertEquals(GlazedListsTests.delimitedStringToList("Mark Mariusz Mya"), mNames);
+        mNames.addAll(2, GlazedListsTests.delimitedStringToList("Mankar"));
+        assertEquals(GlazedListsTests.delimitedStringToList("Mark Mariusz Mankar Mya"), mNames);
     }
 
     /**
@@ -403,5 +427,11 @@ public class GroupingListTest extends TestCase {
         source.commitEvent();
         assertEquals(GlazedListsTests.stringToList("C"), grouped.get(0));
         assertEquals(GlazedListsTests.stringToList("SS"), grouped.get(1));
+    }
+
+    private static class FirstLetterComparator implements Comparator<String> {
+        public int compare(String o1, String o2) {
+            return o1.charAt(0) - o2.charAt(0);
+        }
     }
 }
