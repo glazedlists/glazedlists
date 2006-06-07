@@ -127,11 +127,10 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * which is when they've received all events from their dependencies,
      * and their dependencies are in a consistent state.
      *
-     *        A
-     *        |\
-     *        | B
-     *        |/
-     *        C
+     *        A --> B --.    This diagram shows A --> B, B --> C and A --> C.
+     *        |         |    The only safe notification order of events is
+     *        |         V    for B to receive events from A before C receives
+     *        '-------> C    those same events.
      */
     public void testDiamondDependency() {
 
