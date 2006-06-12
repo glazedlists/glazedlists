@@ -182,6 +182,53 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
     }
 
 
+
+    /**
+     * The publisher should throw an IllegalStateException when a cycle in the
+     * listener graph is created.
+     */
+    public void testCycleThrows() {
+        SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
+        DependentSubjectListener a = new DependentSubjectListener("A");
+        DependentSubjectListener b = new DependentSubjectListener("B");
+        DependentSubjectListener c = new DependentSubjectListener("C");
+
+        // simple cycle of three
+        DependentSubjectListener.addDependency(publisher, a, b);
+        DependentSubjectListener.addDependency(publisher, b, c);
+        try {
+            DependentSubjectListener.addDependency(publisher, c, a);
+            fail("Cycle not detected");
+        } catch(IllegalStateException e) {
+            // expected
+        }
+
+        // cycle of 10
+        publisher = new SequenceDependenciesEventPublisher();
+        DependentSubjectListener[] subjects = new DependentSubjectListener[10];
+        for(int i = 0; i < 10; i++) {
+            subjects[i] = new DependentSubjectListener("" + i);
+            if(i > 0) DependentSubjectListener.addDependency(publisher, subjects[i-1], subjects[i]);
+        }
+        try {
+            DependentSubjectListener.addDependency(publisher, subjects[9], subjects[0]);
+            fail("Cycle not detected");
+        } catch(IllegalStateException e) {
+            // expected
+        }
+
+        // cycle of 1
+        publisher = new SequenceDependenciesEventPublisher();
+        a = new DependentSubjectListener("A");
+        try {
+            DependentSubjectListener.addDependency(publisher, a, a);
+            fail("Cycle not detected");
+        } catch(IllegalStateException e) {
+            // expected
+        }
+    }
+
+
     /**
      * An interesting subject that uses a single integer to maintain state. The
      * integer can increase at any subject, and  all downstream listeners must

@@ -10,11 +10,6 @@ import java.util.*;
 /**
  * Manage listeners, firing events, and making sure that events arrive in order.
  *
- * <p>All SubjectAndListener objects where A is a listener must be notified
- * before any SubjectAndListener pair where A is a subject. This allows us to
- * guarantee that A has been notified completely before its listeners are
- * notified.
- *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 final class SequenceDependenciesEventPublisher extends ListEventPublisher {
@@ -28,41 +23,113 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
     private List<SubjectAndListener> subjectAndListeners = new ArrayList<SubjectAndListener>(5);
 
     /**
+     * Rebuild the subject and listeners list so that all required invariants
+     * are met with respect to notification order. That is, for any listener
+     * T, all of the subjects S that T listens to have been updated before T
+     * receives a change event from any S.
+     *
+     * <p>This implementation still has some problems and work left to do:
+     *  <li>it's big! Can we optimize it? Perhaps shortcutting all the graph
+     *     work for simple cases (the 99% case)
+     *  <li>it's complex! Can we simplify it?
+     *  <li>could we keep the datastructures around? it may be wasteful to
+     *     reconstruct them every single time a listener is changed
+     */
+    private static List<SubjectAndListener> orderSubjectsAndListeners(List<SubjectAndListener> subjectsAndListeners) {
+
+        // since we're regenerating the subjectAndListeners list, clear it
+        // and re-add the elements
+        List<SubjectAndListener> result = new ArrayList<SubjectAndListener>();
+
+        // HashMaps of unprocessed elements, keyed by both source and target
+        IdentityMultimap<Object,SubjectAndListener> sourceToPairs = new IdentityMultimap<Object,SubjectAndListener>();
+        IdentityMultimap<Object,SubjectAndListener> targetToPairs = new IdentityMultimap<Object,SubjectAndListener>();
+
+        // everything that has all of its listeners already notified in subjectAndListeners
+        Map<Object,Boolean> satisfied = new IdentityHashMap<Object,Boolean>();
+        // everything that has a listener already notified
+        List<Object> satisfiedToDo = new ArrayList<Object>();
+
+        // prepare the initial collections: maps that show how each element is
+        // used as source and target in directed edges, plus a list of nodes
+        // that have no incoming edges
+        for(SubjectAndListener subjectAndListener : subjectsAndListeners) {
+            sourceToPairs.addValue(subjectAndListener.subject, subjectAndListener);
+            targetToPairs.addValue(subjectAndListener.listener, subjectAndListener);
+
+            satisfied.remove(subjectAndListener.listener);
+            if(targetToPairs.count(subjectAndListener.subject) == 0) {
+                satisfied.put(subjectAndListener.subject, Boolean.TRUE);
+            }
+        }
+
+        // start with the initial set of sources that don't have dependencies
+        satisfiedToDo.addAll(satisfied.keySet());
+
+        // We have a subject which has all of its dependencies satisfied.
+        // ie. all edges where this subject is a target are already in
+        // subjectAndListeners. Now we want to find further edges from this
+        // subject to further objects. We find all of its listeners, and look
+        // for one of them where all of its dependencies are in the
+        // satisfied list. If we find such a listener, add all its edges
+        // to subjectAndListeners and enque it to find it's listeners
+        // iteratively
+        while(!satisfiedToDo.isEmpty()) {
+
+            // for everything that's not a target,
+            Object subject = satisfiedToDo.remove(0);
+
+            // get all listeners to this subject, we try this set because
+            // we know at least one of their edges is satisfied, and
+            // we hope that all of their edges is satisfied.
+            List<SubjectAndListener> sourceTargets = sourceToPairs.get(subject);
+
+            // can we satisfy this target?
+            tryEachTarget:
+            for(SubjectAndListener sourceTarget : sourceTargets) {
+
+                // make sure we can satisfy this if all its sources are in satisfiedSources
+                List<SubjectAndListener> allSourcesForSourceTarget = targetToPairs.get(sourceTarget.listener);
+                // we've since processed this entire target, we shouldn't process it twice
+                if(allSourcesForSourceTarget.size() == 0) continue;
+                for(SubjectAndListener sourceAndTarget : allSourcesForSourceTarget) {
+                    if(!satisfied.containsKey(sourceAndTarget.subject)) {
+                        continue tryEachTarget;
+                    }
+                }
+
+                // we know we can satisfy this target, add all its edges
+                result.addAll(allSourcesForSourceTarget);
+                targetToPairs.remove(sourceTarget.listener);
+
+                // this target is no longer considered a target, since all
+                // its dependencies are satisfied
+                satisfiedToDo.add(sourceTarget.listener);
+                satisfied.put(sourceTarget.listener, Boolean.TRUE);
+            }
+        }
+
+        // if there's remaining targets, we never covered everything
+        if(!targetToPairs.isEmpty()) {
+            throw new IllegalStateException("Listener cycle detected, " + targetToPairs.values());
+        }
+
+        // success!
+        return result;
+    }
+
+    /**
      * Register the specified listener to receive events from the specified
      * subject whenever they are fired.
      */
     public <Subject,Listener,Event> void addListener(Subject subject, Listener listener, EventFormat<Subject,Listener,Event> format) {
-        // find the latest occurrence where our intended subject acts as a listener
-        int latestIndexOfSubjectAsListener = -1;
-        for(int i = subjectAndListeners.size() - 1; i >= 0; i--) {
-            SubjectAndListener anotherSubjectAndListener = subjectAndListeners.get(i);
-            if(anotherSubjectAndListener.listener == subject) {
-                latestIndexOfSubjectAsListener = i;
-                break;
-            }
-        }
+        // we don't yet support changing the listeners during an event, but
+        // we'll need to soon
+        if(reentrantFireEventCount != 0) throw new IllegalStateException();
 
-        // find the earliest occurence where our intended listener acts as a subject
-        int earliestIndexOfListenerAsSubject = subjectAndListeners.size();
-        for(int i = 0; i < subjectAndListeners.size(); i++) {
-            SubjectAndListener anotherSubjectAndListener = subjectAndListeners.get(i);
-            if(anotherSubjectAndListener.subject == listener) {
-                earliestIndexOfListenerAsSubject = i;
-                break;
-            }
-        }
-
-        // fail if this is a cycle that we should be fixing, in a future rev
-        // this is where we should be rearranging the graph dramatically
-        if(earliestIndexOfListenerAsSubject < latestIndexOfSubjectAsListener) {
-            throw new IllegalStateException("Cannot register " + listener + " as a listener of " +
-                subject + ", due to unsupported case in listener dependency graph");
-        }
-
-        // otherwise we can just insert immediately before the 'earliest' point,
-        // where we know both the listener and subject were notified without
-        // destroying our invariants
-        subjectAndListeners.add(earliestIndexOfListenerAsSubject, new SubjectAndListener<Subject,Listener,Event>(subject, listener, format));
+        // create a new list, then order it so dependencies are safe
+        List<SubjectAndListener> unordered = concatenate(this.subjectAndListeners, Collections.singletonList(new SubjectAndListener(subject, listener, format)));
+        this.subjectAndListeners = orderSubjectsAndListeners(unordered);
     }
 
     /**
@@ -70,6 +137,10 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      * subject.
      */
     public void removeListener(Object subject, Object listener) {
+        // we don't yet support changing the listeners during an event, but
+        // we'll need to soon
+        if(reentrantFireEventCount != 0) throw new IllegalStateException();
+
         // remove by identity (==), not equals()
         for(Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext(); ) {
             SubjectAndListener subjectAndListener = i.next();
@@ -97,8 +168,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      */
     public <Listener> List<Listener> getListeners(Object subject) {
         List<Listener> result = new ArrayList<Listener>();
-        for (Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext();) {
-            SubjectAndListener<?,Listener,?> subjectAndListener = i.next();
+        for(SubjectAndListener<?,Listener,?> subjectAndListener : subjectAndListeners) {
             if(subjectAndListener.subject != subject) continue;
             result.add(subjectAndListener.listener);
         }
@@ -169,8 +239,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             }
 
             // clean up all the subjects now that we're done firing events
-            for (Iterator<Map.Entry<Object, EventFormat>> i = subjectsToCleanUp.entrySet().iterator(); i.hasNext();) {
-                Map.Entry<Object, EventFormat> subjectAndEventFormat = i.next();
+            for(Map.Entry<Object,EventFormat> subjectAndEventFormat : subjectsToCleanUp.entrySet()) {
                 try {
                     subjectAndEventFormat.getValue().postEvent(subjectAndEventFormat.getKey());
                 } catch(RuntimeException e) {
@@ -243,5 +312,38 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             String separator = hasPendingEvent() ? ">>>" : "-->";
             return subject + separator + listener;
         }
+    }
+
+    /**
+     * A poor man's multimap, used only to reduce the complexity code that deals
+     * with these otherwise painful structures.
+     */
+    private static class IdentityMultimap<K,V> extends IdentityHashMap<K,List<V>> {
+        public void addValue(K key, V value) {
+            List<V> values = super.get(key);
+            if(values == null) {
+                values = new ArrayList<V>(2);
+                put(key, values);
+            }
+            values.add(value);
+        }
+        public List<V> get(Object key) {
+            List<V> values = super.get(key);
+            return values == null ? Collections.EMPTY_LIST : values;
+        }
+        public int count(Object key) {
+            List<V> values = super.get(key);
+            return values == null ? 0 : values.size();
+        }
+    }
+
+    /**
+     * Concatenate two lists to create a third list.
+     */
+    private static <E> List<E> concatenate(List<E> a, List<E> b) {
+        List<E> aAndB = new ArrayList<E>(a.size() + b.size());
+        aAndB.addAll(a);
+        aAndB.addAll(b);
+        return aAndB;
     }
 }
