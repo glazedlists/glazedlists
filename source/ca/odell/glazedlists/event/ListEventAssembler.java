@@ -137,7 +137,7 @@ public final class ListEventAssembler<E> {
      *      multiple method's events to be composed into a single
      *      event.
      */
-    public void beginEvent(boolean allowNestedEvents) {
+    public synchronized void beginEvent(boolean allowNestedEvents) {
         delegate.beginEvent(allowNestedEvents);
     }
 
@@ -224,7 +224,7 @@ public final class ListEventAssembler<E> {
      * change the nesting level so that further changes are applied directly to the
      * parent change.
      */
-    public void commitEvent() {
+    public synchronized void commitEvent() {
         delegate.commitEvent();
     }
 
@@ -249,7 +249,7 @@ public final class ListEventAssembler<E> {
      * listener, so if a listener does not process a set of changes, those
      * changes will persist in the next notification.
      */
-    public void addListEventListener(ListEventListener<E> listChangeListener) {
+    public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
         delegate.publisherAdapter.addListEventListener(listChangeListener, delegate.createListEvent());
     }
     /**
@@ -260,7 +260,7 @@ public final class ListEventAssembler<E> {
      * instead of <code>equals()</code>. This is because multiple Lists may be
      * listening and therefore <code>equals()</code> may be ambiguous.
      */
-    public void removeListEventListener(ListEventListener<E> listChangeListener) {
+    public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
         delegate.publisherAdapter.removeListEventListener(listChangeListener);
     }
 

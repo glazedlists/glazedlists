@@ -6,6 +6,7 @@ package ca.odell.glazedlists;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
 // Java collections are used for underlying data storage
 import java.util.*;
 import java.io.IOException;
@@ -88,6 +89,18 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         super(null);
         this.data = list;
         this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
+    }
+
+    /**
+     * Creates a {@link BasicEventList} using the specified
+     * {@link ListEventPublisher} and {@link ReadWriteLock}.
+     *
+     * @since 2006-June-12
+     */
+    BasicEventList(ListEventPublisher publisher, ReadWriteLock readWriteLock) {
+        super(publisher);
+        this.data = new ArrayList<E>();
+        this.readWriteLock = readWriteLock;
     }
 
     /** {@inheritDoc} */

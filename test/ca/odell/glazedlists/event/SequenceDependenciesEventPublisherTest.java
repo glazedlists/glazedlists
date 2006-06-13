@@ -8,13 +8,12 @@ import junit.framework.TestCase;
 import java.util.List;
 import java.util.ArrayList;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.*;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.
  *
- * @author jessewilson
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class SequenceDependenciesEventPublisherTest extends TestCase {
 
@@ -424,5 +423,35 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         public void run() {
             subject.removeListener(listener);
         }
+    }
+
+    /**
+     * This test currently fails in both publisher implementations:
+     *  <li>we don't support dependencies in SequenceDependenciesEventPublisher
+     *  <li>we don't support merging events in GraphDependenciesListEventPublisher
+     *
+     * <p>When these problems are resolved, this should work.
+     */
+    public void testMergingListEvents() {
+
+
+        CompositeList<String> compositeList = new CompositeList<String>();
+        ListConsistencyListener consistencyListener = ListConsistencyListener.install(compositeList);
+        EventList<String> source = compositeList.createMemberList();
+        source.add("C");
+        source.add("A");
+        source.add("B");
+
+        SortedList<String> forwardSource = new SortedList<String>(source);
+        SortedList<String> reverseSource = new SortedList<String>(source, GlazedLists.reverseComparator());
+        compositeList.addMemberList(forwardSource);
+        compositeList.addMemberList(source);
+        compositeList.addMemberList(reverseSource);
+
+        assertEquals(compositeList, GlazedListsTests.stringToList("ABCCABCBA"));
+
+        source.add(1, "D");
+        assertEquals(compositeList, GlazedListsTests.stringToList("ABCDCDABDCBA"));
+
     }
 }

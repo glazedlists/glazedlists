@@ -42,7 +42,7 @@ public class ListConsistencyListener<E> {
      */
     private ListConsistencyListener(EventList<E> source, String name, boolean verbose) {
         this.source = source;
-        this.name = name;
+        this.name = name != null ? name : source.getClass().getName();
         this.verbose = verbose;
         
         // populate the list of expected values
@@ -62,7 +62,7 @@ public class ListConsistencyListener<E> {
         return result;
     }
     public static <E> ListConsistencyListener<E> install(EventList<E> source) {
-        return install(source, "event list", false);
+        return install(source, null, false);
     }
 
     /**
@@ -160,13 +160,11 @@ public class ListConsistencyListener<E> {
             }
 
             // verify the source is consistent with what we expect
-            Assert.assertEquals(expected.size(), source.size());
-            for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {
-                int changeIndex = c.next().intValue();
-                for(int i = Math.max(changeIndex - 1, 0); i < Math.min(changeIndex+2, expected.size()); i++) {
-                    Assert.assertEquals(expected.get(i), source.get(i));
-                }
-            }
+            Assert.assertEquals(expected, source);
+        }
+
+        public String toString() {
+            return "ConsistencyListener:" + name;
         }
     }
 

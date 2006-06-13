@@ -409,5 +409,8 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         public void dispose() {
             children.removeListEventListener(this);
         }
+        public String toString() {
+            return "[" + node.getIndex() + ":" + children + "]";
+        }
     }
 }

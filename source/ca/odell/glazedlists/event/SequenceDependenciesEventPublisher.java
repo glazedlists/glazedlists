@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Manage listeners, firing events, and making sure that events arrive in order.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
