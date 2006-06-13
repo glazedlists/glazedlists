@@ -8,6 +8,9 @@ import junit.framework.TestCase;
 import java.util.List;
 import java.util.ArrayList;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.BasicEventList;
+
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.
  *
@@ -82,6 +85,12 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         /** a string, automatically set when events are received */
         private String value = null;
 
+        /** a log of events received */
+        private List<String> receivedEvents = new ArrayList<String>();
+
+        /** an arbitrary runnable to run when the next event is received */
+        public Runnable runOnceRunnable;
+
         public SimpleSubjectListener(String name, SequenceDependenciesEventPublisher publisher) {
             this.name = name;
             this.publisher = publisher;
@@ -93,6 +102,19 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
             publisher.removeListener(SimpleSubjectListener.this, listener);
         }
         public void handleChange(String value) {
+            // remember the event
+            receivedEvents.add(value);
+
+            // execute any requested code
+            try {
+                if(runOnceRunnable != null) {
+                    runOnceRunnable.run();
+                }
+            } finally {
+                runOnceRunnable = null;
+            }
+
+            // apply this change
             setValue(value);
         }
         public String getValue() {
@@ -104,6 +126,12 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         }
         public String toString() {
             return name;
+        }
+        public List<String> getReceivedEvents() {
+            return receivedEvents;
+        }
+        public void setRunOnceRunnable(Runnable runnable) {
+            this.runOnceRunnable = runnable;
         }
     }
 
@@ -139,7 +167,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         DependentSubjectListener b = new DependentSubjectListener("B");
         DependentSubjectListener c = new DependentSubjectListener("C");
 
-        DependentSubjectListener.addDependency(publisher, a, c);
+        DependentSubjectListener.addListener(publisher, a, c);
         a.increment(publisher, 10);
         assertEquals(10, a.latestRevision);
         assertEquals( 0, b.latestRevision);
@@ -155,7 +183,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         assertEquals(20, b.latestRevision);
         assertEquals(15, c.latestRevision);
 
-        DependentSubjectListener.addDependency(publisher, b, c);
+        DependentSubjectListener.addListener(publisher, b, c);
         assertEquals(10, a.latestRevision);
         assertEquals(20, b.latestRevision);
         assertEquals(20, c.latestRevision);
@@ -170,7 +198,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         assertEquals(22, b.latestRevision);
         assertEquals(25, c.latestRevision);
 
-        DependentSubjectListener.addDependency(publisher, a, b);
+        DependentSubjectListener.addListener(publisher, a, b);
         assertEquals(25, a.latestRevision);
         assertEquals(25, b.latestRevision);
         assertEquals(25, c.latestRevision);
@@ -194,10 +222,10 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         DependentSubjectListener c = new DependentSubjectListener("C");
 
         // simple cycle of three
-        DependentSubjectListener.addDependency(publisher, a, b);
-        DependentSubjectListener.addDependency(publisher, b, c);
+        DependentSubjectListener.addListener(publisher, a, b);
+        DependentSubjectListener.addListener(publisher, b, c);
         try {
-            DependentSubjectListener.addDependency(publisher, c, a);
+            DependentSubjectListener.addListener(publisher, c, a);
             fail("Cycle not detected");
         } catch(IllegalStateException e) {
             // expected
@@ -208,10 +236,10 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         DependentSubjectListener[] subjects = new DependentSubjectListener[10];
         for(int i = 0; i < 10; i++) {
             subjects[i] = new DependentSubjectListener("" + i);
-            if(i > 0) DependentSubjectListener.addDependency(publisher, subjects[i-1], subjects[i]);
+            if(i > 0) DependentSubjectListener.addListener(publisher, subjects[i-1], subjects[i]);
         }
         try {
-            DependentSubjectListener.addDependency(publisher, subjects[9], subjects[0]);
+            DependentSubjectListener.addListener(publisher, subjects[9], subjects[0]);
             fail("Cycle not detected");
         } catch(IllegalStateException e) {
             // expected
@@ -221,7 +249,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         publisher = new SequenceDependenciesEventPublisher();
         a = new DependentSubjectListener("A");
         try {
-            DependentSubjectListener.addDependency(publisher, a, a);
+            DependentSubjectListener.addListener(publisher, a, a);
             fail("Cycle not detected");
         } catch(IllegalStateException e) {
             // expected
@@ -258,7 +286,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         /**
          * Register the listener as dependent on the subject.
          */
-        public static void addDependency(SequenceDependenciesEventPublisher publisher, DependentSubjectListener subject, DependentSubjectListener listener) {
+        public static void addListener(SequenceDependenciesEventPublisher publisher, DependentSubjectListener subject, DependentSubjectListener listener) {
             subject.downstreamListeners.add(listener);
             listener.upstreamSubjects.add(subject);
             listener.latestRevision = Math.max(listener.latestRevision, subject.latestRevision);
@@ -292,4 +320,109 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         }
     }
 
+    /**
+     * Make sure that when the listener graph changes during an event, it gets
+     * processed only at the conclusion of that event.
+     */
+    public void testRemovesAndAddsDuringEvent() {
+        SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
+        SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
+        SimpleSubjectListener b = new SimpleSubjectListener("B", publisher);
+        SimpleSubjectListener c = new SimpleSubjectListener("C", publisher);
+        SimpleSubjectListener d = new SimpleSubjectListener("D", publisher);
+        a.addListener(b);
+
+        // add c as a listener to b, it shouldn't receive the first event
+        b.setRunOnceRunnable(new AddListenerRunnable(b, c));
+        a.setValue("Saskatchwan");
+        assertEquals(1, b.getReceivedEvents().size());
+        assertEquals(0, c.getReceivedEvents().size());
+
+        a.setValue("Tiger-Cats");
+        assertEquals(2, b.getReceivedEvents().size());
+        assertEquals(1, c.getReceivedEvents().size());
+
+        // remove c as a listener to b, it should still receive the event
+        b.setRunOnceRunnable(new RemoveListenerRunnable(b, c));
+        a.setValue("Blue Bombers");
+        assertEquals(3, b.getReceivedEvents().size());
+        assertEquals(2, c.getReceivedEvents().size());
+        a.setValue("Stampeders");
+        assertEquals(4, b.getReceivedEvents().size());
+        assertEquals(2, c.getReceivedEvents().size());
+
+        // add a completely unrelated listener b to do events for c and d
+        a.addListener(c);
+        b.setRunOnceRunnable(new AddListenerRunnable(c, d));
+        a.setValue("Argonauts");
+        assertEquals(3, c.getReceivedEvents().size());
+        assertEquals(0, d.getReceivedEvents().size());
+
+        a.setValue("Lions");
+        assertEquals(4, c.getReceivedEvents().size());
+        assertEquals(1, d.getReceivedEvents().size());
+
+        // remove the unrelated listener b to do events for c and d
+        b.setRunOnceRunnable(new RemoveListenerRunnable(c, d));
+        a.setValue("Eskimos");
+        assertEquals(5, c.getReceivedEvents().size());
+        assertEquals(2, d.getReceivedEvents().size());
+
+        a.setValue("Alouettes");
+        assertEquals(6, c.getReceivedEvents().size());
+        assertEquals(2, d.getReceivedEvents().size());
+    }
+
+    /**
+     * Make sure we throw an exception when attempting to remove something that's
+     * not a listener.
+     */
+    public void testUnknownRemoveThrowsException() {
+        SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
+        SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
+        SimpleSubjectListener b = new SimpleSubjectListener("B", publisher);
+        SimpleSubjectListener c = new SimpleSubjectListener("C", publisher);
+
+        // add a listener
+        a.addListener(b);
+        try {
+            a.removeListener(c);
+            fail("No exception thrown when removing a non-existent listener");
+        } catch(IllegalArgumentException e) {
+            // expected
+        }
+
+        // remove the other listener, this shouldn't throw
+        a.removeListener(b);
+    }
+
+    /**
+     * Add a listener when executed.
+     */
+    private class AddListenerRunnable implements Runnable {
+        private SimpleSubjectListener subject;
+        private SimpleSubjectListener listener;
+        public AddListenerRunnable(SimpleSubjectListener subject, SimpleSubjectListener listener) {
+            this.subject = subject;
+            this.listener = listener;
+        }
+        public void run() {
+            subject.addListener(listener);
+        }
+    }
+
+    /**
+     * Remove a listener when executed.
+     */
+    private class RemoveListenerRunnable implements Runnable {
+        private SimpleSubjectListener subject;
+        private SimpleSubjectListener listener;
+        public RemoveListenerRunnable(SimpleSubjectListener subject, SimpleSubjectListener listener) {
+            this.subject = subject;
+            this.listener = listener;
+        }
+        public void run() {
+            subject.removeListener(listener);
+        }
+    }
 }

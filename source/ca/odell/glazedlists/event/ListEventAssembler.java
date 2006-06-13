@@ -250,9 +250,7 @@ public final class ListEventAssembler<E> {
      * changes will persist in the next notification.
      */
     public void addListEventListener(ListEventListener<E> listChangeListener) {
-        synchronized(delegate) {
-            delegate.publisherAdapter.addListEventListener(listChangeListener, delegate.createListEvent());
-        }
+        delegate.publisherAdapter.addListEventListener(listChangeListener, delegate.createListEvent());
     }
     /**
      * Removes the specified listener from receiving notification when new
@@ -263,9 +261,7 @@ public final class ListEventAssembler<E> {
      * listening and therefore <code>equals()</code> may be ambiguous.
      */
     public void removeListEventListener(ListEventListener<E> listChangeListener) {
-        synchronized(delegate) {
-            delegate.publisherAdapter.removeListEventListener(listChangeListener);
-        }
+        delegate.publisherAdapter.removeListEventListener(listChangeListener);
     }
 
     /**
@@ -694,19 +690,19 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent) {
+        public synchronized void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent) {
             updateListEventListeners(listChangeListener, null, listEvent);
             publisher.addDependency(sourceList, listChangeListener);
         }
 
         /** {@inheritDoc} */
-        public void removeListEventListener(ListEventListener<E> listChangeListener) {
+        public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
             updateListEventListeners(null, listChangeListener, null);
             publisher.removeDependency(sourceList, listChangeListener);
         }
 
         /** {@inheritDoc} */
-        public List<ListEventListener<E>> getListEventListeners() {
+        public synchronized List<ListEventListener<E>> getListEventListeners() {
             return Collections.unmodifiableList(listeners);
         }
 
@@ -804,7 +800,8 @@ public final class ListEventAssembler<E> {
         private final EventList<E> sourceList;
         private final SequenceDependenciesEventPublisher publisherSequenceDependencies;
         private ListEvent<E> listEvent = null;
-        private final SequenceDependenciesEventPublisher.EventFormat<EventList<E>,ListEventListener<E>,ListEvent<E>> eventFormat;
+        private final ListEventFormat<E> eventFormat;
+        private boolean eventEnqueued = false;
 
         public ListSequencePublisherAdapter(AssemblerHelper<E> assemblerDelegate, ListEventPublisher publisherSequenceDependencies) {
             this.sourceList = assemblerDelegate.sourceList;
@@ -830,6 +827,12 @@ public final class ListEventAssembler<E> {
 
         /** {@inheritDoc} */
         public void fireEvent() {
+            // we've already fired this event, we're just adding to it
+            if(eventEnqueued) {
+                return;
+            }
+
+            eventEnqueued = true;
             publisherSequenceDependencies.fireEvent(sourceList, listEvent, eventFormat);
         }
 
@@ -847,7 +850,8 @@ public final class ListEventAssembler<E> {
                 listener.listChanged(event);
             }
             public void postEvent(EventList<E> subject) {
-                 assemblerDelegate.cleanup();
+                assemblerDelegate.cleanup();
+                ((ListSequencePublisherAdapter)assemblerDelegate.publisherAdapter).eventEnqueued = false;
             }
         }
     }
