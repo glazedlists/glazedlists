@@ -426,15 +426,12 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
     }
 
     /**
-     * This test currently fails in both publisher implementations:
-     *  <li>we don't support dependencies in SequenceDependenciesEventPublisher
-     *  <li>we don't support merging events in GraphDependenciesListEventPublisher
-     *
-     * <p>When these problems are resolved, this should work.
+     * This test currently fails in the graph publisher implementation because
+     * we don't support merging events in GraphDependenciesListEventPublisher.
      */
     public void testMergingListEvents() {
         CompositeList<String> compositeList = new CompositeList<String>();
-        ListConsistencyListener consistencyListener = ListConsistencyListener.install(compositeList);
+        ListConsistencyListener.install(compositeList);
         EventList<String> source = compositeList.createMemberList();
         source.add("C");
         source.add("A");
@@ -454,5 +451,10 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         source.removeAll(GlazedListsTests.stringToList("AC"));
         assertEquals(compositeList, GlazedListsTests.stringToList("BDDBDB"));
 
+        source.clear();
+        assertEquals(compositeList, GlazedListsTests.stringToList(""));
+
+        source.addAll(GlazedListsTests.stringToList("CADB"));
+        assertEquals(compositeList, GlazedListsTests.stringToList("ABCDCADBDCBA"));
     }
 }
