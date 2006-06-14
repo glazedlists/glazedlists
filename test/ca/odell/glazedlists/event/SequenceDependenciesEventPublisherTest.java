@@ -433,8 +433,6 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * <p>When these problems are resolved, this should work.
      */
     public void testMergingListEvents() {
-
-
         CompositeList<String> compositeList = new CompositeList<String>();
         ListConsistencyListener consistencyListener = ListConsistencyListener.install(compositeList);
         EventList<String> source = compositeList.createMemberList();
@@ -452,6 +450,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
 
         source.add(1, "D");
         assertEquals(compositeList, GlazedListsTests.stringToList("ABCDCDABDCBA"));
+
+        source.removeAll(GlazedListsTests.stringToList("AC"));
+        assertEquals(compositeList, GlazedListsTests.stringToList("BDDBDB"));
 
     }
 }

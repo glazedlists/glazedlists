@@ -22,6 +22,9 @@ public abstract class ListEventPublisher {
      * specified {@link ListEventListener} which depends on it. Dependencies are
      * automatically managed by most {@link EventList}s, so this method shall only
      * be used for {@link EventList}s that have indirect dependencies.
+     *
+     * @deprecated replaced with {@link #setRelatedSubject}, which has different
+     *      semantics and takes different arguments, but accomplishes the same goal
      */
     public abstract void addDependency(EventList dependency, ListEventListener listener);
 
@@ -31,8 +34,22 @@ public abstract class ListEventPublisher {
      * receive {@link ListEvent}s, but there will be no dependency tracking when
      * such events are fired.
      *
-     * @deprecated we're reworking dependency management, this method is no longer
-     *      necessary since the depencencies can be automatically removed.
+     * @deprecated replaced with {@link #removeRelatedSubject}, which has different
+     *      semantics and takes different arguments, but accomplishes the same goal
      */
     public abstract void removeDependency(EventList dependency, ListEventListener listener);
+
+    /**
+     * Attach the specified listener to the specified subject, so that when
+     * dependencies are being prepared, notifying the listener will be
+     * considered equivalent to notifying the subject. This makes it possible
+     * to support multiple listeners in a single subject, typically using
+     * inner classes.
+     */
+    public abstract void setRelatedSubject(Object listener, Object relatedSubject);
+
+    /**
+     * Detach the subject related to the specified listener.
+     */
+    public abstract void removeRelatedSubject(Object listener);
 }

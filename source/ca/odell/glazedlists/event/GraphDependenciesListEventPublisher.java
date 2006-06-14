@@ -91,6 +91,16 @@ public final class GraphDependenciesListEventPublisher extends ListEventPublishe
         if(dependencies.isEmpty()) dependentListeners.remove(dependentListener);
     }
 
+    /** {@inheritDoc} */
+    public void setRelatedSubject(Object listener, Object relatedSubject) {
+        // do nothing
+    }
+
+    /** {@inheritDoc} */
+    public void removeRelatedSubject(Object listener) {
+        // do nothing
+    }
+
     /**
      * Gets the dependent list for the specified @{ListEventListener}.
      */

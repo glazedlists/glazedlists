@@ -19,6 +19,10 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
     /** subject to cleanup when this event is completely distributed */
     private Map<Object,EventFormat> subjectsToCleanUp = new IdentityHashMap<Object,EventFormat>();
 
+    /** for proper dependency management, when a listener and subject aren't the same identity */
+    private Map<Object,Object> listenersToRelatedSubjects = new IdentityHashMap<Object,Object>();
+
+
     /**
      * A mix of different subjects and listeners pairs in a deliberate order.
      * We should be careful not to make changes to this list directly and instead
@@ -47,7 +51,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      *  <li>could we keep the datastructures around? it may be wasteful to
      *     reconstruct them every single time a listener is changed
      */
-    private static List<SubjectAndListener> orderSubjectsAndListeners(List<SubjectAndListener> subjectsAndListeners) {
+    private List<SubjectAndListener> orderSubjectsAndListeners(List<SubjectAndListener> subjectsAndListeners) {
 
         // since we're regenerating the subjectAndListeners list, clear it
         // and re-add the elements
@@ -67,12 +71,14 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
         // that have no incoming edges
         for(int i = 0, size = subjectsAndListeners.size(); i < size; i++) {
             SubjectAndListener subjectAndListener = subjectsAndListeners.get(i);
-            sourceToPairs.addValue(subjectAndListener.subject, subjectAndListener);
-            targetToPairs.addValue(subjectAndListener.listener, subjectAndListener);
+            Object source = subjectAndListener.subject;
+            Object target = getRelatedSubject(subjectAndListener.listener);
+            sourceToPairs.addValue(source, subjectAndListener);
+            targetToPairs.addValue(target, subjectAndListener);
 
-            satisfied.remove(subjectAndListener.listener);
-            if(targetToPairs.count(subjectAndListener.subject) == 0) {
-                satisfied.put(subjectAndListener.subject, Boolean.TRUE);
+            satisfied.remove(target);
+            if(targetToPairs.count(source) == 0) {
+                satisfied.put(source, Boolean.TRUE);
             }
         }
 
@@ -100,10 +106,10 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             // can we satisfy this target?
             tryEachTarget:
             for(int t = 0, targetsSize = sourceTargets.size(); t < targetsSize; t++) {
-                SubjectAndListener sourceTarget = sourceTargets.get(t);
+                Object sourceTarget = getRelatedSubject(sourceTargets.get(t).listener);
 
                 // make sure we can satisfy this if all its sources are in satisfiedSources
-                List<SubjectAndListener> allSourcesForSourceTarget = targetToPairs.get(sourceTarget.listener);
+                List<SubjectAndListener> allSourcesForSourceTarget = targetToPairs.get(sourceTarget);
                 // we've since processed this entire target, we shouldn't process it twice
                 if(allSourcesForSourceTarget.size() == 0) continue;
                 for(int s = 0, sourcesSize = allSourcesForSourceTarget.size(); s < sourcesSize; s++) {
@@ -115,12 +121,12 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
                 // we know we can satisfy this target, add all its edges
                 result.addAll(allSourcesForSourceTarget);
-                targetToPairs.remove(sourceTarget.listener);
+                targetToPairs.remove(sourceTarget);
 
                 // this target is no longer considered a target, since all
                 // its dependencies are satisfied
-                satisfiedToDo.add(sourceTarget.listener);
-                satisfied.put(sourceTarget.listener, Boolean.TRUE);
+                satisfiedToDo.add(sourceTarget);
+                satisfied.put(sourceTarget, Boolean.TRUE);
             }
         }
 
@@ -131,6 +137,11 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
         // success!
         return result;
+    }
+    private Object getRelatedSubject(Object listener) {
+        Object subject = listenersToRelatedSubjects.get(listener);
+        if(subject == null) return listener;
+        return subject;
     }
 
     /**
@@ -174,14 +185,26 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
     /** {@inheritDoc} */
     public void addDependency(EventList dependency, ListEventListener listener) {
-        // unsupported, do nothing
-        // todo: resolve
+        // do nothing
     }
 
     /** {@inheritDoc} */
     public void removeDependency(EventList dependency, ListEventListener listener) {
-        // unsupported, do nothing
-        // todo: resolve
+        // do nothing
+    }
+
+    /** {@inheritDoc} */
+    public void setRelatedSubject(Object listener, Object relatedSubject) {
+        if(relatedSubject != null) {
+            listenersToRelatedSubjects.put(listener, relatedSubject);
+        } else {
+            listenersToRelatedSubjects.remove(listener);
+        }
+    }
+
+    /** {@inheritDoc} */
+    public void removeRelatedSubject(Object listener) {
+        listenersToRelatedSubjects.remove(listener);
     }
 
     /**
