@@ -162,47 +162,47 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
     public void testDiamondDependency() {
 
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
-        DependentSubjectListener a = new DependentSubjectListener("A");
-        DependentSubjectListener b = new DependentSubjectListener("B");
-        DependentSubjectListener c = new DependentSubjectListener("C");
+        DependentSubjectListener a = new DependentSubjectListener("A", publisher);
+        DependentSubjectListener b = new DependentSubjectListener("B", publisher);
+        DependentSubjectListener c = new DependentSubjectListener("C", publisher);
 
-        DependentSubjectListener.addListener(publisher, a, c);
-        a.increment(publisher, 10);
+        a.addListener(c);
+        a.increment(10);
         assertEquals(10, a.latestRevision);
         assertEquals( 0, b.latestRevision);
         assertEquals(10, c.latestRevision);
 
-        c.increment(publisher, 5);
+        c.increment(5);
         assertEquals(10, a.latestRevision);
         assertEquals( 0, b.latestRevision);
         assertEquals(15, c.latestRevision);
 
-        b.increment(publisher, 20);
+        b.increment(20);
         assertEquals(10, a.latestRevision);
         assertEquals(20, b.latestRevision);
         assertEquals(15, c.latestRevision);
 
-        DependentSubjectListener.addListener(publisher, b, c);
+        b.addListener(c);
         assertEquals(10, a.latestRevision);
         assertEquals(20, b.latestRevision);
         assertEquals(20, c.latestRevision);
 
-        b.increment(publisher, 2);
+        b.increment(2);
         assertEquals(10, a.latestRevision);
         assertEquals(22, b.latestRevision);
         assertEquals(22, c.latestRevision);
 
-        a.increment(publisher, 15);
+        a.increment(15);
         assertEquals(25, a.latestRevision);
         assertEquals(22, b.latestRevision);
         assertEquals(25, c.latestRevision);
 
-        DependentSubjectListener.addListener(publisher, a, b);
+        a.addListener(b);
         assertEquals(25, a.latestRevision);
         assertEquals(25, b.latestRevision);
         assertEquals(25, c.latestRevision);
 
-        a.increment(publisher, 4);
+        a.increment(4);
         assertEquals(29, a.latestRevision);
         assertEquals(29, b.latestRevision);
         assertEquals(29, c.latestRevision);
@@ -216,15 +216,15 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      */
     public void testCycleThrows() {
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
-        DependentSubjectListener a = new DependentSubjectListener("A");
-        DependentSubjectListener b = new DependentSubjectListener("B");
-        DependentSubjectListener c = new DependentSubjectListener("C");
+        DependentSubjectListener a = new DependentSubjectListener("A", publisher);
+        DependentSubjectListener b = new DependentSubjectListener("B", publisher);
+        DependentSubjectListener c = new DependentSubjectListener("C", publisher);
 
         // simple cycle of three
-        DependentSubjectListener.addListener(publisher, a, b);
-        DependentSubjectListener.addListener(publisher, b, c);
+        a.addListener(b);
+        b.addListener(c);
         try {
-            DependentSubjectListener.addListener(publisher, c, a);
+            c.addListener(a);
             fail("Cycle not detected");
         } catch(IllegalStateException e) {
             // expected
@@ -234,11 +234,11 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         publisher = new SequenceDependenciesEventPublisher();
         DependentSubjectListener[] subjects = new DependentSubjectListener[10];
         for(int i = 0; i < 10; i++) {
-            subjects[i] = new DependentSubjectListener("" + i);
-            if(i > 0) DependentSubjectListener.addListener(publisher, subjects[i-1], subjects[i]);
+            subjects[i] = new DependentSubjectListener("" + i, publisher);
+            if(i > 0) subjects[i-1].addListener(subjects[i]);
         }
         try {
-            DependentSubjectListener.addListener(publisher, subjects[9], subjects[0]);
+            subjects[9].addListener(subjects[0]);
             fail("Cycle not detected");
         } catch(IllegalStateException e) {
             // expected
@@ -246,9 +246,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
 
         // cycle of 1
         publisher = new SequenceDependenciesEventPublisher();
-        a = new DependentSubjectListener("A");
+        a = new DependentSubjectListener("A", publisher);
         try {
-            DependentSubjectListener.addListener(publisher, a, a);
+            a.addListener(a);
             fail("Cycle not detected");
         } catch(IllegalStateException e) {
             // expected
@@ -264,6 +264,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * dependency and we have a terrible problem!
      */
     public static class DependentSubjectListener {
+        private SequenceDependenciesEventPublisher publisher;
         /** a monotonically increasing revision number */
         int latestRevision = 0;
         /** useful for debugging */
@@ -272,24 +273,25 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         List<DependentSubjectListener> upstreamSubjects = new ArrayList<DependentSubjectListener>();
         /** objects that depend on me */
         List<DependentSubjectListener> downstreamListeners = new ArrayList<DependentSubjectListener>();
-        public DependentSubjectListener(String name) {
+        public DependentSubjectListener(String name, SequenceDependenciesEventPublisher publisher) {
+            this.publisher = publisher;
             this.name = name;
         }
         public String toString() {
             return name + ":" + latestRevision;
         }
-        public void increment(SequenceDependenciesEventPublisher publisher, int amount) {
+        public void increment(int amount) {
             this.latestRevision += amount;
-            publisher.fireEvent(this, new Integer(this.latestRevision), DependentSubjectListenerEventFormat.INSTANCE);
+            this.publisher.fireEvent(this, new Integer(this.latestRevision), DependentSubjectListenerEventFormat.INSTANCE);
         }
         /**
          * Register the listener as dependent on the subject.
          */
-        public static void addListener(SequenceDependenciesEventPublisher publisher, DependentSubjectListener subject, DependentSubjectListener listener) {
-            subject.downstreamListeners.add(listener);
-            listener.upstreamSubjects.add(subject);
-            listener.latestRevision = Math.max(listener.latestRevision, subject.latestRevision);
-            publisher.addListener(subject, listener, DependentSubjectListenerEventFormat.INSTANCE);
+        public void addListener(DependentSubjectListener listener) {
+            downstreamListeners.add(listener);
+            listener.upstreamSubjects.add(this);
+            listener.latestRevision = Math.max(listener.latestRevision, latestRevision);
+            this.publisher.addListener(this, listener, DependentSubjectListenerEventFormat.INSTANCE);
         }
         /**
          * Dependencies are satisfied if the latestRevision is at least the
@@ -310,9 +312,14 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         public static final DependentSubjectListenerEventFormat INSTANCE = new DependentSubjectListenerEventFormat();
         public void fire(DependentSubjectListener subject, Integer event, DependentSubjectListener listener) {
             // update the listener
+            boolean incremented = listener.latestRevision < event.intValue();
             listener.latestRevision = event.intValue();
             // make sure the listener's dependencies were notified first
             listener.assertDependenciesSatisfiedRecursively(listener);
+            // send the event forward
+            if(incremented) {
+                listener.increment(0);
+            }
         }
         public void postEvent(DependentSubjectListener subject) {
             // do nothing
@@ -456,5 +463,103 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
 
         source.addAll(GlazedListsTests.stringToList("CADB"));
         assertEquals(compositeList, GlazedListsTests.stringToList("ABCDCADBDCBA"));
+    }
+
+    /**
+     * Test that listeners and subjects do not have to use the same identity
+     * so long as {@link ListEventPublisher#setRelatedSubject} is used.
+     */
+    public void testRelatedSubjects() {
+        SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
+        DetachedSubject a = new DetachedSubject("A", publisher);
+        DetachedSubject b = new DetachedSubject("B", publisher);
+        DetachedSubject c = new DetachedSubject("C", publisher);
+        DetachedSubject d = new DetachedSubject("D", publisher);
+        DetachedSubject e = new DetachedSubject("E", publisher);
+
+        b.addListener(e);
+        a.addListener(b);
+
+        c.addListener(e);
+        a.addListener(c);
+
+        d.addListener(e);
+        a.addListener(d);
+
+        // changing a should impact e, but only after b, c, and d
+        a.increment(10);
+        assertEquals(10, a.latestRevision);
+        assertEquals(10, b.latestRevision);
+        assertEquals(10, c.latestRevision);
+        assertEquals(10, d.latestRevision);
+        assertEquals(10, e.latestRevision);
+    }
+
+    /**
+     * A subject that listens to another subject via an inner listener class.
+     * This is used to test that listener identity is not required.
+     */
+    private static class DetachedSubject {
+        private SequenceDependenciesEventPublisher publisher;
+        private String name;
+        private int latestRevision = 0;
+        private List<DetachedSubject> upstreamSubjects = new ArrayList<DetachedSubject>();
+
+        public DetachedSubject(String name, SequenceDependenciesEventPublisher publisher) {
+            this.name = name;
+            this.publisher = publisher;
+        }
+        public String toString() {
+            return name;
+        }
+        public void addListener(DetachedSubject listener) {
+            listener.upstreamSubjects.add(this);
+            Listener innerListener = new Listener(listener);
+            publisher.setRelatedSubject(innerListener, innerListener.subject);
+            publisher.addListener(this, innerListener, DetachedSubjectAndListenerEventFormat.INSTANCE);
+        }
+        public void increment(int amount) {
+            this.latestRevision += amount;
+            publisher.fireEvent(this, new Integer(this.latestRevision), DetachedSubjectAndListenerEventFormat.INSTANCE);
+        }
+        /**
+         * Dependencies are satisfied if the latestRevision is at least the
+         * latestRevision of all upstream {@link DependentSubjectListener}s.
+         */
+        public void assertDependenciesSatisfiedRecursively(DetachedSubject notified) {
+            for(DetachedSubject upstream : upstreamSubjects) {
+                upstream.assertDependenciesSatisfiedRecursively(notified);
+                if(latestRevision < upstream.latestRevision) {
+                    throw new IllegalStateException("Dependencies not satisfied for " + notified + ", dependency " + this + " not updated by " + upstream + "!");
+                }
+            }
+        }
+        private static class Listener {
+            private DetachedSubject subject;
+            public Listener(DetachedSubject subject) {
+                this.subject = subject;
+            }
+            public String toString() {
+                return "L(" + subject.name + ")";
+            }
+        }
+    }
+    /**
+     * Adapt {@link DetachedSubject} and {@link DetachedSubject.Listener} for firing events.
+     */
+    private static class DetachedSubjectAndListenerEventFormat implements SequenceDependenciesEventPublisher.EventFormat<DetachedSubject,DetachedSubject.Listener,Integer> {
+        public static final DetachedSubjectAndListenerEventFormat INSTANCE = new DetachedSubjectAndListenerEventFormat();
+        public void fire(DetachedSubject subject, Integer event, DetachedSubject.Listener listener) {
+            boolean changed = listener.subject.latestRevision < event.intValue();
+            // update the listener
+            listener.subject.latestRevision = event.intValue();
+            // make sure the listener's dependencies were notified first
+            listener.subject.assertDependenciesSatisfiedRecursively(listener.subject);
+            // send the event forward
+            if(changed) listener.subject.increment(0);
+        }
+        public void postEvent(DetachedSubject subject) {
+            // do nothing
+        }
     }
 }
