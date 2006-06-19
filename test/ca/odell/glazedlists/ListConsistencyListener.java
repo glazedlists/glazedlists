@@ -11,7 +11,7 @@ import ca.odell.glazedlists.event.*;
 import junit.framework.*;
 
 /**
- * A very basic list that ensures that lists are kept consistent and that
+ * A very basic listener that ensures that lists are kept consistent and that
  * the change events are consistent.
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
@@ -58,8 +58,7 @@ public class ListConsistencyListener<E> {
      * listener will verify the change reported equals the change applied.
      */
     public static <E> ListConsistencyListener<E> install(EventList<E> source, String name, boolean verbose) {
-        ListConsistencyListener<E> result = new ListConsistencyListener<E>(source, name, verbose);
-        return result;
+        return new ListConsistencyListener<E>(source, name, verbose);
     }
     public static <E> ListConsistencyListener<E> install(EventList<E> source) {
         return install(source, null, false);

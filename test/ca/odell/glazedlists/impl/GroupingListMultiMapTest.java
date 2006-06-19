@@ -233,17 +233,17 @@ public class GroupingListMultiMapTest extends TestCase {
         assertTrue(eventMap.values().isEmpty());
 
         // try inserting a single element list
-        eventMap.put("J", GlazedListsTests.delimitedStringToList("James"));
+        assertEquals(null, eventMap.put("J", GlazedListsTests.delimitedStringToList("James")));
         assertEquals(1, eventMap.size());
         assertEquals(GlazedListsTests.delimitedStringToList("James"), eventMap.get("J"));
 
         // try inserting a multi element list
-        eventMap.put("J", GlazedListsTests.delimitedStringToList("Jesse Jiries"));
+        assertEquals(GlazedListsTests.delimitedStringToList("James"), eventMap.put("J", GlazedListsTests.delimitedStringToList("Jesse Jiries")));
         assertEquals(1, eventMap.size());
         assertEquals(GlazedListsTests.delimitedStringToList("Jesse Jiries"), eventMap.get("J"));
 
         // try inserting an empty list
-        eventMap.put("J", new ArrayList<String>());
+        assertEquals(GlazedListsTests.delimitedStringToList("Jesse Jiries"), eventMap.put("J", new BasicEventList<String>()));
         assertTrue(eventMap.isEmpty());
 
         // try inserting a bad list

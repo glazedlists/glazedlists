@@ -169,7 +169,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     /** {@inheritDoc} */
     public void clear() {
         // don't do a clear on an empty set
-        if(size() == 0) return;
+        if(isEmpty()) return;
         // create the change event
         updates.beginEvent();
         updates.addDelete(0, size() - 1);

@@ -2,9 +2,7 @@ package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 
 public class GroupingListTest extends TestCase {
 
@@ -306,6 +304,11 @@ public class GroupingListTest extends TestCase {
         ((List<String>)groupList.get(1)).set(0, "C");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("CCCC"), groupList.get(1));
+
+        ((List<String>)groupList.get(1)).set(2, "B");
+        assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
+        assertEquals(GlazedListsTests.stringToList("B"), groupList.get(1));
+        assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
     }
 
     public void testGroupListGet() {
@@ -412,7 +415,7 @@ public class GroupingListTest extends TestCase {
     /**
      * Make sure a simple test case that breaks the {@link SeparatorList} doesn't
      * impact the {@link GroupingList}.
-     */ 
+     */
     public void testSeparatorListBreaks() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
         GroupingList<String> grouped = new GroupingList<String>(source, (Comparator)GlazedLists.comparableComparator());
