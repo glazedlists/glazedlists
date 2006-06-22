@@ -1,0 +1,221 @@
+/* Glazed Lists                                                 (c) 2003-2005 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package ca.odell.glazedlists.impl.adt.barcode2;
+
+/**
+ * M4 Macros:
+
+divert(-1)
+# forloop(i, from, to, stmt)
+
+define(`forloop', `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
+define(`_forloop',
+       `$4`'ifelse($1, `$3', ,
+             `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+divert
+
+define(`counti', `count'`$1')
+
+define(`indexToBit', `eval(`2 ** $1')')
+ indexToBit(0) == 1
+ indexToBit(1) == 2
+ indexToBit(2) == 4
+ indexToBit(3) == 8
+
+*/
+
+import java.util.List;
+import java.util.Arrays;
+
+/**
+ * A node in a tree which supports both a value and compressed nodes that
+ * contain a size, useful for index offsetting.
+ *
+ * <p>Note that the <code>counts</code> summary member is created lazily when
+ * this node is given children. This causes the code to be less easy to read,
+ * but it means we can put off about a huge number of object allocations since
+ * 50% of the nodes in an arbitrary tree are leaf nodes, and these leaf nodes
+ * now don't have counts.
+ *
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ */
+class NodeN<V> implements Element<V> {
+
+    /** the number of elements of each color in this subtree */
+/* M4 EQUIVALENT `*'/
+    forloop(`i', 0, COLOUR_COUNT, `int counti(i);
+    ')
+`/'* JAVA *///ifelse(`
+    int count0;
+    int count1;
+    int count2;
+// END ')
+
+    /** the node's color */
+    final byte color;
+
+    /** the node's value */
+    V value;
+
+    /** the size of this node */
+    int size;
+
+    /** values for managing the node within the tree */
+    byte height;
+    NodeN/**/<V> left, right, parent;
+
+    /**
+     * Create a new node.
+     *
+     * @param color a bitmask value such as 1, 2, 4, 8 or 16.
+     * @param size the size of the node
+     * @param value the value of the node
+     * @param parent the parent node in the tree, or <code>null</code> for the
+     *      root node.
+     */
+    public NodeN/**/(byte color, int size, V value, NodeN/**/<V> parent) {
+        assert(Tree.colorAsIndex(color) >= 0 && Tree.colorAsIndex(color) < 7);
+        this.color = color;
+        this.size = size;
+        this.value = value;
+        this.height = 1;
+        this.parent = parent;
+    }
+
+    /**
+     * Get the value of this element.
+     */
+    public V get() {
+        return value;
+    }
+
+    /**
+     * Set the value of this element.
+     */
+    public void set(V value) {
+        this.value = value;
+    }
+
+    /**
+     * Get the color of this element.
+     */
+    public byte getColor() {
+        return color;
+    }
+
+    /**
+     * The size of this entire node, including the left child, this node
+     * and the right child.
+     */
+    final int size(byte colors) {
+        // total the values of the specified array for the specified colors.
+        int result = 0;
+
+        /* M4 EQUIVALENT `*'/
+        forloop(`i', 0, COLOUR_COUNT, `if((colors & indexToBit(i)) != 0) result += counti(i);
+        ')
+        `/'* JAVA *///ifelse(`
+        if((colors & 1) != 0) result += count0;
+        if((colors & 2) != 0) result += count1;
+        if((colors & 4) != 0) result += count2;
+        // END ')
+        return result;
+    }
+
+    /**
+     * The size of the node for the specified colors.
+     */
+    final int nodeSize(byte colors) {
+        return (colors & color) > 0 ? size : 0;
+    }
+
+    /**
+     * Update the counts member variable by examining the counts of
+     * the child nodes and the size member variable.
+     *
+     * @param colorCount the number of colors in the tree
+     */
+    final void refreshCounts(int colorCount) {
+
+        /* M4 EQUIVALENT `*'/
+        forloop(`i', 0, COLOUR_COUNT, `counti(i) = 0;
+        ')
+        `/'* JAVA *///ifelse(`
+        count0 = 0;
+        count1 = 0;
+        count2 = 0;
+        // END ')
+
+        // left child
+        if(left != null) {
+            /* M4 EQUIVALENT `*'/
+            forloop(`i', 0, COLOUR_COUNT, `counti(i) += left. counti(i);
+            ')
+            `/'* JAVA *///ifelse(`
+            count0 += left.count0;
+            count1 += left.count1;
+            count2 += left.count2;
+            // END ')
+        }
+
+        // right child
+        if(right != null) {
+            /* M4 EQUIVALENT `*'/
+            forloop(`i', 0, COLOUR_COUNT, `counti(i) += right. counti(i);
+            ')
+            `/'* JAVA *///ifelse(`
+            count0 += right.count0;
+            count1 += right.count1;
+            count2 += right.count2;
+            // END ')
+        }
+
+        // this node
+        int colorAsIndex = Tree.colorAsIndex(color);
+
+        /* M4 EQUIVALENT `*'/
+        forloop(`i', 0, COLOUR_COUNT, `if(colorAsIndex == i) counti(i) += size;
+        ')
+        `/'* JAVA *///ifelse(`
+        if(colorAsIndex == 0) count0 += size;
+        if(colorAsIndex == 1) count1 += size;
+        if(colorAsIndex == 2) count2 += size;
+        // END ')
+
+    }
+
+    /** {@inheritDoc} */
+    public String toString() {
+        return toString(Arrays.asList(new String[] { "A", "B", "C", "D", "E", "F", "G", "H"}));
+    }
+
+    /**
+     * Write this node out as a String, using the specified colors to write
+     * each of the node values.
+     */
+    String toString(List colors) {
+        StringBuffer result = new StringBuffer();
+        asTree(0, result, colors);
+        return result.toString();
+    }
+    /**
+     * Dump this node as a String for diagnostic and debugging purposes.
+     */
+    void asTree(int indentation, StringBuffer out, List colors) {
+        // write the left subtree
+        if(left != null) left.asTree(indentation + 1, out, colors);
+
+        // write this node
+        for(int i = 0; i < indentation; i++) {
+            out.append("   ");
+        }
+        out.append(colors.get(Tree.colorAsIndex(color)));
+        out.append(" [").append(size).append("]");
+        if(value != null) out.append(": ").append(value);
+        out.append("\n");
+
+        // write the right subtree
+        if(right != null) right.asTree(indentation + 1, out, colors);
+    }
+}
