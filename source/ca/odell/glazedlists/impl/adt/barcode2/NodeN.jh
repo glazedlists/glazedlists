@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
-/**
- * M4 Macros:
+/*
+M4 Macros:
 
 divert(-1)
 # forloop(i, from, to, stmt)
@@ -16,12 +16,22 @@ define(`_forloop',
 divert
 
 define(`counti', `count'`$1')
+define(`originalCounti', `originalCount'`$1')
 
 define(`indexToBit', `eval(`2 ** $1')')
  indexToBit(0) == 1
  indexToBit(1) == 2
  indexToBit(2) == 4
  indexToBit(3) == 8
+
+define(`NodeN', ``Node'VAR_COLOUR_COUNT')
+define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
+
+define(`BEGIN_M4_MACRO', ` BEGIN M4 MACRO GENERATED CODE *'`/')
+define(`END_M4_MACRO', `/'`* END M4 MACRO GENERATED CODE ')
+define(`BEGIN_M4_ALTERNATE', `BEGIN M4 ALTERNATE CODE
+/'`* ')
+define(`END_M4_ALTERNATE', `END ALTERNATE CODE *'`/')
 
 */
 
@@ -43,14 +53,14 @@ import java.util.Arrays;
 class NodeN<V> implements Element<V> {
 
     /** the number of elements of each color in this subtree */
-    /* M4 EQUIVALENT `*'/
-    forloop(`i', 0, COLOUR_COUNT, `int counti(i);
+    /* BEGIN_M4_MACRO
+    forloop(`i', 0, VAR_COLOUR_COUNT, `int counti(i);
     ')
-    `/'* JAVA *///ifelse(`
+    END_M4_MACRO */ // BEGIN_M4_ALTERNATE
     int count0;
     int count1;
     int count2;
-    // END ')
+    // END_M4_ALTERNATE
 
     /** the node's color */
     final byte color;
@@ -112,14 +122,14 @@ class NodeN<V> implements Element<V> {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-        /* M4 EQUIVALENT `*'/
-        forloop(`i', 0, COLOUR_COUNT, `if((colors & indexToBit(i)) != 0) result += counti(i);
+        /* BEGIN_M4_MACRO
+        forloop(`i', 0, VAR_COLOUR_COUNT, `if((colors & indexToBit(i)) != 0) result += counti(i);
         ')
-        `/'* JAVA *///ifelse(`
+        END_M4_MACRO */ // BEGIN_M4_ALTERNATE
         if((colors & 1) != 0) result += count0;
         if((colors & 2) != 0) result += count1;
         if((colors & 4) != 0) result += count2;
-        // END ')
+        // END_M4_ALTERNATE
         return result;
     }
 
@@ -138,50 +148,50 @@ class NodeN<V> implements Element<V> {
      */
     final void refreshCounts(int colorCount) {
 
-        /* M4 EQUIVALENT `*'/
-        forloop(`i', 0, COLOUR_COUNT, `counti(i) = 0;
+        /* BEGIN_M4_MACRO
+        forloop(`i', 0, VAR_COLOUR_COUNT, `counti(i) = 0;
         ')
-        `/'* JAVA *///ifelse(`
+        END_M4_MACRO */ // BEGIN_M4_ALTERNATE
         count0 = 0;
         count1 = 0;
         count2 = 0;
-        // END ')
+        // END_M4_ALTERNATE
 
         // left child
         if(left != null) {
-            /* M4 EQUIVALENT `*'/
-            forloop(`i', 0, COLOUR_COUNT, `counti(i) += left. counti(i);
+            /* BEGIN_M4_MACRO
+            forloop(`i', 0, VAR_COLOUR_COUNT, `counti(i) += left. counti(i);
             ')
-            `/'* JAVA *///ifelse(`
+            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
             count0 += left.count0;
             count1 += left.count1;
             count2 += left.count2;
-            // END ')
+            // END_M4_ALTERNATE
         }
 
         // right child
         if(right != null) {
-            /* M4 EQUIVALENT `*'/
-            forloop(`i', 0, COLOUR_COUNT, `counti(i) += right. counti(i);
+            /* BEGIN_M4_MACRO
+            forloop(`i', 0, VAR_COLOUR_COUNT, `counti(i) += right. counti(i);
             ')
-            `/'* JAVA *///ifelse(`
+            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
             count0 += right.count0;
             count1 += right.count1;
             count2 += right.count2;
-            // END ')
+            // END_M4_ALTERNATE
         }
 
         // this node
         int colorAsIndex = Tree.colorAsIndex(color);
 
-        /* M4 EQUIVALENT `*'/
-        forloop(`i', 0, COLOUR_COUNT, `if(colorAsIndex == i) counti(i) += size;
+        /* BEGIN_M4_MACRO
+        forloop(`i', 0, VAR_COLOUR_COUNT, `if(colorAsIndex == i) counti(i) += size;
         ')
-        `/'* JAVA *///ifelse(`
+        END_M4_MACRO */ // BEGIN_M4_ALTERNATE
         if(colorAsIndex == 0) count0 += size;
         if(colorAsIndex == 1) count1 += size;
         if(colorAsIndex == 2) count2 += size;
-        // END ')
+        // END_M4_ALTERNATE
 
     }
 
