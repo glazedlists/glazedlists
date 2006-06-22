@@ -43,14 +43,14 @@ import java.util.Arrays;
 class NodeN<V> implements Element<V> {
 
     /** the number of elements of each color in this subtree */
-/* M4 EQUIVALENT `*'/
+    /* M4 EQUIVALENT `*'/
     forloop(`i', 0, COLOUR_COUNT, `int counti(i);
     ')
-`/'* JAVA *///ifelse(`
+    `/'* JAVA *///ifelse(`
     int count0;
     int count1;
     int count2;
-// END ')
+    // END ')
 
     /** the node's color */
     final byte color;
