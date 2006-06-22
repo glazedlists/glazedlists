@@ -19,10 +19,10 @@ define(`counti', `count'`$1')
 define(`originalCounti', `originalCount'`$1')
 
 define(`indexToBit', `eval(`2 ** $1')')
- indexToBit(0) == 1
- indexToBit(1) == 2
- indexToBit(2) == 4
- indexToBit(3) == 8
+indexToBit(0) == 1
+indexToBit(1) == 2
+indexToBit(2) == 4
+indexToBit(3) == 8
 
 define(`NodeN', ``Node'VAR_COLOUR_COUNT')
 define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
