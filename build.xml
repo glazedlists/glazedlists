@@ -504,7 +504,8 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        M4
        Run the m4 preprocessor to generate source code, see
-       http://www.gnu.org/software/m4/
+       Unix: http://www.gnu.org/software/m4/
+       Windows; http://gnuwin32.sourceforge.net/packages/m4.htm
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <target name="m4">
         <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Node5.java">
