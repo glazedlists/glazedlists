@@ -28,6 +28,7 @@ m4_define(`originalCounti', ``originalCount'indexToBit($1)')
 m4_define(`indexToBit', `m4_eval(`2 ** $1')')
 m4_define(`NodeN', ``Node'VAR_COLOUR_COUNT')
 m4_define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
+m4_define(`TreeNAsList', ``Tree'VAR_COLOUR_COUNT`AsList'')
 m4_define(`TreeNIterator', ``Tree'VAR_COLOUR_COUNT`Iterator'')
 m4_define(`counti', ``count'indexToBit($1)')
 
@@ -83,12 +84,21 @@ class NodeN<V> implements Element<V> {
      *      root node.
      */
     public NodeN/**/(byte color, int size, V value, NodeN/**/<V> parent) {
-        assert(Tree.colorAsIndex(color) >= 0 && Tree.colorAsIndex(color) < 7);
+        assert(TreeN.colorAsIndex(color) >= 0 && TreeN.colorAsIndex(color) < 7);
         this.color = color;
         this.size = size;
         this.value = value;
         this.height = 1;
         this.parent = parent;
+
+        /* BEGIN_M4_MACRO
+        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(color == indexToBit(i)) counti(i) += size;
+        ')
+        END_M4_MACRO */ // BEGIN_M4_ALTERNATE
+        if(color == 1) count1 += size;
+        if(color == 2) count2 += size;
+        if(color == 4) count4 += size;
+        // END_M4_ALTERNATE
     }
 
     /**
@@ -158,7 +168,7 @@ class NodeN<V> implements Element<V> {
         // left child
         if(left != null) {
             /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `counti(i) += left. counti(i);
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `counti(i) += left.counti(i);
             ')
             END_M4_MACRO */ // BEGIN_M4_ALTERNATE
             count1 += left.count1;
@@ -170,7 +180,7 @@ class NodeN<V> implements Element<V> {
         // right child
         if(right != null) {
             /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `counti(i) += right. counti(i);
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `counti(i) += right.counti(i);
             ')
             END_M4_MACRO */ // BEGIN_M4_ALTERNATE
             count1 += right.count1;
@@ -180,15 +190,13 @@ class NodeN<V> implements Element<V> {
         }
 
         // this node
-        int colorAsIndex = Tree.colorAsIndex(color);
-
         /* BEGIN_M4_MACRO
-        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(colorAsIndex == i) counti(i) += size;
+        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(color == indexToBit(i)) counti(i) += size;
         ')
         END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-        if(colorAsIndex == 1) count1 += size;
-        if(colorAsIndex == 2) count2 += size;
-        if(colorAsIndex == 4) count4 += size;
+        if(color == 1) count1 += size;
+        if(color == 2) count2 += size;
+        if(color == 4) count4 += size;
         // END_M4_ALTERNATE
 
     }
@@ -218,7 +226,7 @@ class NodeN<V> implements Element<V> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-        out.append(colors.get(Tree.colorAsIndex(color)));
+        out.append(colors.get(TreeN.colorAsIndex(color)));
         out.append(" [").append(size).append("]");
         if(value != null) out.append(": ").append(value);
         out.append("\n");

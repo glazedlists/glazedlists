@@ -145,7 +145,9 @@ public class IssuesBrowser implements Runnable {
      */
     private JPanel constructView() {
         // sort the original issues list
+        ListConsistencyListener.install(issuesEventList, "presorted", false); // debug
         final SortedList<Issue> issuesSortedList = new SortedList<Issue>(issuesEventList, null);
+        ListConsistencyListener.install(issuesSortedList, "sorted", false); // debug
 
         // filter the sorted issues
         FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesSortedList, filterPanel.getMatcherEditor());

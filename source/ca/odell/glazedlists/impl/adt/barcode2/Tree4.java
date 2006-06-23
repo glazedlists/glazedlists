@@ -13,30 +13,23 @@ import java.util.Comparator;
 /*
  M4 Macros
 
-m4_divert(-1)
-# forloop(i, from, to, stmt)
 
-m4_define(`forloop', `m4_pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')m4_popdef(`$1')')
-m4_define(`_forloop',
-       `$4`'m4_ifelse($1, `$3', ,
-             `m4_define(`$1', m4_incr($1))_forloop(`$1', `$2', `$3', `$4')')')
-m4_divert
 
-m4_define(`BEGIN_M4_MACRO', ` BEGIN M4 MACRO GENERATED CODE *'`/')
-m4_define(`END_M4_MACRO', `/'`* END M4 MACRO GENERATED CODE ')
-m4_define(`BEGIN_M4_ALTERNATE', `BEGIN M4 ALTERNATE CODE
-/'`* ')
-m4_define(`END_M4_ALTERNATE', `END ALTERNATE CODE *'`/')
+
+
+
+
 
  Barcode2 Macros
 
-m4_define(`VAR_LAST_COLOR_INDEX', `m4_eval(VAR_COLOUR_COUNT-1)')
-m4_define(`originalCounti', ``originalCount'indexToBit($1)')
-m4_define(`indexToBit', `m4_eval(`2 ** $1')')
-m4_define(`NodeN', ``Node'VAR_COLOUR_COUNT')
-m4_define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
-m4_define(`TreeNIterator', ``Tree'VAR_COLOUR_COUNT`Iterator'')
-m4_define(`counti', ``count'indexToBit($1)')
+
+
+
+
+
+
+
+
 
 */
 
@@ -68,20 +61,21 @@ m4_define(`counti', ``count'indexToBit($1)')
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class TreeN<V> {
+public class Tree4<V> {
 
     /** the number of colors in this tree */
-    /* BEGIN_M4_MACRO
-    private static final int COLOR_COUNT = VAR_COLOUR_COUNT;
-    END_M4_MACRO */ // BEGIN_M4_ALTERNATE
+    /*  BEGIN M4 MACRO GENERATED CODE */
+    private static final int COLOR_COUNT = 4;
+    /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
     private static final int COLOR_COUNT = 3;
-    // END_M4_ALTERNATE
+    // END ALTERNATE CODE */
 
     /** the colors in the tree, used for printing purposes only */
     private final ListToByteCoder<V> coder;
 
     /** the tree's root, or <code>null</code> for an empty tree */
-    private NodeN<V> root = null;
+    private Node4<V> root = null;
 
     /**
      * a list to add all nodes to that must be removed from
@@ -89,7 +83,7 @@ public class TreeN<V> {
      * which allows us a chance to do rotations without losing our position
      * in the tree.
      */
-    private final List<NodeN<V>> zeroQueue = new ArrayList<NodeN<V>>();
+    private final List<Node4<V>> zeroQueue = new ArrayList<Node4<V>>();
 
     /**
      * The comparator to use when performing ordering operations on the tree.
@@ -103,7 +97,7 @@ public class TreeN<V> {
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public TreeN/**/(ListToByteCoder<V> coder, Comparator<V> comparator) {
+    public Tree4/**/(ListToByteCoder<V> coder, Comparator<V> comparator) {
         if(coder == null) throw new NullPointerException("Coder cannot be null.");
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
@@ -114,7 +108,7 @@ public class TreeN<V> {
     /**
      * @param coder specifies the node colors
      */
-    public TreeN/**/(ListToByteCoder<V> coder) {
+    public Tree4/**/(ListToByteCoder<V> coder) {
         this(coder, (Comparator)GlazedLists.comparableComparator());
     }
 
@@ -135,13 +129,13 @@ public class TreeN<V> {
         if(root == null) throw new IndexOutOfBoundsException();
 
         // go deep, looking for our node of interest
-        NodeN<V> node = root;
+        Node4<V> node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // recurse on the left
-            NodeN<V> nodeLeft = node.left;
+            Node4<V> nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
             if(index < leftSize) {
                 node = nodeLeft;
@@ -186,16 +180,14 @@ public class TreeN<V> {
         assert(index <= size(indexColors));
         assert(size >= 0);
 
-        int colorAsIndex = colorAsIndex(color);
-
         if(this.root == null) {
             if(index != 0) throw new IndexOutOfBoundsException();
 
-            this.root = new NodeN<V>(color, size, value, null);
+            this.root = new Node4<V>(color, size, value, null);
             assert(valid());
             return this.root;
         } else {
-            NodeN<V> inserted = insertIntoSubtree(root, index, indexColors, color, colorAsIndex, value, size);
+            Node4<V> inserted = insertIntoSubtree(root, index, indexColors, color, value, size);
             assert(valid());
             return inserted;
         }
@@ -208,19 +200,18 @@ public class TreeN<V> {
      *      terms of. For example, if this is determined in terms of colors 4, 8
      *      and 32, then the value here should be 44 (32 + 8 + 4).
      * @param color a bitmask value such as 1, 2, 4, 8, 16, 32, 64 or 128.
-     * @param colorAsIndex an index value such as 0, 1, 2, 3, 4, 5, 6 or 7.
      * @param value the object to hold in the inserted node.
      * @param size the size of the inserted node, with respect to indices.
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private NodeN<V> insertIntoSubtree(NodeN<V> parent, int index, byte indexColors, byte color, int colorAsIndex, V value, int size) {
+    private Node4<V> insertIntoSubtree(Node4<V> parent, int index, byte indexColors, byte color, V value, int size) {
         while(true) {
             assert(parent != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            NodeN<V> parentLeft = parent.left;
+            Node4<V> parentLeft = parent.left;
             int parentLeftSize = parentLeft != null ? parentLeft.size(indexColors) : 0;
             int parentRightStartIndex = parentLeftSize + parent.nodeSize(indexColors);
 
@@ -229,7 +220,7 @@ public class TreeN<V> {
             if(color == parent.color && value == parent.value && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
                     parent.size += size;
-                    fixCountsThruRoot(parent, colorAsIndex, size);
+                    fixCountsThruRoot(parent, color, size);
                     return parent;
                 }
             }
@@ -238,9 +229,9 @@ public class TreeN<V> {
             if(index <= parentLeftSize) {
                 // as a new left child
                 if(parentLeft == null) {
-                    NodeN<V> inserted = new NodeN<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
                     parent.left = inserted;
-                    fixCountsThruRoot(parent, colorAsIndex, size);
+                    fixCountsThruRoot(parent, color, size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -256,10 +247,9 @@ public class TreeN<V> {
             if(index < parentRightStartIndex) {
                 int parentRightHalfSize = parentRightStartIndex - index;
                 parent.size -= parentRightHalfSize;
-                int parentColorAsIndex = colorAsIndex(parent.color);
-                fixCountsThruRoot(parent, parentColorAsIndex, -parentRightHalfSize);
+                fixCountsThruRoot(parent, parent.color, -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
-                Element<V> inserted = insertIntoSubtree(parent, index, indexColors, parent.color, parentColorAsIndex, null, parentRightHalfSize);
+                Element<V> inserted = insertIntoSubtree(parent, index, indexColors, parent.color, null, parentRightHalfSize);
                 inserted.set(parent.value);
 
                 // recalculate parentRightStartIndex, since that should have
@@ -271,13 +261,13 @@ public class TreeN<V> {
             right: {
                 int parentSize = parent.size(indexColors);
                 assert(index <= parentSize);
-                NodeN<V> parentRight = parent.right;
+                Node4<V> parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    NodeN<V> inserted = new NodeN<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
                     parent.right = inserted;
-                    fixCountsThruRoot(parent, colorAsIndex, size);
+                    fixCountsThruRoot(parent, color, size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -304,14 +294,12 @@ public class TreeN<V> {
     public Element<V> addInSortedOrder(byte color, V value, int size) {
         assert(size >= 0);
 
-        int colorAsIndex = colorAsIndex(color);
-
         if(this.root == null) {
-            this.root = new NodeN<V>(color, size, value, null);
+            this.root = new Node4<V>(color, size, value, null);
             assert(valid());
             return this.root;
         } else {
-            NodeN<V> inserted = insertIntoSubtreeInSortedOrder(root, color, colorAsIndex, value, size);
+            Node4<V> inserted = insertIntoSubtreeInSortedOrder(root, color, value, size);
             assert(valid());
             return inserted;
         }
@@ -320,13 +308,12 @@ public class TreeN<V> {
     /**
      * @param parent the subtree to insert into, must not be null.
      * @param color a bitmask value such as 1, 2, 4, 8, 16, 32, 64 or 128.
-     * @param colorAsIndex an index value such as 0, 1, 2, 3, 4, 5, 6 or 7.
      * @param value the object to hold in the inserted node.
      * @param size the size of the inserted node, with respect to indices.
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private NodeN<V> insertIntoSubtreeInSortedOrder(NodeN<V> parent, byte color, int colorAsIndex, V value, int size) {
+    private Node4<V> insertIntoSubtreeInSortedOrder(Node4<V> parent, byte color, V value, int size) {
         while(true) {
             assert(parent != null);
 
@@ -336,7 +323,7 @@ public class TreeN<V> {
             // current node, since that's the cheapest thing to do:
             if(compareResult == 0 && color == parent.color && value == parent.value && value != null) {
                 parent.size += size;
-                fixCountsThruRoot(parent, colorAsIndex, size);
+                fixCountsThruRoot(parent, color, size);
                 return parent;
             }
 
@@ -346,13 +333,13 @@ public class TreeN<V> {
             insertOnLeft = insertOnLeft || compareResult == 0 && parent.left == null;
             insertOnLeft = insertOnLeft || compareResult == 0 && parent.right != null && parent.left.height < parent.right.height;
             if(insertOnLeft) {
-                NodeN<V> parentLeft = parent.left;
+                Node4<V> parentLeft = parent.left;
 
                 // as a new left child
                 if(parentLeft == null) {
-                    NodeN<V> inserted = new NodeN<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
                     parent.left = inserted;
-                    fixCountsThruRoot(parent, colorAsIndex, size);
+                    fixCountsThruRoot(parent, color, size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -364,13 +351,13 @@ public class TreeN<V> {
 
             // ...or on the right
             } else {
-                NodeN<V> parentRight = parent.right;
+                Node4<V> parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    NodeN<V> inserted = new NodeN<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
                     parent.right = inserted;
-                    fixCountsThruRoot(parent, colorAsIndex, size);
+                    fixCountsThruRoot(parent, color, size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -387,16 +374,20 @@ public class TreeN<V> {
      * to the root. The counts of the specified color are adjusted by delta
      * (which may be positive or negative).
      */
-    private final void fixCountsThruRoot(NodeN<V> node, int colorIndex, int delta) {
+    private final void fixCountsThruRoot(Node4<V> node, byte color, int delta) {
         for( ; node != null; node = node.parent) {
-            /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(colorIndex == i) node.counti(i) += delta;
-            ')
-            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-            if(colorIndex == 0) node.count1 += delta;
-            if(colorIndex == 1) node.count2 += delta;
-            if(colorIndex == 2) node.count4 += delta;
-            // END_M4_ALTERNATE
+            /*  BEGIN M4 MACRO GENERATED CODE */
+            if(color == 1) node.count1 += delta;
+            if(color == 2) node.count2 += delta;
+            if(color == 4) node.count4 += delta;
+            if(color == 8) node.count8 += delta;
+            
+            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+            if(color == 1) node.count1 += delta;
+            if(color == 2) node.count2 += delta;
+            if(color == 4) node.count4 += delta;
+            // END ALTERNATE CODE */
         }
     }
 
@@ -414,7 +405,7 @@ public class TreeN<V> {
      *      the opposite side of the tree, whereas on an insert we only delete
      *      as far as necessary.
      */
-    private final void fixHeightPostChange(NodeN<V> node, boolean allTheWayToRoot) {
+    private final void fixHeightPostChange(Node4<V> node, boolean allTheWayToRoot) {
 
         // update the height
         for(; node != null; node = node.parent) {
@@ -467,11 +458,11 @@ public class TreeN<V> {
      *
      * @return the new root of the subtree
      */
-    private final NodeN<V> rotateLeft(NodeN<V> subtreeRoot) {
+    private final Node4<V> rotateLeft(Node4<V> subtreeRoot) {
         assert(subtreeRoot.left != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        NodeN<V> newSubtreeRoot = subtreeRoot.left;
+        Node4<V> newSubtreeRoot = subtreeRoot.left;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -503,11 +494,11 @@ public class TreeN<V> {
 
         return newSubtreeRoot;
     }
-    private final NodeN<V> rotateRight(NodeN<V> subtreeRoot) {
+    private final Node4<V> rotateRight(Node4<V> subtreeRoot) {
         assert(subtreeRoot.right != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        NodeN<V> newSubtreeRoot = subtreeRoot.right;
+        Node4<V> newSubtreeRoot = subtreeRoot.right;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -561,7 +552,7 @@ public class TreeN<V> {
 
         // remove the emptied nodes
         for(int i = 0; i < zeroQueue.size(); i++) {
-            NodeN<V> node = zeroQueue.get(i);
+            Node4<V> node = zeroQueue.get(i);
             assert(node.size == 0);
 
             if(node.right == null) {
@@ -581,13 +572,13 @@ public class TreeN<V> {
      * remove any nodes of size zero, that's up to the caller to do after by
      * removing all nodes in the zeroQueue from the tree.
      */
-    private void removeFromSubtree(NodeN<V> node, int index, byte indexColors, int size) {
+    private void removeFromSubtree(Node4<V> node, int index, byte indexColors, int size) {
         while(size > 0) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            NodeN<V> nodeLeft = node.left;
+            Node4<V> nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
 
             // delete on the left first
@@ -612,11 +603,10 @@ public class TreeN<V> {
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
-                int colorIndex = colorAsIndex(node.color);
                 node.size -= toRemove;
                 size -= toRemove;
                 rightStartIndex -= toRemove;
-                fixCountsThruRoot(node, colorIndex, -toRemove);
+                fixCountsThruRoot(node, node.color, -toRemove);
                 if(node.size == 0) zeroQueue.add(node);
                 if(size == 0) return;
             }
@@ -633,8 +623,8 @@ public class TreeN<V> {
      * the replacement node should have its height set first before this method
      * is called.
      */
-    private void replaceChild(NodeN<V> node, NodeN<V> replacement) {
-        NodeN<V> nodeParent = node.parent;
+    private void replaceChild(Node4<V> node, Node4<V> replacement) {
+        Node4<V> nodeParent = node.parent;
 
         // replace the root
         if(nodeParent == null) {
@@ -667,21 +657,20 @@ public class TreeN<V> {
      *
      * @return the replacement node
      */
-    private NodeN<V> replaceEmptyNodeWithChild(NodeN<V> toReplace) {
+    private Node4<V> replaceEmptyNodeWithChild(Node4<V> toReplace) {
         assert(toReplace.size == 0);
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
         // find the rightmost child on the leftside
-        NodeN<V> replacement = toReplace.left;
+        Node4<V> replacement = toReplace.left;
         while(replacement.right != null) {
             replacement = replacement.right;
         }
         assert(replacement.right == null);
 
         // remove that node from the tree
-        int replacementColorIndex = colorAsIndex(replacement.color);
-        fixCountsThruRoot(replacement, replacementColorIndex, -replacement.size);
+        fixCountsThruRoot(replacement, replacement.color, -replacement.size);
         replaceChild(replacement, replacement.left);
 
         // update the tree structure to point to the replacement
@@ -692,7 +681,7 @@ public class TreeN<V> {
         replacement.height = toReplace.height;
         replacement.refreshCounts(COLOR_COUNT);
         replaceChild(toReplace, replacement);
-        fixCountsThruRoot(replacement.parent, replacementColorIndex, replacement.size);
+        fixCountsThruRoot(replacement.parent, replacement.color, replacement.size);
 
         return replacement;
     }
@@ -727,7 +716,7 @@ public class TreeN<V> {
      * specified.
      */
     public int indexOf(Element<V> element, byte colorsOut) {
-        NodeN<V> node = (NodeN<V>)element;
+        Node4<V> node = (Node4<V>)element;
 
         // count all elements left of this node
         int index = node.left != null ? node.left.size(colorsOut) : 0;
@@ -755,13 +744,13 @@ public class TreeN<V> {
         int result = 0;
 
         // go deep, looking for our node of interest
-        NodeN<V> node = root;
+        Node4<V> node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            NodeN<V> nodeLeft = node.left;
+            Node4<V> nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
 
             // recurse on the left
@@ -821,7 +810,7 @@ public class TreeN<V> {
 
         // print it flattened, like a list of colors
         StringBuffer result = new StringBuffer();
-        for(NodeN<V> n = firstNode(); n != null; n = next(n)) {
+        for(Node4<V> n = firstNode(); n != null; n = next(n)) {
             Object color = coder.getColors().get(colorAsIndex(n.color));
             for(int i = 0; i < n.size; i++) {
                 result.append(color);
@@ -834,10 +823,10 @@ public class TreeN<V> {
     /**
      * Find the next node in the tree, working from left to right.
      */
-    static <V> NodeN<V> next(NodeN<V> node) {
+    static <V> Node4<V> next(Node4<V> node) {
         // if this node has a right subtree, it's the leftmost node in that subtree
         if(node.right != null) {
-            NodeN<V> child = node.right;
+            Node4<V> child = node.right;
             while(child.left != null) {
                 child = child.left;
             }
@@ -845,7 +834,7 @@ public class TreeN<V> {
 
         // otherwise its the nearest ancestor where I'm in the left subtree
         } else {
-            NodeN<V> ancestor = node;
+            Node4<V> ancestor = node;
             while(ancestor.parent != null && ancestor.parent.right == ancestor) {
                 ancestor = ancestor.parent;
             }
@@ -856,10 +845,10 @@ public class TreeN<V> {
     /**
      * Find the leftmost child in this subtree.
      */
-    NodeN<V> firstNode() {
+    Node4<V> firstNode() {
         if(root == null) return null;
 
-        NodeN<V> result = root;
+        Node4<V> result = root;
         while(result.left != null) {
             result = result.left;
         }
@@ -872,26 +861,34 @@ public class TreeN<V> {
      */
     private boolean valid() {
         // walk through all nodes in the tree, looking for something invalid
-        for(NodeN<V> node = firstNode(); node != null; node = next(node)) {
+        for(Node4<V> node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid
 
-            /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `int originalCounti(i) = node.counti(i);
-            ')
-            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
+            /*  BEGIN M4 MACRO GENERATED CODE */
             int originalCount1 = node.count1;
             int originalCount2 = node.count2;
             int originalCount4 = node.count4;
-            // END_M4_ALTERNATE
+            int originalCount8 = node.count8;
+            
+            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+            int originalCount1 = node.count1;
+            int originalCount2 = node.count2;
+            int originalCount4 = node.count4;
+            // END ALTERNATE CODE */
             node.refreshCounts(COLOR_COUNT);
-            /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `assert(originalCounti(i) == node.counti(i)) : "Incorrect count i on node: \n" + node  + "\n Expected " + node.counti(i) + " but was " + originalCounti(i);
-            ')
-            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
+            /*  BEGIN M4 MACRO GENERATED CODE */
+            assert(originalCount1 == node.count1) : "Incorrect count 0 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
+            assert(originalCount2 == node.count2) : "Incorrect count 1 on node: \n" + node  + "\n Expected " + node.count2 + " but was " + originalCount2;
+            assert(originalCount4 == node.count4) : "Incorrect count 2 on node: \n" + node  + "\n Expected " + node.count4 + " but was " + originalCount4;
+            assert(originalCount8 == node.count8) : "Incorrect count 3 on node: \n" + node  + "\n Expected " + node.count8 + " but was " + originalCount8;
+            
+            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
             assert(originalCount1 == node.count1) : "Incorrect count 1 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
             assert(originalCount2 == node.count2) : "Incorrect count 2 on node: \n" + node  + "\n Expected " + node.count2 + " but was " + originalCount2;
             assert(originalCount4 == node.count4) : "Incorrect count 4 on node: \n" + node  + "\n Expected " + node.count4 + " but was " + originalCount4;
-            // END_M4_ALTERNATE
+            // END ALTERNATE CODE */
 
             // heights are valid
             int leftHeight = node.left != null ? node.left.height : 0;

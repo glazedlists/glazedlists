@@ -258,7 +258,7 @@
         </javac>
         <!-- execute the Japex performance tests -->
         <!--<property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>-->
-        <property name="config" value="extensions/japex/ListEventPublisher-JapexConfig.xml"/>
+        <property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>
         <java dir="." fork="true" classname="com.sun.japex.Japex">
             <classpath>
                 <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
@@ -508,13 +508,25 @@
        Windows; http://gnuwin32.sourceforge.net/packages/m4.htm
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <target name="m4">
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Node5.java">
-            <arg line="-DVAR_COLOUR_COUNT=5"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/NodeN.jh"/>
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Node4.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/NodeN.java"/>
         </exec>
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree5.java">
-            <arg line="-DVAR_COLOUR_COUNT=5"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeN.jh"/>
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree4.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeN.java"/>
+        </exec>
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree4Iterator.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNIterator.java"/>
+        </exec>
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree4AsList.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNAsList.java"/>
         </exec>
     </target>
 

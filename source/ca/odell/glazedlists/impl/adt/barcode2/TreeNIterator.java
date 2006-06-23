@@ -28,6 +28,7 @@ m4_define(`originalCounti', ``originalCount'indexToBit($1)')
 m4_define(`indexToBit', `m4_eval(`2 ** $1')')
 m4_define(`NodeN', ``Node'VAR_COLOUR_COUNT')
 m4_define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
+m4_define(`TreeNAsList', ``Tree'VAR_COLOUR_COUNT`AsList'')
 m4_define(`TreeNIterator', ``Tree'VAR_COLOUR_COUNT`Iterator'')
 m4_define(`counti', ``count'indexToBit($1)')
 
@@ -58,7 +59,6 @@ public class TreeNIterator<V> {
     private TreeN<V> tree;
     private NodeN<V> node;
     private int index;
-    private int nodeColorAsIndex;
 
     public TreeNIterator/**/(TreeN<V> tree) {
         this.tree = tree;
@@ -85,7 +85,6 @@ public class TreeNIterator<V> {
 
         result.node = node;
         result.index = index;
-        result.nodeColorAsIndex = nodeColorAsIndex;
         return result;
     }
 
@@ -103,19 +102,18 @@ public class TreeNIterator<V> {
         // start at the first node in the tree
         if(node == null) {
             node = tree.firstNode();
-            nodeColorAsIndex = Tree.colorAsIndex(node.color);
             index = 0;
             if((node.color & colors) != 0) return;
 
         // increment within the current node
         } else if((node.color & colors) != 0 && index < node.size - 1) {
             /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(nodeColorAsIndex == i) counti(i)++;
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(node.color == indexToBit(i)) counti(i)++;
             ')
             END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-            if(nodeColorAsIndex == 0) count1++;
-            if(nodeColorAsIndex == 1) count2++;
-            if(nodeColorAsIndex == 2) count4++;
+            if(node.color == 1) count1++;
+            if(node.color == 2) count2++;
+            if(node.color == 4) count4++;
             // END_M4_ALTERNATE
             index++;
             return;
@@ -124,15 +122,14 @@ public class TreeNIterator<V> {
         // scan through the nodes, looking for the first one of the right color
         while(true) {
             /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(nodeColorAsIndex == i) counti(i) += node.size - index;
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(node.color == indexToBit(i)) counti(i) += node.size - index;
             ')
             END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-            if(nodeColorAsIndex == 0) count1 += node.size - index;
-            if(nodeColorAsIndex == 1) count2 += node.size - index;
-            if(nodeColorAsIndex == 2) count4 += node.size - index;
+            if(node.color == 1) count1 += node.size - index;
+            if(node.color == 2) count2 += node.size - index;
+            if(node.color == 4) count4 += node.size - index;
             // END_M4_ALTERNATE
             node = TreeN.next(node);
-            nodeColorAsIndex = Tree.colorAsIndex(node.color);
             index = 0;
 
             // we've found a node that meet our requirements, so return

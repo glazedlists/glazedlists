@@ -77,11 +77,9 @@ public final class ListEventAssembler<E> {
      */
     private static final <E> AssemblerHelper<E> createAssemblerDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
         if(assemblerName.equals("treedeltas")) {
-            return new TreeDeltasAssembler<E>(sourceList, publisher);
+            return new Tree4DeltasAssembler<E>(sourceList, publisher);
         } else if(assemblerName.equals("blockdeltas")) {
             return new BlockDeltasAssembler<E>(sourceList, publisher);
-//        } else if(assemblerName.equals("tree4deltas")) {
-//            return new Tree4DeltasAssembler<E>(sourceList, publisher);
         } else if(assemblerName.equals("barcodedeltas")) {
             return new BarcodeDeltasAssembler<E>(sourceList, publisher);
         } else {
@@ -433,7 +431,7 @@ public final class ListEventAssembler<E> {
     /**
      * ListEventAssembler using {@link BarcodeListDeltas} to store list changes.
      *
-     * @deprecated replaced with {@link TreeDeltasAssembler}
+     * @deprecated replaced with {@link Tree4DeltasAssembler}
      */
     static class BarcodeDeltasAssembler<E> extends AssemblerHelper<E> {
 
@@ -482,23 +480,22 @@ public final class ListEventAssembler<E> {
         }
     }
 
-
     /**
      * ListEventAssembler using {@link TreeDeltas} to store list changes.
      */
-    static class TreeDeltasAssembler<E> extends AssemblerHelper<E> {
+    static class Tree4DeltasAssembler<E> extends AssemblerHelper<E> {
 
         /** prefer to use the linear blocks, which are more performant but handle only a subset of all cases */
         private BlockSequence blockSequence = new BlockSequence();
         private boolean useListBlocksLinear = false;
 
         /** fall back to list deltas 2, which are capable of all list changes */
-        private TreeDeltas listDeltas = new TreeDeltas();
+        private Tree4Deltas listDeltas = new Tree4Deltas();
 
         /**
          * Creates a new ListEventAssembler that tracks changes for the specified list.
          */
-        public TreeDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
+        public Tree4DeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
             super(sourceList, publisher);
         }
 
@@ -536,7 +533,7 @@ public final class ListEventAssembler<E> {
             return useListBlocksLinear;
         }
 
-        public TreeDeltas getListDeltas() {
+        public Tree4Deltas getListDeltas() {
             return listDeltas;
         }
 
@@ -559,7 +556,7 @@ public final class ListEventAssembler<E> {
         }
 
         protected ListEvent<E> createListEvent() {
-            return new TreeDeltasListEvent<E>(this, sourceList);
+            return new Tree4DeltasListEvent<E>(this, sourceList);
         }
 
         public String toString() {
@@ -567,10 +564,12 @@ public final class ListEventAssembler<E> {
         }
     }
 
+
+
     /**
      * ListEventAssembler using {@link Block}s to store list changes.
      *
-     * @deprecated replaced with {@link TreeDeltasAssembler}
+     * @deprecated replaced with {@link Tree4DeltasAssembler}
      */
     static class BlockDeltasAssembler<E> extends AssemblerHelper<E> {
 

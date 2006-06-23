@@ -3,6 +3,29 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+/*
+ M4 Macros
+
+
+
+
+
+
+
+
+ Barcode2 Macros
+
+
+
+
+
+
+
+
+
+
+*/
+
 import java.util.List;
 import java.util.Arrays;
 
@@ -18,10 +41,21 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class Node<V> implements Element<V> {
+class Node4<V> implements Element<V> {
 
     /** the number of elements of each color in this subtree */
-    int[] counts;
+    /*  BEGIN M4 MACRO GENERATED CODE */
+    int count1;
+    int count2;
+    int count4;
+    int count8;
+    
+    /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+    int count1;
+    int count2;
+    int count4;
+    // END ALTERNATE CODE */
 
     /** the node's color */
     final byte color;
@@ -34,7 +68,7 @@ class Node<V> implements Element<V> {
 
     /** values for managing the node within the tree */
     byte height;
-    Node<V> left, right, parent;
+    Node4/**/<V> left, right, parent;
 
     /**
      * Create a new node.
@@ -45,13 +79,26 @@ class Node<V> implements Element<V> {
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public Node(byte color, int size, V value, Node<V> parent) {
-        assert(Tree.colorAsIndex(color) >= 0 && Tree.colorAsIndex(color) < 7);
+    public Node4/**/(byte color, int size, V value, Node4/**/<V> parent) {
+        assert(Tree4.colorAsIndex(color) >= 0 && Tree4.colorAsIndex(color) < 7);
         this.color = color;
         this.size = size;
         this.value = value;
         this.height = 1;
         this.parent = parent;
+
+        /*  BEGIN M4 MACRO GENERATED CODE */
+        if(color == 1) count1 += size;
+        if(color == 2) count2 += size;
+        if(color == 4) count4 += size;
+        if(color == 8) count8 += size;
+        
+        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+        if(color == 1) count1 += size;
+        if(color == 2) count2 += size;
+        if(color == 4) count4 += size;
+        // END ALTERNATE CODE */
     }
 
     /**
@@ -80,35 +127,22 @@ class Node<V> implements Element<V> {
      * and the right child.
      */
     final int size(byte colors) {
-        if(counts == null) {
-            return (colors & color) != 0 ? size : 0;
-        } else {
-            // total the values of the specified array for the specified colors.
-            int result = 0;
+        // total the values of the specified array for the specified colors.
+        int result = 0;
 
-            if((colors & 1) != 0) result += counts[0];
-            if(counts.length == 1) return result;
-
-            if((colors & 2) != 0) result += counts[1];
-            if(counts.length == 2) return result;
-
-            if((colors & 4) != 0) result += counts[2];
-            if(counts.length == 3) return result;
-
-            if((colors & 8) != 0) result += counts[3];
-            if(counts.length == 4) return result;
-
-            if((colors & 16) != 0) result += counts[4];
-            if(counts.length == 5) return result;
-
-            if((colors & 32) != 0) result += counts[5];
-            if(counts.length == 6) return result;
-
-            if((colors & 64) != 0) result += counts[6];
-            if(counts.length == 7) return result;
-
-            throw new IllegalStateException();
-        }
+        /*  BEGIN M4 MACRO GENERATED CODE */
+        if((colors & 1) != 0) result += count1;
+        if((colors & 2) != 0) result += count2;
+        if((colors & 4) != 0) result += count4;
+        if((colors & 8) != 0) result += count8;
+        
+        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+        if((colors & 1) != 0) result += count1;
+        if((colors & 2) != 0) result += count2;
+        if((colors & 4) != 0) result += count4;
+        // END ALTERNATE CODE */
+        return result;
     }
 
     /**
@@ -125,28 +159,66 @@ class Node<V> implements Element<V> {
      * @param colorCount the number of colors in the tree
      */
     final void refreshCounts(int colorCount) {
-        // if we have a child node, we need a valid counts array
-        if(left != null || right != null) {
-            if(counts == null) counts = new int[colorCount];
-            for(int colorIndex = 0; colorIndex < counts.length; colorIndex++) {
-                int colorTotal = 0;
-                if(left != null && left.counts != null) colorTotal += left.counts[colorIndex];
-                if(right != null && right.counts != null) colorTotal += right.counts[colorIndex];
-                counts[colorIndex] = colorTotal;
-            }
-            counts[Tree.colorAsIndex(color)] += size;
-            if(left != null && left.counts == null) counts[Tree.colorAsIndex(left.color)] += left.size;
-            if(right != null && right.counts == null) counts[Tree.colorAsIndex(right.color)] += right.size;
 
-        // we don't have a child node yet, the counts array may be null
-        } else {
-            if(counts != null) {
-                for(int c = 0; c < colorCount; c++) {
-                    counts[c] = 0;
-                }
-                counts[Tree.colorAsIndex(color)] = size;
-            }
+        /*  BEGIN M4 MACRO GENERATED CODE */
+        count1 = 0;
+        count2 = 0;
+        count4 = 0;
+        count8 = 0;
+        
+        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+        count1 = 0;
+        count2 = 0;
+        count4 = 0;
+        // END ALTERNATE CODE */
+
+        // left child
+        if(left != null) {
+            /*  BEGIN M4 MACRO GENERATED CODE */
+            count1 += left.count1;
+            count2 += left.count2;
+            count4 += left.count4;
+            count8 += left.count8;
+            
+            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+            count1 += left.count1;
+            count2 += left.count2;
+            count4 += left.count4;
+            // END ALTERNATE CODE */
         }
+
+        // right child
+        if(right != null) {
+            /*  BEGIN M4 MACRO GENERATED CODE */
+            count1 += right.count1;
+            count2 += right.count2;
+            count4 += right.count4;
+            count8 += right.count8;
+            
+            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+            count1 += right.count1;
+            count2 += right.count2;
+            count4 += right.count4;
+            // END ALTERNATE CODE */
+        }
+
+        // this node
+        /*  BEGIN M4 MACRO GENERATED CODE */
+        if(color == 1) count1 += size;
+        if(color == 2) count2 += size;
+        if(color == 4) count4 += size;
+        if(color == 8) count8 += size;
+        
+        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+        if(color == 1) count1 += size;
+        if(color == 2) count2 += size;
+        if(color == 4) count4 += size;
+        // END ALTERNATE CODE */
+
     }
 
     /** {@inheritDoc} */
@@ -174,7 +246,7 @@ class Node<V> implements Element<V> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-        out.append(colors.get(Tree.colorAsIndex(color)));
+        out.append(colors.get(Tree4.colorAsIndex(color)));
         out.append(" [").append(size).append("]");
         if(value != null) out.append(": ").append(value);
         out.append("\n");
