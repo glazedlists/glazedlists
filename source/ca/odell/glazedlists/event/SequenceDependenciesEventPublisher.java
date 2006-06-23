@@ -101,7 +101,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             // get all listeners to this subject, we try this set because
             // we know at least one of their edges is satisfied, and
             // we hope that all of their edges is satisfied.
-            List<SubjectAndListener> sourceTargets = sourceToPairs.get(subject);
+            List<SubjectAndListener> sourceTargets = (List<SubjectAndListener>) sourceToPairs.get(subject);
 
             // can we satisfy this target?
             tryEachTarget:
@@ -109,7 +109,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
                 Object sourceTarget = getRelatedSubject(sourceTargets.get(t).listener);
 
                 // make sure we can satisfy this if all its sources are in satisfiedSources
-                List<SubjectAndListener> allSourcesForSourceTarget = targetToPairs.get(sourceTarget);
+                List<SubjectAndListener> allSourcesForSourceTarget = (List<SubjectAndListener>) targetToPairs.get(sourceTarget);
                 // we've since processed this entire target, we shouldn't process it twice
                 if(allSourcesForSourceTarget.size() == 0) continue;
                 for(int s = 0, sourcesSize = allSourcesForSourceTarget.size(); s < sourcesSize; s++) {
