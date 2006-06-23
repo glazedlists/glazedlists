@@ -1125,8 +1125,6 @@ public class SortedListTest extends TestCase {
         expectedOrder = new ArrayList<Comparable>(unsortedList);
         Collections.sort(expectedOrder, artistComparator);
         assertEquals(expectedOrder, sortedAgain);
-
-
     }
 
     public void testSortedSource() {
@@ -1146,7 +1144,7 @@ public class SortedListTest extends TestCase {
         unsortedList.addAll(Arrays.asList(new String[] { "c", "dddd", "aaa", "bb" }));
         assertSortedEquals(sortedList, resortedList);
 
-        // now chnage the comparator
+        // now change the comparator
         sortedList.setComparator(alphabetical);
         assertSortedEquals(sortedList, resortedList);
     }
@@ -1170,6 +1168,49 @@ public class SortedListTest extends TestCase {
         new SortedList<Integer>(new BasicEventList<Integer>(), new AlwaysEqualComparator());
     }
 
+    public void testChangingSortMode() {
+        SortedList<String> names = new SortedList<String>(new BasicEventList<String>());
+        names.setMode(SortedList.AVOID_MOVING_ELEMENTS);
+
+        names.add("");
+        names.add("");
+        names.add("");
+        names.add("");
+
+        names.set(0, "abba");
+        names.set(1, "foo fighters");
+        names.set(2, "nirvana");
+        names.set(3, "cardigans");
+
+        assertEquals("abba", names.get(0));
+        assertEquals("foo fighters", names.get(1));
+        assertEquals("nirvana", names.get(2));
+        assertEquals("cardigans", names.get(3));
+
+        names.setMode(SortedList.STRICT_SORT_ORDER);
+
+        assertEquals("abba", names.get(0));
+        assertEquals("cardigans", names.get(1));
+        assertEquals("foo fighters", names.get(2));
+        assertEquals("nirvana", names.get(3));
+
+        names.setMode(SortedList.AVOID_MOVING_ELEMENTS);
+        names.add("bob marley");
+
+        assertEquals("abba", names.get(0));
+        assertEquals("bob marley", names.get(1));
+        assertEquals("cardigans", names.get(2));
+        assertEquals("foo fighters", names.get(3));
+        assertEquals("nirvana", names.get(4));
+
+        names.set(1, "zamfir");
+        assertEquals("abba", names.get(0));
+        assertEquals("zamfir", names.get(1));
+        assertEquals("cardigans", names.get(2));
+        assertEquals("foo fighters", names.get(3));
+        assertEquals("nirvana", names.get(4));
+    }
+
     /** test a sorted list for equality */
     public void assertSortedEquals(List<Comparable> unsorted, SortedList sorted) {
         // create a protective copy to muck with
@@ -1177,7 +1218,6 @@ public class SortedListTest extends TestCase {
         if(sorted.getComparator() != null) Collections.sort(unsorted, sorted.getComparator());
         assertEquals(unsorted, sorted);
     }
-
 
     /**
      * Compares two objects to be equal.
