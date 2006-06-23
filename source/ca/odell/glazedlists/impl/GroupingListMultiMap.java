@@ -117,7 +117,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     public List<V> put(Comparable<K> key, List<V> value) {
         this.checkKeyValueAgreement(key, value);
 
-        final List<V> removed = this.remove(key);
+        final List<V> removed = (List<V>) this.remove(key);
         this.groupingList.add(value);
 
         return removed;
