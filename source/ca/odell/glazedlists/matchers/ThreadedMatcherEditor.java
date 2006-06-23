@@ -48,9 +48,8 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
     /**
      * The LinkedList acting as a queue of MatcherEditor.Event in the order in which they are received
-     * from {@link #source}. We use a synchronized list to ensure atomicity of reads and writes to
-     * the queue, and take care to ensure iteration occurs over copies of the queue data and not
-     * the queue itself so as to avoid concurrent modification problems.
+     * from {@link #source}. We take great care to ensure that the queue's monitor is held before it
+     * is queried or mutated.
      */
     private final List<MatcherEditor.Event<E>> matcherEventQueue = new LinkedList<MatcherEditor.Event<E>>();
 
