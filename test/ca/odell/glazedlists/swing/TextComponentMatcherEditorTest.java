@@ -3,11 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// for being a JUnit test case
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.SimpleMatcherEditorListener;
 
 import javax.swing.*;
+import javax.swing.text.Document;
+import javax.swing.text.AbstractDocument;
 
 /**
  * Test {@link TextComponentMatcherEditor}.
@@ -33,22 +35,61 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
         eventCounter = null;
     }
 
+    public void testConstructors() {
+        JTextField textComponent = new JTextField();
+        AbstractDocument document = (AbstractDocument) textComponent.getDocument();
+        int initialDocumentListenerCount = document.getDocumentListeners().length;
+        TextFilterator textFilterator = GlazedLists.toStringTextFilterator();
+        TextComponentMatcherEditor<String> tcme;
+
+        tcme = new TextComponentMatcherEditor<String>(textComponent, textFilterator);
+        assertEquals(0, textComponent.getActionListeners().length);
+        assertEquals(initialDocumentListenerCount+1, document.getDocumentListeners().length);
+        assertSame(textFilterator, tcme.getFilterator());
+        assertTrue(tcme.isLive());
+
+        tcme.dispose();
+        tcme = new TextComponentMatcherEditor<String>(textComponent, textFilterator, true);
+        assertEquals(0, textComponent.getActionListeners().length);
+        assertEquals(initialDocumentListenerCount+1, document.getDocumentListeners().length);
+        assertSame(textFilterator, tcme.getFilterator());
+        assertTrue(tcme.isLive());
+
+        tcme.dispose();
+        tcme = new TextComponentMatcherEditor<String>(textComponent, textFilterator, false);
+        assertEquals(1, textComponent.getActionListeners().length);
+        assertEquals(initialDocumentListenerCount, document.getDocumentListeners().length);
+        assertSame(textFilterator, tcme.getFilterator());
+        assertFalse(tcme.isLive());
+
+        tcme.dispose();
+        tcme = new TextComponentMatcherEditor<String>(document, textFilterator);
+        assertEquals(0, textComponent.getActionListeners().length);
+        assertEquals(initialDocumentListenerCount+1, document.getDocumentListeners().length);
+        assertSame(textFilterator, tcme.getFilterator());
+        assertTrue(tcme.isLive());
+
+        tcme.dispose();
+        assertEquals(0, textComponent.getActionListeners().length);
+        assertEquals(initialDocumentListenerCount, document.getDocumentListeners().length);
+    }
+
     /**
      * Test that this thing works, even if our document is preloaded with data.
      */
     public void guiTestPrePopulated() {
-        TextComponentMatcherEditor textMatcherEditor = null;
+        TextComponentMatcherEditor<String> textMatcherEditor = null;
         eventCounter.assertNoEvents(0);
 
         // test the text field
         JTextField prePopulatedTextField = new JTextField();
         prePopulatedTextField.setText("ABC");
-        textMatcherEditor = new TextComponentMatcherEditor(prePopulatedTextField, GlazedLists.toStringTextFilterator(), true);
+        textMatcherEditor = new TextComponentMatcherEditor<String>(prePopulatedTextField, GlazedLists.toStringTextFilterator(), true);
         assertTrue(textMatcherEditor.getMatcher().matches("ABCDE"));
         assertFalse(textMatcherEditor.getMatcher().matches("BCDEF"));
 
         // test the document
-        textMatcherEditor = new TextComponentMatcherEditor(prePopulatedTextField.getDocument(), GlazedLists.toStringTextFilterator());
+        textMatcherEditor = new TextComponentMatcherEditor<String>(prePopulatedTextField.getDocument(), GlazedLists.toStringTextFilterator());
         assertTrue(textMatcherEditor.getMatcher().matches("ABCDE"));
         assertFalse(textMatcherEditor.getMatcher().matches("BCDEF"));
     }
@@ -57,12 +98,12 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
      * Test that this thing works when the document is changed.
      */
     public void guiTestChangeDocument() {
-        TextComponentMatcherEditor textMatcherEditor = null;
+        TextComponentMatcherEditor<String> textMatcherEditor = null;
         eventCounter.assertNoEvents(0);
 
         // test the text field
         JTextField textField = new JTextField();
-        textMatcherEditor = new TextComponentMatcherEditor(textField, GlazedLists.toStringTextFilterator(), true);
+        textMatcherEditor = new TextComponentMatcherEditor<String>(textField, GlazedLists.toStringTextFilterator(), true);
         assertTrue(textMatcherEditor.getMatcher().matches("ABCDE"));
         textField.setText("DEF");
         assertFalse(textMatcherEditor.getMatcher().matches("ABCDE"));
@@ -70,7 +111,7 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
 
         // test the document
         textField = new JTextField();
-        textMatcherEditor = new TextComponentMatcherEditor(textField.getDocument(), GlazedLists.toStringTextFilterator());
+        textMatcherEditor = new TextComponentMatcherEditor<String>(textField.getDocument(), GlazedLists.toStringTextFilterator());
         assertTrue(textMatcherEditor.getMatcher().matches("ABCDE"));
         textField.setText("HIJ");
         assertFalse(textMatcherEditor.getMatcher().matches("BCDEF"));
@@ -81,12 +122,12 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
      * Test that this thing works when live is turned off.
      */
     public void guiTestNonLive() {
-        TextComponentMatcherEditor textMatcherEditor = null;
+        TextComponentMatcherEditor<String> textMatcherEditor = null;
         eventCounter.assertNoEvents(0);
 
         // test the text field
         JTextField textField = new JTextField();
-        textMatcherEditor = new TextComponentMatcherEditor(textField, GlazedLists.toStringTextFilterator(), false);
+        textMatcherEditor = new TextComponentMatcherEditor<String>(textField, GlazedLists.toStringTextFilterator(), false);
         assertTrue(textMatcherEditor.getMatcher().matches("ABCDE"));
         textField.setText("DEF");
         assertTrue(textMatcherEditor.getMatcher().matches("ABCDE"));
@@ -100,7 +141,7 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
      * Test that this thing works with dispose.
      */
     public void guiTestDispose() {
-        TextComponentMatcherEditor textMatcherEditor = null;
+        TextComponentMatcherEditor<String> textMatcherEditor = null;
         eventCounter.assertNoEvents(0);
 
         // test both live and dead
@@ -109,7 +150,7 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
 
             // test the text field
             JTextField textField = new JTextField();
-            textMatcherEditor = new TextComponentMatcherEditor(textField, GlazedLists.toStringTextFilterator(), liveOptions[b]);
+            textMatcherEditor = new TextComponentMatcherEditor<String>(textField, GlazedLists.toStringTextFilterator(), liveOptions[b]);
             textField.setText("DEF");
             textField.postActionEvent();
             assertTrue(textMatcherEditor.getMatcher().matches("TONEDEF"));

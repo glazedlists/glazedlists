@@ -159,7 +159,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         if (TextMatcher.isFilterRelaxed(oldFilters, newFilters))
             fireRelaxed(matcher);
-        else if(TextMatcher.isFilterConstrained(oldFilters, newFilters))
+        else if (TextMatcher.isFilterConstrained(oldFilters, newFilters))
             fireConstrained(matcher);
         else
             fireChanged(matcher);

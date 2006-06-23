@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
  * <p>The MatcherEditor registers itself as a {@link DocumentListener} on the
  * given Document, or {@link ActionListener} for non-live filtering. If this
  * MatcherEditor must be garbage collected before the underlying Document,
- * or JTextField, the listener can be unregistered by calling {@link #dispose()}.
+ * or JTextComponent, the listener can be unregistered by calling {@link #dispose()}.
  *
  * @author James Lemieux
  */
@@ -38,7 +38,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
     /** The Document that provides the filter values. */
     private final Document document;
 
-    /** the JTextField being observed for actions */
+    /** the JTextComponent being observed for actions */
     private JTextComponent textComponent;
 
     /** whether we're listening to each keystroke */
@@ -76,21 +76,13 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      * @param live <code>true</code> to filter by the keystroke or <code>false</code>
      *      to filter only when {@link java.awt.event.KeyEvent#VK_ENTER Enter} is pressed
-     *      within the {@link JTextField}. Note that non-live filtering is only
+     *      within the {@link JTextComponent}. Note that non-live filtering is only
      *      supported if <code>textComponent</code> is a {@link JTextField}.
-     * @throws IllegalArgumentException if the <code>textComponent</code> does
+     * @throws IllegalArgumentException if the <code>textComponent</code>
      *      is not a {@link JTextField} and non-live filtering is specified.
      */
     public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator<E> textFilterator, boolean live) {
-        super(textFilterator);
-
-        this.textComponent = textComponent;
-        this.document = textComponent.getDocument();
-        this.live = live;
-        registerListeners(live);
-
-        // if the document is non-empty to begin with!
-        refilter();
+        this(textComponent, textComponent.getDocument(), textFilterator, live);
     }
 
     /**
@@ -105,9 +97,20 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      */
     public TextComponentMatcherEditor(Document document, TextFilterator<E> textFilterator) {
+        this(null, document, textFilterator, true);
+    }
+
+    /**
+     * This private constructor implements the actual construction work and thus
+     * ensures that all public constructors agree on the construction logic.
+     */
+    private TextComponentMatcherEditor(JTextComponent textComponent, Document document, TextFilterator<E> textFilterator, boolean live) {
         super(textFilterator);
+
+        this.textComponent = textComponent;
         this.document = document;
-        registerListeners(true);
+        this.live = live;
+        registerListeners(live);
 
         // if the document is non-empty to begin with!
         refilter();
@@ -125,7 +128,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      *
      * @param live <code>true</code> to filter by the keystroke or <code>false</code>
      *      to filter only when {@link java.awt.event.KeyEvent#VK_ENTER Enter} is pressed
-     *      within the {@link JTextField}. Note that non-live filtering is only
+     *      within the {@link JTextComponent}. Note that non-live filtering is only
      *      supported if <code>textComponent</code> is a {@link JTextField}.
      */
     public void setLive(boolean live) {
