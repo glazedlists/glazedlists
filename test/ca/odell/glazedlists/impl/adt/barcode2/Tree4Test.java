@@ -301,32 +301,32 @@ public class Tree4Test extends TestCase {
         assertEquals(Tree4Test.april, tree.get(4, Tree4Test.a).get());
     }
 
-    public void testSevenColors() {
-        Tree4Test.colors = GlazedListsTests.stringToList("ABCDEFG");
-        Tree4Test.coder = new ListToByteCoder<String>(Tree4Test.colors);
-        Tree4Test.allColors = Tree4Test.coder.colorsToByte(GlazedListsTests.stringToList("ABCDEFG"));
-        final byte d = Tree4Test.coder.colorToByte("D");
-        final byte e = Tree4Test.coder.colorToByte("E");
-        final byte f = Tree4Test.coder.colorToByte("F");
-        final byte g = Tree4Test.coder.colorToByte("G");
-
-        Tree4<String> tree = new Tree4<String>(Tree4Test.coder);
-        tree.add(0, Tree4Test.allColors, Tree4Test.a, null, 4);
-        tree.add(4, Tree4Test.allColors, Tree4Test.b, null, 4);
-        tree.add(8, Tree4Test.allColors, Tree4Test.c, null, 4);
-        tree.add(12, Tree4Test.allColors, d, null, 4);
-        tree.add(16, Tree4Test.allColors, e, null, 4);
-        tree.add(20, Tree4Test.allColors, f, null, 4);
-        tree.add(24, Tree4Test.allColors, g, null, 4);
-        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGG", tree.asSequenceOfColors());
-        assertEquals(4, tree.size(Tree4Test.a));
-        assertEquals(4, tree.size(Tree4Test.b));
-        assertEquals(4, tree.size(Tree4Test.c));
-        assertEquals(4, tree.size(d));
-        assertEquals(4, tree.size(e));
-        assertEquals(4, tree.size(f));
-        assertEquals(4, tree.size(g));
-    }
+//    public void testSevenColors() {
+//        Tree4Test.colors = GlazedListsTests.stringToList("ABCDEFG");
+//        Tree4Test.coder = new ListToByteCoder<String>(Tree4Test.colors);
+//        Tree4Test.allColors = Tree4Test.coder.colorsToByte(GlazedListsTests.stringToList("ABCDEFG"));
+//        final byte d = Tree4Test.coder.colorToByte("D");
+//        final byte e = Tree4Test.coder.colorToByte("E");
+//        final byte f = Tree4Test.coder.colorToByte("F");
+//        final byte g = Tree4Test.coder.colorToByte("G");
+//
+//        Tree4<String> tree = new Tree4<String>(Tree4Test.coder);
+//        tree.add(0, Tree4Test.allColors, Tree4Test.a, null, 4);
+//        tree.add(4, Tree4Test.allColors, Tree4Test.b, null, 4);
+//        tree.add(8, Tree4Test.allColors, Tree4Test.c, null, 4);
+//        tree.add(12, Tree4Test.allColors, d, null, 4);
+//        tree.add(16, Tree4Test.allColors, e, null, 4);
+//        tree.add(20, Tree4Test.allColors, f, null, 4);
+//        tree.add(24, Tree4Test.allColors, g, null, 4);
+//        assertEquals("AAAABBBBCCCCDDDDEEEEFFFFGGGG", tree.asSequenceOfColors());
+//        assertEquals(4, tree.size(Tree4Test.a));
+//        assertEquals(4, tree.size(Tree4Test.b));
+//        assertEquals(4, tree.size(Tree4Test.c));
+//        assertEquals(4, tree.size(d));
+//        assertEquals(4, tree.size(e));
+//        assertEquals(4, tree.size(f));
+//        assertEquals(4, tree.size(g));
+//    }
 
     public void testTreeAsList() {
         Tree4<String> tree = new Tree4<String>(Tree4Test.coder);
