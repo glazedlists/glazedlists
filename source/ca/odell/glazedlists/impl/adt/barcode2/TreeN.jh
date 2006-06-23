@@ -11,34 +11,32 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /*
-M4 Macros:
+ M4 Macros
 
-divert(-1)
+m4_divert(-1)
 # forloop(i, from, to, stmt)
 
-define(`forloop', `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
-define(`_forloop',
-       `$4`'ifelse($1, `$3', ,
-             `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
-divert
+m4_define(`forloop', `m4_pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')m4_popdef(`$1')')
+m4_define(`_forloop',
+       `$4`'m4_ifelse($1, `$3', ,
+             `m4_define(`$1', m4_incr($1))_forloop(`$1', `$2', `$3', `$4')')')
+m4_divert
 
-define(`counti', `count'`$1')
-define(`originalCounti', `originalCount'`$1')
-
-define(`indexToBit', `eval(`2 ** $1')')
-indexToBit(0) == 1
-indexToBit(1) == 2
-indexToBit(2) == 4
-indexToBit(3) == 8
-
-define(`NodeN', ``Node'VAR_COLOUR_COUNT')
-define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
-
-define(`BEGIN_M4_MACRO', ` BEGIN M4 MACRO GENERATED CODE *'`/')
-define(`END_M4_MACRO', `/'`* END M4 MACRO GENERATED CODE ')
-define(`BEGIN_M4_ALTERNATE', `BEGIN M4 ALTERNATE CODE
+m4_define(`BEGIN_M4_MACRO', ` BEGIN M4 MACRO GENERATED CODE *'`/')
+m4_define(`END_M4_MACRO', `/'`* END M4 MACRO GENERATED CODE ')
+m4_define(`BEGIN_M4_ALTERNATE', `BEGIN M4 ALTERNATE CODE
 /'`* ')
-define(`END_M4_ALTERNATE', `END ALTERNATE CODE *'`/')
+m4_define(`END_M4_ALTERNATE', `END ALTERNATE CODE *'`/')
+
+ Barcode2 Macros
+
+m4_define(`VAR_LAST_COLOR_INDEX', `m4_eval(VAR_COLOUR_COUNT-1)')
+m4_define(`originalCounti', ``originalCount'indexToBit($1)')
+m4_define(`indexToBit', `m4_eval(`2 ** $1')')
+m4_define(`NodeN', ``Node'VAR_COLOUR_COUNT')
+m4_define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
+m4_define(`TreeNIterator', ``Tree'VAR_COLOUR_COUNT`Iterator'')
+m4_define(`counti', ``count'indexToBit($1)')
 
 */
 
@@ -392,12 +390,12 @@ public class TreeN<V> {
     private final void fixCountsThruRoot(NodeN<V> node, int colorIndex, int delta) {
         for( ; node != null; node = node.parent) {
             /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_COLOUR_COUNT, `if(colorIndex == i) node.counti(i) += delta;
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(colorIndex == i) node.counti(i) += delta;
             ')
             END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-            if(colorIndex == 0) node.count0 += delta;
-            if(colorIndex == 1) node.count1 += delta;
-            if(colorIndex == 2) node.count2 += delta;
+            if(colorIndex == 0) node.count1 += delta;
+            if(colorIndex == 1) node.count2 += delta;
+            if(colorIndex == 2) node.count4 += delta;
             // END_M4_ALTERNATE
         }
     }
@@ -878,21 +876,21 @@ public class TreeN<V> {
             // sizes (counts) are valid
 
             /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_COLOUR_COUNT, `int originalCounti(i) = node.counti(i);
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `int originalCounti(i) = node.counti(i);
             ')
             END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-            int originalCount0 = node.count0;
             int originalCount1 = node.count1;
             int originalCount2 = node.count2;
+            int originalCount4 = node.count4;
             // END_M4_ALTERNATE
             node.refreshCounts(COLOR_COUNT);
             /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_COLOUR_COUNT, `assert(originalCounti(i) == node.counti(i)) : "Incorrect count i on node: \n" + node  + "\n Expected " + node.counti(i) + " but was " + originalCounti(i);
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `assert(originalCounti(i) == node.counti(i)) : "Incorrect count i on node: \n" + node  + "\n Expected " + node.counti(i) + " but was " + originalCounti(i);
             ')
             END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-            assert(originalCount0 == node.count0) : "Incorrect count 0 on node: \n" + node  + "\n Expected " + node.count0 + " but was " + originalCount0;
             assert(originalCount1 == node.count1) : "Incorrect count 1 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
             assert(originalCount2 == node.count2) : "Incorrect count 2 on node: \n" + node  + "\n Expected " + node.count2 + " but was " + originalCount2;
+            assert(originalCount4 == node.count4) : "Incorrect count 4 on node: \n" + node  + "\n Expected " + node.count4 + " but was " + originalCount4;
             // END_M4_ALTERNATE
 
             // heights are valid
