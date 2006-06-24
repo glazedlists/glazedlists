@@ -52,12 +52,12 @@ class Tree4Deltas {
 
     public int currentToSnapshot(int currentIndex) {
         if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
-        return tree.indexOf(currentIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.SNAPSHOT_INDICES);
+        return tree.convertIndexColor(currentIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.SNAPSHOT_INDICES);
     }
 
     public int snapshotToCurrent(int snapshotIndex) {
         if(!initialCapacityKnown) ensureCapacity(snapshotIndex + 1);
-        return tree.indexOf(snapshotIndex, Tree4Deltas.SNAPSHOT_INDICES, Tree4Deltas.CURRENT_INDICES);
+        return tree.convertIndexColor(snapshotIndex, Tree4Deltas.SNAPSHOT_INDICES, Tree4Deltas.CURRENT_INDICES);
     }
 
     /**
@@ -69,7 +69,7 @@ class Tree4Deltas {
     public void  update(int startIndex, int endIndex) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
-            int overallIndex = tree.indexOf(i, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
+            int overallIndex = tree.convertIndexColor(i, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
             // don't bother updating an inserted element
             if(tree.get(overallIndex, Tree4Deltas.ALL_INDICES).getColor() == Tree4Deltas.INSERT) return;
             tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.UPDATE, Tree4Deltas.LIST_CHANGE, 1);
@@ -96,7 +96,7 @@ class Tree4Deltas {
     public void delete(int startIndex, int endIndex) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
-            int overallIndex = tree.indexOf(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
+            int overallIndex = tree.convertIndexColor(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
             // if its an insert, simply remove that insert
             if(tree.get(overallIndex, Tree4Deltas.ALL_INDICES).getColor() == Tree4Deltas.INSERT) {
                 if(!allowContradictingEvents) throw new IllegalStateException("Remove " + i + " undoes prior insert at the same index! Consider enabling contradicting events.");

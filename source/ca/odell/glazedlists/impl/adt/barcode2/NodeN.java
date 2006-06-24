@@ -151,10 +151,8 @@ class NodeN<V> implements Element<V> {
     /**
      * Update the counts member variable by examining the counts of
      * the child nodes and the size member variable.
-     *
-     * @param colorCount the number of colors in the tree
      */
-    final void refreshCounts(int colorCount) {
+    final void refreshCounts() {
 
         /* BEGIN_M4_MACRO
         forloop(`i', 0, VAR_LAST_COLOR_INDEX, `counti(i) = 0;

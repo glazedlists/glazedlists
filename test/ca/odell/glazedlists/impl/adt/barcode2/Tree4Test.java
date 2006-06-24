@@ -45,16 +45,16 @@ public class Tree4Test extends TestCase {
         assertEquals(13, tree.size(Tree4Test.bOrC));
         assertEquals(10, tree.size(Tree4Test.aOrC));
 
-        assertEquals(0, tree.indexOf(nodeA1, Tree4Test.allColors));
-        assertEquals(5, tree.indexOf(nodeB1, Tree4Test.allColors));
-        assertEquals(10, tree.indexOf(nodeC1, Tree4Test.allColors));
-        assertEquals(12, tree.indexOf(nodeB2, Tree4Test.allColors));
+        assertEquals(0, tree.indexOfNode(nodeA1, Tree4Test.allColors));
+        assertEquals(5, tree.indexOfNode(nodeB1, Tree4Test.allColors));
+        assertEquals(10, tree.indexOfNode(nodeC1, Tree4Test.allColors));
+        assertEquals(12, tree.indexOfNode(nodeB2, Tree4Test.allColors));
 
-        assertEquals(5, tree.indexOf(nodeC1, Tree4Test.b));
-        assertEquals(2, tree.indexOf(nodeB2, Tree4Test.c));
-        assertEquals(10, tree.indexOf(nodeB2, Tree4Test.aOrB));
-        assertEquals(7, tree.indexOf(nodeB2, Tree4Test.aOrC));
-        assertEquals(7, tree.indexOf(nodeB2, Tree4Test.bOrC));
+        assertEquals(5, tree.indexOfNode(nodeC1, Tree4Test.b));
+        assertEquals(2, tree.indexOfNode(nodeB2, Tree4Test.c));
+        assertEquals(10, tree.indexOfNode(nodeB2, Tree4Test.aOrB));
+        assertEquals(7, tree.indexOfNode(nodeB2, Tree4Test.aOrC));
+        assertEquals(7, tree.indexOfNode(nodeB2, Tree4Test.bOrC));
 
         Element<String> nodeC3 = tree.add(12, Tree4Test.allColors, Tree4Test.c, Tree4Test.april, 3);
         assertSame(nodeC1, nodeC3);
@@ -77,20 +77,20 @@ public class Tree4Test extends TestCase {
         //   C INDICES                           01234   567
         // ALL INDICES 0123456789012345678901234567890123456
         //      VALUES AAAABBABBABBAAAABBBBBBBBBBCCCCCBBBCCC
-        assertEquals(4, tree.indexOf(0, Tree4Test.b, Tree4Test.allColors));
-        assertEquals(0, tree.indexOf(4, Tree4Test.allColors, Tree4Test.b));
-        assertEquals(11, tree.indexOf(5, Tree4Test.b, Tree4Test.allColors));
-        assertEquals(5, tree.indexOf(11, Tree4Test.allColors, Tree4Test.b));
-        assertEquals(31, tree.indexOf(16, Tree4Test.b, Tree4Test.allColors));
-        assertEquals(16, tree.indexOf(31, Tree4Test.allColors, Tree4Test.b));
-        assertEquals(4, tree.indexOf(2, Tree4Test.b, Tree4Test.a));
-        assertEquals(4, tree.indexOf(3, Tree4Test.b, Tree4Test.a));
-        assertEquals(18, tree.indexOf(5, Tree4Test.c, Tree4Test.b));
-        assertEquals(33, tree.indexOf(18, Tree4Test.b, Tree4Test.allColors));
-        assertEquals(11, tree.indexOf(11, Tree4Test.allColors, Tree4Test.aOrB));
-        assertEquals(11, tree.indexOf(11, Tree4Test.aOrB, Tree4Test.allColors));
-        assertEquals(9, tree.indexOf(19, Tree4Test.bOrC, Tree4Test.a));
-        assertEquals(36, tree.indexOf(7, Tree4Test.c, Tree4Test.allColors));
+        assertEquals(4, tree.convertIndexColor(0, Tree4Test.b, Tree4Test.allColors));
+        assertEquals(0, tree.convertIndexColor(4, Tree4Test.allColors, Tree4Test.b));
+        assertEquals(11, tree.convertIndexColor(5, Tree4Test.b, Tree4Test.allColors));
+        assertEquals(5, tree.convertIndexColor(11, Tree4Test.allColors, Tree4Test.b));
+        assertEquals(31, tree.convertIndexColor(16, Tree4Test.b, Tree4Test.allColors));
+        assertEquals(16, tree.convertIndexColor(31, Tree4Test.allColors, Tree4Test.b));
+        assertEquals(4, tree.convertIndexColor(2, Tree4Test.b, Tree4Test.a));
+        assertEquals(4, tree.convertIndexColor(3, Tree4Test.b, Tree4Test.a));
+        assertEquals(18, tree.convertIndexColor(5, Tree4Test.c, Tree4Test.b));
+        assertEquals(33, tree.convertIndexColor(18, Tree4Test.b, Tree4Test.allColors));
+        assertEquals(11, tree.convertIndexColor(11, Tree4Test.allColors, Tree4Test.aOrB));
+        assertEquals(11, tree.convertIndexColor(11, Tree4Test.aOrB, Tree4Test.allColors));
+        assertEquals(9, tree.convertIndexColor(19, Tree4Test.bOrC, Tree4Test.a));
+        assertEquals(36, tree.convertIndexColor(7, Tree4Test.c, Tree4Test.allColors));
         assertEquals(10, tree.size(Tree4Test.a));
         assertEquals(19, tree.size(Tree4Test.b));
         assertEquals(8, tree.size(Tree4Test.c));
@@ -458,9 +458,9 @@ public class Tree4Test extends TestCase {
     }
 
     private static <V> void assertExpectedIndices(Tree4<V> tree, V value, int first, int last, int firstSimulated, int lastSimulated) {
-        assertEquals("" + value, first, tree.indexOf(value, true, false, allColors));
-        assertEquals("" + value, last, tree.indexOf(value, false, false, allColors));
-        assertEquals("" + value, firstSimulated, tree.indexOf(value, true, true, allColors));
-        assertEquals("" + value, lastSimulated, tree.indexOf(value, false, true, allColors));
+        assertEquals("" + value, first, tree.indexOfValue(value, true, false, allColors));
+        assertEquals("" + value, last, tree.indexOfValue(value, false, false, allColors));
+        assertEquals("" + value, firstSimulated, tree.indexOfValue(value, true, true, allColors));
+        assertEquals("" + value, lastSimulated, tree.indexOfValue(value, false, true, allColors));
     }
 }

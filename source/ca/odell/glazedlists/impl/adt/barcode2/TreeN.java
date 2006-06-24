@@ -71,13 +71,6 @@ m4_define(`counti', ``count'indexToBit($1)')
  */
 public class TreeN<V> {
 
-    /** the number of colors in this tree */
-    /* BEGIN_M4_MACRO
-    private static final int COLOR_COUNT = VAR_COLOUR_COUNT;
-    END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-    private static final int COLOR_COUNT = 3;
-    // END_M4_ALTERNATE
-
     /** the colors in the tree, used for printing purposes only */
     private final ListToByteCoder<V> coder;
 
@@ -382,16 +375,22 @@ public class TreeN<V> {
      * (which may be positive or negative).
      */
     private final void fixCountsThruRoot(NodeN<V> node, byte color, int delta) {
-        for( ; node != null; node = node.parent) {
-            /* BEGIN_M4_MACRO
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(color == indexToBit(i)) node.counti(i) += delta;
-            ')
-            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
-            if(color == 1) node.count1 += delta;
-            if(color == 2) node.count2 += delta;
-            if(color == 4) node.count4 += delta;
-            // END_M4_ALTERNATE
+        /* BEGIN_M4_MACRO
+        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(color == indexToBit(i)) {
+            for( ; node != null; node = node.parent) node.counti(i) += delta;
         }
+        ')
+        END_M4_MACRO */ // BEGIN_M4_ALTERNATE
+        if(color == 1) {
+            for( ; node != null; node = node.parent) node.count1 += delta;
+        }
+        if(color == 2) {
+            for( ; node != null; node = node.parent) node.count2 += delta;
+        }
+        if(color == 4) {
+            for( ; node != null; node = node.parent) node.count4 += delta;
+        }
+        // END_M4_ALTERNATE
     }
 
     /**
@@ -488,12 +487,12 @@ public class TreeN<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts(COLOR_COUNT);
+        subtreeRoot.refreshCounts();
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts(COLOR_COUNT);
+        newSubtreeRoot.refreshCounts();
 
         return newSubtreeRoot;
     }
@@ -524,12 +523,12 @@ public class TreeN<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts(COLOR_COUNT);
+        subtreeRoot.refreshCounts();
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts(COLOR_COUNT);
+        newSubtreeRoot.refreshCounts();
 
         return newSubtreeRoot;
     }
@@ -682,7 +681,7 @@ public class TreeN<V> {
         replacement.right = toReplace.right;
         if(replacement.right != null) replacement.right.parent = replacement;
         replacement.height = toReplace.height;
-        replacement.refreshCounts(COLOR_COUNT);
+        replacement.refreshCounts();
         replaceChild(toReplace, replacement);
         fixCountsThruRoot(replacement.parent, replacement.color, replacement.size);
 
@@ -713,12 +712,11 @@ public class TreeN<V> {
         root = null;
     }
 
-
     /**
      * Get the index of the specified element, counting only the colors
      * specified.
      */
-    public int indexOf(Element<V> element, byte colorsOut) {
+    public int indexOfNode(Element<V> element, byte colorsOut) {
         NodeN<V> node = (NodeN<V>)element;
 
         // count all elements left of this node
@@ -747,7 +745,7 @@ public class TreeN<V> {
      *     element x in this tree such that
      *     <code>TreeN.getComparator().compare(x, element) == 0</code>.
      */
-    public int indexOf(V element, boolean firstIndex, boolean simulated, byte colorsOut) {
+    public int indexOfValue(V element, boolean firstIndex, boolean simulated, byte colorsOut) {
         int result = 0;
         boolean found = false;
 
@@ -791,7 +789,7 @@ public class TreeN<V> {
     /**
      * Convert one index into another.
      */
-    public int indexOf(int index, byte indexColors, byte colorsOut) {
+    public int convertIndexColor(int index, byte indexColors, byte colorsOut) {
         if(root == null) {
             if(index == 0) return 0;
             else throw new IndexOutOfBoundsException();
@@ -928,7 +926,7 @@ public class TreeN<V> {
             int originalCount2 = node.count2;
             int originalCount4 = node.count4;
             // END_M4_ALTERNATE
-            node.refreshCounts(COLOR_COUNT);
+            node.refreshCounts();
             /* BEGIN_M4_MACRO
             forloop(`i', 0, VAR_LAST_COLOR_INDEX, `assert(originalCounti(i) == node.counti(i)) : "Incorrect count i on node: \n" + node  + "\n Expected " + node.counti(i) + " but was " + originalCounti(i);
             ')

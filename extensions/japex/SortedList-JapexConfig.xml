@@ -11,6 +11,13 @@
     <driver name="Sorted List">
         <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.SortedListDriver"/>
         <param name="description" value="Sorted List"/>
+        <param name="sortedList" value="SortedList"/>
+    </driver>
+
+    <driver name="Sorted List M4">
+        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.SortedListDriver"/>
+        <param name="description" value="Sorted List M4"/>
+        <param name="sortedList" value="SortedListM4"/>
     </driver>
 
     <testCase name="1+100">
