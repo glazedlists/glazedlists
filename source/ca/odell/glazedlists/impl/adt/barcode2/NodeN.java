@@ -228,7 +228,14 @@ class NodeN<V> implements Element<V> {
         }
         out.append(colors.get(TreeN.colorAsIndex(color)));
         out.append(" [").append(size).append("]");
-        if(value != null) out.append(": ").append(value);
+        if(value != null) {
+            out.append(": ");
+            if(value instanceof NodeN) {
+                out.append("<Node>");
+            } else {
+                out.append(value);
+            }
+        }
         out.append("\n");
 
         // write the right subtree

@@ -732,6 +732,59 @@ public class Tree4<V> {
         return index;
     }
 
+
+    /**
+     * Find the index of the specified element
+     *
+     * @param firstIndex true to return the index of the first occurrence of the
+     *     specified element,  or false for the last index.
+     * @param simulated true to return an index value even if the element is not
+     *     found. Otherwise -1 is returned.
+     * @return an index, or -1 if simulated is false and there exists no
+     *     element x in this tree such that
+     *     <code>Tree4.getComparator().compare(x, element) == 0</code>.
+     */
+    public int indexOf(V element, boolean firstIndex, boolean simulated, byte colorsOut) {
+        int result = 0;
+        boolean found = false;
+
+        // go deep, looking for our node of interest
+        Node4<V> node = root;
+        while(true) {
+            if(node == null) {
+                if(found && !firstIndex) result--;
+                if(found || simulated) return result;
+                else return -1;
+            }
+
+            // figure out if the value is left, center or right
+            int comparison = comparator.compare(element, node.get());
+
+            // recurse on the left
+            if(comparison < 0) {
+                node = node.left;
+                continue;
+            }
+            Node4<V> nodeLeft = node.left;
+
+            // the result is in the centre
+            if(comparison == 0) {
+                found = true;
+
+                // recurse deeper on the left, looking for the first left match
+                if(firstIndex) {
+                    node = nodeLeft;
+                    continue;
+                }
+            }
+
+            // recurse on the right, increment result by left size and center size
+            result += nodeLeft != null ? nodeLeft.size(colorsOut) : 0;
+            result += node.nodeSize(colorsOut);
+            node = node.right;
+        }
+    }
+
     /**
      * Convert one index into another.
      */
@@ -907,23 +960,6 @@ public class Tree4<V> {
 
         // we're valid
         return true;
-    }
-
-    /**
-     * We don't use <code>Arrays.toString</code> here because that method doesn't
-     * exist on Java 1.4, which we continue to support.
-     */
-    private static final String intArrayToString(int[] value) {
-        if(value == null) return "[]";
-
-        StringBuffer result = new StringBuffer();
-        result.append("[");
-        for(int i = 0; i < value.length; i++) {
-            if(i > 0) result.append(", ");
-            result.append(value[i]);
-        }
-        result.append("]");
-        return result.toString();
     }
 
     /**
