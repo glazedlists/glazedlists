@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testSuite name="SortedListPerformance" xmlns="http://www.sun.com/japex/testSuite">
+
+    <param name="japex.classPath" value="${JAPEX_HOME}/jdsl/*.jar"/>
+    <param name="japex.classPath" value="classes"/>
+
+    <!-- Run each test for 20 seconds -->
+    <param name="japex.warmupTime" value="10"/>
+    <param name="japex.runTime" value="10"/>
+
+    <driver name="Sorted List">
+        <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.SortedListDriver"/>
+        <param name="description" value="Sorted List"/>
+    </driver>
+
+    <testCase name="1+100">
+        <param name="baseSize" value="1"/>
+        <param name="changeSize" value="100"/>
+    </testCase>
+
+    <testCase name="10+100">
+        <param name="baseSize" value="10"/>
+        <param name="changeSize" value="100"/>
+    </testCase>
+
+    <testCase name="100+100">
+        <param name="baseSize" value="100"/>
+        <param name="changeSize" value="100"/>
+    </testCase>
+
+    <testCase name="1000+100">
+        <param name="baseSize" value="1000"/>
+        <param name="changeSize" value="100"/>
+    </testCase>
+
+    <testCase name="10000+100">
+        <param name="baseSize" value="10000"/>
+        <param name="changeSize" value="100"/>
+    </testCase>
+
+    <testCase name="100000+100">
+        <param name="baseSize" value="100000"/>
+        <param name="changeSize" value="100"/>
+    </testCase>
+
+</testSuite>

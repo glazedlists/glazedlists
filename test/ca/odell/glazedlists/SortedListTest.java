@@ -1133,9 +1133,11 @@ public class SortedListTest extends TestCase {
 
         sortedList.setComparator(null);
         unsortedList.addAll(Arrays.asList(new String[] { "dddd", "aaa", "c", "bb" }));
+        assertEquals(Arrays.asList(new String[] { "dddd", "aaa", "c", "bb" }), sortedList);
 
         SortedList<String> resortedList = new SortedList(sortedList, length);
         ListConsistencyListener.install(resortedList);
+        assertEquals(Arrays.asList(new String[] { "c", "bb", "aaa", "dddd" }), resortedList);
 
         sortedList.setComparator(alphabetical);
         assertSortedEquals(sortedList, resortedList);
@@ -1147,6 +1149,21 @@ public class SortedListTest extends TestCase {
         // now change the comparator
         sortedList.setComparator(alphabetical);
         assertSortedEquals(sortedList, resortedList);
+    }
+
+    public void testIteratorIsConsistent() {
+        ListConsistencyListener.install(sortedList);
+        unsortedList.addAll(Arrays.asList(new String[] { "d", "c", "a", "b" }));
+
+        Iterator<Comparable> iterator = sortedList.iterator();
+        assertEquals("a", iterator.next());
+        assertEquals("a", sortedList.get(0));
+        assertEquals("b", iterator.next());
+        assertEquals("b", sortedList.get(1));
+        assertEquals("c", iterator.next());
+        assertEquals("c", sortedList.get(2));
+        assertEquals("d", iterator.next());
+        assertEquals("d", sortedList.get(3));
     }
 
     /**

@@ -178,4 +178,8 @@ public class Tree4Iterator<V> {
         if(node == null) throw new IllegalStateException();
         return node.get();
     }
+    public Element<V> node() {
+        if(node == null) throw new IllegalStateException();
+        return node;
+    }
 }

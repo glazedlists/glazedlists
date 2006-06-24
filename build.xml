@@ -258,7 +258,7 @@
         </javac>
         <!-- execute the Japex performance tests -->
         <!--<property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>-->
-        <property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>
+        <property name="config" value="extensions/japex/SortedList-JapexConfig.xml"/>
         <java dir="." fork="true" classname="com.sun.japex.Japex">
             <classpath>
                 <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
@@ -526,6 +526,27 @@
         <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree4AsList.java">
             <arg line="--prefix-builtins"/>
             <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNAsList.java"/>
+        </exec>
+
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Node1.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=1"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/NodeN.java"/>
+        </exec>
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree1.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=1"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeN.java"/>
+        </exec>
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree1Iterator.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=1"/>
+            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNIterator.java"/>
+        </exec>
+        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree1AsList.java">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=1"/>
             <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNAsList.java"/>
         </exec>
     </target>

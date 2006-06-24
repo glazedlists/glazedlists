@@ -435,4 +435,32 @@ public class Tree4Test extends TestCase {
 
         assertEquals(Arrays.asList(new String[] { Tree4Test.april, Tree4Test.february, Tree4Test.january, Tree4Test.march, Tree4Test.may }), new Tree4AsList<String>(tree));
     }
+
+    public void testSortedTreeIndexOf() {
+        Tree4<String> tree = new Tree4<String>(Tree4Test.coder);
+        tree.addInSortedOrder(Tree4Test.a, "B", 1);
+        tree.addInSortedOrder(Tree4Test.a, "B", 1);
+        tree.addInSortedOrder(Tree4Test.a, "C", 1);
+        tree.addInSortedOrder(Tree4Test.a, "E", 1);
+        tree.addInSortedOrder(Tree4Test.a, "F", 1);
+        tree.addInSortedOrder(Tree4Test.a, "F", 1);
+        tree.addInSortedOrder(Tree4Test.a, "G", 1);
+        tree.addInSortedOrder(Tree4Test.a, "G", 1);
+        tree.addInSortedOrder(Tree4Test.a, "G", 1);
+
+        assertExpectedIndices(tree, "A", -1, -1, 0, 0);
+        assertExpectedIndices(tree, "B", 0, 1, 0, 1);
+        assertExpectedIndices(tree, "C", 2, 2, 2, 2);
+        assertExpectedIndices(tree, "D", -1, -1, 3, 3);
+        assertExpectedIndices(tree, "E", 3, 3, 3, 3);
+        assertExpectedIndices(tree, "F", 4, 5, 4, 5);
+        assertExpectedIndices(tree, "G", 6, 8, 6, 8);
+    }
+
+    private static <V> void assertExpectedIndices(Tree4<V> tree, V value, int first, int last, int firstSimulated, int lastSimulated) {
+        assertEquals("" + value, first, tree.indexOf(value, true, false, allColors));
+        assertEquals("" + value, last, tree.indexOf(value, false, false, allColors));
+        assertEquals("" + value, firstSimulated, tree.indexOf(value, true, true, allColors));
+        assertEquals("" + value, lastSimulated, tree.indexOf(value, false, true, allColors));
+    }
 }
