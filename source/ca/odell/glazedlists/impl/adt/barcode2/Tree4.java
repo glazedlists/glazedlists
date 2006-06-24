@@ -714,7 +714,6 @@ public class Tree4<V> {
         root = null;
     }
 
-
     /**
      * Get the index of the specified element, counting only the colors
      * specified.
