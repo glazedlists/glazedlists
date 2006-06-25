@@ -456,11 +456,61 @@ public class Tree4Test extends TestCase {
         assertExpectedIndices(tree, "F", 4, 5, 4, 5);
         assertExpectedIndices(tree, "G", 6, 8, 6, 8);
     }
-
     private static <V> void assertExpectedIndices(Tree4<V> tree, V value, int first, int last, int firstSimulated, int lastSimulated) {
         assertEquals("" + value, first, tree.indexOfValue(value, true, false, allColors));
         assertEquals("" + value, last, tree.indexOfValue(value, false, false, allColors));
         assertEquals("" + value, firstSimulated, tree.indexOfValue(value, true, true, allColors));
         assertEquals("" + value, lastSimulated, tree.indexOfValue(value, false, true, allColors));
     }
+
+    public void testRemoveASingleNode() {
+        Tree4<String> tree = new Tree4<String>(Tree4Test.coder);
+        Element<String> a = tree.addInSortedOrder(Tree4Test.a, "A", 4);
+        Element<String> b = tree.addInSortedOrder(Tree4Test.b, "B", 5);
+        Element<String> c = tree.addInSortedOrder(Tree4Test.c, "C", 6);
+        Element<String> d = tree.addInSortedOrder(Tree4Test.a, "D", 7);
+        Element<String> e = tree.addInSortedOrder(Tree4Test.b, "E", 8);
+        Element<String> f = tree.addInSortedOrder(Tree4Test.c, "F", 9);
+
+        tree.remove(d);
+        tree.remove(c);
+        tree.remove(b);
+        tree.remove(a);
+        tree.remove(f);
+        tree.remove(e);
+    }
+
+    public void testIterator() {
+        Tree4<String> tree = new Tree4<String>(Tree4Test.coder);
+        Element<String> a = tree.addInSortedOrder(Tree4Test.a, "A", 3);
+        Element<String> b = tree.addInSortedOrder(Tree4Test.b, "B", 1);
+        Element<String> c = tree.addInSortedOrder(Tree4Test.c, "C", 2);
+        Element<String> d = tree.addInSortedOrder(Tree4Test.a, "D", 3);
+        Element<String> e = tree.addInSortedOrder(Tree4Test.b, "E", 1);
+        Element<String> f = tree.addInSortedOrder(Tree4Test.c, "F", 2);
+
+        assertEquals(GlazedListsTests.stringToList("AAABCCDDDEFF"), iteratorToList(new Tree4Iterator(tree)));
+        assertEquals(GlazedListsTests.stringToList("AAABCCDDDEFF"), iteratorToList(new Tree4Iterator(tree, 0, allColors)));
+        assertEquals(GlazedListsTests.stringToList("AABCCDDDEFF"), iteratorToList(new Tree4Iterator(tree, 1, allColors)));
+        assertEquals(GlazedListsTests.stringToList("ABCCDDDEFF"), iteratorToList(new Tree4Iterator(tree, 2, allColors)));
+        assertEquals(GlazedListsTests.stringToList("BCCDDDEFF"), iteratorToList(new Tree4Iterator(tree, 3, allColors)));
+        assertEquals(GlazedListsTests.stringToList("CCDDDEFF"), iteratorToList(new Tree4Iterator(tree, 4, allColors)));
+        assertEquals(GlazedListsTests.stringToList("CDDDEFF"), iteratorToList(new Tree4Iterator(tree, 5, allColors)));
+        assertEquals(GlazedListsTests.stringToList("DDDEFF"), iteratorToList(new Tree4Iterator(tree, 6, allColors)));
+        assertEquals(GlazedListsTests.stringToList("DDEFF"), iteratorToList(new Tree4Iterator(tree, 7, allColors)));
+        assertEquals(GlazedListsTests.stringToList("DEFF"), iteratorToList(new Tree4Iterator(tree, 8, allColors)));
+        assertEquals(GlazedListsTests.stringToList("EFF"), iteratorToList(new Tree4Iterator(tree, 9, allColors)));
+        assertEquals(GlazedListsTests.stringToList("FF"), iteratorToList(new Tree4Iterator(tree, 10, allColors)));
+        assertEquals(GlazedListsTests.stringToList("F"), iteratorToList(new Tree4Iterator(tree, 11, allColors)));
+        assertEquals(GlazedListsTests.stringToList(""), iteratorToList(new Tree4Iterator(tree, 12, allColors)));
+    }
+    private static <T> List<T> iteratorToList(Tree4Iterator<T> iterator) {
+        List<T> result = new ArrayList<T>();
+        while(iterator.hasNext(allColors)) {
+            iterator.next(allColors);
+            result.add(iterator.value());
+        }
+        return result;
+    }
+
 }

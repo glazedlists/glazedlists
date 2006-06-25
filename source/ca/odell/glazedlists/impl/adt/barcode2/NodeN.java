@@ -74,6 +74,9 @@ class NodeN<V> implements Element<V> {
     byte height;
     NodeN/**/<V> left, right, parent;
 
+    /** whether this node is consistent in the sorting order */
+    boolean sorted = true;
+
     /**
      * Create a new node.
      *
@@ -238,5 +241,33 @@ class NodeN<V> implements Element<V> {
 
         // write the right subtree
         if(right != null) right.asTree(indentation + 1, out, colors);
+    }
+
+    /**
+     * Toggle whether this node is sorted.
+     */
+    public void setSorted(boolean sorted) {
+        this.sorted = sorted;
+    }
+
+    /**
+     * Get whether the value of this node is greater than the previous node
+     * and less than the next node. This is useful to have occasional unsorted
+     * elements in an otherwise sorted collection, such as what happens when the
+     * user expects order to be both sorted and stable during edits which would
+     * otherwise change the sorting order.
+     */
+    public boolean isSorted() {
+        return sorted;
+    }
+
+    /** {@inheritDoc} */
+    public Element<V> next() {
+        return TreeN.next(this);
+    }
+
+    /** {@inheritDoc} */
+    public Element<V> previous() {
+        return TreeN.previous(this);
     }
 }

@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+import java.util.NoSuchElementException;
+
 /*
  M4 Macros
 
@@ -57,9 +59,57 @@ public class Tree4Iterator<V> {
     private int index;
 
     public Tree4Iterator/**/(Tree4<V> tree) {
+        this(tree, 0, (byte)0);
+    }
+
+    /**
+     * Create an iterator starting at the specified index.
+     *
+     * @param tree the tree to iterate
+     * @param nextIndex the index to be returned after calling {@link #next next()}.
+     * @param nextIndexColors the colors to interpret nextIndex in terms of
+     */
+    public Tree4Iterator/**/(Tree4<V> tree, int nextIndex, byte nextIndexColors) {
         this.tree = tree;
-        this.node = null;
-        this.index = 0;
+
+        // if the start is, we need to find the node in the tree
+        if(nextIndex != 0) {
+            int currentIndex = nextIndex - 1;
+            this.node = (Node4<V>)tree.get(currentIndex, nextIndexColors);
+
+            // find the counts
+            /*  BEGIN M4 MACRO GENERATED CODE */
+            count1 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)1) + (node.color == 1 ? 0 : 1);
+            count2 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)2) + (node.color == 2 ? 0 : 1);
+            count4 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)4) + (node.color == 4 ? 0 : 1);
+            count8 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)8) + (node.color == 8 ? 0 : 1);
+            
+            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+            count1 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)1) + (node.color == 1 ? 0 : 1);
+            count2 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)2) + (node.color == 2 ? 0 : 1);
+            count4 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)4) + (node.color == 4 ? 0 : 1);
+            // END ALTERNATE CODE */
+
+            // find out the index in the node
+            /*  BEGIN M4 MACRO GENERATED CODE */
+            if(node.color == 1) this.index = count1 - tree.indexOfNode(this.node, (byte)1);
+            if(node.color == 2) this.index = count2 - tree.indexOfNode(this.node, (byte)2);
+            if(node.color == 4) this.index = count4 - tree.indexOfNode(this.node, (byte)4);
+            if(node.color == 8) this.index = count8 - tree.indexOfNode(this.node, (byte)8);
+            
+            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
+/* 
+            if(node.color == 1) this.index = count1 - tree.indexOfNode(this.node, (byte)1);
+            if(node.color == 2) this.index = count2 - tree.indexOfNode(this.node, (byte)2);
+            if(node.color == 4) this.index = count4 - tree.indexOfNode(this.node, (byte)4);
+            // END ALTERNATE CODE */
+
+        // just start before the beginning of the tree
+        } else {
+            this.node = null;
+            this.index = 0;
+        }
     }
 
     /**
@@ -89,7 +139,9 @@ public class Tree4Iterator<V> {
     }
 
     public boolean hasNext(byte colors) {
-        if(node != null && (colors & node.color) != 0) {
+        if(node == null) {
+            return tree.size(colors) > 0;
+        } else if((colors & node.color) != 0) {
             return index(colors) < tree.size(colors) - 1;
         } else {
             return index(colors) < tree.size(colors);
@@ -157,6 +209,8 @@ public class Tree4Iterator<V> {
      * Expected values for index should be 0, 1, 2, 3...
      */
     public int index(byte colors) {
+        if(node == null) throw new NoSuchElementException();
+
         // total the values of the specified array for the specified colors.
         int result = 0;
 

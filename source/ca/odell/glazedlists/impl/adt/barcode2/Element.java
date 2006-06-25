@@ -15,4 +15,12 @@ public interface Element<V> {
     void set(V value);
 
     byte getColor();
+
+    void setSorted(boolean sorted);
+
+    boolean isSorted();
+
+    Element<V> next();
+
+    Element<V> previous();
 }

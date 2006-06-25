@@ -5,7 +5,6 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 
 import ca.odell.glazedlists.GlazedLists;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,6 +37,11 @@ m4_define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
 m4_define(`TreeNAsList', ``Tree'VAR_COLOUR_COUNT`AsList'')
 m4_define(`TreeNIterator', ``Tree'VAR_COLOUR_COUNT`Iterator'')
 m4_define(`counti', ``count'indexToBit($1)')
+
+m4_define(`SINGLE_ALTERNATE', m4_ifelse(VAR_COLOUR_COUNT,`1',`USE SINGLE ALTERNATE *'`/ '$1`
+// IGNORE DEFAULT:',` USE DEFAULT'))
+m4_define(`END_SINGLE_ALTERNATE', m4_ifelse(VAR_COLOUR_COUNT,`1',`
+/'`* END SINGLE ALTERNATE',`END DEFAULT'))
 
 */
 
@@ -124,6 +128,9 @@ public class TreeN<V> {
     /**
      * Get the tree element at the specified index relative to the specified index
      * colors.
+     *
+     * <p>This method is an hotspot, so its crucial that it run as efficiently
+     * as possible.
      */
     public Element<V> get(int index, byte indexColors) {
         if(root == null) throw new IndexOutOfBoundsException();
@@ -136,7 +143,7 @@ public class TreeN<V> {
 
             // recurse on the left
             NodeN<V> nodeLeft = node.left;
-            int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
+            int leftSize = nodeLeft != null ? nodeLeft./* SINGLE_ALTERNATE(`count1') */ size(indexColors) /* END_SINGLE_ALTERNATE */ : 0;
             if(index < leftSize) {
                 node = nodeLeft;
                 continue;
@@ -145,7 +152,7 @@ public class TreeN<V> {
             }
 
             // the result is in the centre
-            int size = node.nodeSize(indexColors);
+            int size = node./* SINGLE_ALTERNATE(`size') */ nodeSize(indexColors) /* END_SINGLE_ALTERNATE */;
             if(index < size) {
                 return node;
             } else {
@@ -317,11 +324,26 @@ public class TreeN<V> {
         while(true) {
             assert(parent != null);
 
-            int compareResult = comparator.compare(value, parent.value);
+            // calculating the sort side is a little tricky since we can have
+            // unsorted nodes in the tree. we just look for a neighbour (ie next)
+            // that is sorted, and compare with that
+            int sortSide;
+            for(NodeN<V> currentFollower = parent; true; currentFollower = next(currentFollower)) {
+                // we've hit the end of the list, assume the element is on the left side
+                if(currentFollower == null) {
+                    sortSide = -1;
+                    break;
+                // we've found a comparable node, use it
+                } else if(currentFollower.sorted) {
+                    sortSide = comparator.compare(value, currentFollower.value);
+                    break;
+                }
+            }
+            //int sortSide = comparator.compare(value, parent.value);
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(compareResult == 0 && color == parent.color && value == parent.value && value != null) {
+            if(sortSide == 0 && color == parent.color && value == parent.value && value != null) {
                 parent.size += size;
                 fixCountsThruRoot(parent, color, size);
                 return parent;
@@ -329,9 +351,9 @@ public class TreeN<V> {
 
             // insert on the left...
             boolean insertOnLeft = false;
-            insertOnLeft = insertOnLeft || compareResult < 0;
-            insertOnLeft = insertOnLeft || compareResult == 0 && parent.left == null;
-            insertOnLeft = insertOnLeft || compareResult == 0 && parent.right != null && parent.left.height < parent.right.height;
+            insertOnLeft = insertOnLeft || sortSide < 0;
+            insertOnLeft = insertOnLeft || sortSide == 0 && parent.left == null;
+            insertOnLeft = insertOnLeft || sortSide == 0 && parent.right != null && parent.left.height < parent.right.height;
             if(insertOnLeft) {
                 NodeN<V> parentLeft = parent.left;
 
@@ -534,6 +556,23 @@ public class TreeN<V> {
     }
 
     /**
+     * Remove the specified element from the tree outright.
+     */
+    public void remove(Element<V> element) {
+        NodeN<V> node = (NodeN<V>)element;
+        assert(node.size > 0);
+        assert(root != null);
+
+        // delete the node by adding to the zero queue
+        fixCountsThruRoot(node, node.color, -node.size);
+        node.size = 0;
+        zeroQueue.add(node);
+        drainZeroQueue();
+
+        assert(valid());
+    }
+
+    /**
      * Remove size values at the specified index. Only values of the type
      * specified in indexColors will be removed.
      *
@@ -552,8 +591,17 @@ public class TreeN<V> {
         // remove values from the tree
         removeFromSubtree(root, index, indexColors, size);
 
-        // remove the emptied nodes
-        for(int i = 0; i < zeroQueue.size(); i++) {
+        // clean up any nodes that got deleted
+        drainZeroQueue();
+
+        assert(valid());
+    }
+
+    /**
+     * Prune all nodes scheduled for deletion.
+     */
+    private void drainZeroQueue() {
+        for(int i = 0, size = zeroQueue.size(); i < size; i++) {
             NodeN<V> node = zeroQueue.get(i);
             assert(node.size == 0);
 
@@ -566,9 +614,8 @@ public class TreeN<V> {
             }
         }
         zeroQueue.clear();
-
-        assert(valid());
     }
+
     /**
      * Remove at the specified index in the specified subtree. This doesn't ever
      * remove any nodes of size zero, that's up to the caller to do after by
@@ -715,17 +762,20 @@ public class TreeN<V> {
     /**
      * Get the index of the specified element, counting only the colors
      * specified.
+     *
+     * <p>This method is an hotspot, so its crucial that it run as efficiently
+     * as possible.
      */
     public int indexOfNode(Element<V> element, byte colorsOut) {
         NodeN<V> node = (NodeN<V>)element;
 
         // count all elements left of this node
-        int index = node.left != null ? node.left.size(colorsOut) : 0;
+        int index = node.left != null ? node.left./* SINGLE_ALTERNATE(`count1') */ size(colorsOut) /* END_SINGLE_ALTERNATE */ : 0;
 
         // add all elements on the left, all the way to the root
         for( ; node.parent != null; node = node.parent) {
             if(node.parent.right == node) {
-                index += node.parent.left != null ? node.parent.left.size(colorsOut) : 0;
+                index += node.parent.left != null ? node.parent.left./* SINGLE_ALTERNATE(`count1') */ size(colorsOut) /* END_SINGLE_ALTERNATE */ : 0;
                 index += node.parent.nodeSize(colorsOut);
             }
         }
@@ -877,7 +927,7 @@ public class TreeN<V> {
     /**
      * Find the next node in the tree, working from left to right.
      */
-    static <V> NodeN<V> next(NodeN<V> node) {
+    public static <V> NodeN<V> next(NodeN<V> node) {
         // if this node has a right subtree, it's the leftmost node in that subtree
         if(node.right != null) {
             NodeN<V> child = node.right;
@@ -896,6 +946,29 @@ public class TreeN<V> {
         }
     }
 
+
+    /**
+     * Find the previous node in the tree, working from right to left.
+     */
+    public static <V> NodeN<V> previous(NodeN<V> node) {
+        // if this node has a left subtree, it's the rightmost node in that subtree
+        if(node.left != null) {
+            NodeN<V> child = node.left;
+            while(child.right != null) {
+                child = child.right;
+            }
+            return child;
+
+        // otherwise its the nearest ancestor where I'm in the right subtree
+        } else {
+            NodeN<V> ancestor = node;
+            while(ancestor.parent != null && ancestor.parent.left == ancestor) {
+                ancestor = ancestor.parent;
+            }
+            return ancestor.parent;
+        }
+    }
+
     /**
      * Find the leftmost child in this subtree.
      */
@@ -908,7 +981,6 @@ public class TreeN<V> {
         }
         return result;
     }
-
 
     /**
      * @return true if this tree is structurally valid

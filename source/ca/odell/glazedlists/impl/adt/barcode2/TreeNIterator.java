@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+import java.util.NoSuchElementException;
+
 /*
  M4 Macros
 
@@ -61,9 +63,49 @@ public class TreeNIterator<V> {
     private int index;
 
     public TreeNIterator/**/(TreeN<V> tree) {
+        this(tree, 0, (byte)0);
+    }
+
+    /**
+     * Create an iterator starting at the specified index.
+     *
+     * @param tree the tree to iterate
+     * @param nextIndex the index to be returned after calling {@link #next next()}.
+     * @param nextIndexColors the colors to interpret nextIndex in terms of
+     */
+    public TreeNIterator/**/(TreeN<V> tree, int nextIndex, byte nextIndexColors) {
         this.tree = tree;
-        this.node = null;
-        this.index = 0;
+
+        // if the start is, we need to find the node in the tree
+        if(nextIndex != 0) {
+            int currentIndex = nextIndex - 1;
+            this.node = (NodeN<V>)tree.get(currentIndex, nextIndexColors);
+
+            // find the counts
+            /* BEGIN_M4_MACRO
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `counti(i) = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)indexToBit(i)) + (node.color == indexToBit(i) ? 0 : 1);
+            ')
+            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
+            count1 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)1) + (node.color == 1 ? 0 : 1);
+            count2 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)2) + (node.color == 2 ? 0 : 1);
+            count4 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)4) + (node.color == 4 ? 0 : 1);
+            // END_M4_ALTERNATE
+
+            // find out the index in the node
+            /* BEGIN_M4_MACRO
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(node.color == indexToBit(i)) this.index = counti(i) - tree.indexOfNode(this.node, (byte)indexToBit(i));
+            ')
+            END_M4_MACRO */ // BEGIN_M4_ALTERNATE
+            if(node.color == 1) this.index = count1 - tree.indexOfNode(this.node, (byte)1);
+            if(node.color == 2) this.index = count2 - tree.indexOfNode(this.node, (byte)2);
+            if(node.color == 4) this.index = count4 - tree.indexOfNode(this.node, (byte)4);
+            // END_M4_ALTERNATE
+
+        // just start before the beginning of the tree
+        } else {
+            this.node = null;
+            this.index = 0;
+        }
     }
 
     /**
@@ -88,8 +130,14 @@ public class TreeNIterator<V> {
         return result;
     }
 
+    /**
+     * @return <code>true</code> if there's an element of the specified color in
+     *     this tree.
+     */
     public boolean hasNext(byte colors) {
-        if(node != null && (colors & node.color) != 0) {
+        if(node == null) {
+            return tree.size(colors) > 0;
+        } else if((colors & node.color) != 0) {
             return index(colors) < tree.size(colors) - 1;
         } else {
             return index(colors) < tree.size(colors);
@@ -149,6 +197,8 @@ public class TreeNIterator<V> {
      * Expected values for index should be 0, 1, 2, 3...
      */
     public int index(byte colors) {
+        if(node == null) throw new NoSuchElementException();
+
         // total the values of the specified array for the specified colors.
         int result = 0;
 
