@@ -8,16 +8,16 @@
     <param name="japex.warmupTime" value="10"/>
     <param name="japex.runTime" value="10"/>
 
-    <driver name="Sorted List">
+    <driver name="Indexed Tree">
         <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.SortedListDriver"/>
-        <param name="description" value="Sorted List"/>
-        <param name="sortedList" value="SortedList"/>
+        <param name="description" value="Indexed Tree"/>
+        <param name="backingTree" value="indexedTree"/>
     </driver>
 
-    <driver name="Sorted List M4">
+    <driver name="Barcode2">
         <param name="japex.driverClass" value="com.publicobject.glazedlists.japex.SortedListDriver"/>
-        <param name="description" value="Sorted List M4"/>
-        <param name="sortedList" value="SortedListM4"/>
+        <param name="description" value="Barcode2"/>
+        <param name="backingTree" value="barcode2"/>
     </driver>
 
     <testCase name="1+100">
