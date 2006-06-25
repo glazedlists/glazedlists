@@ -1,30 +1,28 @@
-// Copyright 2006 Google Inc. All Rights Reserved.
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
+package com.publicobject.glazedlists.japex;
 
-package ca.odell.glazedlists;
-
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
 import ca.odell.glazedlists.impl.adt.IndexedTree;
 import ca.odell.glazedlists.impl.adt.IndexedTreeIterator;
-import ca.odell.glazedlists.impl.adt.barcode2.Element;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1Iterator;
-import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.*;
 
 /**
- * An {@link EventList} that shows its source {@link EventList} in sorted order.
+ * An {@link ca.odell.glazedlists.EventList} that shows its source {@link ca.odell.glazedlists.EventList} in sorted order.
  *
- * <p>The sorting strategy is specified with a {@link Comparator}. If no
- * {@link Comparator} is specified, all of the elements of the source {@link EventList}
+ * <p>The sorting strategy is specified with a {@link java.util.Comparator}. If no
+ * {@link java.util.Comparator} is specified, all of the elements of the source {@link ca.odell.glazedlists.EventList}
  * must implement {@link Comparable}.
  *
- * <p>This {@link EventList} supports all write operations.
+ * <p>This {@link ca.odell.glazedlists.EventList} supports all write operations.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
- * breaks the contract required by {@link List}. See {@link EventList}
+ * breaks the contract required by {@link java.util.List}. See {@link ca.odell.glazedlists.EventList}
  * for an example.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
@@ -50,14 +48,9 @@ import java.util.*;
  * </td></tr>
  * </table>
  *
- * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class SortedList<E> extends TransformedList<E,E> {
-
-    private static final ListToByteCoder SORTED_BYTE_CODER = new ListToByteCoder(Collections.singletonList("S"));
-    private static final ListToByteCoder UNSORTED_BYTE_CODER = new ListToByteCoder(Collections.singletonList("U"));
-    private static final byte ALL_COLORS = 1;
-    private static final Element EMPTY_ELEMENT = null;
+public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
 
     /**
      * Sorting mode where elements are always in sorted order, even if this
@@ -75,34 +68,34 @@ public final class SortedList<E> extends TransformedList<E,E> {
     public static final int AVOID_MOVING_ELEMENTS = 1;
 
     /** a map from the unsorted index to the sorted index */
-    private Tree1<Element> unsorted = null;
+    private IndexedTree<IndexedTreeNode> unsorted = null;
     /** a map from the sorted index to the unsorted index */
-    private Tree1<Element> sorted = null;
+    private IndexedTree<IndexedTreeNode> sorted = null;
 
     /** the comparator that this list uses for sorting */
     private Comparator<? super E> comparator = null;
 
     /** one of {@link #STRICT_SORT_ORDER} or {@link #AVOID_MOVING_ELEMENTS}. */
-    private int mode = STRICT_SORT_ORDER;
+    private int mode = SortedListWithIndexedTree.STRICT_SORT_ORDER;
 
 
     /**
-     * Creates a {@link SortedList} that sorts the specified {@link EventList}.
-     * Because this constructor takes no {@link Comparator} argument, all
-     * elements in the specified {@link EventList} must implement {@link Comparable}
+     * Creates a {@link ca.odell.glazedlists.SortedListWithIndexedTree} that sorts the specified {@link ca.odell.glazedlists.EventList}.
+     * Because this constructor takes no {@link java.util.Comparator} argument, all
+     * elements in the specified {@link ca.odell.glazedlists.EventList} must implement {@link Comparable}
      * or a {@link ClassCastException} will be thrown.
      */
-    public SortedList(EventList<E> source) {
+    public SortedListWithIndexedTree(EventList<E> source) {
         this(source, (Comparator<E>)GlazedLists.comparableComparator());
     }
 
     /**
-     * Creates a {@link SortedList} that sorts the specified {@link EventList}
-     * using the specified {@link Comparator} to determine sort order. If the
-     * specified {@link Comparator} is <code>null</code>, then this {@link List}
+     * Creates a {@link ca.odell.glazedlists.SortedListWithIndexedTree} that sorts the specified {@link ca.odell.glazedlists.EventList}
+     * using the specified {@link java.util.Comparator} to determine sort order. If the
+     * specified {@link java.util.Comparator} is <code>null</code>, then this {@link java.util.List}
      * will be unsorted.
      */
-    public SortedList(EventList<E> source, Comparator<? super E> comparator) {
+    public SortedListWithIndexedTree(EventList<E> source, Comparator<? super E> comparator) {
         super(source);
 
         setComparator(comparator);
@@ -111,12 +104,12 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /**
-     * Modify the behaviour of this {@link SortedList} to one of the predefined modes.
+     * Modify the behaviour of this {@link ca.odell.glazedlists.SortedListWithIndexedTree} to one of the predefined modes.
      *
      * @param mode either {@link #STRICT_SORT_ORDER} or {@link #AVOID_MOVING_ELEMENTS}.
      */
     public void setMode(int mode) {
-        if(mode != STRICT_SORT_ORDER && mode != AVOID_MOVING_ELEMENTS) throw new IllegalArgumentException("Mode must be either SortedList.STRICT_SORT_ORDER or SortedList.AVOID_MOVING_ELEMENTS");
+        if(mode != SortedListWithIndexedTree.STRICT_SORT_ORDER && mode != SortedListWithIndexedTree.AVOID_MOVING_ELEMENTS) throw new IllegalArgumentException("Mode must be either SortedList.STRICT_SORT_ORDER or SortedList.AVOID_MOVING_ELEMENTS");
         if(mode == this.mode) return;
 
         // apply the new mode
@@ -124,12 +117,12 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // we need to re-sort the table on the off-chance that an element
         // was out of order before
-        if(this.mode == STRICT_SORT_ORDER) {
+        if(this.mode == SortedListWithIndexedTree.STRICT_SORT_ORDER) {
             setComparator(getComparator());
         }
     }
     /**
-     * Get the behaviour mode for this {@link SortedList}.
+     * Get the behaviour mode for this {@link ca.odell.glazedlists.SortedListWithIndexedTree}.
      *
      * @return one of {@link #STRICT_SORT_ORDER} (default) or
      *     {@link #AVOID_MOVING_ELEMENTS}.
@@ -145,41 +138,38 @@ public final class SortedList<E> extends TransformedList<E,E> {
             int[] sourceReorder = listChanges.getReorderMap();
 
             // remember what the mapping was before
-            int[] previousIndexToSortedIndex = new int[sorted.size(ALL_COLORS)];
+            int[] previousIndexToSortedIndex = new int[sorted.size()];
             int index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(ALL_COLORS); index++) {
-                i.next(ALL_COLORS);
-                Element<Element> unsortedNode = i.value();
-                int unsortedIndex = unsorted.indexOfNode(unsortedNode, ALL_COLORS);
+            for(IndexedTreeIterator<IndexedTreeNode> i = sorted.iterator(0); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> sortedNode = i.next();
+                int unsortedIndex = sortedNode.getValue().getIndex();
                 previousIndexToSortedIndex[unsortedIndex] = index;
             }
             // adjust the from index for the source reorder
-            int[] newIndexToSortedIndex = new int[sorted.size(ALL_COLORS)];
+            int[] newIndexToSortedIndex = new int[sorted.size()];
             for(int i = 0; i < previousIndexToSortedIndex.length; i++) {
                 newIndexToSortedIndex[i] = previousIndexToSortedIndex[sourceReorder[i]];
             }
 
             // reorder the unsorted nodes to get the new sorted order
-            Element<Element>[] unsortedNodes = new Element[unsorted.size(ALL_COLORS)];
+            IndexedTreeNode<IndexedTreeNode>[] unsortedNodes = new IndexedTreeNode[unsorted.size()];
             index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(ALL_COLORS); index++) {
-                i.next(ALL_COLORS);
-                Element<Element> unsortedNode = i.node();
+            for(IndexedTreeIterator<IndexedTreeNode> i = unsorted.iterator(0); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = i.next();
                 unsortedNodes[index] = unsortedNode;
             }
             Arrays.sort(unsortedNodes, sorted.getComparator());
 
             // create a new reorder map to send the changes forward
-            int[] reorderMap = new int[sorted.size(ALL_COLORS)];
+            int[] reorderMap = new int[sorted.size()];
             boolean indexChanged = false;
             index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(ALL_COLORS); index++) {
-                i.next(ALL_COLORS);
-                Element<Element> sortedNode = i.node();
-                Element<Element> unsortedNode = unsortedNodes[index];
-                sortedNode.set(unsortedNode);
-                unsortedNode.set(sortedNode);
-                int unsortedIndex = unsorted.indexOfNode(unsortedNode, ALL_COLORS);
+            for(IndexedTreeIterator<IndexedTreeNode> i = sorted.iterator(0); i.hasNext(); index++) {
+                IndexedTreeNode<IndexedTreeNode> sortedNode = i.next();
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsortedNodes[index];
+                sortedNode.setValue(unsortedNode);
+                unsortedNode.setValue(sortedNode);
+                int unsortedIndex = unsortedNode.getIndex();
                 reorderMap[index] = newIndexToSortedIndex[unsortedIndex];
                 indexChanged = indexChanged || (index != reorderMap[index]);
             }
@@ -220,8 +210,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
         updates.beginEvent();
 
         // first update the offset tree for all changes, and keep the changed nodes in a list
-        LinkedList<Element> insertNodes = new LinkedList<Element>();
-        List<Element<Element>> updateNodes = new ArrayList<Element<Element>>();
+        LinkedList<IndexedTreeNode> insertNodes = new LinkedList<IndexedTreeNode>();
+        List<IndexedTreeNode<IndexedTreeNode>> updateNodes = new ArrayList<IndexedTreeNode<IndexedTreeNode>>();
 
         // Update the indexed tree so it matches the source.
         // Save the nodes to be inserted and updated as well
@@ -233,20 +223,20 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
             // on insert, insert the index node
             if(changeType == ListEvent.INSERT) {
-                Element<Element> unsortedNode = unsorted.add(unsortedIndex, ALL_COLORS, ALL_COLORS, EMPTY_ELEMENT, 1);
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.addByNode(unsortedIndex, IndexedTreeNode.EMPTY_NODE);
                 insertNodes.addLast(unsortedNode);
 
             // on update, mark the updated node as unsorted and save it so it can be moved
             } else if(changeType == ListEvent.UPDATE) {
-                Element<Element> unsortedNode = unsorted.get(unsortedIndex, ALL_COLORS);
-                Element sortedNode = unsortedNode.get();
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.getNode(unsortedIndex);
+                IndexedTreeNode sortedNode = unsortedNode.getValue();
                 sortedNode.setSorted(false);
                 updateNodes.add(sortedNode);
 
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
-                Element<Element> unsortedNode = unsorted.get(unsortedIndex, ALL_COLORS);
-                unsorted.remove(unsortedNode);
+                IndexedTreeNode<IndexedTreeNode> unsortedNode = unsorted.getNode(unsortedIndex);
+                unsortedNode.removeFromTree(unsorted);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.addDelete(deleteSortedIndex);
 
@@ -254,9 +244,9 @@ public final class SortedList<E> extends TransformedList<E,E> {
         }
 
         // fire update events
-        for(Iterator<Element<Element>> i = updateNodes.iterator(); i.hasNext(); ) {
-            Element<Element> sortedNode = i.next();
-            int originalIndex = sorted.indexOfNode(sortedNode, ALL_COLORS);
+        for(Iterator<IndexedTreeNode<IndexedTreeNode>> i = updateNodes.iterator(); i.hasNext(); ) {
+            IndexedTreeNode<IndexedTreeNode> sortedNode = i.next();
+            int originalIndex = sortedNode.getIndex();
 
             // the element is still in sorted order, forward the update event
             if(isNodeInSortedOrder(sortedNode)) {
@@ -265,21 +255,21 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
             // sort order is not enforced so we lose perfect sorting order
             // but we don't need to move elements around
-            } else if(mode == AVOID_MOVING_ELEMENTS) {
+            } else if(mode == SortedListWithIndexedTree.AVOID_MOVING_ELEMENTS) {
                 updates.addUpdate(originalIndex);
 
             // sort order is enforced so move the element to its new location
             } else {
-                sorted.remove(sortedNode);
+                sortedNode.removeFromTree(sorted);
                 updates.addDelete(originalIndex);
-                int insertedIndex = insertByUnsortedNode(sortedNode.get());
+                int insertedIndex = insertByUnsortedNode(sortedNode.getValue());
                 updates.addInsert(insertedIndex);
             }
         }
 
         // fire insert events
         while(!insertNodes.isEmpty()) {
-            Element insertNode = insertNodes.removeFirst();
+            IndexedTreeNode insertNode = insertNodes.removeFirst();
             int insertedIndex = insertByUnsortedNode(insertNode);
             updates.addInsert(insertedIndex);
         }
@@ -295,20 +285,18 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * <p>This method skips unsorted nodes, whose value should not be compared
      * against when determining tree ordering.
      */
-    private boolean isNodeInSortedOrder(Element sortedNode) {
-        Comparator comparator = sorted.getComparator();
-
+    private boolean isNodeInSortedOrder(IndexedTreeNode sortedNode) {
         // first ensure this node is greater than its predecessors
-        for(Element leftNeighbour = sortedNode.previous(); leftNeighbour != null; leftNeighbour = leftNeighbour.previous()) {
+        for(IndexedTreeNode leftNeighbour = sortedNode.previous(); leftNeighbour != null; leftNeighbour = leftNeighbour.previous()) {
             if(!leftNeighbour.isSorted()) continue;
-            if(comparator.compare(leftNeighbour.get(), sortedNode.get()) > 0) return false;
+            if(sorted.getComparator().compare(leftNeighbour.getValue(), sortedNode.getValue()) > 0) return false;
             break;
         }
 
         // then ensure this node is less than its followers
-        for(Element rightNeighbour = sortedNode.next(); rightNeighbour != null; rightNeighbour = rightNeighbour.next()) {
+        for(IndexedTreeNode rightNeighbour = sortedNode.next(); rightNeighbour != null; rightNeighbour = rightNeighbour.next()) {
             if(!rightNeighbour.isSorted()) continue;
-            if(comparator.compare(sortedNode.get(), rightNeighbour.get()) > 0) return false;
+            if(sorted.getComparator().compare(sortedNode.getValue(), rightNeighbour.getValue()) > 0) return false;
             break;
         }
 
@@ -321,13 +309,13 @@ public final class SortedList<E> extends TransformedList<E,E> {
      *
      * @return the sortIndex of the inserted object.
      */
-    private int insertByUnsortedNode(Element unsortedNode) {
+    private int insertByUnsortedNode(IndexedTreeNode unsortedNode) {
         // add the object to the sorted set
-        Element<Element> sortedNode = sorted.addInSortedOrder(ALL_COLORS, unsortedNode, 1);
+        IndexedTreeNode sortedNode = sorted.addByNode(unsortedNode);
         // assign the unsorted node the value of the sorted node
-        unsortedNode.set(sortedNode);
+        unsortedNode.setValue(sortedNode);
         // return the sorted index
-        return sorted.indexOfNode(sortedNode, ALL_COLORS);
+        return sortedNode.getIndex();
     }
     /**
      * Deletes the node in the sorted tree based on the value of the specified
@@ -335,22 +323,22 @@ public final class SortedList<E> extends TransformedList<E,E> {
      *
      * @return the sortIndex of the deleted object.
      */
-    private int deleteByUnsortedNode(Element unsortedNode) {
+    private int deleteByUnsortedNode(IndexedTreeNode unsortedNode) {
         // get the sorted node
-        Element sortedNode = (Element)unsortedNode.get();
+        IndexedTreeNode sortedNode = (IndexedTreeNode)unsortedNode.getValue();
         // look up the sorted index before removing the nodes
-        int sortedIndex = sorted.indexOfNode(sortedNode, ALL_COLORS);
+        int sortedIndex = sortedNode.getIndex();
         // delete the sorted node from its tree
-        sorted.remove(sortedIndex, ALL_COLORS, 1);
+        sortedNode.removeFromTree(sorted);
         // return the sorted index
         return sortedIndex;
     }
 
     /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
-        Element sortedNode = sorted.get(mutationIndex, ALL_COLORS);
-        Element unsortedNode = (Element)sortedNode.get();
-        return unsorted.indexOfNode(unsortedNode, ALL_COLORS);
+        IndexedTreeNode sortedNode = sorted.getNode(mutationIndex);
+        IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
+        return unsortedNode.getIndex();
     }
 
     /** {@inheritDoc} */
@@ -359,11 +347,11 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /**
-     * Gets the {@link Comparator} that is being used to sort this list.
+     * Gets the {@link java.util.Comparator} that is being used to sort this list.
      *
-     * @return the {@link Comparator} in use, or <tt>null</tt> if this list is
+     * @return the {@link java.util.Comparator} in use, or <tt>null</tt> if this list is
      *      currently unsorted. If this is an {@link EventList} of {@link Comparable}
-     *      elements in natural order, then a ComparableComparator} will
+     *      elements in natural order, then a {@link ca.odell.glazedlists.impl.sort.ComparableComparator} will
      *      be returned.
      */
     public Comparator<? super E> getComparator() {
@@ -371,7 +359,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /**
-     * Set the {@link Comparator} in use in this {@link EventList}. This will
+     * Set the {@link java.util.Comparator} in use in this {@link EventList}. This will
      * sort the {@link EventList} into a new order.
      *
      * <p>Performance Note: sorting will take <code>O(N * Log N)</code> time.
@@ -380,29 +368,29 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      *
-     * @param comparator the {@link Comparator} to specify how to sort the list. If
-     *      the source {@link EventList} elements implement {@link Comparable},
-     *      you may use a {@link GlazedLists#comparableComparator()} to sort them
+     * @param comparator the {@link java.util.Comparator} to specify how to sort the list. If
+     *      the source {@link ca.odell.glazedlists.EventList} elements implement {@link Comparable},
+     *      you may use a {@link ca.odell.glazedlists.GlazedLists#comparableComparator()} to sort them
      *      in their natural order. You may also specify <code>null</code> to put
-     *      this {@link SortedList} in unsorted order.
+     *      this {@link ca.odell.glazedlists.SortedListWithIndexedTree} in unsorted order.
      */
     public void setComparator(Comparator<? super E> comparator) {
         // save this comparator
         this.comparator = comparator;
         // keep the old trees to construct the reordering
-        Tree1 previousSorted = sorted;
+        IndexedTree previousSorted = sorted;
         // create the sorted list with a simple comparator
         Comparator treeComparator = null;
-        if(comparator != null) treeComparator = new ElementComparator(comparator);
-        else treeComparator = new ElementRawOrderComparator();
-        sorted = new Tree1<Element>(SORTED_BYTE_CODER, treeComparator);
+        if(comparator != null) treeComparator = new SortedListWithIndexedTree.IndexedTreeNodeComparator(comparator);
+        else treeComparator = new SortedListWithIndexedTree.IndexedTreeNodeRawOrderComparator();
+        sorted = new IndexedTree<IndexedTreeNode>(treeComparator);
 
         // create a list which knows the offsets of the indexes to initialize this list
         if(previousSorted == null && unsorted == null) {
-            unsorted = new Tree1<Element>(UNSORTED_BYTE_CODER);
+            unsorted = new IndexedTree<IndexedTreeNode>();
             // add all elements in the source list, in order
             for(int i = 0, n = source.size(); i < n; i++) {
-                Element unsortedNode = unsorted.add(i, ALL_COLORS, ALL_COLORS, EMPTY_ELEMENT, 1);
+                IndexedTreeNode unsortedNode = unsorted.addByNode(i, IndexedTreeNode.EMPTY_NODE);
                 insertByUnsortedNode(unsortedNode);
             }
             // this is the first sort so we're done
@@ -413,21 +401,19 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if(source.size() == 0) return;
 
         // rebuild the sorted tree to reflect the new Comparator
-        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(ALL_COLORS); ) {
-            i.next(ALL_COLORS);
-            Element unsortedNode = i.node();
+        for(IndexedTreeIterator i = unsorted.iterator(0); i.hasNext(); ) {
+            IndexedTreeNode unsortedNode = i.next();
             insertByUnsortedNode(unsortedNode);
         }
 
         // construct the reorder map
         int[] reorderMap = new int[size()];
         int oldSortedIndex = 0;
-        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(previousSorted); i.hasNext(ALL_COLORS); oldSortedIndex++) {
-            i.next(ALL_COLORS);
-            Element oldSortedNode = i.node();
-            Element unsortedNode = (Element)oldSortedNode.get();
-            Element newSortedNode = (Element)unsortedNode.get();
-            int newSortedIndex = sorted.indexOfNode(newSortedNode, ALL_COLORS);
+        for(IndexedTreeIterator i = previousSorted.iterator(0); i.hasNext(); oldSortedIndex++) {
+            IndexedTreeNode oldSortedNode = i.next();
+            IndexedTreeNode unsortedNode = (IndexedTreeNode)oldSortedNode.getValue();
+            IndexedTreeNode newSortedNode = (IndexedTreeNode)unsortedNode.getValue();
+            int newSortedIndex = newSortedNode.getIndex();
             reorderMap[newSortedIndex] = oldSortedIndex;
         }
 
@@ -439,11 +425,11 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
     /** {@inheritDoc} */
     public int indexOf(Object object) {
-        if(mode != STRICT_SORT_ORDER || comparator == null) return source.indexOf(object);
+        if(mode != SortedListWithIndexedTree.STRICT_SORT_ORDER || comparator == null) return source.indexOf(object);
 
         // use the fact that we have sorted data to quickly locate a position
         // at which we can begin a linear search for an object that .equals(object)
-        int index = ((Tree1)sorted).indexOfValue(object, true, false, ALL_COLORS);
+        int index = sorted.indexOf(object);
 
         // if we couldn't use the comparator to find the index, return -1
         if (index == -1) return -1;
@@ -467,11 +453,11 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
     /** {@inheritDoc} */
     public int lastIndexOf(Object object) {
-        if(mode != STRICT_SORT_ORDER || comparator == null) return source.lastIndexOf(object);
+        if(mode != SortedListWithIndexedTree.STRICT_SORT_ORDER || comparator == null) return source.lastIndexOf(object);
 
         // use the fact that we have sorted data to quickly locate a position
         // at which we can begin a linear search for an object that .equals(object)
-        int index = ((Tree1)sorted).indexOfValue(object, false, false, ALL_COLORS);
+        int index = sorted.lastIndexOf(object);
 
         // if we couldn't use the comparator to find the index, return -1
         if (index == -1) return -1;
@@ -501,7 +487,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * <p>Unlike {@link #indexOf} this method does not guarantee the given
      * <code>object</code> {@link Object#equals(Object) equals} the element at
      * the returned index. Instead, they are indistinguishable according to the
-     * sorting {@link Comparator}.
+     * sorting {@link java.util.Comparator}.
      *
      * @return a value in <tt>[0, size()]</tt> inclusive
      */
@@ -509,7 +495,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if (comparator == null)
             throw new IllegalStateException("No Comparator exists to perform this operation");
 
-        return ((Tree1)sorted).indexOfValue(object, true, true, ALL_COLORS);
+        final int sortIndex = sorted.indexOf(object);
+        return sortIndex == -1 ? sorted.indexOfSimulated(object) : sortIndex;
     }
 
     /**
@@ -520,7 +507,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * <p>Unlike {@link #lastIndexOf} this method does not guarantee the given
      * <code>object</code> {@link Object#equals(Object) equals} the element at
      * the returned index. Instead, they are indistinguishable according to the
-     * sorting {@link Comparator}.
+     * sorting {@link java.util.Comparator}.
      *
      * @return a value in <tt>[0, size()]</tt> inclusive
      */
@@ -528,7 +515,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if (comparator == null)
             throw new IllegalStateException("No Comparator exists to perform this operation");
 
-        return ((Tree1)sorted).indexOfValue(object, false, true, ALL_COLORS);
+        final int lastSortIndex = sorted.lastIndexOf(object);
+        return lastSortIndex == -1 ? sorted.indexOfSimulated(object) : lastSortIndex;
     }
 
     /**
@@ -545,7 +533,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      *      which has cleaner semantics.
      */
     public int indexOfSimulated(Object object) {
-        return comparator != null ? ((Tree1)sorted).indexOfValue(object, true, true, ALL_COLORS) : size();
+        return comparator != null ? sorted.indexOfSimulated(object) : size();
     }
 
     /** {@inheritDoc} */
@@ -559,23 +547,23 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * of an object in a list that has the index of that node.
      *
      * <p>If one of the objects passed to {@link #compare} is not an
-     * {@link Element}, it will compare the object directly to the object
-     * in the source {@link EventList} referenced by the {@link Element}.
+     * {@link ca.odell.glazedlists.impl.adt.IndexedTreeNode}, it will compare the object directly to the object
+     * in the source {@link EventList} referenced by the {@link ca.odell.glazedlists.impl.adt.IndexedTreeNode}.
      * This functionality is necessary to allow use of the underlying
-     * {@link Comparator} within {@link Tree1} to support {@link List#indexOf},
-     * {@link List#lastIndexOf}, and {@link List#contains}.
+     * {@link java.util.Comparator} within {@link ca.odell.glazedlists.impl.adt.IndexedTree} to support {@link java.util.List#indexOf},
+     * {@link java.util.List#lastIndexOf}, and {@link java.util.List#contains}.
      */
-    private class ElementComparator implements Comparator {
+    private class IndexedTreeNodeComparator implements Comparator {
 
         /** the actual comparator used on the values found */
         private Comparator comparator;
 
         /**
-         * Creates an {@link ElementComparator} that compares the
+         * Creates an {@link ca.odell.glazedlists.SortedListWithIndexedTree.IndexedTreeNodeComparator} that compares the
          * objects in the source list based on the indexes of the tree
          * nodes being compared.
          */
-        public ElementComparator(Comparator comparator) {
+        public IndexedTreeNodeComparator(Comparator comparator) {
             this.comparator = comparator;
         }
 
@@ -587,14 +575,14 @@ public final class SortedList<E> extends TransformedList<E,E> {
             Object betaObject = beta;
             int alphaIndex = -1;
             int betaIndex = -1;
-            if(alpha instanceof Element) {
-                Element alphaTreeNode = (Element)alpha;
-                alphaIndex = unsorted.indexOfNode(alphaTreeNode, ALL_COLORS);
+            if(alpha instanceof IndexedTreeNode) {
+                IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
+                alphaIndex = alphaTreeNode.getIndex();
                 alphaObject = source.get(alphaIndex);
             }
-            if(beta instanceof Element) {
-                Element betaTreeNode = (Element)beta;
-                betaIndex = unsorted.indexOfNode(betaTreeNode, ALL_COLORS);
+            if(beta instanceof IndexedTreeNode) {
+                IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
+                betaIndex = betaTreeNode.getIndex();
                 betaObject = source.get(betaIndex);
             }
             int result = comparator.compare(alphaObject, betaObject);
@@ -607,16 +595,16 @@ public final class SortedList<E> extends TransformedList<E,E> {
     /**
      * A comparator that takes an indexed node, and compares the index of that node.
      */
-    private class ElementRawOrderComparator implements Comparator {
+    private static class IndexedTreeNodeRawOrderComparator implements Comparator {
         /**
          * Compares the alpha object to the beta object by their indices.
          */
         public int compare(Object alpha, Object beta) {
             try {
-                Element alphaTreeNode = (Element)alpha;
-                Element betaTreeNode = (Element)beta;
-                int alphaIndex = unsorted.indexOfNode(alphaTreeNode, ALL_COLORS);
-                int betaIndex = unsorted.indexOfNode(betaTreeNode, ALL_COLORS);
+                IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
+                IndexedTreeNode betaTreeNode = (IndexedTreeNode)beta;
+                int alphaIndex = alphaTreeNode.getIndex();
+                int betaIndex = betaTreeNode.getIndex();
                 return alphaIndex - betaIndex;
             } catch(ClassCastException e) {
                 System.out.println(alpha.getClass());
@@ -628,7 +616,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
     /** {@inheritDoc} */
     public Iterator<E> iterator() {
-        return new SortedListIterator();
+        return new SortedListWithIndexedTree.SortedListIterator();
     }
 
     /**
@@ -636,32 +624,32 @@ public final class SortedList<E> extends TransformedList<E,E> {
      */
     private class SortedListIterator implements Iterator<E> {
 
-        /** the Tree1Iterator to use to move across the tree */
-        private Tree1Iterator<Element> treeIterator = new Tree1Iterator<Element>(sorted);
+        /** the IndexedTreeIterator to use to move across the tree */
+        private IndexedTreeIterator<IndexedTreeNode> treeIterator = sorted.iterator(0);
 
         /**
          * Returns true iff there are more value to iterate on by caling next()
          */
         public boolean hasNext() {
-            return treeIterator.hasNext(ALL_COLORS);
+            return treeIterator.hasNext();
         }
 
         /**
          * Returns the next value in the iteration.
          */
         public E next() {
-            treeIterator.next(ALL_COLORS);
-            Element unsortedNode = treeIterator.value();
-            return source.get(unsorted.indexOfNode(unsortedNode, ALL_COLORS));
+            IndexedTreeNode sortedNode = (IndexedTreeNode)treeIterator.next();
+            IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
+            return source.get(unsortedNode.getIndex());
         }
 
         /**
          * Removes the last value returned by this iterator.
          */
         public void remove() {
-            int indexToRemove = treeIterator.index(ALL_COLORS);
-            SortedList.this.source.remove(getSourceIndex(indexToRemove));
-            treeIterator = new Tree1Iterator(sorted, indexToRemove, ALL_COLORS);
+            int indexToRemove = treeIterator.previousIndex();
+            SortedListWithIndexedTree.this.source.remove(getSourceIndex(indexToRemove));
+            treeIterator = sorted.iterator(indexToRemove);
         }
     }
 }
