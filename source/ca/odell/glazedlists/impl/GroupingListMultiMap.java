@@ -80,7 +80,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         this.delegate = new HashMap<Comparable<K>,List<V>>(this.groupingList.size());
 
         // initialize both the keyList and the delegate Map
-        for (Iterator<List<V>> i = this.groupingList.iterator(); i.hasNext();) {
+        for (Iterator<List<V>> i = this.valueList.iterator(); i.hasNext();) {
             final List<V> value = i.next();
             final Comparable key = key(value);
             this.keyList.add(key);
@@ -617,6 +617,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         public V remove(int index) { return delegate.remove(index); }
         public int indexOf(Object o) { return delegate.indexOf(o); }
         public int lastIndexOf(Object o) { return delegate.lastIndexOf(o); }
+        public String toString() { return delegate.toString(); }
 
         /**
          * This class wraps the normal ListIterator returned by the GroupingList

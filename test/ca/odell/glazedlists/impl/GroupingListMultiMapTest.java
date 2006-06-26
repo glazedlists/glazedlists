@@ -666,6 +666,20 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jordache Jordan"), jNames);
     }
 
+    public void testWriteThroughValues3() {
+        final EventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.delimitedStringToList("James Lemieux Jesse Wilson"));
+        FirstLetterFunction f = new FirstLetterFunction();
+        final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, f);
+
+        List<String> jNames = eventMap.get("J");
+        runListMutationTest(jNames, "J");
+        runListMutationTest(jNames.subList(2, 4), "J");
+
+        runListIteratorMutationTest(jNames.listIterator(), "J");
+        runListIteratorMutationTest(jNames.listIterator(3), "J");
+    }
+
     private void runListIteratorMutationTest(ListIterator<String> listIterator, String key) {
         listIterator.next();
 
