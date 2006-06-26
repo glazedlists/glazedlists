@@ -9,6 +9,17 @@ import java.util.AbstractList;
 /*
  M4 Macros
 
+STANDARD M4 LOOP ---------------------------------------------------------------
+
+
+
+MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
+
+
+
+
+
+NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -16,14 +27,13 @@ import java.util.AbstractList;
 
 
 
- Barcode2 Macros
+
+
+USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
 
 
 
-
-
-
-
+SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
@@ -37,55 +47,78 @@ import java.util.AbstractList;
 public class Tree1AsList<V> extends AbstractList<V> {
 
     private final Tree1<V> tree;
-    private final byte colors;
+    /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ private final byte colors; /* 
+/* END SINGLE ALTERNATE */
 
     /** the color of inserted or added elements */
-    private final byte color;
+    /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ private final byte color; /* 
+/* END SINGLE ALTERNATE */
 
     /**
      * Create a new {@link Tree1AsList} adapting the specified tree.
      */
-    public Tree1AsList/**/(Tree1<V> tree) {
+    // 
+/* BEGIN SINGLE SKIPPED CODE 
+    public Tree1AsList
+            (Tree1<V> tree) {
         this(tree, tree.getCoder().colorsToByte(tree.getCoder().getColors()), (byte)1);
     }
+    // END SINGLE SKIPPED CODE */
 
     /**
      * Create a new {@link Tree1AsList}, adapting the specified colors subset
      * of the specified tree. Inserted elements via {@link #add} will be of the
      * specified color.
      */
-    public Tree1AsList/**/(Tree1<V> tree, byte colors, byte color) {
+    public Tree1AsList/**/(Tree1<V> tree /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ , byte colors, byte color /* 
+/* END SINGLE ALTERNATE */) {
         this.tree = tree;
+        // 
+/* BEGIN SINGLE SKIPPED CODE 
         this.colors = colors;
         this.color = color;
+        // END SINGLE SKIPPED CODE */
     }
 
     /** {@inheritDoc} */
     public V get(int index) {
-        return tree.get(index, colors).get();
+        return tree.get(index /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */, colors /* 
+/* END SINGLE ALTERNATE */).get();
     }
 
     /** {@inheritDoc} */
     public void add(int index, V element) {
-        tree.add(index, colors, color, element, 1);
+        tree.add(index, /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ colors, color, /* 
+/* END SINGLE ALTERNATE */ element, 1);
     }
 
     /** {@inheritDoc} */
     public V set(int index, V element) {
         V replaced = get(index);
-        tree.set(index, colors, color, element, 1);
+        tree.set(index, /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ colors, color, /* 
+/* END SINGLE ALTERNATE */ element, 1);
         return replaced;
     }
 
     /** {@inheritDoc} */
     public V remove(int index) {
         V removed = get(index);
-        tree.remove(index, colors, 1);
+        tree.remove(index, /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ colors, /* 
+/* END SINGLE ALTERNATE */ 1);
         return removed;
     }
 
     /** {@inheritDoc} */
     public int size() {
-        return tree.size(colors);
+        return tree.size(/* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ colors /* 
+/* END SINGLE ALTERNATE */);
     }
 }

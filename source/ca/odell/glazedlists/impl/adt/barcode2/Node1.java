@@ -6,6 +6,17 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 /*
  M4 Macros
 
+STANDARD M4 LOOP ---------------------------------------------------------------
+
+
+
+MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
+
+
+
+
+
+NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -13,14 +24,13 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 
 
 
- Barcode2 Macros
+
+
+USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
 
 
 
-
-
-
-
+SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
@@ -55,7 +65,10 @@ class Node1<V> implements Element<V> {
     // END ALTERNATE CODE */
 
     /** the node's color */
-    final byte color;
+    /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ final byte color; /* 
+/* END SINGLE ALTERNATE */
+
 
     /** the node's value */
     V value;
@@ -79,16 +92,21 @@ class Node1<V> implements Element<V> {
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public Node1/**/(byte color, int size, V value, Node1/**/<V> parent) {
+    public Node1/**/(/* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ byte color, /* 
+/* END SINGLE ALTERNATE */ int size, V value, Node1/**/<V> parent) {
+        // 
+/* BEGIN SINGLE SKIPPED CODE 
         assert(Tree1.colorAsIndex(color) >= 0 && Tree1.colorAsIndex(color) < 7);
         this.color = color;
+        // END SINGLE SKIPPED CODE */
         this.size = size;
         this.value = value;
         this.height = 1;
         this.parent = parent;
 
         /*  BEGIN M4 MACRO GENERATED CODE */
-        if(color == 1) count1 += size;
+        count1 += size;
         
         /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
 /* 
@@ -116,7 +134,9 @@ class Node1<V> implements Element<V> {
      * Get the color of this element.
      */
     public byte getColor() {
-        return color;
+        return /* USE SINGLE ALTERNATE */ 1
+// IGNORE DEFAULT: */ color /* 
+/* END SINGLE ALTERNATE */;
     }
 
     /**
@@ -142,9 +162,12 @@ class Node1<V> implements Element<V> {
     /**
      * The size of the node for the specified colors.
      */
+    // 
+/* BEGIN SINGLE SKIPPED CODE 
     final int nodeSize(byte colors) {
         return (colors & color) > 0 ? size : 0;
     }
+    // END SINGLE SKIPPED CODE */
 
     /**
      * Update the counts member variable by examining the counts of
@@ -190,7 +213,7 @@ class Node1<V> implements Element<V> {
 
         // this node
         /*  BEGIN M4 MACRO GENERATED CODE */
-        if(color == 1) count1 += size;
+        count1 += size;
         
         /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
 /* 
@@ -226,7 +249,9 @@ class Node1<V> implements Element<V> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-        out.append(colors.get(Tree1.colorAsIndex(color)));
+        /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ out.append(colors.get(Tree1.colorAsIndex(color))); /* 
+/* END SINGLE ALTERNATE */
         out.append(" [").append(size).append("]");
         if(value != null) {
             out.append(": ");

@@ -6,6 +6,17 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 /*
  M4 Macros
 
+STANDARD M4 LOOP ---------------------------------------------------------------
+
+
+
+MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
+
+
+
+
+
+NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -13,14 +24,13 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 
 
 
- Barcode2 Macros
+
+
+USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
 
 
 
-
-
-
-
+SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
@@ -58,7 +68,8 @@ class Node4<V> implements Element<V> {
     // END ALTERNATE CODE */
 
     /** the node's color */
-    final byte color;
+    /* USE DEFAULT */ final byte color; /* END DEFAULT */
+
 
     /** the node's value */
     V value;
@@ -82,9 +93,11 @@ class Node4<V> implements Element<V> {
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public Node4/**/(byte color, int size, V value, Node4/**/<V> parent) {
+    public Node4/**/(/* USE DEFAULT */ byte color, /* END DEFAULT */ int size, V value, Node4/**/<V> parent) {
+        // 
         assert(Tree4.colorAsIndex(color) >= 0 && Tree4.colorAsIndex(color) < 7);
         this.color = color;
+        // 
         this.size = size;
         this.value = value;
         this.height = 1;
@@ -122,7 +135,7 @@ class Node4<V> implements Element<V> {
      * Get the color of this element.
      */
     public byte getColor() {
-        return color;
+        return /* USE DEFAULT */ color /* END DEFAULT */;
     }
 
     /**
@@ -151,9 +164,11 @@ class Node4<V> implements Element<V> {
     /**
      * The size of the node for the specified colors.
      */
+    // 
     final int nodeSize(byte colors) {
         return (colors & color) > 0 ? size : 0;
     }
+    // 
 
     /**
      * Update the counts member variable by examining the counts of
@@ -247,7 +262,7 @@ class Node4<V> implements Element<V> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-        out.append(colors.get(Tree4.colorAsIndex(color)));
+        /* USE DEFAULT */ out.append(colors.get(Tree4.colorAsIndex(color))); /* END DEFAULT */
         out.append(" [").append(size).append("]");
         if(value != null) {
             out.append(": ");

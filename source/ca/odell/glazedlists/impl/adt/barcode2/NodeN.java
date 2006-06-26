@@ -6,6 +6,8 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 /*
  M4 Macros
 
+STANDARD M4 LOOP ---------------------------------------------------------------
+
 m4_divert(-1)
 # forloop(i, from, to, stmt)
 
@@ -15,14 +17,14 @@ m4_define(`_forloop',
              `m4_define(`$1', m4_incr($1))_forloop(`$1', `$2', `$3', `$4')')')
 m4_divert
 
+MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
 m4_define(`BEGIN_M4_MACRO', ` BEGIN M4 MACRO GENERATED CODE *'`/')
 m4_define(`END_M4_MACRO', `/'`* END M4 MACRO GENERATED CODE ')
 m4_define(`BEGIN_M4_ALTERNATE', `BEGIN M4 ALTERNATE CODE
 /'`* ')
 m4_define(`END_M4_ALTERNATE', `END ALTERNATE CODE *'`/')
 
- Barcode2 Macros
-
+NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 m4_define(`VAR_LAST_COLOR_INDEX', `m4_eval(VAR_COLOUR_COUNT-1)')
 m4_define(`originalCounti', ``originalCount'indexToBit($1)')
 m4_define(`indexToBit', `m4_eval(`2 ** $1')')
@@ -31,6 +33,17 @@ m4_define(`TreeN', ``Tree'VAR_COLOUR_COUNT')
 m4_define(`TreeNAsList', ``Tree'VAR_COLOUR_COUNT`AsList'')
 m4_define(`TreeNIterator', ``Tree'VAR_COLOUR_COUNT`Iterator'')
 m4_define(`counti', ``count'indexToBit($1)')
+
+USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
+m4_define(`SINGLE_ALTERNATE', m4_ifelse(VAR_COLOUR_COUNT,`1',`USE SINGLE ALTERNATE *'`/ '$1`
+// IGNORE DEFAULT:',`USE DEFAULT'))
+m4_define(`END_SINGLE_ALTERNATE', m4_ifelse(VAR_COLOUR_COUNT,`1',`
+/'`* END SINGLE ALTERNATE',`END DEFAULT'))
+
+SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
+m4_define(`BEGIN_SINGLE_SKIP', m4_ifelse(VAR_COLOUR_COUNT,`1',`
+/'`* BEGIN SINGLE SKIPPED CODE '))
+m4_define(`END_SINGLE_SKIP', m4_ifelse(VAR_COLOUR_COUNT,`1',`END SINGLE SKIPPED CODE *'`/'))
 
 */
 
@@ -62,7 +75,8 @@ class NodeN<V> implements Element<V> {
     // END_M4_ALTERNATE
 
     /** the node's color */
-    final byte color;
+    /* SINGLE_ALTERNATE */ final byte color; /* END_SINGLE_ALTERNATE */
+
 
     /** the node's value */
     V value;
@@ -86,17 +100,20 @@ class NodeN<V> implements Element<V> {
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public NodeN/**/(byte color, int size, V value, NodeN/**/<V> parent) {
+    public NodeN/**/(/* SINGLE_ALTERNATE */ byte color, /* END_SINGLE_ALTERNATE */ int size, V value, NodeN/**/<V> parent) {
+        // BEGIN_SINGLE_SKIP
         assert(TreeN.colorAsIndex(color) >= 0 && TreeN.colorAsIndex(color) < 7);
         this.color = color;
+        // END_SINGLE_SKIP
         this.size = size;
         this.value = value;
         this.height = 1;
         this.parent = parent;
 
         /* BEGIN_M4_MACRO
-        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(color == indexToBit(i)) counti(i) += size;
-        ')
+        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`count1 += size;
+        ', `if(color == indexToBit(i)) counti(i) += size;
+        ')')
         END_M4_MACRO */ // BEGIN_M4_ALTERNATE
         if(color == 1) count1 += size;
         if(color == 2) count2 += size;
@@ -122,7 +139,7 @@ class NodeN<V> implements Element<V> {
      * Get the color of this element.
      */
     public byte getColor() {
-        return color;
+        return /* SINGLE_ALTERNATE(`1') */ color /* END_SINGLE_ALTERNATE */;
     }
 
     /**
@@ -147,9 +164,11 @@ class NodeN<V> implements Element<V> {
     /**
      * The size of the node for the specified colors.
      */
+    // BEGIN_SINGLE_SKIP
     final int nodeSize(byte colors) {
         return (colors & color) > 0 ? size : 0;
     }
+    // END_SINGLE_SKIP
 
     /**
      * Update the counts member variable by examining the counts of
@@ -192,8 +211,9 @@ class NodeN<V> implements Element<V> {
 
         // this node
         /* BEGIN_M4_MACRO
-        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `if(color == indexToBit(i)) counti(i) += size;
-        ')
+        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',counti(i)` += size;
+        ', `if(color == 'indexToBit(i)`) 'counti(i)` += size;
+        ')')
         END_M4_MACRO */ // BEGIN_M4_ALTERNATE
         if(color == 1) count1 += size;
         if(color == 2) count2 += size;
@@ -227,7 +247,7 @@ class NodeN<V> implements Element<V> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-        out.append(colors.get(TreeN.colorAsIndex(color)));
+        /* SINGLE_ALTERNATE */ out.append(colors.get(TreeN.colorAsIndex(color))); /* END_SINGLE_ALTERNATE */
         out.append(" [").append(size).append("]");
         if(value != null) {
             out.append(": ");

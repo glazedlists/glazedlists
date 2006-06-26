@@ -12,6 +12,17 @@ import java.util.Comparator;
 /*
  M4 Macros
 
+STANDARD M4 LOOP ---------------------------------------------------------------
+
+
+
+MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
+
+
+
+
+
+NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -19,17 +30,13 @@ import java.util.Comparator;
 
 
 
- Barcode2 Macros
+
+
+USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
 
 
 
-
-
-
-
-
-
-
+SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
@@ -122,7 +129,7 @@ public class Tree4<V> {
      * <p>This method is an hotspot, so its crucial that it run as efficiently
      * as possible.
      */
-    public Element<V> get(int index, byte indexColors) {
+    public Element<V> get(int index /* USE DEFAULT */, byte indexColors /* END DEFAULT */) {
         if(root == null) throw new IndexOutOfBoundsException();
 
         // go deep, looking for our node of interest
@@ -133,7 +140,7 @@ public class Tree4<V> {
 
             // recurse on the left
             Node4<V> nodeLeft = node.left;
-            int leftSize = nodeLeft != null ? nodeLeft./*  USE DEFAULT */ size(indexColors) /* END DEFAULT */ : 0;
+            int leftSize = nodeLeft != null ? nodeLeft./* USE DEFAULT */ size(indexColors) /* END DEFAULT */ : 0;
             if(index < leftSize) {
                 node = nodeLeft;
                 continue;
@@ -142,7 +149,7 @@ public class Tree4<V> {
             }
 
             // the result is in the centre
-            int size = node./*  USE DEFAULT */ nodeSize(indexColors) /* END DEFAULT */;
+            int size = node./* USE DEFAULT */ nodeSize(indexColors) /* END DEFAULT */;
             if(index < size) {
                 return node;
             } else {
@@ -172,19 +179,19 @@ public class Tree4<V> {
      *      unless the size parameter is 0, in which case the result is always
      *      <code>null</code>.
      */
-    public Element<V> add(int index, byte indexColors, byte color, V value, int size) {
+    public Element<V> add(int index, /* USE DEFAULT */ byte indexColors, byte color, /* END DEFAULT */ V value, int size) {
         assert(index >= 0);
-        assert(index <= size(indexColors));
+        assert(index <= size(/* USE DEFAULT */ indexColors /* END DEFAULT */));
         assert(size >= 0);
 
         if(this.root == null) {
             if(index != 0) throw new IndexOutOfBoundsException();
 
-            this.root = new Node4<V>(color, size, value, null);
+            this.root = new Node4<V>(/* USE DEFAULT */ color, /* END DEFAULT */ size, value, null);
             assert(valid());
             return this.root;
         } else {
-            Node4<V> inserted = insertIntoSubtree(root, index, indexColors, color, value, size);
+            Node4<V> inserted = insertIntoSubtree(root, index, /* USE DEFAULT */ indexColors, color, /* END DEFAULT */ value, size);
             assert(valid());
             return inserted;
         }
@@ -202,22 +209,22 @@ public class Tree4<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private Node4<V> insertIntoSubtree(Node4<V> parent, int index, byte indexColors, byte color, V value, int size) {
+    private Node4<V> insertIntoSubtree(Node4<V> parent, int index, /* USE DEFAULT */ byte indexColors, byte color, /* END DEFAULT */ V value, int size) {
         while(true) {
             assert(parent != null);
             assert(index >= 0);
 
             // figure out the layout of this node
             Node4<V> parentLeft = parent.left;
-            int parentLeftSize = parentLeft != null ? parentLeft.size(indexColors) : 0;
-            int parentRightStartIndex = parentLeftSize + parent.nodeSize(indexColors);
+            int parentLeftSize = parentLeft != null ? parentLeft./* USE DEFAULT */ size(indexColors) /* END DEFAULT */ : 0;
+            int parentRightStartIndex = parentLeftSize + parent./* USE DEFAULT */ nodeSize(indexColors) /* END DEFAULT */;
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(color == parent.color && value == parent.value && value != null) {
+            if(/* USE DEFAULT */ color == parent.color &&  /* END DEFAULT */ value == parent.value && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
                     parent.size += size;
-                    fixCountsThruRoot(parent, color, size);
+                    fixCountsThruRoot(parent, /* USE DEFAULT */ color, /* END DEFAULT */ size);
                     return parent;
                 }
             }
@@ -226,9 +233,9 @@ public class Tree4<V> {
             if(index <= parentLeftSize) {
                 // as a new left child
                 if(parentLeft == null) {
-                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(/* USE DEFAULT */ color, /* END DEFAULT */ size, value, parent);
                     parent.left = inserted;
-                    fixCountsThruRoot(parent, color, size);
+                    fixCountsThruRoot(parent, /* USE DEFAULT */ color, /* END DEFAULT */ size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -244,27 +251,27 @@ public class Tree4<V> {
             if(index < parentRightStartIndex) {
                 int parentRightHalfSize = parentRightStartIndex - index;
                 parent.size -= parentRightHalfSize;
-                fixCountsThruRoot(parent, parent.color, -parentRightHalfSize);
+                fixCountsThruRoot(parent, /* USE DEFAULT */ parent.color, /* END DEFAULT */ -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
-                Element<V> inserted = insertIntoSubtree(parent, index, indexColors, parent.color, null, parentRightHalfSize);
+                Element<V> inserted = insertIntoSubtree(parent, index, /* USE DEFAULT */ indexColors, parent.color, /* END DEFAULT */ null, parentRightHalfSize);
                 inserted.set(parent.value);
 
                 // recalculate parentRightStartIndex, since that should have
                 // changed by now. this will then go on to insert on the right
-                parentRightStartIndex = parentLeftSize + parent.nodeSize(indexColors);
+                parentRightStartIndex = parentLeftSize + parent./* USE DEFAULT */ nodeSize(indexColors) /* END DEFAULT */;
             }
 
             // on the right
             right: {
-                int parentSize = parent.size(indexColors);
+                int parentSize = parent./* USE DEFAULT */ size(indexColors) /* END DEFAULT */;
                 assert(index <= parentSize);
                 Node4<V> parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(/* USE DEFAULT */ color, /* END DEFAULT */ size, value, parent);
                     parent.right = inserted;
-                    fixCountsThruRoot(parent, color, size);
+                    fixCountsThruRoot(parent, /* USE DEFAULT */ color, /* END DEFAULT */ size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -292,11 +299,11 @@ public class Tree4<V> {
         assert(size >= 0);
 
         if(this.root == null) {
-            this.root = new Node4<V>(color, size, value, null);
+            this.root = new Node4<V>(/* USE DEFAULT */ color, /* END DEFAULT */ size, value, null);
             assert(valid());
             return this.root;
         } else {
-            Node4<V> inserted = insertIntoSubtreeInSortedOrder(root, color, value, size);
+            Node4<V> inserted = insertIntoSubtreeInSortedOrder(root, /* USE DEFAULT */ color, /* END DEFAULT */ value, size);
             assert(valid());
             return inserted;
         }
@@ -310,7 +317,7 @@ public class Tree4<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private Node4<V> insertIntoSubtreeInSortedOrder(Node4<V> parent, byte color, V value, int size) {
+    private Node4<V> insertIntoSubtreeInSortedOrder(Node4<V> parent, /* USE DEFAULT */ byte color, /* END DEFAULT */ V value, int size) {
         while(true) {
             assert(parent != null);
 
@@ -333,9 +340,9 @@ public class Tree4<V> {
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(sortSide == 0 && color == parent.color && value == parent.value && value != null) {
+            if(sortSide == 0 && /* USE DEFAULT */ color == parent.color && /* END DEFAULT */ value == parent.value && value != null) {
                 parent.size += size;
-                fixCountsThruRoot(parent, color, size);
+                fixCountsThruRoot(parent, /* USE DEFAULT */ color, /* END DEFAULT */ size);
                 return parent;
             }
 
@@ -349,9 +356,9 @@ public class Tree4<V> {
 
                 // as a new left child
                 if(parentLeft == null) {
-                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(/* USE DEFAULT */ color, /* END DEFAULT */ size, value, parent);
                     parent.left = inserted;
-                    fixCountsThruRoot(parent, color, size);
+                    fixCountsThruRoot(parent, /* USE DEFAULT */ color, /* END DEFAULT */ size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -367,9 +374,9 @@ public class Tree4<V> {
 
                 // as a right child
                 if(parentRight == null) {
-                    Node4<V> inserted = new Node4<V>(color, size, value, parent);
+                    Node4<V> inserted = new Node4<V>(/* USE DEFAULT */ color, /* END DEFAULT */ size, value, parent);
                     parent.right = inserted;
-                    fixCountsThruRoot(parent, color, size);
+                    fixCountsThruRoot(parent, /* USE DEFAULT */ color, /* END DEFAULT */ size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -386,7 +393,7 @@ public class Tree4<V> {
      * to the root. The counts of the specified color are adjusted by delta
      * (which may be positive or negative).
      */
-    private final void fixCountsThruRoot(Node4<V> node, byte color, int delta) {
+    private final void fixCountsThruRoot(Node4<V> node, /* USE DEFAULT */ byte color, /* END DEFAULT */ int delta) {
         /*  BEGIN M4 MACRO GENERATED CODE */
         if(color == 1) {
             for( ; node != null; node = node.parent) node.count1 += delta;
@@ -564,7 +571,7 @@ public class Tree4<V> {
         assert(root != null);
 
         // delete the node by adding to the zero queue
-        fixCountsThruRoot(node, node.color, -node.size);
+        fixCountsThruRoot(node, /* USE DEFAULT */ node.color, /* END DEFAULT */ -node.size);
         node.size = 0;
         zeroQueue.add(node);
         drainZeroQueue();
@@ -582,14 +589,14 @@ public class Tree4<V> {
      * tree, sometimes multiple nodes of the same color and value will be
      * encountered in sequence.
      */
-    public void remove(int index, byte indexColors, int size) {
+    public void remove(int index, /* USE DEFAULT */ byte indexColors, /* END DEFAULT */ int size) {
         if(size == 0) return;
         assert(index >= 0);
-        assert(index + size <= size(indexColors));
+        assert(index + size <= size(/* USE DEFAULT */ indexColors /* END DEFAULT */));
         assert(root != null);
 
         // remove values from the tree
-        removeFromSubtree(root, index, indexColors, size);
+        removeFromSubtree(root, index, /* USE DEFAULT */ indexColors, /* END DEFAULT */ size);
 
         // clean up any nodes that got deleted
         drainZeroQueue();
@@ -621,14 +628,14 @@ public class Tree4<V> {
      * remove any nodes of size zero, that's up to the caller to do after by
      * removing all nodes in the zeroQueue from the tree.
      */
-    private void removeFromSubtree(Node4<V> node, int index, byte indexColors, int size) {
+    private void removeFromSubtree(Node4<V> node, int index, /* USE DEFAULT */ byte indexColors, /* END DEFAULT */ int size) {
         while(size > 0) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
             Node4<V> nodeLeft = node.left;
-            int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
+            int leftSize = nodeLeft != null ? nodeLeft./* USE DEFAULT */ size(indexColors) /* END DEFAULT */ : 0;
 
             // delete on the left first
             if(index < leftSize) {
@@ -636,7 +643,7 @@ public class Tree4<V> {
                 // that part recursively
                 if(index + size > leftSize) {
                     int toRemove = leftSize - index;
-                    removeFromSubtree(nodeLeft, index, indexColors, toRemove);
+                    removeFromSubtree(nodeLeft, index, /* USE DEFAULT */ indexColors, /* END DEFAULT */ toRemove);
                     size -= toRemove;
                     leftSize -= toRemove;
                 // we can do our full delete on the left side
@@ -648,14 +655,14 @@ public class Tree4<V> {
             assert(index >= leftSize);
 
             // delete in the centre
-            int rightStartIndex = leftSize + node.nodeSize(indexColors);
+            int rightStartIndex = leftSize + node./* USE DEFAULT */ nodeSize(indexColors) /* END DEFAULT */;
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
                 node.size -= toRemove;
                 size -= toRemove;
                 rightStartIndex -= toRemove;
-                fixCountsThruRoot(node, node.color, -toRemove);
+                fixCountsThruRoot(node, /* USE DEFAULT */ node.color, /* END DEFAULT */ -toRemove);
                 if(node.size == 0) zeroQueue.add(node);
                 if(size == 0) return;
             }
@@ -719,7 +726,7 @@ public class Tree4<V> {
         assert(replacement.right == null);
 
         // remove that node from the tree
-        fixCountsThruRoot(replacement, replacement.color, -replacement.size);
+        fixCountsThruRoot(replacement, /* USE DEFAULT */ replacement.color, /* END DEFAULT */ -replacement.size);
         replaceChild(replacement, replacement.left);
 
         // update the tree structure to point to the replacement
@@ -730,7 +737,7 @@ public class Tree4<V> {
         replacement.height = toReplace.height;
         replacement.refreshCounts();
         replaceChild(toReplace, replacement);
-        fixCountsThruRoot(replacement.parent, replacement.color, replacement.size);
+        fixCountsThruRoot(replacement.parent, /* USE DEFAULT */ replacement.color, /* END DEFAULT */ replacement.size);
 
         return replacement;
     }
@@ -744,9 +751,9 @@ public class Tree4<V> {
      * with one that performs the remove and insert simultaneously, to save
      * on tree navigation.
      */
-    public void set(int index, byte indexColors, byte color, V value, int size) {
-        remove(index, indexColors, size);
-        add(index, indexColors, color, value, size);
+    public void set(int index, /* USE DEFAULT */ byte indexColors, byte color, /* END DEFAULT */ V value, int size) {
+        remove(index, /* USE DEFAULT */ indexColors, /* END DEFAULT */ size);
+        add(index, /* USE DEFAULT */ indexColors, color, /* END DEFAULT */ value, size);
     }
 
 
@@ -770,13 +777,13 @@ public class Tree4<V> {
         Node4<V> node = (Node4<V>)element;
 
         // count all elements left of this node
-        int index = node.left != null ? node.left./*  USE DEFAULT */ size(colorsOut) /* END DEFAULT */ : 0;
+        int index = node.left != null ? node.left./* USE DEFAULT */ size(colorsOut) /* END DEFAULT */ : 0;
 
         // add all elements on the left, all the way to the root
         for( ; node.parent != null; node = node.parent) {
             if(node.parent.right == node) {
-                index += node.parent.left != null ? node.parent.left./*  USE DEFAULT */ size(colorsOut) /* END DEFAULT */ : 0;
-                index += node.parent.nodeSize(colorsOut);
+                index += node.parent.left != null ? node.parent.left./* USE DEFAULT */ size(colorsOut) /* END DEFAULT */ : 0;
+                index += node.parent./* USE DEFAULT */ nodeSize(colorsOut) /* END DEFAULT */;
             }
         }
 
@@ -830,8 +837,8 @@ public class Tree4<V> {
             }
 
             // recurse on the right, increment result by left size and center size
-            result += nodeLeft != null ? nodeLeft.size(colorsOut) : 0;
-            result += node.nodeSize(colorsOut);
+            result += nodeLeft != null ? nodeLeft./* USE DEFAULT */ size(colorsOut) /* END DEFAULT */ : 0;
+            result += node./* USE DEFAULT */ nodeSize(colorsOut) /* END DEFAULT */;
             node = node.right;
         }
     }
@@ -855,7 +862,7 @@ public class Tree4<V> {
 
             // figure out the layout of this node
             Node4<V> nodeLeft = node.left;
-            int leftSize = nodeLeft != null ? nodeLeft.size(indexColors) : 0;
+            int leftSize = nodeLeft != null ? nodeLeft./* USE DEFAULT */ size(indexColors) /* END DEFAULT */ : 0;
 
             // recurse on the left
             if(index < leftSize) {
@@ -863,15 +870,16 @@ public class Tree4<V> {
                 continue;
             // increment by the count on the left
             } else {
-                if(nodeLeft != null) result += nodeLeft.size(colorsOut);
+                if(nodeLeft != null) result += nodeLeft./* USE DEFAULT */ size(colorsOut) /* END DEFAULT */;
                 index -= leftSize;
             }
 
             // the result is in the centre
-            int size = node.nodeSize(indexColors);
+            int size = node./* USE DEFAULT */ nodeSize(indexColors) /* END DEFAULT */;
             if(index < size) {
                 // we're on a node of the same color, return the adjusted index
-                if((colorsOut & node.color) > 0) {
+
+                if(/* USE DEFAULT */ (colorsOut & node.color) > 0 /* END DEFAULT */) {
                     result += index;
                 // we're on a node of a different color, return the previous node of the requested color
                 } else {
@@ -881,7 +889,7 @@ public class Tree4<V> {
 
             // increment by the count in the centre
             } else {
-                result += node.nodeSize(colorsOut);
+                result += node./* USE DEFAULT */ nodeSize(colorsOut) /* END DEFAULT */;
                 index -= size;
             }
 
@@ -893,9 +901,9 @@ public class Tree4<V> {
     /**
      * The size of the tree for the specified colors.
      */
-    public int size(byte colors) {
+    public int size(/* USE DEFAULT */ byte colors /* END DEFAULT */) {
         if(root == null) return 0;
-        else return root.size(colors);
+        else return root./* USE DEFAULT */ size(colors) /* END DEFAULT */;
     }
 
     /**
@@ -909,6 +917,7 @@ public class Tree4<V> {
     /**
      * Print this tree as a list of colors, removing all hierarchy.
      */
+    // 
     public String asSequenceOfColors() {
         if(root == null) return "";
 
@@ -922,6 +931,7 @@ public class Tree4<V> {
         }
         return result.toString();
     }
+    // 
 
 
     /**

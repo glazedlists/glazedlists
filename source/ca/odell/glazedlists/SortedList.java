@@ -145,36 +145,36 @@ public final class SortedList<E> extends TransformedList<E,E> {
             int[] sourceReorder = listChanges.getReorderMap();
 
             // remember what the mapping was before
-            int[] previousIndexToSortedIndex = new int[sorted.size(ALL_COLORS)];
+            int[] previousIndexToSortedIndex = new int[sorted.size()];
             int index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(ALL_COLORS); index++) {
-                i.next(ALL_COLORS);
+            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(); index++) {
+                i.next();
                 Element<Element> unsortedNode = i.value();
                 int unsortedIndex = unsorted.indexOfNode(unsortedNode, ALL_COLORS);
                 previousIndexToSortedIndex[unsortedIndex] = index;
             }
             // adjust the from index for the source reorder
-            int[] newIndexToSortedIndex = new int[sorted.size(ALL_COLORS)];
+            int[] newIndexToSortedIndex = new int[sorted.size()];
             for(int i = 0; i < previousIndexToSortedIndex.length; i++) {
                 newIndexToSortedIndex[i] = previousIndexToSortedIndex[sourceReorder[i]];
             }
 
             // reorder the unsorted nodes to get the new sorted order
-            Element<Element>[] unsortedNodes = new Element[unsorted.size(ALL_COLORS)];
+            Element<Element>[] unsortedNodes = new Element[unsorted.size()];
             index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(ALL_COLORS); index++) {
-                i.next(ALL_COLORS);
+            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(); index++) {
+                i.next();
                 Element<Element> unsortedNode = i.node();
                 unsortedNodes[index] = unsortedNode;
             }
             Arrays.sort(unsortedNodes, sorted.getComparator());
 
             // create a new reorder map to send the changes forward
-            int[] reorderMap = new int[sorted.size(ALL_COLORS)];
+            int[] reorderMap = new int[sorted.size()];
             boolean indexChanged = false;
             index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(ALL_COLORS); index++) {
-                i.next(ALL_COLORS);
+            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(); index++) {
+                i.next();
                 Element<Element> sortedNode = i.node();
                 Element<Element> unsortedNode = unsortedNodes[index];
                 sortedNode.set(unsortedNode);
@@ -233,19 +233,19 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
             // on insert, insert the index node
             if(changeType == ListEvent.INSERT) {
-                Element<Element> unsortedNode = unsorted.add(unsortedIndex, ALL_COLORS, ALL_COLORS, EMPTY_ELEMENT, 1);
+                Element<Element> unsortedNode = unsorted.add(unsortedIndex, EMPTY_ELEMENT, 1);
                 insertNodes.addLast(unsortedNode);
 
             // on update, mark the updated node as unsorted and save it so it can be moved
             } else if(changeType == ListEvent.UPDATE) {
-                Element<Element> unsortedNode = unsorted.get(unsortedIndex, ALL_COLORS);
+                Element<Element> unsortedNode = unsorted.get(unsortedIndex);
                 Element sortedNode = unsortedNode.get();
                 sortedNode.setSorted(false);
                 updateNodes.add(sortedNode);
 
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
-                Element<Element> unsortedNode = unsorted.get(unsortedIndex, ALL_COLORS);
+                Element<Element> unsortedNode = unsorted.get(unsortedIndex);
                 unsorted.remove(unsortedNode);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.addDelete(deleteSortedIndex);
@@ -341,14 +341,14 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // look up the sorted index before removing the nodes
         int sortedIndex = sorted.indexOfNode(sortedNode, ALL_COLORS);
         // delete the sorted node from its tree
-        sorted.remove(sortedIndex, ALL_COLORS, 1);
+        sorted.remove(sortedIndex, 1);
         // return the sorted index
         return sortedIndex;
     }
 
     /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
-        Element sortedNode = sorted.get(mutationIndex, ALL_COLORS);
+        Element sortedNode = sorted.get(mutationIndex);
         Element unsortedNode = (Element)sortedNode.get();
         return unsorted.indexOfNode(unsortedNode, ALL_COLORS);
     }
@@ -402,7 +402,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             unsorted = new Tree1<Element>(UNSORTED_BYTE_CODER);
             // add all elements in the source list, in order
             for(int i = 0, n = source.size(); i < n; i++) {
-                Element unsortedNode = unsorted.add(i, ALL_COLORS, ALL_COLORS, EMPTY_ELEMENT, 1);
+                Element unsortedNode = unsorted.add(i, EMPTY_ELEMENT, 1);
                 insertByUnsortedNode(unsortedNode);
             }
             // this is the first sort so we're done
@@ -413,8 +413,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if(source.size() == 0) return;
 
         // rebuild the sorted tree to reflect the new Comparator
-        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(ALL_COLORS); ) {
-            i.next(ALL_COLORS);
+        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(); ) {
+            i.next();
             Element unsortedNode = i.node();
             insertByUnsortedNode(unsortedNode);
         }
@@ -422,8 +422,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // construct the reorder map
         int[] reorderMap = new int[size()];
         int oldSortedIndex = 0;
-        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(previousSorted); i.hasNext(ALL_COLORS); oldSortedIndex++) {
-            i.next(ALL_COLORS);
+        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(previousSorted); i.hasNext(); oldSortedIndex++) {
+            i.next();
             Element oldSortedNode = i.node();
             Element unsortedNode = (Element)oldSortedNode.get();
             Element newSortedNode = (Element)unsortedNode.get();
@@ -643,14 +643,14 @@ public final class SortedList<E> extends TransformedList<E,E> {
          * Returns true iff there are more value to iterate on by caling next()
          */
         public boolean hasNext() {
-            return treeIterator.hasNext(ALL_COLORS);
+            return treeIterator.hasNext();
         }
 
         /**
          * Returns the next value in the iteration.
          */
         public E next() {
-            treeIterator.next(ALL_COLORS);
+            treeIterator.next();
             Element unsortedNode = treeIterator.value();
             return source.get(unsorted.indexOfNode(unsortedNode, ALL_COLORS));
         }
@@ -659,7 +659,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
          * Removes the last value returned by this iterator.
          */
         public void remove() {
-            int indexToRemove = treeIterator.index(ALL_COLORS);
+            int indexToRemove = treeIterator.index();
             SortedList.this.source.remove(getSourceIndex(indexToRemove));
             treeIterator = new Tree1Iterator(sorted, indexToRemove, ALL_COLORS);
         }

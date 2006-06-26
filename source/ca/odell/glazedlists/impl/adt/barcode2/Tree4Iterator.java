@@ -8,6 +8,17 @@ import java.util.NoSuchElementException;
 /*
  M4 Macros
 
+STANDARD M4 LOOP ---------------------------------------------------------------
+
+
+
+MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
+
+
+
+
+
+NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -15,21 +26,20 @@ import java.util.NoSuchElementException;
 
 
 
- Barcode2 Macros
+
+
+USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
 
 
 
-
-
-
-
+SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
 */
 
 /**
- * Iterate through a {@link Tree}, one element at a time.
+ * Iterate through a {@link Tree4}, one element at a time.
  *
  * <p>We should consider adding the following enhancements to this class:
  * <li>writing methods, such as <code>set()</code> and <code>remove()</code>.
@@ -75,7 +85,7 @@ public class Tree4Iterator<V> {
         // if the start is, we need to find the node in the tree
         if(nextIndex != 0) {
             int currentIndex = nextIndex - 1;
-            this.node = (Node4<V>)tree.get(currentIndex, nextIndexColors);
+            this.node = (Node4<V>)tree.get(currentIndex /* USE DEFAULT */, nextIndexColors /* END DEFAULT */);
 
             // find the counts
             /*  BEGIN M4 MACRO GENERATED CODE */
@@ -113,7 +123,7 @@ public class Tree4Iterator<V> {
     }
 
     /**
-     * Create a {@link TreeIterator} exactly the same as this one.
+     * Create a {@link Tree4Iterator} exactly the same as this one.
      * The iterators will be backed by the same tree but maintain
      * separate cursors into the tree.
      */
@@ -138,27 +148,33 @@ public class Tree4Iterator<V> {
         return result;
     }
 
-    public boolean hasNext(byte colors) {
+    /**
+     * @return <code>true</code> if there's an element of the specified color in
+     *     this tree.
+     */
+    public boolean hasNext(/* USE DEFAULT */ byte colors /* END DEFAULT */) {
         if(node == null) {
-            return tree.size(colors) > 0;
-        } else if((colors & node.color) != 0) {
-            return index(colors) < tree.size(colors) - 1;
+            return tree.size(/* USE DEFAULT */ colors /* END DEFAULT */) > 0;
+        } else if(/* USE DEFAULT */ (colors & node.color) != 0 /* END DEFAULT */) {
+            return index(/* USE DEFAULT */ colors /* END DEFAULT */) < tree.size(/* USE DEFAULT */ colors /* END DEFAULT */) - 1;
         } else {
-            return index(colors) < tree.size(colors);
+            return index(/* USE DEFAULT */ colors /* END DEFAULT */) < tree.size(/* USE DEFAULT */ colors /* END DEFAULT */);
         }
     }
 
-    public void next(byte colors) {
-        assert(hasNext(colors));
+    public void next(/* USE DEFAULT */ byte colors /* END DEFAULT */) {
+        if(!hasNext(/* USE DEFAULT */ colors /* END DEFAULT */)) {
+            throw new NoSuchElementException();
+        }
 
         // start at the first node in the tree
         if(node == null) {
             node = tree.firstNode();
             index = 0;
-            if((node.color & colors) != 0) return;
+            /* USE DEFAULT */if((node.color & colors) != 0) /* END DEFAULT */ return;
 
         // increment within the current node
-        } else if((node.color & colors) != 0 && index < node.size - 1) {
+        } else if(/* USE DEFAULT */ (node.color & colors) != 0 && /* END DEFAULT */ index < node.size - 1) {
             /*  BEGIN M4 MACRO GENERATED CODE */
             if(node.color == 1) count1++;
             if(node.color == 2) count2++;
@@ -193,33 +209,38 @@ public class Tree4Iterator<V> {
             index = 0;
 
             // we've found a node that meet our requirements, so return
-            if((node.color & colors) != 0) break;
+            /* USE DEFAULT */ if((node.color & colors) != 0) /* END DEFAULT */ break;
         }
     }
 
     /**
      * The color of the current element.
      */
+    // 
     public byte color() {
         if(node == null) throw new IllegalStateException();
         return node.color;
     }
+    // 
 
     /**
      * Expected values for index should be 0, 1, 2, 3...
      */
-    public int index(byte colors) {
+    public int index(/* USE DEFAULT */ byte colors /* END DEFAULT */) {
         if(node == null) throw new NoSuchElementException();
 
         // total the values of the specified array for the specified colors.
         int result = 0;
 
         /*  BEGIN M4 MACRO GENERATED CODE */
+        
+
         if((colors & 1) != 0) result += count1;
         if((colors & 2) != 0) result += count2;
         if((colors & 4) != 0) result += count4;
         if((colors & 8) != 0) result += count8;
         
+
         /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
 /* 
         if((colors & 1) != 0) result += count1;
