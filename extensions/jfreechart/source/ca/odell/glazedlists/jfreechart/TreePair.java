@@ -3,13 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.jfreechart;
 
-import ca.odell.glazedlists.impl.adt.IndexedTree;
-import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
 import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
 import ca.odell.glazedlists.GlazedLists;
 
 /**
- * A TreePair contains a two tree structures which store the start and end
+ * A TreePair contains two tree structures which store the start and end
  * {@link Comparable} values of {@link ValueSegment} objects in their natural
  * orders. This allows for efficient answers to questions like
  *
@@ -59,8 +57,8 @@ final class TreePair<V extends Comparable> {
      * Clears the data from the trees efficiently.
      */
     public void clear() {
-        this.start = new Tree1<V>(GlazedLists.comparableComparator());
-        this.end = new Tree1<V>(GlazedLists.comparableComparator());
+        start = new Tree1<V>(GlazedLists.comparableComparator());
+        end = new Tree1<V>(GlazedLists.comparableComparator());
     }
 
     /**
@@ -68,7 +66,7 @@ final class TreePair<V extends Comparable> {
      * otherwise.
      */
     public boolean isEmpty() {
-        return this.start.size() == 0;
+        return size() == 0;
     }
 
     /**
@@ -82,7 +80,10 @@ final class TreePair<V extends Comparable> {
         return numStartedBeforeSegmentEnd - numEndedBeforeSegmentStart;
     }
 
+    /**
+     * Returns the number of {@link ValueSegment} objects contained within.
+     */
     public int size() {
-        return this.start.size();
+        return start.size();
     }
 }
