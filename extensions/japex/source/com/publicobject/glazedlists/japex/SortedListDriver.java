@@ -60,28 +60,17 @@ public class SortedListDriver extends JapexDriverBase {
     }
 
     private void executeTestCase(TestCase testCase) {
-        // get 1000 values
-        for(int i = 0; i < 1000; i++) {
-            int index = i % sortedBase.size();
-            sortedBase.get(index);
-        }
         // add N
         for(int i = 0; i < changeSize; i++) {
             base.add(new Integer(Integer.MAX_VALUE));
         }
-        // get 1000 values
-        for(int i = 0; i < 1000; i++) {
-            int index = i % sortedBase.size();
-            sortedBase.get(index);
+        // get all values
+        for(int i = 0; i < sortedBase.size(); i++) {
+            sortedBase.get(i);
         }
         // remove N
         for(int i = 0; i < changeSize; i++) {
             base.remove(base.size() - 1);
-        }
-        // get 1000 values
-        for(int i = 0; i < 1000; i++) {
-            int index = i % sortedBase.size();
-            sortedBase.get(index);
         }
     }
 

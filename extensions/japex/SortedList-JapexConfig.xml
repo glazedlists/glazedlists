@@ -20,34 +20,14 @@
         <param name="backingTree" value="barcode2"/>
     </driver>
 
-    <testCase name="1+100">
-        <param name="baseSize" value="1"/>
-        <param name="changeSize" value="100"/>
+    <testCase name="10000 Changes">
+        <param name="baseSize" value="0"/>
+        <param name="changeSize" value="10000"/>
     </testCase>
 
-    <testCase name="10+100">
-        <param name="baseSize" value="10"/>
-        <param name="changeSize" value="100"/>
-    </testCase>
-
-    <testCase name="100+100">
-        <param name="baseSize" value="100"/>
-        <param name="changeSize" value="100"/>
-    </testCase>
-
-    <testCase name="1000+100">
-        <param name="baseSize" value="1000"/>
-        <param name="changeSize" value="100"/>
-    </testCase>
-
-    <testCase name="10000+100">
-        <param name="baseSize" value="10000"/>
-        <param name="changeSize" value="100"/>
-    </testCase>
-
-    <testCase name="100000+100">
+    <testCase name="100000 Gets">
         <param name="baseSize" value="100000"/>
-        <param name="changeSize" value="100"/>
+        <param name="changeSize" value="0"/>
     </testCase>
 
 </testSuite>
