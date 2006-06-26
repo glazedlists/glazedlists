@@ -5,6 +5,7 @@ package ca.odell.glazedlists.jfreechart;
 
 import ca.odell.glazedlists.impl.adt.IndexedTree;
 import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
+import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
 import ca.odell.glazedlists.GlazedLists;
 
 /**
@@ -22,17 +23,17 @@ import ca.odell.glazedlists.GlazedLists;
  */
 final class TreePair<V extends Comparable> {
     /** The tree which orders the start indices of all ValueSegments. */
-    private IndexedTree<V> start = new IndexedTree<V>(GlazedLists.comparableComparator());
+    private Tree1<V> start = new Tree1<V>(GlazedLists.comparableComparator());
 
     /** The tree which orders the start indices of all ValueSegments. */
-    private IndexedTree<V> end = new IndexedTree<V>(GlazedLists.comparableComparator());
+    private Tree1<V> end = new Tree1<V>(GlazedLists.comparableComparator());
 
     /**
      * Inserts the given <code>segment</code> into the trees.
      */
     public void insert(ValueSegment<V,?> segment) {
-        start.addByNode(segment.getStart());
-        end.addByNode(segment.getEnd());
+        start.addInSortedOrder((byte)1, segment.getStart(), 1);
+        end.addInSortedOrder((byte)1, segment.getEnd(), 1);
     }
 
     /**
@@ -48,19 +49,18 @@ final class TreePair<V extends Comparable> {
      * Removes the <code>segment</code> from the trees.
      */
     public void delete(ValueSegment<V,?> segment) {
-        final IndexedTreeNode<V> startNode = start.getNode(segment.getStart());
-        final IndexedTreeNode<V> endNode = end.getNode(segment.getEnd());
-
-        startNode.removeFromTree(start);
-        endNode.removeFromTree(end);
+        int startIndex = start.indexOfValue(segment.getStart(), true, false, (byte)1);
+        int endIndex = end.indexOfValue(segment.getEnd(), true, false, (byte)1);
+        start.remove(startIndex, 1);
+        end.remove(endIndex, 1);
     }
 
     /**
      * Clears the data from the trees efficiently.
      */
     public void clear() {
-        this.start = new IndexedTree<V>(GlazedLists.comparableComparator());
-        this.end = new IndexedTree<V>(GlazedLists.comparableComparator());
+        this.start = new Tree1<V>(GlazedLists.comparableComparator());
+        this.end = new Tree1<V>(GlazedLists.comparableComparator());
     }
 
     /**
@@ -76,8 +76,8 @@ final class TreePair<V extends Comparable> {
      * given <code>start</code> and <code>end</code> values.
      */
     public int getCount(V start, V end) {
-        final int numStartedBeforeSegmentEnd = this.start.indexOfSimulated(end);
-        final int numEndedBeforeSegmentStart = this.end.indexOfSimulated(start);
+        final int numStartedBeforeSegmentEnd = this.start.indexOfValue(end, true, true, (byte)1);
+        final int numEndedBeforeSegmentStart = this.end.indexOfValue(start, true, true, (byte)1);
 
         return numStartedBeforeSegmentEnd - numEndedBeforeSegmentStart;
     }

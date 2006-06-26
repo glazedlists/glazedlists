@@ -93,7 +93,7 @@ public class Tree1<V> {
      * Sometimes this tree will not be sorted, so in such situations this
      * comparator will not be used.
      */
-    private final Comparator<V> comparator;
+    private final Comparator<? super V> comparator;
 
     /**
      * @param coder specifies the node colors
@@ -102,7 +102,7 @@ public class Tree1<V> {
      */
     public Tree1/**/(/* USE SINGLE ALTERNATE */ 
 // IGNORE DEFAULT: */ ListToByteCoder<V> coder, /* 
-/* END SINGLE ALTERNATE */ Comparator<V> comparator) {
+/* END SINGLE ALTERNATE */ Comparator<? super V> comparator) {
         /* USE SINGLE ALTERNATE */ 
 // IGNORE DEFAULT: */  if(coder == null) throw new NullPointerException("Coder cannot be null."); /* 
 /* END SINGLE ALTERNATE */
@@ -132,7 +132,7 @@ public class Tree1<V> {
     }
     // END SINGLE SKIPPED CODE */
 
-    public Comparator<V> getComparator() {
+    public Comparator<? super V> getComparator() {
         return comparator;
     }
 

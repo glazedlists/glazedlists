@@ -91,14 +91,14 @@ public class Tree4<V> {
      * Sometimes this tree will not be sorted, so in such situations this
      * comparator will not be used.
      */
-    private final Comparator<V> comparator;
+    private final Comparator<? super V> comparator;
 
     /**
      * @param coder specifies the node colors
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public Tree4/**/(/* USE DEFAULT */ ListToByteCoder<V> coder, /* END DEFAULT */ Comparator<V> comparator) {
+    public Tree4/**/(/* USE DEFAULT */ ListToByteCoder<V> coder, /* END DEFAULT */ Comparator<? super V> comparator) {
         /* USE DEFAULT */  if(coder == null) throw new NullPointerException("Coder cannot be null."); /* END DEFAULT */
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
@@ -119,7 +119,7 @@ public class Tree4<V> {
     }
     // 
 
-    public Comparator<V> getComparator() {
+    public Comparator<? super V> getComparator() {
         return comparator;
     }
 
