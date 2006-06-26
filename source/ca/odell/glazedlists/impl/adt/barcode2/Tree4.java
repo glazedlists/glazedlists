@@ -73,7 +73,7 @@ SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 public class Tree4<V> {
 
     /** the colors in the tree, used for printing purposes only */
-    private final ListToByteCoder<V> coder;
+    /* USE DEFAULT */ private final ListToByteCoder<V> coder; /* END DEFAULT */
 
     /** the tree's root, or <code>null</code> for an empty tree */
     private Node4<V> root = null;
@@ -98,25 +98,26 @@ public class Tree4<V> {
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public Tree4/**/(ListToByteCoder<V> coder, Comparator<V> comparator) {
-        if(coder == null) throw new NullPointerException("Coder cannot be null.");
+    public Tree4/**/(/* USE DEFAULT */ ListToByteCoder<V> coder, /* END DEFAULT */ Comparator<V> comparator) {
+        /* USE DEFAULT */  if(coder == null) throw new NullPointerException("Coder cannot be null."); /* END DEFAULT */
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
-        this.coder = coder;
+        /* USE DEFAULT */ this.coder = coder; /* END DEFAULT */
         this.comparator = comparator;
     }
 
     /**
      * @param coder specifies the node colors
      */
-    public Tree4/**/(ListToByteCoder<V> coder) {
-        this(coder, (Comparator)GlazedLists.comparableComparator());
+    public Tree4/**/(/* USE DEFAULT */ ListToByteCoder<V> coder /* END DEFAULT */) {
+        this(/* USE DEFAULT */ coder, /* END DEFAULT */ (Comparator)GlazedLists.comparableComparator());
     }
 
-
+    // 
     public ListToByteCoder<V> getCoder() {
         return coder;
     }
+    // 
 
     public Comparator<V> getComparator() {
         return comparator;
@@ -911,7 +912,7 @@ public class Tree4<V> {
      */
     public String toString() {
         if(root == null) return "";
-        return root.toString(coder.getColors());
+        return root.toString(/* USE DEFAULT */ coder.getColors() /* END DEFAULT */);
     }
 
     /**

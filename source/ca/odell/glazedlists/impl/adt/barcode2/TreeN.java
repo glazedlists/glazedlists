@@ -84,7 +84,7 @@ m4_define(`END_SINGLE_SKIP', m4_ifelse(VAR_COLOUR_COUNT,`1',`END SINGLE SKIPPED 
 public class TreeN<V> {
 
     /** the colors in the tree, used for printing purposes only */
-    private final ListToByteCoder<V> coder;
+    /* SINGLE_ALTERNATE */ private final ListToByteCoder<V> coder; /* END_SINGLE_ALTERNATE */
 
     /** the tree's root, or <code>null</code> for an empty tree */
     private NodeN<V> root = null;
@@ -109,25 +109,26 @@ public class TreeN<V> {
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public TreeN/**/(ListToByteCoder<V> coder, Comparator<V> comparator) {
-        if(coder == null) throw new NullPointerException("Coder cannot be null.");
+    public TreeN/**/(/* SINGLE_ALTERNATE */ ListToByteCoder<V> coder, /* END_SINGLE_ALTERNATE */ Comparator<V> comparator) {
+        /* SINGLE_ALTERNATE */  if(coder == null) throw new NullPointerException("Coder cannot be null."); /* END_SINGLE_ALTERNATE */
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
-        this.coder = coder;
+        /* SINGLE_ALTERNATE */ this.coder = coder; /* END_SINGLE_ALTERNATE */
         this.comparator = comparator;
     }
 
     /**
      * @param coder specifies the node colors
      */
-    public TreeN/**/(ListToByteCoder<V> coder) {
-        this(coder, (Comparator)GlazedLists.comparableComparator());
+    public TreeN/**/(/* SINGLE_ALTERNATE */ ListToByteCoder<V> coder /* END_SINGLE_ALTERNATE */) {
+        this(/* SINGLE_ALTERNATE */ coder, /* END_SINGLE_ALTERNATE */ (Comparator)GlazedLists.comparableComparator());
     }
 
-
+    // BEGIN_SINGLE_SKIP
     public ListToByteCoder<V> getCoder() {
         return coder;
     }
+    // END_SINGLE_SKIP
 
     public Comparator<V> getComparator() {
         return comparator;
@@ -913,7 +914,7 @@ public class TreeN<V> {
      */
     public String toString() {
         if(root == null) return "";
-        return root.toString(coder.getColors());
+        return root.toString(/* SINGLE_ALTERNATE */ coder.getColors() /* END_SINGLE_ALTERNATE */);
     }
 
     /**

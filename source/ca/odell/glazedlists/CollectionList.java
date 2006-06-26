@@ -8,6 +8,8 @@ import java.util.*;
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
 
 
 /**
@@ -54,7 +56,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     private final Barcode barcode = new Barcode();
 
     /** the Lists and EventLists that this is composed of */
-    private final IndexedTree<ChildElement<E>> childElements = new IndexedTree<ChildElement<E>>();
+    private final Tree1<ChildElement<E>> childElements = new Tree1<ChildElement<E>>();
 
     /**
      * Create a {@link CollectionList} with its contents being the children of
@@ -71,8 +73,8 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             List<E> children = model.getChildren(source.get(i));
 
             // update the list of child lists
-            IndexedTreeNode<ChildElement<E>> node = childElements.addByNode(i, EMPTY_CHILD_ELEMENT);
-            node.setValue(createChildElementForList(children, node));
+            Element<ChildElement<E>> node = childElements.add(i, EMPTY_CHILD_ELEMENT, 1);
+            node.set(createChildElementForList(children, node));
 
             // update the barcode
             barcode.addBlack(barcode.size(), 1);
@@ -204,8 +206,8 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         List<E> children = model.getChildren(parent);
 
         // update the list of child lists
-        IndexedTreeNode<ChildElement<E>> node = childElements.addByNode(parentIndex, EMPTY_CHILD_ELEMENT);
-        node.setValue(createChildElementForList(children, node));
+        Element<ChildElement<E>> node = childElements.add(parentIndex, EMPTY_CHILD_ELEMENT, 1);
+        node.set(createChildElementForList(children, node));
 
         // update the barcode
         barcode.addBlack(absoluteIndex, 1);
@@ -227,9 +229,10 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         int nextParentIndex = getAbsoluteIndex(sourceIndex + 1);
 
         // update the list of child lists
-        ChildElement<E> removedChildElement = childElements.removeByIndex(sourceIndex).getValue();
-        removedChildElement.dispose();
-        
+        Element<ChildElement<E>> removedChildElement = childElements.get(sourceIndex);
+        childElements.remove(removedChildElement);
+        removedChildElement.get().dispose();
+
         // update the barcode
         int childCount = nextParentIndex - parentIndex - 1; // subtract one for the parent
         barcode.remove(parentIndex, 1 + childCount); // delete the parent and all children
@@ -241,23 +244,23 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             updates.addDelete(firstDeletedChildIndex, firstNotDeletedChildIndex - 1); // inclusive ranges
         }
     }
-    
+
     /**
      * Get the child element for the specified child index.
      */
     private ChildElement<E> getChildElement(int childIndex) {
         if(childIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + childIndex);
         if(childIndex >= size()) throw new IndexOutOfBoundsException("Index: " + childIndex + ", Size: " + size());
-        
+
         // get the child element
         int parentIndex = barcode.getBlackBeforeWhite(childIndex);
-        return childElements.getNode(parentIndex).getValue();
+        return childElements.get(parentIndex).get();
     }
-    
+
     /**
      * Create a {@link ChildElement} for the specified List.
      */
-    private ChildElement<E> createChildElementForList(List<E> children, IndexedTreeNode<ChildElement<E>> node) {
+    private ChildElement<E> createChildElementForList(List<E> children, Element<ChildElement<E>> node) {
         if(children instanceof EventList) return new EventChildElement((EventList<E>)children, node);
         else return new SimpleChildElement(children, node);
     }
@@ -276,7 +279,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             throw new IndexOutOfBoundsException();
         }
     }
-    
+
     /**
      * Models a list held by the CollectionList.
      */
@@ -315,8 +318,8 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      */
     private class SimpleChildElement implements ChildElement<E> {
         private List<E> children;
-        private IndexedTreeNode node;
-        public SimpleChildElement(List<E> children, IndexedTreeNode node) {
+        private Element node;
+        public SimpleChildElement(List<E> children, Element node) {
             this.children = children;
             this.node = node;
         }
@@ -325,9 +328,9 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         }
         public E remove(int index) {
             E removed = children.remove(index);
-            
+
             // update the barcode
-            int parentIndex = node.getIndex();
+            int parentIndex = childElements.indexOfNode(node, (byte)0);
             int absoluteIndex = getAbsoluteIndex(parentIndex);
             int firstChildIndex = absoluteIndex + 1;
             barcode.remove(firstChildIndex + index, 1);
@@ -337,21 +340,21 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             updates.beginEvent();
             updates.addDelete(index + childOffset);
             updates.commitEvent();
-            
+
             // all done
             return removed;
         }
         public E set(int index, E element) {
             E replaced = children.set(index, element);
-            
+
             // forward the offset event
-            int parentIndex = node.getIndex();
+            int parentIndex = childElements.indexOfNode(node, (byte)0);
             int absoluteIndex = getAbsoluteIndex(parentIndex);
             int childOffset = absoluteIndex - parentIndex;
             updates.beginEvent();
             updates.addUpdate(index + childOffset);
             updates.commitEvent();
-            
+
             // all done
             return replaced;
         }
@@ -359,15 +362,15 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             // do nothing
         }
     }
-    
+
     /**
      * Monitors changes to a member EventList and forwards changes to all listeners
      * of the CollectionList.
      */
     private class EventChildElement implements ChildElement<E>, ListEventListener<E> {
         private EventList<E> children;
-        private IndexedTreeNode<ChildElement<E>> node;
-        public EventChildElement(EventList<E> children, IndexedTreeNode<ChildElement<E>> node) {
+        private Element<ChildElement<E>> node;
+        public EventChildElement(EventList<E> children, Element<ChildElement<E>> node) {
             this.children = children;
             this.node = node;
             children.getPublisher().setRelatedSubject(this, CollectionList.this);
@@ -385,16 +388,16 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             return children.set(index, element);
         }
         public void listChanged(ListEvent<E> listChanges) {
-            int parentIndex = node.getIndex();
+            int parentIndex = childElements.indexOfNode(node, (byte)1);
             int absoluteIndex = getAbsoluteIndex(parentIndex);
             int nextNodeIndex = getAbsoluteIndex(parentIndex+1);
-            
+
             // update the barcode
             int firstChildIndex = absoluteIndex + 1;
             int previousChildrenCount = nextNodeIndex - firstChildIndex;
             if(previousChildrenCount > 0) barcode.remove(firstChildIndex, previousChildrenCount);
             if(!children.isEmpty()) barcode.addWhite(firstChildIndex, children.size());
-            
+
             // get the offset of this child list
             int childOffset = absoluteIndex - parentIndex;
 
@@ -412,7 +415,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             children.getPublisher().removeRelatedSubject(this);
         }
         public String toString() {
-            return "[" + node.getIndex() + ":" + children + "]";
+            return "[" + childElements.indexOfNode(node, (byte)0) + ":" + children + "]";
         }
     }
 }

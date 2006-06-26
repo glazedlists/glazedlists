@@ -54,8 +54,6 @@ import java.util.*;
  */
 public final class SortedList<E> extends TransformedList<E,E> {
 
-    private static final ListToByteCoder SORTED_BYTE_CODER = new ListToByteCoder(Collections.singletonList("S"));
-    private static final ListToByteCoder UNSORTED_BYTE_CODER = new ListToByteCoder(Collections.singletonList("U"));
     private static final byte ALL_COLORS = 1;
     private static final Element EMPTY_ELEMENT = null;
 
@@ -395,11 +393,11 @@ public final class SortedList<E> extends TransformedList<E,E> {
         Comparator treeComparator = null;
         if(comparator != null) treeComparator = new ElementComparator(comparator);
         else treeComparator = new ElementRawOrderComparator();
-        sorted = new Tree1<Element>(SORTED_BYTE_CODER, treeComparator);
+        sorted = new Tree1<Element>(treeComparator);
 
         // create a list which knows the offsets of the indexes to initialize this list
         if(previousSorted == null && unsorted == null) {
-            unsorted = new Tree1<Element>(UNSORTED_BYTE_CODER);
+            unsorted = new Tree1<Element>();
             // add all elements in the source list, in order
             for(int i = 0, n = source.size(); i < n; i++) {
                 Element unsortedNode = unsorted.add(i, EMPTY_ELEMENT, 1);

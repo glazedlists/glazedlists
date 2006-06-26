@@ -73,7 +73,9 @@ SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 public class Tree1<V> {
 
     /** the colors in the tree, used for printing purposes only */
-    private final ListToByteCoder<V> coder;
+    /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ private final ListToByteCoder<V> coder; /* 
+/* END SINGLE ALTERNATE */
 
     /** the tree's root, or <code>null</code> for an empty tree */
     private Node1<V> root = null;
@@ -98,25 +100,37 @@ public class Tree1<V> {
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public Tree1/**/(ListToByteCoder<V> coder, Comparator<V> comparator) {
-        if(coder == null) throw new NullPointerException("Coder cannot be null.");
+    public Tree1/**/(/* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ ListToByteCoder<V> coder, /* 
+/* END SINGLE ALTERNATE */ Comparator<V> comparator) {
+        /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */  if(coder == null) throw new NullPointerException("Coder cannot be null."); /* 
+/* END SINGLE ALTERNATE */
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
-        this.coder = coder;
+        /* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ this.coder = coder; /* 
+/* END SINGLE ALTERNATE */
         this.comparator = comparator;
     }
 
     /**
      * @param coder specifies the node colors
      */
-    public Tree1/**/(ListToByteCoder<V> coder) {
-        this(coder, (Comparator)GlazedLists.comparableComparator());
+    public Tree1/**/(/* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ ListToByteCoder<V> coder /* 
+/* END SINGLE ALTERNATE */) {
+        this(/* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ coder, /* 
+/* END SINGLE ALTERNATE */ (Comparator)GlazedLists.comparableComparator());
     }
 
-
+    // 
+/* BEGIN SINGLE SKIPPED CODE 
     public ListToByteCoder<V> getCoder() {
         return coder;
     }
+    // END SINGLE SKIPPED CODE */
 
     public Comparator<V> getComparator() {
         return comparator;
@@ -1012,7 +1026,9 @@ public class Tree1<V> {
      */
     public String toString() {
         if(root == null) return "";
-        return root.toString(coder.getColors());
+        return root.toString(/* USE SINGLE ALTERNATE */ 
+// IGNORE DEFAULT: */ coder.getColors() /* 
+/* END SINGLE ALTERNATE */);
     }
 
     /**

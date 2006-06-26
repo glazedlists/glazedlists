@@ -15,14 +15,13 @@ public class Tree1Test extends TestCase {
 
     /** test values */
     private static List<String> colors = GlazedListsTests.stringToList("A");
-    private static ListToByteCoder<String> coder = new ListToByteCoder<String>(Tree1Test.colors);
-    private static byte allColors = Tree1Test.coder.colorsToByte(GlazedListsTests.stringToList("ABC"));
+    private static byte allColors = 1;
 
     /**
      * Make sure we can have a few unsorted elements in an otherwise ordered tree.
      */
     public void testUnsortedElementInSortedTree() {
-        Tree1<String> tree = new Tree1<String>(Tree1Test.coder);
+        Tree1<String> tree = new Tree1<String>();
         Element<String> e = tree.addInSortedOrder(Tree1Test.allColors, "E", 1);
         Element<String> g = tree.addInSortedOrder(Tree1Test.allColors, "G", 1);
         Element<String> i = tree.addInSortedOrder(Tree1Test.allColors, "I", 1);
