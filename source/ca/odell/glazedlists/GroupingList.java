@@ -7,6 +7,8 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.Grouper;
 // Java collections are used for underlying data storage
 import java.util.*;
@@ -40,7 +42,7 @@ import java.util.*;
 public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /** The GroupLists defined by the comparator. They are stored in an IndexedTree so their indices can be quickly updated. */
-    private IndexedTree<GroupList> groupLists = new IndexedTree<GroupList>();
+    private Tree1<GroupList> groupLists = new Tree1<GroupList>();
 
     /** the grouping service manages creating and deleting groups */
     private final Grouper<E> grouper;
@@ -115,7 +117,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          */
         private void insertGroupList(int index) {
             final GroupList groupList = new GroupList();
-            final IndexedTreeNode<GroupList> indexedTreeNode = groupLists.addByNode(index, groupList);
+            final Element<GroupList> indexedTreeNode = groupLists.add(index, groupList, 1);
             groupList.setTreeNode(indexedTreeNode);
         }
 
@@ -125,10 +127,11 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          * @param index the location at which to remove a GroupList
          */
         private void removeGroupList(int index) {
-            final IndexedTreeNode<GroupList> indexedTreeNode = groupLists.removeByIndex(index);
+            final Element<GroupList> indexedTreeNode = groupLists.get(index);
+            groupLists.remove(indexedTreeNode);
 
             // for safety, null out the GroupList's reference to its now defunct indexedTreeNode
-            indexedTreeNode.getValue().setTreeNode(null);
+            indexedTreeNode.get().setTreeNode(null);
         }
     }
 
@@ -155,7 +158,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     }
 
     public List<E> get(int index) {
-        return this.groupLists.get(index);
+        return this.groupLists.get(index).get();
     }
 
     /** {@inheritDoc} */
@@ -214,13 +217,13 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     private class GroupList extends AbstractList<E> {
 
         /** The node within {@link groupLists} that records the index of this GroupList within the GroupingList. */
-        private IndexedTreeNode<GroupList> treeNode;
+        private Element<GroupList> treeNode;
 
         /**
          * Attach the IndexedTreeNode that tracks this GroupLists position to the
          * GroupList itself so it can look up its own position.
          */
-        private void setTreeNode(IndexedTreeNode<GroupList> treeNode) {
+        private void setTreeNode(Element<GroupList> treeNode) {
             this.treeNode = treeNode;
         }
 
@@ -230,7 +233,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          */
         private int getStartIndex() {
             if (treeNode == null) return -1;
-            final int groupIndex = treeNode.getIndex();
+            final int groupIndex = groupLists.indexOfNode(treeNode, (byte)1);
             return GroupingList.this.getSourceIndex(groupIndex);
         }
 
@@ -240,7 +243,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          */
         private int getEndIndex() {
             if (treeNode == null) return -1;
-            final int groupIndex = treeNode.getIndex();
+            final int groupIndex = groupLists.indexOfNode(treeNode, (byte)1);
 
             // if this is before the end, its everything up to the first different element
             if(groupIndex < grouper.getBarcode().blackSize() - 1) {

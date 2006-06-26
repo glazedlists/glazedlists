@@ -5,6 +5,9 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.Grouper;
 import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
+import ca.odell.glazedlists.impl.adt.barcode2.Tree1Iterator;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.Comparator;
@@ -140,12 +143,13 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         if(listChanges.isReordering()) {
             boolean canReorder = true;
 
-            for(IndexedTreeIterator i = separatorSource.separators.iterator(0); i.hasNext(); ) {
-                IndexedTreeNode<SeparatorInjectorList<E>.GroupSeparator> node = (IndexedTreeNode<SeparatorInjectorList<E>.GroupSeparator>)i.next();
-                int limit = node.getValue().getLimit();
+            for(Tree1Iterator<SeparatorInjectorList<E>.GroupSeparator> i = new Tree1Iterator<SeparatorInjectorList<E>.GroupSeparator>(separatorSource.separators); i.hasNext(); ) {
+                i.next();
+                Element<SeparatorInjectorList<E>.GroupSeparator> node = i.node();
+                int limit = node.get().getLimit();
                 if(limit == 0) continue;
                 if(limit >= separatorSource.size()) continue;
-                if(limit >= node.getValue().size()) continue;
+                if(limit >= node.get().size()) continue;
                 canReorder = false;
                 break;
             }
@@ -276,7 +280,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
      * that just won't do for performance requirements.
      */
     private void updateGroup(int group, int groupCount, boolean fireEvents) {
-        Separator separator = separatorSource.separators.get(group);
+        Separator separator = separatorSource.separators.get(group).get();
         int limit = separator.getLimit();
 
         // fix up this separator
@@ -415,7 +419,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private Barcode insertedSeparators;
 
         /** a list of {@link Separator}s, one for each separator in the list */
-        private IndexedTree<GroupSeparator> separators;
+        private Tree1<GroupSeparator> separators;
 
         /** the number of elements to show in each group, such as 0, 5, or {@link Integer.MAX_VALUE} */
         private int defaultLimit;
@@ -448,7 +452,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private void rebuildSeparators() {
             // clear the initial state of these separators
             insertedSeparators = new Barcode();
-            separators = new IndexedTree<GroupSeparator>();
+            separators = new Tree1<GroupSeparator>();
 
             // prepare the separator list
             insertedSeparators.add(0, SOURCE_ELEMENT, source.size());
@@ -457,20 +461,20 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 int groupIndex = i.getColourIndex(Grouper.UNIQUE);
                 int sourceIndex = i.getIndex();
                 insertedSeparators.add(groupIndex + sourceIndex, SEPARATOR, 1);
-                IndexedTreeNode<GroupSeparator> node = separators.addByNode(groupIndex, new GroupSeparator());
-                node.getValue().setNode(node);
-                node.getValue().setLimit(defaultLimit);
+                Element<GroupSeparator> node = separators.add(groupIndex, new GroupSeparator(), 1);
+                node.get().setNode(node);
+                node.get().setLimit(defaultLimit);
             }
             // update the cached values in all separators
             for(int i = 0; i < separators.size(); i++) {
-                separators.get(i).updateCachedValues();
+                separators.get(i).get().updateCachedValues();
             }
         }
 
         /** {@inheritDoc} */
         public E get(int index) {
             Object type = insertedSeparators.get(index);
-            if(type == SEPARATOR) return (E)separators.get(getSeparatorIndex(index));
+            if(type == SEPARATOR) return (E)separators.get(getSeparatorIndex(index)).get();
             else if(type == SOURCE_ELEMENT) return source.get(getSourceIndex(index));
             else throw new IllegalStateException();
         }
@@ -529,7 +533,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                         reorderMap[i + group] = i + group;
                         groupStartIndex = groupEndIndex;
                         int nextGroup = group + 1;
-                        groupEndIndex = nextGroup < separators.size() ? separators.get(nextGroup).start() : insertedSeparators.size();
+                        groupEndIndex = nextGroup < separators.size() ? separators.get(nextGroup).get().start() : insertedSeparators.size();
                     }
 
                     // make sure the move doesn't leave the group
@@ -550,7 +554,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
             // update the cached values in all separators
             for(int i = 0; i < separators.size(); i++) {
-                separators.get(i).updateCachedValues();
+                separators.get(i).get().updateCachedValues();
             }
 
             updates.commitEvent();
@@ -568,9 +572,9 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     insertedSeparators.add(expandedIndex, SEPARATOR, 1);
                     updates.addInsert(expandedIndex);
                     // add the separator and link the separator to its node
-                    IndexedTreeNode<GroupSeparator> node = separators.addByNode(groupIndex, new GroupSeparator());
-                    node.getValue().setNode(node);
-                    node.getValue().setLimit(defaultLimit);
+                    Element<GroupSeparator> node = separators.add(groupIndex, new GroupSeparator(), 1);
+                    node.get().setNode(node);
+                    node.get().setLimit(defaultLimit);
                 } else if(groupChangeType == ListEvent.UPDATE) {
                     int expandedIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
                     updates.addUpdate(expandedIndex);
@@ -579,9 +583,10 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     insertedSeparators.remove(expandedIndex, 1);
                     updates.addDelete(expandedIndex);
                     // invalidate the node
-                    IndexedTreeNode<GroupSeparator> node = separators.removeByIndex(groupIndex);
-                    node.getValue().setNode(null);
-                    node.getValue().updateCachedValues();
+                    Element<GroupSeparator> node = separators.get(groupIndex);
+                    separators.remove(node);
+                    node.get().setNode(null);
+                    node.get().updateCachedValues();
                     groupIndex--;
                 }
 
@@ -638,7 +643,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
              * The node allows the separator to figure out which
              * group in the overall list its representing.
              */
-            private IndexedTreeNode<GroupSeparator> node = null;
+            private Element<GroupSeparator> node = null;
 
             /** {@inheritDoc} */
             public int getLimit() {
@@ -657,7 +662,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
                 // notify the world of this separator change
                 updates.beginEvent();
-                int groupIndex = node.getIndex();
+                int groupIndex = separators.indexOfNode(node, (byte)1);
                 int separatorIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
                 updates.addUpdate(separatorIndex);
                 updates.commitEvent();
@@ -680,7 +685,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
              * Set the {@link IndexedTreeNode} that this {@link Separator} can
              * use to find its index in the overall list of {@link Separator}s;
              */
-            public void setNode(IndexedTreeNode<GroupSeparator> node) {
+            public void setNode(Element<GroupSeparator> node) {
                 this.node = node;
             }
 
@@ -689,7 +694,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
              */
             private int start() {
                 if(this.node == null) throw new IllegalStateException();
-                int separatorIndex = node.getIndex();
+                int separatorIndex = separators.indexOfNode(node, (byte)1);
                 if(separatorIndex == -1) throw new IllegalStateException();
                 int groupStartIndex = insertedSeparators.getIndex(separatorIndex, SEPARATOR);
                 return groupStartIndex - separatorIndex;
@@ -699,7 +704,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
              */
             private int end() {
                 if(this.node == null) throw new IllegalStateException();
-                int nextSeparatorIndex = node.getIndex() + 1;
+                int nextSeparatorIndex = separators.indexOfNode(node, (byte)1) + 1;
                 if(nextSeparatorIndex == 0) throw new IllegalStateException();
                 int nextGroupStartIndex = nextSeparatorIndex == insertedSeparators.colourSize(SEPARATOR) ? insertedSeparators.size() : insertedSeparators.getIndex(nextSeparatorIndex, SEPARATOR);
                 return nextGroupStartIndex - nextSeparatorIndex;
