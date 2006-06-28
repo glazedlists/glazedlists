@@ -432,6 +432,12 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("SS"), grouped.get(1));
     }
 
+    public void testGenerics() {
+        EventList<String> source = new BasicEventList<String>();
+
+        EventList<List<String>> testList = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+    }
+
     private static class FirstLetterComparator implements Comparator<String> {
         public int compare(String o1, String o2) {
             return o1.charAt(0) - o2.charAt(0);
