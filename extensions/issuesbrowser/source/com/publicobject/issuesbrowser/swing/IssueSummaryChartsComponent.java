@@ -69,8 +69,9 @@ class IssueSummaryChartsComponent {
     public IssueSummaryChartsComponent(EventList<Issue> issuesList) {
         // build a PieDataset representing Issues by Status
         final Comparator<Issue> issuesByStatusGrouper = GlazedLists.beanPropertyComparator(Issue.class, "status");
-        final StatusFunction statusFunction = new StatusFunction();
-        final PieDataset issuesByStatusDataset = new EventListPieDataset(new SwingThreadProxyEventList<Issue>(issuesList), statusFunction, issuesByStatusGrouper);
+        final FunctionList.Function keyFunction = new StatusFunction();
+        final FunctionList.Function valueFunction = new ListSizeFunction();
+        final PieDataset issuesByStatusDataset = new EventListPieDataset(new SwingThreadProxyEventList<Issue>(issuesList), issuesByStatusGrouper, keyFunction, valueFunction);
 
         // build a Pie Chart and a panel to display it
         final JFreeChart pieChart_IssuesByStatus = new JFreeChart("Issues By Status", new CustomPiePlot(issuesByStatusDataset));
@@ -107,6 +108,16 @@ class IssueSummaryChartsComponent {
     private static class StatusFunction implements FunctionList.Function<List,Comparable> {
         public Comparable evaluate(List sourceValue) {
             return ((Issue) sourceValue.get(0)).getStatus();
+        }
+    }
+
+    /**
+     * A function to extract the size of a list of {@link Issue} objects that
+     * share the same status.
+     */
+    private static class ListSizeFunction implements FunctionList.Function<List,Number> {
+        public Number evaluate(List sourceValue) {
+            return new Integer(sourceValue.size());
         }
     }
 

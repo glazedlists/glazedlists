@@ -31,40 +31,76 @@ import java.util.List;
  *
  * <p> Note: The DataEvents broadcasted by this class occur on the Thread the
  * ListEvents arrive on. If this PieDataset is attached to a swing component,
- * it is the responsibility of the client to ensure that the ListEvents are
- * arriving on the Swing Event Dispatch Thread, perhaps by using the
+ * like a {@link org.jfree.chart.ChartPanel}, it is the responsibility of the
+ * client to ensure that the ListEvents are arriving on the Swing Event
+ * Dispatch Thread, perhaps by using the
  * {@link ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList}.
  *
  * @see ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList
  *
  * @author James Lemieux
  */
-public class EventListPieDataset extends AbstractDataset implements PieDataset {
+public class EventListPieDataset<E,K> extends AbstractDataset implements PieDataset {
 
     /** The single immutable DatasetChangeEvent we fire each time this Dataset is changed. */
     private final DatasetChangeEvent immutableChangeEvent = new DatasetChangeEvent(this, this);
 
+    // the list that is the source of all data
+    private final EventList sourceList;
+
     // the list that groups the data into sections of the pie
     private final GroupingList groupingList;
-    // a function that extract keys from the groups
-    private final FunctionList<List, Comparable> functionList;
 
-    // listen to changes in the {@link groupingList} and rebroadcast them as changes to this PieDataset
+    // a function that extracts keys from the groups
+    private final FunctionList<List, Comparable> keyList;
+
+    // a function that extracts values from the groups
+    private final FunctionList<List, Number> valueList;
+
+    // listen to changes in the {@link sourceList} and rebroadcast them as changes to this PieDataset
     private final ListEventListener datasetEventListener = new DatasetEventListener();
+
+    /**
+     * Adapts the given <code>source</code> to the PieDataset interface. The
+     * given <code>keyFunction</code> is then applied to each element of the
+     * <code>source</code> to produce the unique key for the element and the
+     * given <code>valueFunction</code> is applied to produce the value for an
+     * element.
+     *
+     * <p>This constructor should be used when the elements in
+     * <code>source</code> do not need to be grouped together in order to
+     * represent pie data.
+     *
+     * @param source the {@link EventList} containing the data to chart
+     * @param keyFunction produces the keys of the source elements in the pie chart
+     * @param valueFunction produces the values of the source elements in the pie chart
+     */
+    public EventListPieDataset(EventList<E> source, FunctionList.Function<E, Comparable<K>> keyFunction, FunctionList.Function<E, Number> valueFunction) {
+        this.groupingList = null;
+        this.sourceList = source;
+        this.keyList = new FunctionList(source, keyFunction);
+        this.valueList = new FunctionList(source, valueFunction);
+
+        source.addListEventListener(this.datasetEventListener);
+    }
 
     /**
      * Adapts the given <code>source</code> to the PieDataset interface by
      * applying the <code>groupingComparator</code> to forms groups to be
      * represented in the pie chart. The given <code>keyFunction</code> is then
-     * applied to produce the key for a group.
+     * applied to produce the key for a group and the given
+     * <code>valueFunction</code> is applied to produce the value for a group.
      *
-     * @param source the {@link EventList} containg the data to chart
-     * @param keyFunction produces the keys of the groups in the pie chart
+     * @param source the {@link EventList} containing the data to chart
      * @param groupingComparator produces the groups in the pie chart
+     * @param keyFunction produces the keys of the groups in the pie chart
+     * @param valueFunction produces the values of the groups in the pie chart
      */
-    public EventListPieDataset(EventList source, FunctionList.Function<List, Comparable> keyFunction, Comparator groupingComparator) {
+    public EventListPieDataset(EventList<E> source, Comparator<E> groupingComparator, FunctionList.Function<List<E>, Comparable<K>> keyFunction, FunctionList.Function<List<E>, Number> valueFunction) {
         this.groupingList = new GroupingList(source, groupingComparator);
-        this.functionList = new FunctionList<List, Comparable>(this.groupingList, keyFunction);
+        this.sourceList = this.groupingList;
+        this.keyList = new FunctionList(this.groupingList, keyFunction);
+        this.valueList = new FunctionList(this.groupingList, valueFunction);
 
         this.groupingList.addListEventListener(this.datasetEventListener);
     }
@@ -78,7 +114,7 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * @throws IndexOutOfBoundsException if <code>index</code> is out of bounds
      */
     public Comparable getKey(int index) {
-        return this.functionList.get(index);
+        return this.keyList.get(index);
     }
 
     /**
@@ -88,7 +124,7 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * @return the index, or <code>-1</code> if the key is unrecognised
      */
     public int getIndex(Comparable key) {
-        return this.functionList.indexOf(key);
+        return this.keyList.indexOf(key);
     }
 
     /**
@@ -100,7 +136,7 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * @return the keys (never <code>null</code>).
      */
     public List getKeys() {
-        return this.functionList;
+        return this.keyList;
     }
 
     /**
@@ -112,15 +148,14 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * @throws org.jfree.data.UnknownKeyException if the key is not recognised
      */
     public Number getValue(Comparable key) {
-        final List group = (List) this.groupingList.get(this.getIndex(key));
-        return new Integer(group.size());
+        return getValue(this.getIndex(key));
     }
 
     /**
      * Returns the number of items (values).
      */
     public int getItemCount() {
-        return this.functionList.size();
+        return this.keyList.size();
     }
 
     /**
@@ -130,8 +165,7 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * @return the value
      */
     public Number getValue(int index) {
-        final List group = (List) this.groupingList.get(index);
-        return new Integer(group.size());
+        return this.valueList.get(index);
     }
 
     /**
@@ -145,9 +179,12 @@ public class EventListPieDataset extends AbstractDataset implements PieDataset {
      * to call any method on an EventListPieDataset after it has been disposed.
      */
     public void dispose() {
-        this.functionList.dispose();
-        this.groupingList.removeListEventListener(this.datasetEventListener);
-        this.groupingList.dispose();
+        this.keyList.dispose();
+        this.valueList.dispose();
+        this.sourceList.removeListEventListener(this.datasetEventListener);
+
+        if (this.groupingList != null)
+            this.groupingList.dispose();
     }
 
     /**
