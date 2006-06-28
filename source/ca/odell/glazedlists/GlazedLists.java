@@ -451,6 +451,17 @@ public final class GlazedLists {
         return new FixedMatcherEditor<E>(matcher);
     }
 
+    // Functions // // // // // // // // // // // // // // // // // // // // //
+
+    /**
+     * Get a {@link FunctionList.Function} that extracts the property with the
+     * given <code>propertyName</code> from objects of the given
+     * <code>beanClass</code>.
+     */
+    public static <E,V> FunctionList.Function<E,V> beanFunction(Class<E> beanClass, String propertyName) {
+        return new BeanFunction<E,V>(beanClass, propertyName);
+    }
+
     // ListEventListeners // // // // // // // // // // // // // // // // // //
 
     /**
@@ -494,6 +505,31 @@ public final class GlazedLists {
      */
     public static <E> ListEventListener<E> syncEventListToList(EventList<E> source, List<E> target) {
         return new SyncListener<E>(source, target);
+    }
+
+    /**
+     * Check list elements for type safety after they are added to an EventList
+     * using a {@link ListEventListener}. The {@link ListEventListener} which
+     * is installed and returned to the caller (which they may uninstall at
+     * their leisure) will throw an {@link IllegalArgumentException} if it
+     * detects the addition of an element with an unsupported type.
+     *
+     * <p> This {@link ListEventListener} is typically used as a tool to
+     * check invariants of the elements of {@link EventList}s during
+     * software development and testing phases.
+     *
+     * @param source the {@link EventList} on which to provide type safety
+     * @param types the set of types to which each list element must be
+     *      assignable - note <tt>null</tt> is an acceptable type and
+     *      indicates the {@link EventList} expects to contain <tt>null</tt>
+     *      elements
+     * @return the {@link ListEventListener} providing the which provides type
+     *      safety checking on the given <code>source</code>. To stop the
+     *      type safety checking, use
+     *      {@link EventList#removeListEventListener(ListEventListener)}.
+     */
+    public static <E> ListEventListener<E> typeSafetyListener(EventList<E> source, Set<Class> types) {
+        return new TypeSafetyListener<E>(source, types);
     }
 
     /**
@@ -551,30 +587,5 @@ public final class GlazedLists {
      */
     public static <K, V> Map<Comparable<K>, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends Comparable<K>> keyMaker) {
         return new GroupingListMultiMap<K, V>(source, keyMaker);
-    }
-
-    /**
-     * Check list elements for type safety after they are added to an EventList
-     * using a {@link ListEventListener}. The {@link ListEventListener} which
-     * is installed and returned to the caller (which they may uninstall at
-     * their leisure) will throw an {@link IllegalArgumentException} if it
-     * detects the addition of an element with an unsupported type.
-     *
-     * <p> This {@link ListEventListener} is typically used as a tool to
-     * check invariants of the elements of {@link EventList}s during
-     * software development and testing phases.
-     *
-     * @param source the {@link EventList} on which to provide type safety
-     * @param types the set of types to which each list element must be
-     *      assignable - note <tt>null</tt> is an acceptable type and
-     *      indicates the {@link EventList} expects to contain <tt>null</tt>
-     *      elements
-     * @return the {@link ListEventListener} providing the which provides type
-     *      safety checking on the given <code>source</code>. To stop the
-     *      type safety checking, use
-     *      {@link EventList#removeListEventListener(ListEventListener)}.
-     */
-    public static <E> ListEventListener<E> typeSafetyListener(EventList<E> source, Set<Class> types) {
-        return new TypeSafetyListener<E>(source, types);
     }
 }
