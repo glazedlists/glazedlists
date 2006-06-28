@@ -4,6 +4,8 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.gui.TableFormat;
 
 import javax.swing.*;
@@ -123,6 +125,23 @@ public class AutoCompleteSupportTestApp {
 
     private final JList autocompleteActionList = new JList(autocompleteActionListModel);
     private final JList regularActionList = new JList(regularActionListModel);
+
+    private final JRadioButton filterModeStartsWith = new JRadioButton("Starts With");
+    private final JRadioButton filterModeContains = new JRadioButton("Contains");
+    private final ButtonGroup filterModeButtonGroup = new ButtonGroup();
+    {
+        filterModeStartsWith.addActionListener(new FilterModeActionHandler(TextMatcherEditor.STARTS_WITH));
+        filterModeContains.addActionListener(new FilterModeActionHandler(TextMatcherEditor.CONTAINS));
+
+        filterModeButtonGroup.add(filterModeStartsWith);
+        filterModeButtonGroup.add(filterModeContains);
+        filterModeButtonGroup.setSelected(filterModeStartsWith.getModel(), true);
+    }
+    private final JPanel filterModePanel = new JPanel();
+    {
+        filterModePanel.add(filterModeStartsWith);
+        filterModePanel.add(filterModeContains);
+    }
 
     private final JTable table = new JTable();
 
@@ -298,6 +317,18 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
+    private class FilterModeActionHandler implements ActionListener {
+        private final int mode;
+
+        public FilterModeActionHandler(int mode) {
+            this.mode = mode;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            autoCompleteSupport.setFilterMode(this.mode);
+        }
+    }
+
     private static class SetValueProgrammaticallyActionHandler extends AbstractAction {
         private final JComboBox comboBox;
 
@@ -323,7 +354,10 @@ public class AutoCompleteSupportTestApp {
 
         panel.add(new JLabel("Select Text on Focus Gain:"), new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
         panel.add(selectTextOnFocusGainCheckBox,            new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        
+
+        panel.add(new JLabel("Filter Mode:"),               new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(filterModePanel,                          new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
         return panel;
     }
 

@@ -5,12 +5,12 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.ComboBoxUI;
-import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -361,7 +361,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     public void guiTestDeleteKey() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
         final JComboBox combo = new JComboBox();
-        combo.addActionListener (listener);
+        combo.addActionListener(listener);
 
         final EventList<String> items = new BasicEventList<String>();
         items.add("New Brunswick");
@@ -396,6 +396,49 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("New Brunswick", textField.getText());
         assertEquals(" Brunswick", textField.getSelectedText());
         assertEquals(1, listener.getCount());
+    }
+
+    public void guiTestFilterMode() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("New Brunswick");
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final ComboBoxModel model = combo.getModel();
+        assertEquals(TextMatcherEditor.STARTS_WITH, support.getFilterMode());
+
+        doc.replace(0, doc.getLength(), "u", null);
+        assertEquals(0, combo.getItemCount());
+
+        support.setFilterMode(TextMatcherEditor.CONTAINS);
+        assertEquals(TextMatcherEditor.CONTAINS, support.getFilterMode());
+        assertEquals("u", textField.getText());
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", model.getElementAt(0));
+        assertEquals("Newfoundland", model.getElementAt(1));
+
+        doc.replace(0, doc.getLength(), "n", null);
+        assertEquals(4, combo.getItemCount());
+        assertEquals("New Brunswick", model.getElementAt(0));
+        assertEquals("Nova Scotia", model.getElementAt(1));
+        assertEquals("Newfoundland", model.getElementAt(2));
+        assertEquals("Prince Edward Island", model.getElementAt(3));
+
+        support.setFilterMode(TextMatcherEditor.STARTS_WITH);
+        assertEquals(TextMatcherEditor.STARTS_WITH, support.getFilterMode());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals("ew Brunswick", textField.getSelectedText());
+        assertEquals(3, combo.getItemCount());
+        assertEquals("New Brunswick", model.getElementAt(0));
+        assertEquals("Nova Scotia", model.getElementAt(1));
+        assertEquals("Newfoundland", model.getElementAt(2));
     }
 
     private static class NoopDocument implements Document {
@@ -440,17 +483,6 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         public void selectAll() { }
         public void addActionListener(ActionListener l) { }
         public void removeActionListener(ActionListener l) { }
-    }
-
-    private static class NoopComboBoxUI extends ComboBoxUI {
-        public void installUI(JComponent c) {
-            JComboBox combo = (JComboBox) c;
-            combo.setEditor(new BasicComboBoxEditor());
-        }
-
-        public void setPopupVisible(JComboBox c, boolean v) { }
-        public boolean isPopupVisible(JComboBox c) { return false; }
-        public boolean isFocusTraversable(JComboBox c) { return false; }
     }
 
     private static class CountingActionListener implements ActionListener {

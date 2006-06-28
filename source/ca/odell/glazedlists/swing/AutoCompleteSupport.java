@@ -320,8 +320,8 @@ public final class AutoCompleteSupport<E> {
         // build the ComboBoxModel capable of filtering its values
         this.filterMatcherEditor = new TextMatcherEditor<E>(filterator);
         this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
-        this.filteredItems = new FilterList<E>(items, filterMatcherEditor);
-        this.comboBoxModel = new AutoCompleteComboBoxModel(filteredItems);
+        this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
+        this.comboBoxModel = new AutoCompleteComboBoxModel(this.filteredItems);
 
         // customize the comboBox
         this.comboBox.setModel(this.comboBoxModel);
@@ -698,6 +698,46 @@ public final class AutoCompleteSupport<E> {
         checkAccessThread();
 
         this.selectsTextOnFocusGain = selectsTextOnFocusGain;
+    }
+
+    /**
+     * Returns the manner in which the contents of the {@link ComboBoxModel}
+     * are filtered. This method will return one of
+     * {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH}.
+     *
+     * <p>{@link TextMatcherEditor#CONTAINS} indicates elements of the
+     * {@link ComboBoxModel} are matched when they contain the text entered by
+     * the user.
+     *
+     * <p>{@link TextMatcherEditor#STARTS_WITH} indicates elements of the
+     * {@link ComboBoxModel} are matched when they start with the text entered
+     * by the user.
+     */
+    public int getFilterMode() {
+        return filterMatcherEditor.getMode();
+    }
+
+    /**
+     * Sets the manner in which the contents of the {@link ComboBoxModel} are
+     * filtered. The given <code>mode</code> must be one of
+     * {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH}.
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     *
+     * @see #getFilterMode()
+     */
+    public void setFilterMode(int mode) {
+        checkAccessThread();
+
+        // adjust the MatcherEditor that filters the AutoCompleteComboBoxModel to respect the given mode
+        // but ONLY adjust the contents of the model, avoid changing the text in the JComboBox's textfield
+        doNotChangeDocument = true;
+        try {
+            filterMatcherEditor.setMode(mode);
+        } finally {
+            doNotChangeDocument = false;
+        }
     }
 
     /**
