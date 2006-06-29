@@ -9,10 +9,7 @@ import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -149,7 +146,7 @@ public class Issue implements Comparable {
         String state = "NEW";
 
         // the end Date of the previous ValueSegment
-        Date last = issue.getCreationTimestamp();
+        Date last = monthify(issue.getCreationTimestamp());
 
         // Iterate the issues in chronological (natural) order
         for (Iterator<Activity> i = issue.getActivities().iterator(); i.hasNext();) {
@@ -158,9 +155,10 @@ public class Issue implements Comparable {
             // if the Activity represents a change in status
             if ("issue_status" == activity.getField()) {
                 // create an entry in the timeline
-                timeline.add(new DefaultValueSegment<Date,String>(last, activity.getWhen(), state));
+                Date when = monthify(activity.getWhen());
+                timeline.add(new DefaultValueSegment<Date,String>(last, when, state));
 
-                last = activity.getWhen();
+                last = when;
                 state = activity.getNewValue();
             }
         }
@@ -169,6 +167,18 @@ public class Issue implements Comparable {
         timeline.add(new DefaultValueSegment<Date,String>(last, lastDate, state));
 
         return timeline;
+    }
+
+    private static final TreeMap<Date,Date> months = new TreeMap<Date,Date>();
+
+    private static final Date monthify(Date d) {
+        Date month = new Date(d.getYear(), d.getMonth(), 15);
+        Date monthNormalized = months.get(month);
+        if(monthNormalized == null) {
+            months.put(month, month);
+            monthNormalized = month;
+        }
+        return monthNormalized;
     }
 
     /**

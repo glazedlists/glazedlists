@@ -11,6 +11,9 @@ package ca.odell.glazedlists.impl.adt;
  */
 public final class AgedNode {
 
+    /** provide times of nodes relative to one-another */
+    private static long nextTimestamp = 0;
+
     /** The corresponding node in the index tree */
     private SparseListNode indexNode = null;
     /** The timestamp corresponding to the last access of this node */
@@ -27,7 +30,11 @@ public final class AgedNode {
     public AgedNode(SparseListNode indexNode, Object value) {
         this.indexNode = indexNode;
         this.value =  value;
-        timestamp = System.currentTimeMillis();
+        timestamp = nextTimestamp();
+    }
+
+    private static synchronized final long nextTimestamp() {
+        return nextTimestamp++;
     }
 
     /**
@@ -38,7 +45,7 @@ public final class AgedNode {
      * @return The value of this node
      */
     public Object getValue() {
-        timestamp = System.currentTimeMillis();
+        timestamp = nextTimestamp();
         return value;
     }
 
@@ -60,4 +67,7 @@ public final class AgedNode {
         return timestamp;
     }
 
+    public String toString() {
+        return "[AgedNode: " + value + "]";
+    }
 }

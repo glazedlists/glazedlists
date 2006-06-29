@@ -7,6 +7,8 @@ package ca.odell.glazedlists.io;
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
 import ca.odell.glazedlists.TransformedList;
@@ -48,7 +50,7 @@ import ca.odell.glazedlists.EventList;
 public class CachingList extends TransformedList {
 
     /** The cache is implemented using a tree-based cache */
-    private IndexedTree cache;
+    private Tree1<AgedNode> cache;
 
     /** The model of the source list for scalability with minimal memory footprint */
     private SparseList indexTree;
@@ -76,7 +78,7 @@ public class CachingList extends TransformedList {
         readWriteLock = new CacheLock(readWriteLock);
         this.maxSize = maxSize;
 
-        cache = new IndexedTree(new AgedNodeComparator());
+        cache = new Tree1<AgedNode>(new AgedNodeComparator());
         indexTree = new SparseList();
         indexTree.addNulls(0, source.size());
         source.addListEventListener(this);
@@ -117,25 +119,25 @@ public class CachingList extends TransformedList {
 
         // attempt to get the element from the cache
         Object value = null;
-        IndexedTreeNode cacheNode = (IndexedTreeNode)indexTree.get(index);
+        Element cacheNode = (Element)indexTree.get(index);
 
         // The value is cached, return cached value
         if(cacheNode != null) {
             if(recordHitsOrMisses) cacheHits ++;;
-            AgedNode agedNode = (AgedNode)cacheNode.getValue();
+            AgedNode agedNode = (AgedNode)cacheNode.get();
             value = agedNode.getValue();
-            cacheNode.removeFromTree(cache);
+            cache.remove(cacheNode);
             SparseListNode indexNode = agedNode.getIndexNode();
-            indexNode.setValue(cache.addByNode(agedNode));
+            indexNode.setValue(cache.addInSortedOrder((byte)1, agedNode, 1));
 
         // The value is not cached, lookup from source and cache
         } else {
             if(recordHitsOrMisses) cacheMisses++;
             // Make room in the cache if it is full
             if(currentSize >= maxSize) {
-                IndexedTreeNode oldestInCache = cache.getNode(0);
-                oldestInCache.removeFromTree(cache);
-                AgedNode oldAgedNode = (AgedNode)oldestInCache.getValue();
+                Element oldestInCache = cache.get(0);
+                cache.remove(oldestInCache);
+                AgedNode oldAgedNode = (AgedNode)oldestInCache.get();
                 SparseListNode oldIndexNode = oldAgedNode.getIndexNode();
                 indexTree.set(oldIndexNode.getIndex(), null);
                 currentSize--;
@@ -146,7 +148,7 @@ public class CachingList extends TransformedList {
             indexTree.set(index, Boolean.TRUE);
             SparseListNode indexNode = indexTree.getNode(index);
             AgedNode agedNode = new AgedNode(indexNode, value);
-            indexNode.setValue(cache.addByNode(agedNode));
+            indexNode.setValue(cache.addInSortedOrder((byte)1, agedNode, 1));
             currentSize++;
         }
         return value;
@@ -214,9 +216,9 @@ public class CachingList extends TransformedList {
             int changeType = listChanges.getType();
 
             // Lookup the cache entry for this index if possible
-            IndexedTreeNode cacheNode = null;
+            Element cacheNode = null;
             if(index < lastKnownSize) {
-                cacheNode = (IndexedTreeNode)indexTree.get(index);
+                cacheNode = (Element)indexTree.get(index);
             }
 
             // An INSERT causes the indexes of cached values to be offset.
@@ -226,7 +228,7 @@ public class CachingList extends TransformedList {
             // A DELETE causes an entry to be removed and/or the index values to be offset.
             } else if(changeType == ListEvent.DELETE) {
                 if(cacheNode != null) {
-                    cacheNode.removeFromTree(cache);
+                    cache.remove(cacheNode);
                     currentSize--;
                 }
                 indexTree.remove(index);
@@ -234,7 +236,7 @@ public class CachingList extends TransformedList {
             // An UPDATE causes an existing entry to be removed
             } else if(changeType == ListEvent.UPDATE) {
                 if(cacheNode != null) {
-                    cacheNode.removeFromTree(cache);
+                    cache.remove(cacheNode);
                     currentSize--;
                 }
             }
