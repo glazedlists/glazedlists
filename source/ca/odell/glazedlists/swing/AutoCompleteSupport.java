@@ -124,6 +124,8 @@ import java.beans.PropertyChangeListener;
  *   <li> {@link #uninstall()}
  *   <li> {@link #setCorrectsCase(boolean)}
  *   <li> {@link #setStrict(boolean)}
+ *   <li> {@link #setSelectsTextOnFocusGain(boolean)}
+ *   <li> {@link #setFilterMode(int)}
  * </ul>
  *
  * @author James Lemieux
