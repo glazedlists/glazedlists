@@ -146,7 +146,7 @@ public class Issue implements Comparable {
         String state = "NEW";
 
         // the end Date of the previous ValueSegment
-        Date last = monthify(issue.getCreationTimestamp());
+        Date last = issue.getCreationTimestamp();
 
         // Iterate the issues in chronological (natural) order
         for (Iterator<Activity> i = issue.getActivities().iterator(); i.hasNext();) {
@@ -155,7 +155,7 @@ public class Issue implements Comparable {
             // if the Activity represents a change in status
             if ("issue_status" == activity.getField()) {
                 // create an entry in the timeline
-                Date when = monthify(activity.getWhen());
+                Date when = activity.getWhen();
                 timeline.add(new DefaultValueSegment<Date,String>(last, when, state));
 
                 last = when;
@@ -167,18 +167,6 @@ public class Issue implements Comparable {
         timeline.add(new DefaultValueSegment<Date,String>(last, lastDate, state));
 
         return timeline;
-    }
-
-    private static final TreeMap<Date,Date> months = new TreeMap<Date,Date>();
-
-    private static final Date monthify(Date d) {
-        Date month = new Date(d.getYear(), d.getMonth(), 15);
-        Date monthNormalized = months.get(month);
-        if(monthNormalized == null) {
-            months.put(month, month);
-            monthNormalized = month;
-        }
-        return monthNormalized;
     }
 
     /**

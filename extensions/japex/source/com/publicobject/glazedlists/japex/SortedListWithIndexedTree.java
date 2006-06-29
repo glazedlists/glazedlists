@@ -4,9 +4,9 @@
 package com.publicobject.glazedlists.japex;
 
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
-import ca.odell.glazedlists.impl.adt.IndexedTree;
-import ca.odell.glazedlists.impl.adt.IndexedTreeIterator;
+import com.publicobject.glazedlists.japex.adt.IndexedTreeNode;
+import com.publicobject.glazedlists.japex.adt.IndexedTree;
+import com.publicobject.glazedlists.japex.adt.IndexedTreeIterator;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.event.ListEvent;
 
@@ -80,7 +80,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
 
 
     /**
-     * Creates a {@link ca.odell.glazedlists.SortedListWithIndexedTree} that sorts the specified {@link ca.odell.glazedlists.EventList}.
+     * Creates a {@link SortedListWithIndexedTree} that sorts the specified {@link EventList}.
      * Because this constructor takes no {@link java.util.Comparator} argument, all
      * elements in the specified {@link ca.odell.glazedlists.EventList} must implement {@link Comparable}
      * or a {@link ClassCastException} will be thrown.
@@ -90,7 +90,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /**
-     * Creates a {@link ca.odell.glazedlists.SortedListWithIndexedTree} that sorts the specified {@link ca.odell.glazedlists.EventList}
+     * Creates a {@link SortedListWithIndexedTree} that sorts the specified {@link EventList}
      * using the specified {@link java.util.Comparator} to determine sort order. If the
      * specified {@link java.util.Comparator} is <code>null</code>, then this {@link java.util.List}
      * will be unsorted.
@@ -104,7 +104,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /**
-     * Modify the behaviour of this {@link ca.odell.glazedlists.SortedListWithIndexedTree} to one of the predefined modes.
+     * Modify the behaviour of this {@link SortedListWithIndexedTree} to one of the predefined modes.
      *
      * @param mode either {@link #STRICT_SORT_ORDER} or {@link #AVOID_MOVING_ELEMENTS}.
      */
@@ -122,7 +122,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         }
     }
     /**
-     * Get the behaviour mode for this {@link ca.odell.glazedlists.SortedListWithIndexedTree}.
+     * Get the behaviour mode for this {@link SortedListWithIndexedTree}.
      *
      * @return one of {@link #STRICT_SORT_ORDER} (default) or
      *     {@link #AVOID_MOVING_ELEMENTS}.
@@ -372,7 +372,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
      *      the source {@link ca.odell.glazedlists.EventList} elements implement {@link Comparable},
      *      you may use a {@link ca.odell.glazedlists.GlazedLists#comparableComparator()} to sort them
      *      in their natural order. You may also specify <code>null</code> to put
-     *      this {@link ca.odell.glazedlists.SortedListWithIndexedTree} in unsorted order.
+     *      this {@link SortedListWithIndexedTree} in unsorted order.
      */
     public void setComparator(Comparator<? super E> comparator) {
         // save this comparator
@@ -559,7 +559,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         private Comparator comparator;
 
         /**
-         * Creates an {@link ca.odell.glazedlists.SortedListWithIndexedTree.IndexedTreeNodeComparator} that compares the
+         * Creates an {@link SortedListWithIndexedTree.IndexedTreeNodeComparator} that compares the
          * objects in the source list based on the indexes of the tree
          * nodes being compared.
          */

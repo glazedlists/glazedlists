@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.impl.adt;
+package com.publicobject.glazedlists.japex.adt;
 
 // for comparators and iterators
 import java.util.*;
@@ -20,6 +20,8 @@ import ca.odell.glazedlists.GlazedLists;
  * it does not support {@link #addByNode(Object)} because that
  * method specifies no index.
  *
+ * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.TreeN BC2}
+ * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
 public final class IndexedTree<V> {

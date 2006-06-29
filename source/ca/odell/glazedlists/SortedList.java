@@ -2,13 +2,9 @@
 
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.adt.IndexedTreeNode;
-import ca.odell.glazedlists.impl.adt.IndexedTree;
-import ca.odell.glazedlists.impl.adt.IndexedTreeIterator;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
 import ca.odell.glazedlists.impl.adt.barcode2.Tree1Iterator;
-import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.event.ListEvent;
 

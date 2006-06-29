@@ -1,13 +1,15 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.impl.adt;
+package com.publicobject.glazedlists.japex.adt;
 
 // for iterators
 import java.util.*;
 
 /**
  * A simple itertor of the nodes in an {@link IndexedTree}.
+ *
+ * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.TreeN BC2}
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

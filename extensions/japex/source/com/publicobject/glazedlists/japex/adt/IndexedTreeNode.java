@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.impl.adt;
+package com.publicobject.glazedlists.japex.adt;
 
 // for specifying a sorting order
 import java.util.*;
@@ -23,6 +23,8 @@ import java.util.*;
  * reasonable data store when new elements should be added in sorted order,
  * but old elements are not to be moved once added. To mark a node as unsorted,
  * use the
+ *
+ * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.TreeN BC2}
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
