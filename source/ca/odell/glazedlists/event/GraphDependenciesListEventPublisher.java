@@ -1,5 +1,6 @@
-// Copyright 2006 Google Inc. All Rights Reserved.
-
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.EventList;
