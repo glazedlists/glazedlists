@@ -5,6 +5,8 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.io.IntegerTableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 import javax.swing.*;
@@ -439,6 +441,28 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("New Brunswick", model.getElementAt(0));
         assertEquals("Nova Scotia", model.getElementAt(1));
         assertEquals("Newfoundland", model.getElementAt(2));
+    }
+
+    public void guiTestCreateTableCellEditor() {
+        final EventList<Integer> ints = new BasicEventList<Integer>();
+        ints.add(new Integer(0));
+        ints.add(new Integer(10));
+        ints.add(new Integer(199));
+        ints.add(new Integer(199)); // should be removed by createTableCellEditor(...)
+        ints.add(new Integer(10));  // should be removed by createTableCellEditor(...)
+        ints.add(new Integer(0));   // should be removed by createTableCellEditor(...)
+
+        DefaultCellEditor editor = AutoCompleteSupport.createTableCellEditor(new IntegerTableFormat(), ints, 0);
+        JComboBox comboBox = (JComboBox) editor.getComponent();
+        assertSame(ints.get(0), comboBox.getItemAt(0));
+        assertSame(ints.get(1), comboBox.getItemAt(1));
+        assertSame(ints.get(2), comboBox.getItemAt(2));
+
+        editor = AutoCompleteSupport.createTableCellEditor(GlazedLists.reverseComparator(), new IntegerTableFormat(), ints, 0);
+        comboBox = (JComboBox) editor.getComponent();
+        assertSame(ints.get(2), comboBox.getItemAt(0));
+        assertSame(ints.get(1), comboBox.getItemAt(1));
+        assertSame(ints.get(0), comboBox.getItemAt(2));
     }
 
     private static class NoopDocument implements Document {

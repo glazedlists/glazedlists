@@ -22,6 +22,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Comparator;
 
 /**
  * This class {@link #install}s support for filtering and autocompletion into
@@ -509,7 +510,7 @@ public final class AutoCompleteSupport<E> {
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
-    public static <E> AutoCompleteSupport install(JComboBox comboBox, EventList<E> items) {
+    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items) {
         return install(comboBox, items, GlazedLists.toStringTextFilterator());
     }
 
@@ -1440,6 +1441,26 @@ public final class AutoCompleteSupport<E> {
      * Cell Editor. The values within the table column are used as
      * autocompletion terms within the {@link ComboBoxModel}.
      *
+     * <p>This version of <code>createTableCellEditor</code> assumes that the
+     * values stored in the TableModel at the given <code>columnIndex</code>
+     * are all {@link Comparable}, and that the natural ordering defined by
+     * those {@link Comparable} values also determines which are duplicates
+     * (and thus can safely be removed) and which are unique (and thus must
+     * remain in the {@link ComboBoxModel}).
+     *
+     * <p>Note that this factory method is only appropriate for use when the
+     * values in the {@link ComboBoxModel} should be the unique set of values
+     * in a table column. If some other list of values will be used, do not use
+     * this factory method and create the {@link DefaultCellEditor} directly
+     * with code similar to this: <p>
+     *
+     * <pre>
+     * EventList comboBoxModelValues = ...
+     * JComboBox comboBox = new JComboBox();
+     * DefaultCellEditor cellEditor = new DefaultCellEditor(comboBox);
+     * AutoCompleteSupport.install(comboBox, comboBoxModelValues);
+     * </pre>
+     *
      * <p>If the appearance or function of the autocompleting {@link JComboBox}
      * is to be customized, it can be retrieved using
      * {@link DefaultCellEditor#getComponent()}.
@@ -1447,19 +1468,64 @@ public final class AutoCompleteSupport<E> {
      * @param tableFormat specifies how each row object within a table is
      *      broken apart into column values
      * @param tableData the {@link EventList} backing the TableModel
-     * @param columnIndex the index of the column for which to return a Table
-     *      Cell Editor
+     * @param columnIndex the index of the column for which to return a
+     *      {@link DefaultCellEditor}
      * @return a {@link DefaultCellEditor} which contains an autocompleting
      *      combobox whose contents remain consistent with the data in the
      *      table column at the given <code>columnIndex</code>
      */
     public static <E> DefaultCellEditor createTableCellEditor(TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex) {
+        return createTableCellEditor(GlazedLists.comparableComparator(), tableFormat, tableData, columnIndex);
+    }
+
+    /**
+     * This factory method creates and returns a {@link DefaultCellEditor}
+     * which adapts an autocompleting {@link JComboBox} for use as a Table
+     * Cell Editor. The values within the table column are used as
+     * autocompletion terms within the {@link ComboBoxModel}.
+     *
+     * <p>This version of <code>createTableCellEditor</code> makes no
+     * assumption about the values stored in the TableModel at the given
+     * <code>columnIndex</code>. Instead, it uses the given
+     * <code>uniqueComparator</code> to determine which values are duplicates
+     * (and thus can safely be removed) and which are unique (and thus must
+     * remain in the {@link ComboBoxModel}).
+     *
+     * <p>Note that this factory method is only appropriate for use when the
+     * values in the {@link ComboBoxModel} should be the unique set of values
+     * in a table column. If some other list of values will be used, do not use
+     * this factory method and create the {@link DefaultCellEditor} directly
+     * with code similar to this: <p>
+     *
+     * <pre>
+     * EventList comboBoxModelValues = ...
+     * JComboBox comboBox = new JComboBox();
+     * DefaultCellEditor cellEditor = new DefaultCellEditor(comboBox);
+     * AutoCompleteSupport.install(comboBox, comboBoxModelValues);
+     * </pre>
+     *
+     * <p>If the appearance or function of the autocompleting {@link JComboBox}
+     * is to be customized, it can be retrieved using
+     * {@link DefaultCellEditor#getComponent()}.
+     *
+     * @param uniqueComparator the {@link Comparator} that strips away
+     *      duplicate elements from the {@link ComboBoxModel}
+     * @param tableFormat specifies how each row object within a table is
+     *      broken apart into column values
+     * @param tableData the {@link EventList} backing the TableModel
+     * @param columnIndex the index of the column for which to return a
+     *      {@link DefaultCellEditor}
+     * @return a {@link DefaultCellEditor} which contains an autocompleting
+     *      combobox whose contents remain consistent with the data in the
+     *      table column at the given <code>columnIndex</code>
+     */
+    public static <E> DefaultCellEditor createTableCellEditor(Comparator uniqueComparator, TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex) {
         // use a function to extract all values for the column
-        final FunctionList.Function<E,String> columnValueFunction = new TableColumnValueFunction<E>(tableFormat, columnIndex);
-        final FunctionList<E, String> allColumnValues = new FunctionList<E, String>(tableData, columnValueFunction);
+        final FunctionList.Function<E, Object> columnValueFunction = new TableColumnValueFunction<E>(tableFormat, columnIndex);
+        final FunctionList<E, Object> allColumnValues = new FunctionList<E, Object>(tableData, columnValueFunction);
 
         // narrow the list to just unique values within the column
-        final EventList<String> uniqueColumnValues = new UniqueList<String>(allColumnValues);
+        final EventList<Object> uniqueColumnValues = new UniqueList<Object>(allColumnValues, uniqueComparator);
 
         // create a DefaultCellEditor backed by a JComboBox
         final DefaultCellEditor cellEditor = new DefaultCellEditor(new JComboBox());
@@ -1473,11 +1539,10 @@ public final class AutoCompleteSupport<E> {
 
     /**
      * This function uses a TableFormat and columnIndex to extract all of the
-     * values from an object that are displayed in the given column. These
-     * values are used as autocompletion terms when editing a cell within that
-     * column.
+     * values that are displayed in the given table column. These values are
+     * used as autocompletion terms when editing a cell within that column.
      */
-    private static final class TableColumnValueFunction<E> implements FunctionList.Function<E,String> {
+    private static final class TableColumnValueFunction<E> implements FunctionList.Function<E, Object> {
         private final TableFormat<E> tableFormat;
         private final int columnIndex;
 
@@ -1486,9 +1551,8 @@ public final class AutoCompleteSupport<E> {
             this.columnIndex = columnIndex;
         }
 
-        public String evaluate(E sourceValue) {
-            final Object columnValue = tableFormat.getColumnValue(sourceValue, columnIndex);
-            return columnValue == null ? null : columnValue.toString();
+        public Object evaluate(E sourceValue) {
+            return tableFormat.getColumnValue(sourceValue, columnIndex);
         }
     }
 }
