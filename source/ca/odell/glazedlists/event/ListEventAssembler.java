@@ -75,7 +75,7 @@ public final class ListEventAssembler<E> {
     /**
      * Create a delegate using the current assembler.
      */
-    private static final <E> AssemblerHelper<E> createAssemblerDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
+    private static <E> AssemblerHelper<E> createAssemblerDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
         if(assemblerName.equals("treedeltas")) {
             return new Tree4DeltasAssembler<E>(sourceList, publisher);
         } else if(assemblerName.equals("blockdeltas")) {
@@ -91,7 +91,7 @@ public final class ListEventAssembler<E> {
      * Create a new {@link ListEventPublisher} for an {@link EventList} not attached
      * to any other {@link EventList}s.
      */
-    public static final ListEventPublisher createListEventPublisher() {
+    public static ListEventPublisher createListEventPublisher() {
         if(publisherName.equals("graphdependencies")) {
             return new GraphDependenciesListEventPublisher();
         } else if(publisherName.equals("sequencedependencies")) {
@@ -300,7 +300,7 @@ public final class ListEventAssembler<E> {
         /**
          * Create a {@link PublisherAdapter} using the current strategy.
          */
-        private final PublisherAdapter<E> createPublisherDelegate(ListEventPublisher publisher) {
+        private PublisherAdapter<E> createPublisherDelegate(ListEventPublisher publisher) {
             if(publisherName.equals("graphdependencies")) {
                 return new GraphSequencePublisherAdapter<E>(this, publisher);
             } else if(publisherName.equals("sequencedependencies")) {
@@ -481,7 +481,7 @@ public final class ListEventAssembler<E> {
     }
 
     /**
-     * ListEventAssembler using {@link TreeDeltas} to store list changes.
+     * ListEventAssembler using {@link Tree4Deltas} to store list changes.
      */
     static class Tree4DeltasAssembler<E> extends AssemblerHelper<E> {
 
@@ -719,7 +719,7 @@ public final class ListEventAssembler<E> {
          * @param toAdd a ListEventListener to be added, or <code>null</code>
          * @param toRemove a ListEventListener to be removed, or <code>null</code>
          */
-        private void updateListEventListeners(ListEventListener<E> toAdd, ListEventListener<E> toRemove, ListEvent listEvent) {
+        private void updateListEventListeners(ListEventListener<E> toAdd, ListEventListener<E> toRemove, ListEvent<E> listEvent) {
             // only work on copies of the Lists and swap them in place at the end
             final List<ListEventListener<E>> listenersCopy = new ArrayList<ListEventListener<E>>(listeners);
             final List<ListEvent<E>> listenerEventsCopy = new ArrayList<ListEvent<E>>(listenerEvents);
