@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-// for sorting the list
 import java.util.List;
 
 /**
@@ -194,7 +193,7 @@ final class Block {
             return true;
         }
 
-        // can't be an contradiction
+        // can't be a contradiction
         return false;
     }
 
@@ -217,7 +216,6 @@ final class Block {
             second.endIndex -= commonLength;
             if(second.getLength() == 0) contradictingPair.remove(1);
             if(first.getLength() == 0) contradictingPair.remove(0);
-            return;
 
         // insert then update shortens update and reorders the two changes
         } else if(first.type == ListEvent.INSERT && second.type == ListEvent.UPDATE) {
