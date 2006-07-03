@@ -8,7 +8,6 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.SimpleMatcherEditorListener;
 
 import javax.swing.*;
-import javax.swing.text.Document;
 import javax.swing.text.AbstractDocument;
 
 /**
@@ -35,7 +34,7 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
         eventCounter = null;
     }
 
-    public void testConstructors() {
+    public void guiTestConstructors() {
         JTextField textComponent = new JTextField();
         AbstractDocument document = (AbstractDocument) textComponent.getDocument();
         int initialDocumentListenerCount = document.getDocumentListeners().length;
