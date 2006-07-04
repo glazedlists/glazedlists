@@ -3,13 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists package
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.Matchers;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -35,26 +33,22 @@ public class EventSelectionModelTest extends SwingTestCase {
         EventSelectionModel<Comparable> eventSelectionModel = new EventSelectionModel<Comparable>(sorted);
         
         // populate the list
-        list.add("E");
-        list.add("C");
-        list.add("F");
-        list.add("B");
-        list.add("A");
-        list.add("D");
-        assertEquals(Arrays.asList(new String[] { }), eventSelectionModel.getSelected());
+        list.addAll(GlazedListsTests.delimitedStringToList("E C F B A D"));
+
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
         
         // select the vowels
         eventSelectionModel.addSelectionInterval(0, 0);
         eventSelectionModel.addSelectionInterval(4, 4);
-        assertEquals(Arrays.asList(new String[] { "E", "A" }), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("E A"), eventSelectionModel.getSelected());
         
         // flip the list
         sorted.setComparator(GlazedLists.comparableComparator());
-        assertEquals(Arrays.asList(new String[] { "A", "E" }), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A E"), eventSelectionModel.getSelected());
         
         // flip the list again
         sorted.setComparator(GlazedLists.reverseComparator());
-        assertEquals(Arrays.asList(new String[] { "E", "A" }), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("E A"), eventSelectionModel.getSelected());
     }
 
     /**
@@ -65,12 +59,7 @@ public class EventSelectionModelTest extends SwingTestCase {
         EventSelectionModel eventSelectionModel = new EventSelectionModel<String>(list);
 
         // populate the list
-        list.add("A");
-        list.add("B");
-        list.add("C");
-        list.add("D");
-        list.add("E");
-        list.add("F");
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
 
         // make a selection
         eventSelectionModel.addSelectionInterval(1, 4);
@@ -95,7 +84,7 @@ public class EventSelectionModelTest extends SwingTestCase {
      */
     public void guiTestSelectionModel() {
         EventList<Object> source = new BasicEventList<Object>();
-        source.addAll(Arrays.asList(new String[] { "one", "two", "three" }));
+        source.addAll(GlazedListsTests.delimitedStringToList("one two three"));
         FilterList<Object> filtered = new FilterList<Object>(source, Matchers.trueMatcher());
 
         // create selection model
@@ -147,6 +136,28 @@ public class EventSelectionModelTest extends SwingTestCase {
         // correct locking should have produced a thread log like: WriterThread* AWT-EventQueue-0* WriterThread*
         // correct locking should have produced a read/write pattern like: W...W R...R W...W
         assertEquals(3, atomicList.getReadWriteBlockCount());
+    }
+
+    public void guiTestDeleteSelectedRows() {
+        EventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.delimitedStringToList("one two three"));
+
+        // create selection model
+        EventSelectionModel<String> model = new EventSelectionModel<String>(source);
+        ListSelectionChangeCounter counter = new ListSelectionChangeCounter();
+        model.addListSelectionListener(counter);
+
+        // select all elements (should produce 1 ListSelectionEvent)
+        model.setSelectionInterval(0, 2);
+        assertEquals(source, model.getSelected());
+        assertEquals(1, counter.getCountAndReset());
+
+        // remove all selected elements (should produce 1 ListSelectionEvent)
+        model.getSelected().clear();
+        assertEquals(Collections.EMPTY_LIST, source);
+        assertEquals(Collections.EMPTY_LIST, model.getSelected());
+        // todo fix this defect (this is the functionality that Bruce Alspaugh is looking for)
+        assertEquals(1, counter.getCountAndReset());
     }
 
     /**
