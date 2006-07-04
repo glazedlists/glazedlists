@@ -3,18 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import junit.framework.TestCase;
 
-import java.io.*;
-import java.util.List;
+import java.io.IOException;
+import java.io.ObjectStreamClass;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Arrays;
-
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.matchers.Matchers;
-import ca.odell.glazedlists.matchers.Matcher;
+import java.util.List;
 
 /**
  * Makes sure that {@link BasicEventList} works above and beyond its duties as
@@ -25,9 +22,9 @@ import ca.odell.glazedlists.matchers.Matcher;
 public class BasicEventListTest extends TestCase {
 
     public void testSimpleSerialization() throws IOException, ClassNotFoundException {
-        EventList serializableList = new BasicEventList();
+        EventList<String> serializableList = new BasicEventList<String>();
         serializableList.addAll(GlazedListsTests.stringToList("Saskatchewan Roughriders"));
-        EventList serializedCopy = GlazedListsTests.serialize(serializableList);
+        EventList<String> serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
 
         serializedCopy.addAll(GlazedListsTests.stringToList("Hamilton Tiger-Cats"));
@@ -41,14 +38,14 @@ public class BasicEventListTest extends TestCase {
     }
 
     public void testSerializableListeners() throws IOException, ClassNotFoundException {
-        EventList serializableList = new BasicEventList();
+        EventList<String> serializableList = new BasicEventList<String>();
         SerializableListener listener = new SerializableListener();
         serializableList.addListEventListener(listener);
 
         serializableList.addAll(GlazedListsTests.stringToList("Szarka"));
         assertEquals(serializableList, SerializableListener.getLastSource());
 
-        EventList serializedCopy = GlazedListsTests.serialize(serializableList);
+        EventList<String> serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
 
         assertEquals(serializableList, SerializableListener.getLastSource());
@@ -57,14 +54,14 @@ public class BasicEventListTest extends TestCase {
     }
 
     public void testUnserializableListeners() throws IOException, ClassNotFoundException {
-        EventList serializableList = new BasicEventList();
+        EventList<String> serializableList = new BasicEventList<String>();
         UnserializableListener listener = new UnserializableListener();
         serializableList.addListEventListener(listener);
 
         serializableList.addAll(GlazedListsTests.stringToList("Keith"));
         assertEquals(serializableList, UnserializableListener.getLastSource());
 
-        EventList serializedCopy = GlazedListsTests.serialize(serializableList);
+        EventList<String> serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
 
         assertEquals(serializableList, UnserializableListener.getLastSource());
@@ -101,7 +98,7 @@ public class BasicEventListTest extends TestCase {
              0x62, -0x52,  0x4f,  0x32,  0x0d,  0x02,  0x00,  0x00,  0x78,  0x70,  0x00,  0x00,  0x00,  0x00,  0x78,
         };
 
-        List expected = new ArrayList();
+        List<String> expected = new ArrayList<String>();
         expected.addAll(GlazedListsTests.stringToList("October 10, 2005"));
 
         Object deserialized = GlazedListsTests.fromBytes(serializedBytes);
