@@ -5,9 +5,14 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.gui.*;
 // the objects to play with
 import javax.swing.*;
+import java.util.Random;
 
 
 /**
@@ -18,13 +23,6 @@ import javax.swing.*;
  */
 public class ConflictingThreadsTest extends SwingTestCase {
 
-	/** the list of labels */
-	private EventList labelsList;
-
-	/** the table of labels */
-	private EventTableModel labelsTable;
-
-
     /**
      * Tests the user interface. This is a mandatory method in SwingTestCase classes.
      */
@@ -32,40 +30,42 @@ public class ConflictingThreadsTest extends SwingTestCase {
         super.testGui();
     }
 
-	/**
-	 * Prepare for the test.
-	 */
-	public void guiSetUp() {
-		labelsList = new BasicEventList();
-		labelsList.add(new JLabel("7-up"));
-		labelsList.add(new JLabel("Pepsi"));
-		labelsList.add(new JLabel("Dr. Pepper"));
+    /**
+     * Prepare for the test.
+     */
+    public void guiSetUp() {
+        // do nothing
+    }
 
-		String[] properties = new String[] { "text", "toolTipText" };
-		String[] headers = new String[] { "Text", "Tool Tip" };
-		boolean[] editable = new boolean[] { true, true };
-		TableFormat labelsTableFormat = GlazedLists.tableFormat(JLabel.class, properties, headers, editable);
+    /**
+     * Clean up after the test.
+     */
+    public void guiTearDown() {
+        // do nothing
+    }
 
-		labelsTable = new EventTableModel(labelsList, labelsTableFormat);
-	}
+    /**
+     * Verifies that conflicting threads are resolved intelligently.
+     */
+    public void guiTestConflictingThreads() {
+        EventList labelsList = new BasicEventList();
+        labelsList.add(new JLabel("7-up"));
+        labelsList.add(new JLabel("Pepsi"));
+        labelsList.add(new JLabel("Dr. Pepper"));
 
-	/**
-	 * Clean up after the test.
-	 */
-	public void guiTearDown() {
-	}
+        String[] properties = new String[] { "text", "toolTipText" };
+        String[] headers = new String[] { "Text", "Tool Tip" };
+        boolean[] editable = new boolean[] { true, true };
+        TableFormat labelsTableFormat = GlazedLists.tableFormat(JLabel.class, properties, headers, editable);
 
-	/**
-	 * Verifies that conflicting threads are resolved intelligently.
-	 */
-	public void guiTestConflictingThreads() {
+        EventTableModel labelsTable = new EventTableModel(labelsList, labelsTableFormat);
 
-		doBackgroundTask(new ClearListRunnable());
+        doBackgroundTask(new ClearListRunnable(labelsList), true);
 
-		labelsList.getReadWriteLock().writeLock().lock();
-		assertEquals(0, labelsList.size());
-		labelsList.add(new JLabel("Coca-Cola"));
-		labelsList.getReadWriteLock().writeLock().unlock();
+        labelsList.getReadWriteLock().writeLock().lock();
+        assertEquals(0, labelsList.size());
+        labelsList.add(new JLabel("Coca-Cola"));
+        labelsList.getReadWriteLock().writeLock().unlock();
 
         // This fails. We know it fails. Do not fix this!
         //
@@ -79,9 +79,12 @@ public class ConflictingThreadsTest extends SwingTestCase {
         // may be doing the read, and firing updates from within the JTable's
         // call stack (and re-entering JTable) is likely quite problematic!
         assertEquals(1, labelsTable.getRowCount());
-	}
-
-    private class ClearListRunnable implements Runnable {
+    }
+    private static class ClearListRunnable implements Runnable {
+        private final EventList labelsList;
+        public ClearListRunnable(EventList labelsList) {
+            this.labelsList = labelsList;
+        }
         public void run() {
             labelsList.getReadWriteLock().writeLock().lock();
             labelsList.clear();
@@ -89,7 +92,7 @@ public class ConflictingThreadsTest extends SwingTestCase {
         }
     }
 
-	public static void main(String[] args) {
-		new ConflictingThreadsTest().testGui();
-	}
+    public static void main(String[] args) {
+        new ConflictingThreadsTest().testGui();
+    }
 }

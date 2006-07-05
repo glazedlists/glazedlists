@@ -105,90 +105,27 @@ public abstract class SwingTestCase extends TestCase {
     }
 
     /**
-     * Ensures that all waiting Swing events have been handled before proceeding.
-     * This hack method can be used when unit testing classes that interact with
-     * the Swing event dispatch thread.
-     *
-     * <p>This guarantees that all events in the event dispatch queue before this
-     * method is called will have executed. It provides no guarantee that the event
-     * dispatch thread will be empty upon return.
-     */
-    /*private void flushEventDispatchThread() {
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                }
-            });
-        } catch(InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch(java.lang.reflect.InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }*/
-    
-    
-    /**
      * Run the specified task on a background thread. This method does not return
      * until the task has completed.
+     *
+     * @param block true to wait for the background task to complete before
+     *      proceeding.
+     * @return the thread the background task was started on
      */
-    public static void doBackgroundTask(Runnable task) {
+    public static Thread doBackgroundTask(Runnable task, boolean block) {
         // start the background task
-        //BackgroundRunnable runnable = new BackgroundRunnable(task, Thread.currentThread());
         Thread background = new Thread(task);
         background.start();
         
         // wait for the task to complete
-        try {
-            background.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        if(block) {
+            try {
+                background.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
+
+        return background;
     }
-    
-//    /**
-//     * Wait until interrupted.
-//     */
-//    public static void waitForInterrupt() {
-//        try {
-//            Object pillow = new Object();
-//            synchronized(pillow) {
-//                pillow.wait();
-//            }
-//        } catch(InterruptedException e) {
-//            // do nothing
-//        }
-//    }
-//
-//    /**
-//     * Sleep a little while.
-//     */
-//    public void sleep(long duration) {
-//        try {
-//            Object pillow = new Object();
-//            synchronized(pillow) {
-//                pillow.wait(duration);
-//            }
-//        } catch(InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-    
-//    /**
-//     * Run a task on a background thread and then interrupt the caller.
-//     */
-//    private static class BackgroundRunnable implements Runnable {
-//        private Runnable target;
-//        private Thread blocking;
-//        public BackgroundRunnable(Runnable target, Thread blocking) {
-//            this.target = target;
-//            this.blocking = blocking;
-//        }
-//        public void run() {
-//            try {
-//                target.run();
-//            } finally {
-//                blocking.interrupt();
-//            }
-//        }
-//    }
 }
