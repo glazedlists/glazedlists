@@ -110,7 +110,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,io,swt,jfreechart,issuesbrowser"
+	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser"
 		description="Compile all components of the source.">
 	</target>
 
