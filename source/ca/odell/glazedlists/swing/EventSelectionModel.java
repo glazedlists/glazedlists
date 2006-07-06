@@ -179,7 +179,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * Inverts the current selection.
      */
     public void invertSelection() {
-        listSelection.invertSelection();
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.invertSelection();
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -196,7 +201,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      */
     public void setSelectionInterval(int index0, int index1) {
         if(!enabled) return;
-        listSelection.setSelection(index0, index1);
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.setSelection(index0, index1);
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -204,7 +214,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      */
     public void addSelectionInterval(int index0, int index1) {
         if(!enabled) return;
-        listSelection.select(index0, index1);
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.select(index0, index1);
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
     /**
      * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
@@ -212,7 +227,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     public void removeSelectionInterval(int index0, int index1) {
         if(!enabled) return;
         if(index0 == 0 && index1 == 0 && swingThreadSource.isEmpty()) return; // hack for Java 5 compatibility
-        listSelection.deselect(index0, index1);
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.deselect(index0, index1);
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -238,7 +258,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      */
     public void setAnchorSelectionIndex(int anchorSelectionIndex) {
         if(!enabled) return;
-        listSelection.setAnchorSelectionIndex(anchorSelectionIndex);
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.setAnchorSelectionIndex(anchorSelectionIndex);
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
     /**
      * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
@@ -251,7 +276,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      */
     public void setLeadSelectionIndex(int leadSelectionIndex) {
         if(!enabled) return;
-        listSelection.setLeadSelectionIndex(leadSelectionIndex);
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.setLeadSelectionIndex(leadSelectionIndex);
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -273,7 +303,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      */
     public void clearSelection() {
         if(!enabled) return;
-        listSelection.deselectAll();
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.deselectAll();
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
     /**
      * Returns true if no indices are selected.
@@ -304,9 +339,14 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
         // fire one extra change containing all changes in this set
         if(!valueIsAdjusting) {
             if(fullChangeStart != -1 && fullChangeFinish != -1) {
-                fireSelectionChanged(fullChangeStart, fullChangeFinish);
-                fullChangeStart = -1;
-                fullChangeFinish = -1;
+                swingThreadSource.getReadWriteLock().writeLock().lock();
+                try {
+                    fireSelectionChanged(fullChangeStart, fullChangeFinish);
+                    fullChangeStart = -1;
+                    fullChangeFinish = -1;
+                } finally {
+                    swingThreadSource.getReadWriteLock().writeLock().unlock();
+                }
             }
         }
     }
@@ -322,7 +362,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * Set the selection mode.
      */
     public void setSelectionMode(int selectionMode) {
-        listSelection.setSelectionMode(selectionMode);
+        swingThreadSource.getReadWriteLock().writeLock().lock();
+        try {
+            listSelection.setSelectionMode(selectionMode);
+        } finally {
+            swingThreadSource.getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
