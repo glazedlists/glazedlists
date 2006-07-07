@@ -471,10 +471,7 @@
 
     <target name="test" depends="compiletests"
             description="Compile unit tests and run them using JUnit.">
-            <!-- Verify that JUnit is available on the classpath -->
-            <available classname="junit.framework.TestCase" property="junit.present"/>
-            <fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
-            <!-- Execute JUnit tests -->
+           <!-- Execute JUnit tests -->
             <junit printsummary="true" showoutput="false" fork="true"
                     errorProperty="test.failed" failureProperty="test.failed">
                     <assertions>
@@ -492,7 +489,10 @@
     <target name="compiletests" depends="compileall">
         <!-- Compile the test classes from source/ into classes/ -->
         <echo>${ant.home}</echo>
-        <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+        <!-- Verify that JUnit is available on the classpath -->
+	<available classname="junit.framework.TestCase" property="junit.present"/>
+	<fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
+ <javac destdir="classes" srcdir="test" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions" includes="**/*.jar"/>
                 <fileset file="${ant.home}/lib/junit.jar"/>
