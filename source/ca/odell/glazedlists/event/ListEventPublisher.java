@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public abstract class ListEventPublisher {
+public interface ListEventPublisher {
 
     /**
      * Requires that the specified {@link EventList} be updated before the

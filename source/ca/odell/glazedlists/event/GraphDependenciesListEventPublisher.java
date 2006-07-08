@@ -19,7 +19,7 @@ import java.util.Iterator;
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */
-public final class GraphDependenciesListEventPublisher extends ListEventPublisher {
+public final class GraphDependenciesListEventPublisher implements ListEventPublisher {
 
     /** the list of DependentListeners managed by this publisher */
     private List<DependentListener> dependentListeners = new ArrayList<DependentListener>();

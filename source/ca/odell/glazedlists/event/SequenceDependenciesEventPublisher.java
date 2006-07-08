@@ -25,7 +25,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-final class SequenceDependenciesEventPublisher extends ListEventPublisher {
+final class SequenceDependenciesEventPublisher implements ListEventPublisher {
 
     /** keep track of how many times the fireEvent() method is on the stack */
     private int reentrantFireEventCount = 0;
@@ -41,7 +41,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      * We should be careful not to make changes to this list directly and instead
      * create a copy as necessary
      */
-    private List<SubjectAndListener> subjectAndListeners = Collections.emptyList();
+    private List<SubjectAndListener> subjectAndListeners = Collections.EMPTY_LIST;
 
     /**
      * We use copy-on-write on the listeners list. This is a copy of the
@@ -62,7 +62,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      *     work for simple cases (the 99% case)
      *  <li>it's complex! Can we simplify it?
      *  <li>could we keep the datastructures around? it may be wasteful to
-     *     reconstruct them every single time a listener is changed
+     *     reconstruct them every single time a listener is added
      */
     private List<SubjectAndListener> orderSubjectsAndListeners(List<SubjectAndListener> subjectsAndListeners) {
 
@@ -282,7 +282,6 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             if(previous != null) throw new IllegalStateException("Reentrant fireEvent() by \"" + subject + "\"");
 
             // Mark the listeners who need this event
-            //for(SubjectAndListener subjectAndListener : subjectAndListeners) {
             int subjectAndListenersSize = subjectsAndListenersForCurrentEvent.size();
             for(int i = 0; i < subjectAndListenersSize; i++) {
                 SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
@@ -361,7 +360,8 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
         /**
          * Whether the listener is still valid. Usually a listener becomes stale
-         * when a weak reference goes out of scope.
+         * when a weak reference goes out of scope. If this method returns true,
+         * the listener will be silently removed and no longer receive events.
          */
         boolean isStale(Subject subject, Listener listener);
     }

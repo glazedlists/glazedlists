@@ -69,7 +69,7 @@ public final class ListEventAssembler<E> {
         if(assemblerProperty != null) assemblerName = assemblerProperty;
         else assemblerName = "treedeltas";
         if(publisherProperty != null) publisherName = publisherProperty;
-        else publisherName = "graphdependencies";
+        else publisherName = "sequencedependencies";
     }
 
     /**
