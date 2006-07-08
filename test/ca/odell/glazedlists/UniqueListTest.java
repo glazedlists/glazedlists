@@ -14,6 +14,7 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
  * A UniqueListTest tests the functionality of the UniqueList
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class UniqueListTest extends TestCase {
 
@@ -1448,5 +1449,21 @@ public class UniqueListTest extends TestCase {
         // disposing of the UniqueList should leave nothing listening to the source list
         unique.dispose();
         assertEquals(0, source.updates.getListEventListeners().size());
+    }
+
+    /**
+     * When {@link UniqueList#set} is called, this should fire an updated event.
+     */
+    public void testEventsFiredBySet() {
+        source.addAll(GlazedListsTests.stringToList("AAABBBDDD"));
+        ListConsistencyListener consistencyListener = ListConsistencyListener.install(unique);
+
+        unique.set(1, "B");
+        assertEquals(1, consistencyListener.getEventCount());
+        assertEquals(1, consistencyListener.getChangeCount(0));
+
+        unique.set(1, "C");
+        assertEquals(2, consistencyListener.getEventCount());
+        assertEquals(1, consistencyListener.getChangeCount(1));
     }
 }

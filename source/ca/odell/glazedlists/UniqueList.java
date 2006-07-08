@@ -160,8 +160,14 @@ public final class UniqueList<E> extends TransformedList<E, E> {
         updates.beginEvent(true);
 
         // remove all duplicates of this value first
-        E result = remove(index);
-        add(index, value);
+        int startIndex = getSourceIndex(index) + 1;
+        int endIndex = getEndIndex(index);
+        if(endIndex > startIndex) {
+            ((SortedList)source).subList(startIndex, endIndex).clear();
+        }
+
+        // now do the set
+        E result = super.set(index, value);
 
         updates.commitEvent();
 
