@@ -7,6 +7,7 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.*;
 // access to the volatile implementation classes
 import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.impl.NoOpEventFormat;
 // to store event info for forwarding on the deselected EventList
 import java.util.*;
 
@@ -100,6 +101,14 @@ public class ListSelection<E> {
         source.addListEventListener(sourceListener);
         deselectedList = new DeselectedList<E>(source);
         selectedList = new SelectedList<E>(source);
+
+        // we need to tell the sequence dependencies publisher that the
+        // selected and deselected lists depend on the sourceListener
+        if(source.getPublisher() instanceof SequenceDependenciesEventPublisher) {
+            SequenceDependenciesEventPublisher sequenceDependenciesEventPublisher = (SequenceDependenciesEventPublisher)source.getPublisher();
+            sequenceDependenciesEventPublisher.addListener(sourceListener, selectedList, NoOpEventFormat.INSTANCE);
+            sequenceDependenciesEventPublisher.addListener(sourceListener, deselectedList, NoOpEventFormat.INSTANCE);
+        }
     }
 
     /**
@@ -978,6 +987,13 @@ public class ListSelection<E> {
     public void dispose() {
         source.removeListEventListener(sourceListener);
         selectionListeners.clear();
+
+        // detach the publisher dependencies
+        if(source.getPublisher() instanceof SequenceDependenciesEventPublisher) {
+            SequenceDependenciesEventPublisher sequenceDependenciesEventPublisher = (SequenceDependenciesEventPublisher)source.getPublisher();
+            sequenceDependenciesEventPublisher.removeListener(sourceListener, selectedList);
+            sequenceDependenciesEventPublisher.removeListener(sourceListener, deselectedList);
+        }
     }
 
     /**

@@ -25,7 +25,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-final class SequenceDependenciesEventPublisher implements ListEventPublisher {
+public final class SequenceDependenciesEventPublisher implements ListEventPublisher {
 
     /** keep track of how many times the fireEvent() method is on the stack */
     private int reentrantFireEventCount = 0;
@@ -35,6 +35,8 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
     /** for proper dependency management, when a listener and subject aren't the same identity */
     private Map<Object,Object> listenersToRelatedSubjects = new IdentityHashMap<Object,Object>();
 
+    /** the last listener notified, the next one will be beyond it in the list */
+    private int lastNotified;
 
     /**
      * A mix of different subjects and listeners pairs in a deliberate order.
@@ -270,6 +272,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
         // the topmost event, the list won't change because we copy on write
         if(reentrantFireEventCount == 0) {
             subjectsAndListenersForCurrentEvent = subjectAndListeners;
+            lastNotified = -1;
         }
 
         // keep track of whether this method is being reentered because one
@@ -283,7 +286,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
 
             // Mark the listeners who need this event
             int subjectAndListenersSize = subjectsAndListenersForCurrentEvent.size();
-            for(int i = 0; i < subjectAndListenersSize; i++) {
+            for(int i = lastNotified + 1; i < subjectAndListenersSize; i++) {
                 SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
                 if(subjectAndListener.subject != subject) continue;
                 subjectAndListener.addPendingEvent(event);
@@ -300,10 +303,11 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
                 SubjectAndListener nextToFire = null;
 
                 // find the next listener still pending
-                for(int i = 0; i < subjectAndListenersSize; i++) {
+                for(int i = lastNotified + 1; i < subjectAndListenersSize; i++) {
                     SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
                     if(subjectAndListener.hasPendingEvent()) {
                         nextToFire = subjectAndListener;
+                        lastNotified = i;
                         break;
                     }
                 }
