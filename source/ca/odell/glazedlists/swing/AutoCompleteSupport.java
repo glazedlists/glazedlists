@@ -986,8 +986,16 @@ public final class AutoCompleteSupport<E> {
 
             updatePrefix();
             applyFilter(prefix);
-            selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit);
+            final boolean autocompleteTermSelected = selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit);
             togglePopup();
+
+            // some L&Fs (Windows, WinLAF) actually select the text in the comboBoxEditor
+            // whenever a new item is set into it (via BasicComboBoxEditor.setItem(...))
+            // but we don't want that. So, if an autocompletion term wasn't selected
+            // (in which case we have already corrected the selected text), then clear
+            // away any text selection.
+            if (!autocompleteTermSelected)
+                comboBoxEditor.setCaretPosition(comboBoxEditor.getCaretPosition());
         }
 
         /**
@@ -997,10 +1005,14 @@ public final class AutoCompleteSupport<E> {
          * autocomplete item and select it. If the selection changes and the
          * JComboBox is not a Table Cell Editor, an ActionEvent will be
          * broadcast from the combo box.
+         *
+         * @return <tt>true</tt> if an autocompletion term was selected;
+         *      <tt>false</tt> if either we were instructed not to, or could
+         *      not find a suitable autocomplete term
          */
-        private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
+        private boolean selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
             // break out early if we're flagged to ignore attempts to autocomplete
-            if (doNotAutoComplete) return;
+            if (doNotAutoComplete) return false;
 
             // determine if our prefix is empty (in which case we cannot use our prefixMatcher to locate an autocompletion term)
             final boolean prefixIsEmpty = "".equals(prefix);
@@ -1031,13 +1043,14 @@ public final class AutoCompleteSupport<E> {
                 // (it represents the autocomplete text)
                 comboBoxEditor.select(prefix.length(), document.getLength());
 
-                return;
+                return true;
             }
 
             // reset the selection since we couldn't find the prefix in the model
             // (this has the side-effect of scrolling the popup to the top)
             final boolean silently = isTableCellEditor || selectedItemBeforeEdit == null;
             selectItem(-1, silently);
+            return false;
         }
 
         /**
