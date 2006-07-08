@@ -145,6 +145,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         public void postEvent(SimpleSubjectListener subject) {
             // do nothing
         }
+        public boolean isStale(SimpleSubjectListener subject, SimpleSubjectListener listener) {
+            return false;
+        }
     }
 
     /**
@@ -323,6 +326,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         }
         public void postEvent(DependentSubjectListener subject) {
             // do nothing
+        }
+        public boolean isStale(DependentSubjectListener subject, DependentSubjectListener listener) {
+            return false;
         }
     }
 
@@ -560,6 +566,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         }
         public void postEvent(DetachedSubject subject) {
             // do nothing
+        }
+        public boolean isStale(DetachedSubject subject, DetachedSubject.Listener listener) {
+            return false;
         }
     }
 }

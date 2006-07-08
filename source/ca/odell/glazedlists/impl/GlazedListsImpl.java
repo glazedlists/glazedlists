@@ -35,6 +35,16 @@ public final class GlazedListsImpl {
     }
 
     /**
+     * Concatenate two lists to create a third list.
+     */
+    public static <E> List<E> concatenate(List<E> a, List<E> b) {
+        List<E> aAndB = new ArrayList<E>(a.size() + b.size());
+        aAndB.addAll(a);
+        aAndB.addAll(b);
+        return aAndB;
+    }
+
+    /**
      * Replace all elements in the target {@link EventList} with the elements in
      * the source {@link List}.
      *

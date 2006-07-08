@@ -107,9 +107,9 @@ public final class ListEventAssembler<E> {
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
         delegate = createAssemblerDelegate(sourceList, publisher);
     }
-    
+
     /**
-     * Starts a new atomic change to this list change queue. 
+     * Starts a new atomic change to this list change queue.
      *
      * <p>This simple change event does not support change events nested within.
      * To allow other methods to nest change events within a change event, use
@@ -118,7 +118,7 @@ public final class ListEventAssembler<E> {
     public void beginEvent() {
         delegate.beginEvent(false);
     }
-        
+
     /**
      * Starts a new atomic change to this list change queue. This signature
      * allows you to specify allowing nested changes. This simply means that
@@ -188,7 +188,7 @@ public final class ListEventAssembler<E> {
     /**
      * Convenience method for appending a range of updates.
      */
-    public void addUpdate(int startIndex, int endIndex) { 
+    public void addUpdate(int startIndex, int endIndex) {
         addChange(ListEvent.UPDATE, startIndex, endIndex);
     }
     /**
@@ -851,6 +851,13 @@ public final class ListEventAssembler<E> {
             public void postEvent(EventList<E> subject) {
                 assemblerDelegate.cleanup();
                 ((ListSequencePublisherAdapter)assemblerDelegate.publisherAdapter).eventEnqueued = false;
+            }
+            public boolean isStale(EventList<E> subject, ListEventListener<E> listener) {
+                if(listener instanceof WeakReferenceProxy && ((WeakReferenceProxy)listener).getReferent() == null) {
+                    ((WeakReferenceProxy)listener).dispose();
+                    return true;
+                }
+                return false;
             }
         }
     }

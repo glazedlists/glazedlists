@@ -3,12 +3,25 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
+import ca.odell.glazedlists.impl.adt.IdentityMultimap;
 import ca.odell.glazedlists.EventList;
 
 import java.util.*;
 
 /**
  * Manage listeners, firing events, and making sure that events arrive in order.
+ *
+ * <p>This manages listeners across multiple objects in a pipeline of observables
+ * and their listeners. It implements Martin Fowler's
+ * <a href="http://www.martinfowler.com/eaaDev/EventAggregator.html">EventAggregator</a>
+ * design.
+ *
+ * <p>To guarantee a safe notification order, this class makes sure that all an
+ * object's dependencies have been notified of a particular event before that
+ * object is itself notified. This is tricky because it requires us to interrupt
+ * the event flow and control its flow. In this class, event flow is controlled
+ * by queueing events and not necessarily firing them during the {@link #fireEvent}
+ * method.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -148,15 +161,9 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      * Register the specified listener to receive events from the specified
      * subject whenever they are fired.
      */
-    public synchronized <Subject,Listener,Event> void addListener(Subject subject, Listener listener, EventFormat<Subject,Listener,Event> format) {
-        // create a new list, then order it so dependencies are safe
-        List<SubjectAndListener> unordered = concatenate(this.subjectAndListeners, Collections.singletonList(new SubjectAndListener(subject, listener, format)));
-        this.subjectAndListeners = orderSubjectsAndListeners(unordered);
-
-        // todo:
-        // we're not out of the woods yet! We still need to walk through the
-        // listeners list and trim obsolete listeners (from weak reference
-        // proxies etc)
+    public synchronized <Subject,Listener,Event> void addListener(Subject subject, Listener listener, EventFormat<Subject,Listener,Event> eventFormat) {
+        List<SubjectAndListener> unordered = updateListEventListeners(subject, listener, null, eventFormat);
+        subjectAndListeners = orderSubjectsAndListeners(unordered);
     }
 
     /**
@@ -164,24 +171,54 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      * subject.
      */
     public synchronized void removeListener(Object subject, Object listener) {
-        subjectAndListeners = new ArrayList<SubjectAndListener>(subjectAndListeners);
+        subjectAndListeners = updateListEventListeners(subject, null, listener, null);
+    }
 
-        // remove by identity (==), not equals()
-        for(Iterator<SubjectAndListener> i = subjectAndListeners.iterator(); i.hasNext(); ) {
-            SubjectAndListener subjectAndListener = i.next();
-            if(subjectAndListener.subject != subject) continue;
-            if(subjectAndListener.listener != listener) continue;
-            i.remove();
-            return;
+    /**
+     * Support method for adding and removing listeners, that also cleans up
+     * stale listeners, such as those from weak references.
+     *
+     * @param listenerToAdd a listener to be added, or <code>null</code>
+     * @param listenerToRemove a listener to be removed, or <code>null</code>
+     */
+    private <Subject,Listener,Event> List<SubjectAndListener> updateListEventListeners(Subject subject, Listener listenerToAdd, Listener listenerToRemove, EventFormat<Subject,Listener,Event> eventFormat) {
+        // we'll want to output a copy of all the listeners
+        int anticipatedSize = this.subjectAndListeners.size() + (listenerToAdd == null ? - 1 : 1);
+        List<SubjectAndListener> result = new ArrayList<SubjectAndListener>(anticipatedSize);
+
+        // walk through, adding all the old listeners to the new listeners list,
+        // unless a particular listener is slated for removal for some reaosn
+        for(int i = 0; i < subjectAndListeners.size(); i++) {
+            final SubjectAndListener originalSubjectAndListener = subjectAndListeners.get(i);
+
+            // if we're supposed to remove this listener, skip it
+            if(originalSubjectAndListener.listener == listenerToRemove && originalSubjectAndListener.subject == subject) {
+                listenerToRemove = null;
+                continue;
+            }
+
+            // if this listener is stale, skip it
+            if(originalSubjectAndListener.eventFormat.isStale(originalSubjectAndListener.subject, originalSubjectAndListener.listener)) {
+                continue;
+            }
+
+            // this listener's still good, keep it!
+            result.add(originalSubjectAndListener);
         }
 
-        // todo:
-        // we're not out of the woods yet! We still need to walk through the
-        // listeners list and trim obsolete listeners (from weak reference
-        // proxies etc)
+        // sanity check to ensure we found the listener we were asked to remove, if any
+        if(listenerToRemove != null) {
+            throw new IllegalArgumentException("Cannot remove nonexistent listener " + listenerToRemove);
+        }
 
-        throw new IllegalArgumentException("Cannot remove nonexistent listener " + listener);
+        // add the listener we were asked to add, if any
+        if(listenerToAdd != null) {
+            result.add(new SubjectAndListener(subject, listenerToAdd, eventFormat));
+        }
+
+        return result;
     }
+
 
     /** {@inheritDoc} */
     public void addDependency(EventList dependency, ListEventListener listener) {
@@ -321,6 +358,12 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
          * a hook to clean up temporary datastructures for that event.
          */
         void postEvent(Subject subject);
+
+        /**
+         * Whether the listener is still valid. Usually a listener becomes stale
+         * when a weak reference goes out of scope.
+         */
+        boolean isStale(Subject subject, Listener listener);
     }
 
     /**
@@ -328,10 +371,10 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
      * be fired to the listener from the subject.
      */
     private static class SubjectAndListener<Subject,Listener,Event> {
-        private Subject subject;
-        private Listener listener;
+        private final Subject subject;
+        private final Listener listener;
+        private final EventFormat<Subject,Listener,Event> eventFormat;
         private Event pendingEvent;
-        private EventFormat<Subject,Listener,Event> eventFormat;
 
         public SubjectAndListener(Subject subject, Listener listener, EventFormat<Subject,Listener,Event> eventFormat) {
             this.subject = subject;
@@ -345,6 +388,7 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
 
         public void addPendingEvent(Event pendingEvent) {
             if(this.pendingEvent != null) throw new IllegalStateException();
+            if(pendingEvent == null) throw new IllegalStateException();
             this.pendingEvent = pendingEvent;
         }
 
@@ -361,38 +405,5 @@ final class SequenceDependenciesEventPublisher extends ListEventPublisher {
             String separator = hasPendingEvent() ? ">>>" : "-->";
             return subject + separator + listener;
         }
-    }
-
-    /**
-     * A poor man's multimap, used only to reduce the complexity code that deals
-     * with these otherwise painful structures.
-     */
-    private static class IdentityMultimap<K,V> extends IdentityHashMap<K,List<V>> {
-        public void addValue(K key, V value) {
-            List<V> values = super.get(key);
-            if(values == null) {
-                values = new ArrayList<V>(2);
-                put(key, values);
-            }
-            values.add(value);
-        }
-        public List<V> get(Object key) {
-            List<V> values = super.get(key);
-            return values == null ? Collections.EMPTY_LIST : values;
-        }
-        public int count(Object key) {
-            List<V> values = super.get(key);
-            return values == null ? 0 : values.size();
-        }
-    }
-
-    /**
-     * Concatenate two lists to create a third list.
-     */
-    private static <E> List<E> concatenate(List<E> a, List<E> b) {
-        List<E> aAndB = new ArrayList<E>(a.size() + b.size());
-        aAndB.addAll(a);
-        aAndB.addAll(b);
-        return aAndB;
     }
 }

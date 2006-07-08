@@ -115,5 +115,8 @@ public class ListEventPublisher2Test extends TestCase {
         public void postEvent(SimpleSubjectListener subject) {
             // do nothing
         }
+        public boolean isStale(SimpleSubjectListener subject, SimpleSubjectListener listener) {
+            return false;
+        }
     }
 }
