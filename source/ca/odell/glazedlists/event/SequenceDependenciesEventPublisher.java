@@ -25,7 +25,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class SequenceDependenciesEventPublisher implements ListEventPublisher {
+final class SequenceDependenciesEventPublisher implements ListEventPublisher {
 
     /** keep track of how many times the fireEvent() method is on the stack */
     private int reentrantFireEventCount = 0;
@@ -221,6 +221,18 @@ public final class SequenceDependenciesEventPublisher implements ListEventPublis
         return result;
     }
 
+    /** {@inheritDoc} */
+    public void setRelatedListener(Object subject, Object relatedListener) {
+        // force the dependency by adding a listener that just doesn't
+        // do anything. This will make sure that subject is always after
+        // related listener in the dependencies graph
+        addListener(relatedListener, subject, NoOpEventFormat.INSTANCE);
+    }
+
+    /** {@inheritDoc} */
+    public void clearRelatedListener(Object subject, Object relatedListener) {
+        removeListener(relatedListener, subject);
+    }
 
     /** {@inheritDoc} */
     public void addDependency(EventList dependency, ListEventListener listener) {
@@ -242,7 +254,7 @@ public final class SequenceDependenciesEventPublisher implements ListEventPublis
     }
 
     /** {@inheritDoc} */
-    public void removeRelatedSubject(Object listener) {
+    public void clearRelatedSubject(Object listener) {
         listenersToRelatedSubjects.remove(listener);
     }
 
@@ -368,6 +380,25 @@ public final class SequenceDependenciesEventPublisher implements ListEventPublis
          * the listener will be silently removed and no longer receive events.
          */
         boolean isStale(Subject subject, Listener listener);
+    }
+
+    /**
+     * An EventFormat used to specify explicit dependencies, but that doesn't
+     * actually fire events.
+     *
+     * @see {@link ListEventPublisher#setRelatedListener}
+     */
+    private static class NoOpEventFormat implements SequenceDependenciesEventPublisher.EventFormat {
+        public static final SequenceDependenciesEventPublisher.EventFormat INSTANCE = new NoOpEventFormat();
+        public void fire(Object subject, Object event, Object listener) {
+            throw new UnsupportedOperationException();
+        }
+        public void postEvent(Object subject) {
+            throw new UnsupportedOperationException();
+        }
+        public boolean isStale(Object subject, Object listener) {
+            return false;
+        }
     }
 
     /**

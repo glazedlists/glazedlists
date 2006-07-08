@@ -412,7 +412,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         }
         public void dispose() {
             children.removeListEventListener(this);
-            children.getPublisher().removeRelatedSubject(this);
+            children.getPublisher().clearRelatedSubject(this);
         }
         public String toString() {
             return "[" + childElements.indexOfNode(node, (byte)0) + ":" + children + "]";

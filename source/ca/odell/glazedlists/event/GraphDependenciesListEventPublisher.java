@@ -94,12 +94,22 @@ public final class GraphDependenciesListEventPublisher implements ListEventPubli
 
     /** {@inheritDoc} */
     public void setRelatedSubject(Object listener, Object relatedSubject) {
-        // do nothing
+        // do nothing, these are for sequence dependencies event publisher
     }
 
     /** {@inheritDoc} */
-    public void removeRelatedSubject(Object listener) {
-        // do nothing
+    public void clearRelatedSubject(Object listener) {
+        // do nothing, these are for sequence dependencies event publisher
+    }
+
+    /** {@inheritDoc} */
+    public void setRelatedListener(Object subject, Object relatedListener) {
+        // do nothing, these are for sequence dependencies event publisher
+    }
+
+    /** {@inheritDoc} */
+    public void clearRelatedListener(Object subject, Object relatedListener) {
+        // do nothing, these are for sequence dependencies event publisher
     }
 
     /**

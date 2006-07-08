@@ -5,10 +5,8 @@ package ca.odell.glazedlists.event;
 
 // the core Glazed Lists package
 import ca.odell.glazedlists.EventList;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import ca.odell.glazedlists.CompositeList;
+import ca.odell.glazedlists.ListSelection;
 
 /**
  * Define a strategy for managing dependencies in the observer pattern.
@@ -26,7 +24,7 @@ public interface ListEventPublisher {
      * @deprecated replaced with {@link #setRelatedSubject}, which has different
      *      semantics and takes different arguments, but accomplishes the same goal
      */
-    public abstract void addDependency(EventList dependency, ListEventListener listener);
+    void addDependency(EventList dependency, ListEventListener listener);
 
     /**
      * Removes the specified {@link EventList} as a dependency for the specified
@@ -34,10 +32,10 @@ public interface ListEventPublisher {
      * receive {@link ListEvent}s, but there will be no dependency tracking when
      * such events are fired.
      *
-     * @deprecated replaced with {@link #removeRelatedSubject}, which has different
+     * @deprecated replaced with {@link #clearRelatedSubject}, which has different
      *      semantics and takes different arguments, but accomplishes the same goal
      */
-    public abstract void removeDependency(EventList dependency, ListEventListener listener);
+    void removeDependency(EventList dependency, ListEventListener listener);
 
     /**
      * Attach the specified listener to the specified subject, so that when
@@ -45,11 +43,31 @@ public interface ListEventPublisher {
      * considered equivalent to notifying the subject. This makes it possible
      * to support multiple listeners in a single subject, typically using
      * inner classes.
+     *
+     * <p>For example, the {@link CompositeList} class uses multiple listeners
+     * for a single subject, and uses this method to define that relationship.
      */
-    public abstract void setRelatedSubject(Object listener, Object relatedSubject);
+    void setRelatedSubject(Object listener, Object relatedSubject);
 
     /**
-     * Detach the subject related to the specified listener.
+     * Detach the listener from its related subject.
      */
-    public abstract void removeRelatedSubject(Object listener);
+    void clearRelatedSubject(Object listener);
+
+    /**
+     * Attach the specified subject to the specified listener, so that the
+     * listener's dependencies are satisfied before the subject is notified.
+     * This makes it possible for a single listener to have multiple subjects,
+     * typically using inner classes.
+     *
+     * <p>For example, the {@link ListSelection} class uses a single listener
+     * for multiple subjects (selected and unselected), and uses this method
+     * to define that relationship.
+     */
+    void setRelatedListener(Object subject, Object relatedListener);
+
+    /**
+     * Detach the subject from its related listener.
+     */
+    void clearRelatedListener(Object subject, Object relatedListener);
 }
