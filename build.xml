@@ -506,47 +506,45 @@
        Windows; http://gnuwin32.sourceforge.net/packages/m4.htm
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <target name="m4">
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Node4.java">
-            <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=4"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/NodeN.java"/>
-        </exec>
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree4.java">
-            <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=4"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeN.java"/>
-        </exec>
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree4Iterator.java">
-            <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=4"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNIterator.java"/>
-        </exec>
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree4AsList.java">
-            <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=4"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNAsList.java"/>
-        </exec>
 
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Node1.java">
+        <mapper id="tempfilesout" type="glob"
+           from="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"
+           to="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"/>
+
+        <apply executable="m4" parallel="false">
             <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=1"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/NodeN.java"/>
-        </exec>
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree1.java">
+            <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <srcfile/>
+            <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
+            <mapper refid="tempfilesout"/>
+            <redirector>
+                <outputmapper refid="tempfilesout"/>
+            </redirector>
+        </apply>
+
+        <mapper id="tempfilesin" type="glob"
+           from="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"
+           to="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java"/>
+
+        <apply executable="m4" parallel="false">
             <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=1"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeN.java"/>
-        </exec>
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree1Iterator.java">
-            <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=1"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNIterator.java"/>
-        </exec>
-        <exec executable="m4" output="source/ca/odell/glazedlists/impl/adt/barcode2/Tree1AsList.java">
-            <arg line="--prefix-builtins"/>
-            <arg line="-DVAR_COLOUR_COUNT=1"/>
-            <arg value="source/ca/odell/glazedlists/impl/adt/barcode2/TreeNAsList.java"/>
-        </exec>
+            <arg line="-DBciiTree=FourColorTree"/>
+            <arg line="-DBciiNode=FourColorNode"/>
+            <srcfile/>
+            <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"/>
+            <mapper refid="tempfilesin"/>
+            <redirector>
+                <outputmapper refid="tempfilesin"/>
+            </redirector>
+        </apply>
+
+        <!-- Delete intermediate files -->
+        <delete>
+            <fileset dir="${basedir}" defaultexcludes="no">
+                <include name="source/ca/odell/glazedlists/impl/adt/barcode2/*.java_intermediate"/>
+            </fileset>
+        </delete>
+
     </target>
 
 </project>
