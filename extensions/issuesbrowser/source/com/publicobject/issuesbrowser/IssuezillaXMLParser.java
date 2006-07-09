@@ -144,7 +144,7 @@ public class IssuezillaXMLParser {
             }
 
             // prepare a stream
-            URL issuesUrl = new URL(baseUrl + "?id=" + idArg);
+            URL issuesUrl = new URL(baseUrl + "?include_attachments=false&id=" + idArg);
             InputStream issuesInStream = issuesUrl.openStream();
 
             // parse
