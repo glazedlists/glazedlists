@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
 import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
 
@@ -457,13 +456,13 @@ class Attachment {
     public void setFilename(String filename) { this.filename = filename; }
 
     /**
-     * Issuezilla ID of attachement submitter.
+     * Issuezilla ID of attachment submitter.
      */
     public String getSubmitterId() { return submitterId; }
     public void setSubmitterId(String submitterId) { this.submitterId = submitterId; }
 
     /**
-     * username of attachement submitter.
+     * username of attachment submitter.
      */
     public String getSubmitterUsername() { return submitterUsername; }
     public void setSubmitterUsername(String submitterUsername) { this.submitterUsername = submitterUsername; }
