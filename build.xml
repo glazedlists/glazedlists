@@ -258,7 +258,8 @@
         </javac>
         <!-- execute the Japex performance tests -->
         <!--<property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>-->
-        <property name="config" value="extensions/japex/ListEventPublisher-JapexConfig.xml"/>
+        <property name="config" value="extensions/japex/ListEventPublisher
+        -JapexConfig.xml"/>
         <java dir="." fork="true" classname="com.sun.japex.Japex">
             <classpath>
                 <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
@@ -487,8 +488,6 @@
     </target>
 
     <target name="compiletests" depends="compileall">
-        <!-- Compile the test classes from source/ into classes/ -->
-        <echo>${ant.home}</echo>
         <!-- Verify that JUnit is available on the classpath -->
 	<available classname="junit.framework.TestCase" property="junit.present"/>
 	<fail unless="junit.present" message="To run this task, install junit.jar and optional.jar into ${ant.home}/lib/ JUnit is available free at http://www.junit.org"/>
