@@ -298,6 +298,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
 
             // Mark the listeners who need this event
             int subjectAndListenersSize = subjectsAndListenersForCurrentEvent.size();
+            assert(allListenersForSubjectAreAfterIndex(subject, lastNotified));
             for(int i = lastNotified + 1; i < subjectAndListenersSize; i++) {
                 SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
                 if(subjectAndListener.subject != subject) continue;
@@ -315,11 +316,12 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
                 SubjectAndListener nextToFire = null;
 
                 // find the next listener still pending
+                assert(allPendingListenersAreAfterIndex(lastNotified));
                 for(int i = lastNotified + 1; i < subjectAndListenersSize; i++) {
                     SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
                     if(subjectAndListener.hasPendingEvent()) {
                         nextToFire = subjectAndListener;
-                        lastNotified = i;
+//                        lastNotified = i;
                         break;
                     }
                 }
@@ -355,6 +357,31 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
         } finally {
             reentrantFireEventCount--;
         }
+    }
+
+    /**
+     * Make sure our optimization that the subjects are in order is valid.
+     * @return true if all listeners of the specified subject are after the
+     *      specified index.
+     */
+    private boolean allListenersForSubjectAreAfterIndex(Object subject, int index) {
+        for(int i = 0; i <= index; i++) {
+            SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
+            assert(subjectAndListener.subject != subject) : "Out-of-order subject: " + subjectAndListener;
+        }
+        return true;
+    }
+
+    /**
+     * Make sure our optimization that all the listeners are in order is valid.
+     * @return true if all listeners until the specified index have been notified.
+     */
+    private boolean allPendingListenersAreAfterIndex(int index) {
+        for(int i = 0; i <= index; i++) {
+            SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
+            assert(!subjectAndListener.hasPendingEvent()) : "Subject not notified: " + subjectAndListener;
+        }
+        return true;
     }
 
     /**
