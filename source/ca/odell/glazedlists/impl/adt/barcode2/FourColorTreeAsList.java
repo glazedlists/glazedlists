@@ -7,7 +7,18 @@ import java.util.List;
 import java.util.AbstractList;
 
 /*
- M4 Macros
+ # some M4 Macros that make it easy to use m4 with Java
+
+
+
+
+
+
+
+
+
+
+  M4 Macros
 
 STANDARD M4 LOOP ---------------------------------------------------------------
 
@@ -37,70 +48,78 @@ SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
+
+
+
+
 */
+/*[ BEGIN_M4_JAVA ]*/   
 
 /**
- * Adapt a {@link Tree4} for use as a {@link List}.
+ * Adapt a {@link FourColorTree} for use as a {@link List}.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class Tree4AsList<V> extends AbstractList<V> {
+public class FourColorTreeAsList<V> extends AbstractList<V> {
 
-    private final Tree4<V> tree;
-    /* USE DEFAULT */ private final byte colors; /* END DEFAULT */
+    private final FourColorTree<V> tree;
+
+     
+    private final byte colors;
 
     /** the color of inserted or added elements */
-    /* USE DEFAULT */ private final byte color; /* END DEFAULT */
+    private final byte color;
+      
 
+     
     /**
-     * Create a new {@link Tree4AsList} adapting the specified tree.
+     * Create a new {@link FourColorTreeAsList} adapting the specified tree.
      */
-    // 
-    public Tree4AsList
-            (Tree4<V> tree) {
+    public FourColorTreeAsList/**/(FourColorTree<V> tree) {
         this(tree, tree.getCoder().colorsToByte(tree.getCoder().getColors()), (byte)1);
     }
-    // 
+      
 
     /**
-     * Create a new {@link Tree4AsList}, adapting the specified colors subset
+     * Create a new {@link FourColorTreeAsList}, adapting the specified colors subset
      * of the specified tree. Inserted elements via {@link #add} will be of the
      * specified color.
      */
-    public Tree4AsList/**/(Tree4<V> tree /* USE DEFAULT */ , byte colors, byte color /* END DEFAULT */) {
+    public FourColorTreeAsList/**/(FourColorTree<V> tree   , byte colors, byte color   ) {
         this.tree = tree;
-        // 
+         
         this.colors = colors;
         this.color = color;
-        // 
+          
     }
 
     /** {@inheritDoc} */
     public V get(int index) {
-        return tree.get(index /* USE DEFAULT */, colors /* END DEFAULT */).get();
+        return tree.get(index  , colors   ).get();
     }
 
     /** {@inheritDoc} */
     public void add(int index, V element) {
-        tree.add(index, /* USE DEFAULT */ colors, color, /* END DEFAULT */ element, 1);
+        tree.add(index,   colors, color,    element, 1);
     }
 
     /** {@inheritDoc} */
     public V set(int index, V element) {
         V replaced = get(index);
-        tree.set(index, /* USE DEFAULT */ colors, color, /* END DEFAULT */ element, 1);
+        tree.set(index,   colors, color,    element, 1);
         return replaced;
     }
 
     /** {@inheritDoc} */
     public V remove(int index) {
         V removed = get(index);
-        tree.remove(index, /* USE DEFAULT */ colors, /* END DEFAULT */ 1);
+        tree.remove(index,   colors,    1);
         return removed;
     }
 
     /** {@inheritDoc} */
     public int size() {
-        return tree.size(/* USE DEFAULT */ colors /* END DEFAULT */);
+        return tree.size(  colors   );
     }
 }
+  /*[ END_M4_JAVA ]*/

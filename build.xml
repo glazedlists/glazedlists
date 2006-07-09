@@ -530,6 +530,8 @@
             <arg line="--prefix-builtins"/>
             <arg line="-DBciiTree=FourColorTree"/>
             <arg line="-DBciiNode=FourColorNode"/>
+            <arg line="-DBciiTreeAsList=FourColorTreeAsList"/>
+            <arg line="-DBciiTreeIterator=FourColorTreeIterator"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"/>
             <mapper refid="tempfilesin"/>

@@ -33,7 +33,7 @@ class Tree4Deltas {
     private static final byte ALL_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+", "_" }));
     private static final byte CHANGE_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
 
-    private Tree4<String> tree = new Tree4<String>(Tree4Deltas.BYTE_CODER);
+    private FourColorTree<String> tree = new FourColorTree<String>(Tree4Deltas.BYTE_CODER);
     private boolean allowContradictingEvents = true;
 
     /**
@@ -173,15 +173,15 @@ class Tree4Deltas {
      */
     public static class Iterator<V> {
 
-        private final Tree4<V> tree;
-        private final Tree4Iterator<V> treeIterator;
+        private final FourColorTree<V> tree;
+        private final FourColorTreeIterator<V> treeIterator;
 
-        private Iterator(Tree4<V> tree) {
+        private Iterator(FourColorTree<V> tree) {
             this.tree = tree;
-            this.treeIterator = new Tree4Iterator<V>(tree);
+            this.treeIterator = new FourColorTreeIterator<V>(tree);
         }
 
-        private Iterator(Tree4<V> tree, Tree4Iterator<V> treeIterator) {
+        private Iterator(FourColorTree<V> tree, FourColorTreeIterator<V> treeIterator) {
             this.tree = tree;
             this.treeIterator = treeIterator;
         }

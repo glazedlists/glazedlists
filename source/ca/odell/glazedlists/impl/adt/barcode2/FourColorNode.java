@@ -3,8 +3,22 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+import java.util.List;
+import java.util.Arrays;
+
 /*
- M4 Macros
+ # some M4 Macros that make it easy to use m4 with Java
+
+
+
+
+
+
+
+
+
+
+  M4 Macros
 
 STANDARD M4 LOOP ---------------------------------------------------------------
 
@@ -34,10 +48,12 @@ SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
-*/
 
-import java.util.List;
-import java.util.Arrays;
+
+
+
+*/
+/*[ BEGIN_M4_JAVA ]*/   
 
 /**
  * A node in a tree which supports both a value and compressed nodes that
@@ -51,24 +67,22 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class Node4<V> implements Element<V> {
+class FourColorNode<V> implements Element<V> {
 
     /** the number of elements of each color in this subtree */
-    /*  BEGIN M4 MACRO GENERATED CODE */
+     
     int count1;
     int count2;
     int count4;
     int count8;
     
-    /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-    int count1;
-    int count2;
-    int count4;
-    // END ALTERNATE CODE */
+    
+     
 
+     
     /** the node's color */
-    /* USE DEFAULT */ final byte color; /* END DEFAULT */
+    final byte color;
+      
 
 
     /** the node's value */
@@ -79,7 +93,7 @@ class Node4<V> implements Element<V> {
 
     /** values for managing the node within the tree */
     byte height;
-    Node4/**/<V> left, right, parent;
+    FourColorNode<V> left, right, parent;
 
     /** whether this node is consistent in the sorting order */
     boolean sorted = true;
@@ -93,28 +107,24 @@ class Node4<V> implements Element<V> {
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public Node4/**/(/* USE DEFAULT */ byte color, /* END DEFAULT */ int size, V value, Node4/**/<V> parent) {
-        // 
-        assert(Tree4.colorAsIndex(color) >= 0 && Tree4.colorAsIndex(color) < 7);
+    public FourColorNode/**/(  byte color,    int size, V value, FourColorNode/**/<V> parent) {
+         
+        assert(FourColorTree.colorAsIndex(color) >= 0 && FourColorTree.colorAsIndex(color) < 7);
         this.color = color;
-        // 
+          
         this.size = size;
         this.value = value;
         this.height = 1;
         this.parent = parent;
 
-        /*  BEGIN M4 MACRO GENERATED CODE */
+         
         if(color == 1) count1 += size;
         if(color == 2) count2 += size;
         if(color == 4) count4 += size;
         if(color == 8) count8 += size;
         
-        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-        if(color == 1) count1 += size;
-        if(color == 2) count2 += size;
-        if(color == 4) count4 += size;
-        // END ALTERNATE CODE */
+        
+         
     }
 
     /**
@@ -135,7 +145,7 @@ class Node4<V> implements Element<V> {
      * Get the color of this element.
      */
     public byte getColor() {
-        return /* USE DEFAULT */ color /* END DEFAULT */;
+        return   color   ;
     }
 
     /**
@@ -146,29 +156,25 @@ class Node4<V> implements Element<V> {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-        /*  BEGIN M4 MACRO GENERATED CODE */
+         
         if((colors & 1) != 0) result += count1;
         if((colors & 2) != 0) result += count2;
         if((colors & 4) != 0) result += count4;
         if((colors & 8) != 0) result += count8;
         
-        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-        if((colors & 1) != 0) result += count1;
-        if((colors & 2) != 0) result += count2;
-        if((colors & 4) != 0) result += count4;
-        // END ALTERNATE CODE */
+        
+         
         return result;
     }
 
+     
     /**
      * The size of the node for the specified colors.
      */
-    // 
     final int nodeSize(byte colors) {
         return (colors & color) > 0 ? size : 0;
     }
-    // 
+      
 
     /**
      * Update the counts member variable by examining the counts of
@@ -176,65 +182,48 @@ class Node4<V> implements Element<V> {
      */
     final void refreshCounts() {
 
-        /*  BEGIN M4 MACRO GENERATED CODE */
+         
         count1 = 0;
         count2 = 0;
         count4 = 0;
         count8 = 0;
         
-        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-        count1 = 0;
-        count2 = 0;
-        count4 = 0;
-        // END ALTERNATE CODE */
+        
+         
 
         // left child
         if(left != null) {
-            /*  BEGIN M4 MACRO GENERATED CODE */
+             
             count1 += left.count1;
             count2 += left.count2;
             count4 += left.count4;
             count8 += left.count8;
             
-            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-            count1 += left.count1;
-            count2 += left.count2;
-            count4 += left.count4;
-            // END ALTERNATE CODE */
+            
+             
         }
 
         // right child
         if(right != null) {
-            /*  BEGIN M4 MACRO GENERATED CODE */
+             
             count1 += right.count1;
             count2 += right.count2;
             count4 += right.count4;
             count8 += right.count8;
             
-            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-            count1 += right.count1;
-            count2 += right.count2;
-            count4 += right.count4;
-            // END ALTERNATE CODE */
+            
+             
         }
 
         // this node
-        /*  BEGIN M4 MACRO GENERATED CODE */
+         
         if(color == 1) count1 += size;
         if(color == 2) count2 += size;
         if(color == 4) count4 += size;
         if(color == 8) count8 += size;
         
-        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-        if(color == 1) count1 += size;
-        if(color == 2) count2 += size;
-        if(color == 4) count4 += size;
-        // END ALTERNATE CODE */
-
+        
+         
     }
 
     /** {@inheritDoc} */
@@ -262,11 +251,11 @@ class Node4<V> implements Element<V> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-        /* USE DEFAULT */ out.append(colors.get(Tree4.colorAsIndex(color))); /* END DEFAULT */
+          out.append(colors.get(FourColorTree.colorAsIndex(color)));   
         out.append(" [").append(size).append("]");
         if(value != null) {
             out.append(": ");
-            if(value instanceof Node4) {
+            if(value instanceof FourColorNode) {
                 out.append("<Node>");
             } else {
                 out.append(value);
@@ -298,11 +287,12 @@ class Node4<V> implements Element<V> {
 
     /** {@inheritDoc} */
     public Element<V> next() {
-        return Tree4.next(this);
+        return FourColorTree.next(this);
     }
 
     /** {@inheritDoc} */
     public Element<V> previous() {
-        return Tree4.previous(this);
+        return FourColorTree.previous(this);
     }
 }
+  /*[ END_M4_JAVA ]*/
