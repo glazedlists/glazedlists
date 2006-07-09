@@ -507,25 +507,22 @@
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <target name="m4">
 
-        <mapper id="tempfilesout" type="glob"
+        <!-- generate the four color tree -->
+        <mapper id="bcii_to_fourcolorintermediate" type="glob"
            from="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"
            to="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"/>
-
         <apply executable="m4" parallel="false">
             <arg line="--prefix-builtins"/>
             <arg line="-DVAR_COLOUR_COUNT=4"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
-            <mapper refid="tempfilesout"/>
-            <redirector>
-                <outputmapper refid="tempfilesout"/>
-            </redirector>
+            <mapper refid="bcii_to_fourcolorintermediate"/>
+            <redirector><outputmapper refid="bcii_to_fourcolorintermediate"/></redirector>
         </apply>
 
-        <mapper id="tempfilesin" type="glob"
+        <mapper id="fourcolorintermediate_to_fourcolor" type="glob"
            from="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"
            to="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java"/>
-
         <apply executable="m4" parallel="false">
             <arg line="--prefix-builtins"/>
             <arg line="-DBciiTree=FourColorTree"/>
@@ -534,10 +531,36 @@
             <arg line="-DBciiTreeIterator=FourColorTreeIterator"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"/>
-            <mapper refid="tempfilesin"/>
-            <redirector>
-                <outputmapper refid="tempfilesin"/>
-            </redirector>
+            <mapper refid="fourcolorintermediate_to_fourcolor"/>
+            <redirector><outputmapper refid="fourcolorintermediate_to_fourcolor"/></redirector>
+        </apply>
+
+        <!-- generate the simple tree -->
+        <mapper id="bcii_to_simpleintermediate" type="glob"
+           from="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"
+           to="source/ca/odell/glazedlists/impl/adt/barcode2/Simple*.java_intermediate"/>
+        <apply executable="m4" parallel="false">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=1"/>
+            <srcfile/>
+            <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
+            <mapper refid="bcii_to_simpleintermediate"/>
+            <redirector><outputmapper refid="bcii_to_simpleintermediate"/></redirector>
+        </apply>
+
+        <mapper id="simpleintermediate_to_simple" type="glob"
+           from="source/ca/odell/glazedlists/impl/adt/barcode2/Simple*.java_intermediate"
+           to="source/ca/odell/glazedlists/impl/adt/barcode2/Simple*.java"/>
+        <apply executable="m4" parallel="false">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DBciiTree=SimpleTree"/>
+            <arg line="-DBciiNode=SimpleNode"/>
+            <arg line="-DBciiTreeAsList=SimpleTreeAsList"/>
+            <arg line="-DBciiTreeIterator=SimpleTreeIterator"/>
+            <srcfile/>
+            <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Simple*.java_intermediate"/>
+            <mapper refid="simpleintermediate_to_simple"/>
+            <redirector><outputmapper refid="simpleintermediate_to_simple"/></redirector>
         </apply>
 
         <!-- Delete intermediate files -->

@@ -7,7 +7,7 @@ package ca.odell.glazedlists.impl;
 import java.util.*;
 
 /**
- * The SimpleIterator is an iterator that allows the user to iterate
+ * The SimpleTreeIterator is an iterator that allows the user to iterate
  * on a list.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>

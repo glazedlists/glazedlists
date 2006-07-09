@@ -5,9 +5,9 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.Grouper;
 import ca.odell.glazedlists.impl.adt.*;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1Iterator;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.Comparator;
@@ -143,7 +143,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         if(listChanges.isReordering()) {
             boolean canReorder = true;
 
-            for(Tree1Iterator<SeparatorInjectorList<E>.GroupSeparator> i = new Tree1Iterator<SeparatorInjectorList<E>.GroupSeparator>(separatorSource.separators); i.hasNext(); ) {
+            for(SimpleTreeIterator<SeparatorInjectorList<E>.GroupSeparator> i = new SimpleTreeIterator<SeparatorInjectorList<E>.GroupSeparator>(separatorSource.separators); i.hasNext(); ) {
                 i.next();
                 Element<SeparatorInjectorList<E>.GroupSeparator> node = i.node();
                 int limit = node.get().getLimit();
@@ -419,7 +419,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private Barcode insertedSeparators;
 
         /** a list of {@link Separator}s, one for each separator in the list */
-        private Tree1<GroupSeparator> separators;
+        private SimpleTree<GroupSeparator> separators;
 
         /** the number of elements to show in each group, such as 0, 5, or {@link Integer.MAX_VALUE} */
         private int defaultLimit;
@@ -452,7 +452,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private void rebuildSeparators() {
             // clear the initial state of these separators
             insertedSeparators = new Barcode();
-            separators = new Tree1<GroupSeparator>();
+            separators = new SimpleTree<GroupSeparator>();
 
             // prepare the separator list
             insertedSeparators.add(0, SOURCE_ELEMENT, source.size());

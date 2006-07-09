@@ -10,7 +10,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /*
- M4 Macros
+ # some M4 Macros that make it easy to use m4 with Java
+
+
+
+
+
+
+
+
+
+
+  M4 Macros
 
 STANDARD M4 LOOP ---------------------------------------------------------------
 
@@ -40,7 +51,12 @@ SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
+
+
+
+
 */
+/*[ BEGIN_M4_JAVA ]*/   
 
 /**
  * Our second generation tree class.
@@ -70,15 +86,12 @@ SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class Tree1<V> {
+public class SimpleTree<V> {
 
-    /** the colors in the tree, used for printing purposes only */
-    /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ private final ListToByteCoder<V> coder; /* 
-/* END SINGLE ALTERNATE */
+      
 
     /** the tree's root, or <code>null</code> for an empty tree */
-    private Node1<V> root = null;
+    private SimpleNode<V> root = null;
 
     /**
      * a list to add all nodes to that must be removed from
@@ -86,7 +99,7 @@ public class Tree1<V> {
      * which allows us a chance to do rotations without losing our position
      * in the tree.
      */
-    private final List<Node1<V>> zeroQueue = new ArrayList<Node1<V>>();
+    private final List<SimpleNode<V>> zeroQueue = new ArrayList<SimpleNode<V>>();
 
     /**
      * The comparator to use when performing ordering operations on the tree.
@@ -100,37 +113,22 @@ public class Tree1<V> {
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public Tree1/**/(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ ListToByteCoder<V> coder, /* 
-/* END SINGLE ALTERNATE */ Comparator<? super V> comparator) {
-        /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */  if(coder == null) throw new NullPointerException("Coder cannot be null."); /* 
-/* END SINGLE ALTERNATE */
+    public SimpleTree/**/(   Comparator<? super V> comparator) {
+          
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
-        /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ this.coder = coder; /* 
-/* END SINGLE ALTERNATE */
+          
         this.comparator = comparator;
     }
 
     /**
      * @param coder specifies the node colors
      */
-    public Tree1/**/(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ ListToByteCoder<V> coder /* 
-/* END SINGLE ALTERNATE */) {
-        this(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ coder, /* 
-/* END SINGLE ALTERNATE */ (Comparator)GlazedLists.comparableComparator());
+    public SimpleTree/**/(  ) {
+        this(   (Comparator)GlazedLists.comparableComparator());
     }
 
-    // 
-/* BEGIN SINGLE SKIPPED CODE 
-    public ListToByteCoder<V> getCoder() {
-        return coder;
-    }
-    // END SINGLE SKIPPED CODE */
+      
 
     public Comparator<? super V> getComparator() {
         return comparator;
@@ -143,22 +141,18 @@ public class Tree1<V> {
      * <p>This method is an hotspot, so its crucial that it run as efficiently
      * as possible.
      */
-    public Element<V> get(int index /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */, byte indexColors /* 
-/* END SINGLE ALTERNATE */) {
+    public Element<V> get(int index   ) {
         if(root == null) throw new IndexOutOfBoundsException();
 
         // go deep, looking for our node of interest
-        Node1<V> node = root;
+        SimpleNode<V> node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // recurse on the left
-            Node1<V> nodeLeft = node.left;
-            int leftSize = nodeLeft != null ? nodeLeft./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(indexColors) /* 
-/* END SINGLE ALTERNATE */ : 0;
+            SimpleNode<V> nodeLeft = node.left;
+            int leftSize = nodeLeft != null ? nodeLeft. count1  : 0;
             if(index < leftSize) {
                 node = nodeLeft;
                 continue;
@@ -167,9 +161,7 @@ public class Tree1<V> {
             }
 
             // the result is in the centre
-            int size = node./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(indexColors) /* 
-/* END SINGLE ALTERNATE */;
+            int size = node. size ;
             if(index < size) {
                 return node;
             } else {
@@ -199,27 +191,19 @@ public class Tree1<V> {
      *      unless the size parameter is 0, in which case the result is always
      *      <code>null</code>.
      */
-    public Element<V> add(int index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte indexColors, byte color, /* 
-/* END SINGLE ALTERNATE */ V value, int size) {
+    public Element<V> add(int index,    V value, int size) {
         assert(index >= 0);
-        assert(index <= size(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors /* 
-/* END SINGLE ALTERNATE */));
+        assert(index <= size(  ));
         assert(size >= 0);
 
         if(this.root == null) {
             if(index != 0) throw new IndexOutOfBoundsException();
 
-            this.root = new Node1<V>(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size, value, null);
+            this.root = new SimpleNode<V>(   size, value, null);
             assert(valid());
             return this.root;
         } else {
-            Node1<V> inserted = insertIntoSubtree(root, index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors, color, /* 
-/* END SINGLE ALTERNATE */ value, size);
+            SimpleNode<V> inserted = insertIntoSubtree(root, index,    value, size);
             assert(valid());
             return inserted;
         }
@@ -237,32 +221,22 @@ public class Tree1<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private Node1<V> insertIntoSubtree(Node1<V> parent, int index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte indexColors, byte color, /* 
-/* END SINGLE ALTERNATE */ V value, int size) {
+    private SimpleNode<V> insertIntoSubtree(SimpleNode<V> parent, int index,    V value, int size) {
         while(true) {
             assert(parent != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            Node1<V> parentLeft = parent.left;
-            int parentLeftSize = parentLeft != null ? parentLeft./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(indexColors) /* 
-/* END SINGLE ALTERNATE */ : 0;
-            int parentRightStartIndex = parentLeftSize + parent./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(indexColors) /* 
-/* END SINGLE ALTERNATE */;
+            SimpleNode<V> parentLeft = parent.left;
+            int parentLeftSize = parentLeft != null ? parentLeft. count1  : 0;
+            int parentRightStartIndex = parentLeftSize + parent. size ;
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color == parent.color &&  /* 
-/* END SINGLE ALTERNATE */ value == parent.value && value != null) {
+            if(   value == parent.value && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
                     parent.size += size;
-                    fixCountsThruRoot(parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size);
+                    fixCountsThruRoot(parent,    size);
                     return parent;
                 }
             }
@@ -271,13 +245,9 @@ public class Tree1<V> {
             if(index <= parentLeftSize) {
                 // as a new left child
                 if(parentLeft == null) {
-                    Node1<V> inserted = new Node1<V>(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size, value, parent);
+                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
                     parent.left = inserted;
-                    fixCountsThruRoot(parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size);
+                    fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -293,39 +263,27 @@ public class Tree1<V> {
             if(index < parentRightStartIndex) {
                 int parentRightHalfSize = parentRightStartIndex - index;
                 parent.size -= parentRightHalfSize;
-                fixCountsThruRoot(parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ parent.color, /* 
-/* END SINGLE ALTERNATE */ -parentRightHalfSize);
+                fixCountsThruRoot(parent,    -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
-                Element<V> inserted = insertIntoSubtree(parent, index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors, parent.color, /* 
-/* END SINGLE ALTERNATE */ null, parentRightHalfSize);
+                Element<V> inserted = insertIntoSubtree(parent, index,    null, parentRightHalfSize);
                 inserted.set(parent.value);
 
                 // recalculate parentRightStartIndex, since that should have
                 // changed by now. this will then go on to insert on the right
-                parentRightStartIndex = parentLeftSize + parent./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(indexColors) /* 
-/* END SINGLE ALTERNATE */;
+                parentRightStartIndex = parentLeftSize + parent. size ;
             }
 
             // on the right
             right: {
-                int parentSize = parent./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(indexColors) /* 
-/* END SINGLE ALTERNATE */;
+                int parentSize = parent. count1 ;
                 assert(index <= parentSize);
-                Node1<V> parentRight = parent.right;
+                SimpleNode<V> parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    Node1<V> inserted = new Node1<V>(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size, value, parent);
+                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
                     parent.right = inserted;
-                    fixCountsThruRoot(parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size);
+                    fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -353,15 +311,11 @@ public class Tree1<V> {
         assert(size >= 0);
 
         if(this.root == null) {
-            this.root = new Node1<V>(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size, value, null);
+            this.root = new SimpleNode<V>(   size, value, null);
             assert(valid());
             return this.root;
         } else {
-            Node1<V> inserted = insertIntoSubtreeInSortedOrder(root, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ value, size);
+            SimpleNode<V> inserted = insertIntoSubtreeInSortedOrder(root,    value, size);
             assert(valid());
             return inserted;
         }
@@ -375,9 +329,7 @@ public class Tree1<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private Node1<V> insertIntoSubtreeInSortedOrder(Node1<V> parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte color, /* 
-/* END SINGLE ALTERNATE */ V value, int size) {
+    private SimpleNode<V> insertIntoSubtreeInSortedOrder(SimpleNode<V> parent,    V value, int size) {
         while(true) {
             assert(parent != null);
 
@@ -385,7 +337,7 @@ public class Tree1<V> {
             // unsorted nodes in the tree. we just look for a neighbour (ie next)
             // that is sorted, and compare with that
             int sortSide;
-            for(Node1<V> currentFollower = parent; true; currentFollower = next(currentFollower)) {
+            for(SimpleNode<V> currentFollower = parent; true; currentFollower = next(currentFollower)) {
                 // we've hit the end of the list, assume the element is on the left side
                 if(currentFollower == null) {
                     sortSide = -1;
@@ -400,13 +352,9 @@ public class Tree1<V> {
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(sortSide == 0 && /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color == parent.color && /* 
-/* END SINGLE ALTERNATE */ value == parent.value && value != null) {
+            if(sortSide == 0 &&    value == parent.value && value != null) {
                 parent.size += size;
-                fixCountsThruRoot(parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size);
+                fixCountsThruRoot(parent,    size);
                 return parent;
             }
 
@@ -416,17 +364,13 @@ public class Tree1<V> {
             insertOnLeft = insertOnLeft || sortSide == 0 && parent.left == null;
             insertOnLeft = insertOnLeft || sortSide == 0 && parent.right != null && parent.left.height < parent.right.height;
             if(insertOnLeft) {
-                Node1<V> parentLeft = parent.left;
+                SimpleNode<V> parentLeft = parent.left;
 
                 // as a new left child
                 if(parentLeft == null) {
-                    Node1<V> inserted = new Node1<V>(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size, value, parent);
+                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
                     parent.left = inserted;
-                    fixCountsThruRoot(parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size);
+                    fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -438,17 +382,13 @@ public class Tree1<V> {
 
             // ...or on the right
             } else {
-                Node1<V> parentRight = parent.right;
+                SimpleNode<V> parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    Node1<V> inserted = new Node1<V>(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size, value, parent);
+                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
                     parent.right = inserted;
-                    fixCountsThruRoot(parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ color, /* 
-/* END SINGLE ALTERNATE */ size);
+                    fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
                     return inserted;
 
@@ -465,24 +405,12 @@ public class Tree1<V> {
      * to the root. The counts of the specified color are adjusted by delta
      * (which may be positive or negative).
      */
-    private final void fixCountsThruRoot(Node1<V> node, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte color, /* 
-/* END SINGLE ALTERNATE */ int delta) {
-        /*  BEGIN M4 MACRO GENERATED CODE */
+    private final void fixCountsThruRoot(SimpleNode<V> node,    int delta) {
+         
         for( ; node != null; node = node.parent) node.count1 += delta;
         
-        /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-        if(color == 1) {
-            for( ; node != null; node = node.parent) node.count1 += delta;
-        }
-        if(color == 2) {
-            for( ; node != null; node = node.parent) node.count2 += delta;
-        }
-        if(color == 4) {
-            for( ; node != null; node = node.parent) node.count4 += delta;
-        }
-        // END ALTERNATE CODE */
+        
+         
     }
 
     /**
@@ -499,7 +427,7 @@ public class Tree1<V> {
      *      the opposite side of the tree, whereas on an insert we only delete
      *      as far as necessary.
      */
-    private final void fixHeightPostChange(Node1<V> node, boolean allTheWayToRoot) {
+    private final void fixHeightPostChange(SimpleNode<V> node, boolean allTheWayToRoot) {
 
         // update the height
         for(; node != null; node = node.parent) {
@@ -552,11 +480,11 @@ public class Tree1<V> {
      *
      * @return the new root of the subtree
      */
-    private final Node1<V> rotateLeft(Node1<V> subtreeRoot) {
+    private final SimpleNode<V> rotateLeft(SimpleNode<V> subtreeRoot) {
         assert(subtreeRoot.left != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        Node1<V> newSubtreeRoot = subtreeRoot.left;
+        SimpleNode<V> newSubtreeRoot = subtreeRoot.left;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -588,11 +516,11 @@ public class Tree1<V> {
 
         return newSubtreeRoot;
     }
-    private final Node1<V> rotateRight(Node1<V> subtreeRoot) {
+    private final SimpleNode<V> rotateRight(SimpleNode<V> subtreeRoot) {
         assert(subtreeRoot.right != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        Node1<V> newSubtreeRoot = subtreeRoot.right;
+        SimpleNode<V> newSubtreeRoot = subtreeRoot.right;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -629,14 +557,12 @@ public class Tree1<V> {
      * Remove the specified element from the tree outright.
      */
     public void remove(Element<V> element) {
-        Node1<V> node = (Node1<V>)element;
+        SimpleNode<V> node = (SimpleNode<V>)element;
         assert(node.size > 0);
         assert(root != null);
 
         // delete the node by adding to the zero queue
-        fixCountsThruRoot(node, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ node.color, /* 
-/* END SINGLE ALTERNATE */ -node.size);
+        fixCountsThruRoot(node,    -node.size);
         node.size = 0;
         zeroQueue.add(node);
         drainZeroQueue();
@@ -654,20 +580,14 @@ public class Tree1<V> {
      * tree, sometimes multiple nodes of the same color and value will be
      * encountered in sequence.
      */
-    public void remove(int index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte indexColors, /* 
-/* END SINGLE ALTERNATE */ int size) {
+    public void remove(int index,    int size) {
         if(size == 0) return;
         assert(index >= 0);
-        assert(index + size <= size(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors /* 
-/* END SINGLE ALTERNATE */));
+        assert(index + size <= size(  ));
         assert(root != null);
 
         // remove values from the tree
-        removeFromSubtree(root, index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors, /* 
-/* END SINGLE ALTERNATE */ size);
+        removeFromSubtree(root, index,    size);
 
         // clean up any nodes that got deleted
         drainZeroQueue();
@@ -680,7 +600,7 @@ public class Tree1<V> {
      */
     private void drainZeroQueue() {
         for(int i = 0, size = zeroQueue.size(); i < size; i++) {
-            Node1<V> node = zeroQueue.get(i);
+            SimpleNode<V> node = zeroQueue.get(i);
             assert(node.size == 0);
 
             if(node.right == null) {
@@ -699,18 +619,14 @@ public class Tree1<V> {
      * remove any nodes of size zero, that's up to the caller to do after by
      * removing all nodes in the zeroQueue from the tree.
      */
-    private void removeFromSubtree(Node1<V> node, int index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte indexColors, /* 
-/* END SINGLE ALTERNATE */ int size) {
+    private void removeFromSubtree(SimpleNode<V> node, int index,    int size) {
         while(size > 0) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            Node1<V> nodeLeft = node.left;
-            int leftSize = nodeLeft != null ? nodeLeft./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(indexColors) /* 
-/* END SINGLE ALTERNATE */ : 0;
+            SimpleNode<V> nodeLeft = node.left;
+            int leftSize = nodeLeft != null ? nodeLeft. count1  : 0;
 
             // delete on the left first
             if(index < leftSize) {
@@ -718,9 +634,7 @@ public class Tree1<V> {
                 // that part recursively
                 if(index + size > leftSize) {
                     int toRemove = leftSize - index;
-                    removeFromSubtree(nodeLeft, index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors, /* 
-/* END SINGLE ALTERNATE */ toRemove);
+                    removeFromSubtree(nodeLeft, index,    toRemove);
                     size -= toRemove;
                     leftSize -= toRemove;
                 // we can do our full delete on the left side
@@ -732,18 +646,14 @@ public class Tree1<V> {
             assert(index >= leftSize);
 
             // delete in the centre
-            int rightStartIndex = leftSize + node./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(indexColors) /* 
-/* END SINGLE ALTERNATE */;
+            int rightStartIndex = leftSize + node. size ;
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
                 node.size -= toRemove;
                 size -= toRemove;
                 rightStartIndex -= toRemove;
-                fixCountsThruRoot(node, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ node.color, /* 
-/* END SINGLE ALTERNATE */ -toRemove);
+                fixCountsThruRoot(node,    -toRemove);
                 if(node.size == 0) zeroQueue.add(node);
                 if(size == 0) return;
             }
@@ -760,8 +670,8 @@ public class Tree1<V> {
      * the replacement node should have its height set first before this method
      * is called.
      */
-    private void replaceChild(Node1<V> node, Node1<V> replacement) {
-        Node1<V> nodeParent = node.parent;
+    private void replaceChild(SimpleNode<V> node, SimpleNode<V> replacement) {
+        SimpleNode<V> nodeParent = node.parent;
 
         // replace the root
         if(nodeParent == null) {
@@ -794,22 +704,20 @@ public class Tree1<V> {
      *
      * @return the replacement node
      */
-    private Node1<V> replaceEmptyNodeWithChild(Node1<V> toReplace) {
+    private SimpleNode<V> replaceEmptyNodeWithChild(SimpleNode<V> toReplace) {
         assert(toReplace.size == 0);
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
         // find the rightmost child on the leftside
-        Node1<V> replacement = toReplace.left;
+        SimpleNode<V> replacement = toReplace.left;
         while(replacement.right != null) {
             replacement = replacement.right;
         }
         assert(replacement.right == null);
 
         // remove that node from the tree
-        fixCountsThruRoot(replacement, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ replacement.color, /* 
-/* END SINGLE ALTERNATE */ -replacement.size);
+        fixCountsThruRoot(replacement,    -replacement.size);
         replaceChild(replacement, replacement.left);
 
         // update the tree structure to point to the replacement
@@ -820,9 +728,7 @@ public class Tree1<V> {
         replacement.height = toReplace.height;
         replacement.refreshCounts();
         replaceChild(toReplace, replacement);
-        fixCountsThruRoot(replacement.parent, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ replacement.color, /* 
-/* END SINGLE ALTERNATE */ replacement.size);
+        fixCountsThruRoot(replacement.parent,    replacement.size);
 
         return replacement;
     }
@@ -836,15 +742,9 @@ public class Tree1<V> {
      * with one that performs the remove and insert simultaneously, to save
      * on tree navigation.
      */
-    public void set(int index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte indexColors, byte color, /* 
-/* END SINGLE ALTERNATE */ V value, int size) {
-        remove(index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors, /* 
-/* END SINGLE ALTERNATE */ size);
-        add(index, /* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ indexColors, color, /* 
-/* END SINGLE ALTERNATE */ value, size);
+    public void set(int index,    V value, int size) {
+        remove(index,    size);
+        add(index,    value, size);
     }
 
 
@@ -865,22 +765,16 @@ public class Tree1<V> {
      * as possible.
      */
     public int indexOfNode(Element<V> element, byte colorsOut) {
-        Node1<V> node = (Node1<V>)element;
+        SimpleNode<V> node = (SimpleNode<V>)element;
 
         // count all elements left of this node
-        int index = node.left != null ? node.left./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(colorsOut) /* 
-/* END SINGLE ALTERNATE */ : 0;
+        int index = node.left != null ? node.left. count1  : 0;
 
         // add all elements on the left, all the way to the root
         for( ; node.parent != null; node = node.parent) {
             if(node.parent.right == node) {
-                index += node.parent.left != null ? node.parent.left./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(colorsOut) /* 
-/* END SINGLE ALTERNATE */ : 0;
-                index += node.parent./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(colorsOut) /* 
-/* END SINGLE ALTERNATE */;
+                index += node.parent.left != null ? node.parent.left. count1  : 0;
+                index += node.parent. size ;
             }
         }
 
@@ -897,14 +791,14 @@ public class Tree1<V> {
      *     found. Otherwise -1 is returned.
      * @return an index, or -1 if simulated is false and there exists no
      *     element x in this tree such that
-     *     <code>Tree1.getComparator().compare(x, element) == 0</code>.
+     *     <code>TreeN.getComparator().compare(x, element) == 0</code>.
      */
     public int indexOfValue(V element, boolean firstIndex, boolean simulated, byte colorsOut) {
         int result = 0;
         boolean found = false;
 
         // go deep, looking for our node of interest
-        Node1<V> node = root;
+        SimpleNode<V> node = root;
         while(true) {
             if(node == null) {
                 if(found && !firstIndex) result--;
@@ -920,7 +814,7 @@ public class Tree1<V> {
                 node = node.left;
                 continue;
             }
-            Node1<V> nodeLeft = node.left;
+            SimpleNode<V> nodeLeft = node.left;
 
             // the result is in the centre
             if(comparison == 0) {
@@ -934,12 +828,8 @@ public class Tree1<V> {
             }
 
             // recurse on the right, increment result by left size and center size
-            result += nodeLeft != null ? nodeLeft./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(colorsOut) /* 
-/* END SINGLE ALTERNATE */ : 0;
-            result += node./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(colorsOut) /* 
-/* END SINGLE ALTERNATE */;
+            result += nodeLeft != null ? nodeLeft. count1  : 0;
+            result += node. size ;
             node = node.right;
         }
     }
@@ -956,16 +846,14 @@ public class Tree1<V> {
         int result = 0;
 
         // go deep, looking for our node of interest
-        Node1<V> node = root;
+        SimpleNode<V> node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            Node1<V> nodeLeft = node.left;
-            int leftSize = nodeLeft != null ? nodeLeft./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(indexColors) /* 
-/* END SINGLE ALTERNATE */ : 0;
+            SimpleNode<V> nodeLeft = node.left;
+            int leftSize = nodeLeft != null ? nodeLeft. count1  : 0;
 
             // recurse on the left
             if(index < leftSize) {
@@ -973,22 +861,16 @@ public class Tree1<V> {
                 continue;
             // increment by the count on the left
             } else {
-                if(nodeLeft != null) result += nodeLeft./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(colorsOut) /* 
-/* END SINGLE ALTERNATE */;
+                if(nodeLeft != null) result += nodeLeft. count1 ;
                 index -= leftSize;
             }
 
             // the result is in the centre
-            int size = node./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(indexColors) /* 
-/* END SINGLE ALTERNATE */;
+            int size = node. size ;
             if(index < size) {
                 // we're on a node of the same color, return the adjusted index
 
-                if(/* USE SINGLE ALTERNATE */ true
-// IGNORE DEFAULT: */ (colorsOut & node.color) > 0 /* 
-/* END SINGLE ALTERNATE */) {
+                if( true ) {
                     result += index;
                 // we're on a node of a different color, return the previous node of the requested color
                 } else {
@@ -998,9 +880,7 @@ public class Tree1<V> {
 
             // increment by the count in the centre
             } else {
-                result += node./* USE SINGLE ALTERNATE */ size
-// IGNORE DEFAULT: */ nodeSize(colorsOut) /* 
-/* END SINGLE ALTERNATE */;
+                result += node. size ;
                 index -= size;
             }
 
@@ -1012,13 +892,9 @@ public class Tree1<V> {
     /**
      * The size of the tree for the specified colors.
      */
-    public int size(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ byte colors /* 
-/* END SINGLE ALTERNATE */) {
+    public int size(  ) {
         if(root == null) return 0;
-        else return root./* USE SINGLE ALTERNATE */ count1
-// IGNORE DEFAULT: */ size(colors) /* 
-/* END SINGLE ALTERNATE */;
+        else return root. count1 ;
     }
 
     /**
@@ -1026,39 +902,22 @@ public class Tree1<V> {
      */
     public String toString() {
         if(root == null) return "";
-        return root.toString(/* USE SINGLE ALTERNATE */ 
-// IGNORE DEFAULT: */ coder.getColors() /* 
-/* END SINGLE ALTERNATE */);
+        return root.toString(  );
     }
 
     /**
      * Print this tree as a list of colors, removing all hierarchy.
      */
-    // 
-/* BEGIN SINGLE SKIPPED CODE 
-    public String asSequenceOfColors() {
-        if(root == null) return "";
-
-        // print it flattened, like a list of colors
-        StringBuffer result = new StringBuffer();
-        for(Node1<V> n = firstNode(); n != null; n = next(n)) {
-            Object color = coder.getColors().get(colorAsIndex(n.color));
-            for(int i = 0; i < n.size; i++) {
-                result.append(color);
-            }
-        }
-        return result.toString();
-    }
-    // END SINGLE SKIPPED CODE */
+      
 
 
     /**
      * Find the next node in the tree, working from left to right.
      */
-    public static <V> Node1<V> next(Node1<V> node) {
+    public static <V> SimpleNode<V> next(SimpleNode<V> node) {
         // if this node has a right subtree, it's the leftmost node in that subtree
         if(node.right != null) {
-            Node1<V> child = node.right;
+            SimpleNode<V> child = node.right;
             while(child.left != null) {
                 child = child.left;
             }
@@ -1066,7 +925,7 @@ public class Tree1<V> {
 
         // otherwise its the nearest ancestor where I'm in the left subtree
         } else {
-            Node1<V> ancestor = node;
+            SimpleNode<V> ancestor = node;
             while(ancestor.parent != null && ancestor.parent.right == ancestor) {
                 ancestor = ancestor.parent;
             }
@@ -1078,10 +937,10 @@ public class Tree1<V> {
     /**
      * Find the previous node in the tree, working from right to left.
      */
-    public static <V> Node1<V> previous(Node1<V> node) {
+    public static <V> SimpleNode<V> previous(SimpleNode<V> node) {
         // if this node has a left subtree, it's the rightmost node in that subtree
         if(node.left != null) {
-            Node1<V> child = node.left;
+            SimpleNode<V> child = node.left;
             while(child.right != null) {
                 child = child.right;
             }
@@ -1089,7 +948,7 @@ public class Tree1<V> {
 
         // otherwise its the nearest ancestor where I'm in the right subtree
         } else {
-            Node1<V> ancestor = node;
+            SimpleNode<V> ancestor = node;
             while(ancestor.parent != null && ancestor.parent.left == ancestor) {
                 ancestor = ancestor.parent;
             }
@@ -1100,10 +959,10 @@ public class Tree1<V> {
     /**
      * Find the leftmost child in this subtree.
      */
-    Node1<V> firstNode() {
+    SimpleNode<V> firstNode() {
         if(root == null) return null;
 
-        Node1<V> result = root;
+        SimpleNode<V> result = root;
         while(result.left != null) {
             result = result.left;
         }
@@ -1115,28 +974,20 @@ public class Tree1<V> {
      */
     private boolean valid() {
         // walk through all nodes in the tree, looking for something invalid
-        for(Node1<V> node = firstNode(); node != null; node = next(node)) {
+        for(SimpleNode<V> node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid
 
-            /*  BEGIN M4 MACRO GENERATED CODE */
+             
             int originalCount1 = node.count1;
             
-            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-            int originalCount1 = node.count1;
-            int originalCount2 = node.count2;
-            int originalCount4 = node.count4;
-            // END ALTERNATE CODE */
+            
+             
             node.refreshCounts();
-            /*  BEGIN M4 MACRO GENERATED CODE */
+             
             assert(originalCount1 == node.count1) : "Incorrect count 0 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
             
-            /* END M4 MACRO GENERATED CODE  */ // BEGIN M4 ALTERNATE CODE
-/* 
-            assert(originalCount1 == node.count1) : "Incorrect count 1 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
-            assert(originalCount2 == node.count2) : "Incorrect count 2 on node: \n" + node  + "\n Expected " + node.count2 + " but was " + originalCount2;
-            assert(originalCount4 == node.count4) : "Incorrect count 4 on node: \n" + node  + "\n Expected " + node.count4 + " but was " + originalCount4;
-            // END ALTERNATE CODE */
+            
+             
 
             // heights are valid
             int leftHeight = node.left != null ? node.left.height : 0;
@@ -1174,3 +1025,4 @@ public class Tree1<V> {
         throw new IllegalArgumentException();
     }
 }
+  /*[ END_M4_JAVA ]*/

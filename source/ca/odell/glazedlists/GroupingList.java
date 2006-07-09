@@ -6,8 +6,7 @@ package ca.odell.glazedlists;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
-import ca.odell.glazedlists.impl.adt.*;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.Grouper;
 // Java collections are used for underlying data storage
@@ -42,7 +41,7 @@ import java.util.*;
 public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /** The GroupLists defined by the comparator. They are stored in an IndexedTree so their indices can be quickly updated. */
-    private Tree1<GroupList> groupLists = new Tree1<GroupList>();
+    private SimpleTree<GroupList> groupLists = new SimpleTree<GroupList>();
 
     /** the grouping service manages creating and deleting groups */
     private final Grouper<E> grouper;

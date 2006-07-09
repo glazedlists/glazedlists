@@ -7,7 +7,7 @@ package ca.odell.glazedlists.io;
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 // concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.util.concurrent.*;
@@ -50,7 +50,7 @@ import ca.odell.glazedlists.EventList;
 public class CachingList extends TransformedList {
 
     /** The cache is implemented using a tree-based cache */
-    private Tree1<AgedNode> cache;
+    private SimpleTree<AgedNode> cache;
 
     /** The model of the source list for scalability with minimal memory footprint */
     private SparseList indexTree;
@@ -78,7 +78,7 @@ public class CachingList extends TransformedList {
         readWriteLock = new CacheLock(readWriteLock);
         this.maxSize = maxSize;
 
-        cache = new Tree1<AgedNode>(new AgedNodeComparator());
+        cache = new SimpleTree<AgedNode>(new AgedNodeComparator());
         indexTree = new SparseList();
         indexTree.addNulls(0, source.size());
         source.addListEventListener(this);

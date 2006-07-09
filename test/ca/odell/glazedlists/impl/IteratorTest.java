@@ -84,7 +84,7 @@ public class IteratorTest extends TestCase {
     }
 
     /**
-     * Tests to verify that the EventListIterator and the SimpleIterator can
+     * Tests to verify that the EventListIterator and the SimpleTreeIterator can
      * iterate through the list and remove its elements as it goes without
      * incident.
      */

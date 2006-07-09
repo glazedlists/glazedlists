@@ -26,7 +26,7 @@ public class Tree1Test extends TestCase {
      * Make sure we can have a few unsorted elements in an otherwise ordered tree.
      */
     public void testUnsortedElementInSortedTree() {
-        Tree1<String> tree = new Tree1<String>();
+        SimpleTree<String> tree = new SimpleTree<String>();
         Element<String> e = tree.addInSortedOrder(Tree1Test.allColors, "E", 1);
         Element<String> g = tree.addInSortedOrder(Tree1Test.allColors, "G", 1);
         Element<String> i = tree.addInSortedOrder(Tree1Test.allColors, "I", 1);
@@ -40,18 +40,18 @@ public class Tree1Test extends TestCase {
         Element<String> h = tree.addInSortedOrder(Tree1Test.allColors, "H", 1);
         Element<String> n = tree.addInSortedOrder(Tree1Test.allColors, "N", 1);
 
-        List<String> asList = new Tree1AsList<String>(tree);
+        List<String> asList = new SimpleTreeAsList<String>(tree);
 
         assertEquals(GlazedListsTests.stringToList("EGHIAMNO"), asList);
     }
 
 
     /**
-     * Tests to verify that the Tree1 is consistent after a long
+     * Tests to verify that the SimpleTree is consistent after a long
      * series of list operations.
      */
     public void testListOperations() {
-        Tree1 indexedTree = new Tree1();
+        SimpleTree indexedTree = new SimpleTree();
         List controlList = new ArrayList();
 
         // apply various operations to both the list and the tree
@@ -69,9 +69,9 @@ public class Tree1Test extends TestCase {
             }
         }
 
-        // create a list from the elements of the Tree1
+        // create a list from the elements of the SimpleTree
         List indexedTreeList = new ArrayList();
-        for(Tree1Iterator i = new Tree1Iterator(indexedTree); i.hasNext(); ) {
+        for(SimpleTreeIterator i = new SimpleTreeIterator(indexedTree); i.hasNext(); ) {
             i.next();
             Element node = i.node();
             indexedTreeList.add(node.get());
@@ -83,11 +83,11 @@ public class Tree1Test extends TestCase {
 
 
     /**
-     * Tests to verify that the Tree1 is consistent with multiple
+     * Tests to verify that the SimpleTree is consistent with multiple
      * entries that have the same value.
      */
     public void testEqualValues() {
-        Tree1 indexedTree = new Tree1(GlazedLists.comparableComparator());
+        SimpleTree indexedTree = new SimpleTree(GlazedLists.comparableComparator());
 
         int ACount = 0;
         int BCount = 0;
@@ -139,7 +139,7 @@ public class Tree1Test extends TestCase {
         }
 
         // verify the list contains only the original 100 Bs and 100 Ds
-        for(Tree1Iterator i = new Tree1Iterator(indexedTree); i.hasNext(); ) {
+        for(SimpleTreeIterator i = new SimpleTreeIterator(indexedTree); i.hasNext(); ) {
             i.next();
             Element node = i.node();
             if(node.get().equals("B")) BCount--;
@@ -151,12 +151,12 @@ public class Tree1Test extends TestCase {
     }
 
     public void testIterators() {
-        Tree1<String> tree = new Tree1<String>();
+        SimpleTree<String> tree = new SimpleTree<String>();
         tree.add(0, "A", 1);
         tree.add(1, "B", 1);
         tree.add(2, "C", 1);
 
-        Tree1Iterator<String> iterator = new Tree1Iterator<String>(tree, 0, (byte)1);
+        SimpleTreeIterator<String> iterator = new SimpleTreeIterator<String>(tree, 0, (byte)1);
 
         assertEquals(true, iterator.hasNext());
         iterator.next();
@@ -201,7 +201,7 @@ public class Tree1Test extends TestCase {
     }
 
     public void testIndexOfEtc() {
-        Tree1<String> tree = new Tree1<String>(GlazedLists.comparableComparator());
+        SimpleTree<String> tree = new SimpleTree<String>(GlazedLists.comparableComparator());
         tree.addInSortedOrder((byte)1, "B", 1);
         tree.addInSortedOrder((byte)1, "B", 1);
         tree.addInSortedOrder((byte)1, "B", 1);

@@ -4,8 +4,8 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1Iterator;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.event.ListEvent;
 
@@ -70,9 +70,9 @@ public final class SortedList<E> extends TransformedList<E,E> {
     public static final int AVOID_MOVING_ELEMENTS = 1;
 
     /** a map from the unsorted index to the sorted index */
-    private Tree1<Element> unsorted = null;
+    private SimpleTree<Element> unsorted = null;
     /** a map from the sorted index to the unsorted index */
-    private Tree1<Element> sorted = null;
+    private SimpleTree<Element> sorted = null;
 
     /** the comparator that this list uses for sorting */
     private Comparator<? super E> comparator = null;
@@ -142,7 +142,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // remember what the mapping was before
             int[] previousIndexToSortedIndex = new int[sorted.size()];
             int index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(); index++) {
+            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(sorted); i.hasNext(); index++) {
                 i.next();
                 Element<Element> unsortedNode = i.value();
                 int unsortedIndex = unsorted.indexOfNode(unsortedNode, ALL_COLORS);
@@ -157,7 +157,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // reorder the unsorted nodes to get the new sorted order
             Element<Element>[] unsortedNodes = new Element[unsorted.size()];
             index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(); index++) {
+            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(unsorted); i.hasNext(); index++) {
                 i.next();
                 Element<Element> unsortedNode = i.node();
                 unsortedNodes[index] = unsortedNode;
@@ -168,7 +168,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             int[] reorderMap = new int[sorted.size()];
             boolean indexChanged = false;
             index = 0;
-            for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(sorted); i.hasNext(); index++) {
+            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(sorted); i.hasNext(); index++) {
                 i.next();
                 Element<Element> sortedNode = i.node();
                 Element<Element> unsortedNode = unsortedNodes[index];
@@ -385,16 +385,16 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // save this comparator
         this.comparator = comparator;
         // keep the old trees to construct the reordering
-        Tree1 previousSorted = sorted;
+        SimpleTree previousSorted = sorted;
         // create the sorted list with a simple comparator
         Comparator treeComparator = null;
         if(comparator != null) treeComparator = new ElementComparator(comparator);
         else treeComparator = new ElementRawOrderComparator();
-        sorted = new Tree1<Element>(treeComparator);
+        sorted = new SimpleTree<Element>(treeComparator);
 
         // create a list which knows the offsets of the indexes to initialize this list
         if(previousSorted == null && unsorted == null) {
-            unsorted = new Tree1<Element>();
+            unsorted = new SimpleTree<Element>();
             // add all elements in the source list, in order
             for(int i = 0, n = source.size(); i < n; i++) {
                 Element unsortedNode = unsorted.add(i, EMPTY_ELEMENT, 1);
@@ -408,7 +408,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if(source.size() == 0) return;
 
         // rebuild the sorted tree to reflect the new Comparator
-        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(unsorted); i.hasNext(); ) {
+        for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(unsorted); i.hasNext(); ) {
             i.next();
             Element unsortedNode = i.node();
             insertByUnsortedNode(unsortedNode);
@@ -417,7 +417,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // construct the reorder map
         int[] reorderMap = new int[size()];
         int oldSortedIndex = 0;
-        for(Tree1Iterator<Element> i = new Tree1Iterator<Element>(previousSorted); i.hasNext(); oldSortedIndex++) {
+        for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(previousSorted); i.hasNext(); oldSortedIndex++) {
             i.next();
             Element oldSortedNode = i.node();
             Element unsortedNode = (Element)oldSortedNode.get();
@@ -438,7 +438,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // use the fact that we have sorted data to quickly locate a position
         // at which we can begin a linear search for an object that .equals(object)
-        int index = ((Tree1)sorted).indexOfValue(object, true, false, ALL_COLORS);
+        int index = ((SimpleTree)sorted).indexOfValue(object, true, false, ALL_COLORS);
 
         // if we couldn't use the comparator to find the index, return -1
         if (index == -1) return -1;
@@ -466,7 +466,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // use the fact that we have sorted data to quickly locate a position
         // at which we can begin a linear search for an object that .equals(object)
-        int index = ((Tree1)sorted).indexOfValue(object, false, false, ALL_COLORS);
+        int index = ((SimpleTree)sorted).indexOfValue(object, false, false, ALL_COLORS);
 
         // if we couldn't use the comparator to find the index, return -1
         if (index == -1) return -1;
@@ -504,7 +504,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if (comparator == null)
             throw new IllegalStateException("No Comparator exists to perform this operation");
 
-        return ((Tree1)sorted).indexOfValue(object, true, true, ALL_COLORS);
+        return ((SimpleTree)sorted).indexOfValue(object, true, true, ALL_COLORS);
     }
 
     /**
@@ -523,7 +523,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if (comparator == null)
             throw new IllegalStateException("No Comparator exists to perform this operation");
 
-        return ((Tree1)sorted).indexOfValue(object, false, true, ALL_COLORS);
+        return ((SimpleTree)sorted).indexOfValue(object, false, true, ALL_COLORS);
     }
 
     /**
@@ -540,7 +540,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      *      which has cleaner semantics.
      */
     public int indexOfSimulated(Object object) {
-        return comparator != null ? ((Tree1)sorted).indexOfValue(object, true, true, ALL_COLORS) : size();
+        return comparator != null ? ((SimpleTree)sorted).indexOfValue(object, true, true, ALL_COLORS) : size();
     }
 
     /** {@inheritDoc} */
@@ -557,7 +557,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * {@link Element}, it will compare the object directly to the object
      * in the source {@link EventList} referenced by the {@link Element}.
      * This functionality is necessary to allow use of the underlying
-     * {@link Comparator} within {@link Tree1} to support {@link List#indexOf},
+     * {@link Comparator} within {@link SimpleTree} to support {@link List#indexOf},
      * {@link List#lastIndexOf}, and {@link List#contains}.
      */
     private class ElementComparator implements Comparator {
@@ -631,8 +631,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
      */
     private class SortedListIterator implements Iterator<E> {
 
-        /** the Tree1Iterator to use to move across the tree */
-        private Tree1Iterator<Element> treeIterator = new Tree1Iterator<Element>(sorted);
+        /** the SimpleTreeIterator to use to move across the tree */
+        private SimpleTreeIterator<Element> treeIterator = new SimpleTreeIterator<Element>(sorted);
 
         /**
          * Returns true iff there are more value to iterate on by caling next()
@@ -656,7 +656,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         public void remove() {
             int indexToRemove = treeIterator.index();
             SortedList.this.source.remove(getSourceIndex(indexToRemove));
-            treeIterator = new Tree1Iterator(sorted, indexToRemove, ALL_COLORS);
+            treeIterator = new SimpleTreeIterator(sorted, indexToRemove, ALL_COLORS);
         }
     }
 }

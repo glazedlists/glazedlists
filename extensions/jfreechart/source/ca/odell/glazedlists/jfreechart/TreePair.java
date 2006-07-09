@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.jfreechart;
 
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.GlazedLists;
 
 /**
@@ -21,10 +21,10 @@ import ca.odell.glazedlists.GlazedLists;
  */
 final class TreePair<V extends Comparable> {
     /** The tree which orders the start indices of all ValueSegments. */
-    private Tree1<V> start = new Tree1<V>(GlazedLists.comparableComparator());
+    private SimpleTree<V> start = new SimpleTree<V>(GlazedLists.comparableComparator());
 
     /** The tree which orders the start indices of all ValueSegments. */
-    private Tree1<V> end = new Tree1<V>(GlazedLists.comparableComparator());
+    private SimpleTree<V> end = new SimpleTree<V>(GlazedLists.comparableComparator());
 
     /**
      * Inserts the given <code>segment</code> into the trees.
@@ -57,8 +57,8 @@ final class TreePair<V extends Comparable> {
      * Clears the data from the trees efficiently.
      */
     public void clear() {
-        start = new Tree1<V>(GlazedLists.comparableComparator());
-        end = new Tree1<V>(GlazedLists.comparableComparator());
+        start = new SimpleTree<V>(GlazedLists.comparableComparator());
+        end = new SimpleTree<V>(GlazedLists.comparableComparator());
     }
 
     /**

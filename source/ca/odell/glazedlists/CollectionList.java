@@ -8,7 +8,7 @@ import java.util.*;
 import ca.odell.glazedlists.event.*;
 // volatile implementation support
 import ca.odell.glazedlists.impl.adt.*;
-import ca.odell.glazedlists.impl.adt.barcode2.Tree1;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 
 
@@ -56,7 +56,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     private final Barcode barcode = new Barcode();
 
     /** the Lists and EventLists that this is composed of */
-    private final Tree1<ChildElement<E>> childElements = new Tree1<ChildElement<E>>();
+    private final SimpleTree<ChildElement<E>> childElements = new SimpleTree<ChildElement<E>>();
 
     /**
      * Create a {@link CollectionList} with its contents being the children of
