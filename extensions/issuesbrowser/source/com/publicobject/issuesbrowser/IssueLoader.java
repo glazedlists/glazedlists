@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-// GlazedLists
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 
@@ -31,7 +30,7 @@ public class IssueLoader implements Runnable {
     private Project project = null;
     private Throbber throbber = null;
     private Thread issueLoaderThread = null;
-    private EventList issuesList = null;
+    private EventList<Issue> issuesList = null;
 
     public IssueLoader(EventList<Issue> issuesList, Throbber throbber) {
         this.issuesList = GlazedLists.threadSafeList(issuesList);
