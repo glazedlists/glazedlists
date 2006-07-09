@@ -360,33 +360,6 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
     }
 
     /**
-     * Make sure our optimization that the subjects are in order is valid.
-     * @return true if all listeners of the specified subject are after the
-     *      specified index.
-     */
-    private boolean allListenersForSubjectAreAfterIndex(Object subject, int index) {
-        for(int i = 0; i <= index; i++) {
-            SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
-            if(subjectAndListener.subject == subject) {
-                throw new IllegalStateException("Out-of-order subject: " + subjectAndListener);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Make sure our optimization that all the listeners are in order is valid.
-     * @return true if all listeners until the specified index have been notified.
-     */
-    private boolean allPendingListenersAreAfterIndex(int index) {
-        for(int i = 0; i <= index; i++) {
-            SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
-            assert(!subjectAndListener.hasPendingEvent()) : "Subject not notified: " + subjectAndListener;
-        }
-        return true;
-    }
-
-    /**
      * Adapt any observer-style interface to a common format.
      */
     public interface EventFormat<Subject,Listener,Event> {
