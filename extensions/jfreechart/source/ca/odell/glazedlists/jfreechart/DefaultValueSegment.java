@@ -83,4 +83,9 @@ public class DefaultValueSegment<T extends Comparable, V extends Comparable> imp
         // 3. compare by segment end
         return end.compareTo(o.getEnd());
     }
+
+    /** {@inheritDoc} */
+    public String toString() {
+        return "(" + start + ", " + end + ")";
+    }
 }

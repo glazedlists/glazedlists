@@ -36,7 +36,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
     private Map<Object,Object> listenersToRelatedSubjects = new IdentityHashMap<Object,Object>();
 
     /** the last listener notified, the next one will be beyond it in the list */
-    private int lastNotified;
+    private int nextToNotify;
 
     /**
      * A mix of different subjects and listeners pairs in a deliberate order.
@@ -284,7 +284,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
         // the topmost event, the list won't change because we copy on write
         if(reentrantFireEventCount == 0) {
             subjectsAndListenersForCurrentEvent = subjectAndListeners;
-            lastNotified = -1;
+            nextToNotify = Integer.MAX_VALUE;
         }
 
         // keep track of whether this method is being reentered because one
@@ -298,10 +298,11 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
 
             // Mark the listeners who need this event
             int subjectAndListenersSize = subjectsAndListenersForCurrentEvent.size();
-            assert(allListenersForSubjectAreAfterIndex(subject, lastNotified));
-            for(int i = lastNotified + 1; i < subjectAndListenersSize; i++) {
+            // was i = lastNotified + 1
+            for(int i = 0; i < subjectAndListenersSize; i++) {
                 SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
                 if(subjectAndListener.subject != subject) continue;
+                if(i < nextToNotify) nextToNotify = i;
                 subjectAndListener.addPendingEvent(event);
             }
 
@@ -316,12 +317,11 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
                 SubjectAndListener nextToFire = null;
 
                 // find the next listener still pending
-                assert(allPendingListenersAreAfterIndex(lastNotified));
-                for(int i = lastNotified + 1; i < subjectAndListenersSize; i++) {
+                for(int i = nextToNotify; i < subjectAndListenersSize; i++) {
                     SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
                     if(subjectAndListener.hasPendingEvent()) {
                         nextToFire = subjectAndListener;
-//                        lastNotified = i;
+                        nextToNotify = i + 1;
                         break;
                     }
                 }
@@ -367,7 +367,9 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
     private boolean allListenersForSubjectAreAfterIndex(Object subject, int index) {
         for(int i = 0; i <= index; i++) {
             SubjectAndListener subjectAndListener = subjectsAndListenersForCurrentEvent.get(i);
-            assert(subjectAndListener.subject != subject) : "Out-of-order subject: " + subjectAndListener;
+            if(subjectAndListener.subject == subject) {
+                throw new IllegalStateException("Out-of-order subject: " + subjectAndListener);
+            }
         }
         return true;
     }
