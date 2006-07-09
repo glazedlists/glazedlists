@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * A simple itertor of the nodes in an {@link IndexedTree}.
  *
- * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.TreeN BC2}
+ * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTreeIterator BC2}
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

@@ -20,7 +20,7 @@ import ca.odell.glazedlists.GlazedLists;
  * it does not support {@link #addByNode(Object)} because that
  * method specifies no index.
  *
- * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.TreeN BC2}
+ * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTree BC2}
  * 
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

@@ -24,7 +24,7 @@ import java.util.*;
  * but old elements are not to be moved once added. To mark a node as unsorted,
  * use the
  *
- * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.TreeN BC2}
+ * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTree BC2}
  *
  * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
  */

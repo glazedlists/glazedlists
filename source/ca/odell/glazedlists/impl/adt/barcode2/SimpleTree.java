@@ -791,7 +791,7 @@ public class SimpleTree<V> {
      *     found. Otherwise -1 is returned.
      * @return an index, or -1 if simulated is false and there exists no
      *     element x in this tree such that
-     *     <code>TreeN.getComparator().compare(x, element) == 0</code>.
+     *     <code>SimpleTree.getComparator().compare(x, element) == 0</code>.
      */
     public int indexOfValue(V element, boolean firstIndex, boolean simulated, byte colorsOut) {
         int result = 0;
