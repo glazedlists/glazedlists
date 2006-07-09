@@ -135,8 +135,8 @@ public class IssuesBrowser implements Runnable {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1024, 600);
         frame.setLocationRelativeTo(null);
-        frame.getContentPane().setLayout(new GridBagLayout());
-        frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        frame.getContentPane().setLayout(new BorderLayout());
+        frame.getContentPane().add(constructView(), BorderLayout.CENTER);
         frame.setVisible(true);
     }
 
