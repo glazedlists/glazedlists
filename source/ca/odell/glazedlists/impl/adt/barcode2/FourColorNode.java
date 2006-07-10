@@ -20,17 +20,6 @@ import java.util.Arrays;
 
   M4 Macros
 
-STANDARD M4 LOOP ---------------------------------------------------------------
-
-
-
-MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
-
-
-
-
-
-NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -40,15 +29,24 @@ NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
-USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
-
-
-
-SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
 
+
+    
+
+
+# define a function NODE_SIZE(node, colors) to no node.nodeSize()
+
+    
+       
+    
+
+
+# define a function to refresh counts
+
+   
 
 
 
@@ -88,8 +86,10 @@ class FourColorNode<V> implements Element<V> {
     /** the node's value */
     V value;
 
+     
     /** the size of this node */
     int size;
+      
 
     /** values for managing the node within the tree */
     byte height;
@@ -112,7 +112,9 @@ class FourColorNode<V> implements Element<V> {
         assert(FourColorTree.colorAsIndex(color) >= 0 && FourColorTree.colorAsIndex(color) < 7);
         this.color = color;
           
+         
         this.size = size;
+          
         this.value = value;
         this.height = 1;
         this.parent = parent;
@@ -180,7 +182,7 @@ class FourColorNode<V> implements Element<V> {
      * Update the counts member variable by examining the counts of
      * the child nodes and the size member variable.
      */
-    final void refreshCounts() {
+    final void refreshCounts(  ) {
 
          
         count1 = 0;
@@ -252,7 +254,7 @@ class FourColorNode<V> implements Element<V> {
             out.append("   ");
         }
           out.append(colors.get(FourColorTree.colorAsIndex(color)));   
-        out.append(" [").append(size).append("]");
+          out.append(" [").append(size).append("]");   
         if(value != null) {
             out.append(": ");
             if(value instanceof FourColorNode) {

@@ -19,17 +19,6 @@ import java.util.NoSuchElementException;
 
   M4 Macros
 
-STANDARD M4 LOOP ---------------------------------------------------------------
-
-
-
-MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
-
-
-
-
-
-NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -39,15 +28,22 @@ NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
-USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
-
-
-
-SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
 
+
+    
+
+
+# define a function NODE_SIZE(node, colors) to no node.nodeSize()
+
+   
+
+
+# define a function to refresh counts
+
+   
 
 
 
@@ -162,7 +158,7 @@ public class SimpleTreeIterator<V> {
                return;
 
         // increment within the current node
-        } else if(   index < node.size - 1) {
+        } else if(   index <  1  - 1) {
              
             count1++;
             
@@ -175,7 +171,7 @@ public class SimpleTreeIterator<V> {
         // scan through the nodes, looking for the first one of the right color
         while(true) {
              
-            count1 += node.size - index;
+            count1 += 1 - index;
             
             
              

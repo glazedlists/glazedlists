@@ -258,7 +258,7 @@
         </javac>
         <!-- execute the Japex performance tests -->
         <!--<property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>-->
-        <property name="config" value="extensions/japex/ListEventPublisher-JapexConfig.xml"/>
+        <property name="config" value="extensions/japex/SortedList-JapexConfig.xml"/>
         <java dir="." fork="true" classname="com.sun.japex.Japex">
             <classpath>
                 <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
@@ -514,6 +514,7 @@
         <apply executable="m4" parallel="false">
             <arg line="--prefix-builtins"/>
             <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <arg line="-DVAR_WIDE_NODES=true"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
             <mapper refid="bcii_to_fourcolorintermediate"/>
@@ -542,6 +543,7 @@
         <apply executable="m4" parallel="false">
             <arg line="--prefix-builtins"/>
             <arg line="-DVAR_COLOUR_COUNT=1"/>
+            <arg line="-DVAR_WIDE_NODES=false"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
             <mapper refid="bcii_to_simpleintermediate"/>

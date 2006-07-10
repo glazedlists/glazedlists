@@ -23,17 +23,6 @@ import java.util.Comparator;
 
   M4 Macros
 
-STANDARD M4 LOOP ---------------------------------------------------------------
-
-
-
-MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
-
-
-
-
-
-NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -43,15 +32,22 @@ NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
-USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
-
-
-
-SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
 
+
+    
+
+
+# define a function NODE_SIZE(node, colors) to no node.nodeSize()
+
+   
+
+
+# define a function to refresh counts
+
+   
 
 
 
@@ -161,7 +157,7 @@ public class SimpleTree<V> {
             }
 
             // the result is in the centre
-            int size = node. size ;
+            int size =  1  ;
             if(index < size) {
                 return node;
             } else {
@@ -229,13 +225,13 @@ public class SimpleTree<V> {
             // figure out the layout of this node
             SimpleNode<V> parentLeft = parent.left;
             int parentLeftSize = parentLeft != null ? parentLeft. count1  : 0;
-            int parentRightStartIndex = parentLeftSize + parent. size ;
+            int parentRightStartIndex = parentLeftSize +  1  ;
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(   value == parent.value && value != null) {
+            if( false &&     value == parent.value && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
-                    parent.size += size;
+                      
                     fixCountsThruRoot(parent,    size);
                     return parent;
                 }
@@ -262,7 +258,7 @@ public class SimpleTree<V> {
             // centre, and inserting the value
             if(index < parentRightStartIndex) {
                 int parentRightHalfSize = parentRightStartIndex - index;
-                parent.size -= parentRightHalfSize;
+                  
                 fixCountsThruRoot(parent,    -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
                 Element<V> inserted = insertIntoSubtree(parent, index,    null, parentRightHalfSize);
@@ -270,7 +266,7 @@ public class SimpleTree<V> {
 
                 // recalculate parentRightStartIndex, since that should have
                 // changed by now. this will then go on to insert on the right
-                parentRightStartIndex = parentLeftSize + parent. size ;
+                parentRightStartIndex = parentLeftSize +  1  ;
             }
 
             // on the right
@@ -352,8 +348,8 @@ public class SimpleTree<V> {
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(sortSide == 0 &&    value == parent.value && value != null) {
-                parent.size += size;
+            if( false &&  sortSide == 0 &&    value == parent.value && value != null) {
+                  
                 fixCountsThruRoot(parent,    size);
                 return parent;
             }
@@ -507,12 +503,13 @@ public class SimpleTree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+         subtreeRoot.refreshCounts(!zeroQueue.contains(subtreeRoot));  
+
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+         newSubtreeRoot.refreshCounts(!zeroQueue.contains(newSubtreeRoot));  
 
         return newSubtreeRoot;
     }
@@ -543,12 +540,13 @@ public class SimpleTree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+         subtreeRoot.refreshCounts(!zeroQueue.contains(subtreeRoot));  
+
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+         newSubtreeRoot.refreshCounts(!zeroQueue.contains(newSubtreeRoot));  
 
         return newSubtreeRoot;
     }
@@ -558,12 +556,12 @@ public class SimpleTree<V> {
      */
     public void remove(Element<V> element) {
         SimpleNode<V> node = (SimpleNode<V>)element;
-        assert(node.size > 0);
+          
         assert(root != null);
 
         // delete the node by adding to the zero queue
-        fixCountsThruRoot(node,    -node.size);
-        node.size = 0;
+        fixCountsThruRoot(node,     -1 );
+          
         zeroQueue.add(node);
         drainZeroQueue();
 
@@ -601,7 +599,7 @@ public class SimpleTree<V> {
     private void drainZeroQueue() {
         for(int i = 0, size = zeroQueue.size(); i < size; i++) {
             SimpleNode<V> node = zeroQueue.get(i);
-            assert(node.size == 0);
+              
 
             if(node.right == null) {
                 replaceChild(node, node.left);
@@ -646,15 +644,17 @@ public class SimpleTree<V> {
             assert(index >= leftSize);
 
             // delete in the centre
-            int rightStartIndex = leftSize + node. size ;
+            int rightStartIndex = leftSize +  1  ;
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
-                node.size -= toRemove;
+                  
                 size -= toRemove;
                 rightStartIndex -= toRemove;
                 fixCountsThruRoot(node,    -toRemove);
-                if(node.size == 0) zeroQueue.add(node);
+                if( true ) {
+                    zeroQueue.add(node);
+                }
                 if(size == 0) return;
             }
             assert(index >= rightStartIndex);
@@ -705,7 +705,7 @@ public class SimpleTree<V> {
      * @return the replacement node
      */
     private SimpleNode<V> replaceEmptyNodeWithChild(SimpleNode<V> toReplace) {
-        assert(toReplace.size == 0);
+          
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
@@ -717,7 +717,7 @@ public class SimpleTree<V> {
         assert(replacement.right == null);
 
         // remove that node from the tree
-        fixCountsThruRoot(replacement,    -replacement.size);
+        fixCountsThruRoot(replacement,     -1 );
         replaceChild(replacement, replacement.left);
 
         // update the tree structure to point to the replacement
@@ -726,9 +726,9 @@ public class SimpleTree<V> {
         replacement.right = toReplace.right;
         if(replacement.right != null) replacement.right.parent = replacement;
         replacement.height = toReplace.height;
-        replacement.refreshCounts();
+         replacement.refreshCounts(!zeroQueue.contains(replacement));  
         replaceChild(toReplace, replacement);
-        fixCountsThruRoot(replacement.parent,    replacement.size);
+        fixCountsThruRoot(replacement.parent,     1 );
 
         return replacement;
     }
@@ -774,7 +774,7 @@ public class SimpleTree<V> {
         for( ; node.parent != null; node = node.parent) {
             if(node.parent.right == node) {
                 index += node.parent.left != null ? node.parent.left. count1  : 0;
-                index += node.parent. size ;
+                index +=  1  ;
             }
         }
 
@@ -829,7 +829,7 @@ public class SimpleTree<V> {
 
             // recurse on the right, increment result by left size and center size
             result += nodeLeft != null ? nodeLeft. count1  : 0;
-            result += node. size ;
+            result +=  1  ;
             node = node.right;
         }
     }
@@ -866,7 +866,7 @@ public class SimpleTree<V> {
             }
 
             // the result is in the centre
-            int size = node. size ;
+            int size =  1  ;
             if(index < size) {
                 // we're on a node of the same color, return the adjusted index
 
@@ -880,7 +880,7 @@ public class SimpleTree<V> {
 
             // increment by the count in the centre
             } else {
-                result += node. size ;
+                result +=  1  ;
                 index -= size;
             }
 
@@ -982,7 +982,7 @@ public class SimpleTree<V> {
             
             
              
-            node.refreshCounts();
+             node.refreshCounts(!zeroQueue.contains(node));  
              
             assert(originalCount1 == node.count1) : "Incorrect count 0 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
             

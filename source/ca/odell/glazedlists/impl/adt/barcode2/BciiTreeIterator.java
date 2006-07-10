@@ -137,7 +137,7 @@ public class BciiTreeIterator<V> {
             /*[ COLORED_START ]*/if((node.color & colors) != 0) /*[ COLORED_END ]*/ return;
 
         // increment within the current node
-        } else if(/*[ COLORED_START ]*/ (node.color & colors) != 0 && /*[ COLORED_END ]*/ index < node.size - 1) {
+        } else if(/*[ COLORED_START ]*/ (node.color & colors) != 0 && /*[ COLORED_END ]*/ index < /*[ WIDE_NODES_START(1) ]*/ node.size /*[ WIDE_NODES_END ]*/ - 1) {
             /*[ GENERATED_CODE_START
             forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`count1++;
             ', `if(node.color == indexToBit(i)) counti(i)++;
@@ -155,7 +155,7 @@ public class BciiTreeIterator<V> {
         // scan through the nodes, looking for the first one of the right color
         while(true) {
             /*[ GENERATED_CODE_START
-            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`count1 += node.size - index;
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`count1 += NODE_SIZE(node, colors) - index;
             ', `if(node.color == indexToBit(i)) counti(i) += node.size - index;
             ')')
             GENERATED_CODE_END

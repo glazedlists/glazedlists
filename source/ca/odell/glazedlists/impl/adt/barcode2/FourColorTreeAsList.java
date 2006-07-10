@@ -20,17 +20,6 @@ import java.util.AbstractList;
 
   M4 Macros
 
-STANDARD M4 LOOP ---------------------------------------------------------------
-
-
-
-MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
-
-
-
-
-
-NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -40,15 +29,24 @@ NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
-USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
-
-
-
-SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
 
+
+    
+
+
+# define a function NODE_SIZE(node, colors) to no node.nodeSize()
+
+    
+       
+    
+
+
+# define a function to refresh counts
+
+   
 
 
 

@@ -20,17 +20,6 @@ import java.util.Arrays;
 
   M4 Macros
 
-STANDARD M4 LOOP ---------------------------------------------------------------
-
-
-
-MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
-
-
-
-
-
-NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -40,15 +29,22 @@ NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
-USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
-
-
-
-SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
 
+
+    
+
+
+# define a function NODE_SIZE(node, colors) to no node.nodeSize()
+
+   
+
+
+# define a function to refresh counts
+
+   
 
 
 
@@ -82,8 +78,7 @@ class SimpleNode<V> implements Element<V> {
     /** the node's value */
     V value;
 
-    /** the size of this node */
-    int size;
+      
 
     /** values for managing the node within the tree */
     byte height;
@@ -103,7 +98,7 @@ class SimpleNode<V> implements Element<V> {
      */
     public SimpleNode/**/(   int size, V value, SimpleNode/**/<V> parent) {
           
-        this.size = size;
+         assert(size == 1); 
         this.value = value;
         this.height = 1;
         this.parent = parent;
@@ -158,7 +153,7 @@ class SimpleNode<V> implements Element<V> {
      * Update the counts member variable by examining the counts of
      * the child nodes and the size member variable.
      */
-    final void refreshCounts() {
+    final void refreshCounts( boolean countSelf ) {
 
          
         count1 = 0;
@@ -186,7 +181,7 @@ class SimpleNode<V> implements Element<V> {
 
         // this node
          
-        count1 += size;
+        count1 += countSelf ? 1 : 0;
         
         
          
@@ -218,7 +213,7 @@ class SimpleNode<V> implements Element<V> {
             out.append("   ");
         }
           
-        out.append(" [").append(size).append("]");
+          
         if(value != null) {
             out.append(": ");
             if(value instanceof SimpleNode) {

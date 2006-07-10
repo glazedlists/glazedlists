@@ -125,7 +125,7 @@ public class BciiTree<V> {
             }
 
             // the result is in the centre
-            int size = node./*[ COLORED_START(size) ]*/ nodeSize(indexColors) /*[ COLORED_END ]*/;
+            int size = /*[ NODE_SIZE(node, indexColors) EXAMPLE_START ]*/ node.nodeSize(indexColors) /*[ EXAMPLE_END ]*/;
             if(index < size) {
                 return node;
             } else {
@@ -193,13 +193,13 @@ public class BciiTree<V> {
             // figure out the layout of this node
             BciiNode<V> parentLeft = parent.left;
             int parentLeftSize = parentLeft != null ? parentLeft./*[ COLORED_START(count1) ]*/ size(indexColors) /*[ COLORED_END ]*/ : 0;
-            int parentRightStartIndex = parentLeftSize + parent./*[ COLORED_START(size) ]*/ nodeSize(indexColors) /*[ COLORED_END ]*/;
+            int parentRightStartIndex = parentLeftSize + /*[ NODE_SIZE(parent, indexColors) EXAMPLE_START ]*/ parent.nodeSize(indexColors) /*[ EXAMPLE_END ]*/;
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(/*[ COLORED_START ]*/ color == parent.color &&  /*[ COLORED_END ]*/ value == parent.value && value != null) {
+            if(/*[ WIDE_NODES_START(false &&) WIDE_NODES_END ]*/ /*[ COLORED_START ]*/ color == parent.color &&  /*[ COLORED_END ]*/ value == parent.value && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
-                    parent.size += size;
+                    /*[ WIDE_NODES_START ]*/ parent.size += size; /*[ WIDE_NODES_END ]*/
                     fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
                     return parent;
                 }
@@ -226,7 +226,7 @@ public class BciiTree<V> {
             // centre, and inserting the value
             if(index < parentRightStartIndex) {
                 int parentRightHalfSize = parentRightStartIndex - index;
-                parent.size -= parentRightHalfSize;
+                /*[ WIDE_NODES_START ]*/ parent.size -= parentRightHalfSize; /*[ WIDE_NODES_END ]*/
                 fixCountsThruRoot(parent, /*[ COLORED_START ]*/ parent.color, /*[ COLORED_END ]*/ -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
                 Element<V> inserted = insertIntoSubtree(parent, index, /*[ COLORED_START ]*/ indexColors, parent.color, /*[ COLORED_END ]*/ null, parentRightHalfSize);
@@ -234,7 +234,7 @@ public class BciiTree<V> {
 
                 // recalculate parentRightStartIndex, since that should have
                 // changed by now. this will then go on to insert on the right
-                parentRightStartIndex = parentLeftSize + parent./*[ COLORED_START(size) ]*/ nodeSize(indexColors) /*[ COLORED_END ]*/;
+                parentRightStartIndex = parentLeftSize + /*[ NODE_SIZE(parent, indexColors) EXAMPLE_START ]*/ parent.nodeSize(indexColors) /*[ EXAMPLE_END ]*/;
             }
 
             // on the right
@@ -316,8 +316,8 @@ public class BciiTree<V> {
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(sortSide == 0 && /*[ COLORED_START ]*/ color == parent.color && /*[ COLORED_END ]*/ value == parent.value && value != null) {
-                parent.size += size;
+            if(/*[ WIDE_NODES_START(false &&) WIDE_NODES_END ]*/ sortSide == 0 && /*[ COLORED_START ]*/ color == parent.color && /*[ COLORED_END ]*/ value == parent.value && value != null) {
+                /*[ WIDE_NODES_START ]*/ parent.size += size; /*[ WIDE_NODES_END ]*/
                 fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
                 return parent;
             }
@@ -484,12 +484,13 @@ public class BciiTree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+        /*[ REFRESH_COUNTS(subtreeRoot) ]*/ subtreeRoot.refreshCounts(); /*[ EXAMPLE_END ]*/
+
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+        /*[ REFRESH_COUNTS(newSubtreeRoot) ]*/ newSubtreeRoot.refreshCounts(); /*[ EXAMPLE_END ]*/
 
         return newSubtreeRoot;
     }
@@ -520,12 +521,13 @@ public class BciiTree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+        /*[ REFRESH_COUNTS(subtreeRoot) ]*/ subtreeRoot.refreshCounts(); /*[ EXAMPLE_END ]*/
+
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+        /*[ REFRESH_COUNTS(newSubtreeRoot) ]*/ newSubtreeRoot.refreshCounts(); /*[ EXAMPLE_END ]*/
 
         return newSubtreeRoot;
     }
@@ -535,12 +537,12 @@ public class BciiTree<V> {
      */
     public void remove(Element<V> element) {
         BciiNode<V> node = (BciiNode<V>)element;
-        assert(node.size > 0);
+        /*[ WIDE_NODES_START ]*/ assert(node.size > 0); /*[ WIDE_NODES_END ]*/
         assert(root != null);
 
         // delete the node by adding to the zero queue
-        fixCountsThruRoot(node, /*[ COLORED_START ]*/ node.color, /*[ COLORED_END ]*/ -node.size);
-        node.size = 0;
+        fixCountsThruRoot(node, /*[ COLORED_START ]*/ node.color, /*[ COLORED_END ]*/ /*[ WIDE_NODES_START(-1) ]*/ -node.size /*[ WIDE_NODES_END ]*/);
+        /*[ WIDE_NODES_START ]*/ node.size = 0; /*[ WIDE_NODES_END ]*/
         zeroQueue.add(node);
         drainZeroQueue();
 
@@ -578,7 +580,7 @@ public class BciiTree<V> {
     private void drainZeroQueue() {
         for(int i = 0, size = zeroQueue.size(); i < size; i++) {
             BciiNode<V> node = zeroQueue.get(i);
-            assert(node.size == 0);
+            /*[ WIDE_NODES_START ]*/ assert(node.size == 0); /*[ WIDE_NODES_END ]*/
 
             if(node.right == null) {
                 replaceChild(node, node.left);
@@ -623,15 +625,17 @@ public class BciiTree<V> {
             assert(index >= leftSize);
 
             // delete in the centre
-            int rightStartIndex = leftSize + node./*[ COLORED_START(size) ]*/ nodeSize(indexColors) /*[ COLORED_END ]*/;
+            int rightStartIndex = leftSize + /*[ NODE_SIZE(node, indexColors) EXAMPLE_START ]*/ node.nodeSize(indexColors) /*[ EXAMPLE_END ]*/;
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
-                node.size -= toRemove;
+                /*[ WIDE_NODES_START ]*/ node.size -= toRemove; /*[ WIDE_NODES_END ]*/
                 size -= toRemove;
                 rightStartIndex -= toRemove;
                 fixCountsThruRoot(node, /*[ COLORED_START ]*/ node.color, /*[ COLORED_END ]*/ -toRemove);
-                if(node.size == 0) zeroQueue.add(node);
+                if(/*[ WIDE_NODES_START(true) ]*/ node.size == 0 /*[ WIDE_NODES_END ]*/) {
+                    zeroQueue.add(node);
+                }
                 if(size == 0) return;
             }
             assert(index >= rightStartIndex);
@@ -682,7 +686,7 @@ public class BciiTree<V> {
      * @return the replacement node
      */
     private BciiNode<V> replaceEmptyNodeWithChild(BciiNode<V> toReplace) {
-        assert(toReplace.size == 0);
+        /*[ WIDE_NODES_START ]*/ assert(toReplace.size == 0); /*[ WIDE_NODES_END ]*/
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
@@ -694,7 +698,7 @@ public class BciiTree<V> {
         assert(replacement.right == null);
 
         // remove that node from the tree
-        fixCountsThruRoot(replacement, /*[ COLORED_START ]*/ replacement.color, /*[ COLORED_END ]*/ -replacement.size);
+        fixCountsThruRoot(replacement, /*[ COLORED_START ]*/ replacement.color, /*[ COLORED_END ]*/ /*[ WIDE_NODES_START(-1) ]*/ -replacement.size /*[ WIDE_NODES_END ]*/);
         replaceChild(replacement, replacement.left);
 
         // update the tree structure to point to the replacement
@@ -703,9 +707,9 @@ public class BciiTree<V> {
         replacement.right = toReplace.right;
         if(replacement.right != null) replacement.right.parent = replacement;
         replacement.height = toReplace.height;
-        replacement.refreshCounts();
+        /*[ REFRESH_COUNTS(replacement) ]*/ replacement.refreshCounts(); /*[ EXAMPLE_END ]*/
         replaceChild(toReplace, replacement);
-        fixCountsThruRoot(replacement.parent, /*[ COLORED_START ]*/ replacement.color, /*[ COLORED_END ]*/ replacement.size);
+        fixCountsThruRoot(replacement.parent, /*[ COLORED_START ]*/ replacement.color, /*[ COLORED_END ]*/ /*[ WIDE_NODES_START(1) ]*/ replacement.size /*[ WIDE_NODES_END ]*/);
 
         return replacement;
     }
@@ -751,7 +755,7 @@ public class BciiTree<V> {
         for( ; node.parent != null; node = node.parent) {
             if(node.parent.right == node) {
                 index += node.parent.left != null ? node.parent.left./*[ COLORED_START(count1) ]*/ size(colorsOut) /*[ COLORED_END ]*/ : 0;
-                index += node.parent./*[ COLORED_START(size) ]*/ nodeSize(colorsOut) /*[ COLORED_END ]*/;
+                index += /*[ NODE_SIZE(node.parent, colorsOut) EXAMPLE_START ]*/ node.parent.nodeSize(colorsOut) /*[ EXAMPLE_END ]*/;
             }
         }
 
@@ -806,7 +810,7 @@ public class BciiTree<V> {
 
             // recurse on the right, increment result by left size and center size
             result += nodeLeft != null ? nodeLeft./*[ COLORED_START(count1) ]*/ size(colorsOut) /*[ COLORED_END ]*/ : 0;
-            result += node./*[ COLORED_START(size) ]*/ nodeSize(colorsOut) /*[ COLORED_END ]*/;
+            result += /*[ NODE_SIZE(node, colorsOut) EXAMPLE_START ]*/ node.nodeSize(colorsOut) /*[ EXAMPLE_END ]*/;
             node = node.right;
         }
     }
@@ -843,7 +847,7 @@ public class BciiTree<V> {
             }
 
             // the result is in the centre
-            int size = node./*[ COLORED_START(size) ]*/ nodeSize(indexColors) /*[ COLORED_END ]*/;
+            int size = /*[ NODE_SIZE(node, indexColors) EXAMPLE_START ]*/ node.nodeSize(indexColors) /*[ EXAMPLE_END ]*/;
             if(index < size) {
                 // we're on a node of the same color, return the adjusted index
 
@@ -857,7 +861,7 @@ public class BciiTree<V> {
 
             // increment by the count in the centre
             } else {
-                result += node./*[ COLORED_START(size) ]*/ nodeSize(colorsOut) /*[ COLORED_END ]*/;
+                result += /*[ NODE_SIZE(node, colorsOut) EXAMPLE_START ]*/ node.nodeSize(colorsOut) /*[ EXAMPLE_END ]*/;
                 index -= size;
             }
 
@@ -893,7 +897,7 @@ public class BciiTree<V> {
         StringBuffer result = new StringBuffer();
         for(BciiNode<V> n = firstNode(); n != null; n = next(n)) {
             Object color = coder.getColors().get(colorAsIndex(n.color));
-            for(int i = 0; i < n.size; i++) {
+            for(/*[ WIDE_NODES_START(true) ]*/ int i = 0; i < n.size; i++/*[ WIDE_NODES_END ]*/) {
                 result.append(color);
             }
         }
@@ -977,7 +981,7 @@ public class BciiTree<V> {
             int originalCount2 = node.count2;
             int originalCount4 = node.count4;
             /*[ EXAMPLE_END ]*/
-            node.refreshCounts();
+            /*[ REFRESH_COUNTS(node) ]*/ node.refreshCounts(); /*[ EXAMPLE_END ]*/
             /*[ GENERATED_CODE_START
             forloop(`i', 0, VAR_LAST_COLOR_INDEX, `assert(originalCounti(i) == node.counti(i)) : "Incorrect count i on node: \n" + node  + "\n Expected " + node.counti(i) + " but was " + originalCounti(i);
             ')

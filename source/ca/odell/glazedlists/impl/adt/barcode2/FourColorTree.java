@@ -23,17 +23,6 @@ import java.util.Comparator;
 
   M4 Macros
 
-STANDARD M4 LOOP ---------------------------------------------------------------
-
-
-
-MACRO CODE WITH A JAVA ALTERNATIVE ---------------------------------------------
-
-
-
-
-
-NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
@@ -43,15 +32,24 @@ NODE SPECIFIC VARIABLES & FUNCTIONS--- -----------------------------------------
 
 
 
-USE ALTERNATE CODE WHEN WE ONLY HAVE ONE COLOR ---------------------------------
-
-
-
-SKIP SECTIONS OF CODE WHEN WE ONLY HAVE ONE COLOR ------------------------------
 
 
 
 
+
+    
+
+
+# define a function NODE_SIZE(node, colors) to no node.nodeSize()
+
+    
+       
+    
+
+
+# define a function to refresh counts
+
+   
 
 
 
@@ -168,7 +166,7 @@ public class FourColorTree<V> {
             }
 
             // the result is in the centre
-            int size = node.  nodeSize(indexColors)   ;
+            int size =  node.nodeSize(indexColors)  ;
             if(index < size) {
                 return node;
             } else {
@@ -236,13 +234,13 @@ public class FourColorTree<V> {
             // figure out the layout of this node
             FourColorNode<V> parentLeft = parent.left;
             int parentLeftSize = parentLeft != null ? parentLeft.  size(indexColors)    : 0;
-            int parentRightStartIndex = parentLeftSize + parent.  nodeSize(indexColors)   ;
+            int parentRightStartIndex = parentLeftSize +  parent.nodeSize(indexColors)  ;
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(  color == parent.color &&     value == parent.value && value != null) {
+            if(     color == parent.color &&     value == parent.value && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
-                    parent.size += size;
+                      parent.size += size;   
                     fixCountsThruRoot(parent,   color,    size);
                     return parent;
                 }
@@ -269,7 +267,7 @@ public class FourColorTree<V> {
             // centre, and inserting the value
             if(index < parentRightStartIndex) {
                 int parentRightHalfSize = parentRightStartIndex - index;
-                parent.size -= parentRightHalfSize;
+                  parent.size -= parentRightHalfSize;   
                 fixCountsThruRoot(parent,   parent.color,    -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
                 Element<V> inserted = insertIntoSubtree(parent, index,   indexColors, parent.color,    null, parentRightHalfSize);
@@ -277,7 +275,7 @@ public class FourColorTree<V> {
 
                 // recalculate parentRightStartIndex, since that should have
                 // changed by now. this will then go on to insert on the right
-                parentRightStartIndex = parentLeftSize + parent.  nodeSize(indexColors)   ;
+                parentRightStartIndex = parentLeftSize +  parent.nodeSize(indexColors)  ;
             }
 
             // on the right
@@ -359,8 +357,8 @@ public class FourColorTree<V> {
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(sortSide == 0 &&   color == parent.color &&    value == parent.value && value != null) {
-                parent.size += size;
+            if(   sortSide == 0 &&   color == parent.color &&    value == parent.value && value != null) {
+                  parent.size += size;   
                 fixCountsThruRoot(parent,   color,    size);
                 return parent;
             }
@@ -525,12 +523,13 @@ public class FourColorTree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+         subtreeRoot.refreshCounts();  
+
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+         newSubtreeRoot.refreshCounts();  
 
         return newSubtreeRoot;
     }
@@ -561,12 +560,13 @@ public class FourColorTree<V> {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-        subtreeRoot.refreshCounts();
+         subtreeRoot.refreshCounts();  
+
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-        newSubtreeRoot.refreshCounts();
+         newSubtreeRoot.refreshCounts();  
 
         return newSubtreeRoot;
     }
@@ -576,12 +576,12 @@ public class FourColorTree<V> {
      */
     public void remove(Element<V> element) {
         FourColorNode<V> node = (FourColorNode<V>)element;
-        assert(node.size > 0);
+          assert(node.size > 0);   
         assert(root != null);
 
         // delete the node by adding to the zero queue
-        fixCountsThruRoot(node,   node.color,    -node.size);
-        node.size = 0;
+        fixCountsThruRoot(node,   node.color,      -node.size   );
+          node.size = 0;   
         zeroQueue.add(node);
         drainZeroQueue();
 
@@ -619,7 +619,7 @@ public class FourColorTree<V> {
     private void drainZeroQueue() {
         for(int i = 0, size = zeroQueue.size(); i < size; i++) {
             FourColorNode<V> node = zeroQueue.get(i);
-            assert(node.size == 0);
+              assert(node.size == 0);   
 
             if(node.right == null) {
                 replaceChild(node, node.left);
@@ -664,15 +664,17 @@ public class FourColorTree<V> {
             assert(index >= leftSize);
 
             // delete in the centre
-            int rightStartIndex = leftSize + node.  nodeSize(indexColors)   ;
+            int rightStartIndex = leftSize +  node.nodeSize(indexColors)  ;
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
-                node.size -= toRemove;
+                  node.size -= toRemove;   
                 size -= toRemove;
                 rightStartIndex -= toRemove;
                 fixCountsThruRoot(node,   node.color,    -toRemove);
-                if(node.size == 0) zeroQueue.add(node);
+                if(  node.size == 0   ) {
+                    zeroQueue.add(node);
+                }
                 if(size == 0) return;
             }
             assert(index >= rightStartIndex);
@@ -723,7 +725,7 @@ public class FourColorTree<V> {
      * @return the replacement node
      */
     private FourColorNode<V> replaceEmptyNodeWithChild(FourColorNode<V> toReplace) {
-        assert(toReplace.size == 0);
+          assert(toReplace.size == 0);   
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
@@ -735,7 +737,7 @@ public class FourColorTree<V> {
         assert(replacement.right == null);
 
         // remove that node from the tree
-        fixCountsThruRoot(replacement,   replacement.color,    -replacement.size);
+        fixCountsThruRoot(replacement,   replacement.color,      -replacement.size   );
         replaceChild(replacement, replacement.left);
 
         // update the tree structure to point to the replacement
@@ -744,9 +746,9 @@ public class FourColorTree<V> {
         replacement.right = toReplace.right;
         if(replacement.right != null) replacement.right.parent = replacement;
         replacement.height = toReplace.height;
-        replacement.refreshCounts();
+         replacement.refreshCounts();  
         replaceChild(toReplace, replacement);
-        fixCountsThruRoot(replacement.parent,   replacement.color,    replacement.size);
+        fixCountsThruRoot(replacement.parent,   replacement.color,      replacement.size   );
 
         return replacement;
     }
@@ -792,7 +794,7 @@ public class FourColorTree<V> {
         for( ; node.parent != null; node = node.parent) {
             if(node.parent.right == node) {
                 index += node.parent.left != null ? node.parent.left.  size(colorsOut)    : 0;
-                index += node.parent.  nodeSize(colorsOut)   ;
+                index +=  node.parent.nodeSize(colorsOut)  ;
             }
         }
 
@@ -847,7 +849,7 @@ public class FourColorTree<V> {
 
             // recurse on the right, increment result by left size and center size
             result += nodeLeft != null ? nodeLeft.  size(colorsOut)    : 0;
-            result += node.  nodeSize(colorsOut)   ;
+            result +=  node.nodeSize(colorsOut)  ;
             node = node.right;
         }
     }
@@ -884,7 +886,7 @@ public class FourColorTree<V> {
             }
 
             // the result is in the centre
-            int size = node.  nodeSize(indexColors)   ;
+            int size =  node.nodeSize(indexColors)  ;
             if(index < size) {
                 // we're on a node of the same color, return the adjusted index
 
@@ -898,7 +900,7 @@ public class FourColorTree<V> {
 
             // increment by the count in the centre
             } else {
-                result += node.  nodeSize(colorsOut)   ;
+                result +=  node.nodeSize(colorsOut)  ;
                 index -= size;
             }
 
@@ -934,7 +936,7 @@ public class FourColorTree<V> {
         StringBuffer result = new StringBuffer();
         for(FourColorNode<V> n = firstNode(); n != null; n = next(n)) {
             Object color = coder.getColors().get(colorAsIndex(n.color));
-            for(int i = 0; i < n.size; i++) {
+            for(  int i = 0; i < n.size; i++  ) {
                 result.append(color);
             }
         }
@@ -1017,7 +1019,7 @@ public class FourColorTree<V> {
             
             
              
-            node.refreshCounts();
+             node.refreshCounts();  
              
             assert(originalCount1 == node.count1) : "Incorrect count 0 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
             assert(originalCount2 == node.count2) : "Incorrect count 1 on node: \n" + node  + "\n Expected " + node.count2 + " but was " + originalCount2;

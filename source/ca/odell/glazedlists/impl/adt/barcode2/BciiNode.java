@@ -46,8 +46,10 @@ class BciiNode<V> implements Element<V> {
     /** the node's value */
     V value;
 
+    /*[ WIDE_NODES_START ]*/
     /** the size of this node */
     int size;
+    /*[ WIDE_NODES_END ]*/
 
     /** values for managing the node within the tree */
     byte height;
@@ -70,7 +72,9 @@ class BciiNode<V> implements Element<V> {
         assert(BciiTree.colorAsIndex(color) >= 0 && BciiTree.colorAsIndex(color) < 7);
         this.color = color;
         /*[ COLORED_END ]*/
+        /*[ WIDE_NODES_START(assert(size == 1);) ]*/
         this.size = size;
+        /*[ WIDE_NODES_END ]*/
         this.value = value;
         this.height = 1;
         this.parent = parent;
@@ -141,7 +145,7 @@ class BciiNode<V> implements Element<V> {
      * Update the counts member variable by examining the counts of
      * the child nodes and the size member variable.
      */
-    final void refreshCounts() {
+    final void refreshCounts(/*[ WIDE_NODES_START(boolean countSelf) WIDE_NODES_END ]*/) {
 
         /*[ GENERATED_CODE_START
         forloop(`i', 0, VAR_LAST_COLOR_INDEX, `counti(i) = 0;
@@ -181,8 +185,8 @@ class BciiNode<V> implements Element<V> {
 
         // this node
         /*[ GENERATED_CODE_START
-        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',counti(i)` += size;
-        ', `if(color == 'indexToBit(i)`) 'counti(i)` += size;
+        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',counti(i)` += 'NODE_WIDTH(countSelf)`;
+        ', `if(color == 'indexToBit(i)`) 'counti(i)` += 'NODE_WIDTH(countSelf)`;
         ')')
         GENERATED_CODE_END
         EXAMPLE_START ]*/
@@ -218,7 +222,7 @@ class BciiNode<V> implements Element<V> {
             out.append("   ");
         }
         /*[ COLORED_START ]*/ out.append(colors.get(BciiTree.colorAsIndex(color))); /*[ COLORED_END ]*/
-        out.append(" [").append(size).append("]");
+        /*[ WIDE_NODES_START ]*/ out.append(" [").append(size).append("]"); /*[ WIDE_NODES_END ]*/
         if(value != null) {
             out.append(": ");
             if(value instanceof BciiNode) {
