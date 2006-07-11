@@ -4,6 +4,8 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.*;
 import java.io.*;
@@ -230,6 +232,22 @@ public class GlazedListsTests {
                     // best attempt only
                 }
             }
+        }
+    }
+
+    /**
+     * Counts the number of ListEvents fired.
+     */
+    public static class ListEventCounter implements ListEventListener {
+        private int count = 0;
+
+        public void listChanged(ListEvent listChanges) {
+            count++;
+        }
+        public int getCountAndReset() {
+            int result = count;
+            count = 0;
+            return result;
         }
     }
 }

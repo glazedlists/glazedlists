@@ -143,6 +143,30 @@ public class FilterListTest extends TestCase {
 		matcher.showAll(true);
 		assertEquals(5, filterList.size());
 	}
+
+    public void testDispose() {
+        EventList<String> baseList = GlazedLists.eventList(GlazedListsTests.stringToList("ABCCBA"));
+        FilterList<String> filterList = new FilterList<String>(baseList);
+
+        GlazedListsTests.ListEventCounter counter = new GlazedListsTests.ListEventCounter();
+        filterList.addListEventListener(counter);
+
+        TextMatcherEditor<String> editor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        filterList.setMatcherEditor(editor);
+
+        assertEquals(0, counter.getCountAndReset());
+
+        editor.setFilterText(new String[] {"B"});
+        assertEquals(1, counter.getCountAndReset());
+
+        // dispose() should not produce any ListEvents, and the MatcherEditor should be nulled out
+        filterList.dispose();
+        assertEquals(0, counter.getCountAndReset());
+
+        // the editor should have been disconnected during dispose(), so this should produce no ListEvent
+        editor.setFilterText(new String[] {"C"});
+        assertEquals(0, counter.getCountAndReset());
+    }
 }
 
 

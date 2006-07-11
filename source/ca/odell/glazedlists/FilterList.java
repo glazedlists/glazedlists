@@ -142,6 +142,19 @@ public final class FilterList<E> extends TransformedList<E,E> {
         }
     }
 
+    /** @inheritDoc */
+    public void dispose() {
+        super.dispose();
+
+        // stop listening to the MatcherEditor if one exists
+        if (currentEditor != null) {
+            currentEditor.removeMatcherEditorListener(listener);
+            currentEditor = null;
+        }
+
+        currentMatcher = null;
+    }
+
     /** {@inheritDoc} */
     public final void listChanged(ListEvent<E> listChanges) {
         // all of these changes to this list happen "atomically"
