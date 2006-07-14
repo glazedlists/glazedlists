@@ -1181,7 +1181,7 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
-     * This class listens the to the ComboBoxModel redraws the popup if it
+     * This class listens to the ComboBoxModel and redraws the popup if it
      * must grow or shrink to accomodate the latest list of items.
      */
     private class ListDataHandler implements ListDataListener {

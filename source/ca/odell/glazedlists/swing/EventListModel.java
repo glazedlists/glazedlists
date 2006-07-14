@@ -72,7 +72,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * ListTable accepts large change events.
      */
     public void listChanged(ListEvent<E> listChanges) {
-        // when all events hae already been processed by clearing the event queue
+        // when all events have already been processed by clearing the event queue
         if(!listChanges.hasNext()) return;
 
         // for all changes, one block at a time
