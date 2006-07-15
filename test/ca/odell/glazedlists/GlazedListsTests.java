@@ -238,10 +238,10 @@ public class GlazedListsTests {
     /**
      * Counts the number of ListEvents fired.
      */
-    public static class ListEventCounter implements ListEventListener {
+    public static class ListEventCounter<E> implements ListEventListener<E> {
         private int count = 0;
 
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<E> listChanges) {
             count++;
         }
         public int getCountAndReset() {

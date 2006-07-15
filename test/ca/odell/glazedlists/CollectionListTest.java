@@ -259,6 +259,107 @@ public class CollectionListTest extends TestCase {
         characters.remove(1);
 		assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
 	}
+ 
+    /**
+     * Tests disposing of CollectionList, where the model produces plain lists containing the
+     * children.  
+     */
+    public void testDisposeWithPlainListChildren() {        
+        final List<String> abcList = GlazedListsTests.stringToList("ABC");
+        final List<String> defList = GlazedListsTests.stringToList("DEF");
+        final List<String> ghiList = GlazedListsTests.stringToList("GHI");
+        final EventList<List<String>> parentEventList = new BasicEventList<List<String>>();
+        parentEventList.add(abcList);
+        parentEventList.add(defList);
+        parentEventList.add(ghiList);
+        
+        final CollectionList<List<String>, String> collectionList = 
+            new CollectionList<List<String>, String>(parentEventList, (CollectionList.Model) GlazedLists.listCollectionListModel());
+        
+        final GlazedListsTests.ListEventCounter<String> eventCounter = 
+            new GlazedListsTests.ListEventCounter<String>();
+        collectionList.addListEventListener(eventCounter);
+        
+        // modify source list
+        parentEventList.add(ghiList);
+        assertEquals(1, eventCounter.getCountAndReset());
+        parentEventList.remove(defList);
+        assertEquals(1, eventCounter.getCountAndReset());
+
+        // modify child lists
+        // these are no EventLists, so no ListEvents are expected
+        abcList.add("D");
+        assertEquals(0, eventCounter.getCountAndReset());        
+        abcList.remove("A");
+        assertEquals(0, eventCounter.getCountAndReset());
+        
+        // dispose CollectionList, no ListEvents are expected further on
+        collectionList.dispose();
+        
+        // modify source list after disposing
+        parentEventList.remove(ghiList);
+        assertEquals(0, eventCounter.getCountAndReset());
+        parentEventList.add(0, defList);
+        assertEquals(0, eventCounter.getCountAndReset());
+        
+        // modify child lists after disposing
+        abcList.add("E");
+        assertEquals(0, eventCounter.getCountAndReset());        
+        abcList.remove("B");
+        assertEquals(0, eventCounter.getCountAndReset());        
+    }
+    
+    /**
+     * Tests disposing of CollectionList, where the model produces EventLists containing the
+     * children.  
+     */
+    public void testDisposeWithEventListChildren() {        
+        final List<String> abcList = GlazedListsTests.stringToList("ABC");
+        final EventList<String> abcEventList = GlazedLists.eventList(abcList);
+        final List<String> defList = GlazedListsTests.stringToList("DEF");
+        final EventList<String> defEventList = GlazedLists.eventList(defList);
+        final List<String> ghiList = GlazedListsTests.stringToList("GHI");
+        final EventList<String> ghiEventList = GlazedLists.eventList(ghiList);
+        final EventList<List<String>> parentEventList = new BasicEventList<List<String>>();
+        parentEventList.add(abcEventList);
+        parentEventList.add(defEventList);
+        parentEventList.add(ghiEventList);
+        
+        final CollectionList<List<String>, String> collectionList = 
+            new CollectionList<List<String>, String>(parentEventList, (CollectionList.Model) GlazedLists.listCollectionListModel());
+        
+        final GlazedListsTests.ListEventCounter<String> eventCounter = 
+            new GlazedListsTests.ListEventCounter<String>();
+        collectionList.addListEventListener(eventCounter);
+        
+        // modify source list
+        parentEventList.add(ghiEventList);
+        assertEquals(1, eventCounter.getCountAndReset());
+        parentEventList.remove(defEventList);
+        assertEquals(1, eventCounter.getCountAndReset());
+
+        // modify child lists
+        // these are EventLists, so changes are propagated to CollectionList
+        abcEventList.add("D");
+        assertEquals(1, eventCounter.getCountAndReset());        
+        abcEventList.remove("A");
+        assertEquals(1, eventCounter.getCountAndReset());
+        
+        // dispose CollectionList, no ListEvents are expected further on
+        collectionList.dispose();
+        
+        // modify source list after disposing
+        parentEventList.remove(ghiEventList);
+        assertEquals(0, eventCounter.getCountAndReset());
+        parentEventList.add(0, defEventList);
+        assertEquals(0, eventCounter.getCountAndReset());
+        
+        // modify child lists after disposing
+        abcEventList.add("E");
+        assertEquals(0, eventCounter.getCountAndReset());        
+        abcEventList.remove("B");
+        assertEquals(0, eventCounter.getCountAndReset());        
+    }
     
 	/**
 	 * Check the basic data on a CollectionList to make sure it's showing the characters
@@ -275,5 +376,5 @@ public class CollectionListTest extends TestCase {
 		public List<String> getChildren(String parent) {
 			return GlazedListsTests.stringToList(parent);
         }
-	}
+	}    
 }

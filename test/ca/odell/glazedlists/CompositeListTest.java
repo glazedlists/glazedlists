@@ -214,4 +214,36 @@ public class CompositeListTest extends TestCase {
         assertSame(sharedLock, gamma.getReadWriteLock());
         assertSame(sharedLock, uber.getReadWriteLock());
     }
+
+    /**
+     * Tests that after disposing {@link CompositeList}, all installed ListEventListeners
+     * have been removed, e.g. changes to member lists are ignored.
+     */
+    public void testDispose() {
+        final EventList<String> memberListOne = new BasicEventList<String>();
+        memberListOne.addAll(GlazedListsTests.stringToList("ABC"));
+        final EventList<String> memberListTwo = new BasicEventList<String>();
+        memberListTwo.addAll(GlazedListsTests.stringToList("DEF"));
+        final CompositeList<String> composite = new CompositeList<String>();
+        composite.addMemberList(memberListOne);
+        composite.addMemberList(memberListTwo);
+        final GlazedListsTests.ListEventCounter<String> eventCounter =
+                new GlazedListsTests.ListEventCounter<String>();
+        composite.addListEventListener(eventCounter);
+
+        // modify member lists
+        memberListOne.add("D");
+        assertEquals(1, eventCounter.getCountAndReset());
+        memberListTwo.remove("D");
+        assertEquals(1, eventCounter.getCountAndReset());
+
+        // dispose CompositeList, no ListEvents are expected further on
+        composite.dispose();
+
+        // modify member lists after dispose
+        memberListOne.remove("D");
+        assertEquals(0, eventCounter.getCountAndReset());
+        memberListTwo.add(0, "D");
+        assertEquals(0, eventCounter.getCountAndReset());
+    }
 }

@@ -10,6 +10,7 @@ import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.impl.adt.*;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
 
 
 /**
@@ -192,7 +193,20 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         }
         updates.commitEvent();
     }
-
+    
+    /** @inheritDoc */
+    public void dispose() {
+        super.dispose();
+        
+        // iterate over all child elements and dispose them
+        final SimpleTreeIterator<ChildElement<E>> treeIterator = 
+            new SimpleTreeIterator<ChildElement<E>>(childElements);
+        
+        while(treeIterator.hasNext()) {
+            treeIterator.next();
+            treeIterator.value().dispose();
+        }
+    }
 
     /**
      * Helper for {@link #listChanged(ListEvent)} when inserting.

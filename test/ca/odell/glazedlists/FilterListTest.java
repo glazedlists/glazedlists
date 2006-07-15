@@ -148,7 +148,7 @@ public class FilterListTest extends TestCase {
         EventList<String> baseList = GlazedLists.eventList(GlazedListsTests.stringToList("ABCCBA"));
         FilterList<String> filterList = new FilterList<String>(baseList);
 
-        GlazedListsTests.ListEventCounter counter = new GlazedListsTests.ListEventCounter();
+        GlazedListsTests.ListEventCounter<String> counter = new GlazedListsTests.ListEventCounter<String>();
         filterList.addListEventListener(counter);
 
         TextMatcherEditor<String> editor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
