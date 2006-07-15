@@ -318,7 +318,7 @@ public class ListSelection<E> {
      * {@link IllegalArgumentException} is thrown. This list does not support
      * the {@link List#set set} method.
      */
-    public List<E> getTogglingSelected() {
+    public EventList<E> getTogglingSelected() {
         source.getReadWriteLock().writeLock().lock();
         try {
             if(selectedToggleList == null){
@@ -350,7 +350,7 @@ public class ListSelection<E> {
      * {@link IllegalArgumentException} is thrown. This list does not support
      * the {@link List#set set} method.
      */
-    public List getTogglingDeselected() {
+    public EventList getTogglingDeselected() {
         source.getReadWriteLock().writeLock().lock();
         try {
             if(deselectedToggleList == null) {
