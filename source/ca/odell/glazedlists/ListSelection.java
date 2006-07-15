@@ -66,6 +66,12 @@ public class ListSelection<E> {
     /** the deselected view */
     private final DeselectedList<E> deselectedList;
 
+    /** the toggling selected view */
+    private SelectionToggleList<E> selectedToggleList;
+
+    /** the toggling deselected view */
+    private DeselectionToggleList<E> deselectedToggleList;
+    
     /** observe the source list */
     private final SourceListener<E> sourceListener = new SourceListener<E>();
 
@@ -292,17 +298,68 @@ public class ListSelection<E> {
     }
 
     /**
-     * Provides access to an {@link EventList} that contains only selected values.
+     * Gets an {@link EventList} that contains only selected values and modifies
+     * the source list on mutation.
+     * 
+     * Adding and removing items from this list performs the same operation on
+     * the source list.
      */
     public EventList<E> getSelected() {
         return selectedList;
     }
 
+
     /**
-     * Provides access to an {@link EventList} that contains only deselected values.
+     * Gets an {@link EventList} that contains only selected values and modifies
+     * the selection state on mutation.
+     * 
+     * <p>Adding an item to this list selects it and removing an item deselects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown. This list does not support
+     * the {@link List#set set} method.
+     */
+    public List<E> getTogglingSelected() {
+        source.getReadWriteLock().writeLock().lock();
+        try {
+            if(selectedToggleList == null){
+                selectedToggleList = new SelectionToggleList<E>(source);
+            }
+            return selectedToggleList;
+        } finally {
+            source.getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    /**
+     * Gets an {@link EventList} that contains only deselected values add
+     * modifies the source list on mutation.
+     * 
+     * Adding and removing items from this list performs the same operation on
+     * the source list.
      */
     public EventList<E> getDeselected() {
         return deselectedList;
+    }
+
+    /**
+     * Gets an {@link EventList} that contains only deselected values and
+     * modifies the selection state on mutation.
+     * 
+     * <p>Adding an item to this list deselects it and removing an item selects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown. This list does not support
+     * the {@link List#set set} method.
+     */
+    public List getTogglingDeselected() {
+        source.getReadWriteLock().writeLock().lock();
+        try {
+            if(deselectedToggleList == null) {
+                deselectedToggleList = new DeselectionToggleList<E>(source);
+            }
+            return deselectedToggleList;
+        } finally {
+            source.getReadWriteLock().writeLock().unlock();
+        }
     }
 
     /**
@@ -1038,7 +1095,7 @@ public class ListSelection<E> {
      * The {@link EventList} that contains only values that are currently
      * selected.
      */
-    private final class SelectedList<E> extends TransformedList<E, E> {
+    private class SelectedList<E> extends TransformedList<E, E> {
 
         /**
          * Creates an {@link EventList} that provides a view of the
@@ -1086,10 +1143,55 @@ public class ListSelection<E> {
     }
 
     /**
+     * A SelectedList that mutates the selection instead of the underlying list.
+     */
+    private class SelectionToggleList<E> extends SelectedList<E>{
+
+        SelectionToggleList(EventList<E> source) {
+            super(source);
+        }
+
+        /** @throws UnsupportedOperationException unconditionally */
+        public void addListEventListener(ListEventListener<E> listener){
+            throw new UnsupportedOperationException("Toggling lists don't support firing events");
+        }
+
+        /** @throws UnsupportedOperationException unconditionally */
+        public E set(int index, E item){
+            throw new UnsupportedOperationException("Toggling lists don't support setting items");
+        }
+        
+        /**
+         * Select the specified value in the source list, regardless of its
+         * index. If the given item is found in the source list, it is selected.
+         *
+         * @throws IllegalArgumentException if the element isn't found
+         */
+        public void add(int index, E item) {
+            index = source.indexOf(item);
+            if(index != -1) {
+                select(index);
+            } else {
+                throw new IllegalArgumentException("Added item " + item + " must be in source list");
+            }
+        }
+
+        /**
+         * Deselect the specified index.
+         */
+        public E remove(int index){
+            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+            int sourceIndex = getSourceIndex(index);
+            deselect(sourceIndex);
+            return source.get(sourceIndex);
+        }
+    }
+    
+    /**
      * The {@link EventList} that contains only values that are not currently
      * selected.
      */
-    private final class DeselectedList<E> extends TransformedList<E, E> {
+    private class DeselectedList<E> extends TransformedList<E, E> {
 
         /**
          * Creates an {@link EventList} that provides a view of the
@@ -1133,6 +1235,50 @@ public class ListSelection<E> {
          */
         public void dispose() {
             // Do Nothing
+        }
+    }
+    
+    /**
+     * A DeselectedList that mutates the selection instead of the underlying list.
+     */
+    private class DeselectionToggleList<E> extends DeselectedList<E>{
+
+        DeselectionToggleList(EventList<E> source) {
+            super(source);
+        }
+        
+        /** @throws UnsupportedOperationException unconditionally */
+        public void addListEventListener(ListEventListener<E> listener){
+            throw new UnsupportedOperationException("Toggling lists don't support firing events");
+        }
+
+        /** @throws UnsupportedOperationException unconditionally */
+        public E set(int index, E item){
+            throw new UnsupportedOperationException("Toggling lists don't support setting items");
+        }
+        
+        /**
+         * Deselect the specified value.
+         *
+         * @throws IllegalArgumentException if the element isn't found
+         */
+        public void add(int index, E item) {
+            index = source.indexOf(item);
+            if(index != -1) {
+                deselect(index);
+            } else {
+                throw new IllegalArgumentException("Added item " + item + " must be in source list");
+            }
+        }
+
+        /**
+         * Select the specified index.
+         */
+        public E remove(int index){
+            if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
+            int sourceIndex = getSourceIndex(index);
+            select(sourceIndex);
+            return source.get(sourceIndex);
         }
     }
 }

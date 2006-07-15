@@ -610,4 +610,98 @@ public class ListSelectionTest extends TestCase {
         assertEquals(2, listSelection.getMinSelectionIndex());
         assertEquals(5, listSelection.getMaxSelectionIndex());
     }
+    
+    public void testTogglingViewAddingAndRemoving(){
+
+        source.add(new Integer(0));
+        source.add(new Integer(1));
+        source.add(new Integer(2));
+        source.add(new Integer(3));
+        source.add(new Integer(4));
+        source.add(new Integer(5));
+        
+        List selectedToggler = listSelection.getTogglingSelected();
+        List deselectedToggler = listSelection.getTogglingDeselected();
+        assertEquals(0, selectedToggler.size());
+        selectedToggler.add(source.get(0));
+        assertEquals(1, selectedToggler.size());
+        assertEquals(6, source.size());
+        assertEquals(5, deselectedToggler.size());
+        deselectedToggler.remove(source.get(1));
+        deselectedToggler.add(source.get(0));
+        assertEquals(1, selectedToggler.size());
+        assertEquals(6, source.size());
+        assertEquals(5, deselectedToggler.size());
+        selectedToggler.remove(source.get(1));
+        assertEquals(0, selectedToggler.size());
+        assertEquals(6, source.size());
+        assertEquals(6, deselectedToggler.size());
+        
+
+        try {
+            listSelection.getTogglingSelected().remove(6);
+            fail("IndexOutOfBoundsException not thrown when removing beyond end");
+        } catch(IndexOutOfBoundsException e) {}
+        try {
+            listSelection.getTogglingDeselected().remove(6);
+            fail("IndexOutOfBoundsException not thrown when removing beyond end");
+        } catch(IndexOutOfBoundsException e) {}
+        
+    }
+    
+    public void testAddingItemNotInSourceToTogglingView(){
+        try {
+            listSelection.getTogglingSelected().add(new Integer(6));
+            fail("IllegalArgumentException not thrown when item not in source list added");
+        } catch(IllegalArgumentException e) {}
+        try {
+            listSelection.getTogglingDeselected().add(new Integer(6));
+            fail("IllegalArgumentException not thrown when item not in source list added");
+        } catch(IllegalArgumentException e) {}
+        List<Integer> ints = new ArrayList<Integer>();
+        ints.add(0);
+        ints.add(1);
+        try {
+            listSelection.getTogglingSelected().addAll(ints);
+            fail("IllegalArgumentException not thrown when item not in source list added");
+        } catch(IllegalArgumentException e) {}
+        try {
+            listSelection.getTogglingDeselected().addAll(ints);
+            fail("IllegalArgumentException not thrown when item not in source list added");
+        } catch(IllegalArgumentException e) {}
+    }
+    
+    public void testRemovingItemNotInSourceFromTogglingView() {
+        List togglingSelected = listSelection.getTogglingSelected();
+        List togglingDeselected = listSelection.getTogglingDeselected();
+        assertFalse(togglingSelected.remove(new Integer(6)));
+        assertFalse(togglingDeselected.remove(new Integer(6)));
+        List<Integer> ints = new ArrayList<Integer>();
+        ints.add(0);
+        ints.add(1);
+        assertFalse(togglingSelected.removeAll(ints));
+        assertFalse(togglingDeselected.removeAll(ints));
+    }
+    
+    public void testTogglingViewBulkOperations(){
+        List<Integer> ints = new ArrayList<Integer>();
+        ints.add(0);
+        ints.add(1);
+        source.addAll(ints);
+        listSelection.getTogglingSelected().addAll(ints);
+        assertEquals(2, listSelection.getTogglingSelected().size());
+        assertEquals(0, listSelection.getTogglingDeselected().size());
+        listSelection.getTogglingDeselected().addAll(ints);
+        assertEquals(0, listSelection.getTogglingSelected().size());
+        assertEquals(2, source.size());
+        assertEquals(2, listSelection.getTogglingDeselected().size());
+        listSelection.getTogglingDeselected().removeAll(ints);
+        assertEquals(2, listSelection.getTogglingSelected().size());
+        assertEquals(2, source.size());
+        assertEquals(0, listSelection.getTogglingDeselected().size());
+        listSelection.getTogglingSelected().removeAll(ints);
+        assertEquals(0, listSelection.getTogglingSelected().size());
+        assertEquals(2, source.size());
+        assertEquals(2, listSelection.getTogglingDeselected().size());
+    }
 }
