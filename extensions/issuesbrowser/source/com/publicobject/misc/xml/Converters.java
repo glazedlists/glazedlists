@@ -48,12 +48,19 @@ public final class Converters {
         }
 
         public Object convert(String value) {
-            for (int i = 0; i < format.length; i++) {
-                try {
-                    return format[i].parse(value);
-                } catch (ParseException e) {
-                    if (i == format.length-1)
-                        throw new RuntimeException(e);
+            // Format is most like a SimpleDateFormat. From the SimpleDateFormat class doc:
+            //
+            // Date formats are not synchronized. It is recommended to create separate
+            // format instances for each thread. If multiple threads access a format
+            // concurrently, it must be synchronized externally.
+            synchronized (format) {
+                for (int i = 0; i < format.length; i++) {
+                    try {
+                        return format[i].parse(value);
+                    } catch (ParseException e) {
+                        if (i == format.length-1)
+                            throw new RuntimeException(e);
+                    }
                 }
             }
 

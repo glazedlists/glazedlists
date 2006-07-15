@@ -36,12 +36,12 @@ import javax.xml.parsers.ParserConfigurationException;
  *   Parser parser = new Parser();
  *
  *   // create a new Customer object each time the customer start tag is found
- *   XMLTagPath customerStartPath = XMLTagPath.startTag("customer");
+ *   XMLTagPath customerStartPath = XMLTagPath.startTagPath("customer");
  *   Processor customerStartTag = Processors.createNewObject(Customer.class);
  *   parser.addProcessor(customerStartPath, customerStartTag);
  *
  *   // add the new Customer object to the target EventList when the end tag is found
- *   XMLTagPath customerEndPath = XMLTagPath.endTag("customer");
+ *   XMLTagPath customerEndPath = XMLTagPath.endTagPath("customer");
  *   Processor customerEndTag = Processors.addObjectToTargetList();
  *   parser.addProcessor(customerEndPath, customerEndTag);
  *
@@ -225,7 +225,10 @@ public class Parser {
         /** @inheritDoc */
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             // update the XMLTagPath by pushing on the latest start tag
-            currentTagPath = currentTagPath.push(qName);
+            currentTagPath = currentTagPath.child(qName).start();
+
+            // null out any value at the position within the parse context Map
+            context.put(currentTagPath.end(), null);
 
             // execute any Processor associated with the current start XMLTagPath
             executeProcessor(currentTagPath, context);
@@ -237,13 +240,15 @@ public class Parser {
             currentTagPath = currentTagPath.end();
 
             // store the raw String data captured between the start and end tags
-            context.put(currentTagPath, currentChars.toString());
+            // if the context does not include a value already
+            if (context.get(currentTagPath) == null)
+                context.put(currentTagPath, currentChars.toString());
 
             // execute any Processor associated with the current end XMLTagPath
             executeProcessor(currentTagPath, context);
 
             // remove the last tag in the XMLTagPath to obtain the start of the next XMLTagPath
-            currentTagPath = currentTagPath.pop();
+            currentTagPath = currentTagPath.parent();
 
             // reset the raw String data capture buffer
             currentChars.setLength(0);

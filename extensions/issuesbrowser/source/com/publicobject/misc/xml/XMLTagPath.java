@@ -113,10 +113,20 @@ public final class XMLTagPath {
      * Produces a new XMLTagPath by appending the given <code>part</code> to
      * this XMLTagPath.
      */
-    public XMLTagPath push(String part) {
+    public XMLTagPath child(String part) {
         final LinkedList<String> newParts = new LinkedList<String>(parts);
         newParts.add(part);
-        return new XMLTagPath(newParts, START_TAG);
+        return new XMLTagPath(newParts, location);
+    }
+
+    /**
+     * Produces a new XMLTagPath by removing the last <code>part</code> from
+     * this XMLTagPath.
+     */
+    public XMLTagPath parent() {
+        final LinkedList<String> newParts = new LinkedList<String>(parts);
+        newParts.removeLast();
+        return new XMLTagPath(newParts, location);
     }
 
     /**
@@ -133,16 +143,6 @@ public final class XMLTagPath {
      */
     public XMLTagPath end() {
         return location == END_TAG ? this : new XMLTagPath(parts, END_TAG);
-    }
-
-    /**
-     * Produces a new XMLTagPath by removing the last <code>part</code> from
-     * this XMLTagPath.
-     */
-    public XMLTagPath pop() {
-        final LinkedList<String> newParts = new LinkedList<String>(parts);
-        newParts.removeLast();
-        return new XMLTagPath(newParts, location);
     }
 
     /** @inheritDoc */

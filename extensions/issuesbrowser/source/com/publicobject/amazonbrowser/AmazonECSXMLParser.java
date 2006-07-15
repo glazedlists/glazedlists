@@ -30,50 +30,37 @@ public class AmazonECSXMLParser {
         // Parsing instructions for Item
         final XMLTagPath startItemTag = XMLTagPath.startTagPath("ItemLookupResponse Items Item");
         final XMLTagPath endItemTag = startItemTag.end();
-        ITEM_LOOKUP_PARSER.addProcessor(startItemTag, Processors.createNewObject(Item.class, startItemTag));
-
-        final XMLTagPath endASINTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ASIN");
-        final XMLTagPath endDetailPageURLTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item DetailPageURL");
-        ITEM_LOOKUP_PARSER.addProcessor(endASINTag,          Processors.setterMethod(startItemTag, endASINTag, Item.class, "aSIN"));
-        ITEM_LOOKUP_PARSER.addProcessor(endDetailPageURLTag, Processors.setterMethod(startItemTag, endDetailPageURLTag, Item.class, "detailPageURL"));
-        ITEM_LOOKUP_PARSER.addProcessor(endItemTag,          Processors.addObjectToTargetList(startItemTag));
+        ITEM_LOOKUP_PARSER.addProcessor(startItemTag,                                        Processors.createNewObject(Item.class));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemTag.child("ASIN"),                            Processors.setterMethod(Item.class, "aSIN"));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemTag.child("DetailPageURL"),                   Processors.setterMethod(Item.class, "detailPageURL"));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemTag,                                          Processors.addObjectToTargetList());
 
         // Parsing instructions for ItemAttributes
-        final XMLTagPath startItemAttributesTag = XMLTagPath.startTagPath("ItemLookupResponse Items Item ItemAttributes");
+        final XMLTagPath startItemAttributesTag = startItemTag.child("ItemAttributes");
         final XMLTagPath endItemAttributesTag = startItemAttributesTag.end();
-        ITEM_LOOKUP_PARSER.addProcessor(startItemAttributesTag, Processors.createNewObject(ItemAttributes.class, startItemAttributesTag));
-
-        final XMLTagPath endAudienceRatingTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes AudienceRating");
-        final XMLTagPath endDirectorTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes Director");
-        final XMLTagPath endReleaseDateTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes ReleaseDate");
-        final XMLTagPath endTheatricalReleaseDateTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes TheatricalReleaseDate");
-        final XMLTagPath endTitleTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes Title");
-        ITEM_LOOKUP_PARSER.addProcessor(endAudienceRatingTag,        Processors.setterMethod(startItemAttributesTag, endAudienceRatingTag, ItemAttributes.class, "audienceRating", new AudienceRatingConverter()));
-        ITEM_LOOKUP_PARSER.addProcessor(endDirectorTag,              Processors.setterMethod(startItemAttributesTag, endDirectorTag, ItemAttributes.class, "director"));
-        ITEM_LOOKUP_PARSER.addProcessor(endReleaseDateTag,           Processors.setterMethod(startItemAttributesTag, endReleaseDateTag, ItemAttributes.class, "releaseDate", Converters.date(dateFormats)));
-        ITEM_LOOKUP_PARSER.addProcessor(endTheatricalReleaseDateTag, Processors.setterMethod(startItemAttributesTag, endTheatricalReleaseDateTag, ItemAttributes.class, "theatricalReleaseDate", Converters.date(dateFormats)));
-        ITEM_LOOKUP_PARSER.addProcessor(endTitleTag,                 Processors.setterMethod(startItemAttributesTag, endTitleTag, ItemAttributes.class, "title"));
-        ITEM_LOOKUP_PARSER.addProcessor(endItemAttributesTag,    Processors.setterMethod(startItemTag, startItemAttributesTag, Item.class, "itemAttributes"));
+        ITEM_LOOKUP_PARSER.addProcessor(startItemAttributesTag,                              Processors.createNewObject(ItemAttributes.class));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemAttributesTag.child("AudienceRating"),        Processors.setterMethod(ItemAttributes.class, "audienceRating", new AudienceRatingConverter()));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemAttributesTag.child("Director"),              Processors.setterMethod(ItemAttributes.class, "director"));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemAttributesTag.child("ReleaseDate"),           Processors.setterMethod(ItemAttributes.class, "releaseDate", Converters.date(dateFormats)));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemAttributesTag.child("TheatricalReleaseDate"), Processors.setterMethod(ItemAttributes.class, "theatricalReleaseDate", Converters.date(dateFormats)));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemAttributesTag.child("Title"),                 Processors.setterMethod(ItemAttributes.class, "title"));
+        ITEM_LOOKUP_PARSER.addProcessor(endItemAttributesTag,                                Processors.setterMethod(Item.class, "itemAttributes"));
 
         // Parsing instructions for ListPrice
-        final XMLTagPath startListPriceTag = XMLTagPath.startTagPath("ItemLookupResponse Items Item ItemAttributes ListPrice");
+        final XMLTagPath startListPriceTag = startItemAttributesTag.child("ListPrice");
         final XMLTagPath endListPriceTag = startListPriceTag.end();
-        ITEM_LOOKUP_PARSER.addProcessor(startListPriceTag, Processors.createNewObject(ListPrice.class, startListPriceTag));
-
-        final XMLTagPath endAmountTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes ListPrice Amount");
-        final XMLTagPath endCurrencyCodeTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes ListPrice CurrencyCode");
-        final XMLTagPath endFormattedPriceTag = XMLTagPath.endTagPath("ItemLookupResponse Items Item ItemAttributes ListPrice FormattedPrice");
-        ITEM_LOOKUP_PARSER.addProcessor(endAmountTag,         Processors.setterMethod(startListPriceTag, endAmountTag, ListPrice.class, "amount", Converters.integer()));
-        ITEM_LOOKUP_PARSER.addProcessor(endCurrencyCodeTag,   Processors.setterMethod(startListPriceTag, endCurrencyCodeTag, ListPrice.class, "currencyCode"));
-        ITEM_LOOKUP_PARSER.addProcessor(endFormattedPriceTag, Processors.setterMethod(startListPriceTag, endFormattedPriceTag, ListPrice.class, "formattedPrice"));
-        ITEM_LOOKUP_PARSER.addProcessor(endListPriceTag,  Processors.setterMethod(startItemAttributesTag, startListPriceTag, ItemAttributes.class, "listPrice"));
+        ITEM_LOOKUP_PARSER.addProcessor(startListPriceTag,                                   Processors.createNewObject(ListPrice.class));
+        ITEM_LOOKUP_PARSER.addProcessor(endListPriceTag.child("Amount"),                     Processors.setterMethod(ListPrice.class, "amount", Converters.integer()));
+        ITEM_LOOKUP_PARSER.addProcessor(endListPriceTag.child("CurrencyCode"),               Processors.setterMethod(ListPrice.class, "currencyCode"));
+        ITEM_LOOKUP_PARSER.addProcessor(endListPriceTag.child("FormattedPrice"),             Processors.setterMethod(ListPrice.class, "formattedPrice"));
+        ITEM_LOOKUP_PARSER.addProcessor(endListPriceTag,                                     Processors.setterMethod(ItemAttributes.class, "listPrice"));
     }
 
     private static final Parser ITEM_SEARCH_PARSER = new Parser();
     static {
         // configure the Parser for Item Searches
         XMLTagPath endASINTag = XMLTagPath.endTagPath("ItemSearchResponse Items Item ASIN");
-        ITEM_SEARCH_PARSER.addProcessor(endASINTag, Processors.addObjectToTargetList(endASINTag));
+        ITEM_SEARCH_PARSER.addProcessor(endASINTag, Processors.addObjectToTargetList());
     }
 
     private static final XMLTagPath ITEM_SEARCH_RESULTS_PAGE_COUNT = XMLTagPath.endTagPath("ItemSearchResponse Items TotalPages");
@@ -212,8 +199,8 @@ public class AmazonECSXMLParser {
         /** The list of all Items to populate */
         private final EventList<Item> target;
 
-        /** A pool of 50 Threads servicing an unbounded Channel. */
-        private final PooledExecutor threadPool = new PooledExecutor(new LinkedQueue(), 50);
+        /** A pool of Threads servicing an unbounded Channel. */
+        private final PooledExecutor threadPool = new PooledExecutor(new LinkedQueue(), 5);
 
         public ItemFetcher(EventList<Item> target) {
             this.target = target;
@@ -253,7 +240,7 @@ public class AmazonECSXMLParser {
 
         /**
          * This Runnable fetches the details for an individual Amazon product
-         * identified by its ASIN (Amazon Standard Identification Number)
+         * identified by its ASIN (Amazon Standard Identification Number).
          */
         private static class LoadItemRunnable implements Runnable {
             private static final int MAX_RETRIES = 10;
@@ -270,9 +257,6 @@ public class AmazonECSXMLParser {
                 for (int retries = MAX_RETRIES; retries > 0; retries--) {
                     try {
                         loadItem(target, asin);
-
-                        if (retries != MAX_RETRIES)
-                            System.out.println("SUCCEEDED IN FETCHING " + asin + " AFTER " + (MAX_RETRIES - retries) + " ATTEMPTS.");
                         return;
                     } catch (IOException e) {
                         retries--;
