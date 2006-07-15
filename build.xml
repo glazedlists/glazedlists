@@ -110,7 +110,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser"
+	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser, swinglabs"
 		description="Compile all components of the source.">
 	</target>
 
@@ -477,7 +477,11 @@
                     <assertions>
                             <enable/>
                     </assertions>
-                    <classpath path="classes:${ant.home}/lib/junit.jar"/>
+                    <classpath>
+                        <pathelement location="classes"/>
+                        <fileset dir="extensions" includes="**/*.jar"/>
+                        <fileset file="${ant.home}/lib/junit.jar"/>
+                    </classpath>
                     <formatter type="brief" usefile="false"/>
                     <batchtest>
                             <fileset dir="classes/" includes="**/**Test.class"/>
