@@ -183,9 +183,7 @@ public class IssuezillaXMLParser {
 
     /**
      * ParserSidekick performs various services for the SaxParser.
-     * It doesn't print exceptions caused by InterruptedException since this parser
-     * is frequently interrupted intentionally. It also skips DTD validation for
-     * a significant performance boost.
+     * It skips DTD validation for a significant performance boost.
      *
      * @see <a href="http://forum.java.sun.com/thread.jspa?forumID=34&threadID=284209">Java Forums</a>
      */
@@ -237,12 +235,11 @@ public class IssuezillaXMLParser {
         /**
          * Gets the list of issues parsed by this handler.
          */
-        public List getIssues() {
+        public List<Issue> getIssues() {
             return issues;
         }
 
-        public void startElement(String uri, String localName, String qName,
-            Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
             // ignore issuezilla tags
             if(qName.equals("issuezilla")) {
                 // ignore
@@ -511,23 +508,6 @@ public class IssuezillaXMLParser {
     }
 
     /**
-     * Convert the specified literal String to a String that the Java compiler
-     * can parse.
-     */
-    private static String escapeToJava(String text) {
-        StringBuffer result = new StringBuffer();
-        for(int c = 0; c < text.length(); c++) {
-            char letter = text.charAt(c);
-            if (letter == '\"') result.append("\\\"");
-            else if (letter == '\\') result.append("\\\\");
-            else if (letter == '\n') result.append("\\n");
-            else result.append(letter);
-        }
-        return result.toString();
-    }
-
-
-    /**
      * A simple class for parsing issuezilla element blocks that contain no
      * smaller blocks within.
      */
@@ -538,15 +518,13 @@ public class IssuezillaXMLParser {
         private Set acceptableFields = null;
         private StringBuffer currentValue;
 
-        protected AbstractSimpleElementHandler(IssueHandler parent, String hostElement,
-            Set acceptableFields) {
+        protected AbstractSimpleElementHandler(IssueHandler parent, String hostElement, Set acceptableFields) {
             this.parent = parent;
             this.hostElement = hostElement;
             this.acceptableFields = acceptableFields;
         }
 
-        public void startElement(String uri, String localName, String qName,
-            Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
             if(currentField != null) {
                 parent.addException(this + " expected end of element " + currentField + " but found " + qName);
             } else if(acceptableFields.contains(qName)) {
