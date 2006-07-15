@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-// demo
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -13,10 +12,10 @@ import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 import com.publicobject.issuesbrowser.*;
 import com.publicobject.misc.Exceptions;
-import com.publicobject.misc.Throbber;
 import com.publicobject.misc.swing.Icons;
 import com.publicobject.misc.swing.JSeparatorTable;
 import com.publicobject.misc.swing.NoFocusRenderer;
+import com.publicobject.misc.swing.IndeterminateToggler;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -79,7 +78,7 @@ public class IssuesBrowser implements Runnable {
     private IssueCounterLabel issueCounter = null;
 
     /** loads issues as requested */
-    private IssueLoader issueLoader = new IssueLoader(issuesEventList, new IndeterminateToggler());
+    private IssueLoader issueLoader = null;
 
     /** the application window */
     private JFrame frame;
@@ -107,7 +106,8 @@ public class IssuesBrowser implements Runnable {
         Exceptions.getInstance().addHandler(new AccessControlExceptionHandler());
         Exceptions.getInstance().addHandler(new IOExceptionCode500Handler());
 
-        // start loading the issues
+        // create the issue loader and start loading issues
+        issueLoader = new IssueLoader(issuesEventList, new IndeterminateToggler(throbber, THROBBER_ACTIVE, THROBBER_STATIC));
         issueLoader.start();
 
         // load issues from a file if requested
@@ -130,7 +130,6 @@ public class IssuesBrowser implements Runnable {
      * Constructs the browser as a standalone frame.
      */
     private void constructStandalone() {
-        // create a frame with that panel
         frame = new JFrame("Issues");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1024, 600);
@@ -222,7 +221,7 @@ public class IssuesBrowser implements Runnable {
         issueDetailsComponent.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GLAZED_LISTS_DARK_BROWN));
 
         // the outermost panel to layout the icon bar with the other panels
-        JPanel mainPanel = new JPanel(new GridBagLayout());
+        final JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.add(iconBar,                        new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         mainPanel.add(filtersPanel,                   new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         mainPanel.add(Box.createHorizontalStrut(240), new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -294,34 +293,6 @@ public class IssuesBrowser implements Runnable {
             final IssuesBrowser browser = new IssuesBrowser();
             browser.setStartupArgs(args);
             browser.run();
-        }
-    }
-
-    /**
-     * Toggles the throbber on and off.
-     */
-    private class IndeterminateToggler implements Runnable, Throbber {
-
-        /** whether the throbber will be turned on or off */
-        private boolean on = false;
-
-        public synchronized void setOn() {
-            if (!on) {
-                on = true;
-                SwingUtilities.invokeLater(this);
-            }
-        }
-
-        public synchronized void setOff() {
-            if (on) {
-                on = false;
-                SwingUtilities.invokeLater(this);
-            }
-        }
-
-        public synchronized void run() {
-            if(on) throbber.setIcon(THROBBER_ACTIVE);
-            else throbber.setIcon(THROBBER_STATIC);
         }
     }
 
