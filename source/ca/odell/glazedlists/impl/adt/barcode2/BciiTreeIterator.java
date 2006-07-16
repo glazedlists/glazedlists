@@ -113,7 +113,7 @@ public class BciiTreeIterator<V> {
 
     /**
      * @return <code>true</code> if there's an element of the specified color in
-     *     this tree.
+     *     this tree following the current element.
      */
     public boolean hasNext(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
         if(node == null) {
@@ -125,6 +125,21 @@ public class BciiTreeIterator<V> {
         }
     }
 
+    /**
+     * @return <code>true</code> if there's a node of the specified color in this
+     *      tree following the current node.
+     */
+    public boolean hasNextNode(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
+        if(node == null) {
+            return tree.size(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/) > 0;
+        } else {
+            return nodeEndIndex(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/) < tree.size(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/);
+        }
+    }
+
+    /**
+     * Step to the next element.
+     */
     public void next(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
         if(!hasNext(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/)) {
             throw new NoSuchElementException();
@@ -172,6 +187,54 @@ public class BciiTreeIterator<V> {
         }
     }
 
+    /**
+     * Step to the next node.
+     */
+    public void nextNode(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
+        if(!hasNextNode(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/)) {
+            throw new NoSuchElementException();
+        }
+
+        // start at the first node in the tree
+        if(node == null) {
+            node = tree.firstNode();
+            index = 0;
+            /*[ COLORED_START ]*/if((node.color & colors) != 0) /*[ COLORED_END ]*/ return;
+        }
+
+        // scan through the nodes, looking for the first one of the right color
+        while(true) {
+            /*[ GENERATED_CODE_START
+            forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`count1 += NODE_SIZE(node, colors) - index;
+            ', `if(node.color == indexToBit(i)) counti(i) += node.size - index;
+            ')')
+            GENERATED_CODE_END
+            EXAMPLE_START ]*/
+            if(node.color == 1) count1 += node.size - index;
+            if(node.color == 2) count2 += node.size - index;
+            if(node.color == 4) count4 += node.size - index;
+            /*[ EXAMPLE_END ]*/
+            node = BciiTree.next(node);
+            index = 0;
+
+            // we've found a node that meet our requirements, so return
+            /*[ COLORED_START ]*/ if((node.color & colors) != 0) /*[ COLORED_END ]*/ break;
+        }
+    }
+
+
+    /**
+     * Get the size of the current node, or 0 if it's color doesn't match those
+     * specified.
+     */
+    public int nodeSize(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
+        if(/*[ COLORED_START(true) ]*/ (node.color & colors) != 0 /*[ COLORED_END ]*/) {
+            return /*[ WIDE_NODES_START(1) ]*/ node.size /*[ WIDE_NODES_END ]*/;
+        } else {
+            return 0;
+        }
+    }
+
     /*[ COLORED_START ]*/
     /**
      * The color of the current element.
@@ -183,7 +246,7 @@ public class BciiTreeIterator<V> {
     /*[ COLORED_END ]*/
 
     /**
-     * Expected values for index should be 0, 1, 2, 3...
+     * Expected values for index should be in the range  ( 0, size() - 1 )
      */
     public int index(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
         if(node == null) throw new NoSuchElementException();
@@ -191,7 +254,6 @@ public class BciiTreeIterator<V> {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-        // forloop(`i', 0, VAR_LAST_COLOR_INDEX, )
         /*[ GENERATED_CODE_START
         forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`result += count1;
         ', `if((colors & indexToBit(i)) != 0) result += counti(i);
@@ -203,6 +265,46 @@ public class BciiTreeIterator<V> {
         if((colors & 4) != 0) result += count4;
         /*[ EXAMPLE_END ]*/
         return result;
+    }
+    /**
+     * Get the index of the current node's start.
+     */
+    public int nodeStartIndex(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
+        if(node == null) throw new NoSuchElementException();
+
+        // the count of all nodes prior to this one
+        int result = 0;
+
+        // this should merely be the sum of each count
+        /*[ GENERATED_CODE_START
+        forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`result += count1;
+        ', `if((colors & indexToBit(i)) != 0) result += counti(i);
+        ')')
+        GENERATED_CODE_END
+        EXAMPLE_START ]*/
+        if((colors & 1) != 0) result += count1;
+        if((colors & 2) != 0) result += count2;
+        if((colors & 4) != 0) result += count4;
+        /*[ EXAMPLE_END ]*/
+
+        // subtract the count of anything in the current node which we may
+        // have included inadvertently
+        if(/*[ COLORED_START(true) ]*/ (node.color & colors) != 0 /*[ COLORED_END ]*/) {
+            result -= index;
+        }
+
+        return result;
+    }
+    /**
+     * Get the index of the node immediately following the current. Expected
+     * values are in the range ( 1, size() )
+     */
+    public int nodeEndIndex(/*[ COLORED_START ]*/ byte colors /*[ COLORED_END ]*/) {
+        if(node == null) throw new NoSuchElementException();
+
+        // the count of all nodes previous
+        return nodeStartIndex(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/)
+                + nodeSize(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/);
     }
     public V value() {
         if(node == null) throw new IllegalStateException();

@@ -483,12 +483,12 @@ public class Tree4Test extends TestCase {
 
     public void testIterator() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
-        Element<String> a = tree.addInSortedOrder(Tree4Test.a, "A", 3);
-        Element<String> b = tree.addInSortedOrder(Tree4Test.b, "B", 1);
-        Element<String> c = tree.addInSortedOrder(Tree4Test.c, "C", 2);
-        Element<String> d = tree.addInSortedOrder(Tree4Test.a, "D", 3);
-        Element<String> e = tree.addInSortedOrder(Tree4Test.b, "E", 1);
-        Element<String> f = tree.addInSortedOrder(Tree4Test.c, "F", 2);
+        tree.addInSortedOrder(Tree4Test.a, "A", 3);
+        tree.addInSortedOrder(Tree4Test.b, "B", 1);
+        tree.addInSortedOrder(Tree4Test.c, "C", 2);
+        tree.addInSortedOrder(Tree4Test.a, "D", 3);
+        tree.addInSortedOrder(Tree4Test.b, "E", 1);
+        tree.addInSortedOrder(Tree4Test.c, "F", 2);
 
         assertEquals(GlazedListsTests.stringToList("AAABCCDDDEFF"), iteratorToList(new FourColorTreeIterator(tree)));
         assertEquals(GlazedListsTests.stringToList("AAABCCDDDEFF"), iteratorToList(new FourColorTreeIterator(tree, 0, allColors)));
@@ -512,6 +512,63 @@ public class Tree4Test extends TestCase {
             result.add(iterator.value());
         }
         return result;
+    }
+
+    /**
+     * Make sure the iterator iterates over blocks as expected.
+     */
+    public void testIteratorOnBlocks() {
+        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        // AAABCCDDDEFF
+        tree.addInSortedOrder(Tree4Test.a, "A", 3);
+        tree.addInSortedOrder(Tree4Test.b, "B", 1);
+        tree.addInSortedOrder(Tree4Test.c, "C", 2);
+        tree.addInSortedOrder(Tree4Test.a, "D", 3);
+        tree.addInSortedOrder(Tree4Test.b, "E", 1);
+        tree.addInSortedOrder(Tree4Test.c, "F", 2);
+
+        FourColorTreeIterator<String> iterator = new FourColorTreeIterator<String>(tree, 0, allColors);
+
+        assertEquals(true, iterator.hasNextNode(allColors));
+        iterator.nextNode(allColors);
+        assertEquals(0, iterator.index(allColors));
+        assertEquals("A", iterator.value());
+        assertEquals(3, iterator.nodeEndIndex(allColors));
+
+        assertEquals(true, iterator.hasNextNode(allColors));
+        iterator.nextNode(allColors);
+        assertEquals(3, iterator.index(allColors));
+        assertEquals("B", iterator.value());
+        assertEquals(4, iterator.nodeEndIndex(allColors));
+
+        assertEquals(true, iterator.hasNextNode(allColors));
+        iterator.nextNode(allColors);
+        assertEquals(4, iterator.index(allColors));
+        assertEquals("C", iterator.value());
+        assertEquals(6, iterator.nodeEndIndex(allColors));
+
+        assertEquals(true, iterator.hasNextNode(allColors));
+        iterator.nextNode(allColors);
+        assertEquals(6, iterator.index(allColors));
+        assertEquals("D", iterator.value());
+        assertEquals(9, iterator.nodeEndIndex(allColors));
+        assertEquals(true, iterator.hasNextNode(aOrB));
+        assertEquals(false, iterator.hasNextNode(a));
+
+        assertEquals(true, iterator.hasNextNode(Tree4Test.allColors));
+        iterator.nextNode(allColors);
+        assertEquals(9, iterator.index(allColors));
+        assertEquals("E", iterator.value());
+        assertEquals(10, iterator.nodeEndIndex(allColors));
+        assertEquals(false, iterator.hasNextNode(aOrB));
+
+        assertEquals(true, iterator.hasNextNode(allColors));
+        iterator.nextNode(allColors);
+        assertEquals(10, iterator.index(allColors));
+        assertEquals("F", iterator.value());
+        assertEquals(12, iterator.nodeEndIndex(allColors));
+
+        assertEquals(false, iterator.hasNextNode(allColors));
     }
 
 }

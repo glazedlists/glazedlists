@@ -36,6 +36,7 @@ import java.util.Comparator;
 
 
 
+# define a function NODE_WIDTH(boolean) to get the node's size for this color
 
     
 

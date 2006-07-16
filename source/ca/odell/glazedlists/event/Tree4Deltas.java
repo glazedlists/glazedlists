@@ -192,6 +192,14 @@ class Tree4Deltas {
         public int getIndex() {
             return treeIterator.index(Tree4Deltas.CURRENT_INDICES);
         }
+        public int getEndIndex() {
+            // this is peculiar. We add mixed types - an index of current indices
+            // plus the size of "all indices". . . this is because we describe the
+            // range of deleted indices from its start to finish, although it's
+            // finish will ultimately go to zero once the change is applied. 
+            return treeIterator.nodeStartIndex(Tree4Deltas.CURRENT_INDICES) + treeIterator.nodeSize(Tree4Deltas.ALL_INDICES);
+        }
+
         public int getType() {
             byte color = treeIterator.color();
             if(color == Tree4Deltas.INSERT) return ListEvent.INSERT;
@@ -204,8 +212,16 @@ class Tree4Deltas {
             treeIterator.next(Tree4Deltas.CHANGE_INDICES);
             return true;
         }
+        public boolean nextNode() {
+            if(!hasNextNode()) return false;
+            treeIterator.nextNode(Tree4Deltas.CHANGE_INDICES);
+            return true;
+        }
         public boolean hasNext() {
             return treeIterator.hasNext(Tree4Deltas.CHANGE_INDICES);
+        }
+        public boolean hasNextNode() {
+            return treeIterator.hasNextNode(Tree4Deltas.CHANGE_INDICES);
         }
     }
 }

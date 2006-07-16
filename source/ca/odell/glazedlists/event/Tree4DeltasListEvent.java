@@ -8,10 +8,8 @@ import ca.odell.glazedlists.EventList;
 import java.util.List;
 
 /**
- * Strictly a cut&paste of {@link ca.odell.glazedlists.event.BarcodeListDeltasListEvent}, see {@link ca.odell.glazedlists.event.TreeDeltas}.
- *
- * <p><font color="#FF0000"><strong>Warning: </strong></font> this
- * class is part of an experimental new API.
+ * A list event that iterates {@link Tree4Deltas} as the
+ * datastore.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -62,7 +60,8 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     }
 
     public boolean nextBlock() {
-        return next();
+        if(linearIterator != null) return linearIterator.nextBlock();
+        else return deltasIterator.nextNode();
     }
 
     public boolean isReordering() {
@@ -81,11 +80,13 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     }
 
     public int getBlockStartIndex() {
-        return getIndex();
+        if(linearIterator != null) return linearIterator.getBlockStart();
+        else return deltasIterator.getIndex();
     }
 
     public int getBlockEndIndex() {
-        return getIndex();
+        if(linearIterator != null) return linearIterator.getBlockEnd() - 1;
+        else return deltasIterator.getEndIndex() - 1;
     }
 
     public int getType() {

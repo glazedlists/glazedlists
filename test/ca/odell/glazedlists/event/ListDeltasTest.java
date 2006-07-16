@@ -281,4 +281,20 @@ public class ListDeltasTest extends TestCase {
         source.remove(7);
         nesting.commitEvent();
     }
+
+    /**
+     * Make sure the deltas iterator works as expected.
+     */
+    public void testIterateByBlocks() {
+        Tree4Deltas deltas = new Tree4Deltas();
+        deltas.reset(10);
+        deltas.insert(3, 6);
+
+        Tree4Deltas.Iterator iterator = deltas.iterator();
+        assertEquals(true, iterator.hasNextNode());
+        assertEquals(true, iterator.nextNode());
+        assertEquals(3, iterator.getIndex());
+        assertEquals(6, iterator.getEndIndex());
+        assertEquals(false, iterator.hasNextNode());
+    }
 }

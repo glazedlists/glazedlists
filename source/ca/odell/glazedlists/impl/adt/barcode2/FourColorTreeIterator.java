@@ -32,6 +32,7 @@ import java.util.NoSuchElementException;
 
 
 
+# define a function NODE_WIDTH(boolean) to get the node's size for this color
 
     
 
@@ -148,7 +149,7 @@ public class FourColorTreeIterator<V> {
 
     /**
      * @return <code>true</code> if there's an element of the specified color in
-     *     this tree.
+     *     this tree following the current element.
      */
     public boolean hasNext(  byte colors   ) {
         if(node == null) {
@@ -160,6 +161,21 @@ public class FourColorTreeIterator<V> {
         }
     }
 
+    /**
+     * @return <code>true</code> if there's a node of the specified color in this
+     *      tree following the current node.
+     */
+    public boolean hasNextNode(  byte colors   ) {
+        if(node == null) {
+            return tree.size(  colors   ) > 0;
+        } else {
+            return nodeEndIndex(  colors   ) < tree.size(  colors   );
+        }
+    }
+
+    /**
+     * Step to the next element.
+     */
     public void next(  byte colors   ) {
         if(!hasNext(  colors   )) {
             throw new NoSuchElementException();
@@ -203,6 +219,52 @@ public class FourColorTreeIterator<V> {
         }
     }
 
+    /**
+     * Step to the next node.
+     */
+    public void nextNode(  byte colors   ) {
+        if(!hasNextNode(  colors   )) {
+            throw new NoSuchElementException();
+        }
+
+        // start at the first node in the tree
+        if(node == null) {
+            node = tree.firstNode();
+            index = 0;
+             if((node.color & colors) != 0)    return;
+        }
+
+        // scan through the nodes, looking for the first one of the right color
+        while(true) {
+             
+            if(node.color == 1) count1 += node.size - index;
+            if(node.color == 2) count2 += node.size - index;
+            if(node.color == 4) count4 += node.size - index;
+            if(node.color == 8) count8 += node.size - index;
+            
+            
+             
+            node = FourColorTree.next(node);
+            index = 0;
+
+            // we've found a node that meet our requirements, so return
+              if((node.color & colors) != 0)    break;
+        }
+    }
+
+
+    /**
+     * Get the size of the current node, or 0 if it's color doesn't match those
+     * specified.
+     */
+    public int nodeSize(  byte colors   ) {
+        if(  (node.color & colors) != 0   ) {
+            return   node.size   ;
+        } else {
+            return 0;
+        }
+    }
+
      
     /**
      * The color of the current element.
@@ -214,7 +276,7 @@ public class FourColorTreeIterator<V> {
       
 
     /**
-     * Expected values for index should be 0, 1, 2, 3...
+     * Expected values for index should be in the range  ( 0, size() - 1 )
      */
     public int index(  byte colors   ) {
         if(node == null) throw new NoSuchElementException();
@@ -222,7 +284,6 @@ public class FourColorTreeIterator<V> {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-        // forloop(i, 0, VAR_LAST_COLOR_INDEX, )
          
         if((colors & 1) != 0) result += count1;
         if((colors & 2) != 0) result += count2;
@@ -232,6 +293,44 @@ public class FourColorTreeIterator<V> {
         
          
         return result;
+    }
+    /**
+     * Get the index of the current node's start.
+     */
+    public int nodeStartIndex(  byte colors   ) {
+        if(node == null) throw new NoSuchElementException();
+
+        // the count of all nodes prior to this one
+        int result = 0;
+
+        // this should merely be the sum of each count
+         
+        if((colors & 1) != 0) result += count1;
+        if((colors & 2) != 0) result += count2;
+        if((colors & 4) != 0) result += count4;
+        if((colors & 8) != 0) result += count8;
+        
+        
+         
+
+        // subtract the count of anything in the current node which we may
+        // have included inadvertently
+        if(  (node.color & colors) != 0   ) {
+            result -= index;
+        }
+
+        return result;
+    }
+    /**
+     * Get the index of the node immediately following the current. Expected
+     * values are in the range ( 1, size() )
+     */
+    public int nodeEndIndex(  byte colors   ) {
+        if(node == null) throw new NoSuchElementException();
+
+        // the count of all nodes previous
+        return nodeStartIndex(  colors   )
+                + nodeSize(  colors   );
     }
     public V value() {
         if(node == null) throw new IllegalStateException();

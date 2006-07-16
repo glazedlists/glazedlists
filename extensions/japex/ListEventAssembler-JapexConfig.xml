@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testSuite name="ParsingPerformance" xmlns="http://www.sun.com/japex/testSuite">
+<testSuite name="ListEventAssemblerPerformance" xmlns="http://www.sun.com/japex/testSuite">
 
     <param name="japex.classPath" value="${JAPEX_HOME}/jdsl/*.jar"/>
     <param name="japex.classPath" value="classes"/>

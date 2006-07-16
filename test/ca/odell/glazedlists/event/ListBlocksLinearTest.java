@@ -35,7 +35,7 @@ public class ListBlocksLinearTest extends TestCase {
         assertNext(13, ListEvent.UPDATE, iterator);
         assertNext(16, ListEvent.UPDATE, iterator);
         assertNext(17, ListEvent.UPDATE, iterator);
-        assertComplete(iterator);
+        assertEquals(false, iterator.hasNext());
     }
 
     /**
@@ -75,7 +75,7 @@ public class ListBlocksLinearTest extends TestCase {
         assertNext(9, ListEvent.INSERT, iterator);
         assertNext(10, ListEvent.UPDATE, iterator);
         assertNext(11, ListEvent.UPDATE, iterator);
-        assertComplete(iterator);
+        assertEquals(false, iterator.hasNext());
     }
 
     /**
@@ -131,6 +131,32 @@ public class ListBlocksLinearTest extends TestCase {
         assertFalse(listBlocks.update(1, 2));
     }
 
+    /**
+     * Test we can iterate the BlockSequence one block at a time.
+     */
+    public void testIterateByBlocks() {
+        BlockSequence listBlocks = new BlockSequence();
+        listBlocks.insert(0, 2);
+        listBlocks.insert(2, 4);
+        listBlocks.delete(4, 6);
+        listBlocks.delete(4, 6);
+        listBlocks.delete(4, 6);
+        listBlocks.update(4, 6);
+        listBlocks.update(6, 8);
+        listBlocks.delete(8, 10);
+        listBlocks.insert(8, 10);
+        listBlocks.update(10, 12);
+
+        BlockSequence.Iterator iterator = listBlocks.iterator();
+        assertNextBlock(0, 4, ListEvent.INSERT, iterator);
+        assertNextBlock(4, 10, ListEvent.DELETE, iterator);
+        assertNextBlock(4, 8, ListEvent.UPDATE, iterator);
+        assertNextBlock(8, 10, ListEvent.DELETE, iterator);
+        assertNextBlock(8, 10, ListEvent.INSERT, iterator);
+        assertNextBlock(10, 12, ListEvent.UPDATE, iterator);
+        assertEquals(false, iterator.hasNextBlock());
+    }
+
     public static final void assertNext(int index, int type, BlockSequence.Iterator iterator) {
         assertEquals(true, iterator.hasNext());
         assertEquals(true, iterator.next());
@@ -138,7 +164,11 @@ public class ListBlocksLinearTest extends TestCase {
         assertEquals(type, iterator.getType());
     }
 
-    public static final void assertComplete(BlockSequence.Iterator iterator) {
-        assertEquals(false, iterator.hasNext());
+    public static final void assertNextBlock(int startIndex, int endIndex, int type, BlockSequence.Iterator iterator) {
+        assertEquals(true, iterator.hasNext());
+        assertEquals(true, iterator.nextBlock());
+        assertEquals(startIndex, iterator.getBlockStart());
+        assertEquals(endIndex, iterator.getBlockEnd());
+        assertEquals(type, iterator.getType());
     }
 }
