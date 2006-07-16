@@ -10,7 +10,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +17,8 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import com.publicobject.misc.xml.SaxParserSidekick;
 
 /**
  * Parses IssueZilla issue as described by their XML.
@@ -165,9 +166,7 @@ public class IssuezillaXMLParser {
         try {
             // configure a SAX parser
             XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
-            IssuezillaParserSidekick parserSidekick = new IssuezillaParserSidekick();
-            xmlReader.setEntityResolver(parserSidekick);
-            xmlReader.setErrorHandler(parserSidekick);
+            SaxParserSidekick.install(xmlReader);
             xmlReader.setContentHandler(new IssueHandler(target, owner));
 
             // parse away
@@ -178,39 +177,6 @@ public class IssuezillaXMLParser {
         } catch(ParserConfigurationException e) {
             e.printStackTrace();
             throw new IOException("Parsing failed " + e.getMessage());
-        }
-    }
-
-    /**
-     * ParserSidekick performs various services for the SaxParser.
-     * It skips DTD validation for a significant performance boost.
-     *
-     * @see <a href="http://forum.java.sun.com/thread.jspa?forumID=34&threadID=284209">Java Forums</a>
-     */
-    static class IssuezillaParserSidekick implements EntityResolver, ErrorHandler {
-        /**
-         * Don't fetch a DTD from a remote webserver.
-         */
-        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-            // skip the DTD
-            if(systemId.endsWith("issuezilla.dtd")) {
-                byte[] emptyDTDBytes = "<?xml version='1.0' encoding='UTF-8'?>".getBytes();
-                return new InputSource(new ByteArrayInputStream(emptyDTDBytes));
-            } else {
-                return null;
-            }
-        }
-        public void error(SAXParseException exception) {
-            System.out.println("Error: ");
-            exception.printStackTrace();
-        }
-        public void fatalError(SAXParseException exception) {
-            System.out.println("Fatal error: ");
-            exception.printStackTrace();
-        }
-        public void warning(SAXParseException exception) {
-            System.out.println("Warning: ");
-            exception.printStackTrace();
         }
     }
 

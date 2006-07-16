@@ -35,7 +35,7 @@ public class AmazonBrowser implements Runnable {
         constructStandalone();
 
         // create the issue loader and start loading issues
-        itemLoader = new ItemLoader(itemEventList, new IndeterminateToggler(throbber, THROBBER_ACTIVE, THROBBER_STATIC));
+        itemLoader = new ItemLoader(null, itemEventList, new IndeterminateToggler(throbber, THROBBER_ACTIVE, THROBBER_STATIC));
         itemLoader.start();
     }
 

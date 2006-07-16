@@ -105,9 +105,8 @@ public class Parser {
         try {
             // configure a SAX parser
             XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
-            ParserSidekick parserSidekick = new ParserSidekick();
-            xmlReader.setEntityResolver(parserSidekick);
-            xmlReader.setErrorHandler(parserSidekick);
+            SaxParserSidekick.install(xmlReader);
+
             xmlReader.setContentHandler(handler);
 
             // parse away

@@ -13,14 +13,18 @@ import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.security.AccessControlException;
 
+import HTTPClient.HTTPConnection;
+
 public class ItemLoader implements Runnable {
 
     private String keywords = null;
     private Throbber throbber = null;
     private Thread itemLoaderThread = null;
     private EventList<Item> itemsList = null;
+    private final String host;
 
-    public ItemLoader(EventList<Item> issuesList, Throbber throbber) {
+    public ItemLoader(String host, EventList<Item> issuesList, Throbber throbber) {
+        this.host = host;
         this.itemsList = GlazedLists.threadSafeList(issuesList);
         this.throbber = throbber;
     }
@@ -64,7 +68,7 @@ public class ItemLoader implements Runnable {
                 // load the issues
                 itemsList.clear();
 
-                AmazonECSXMLParser.searchAndLoadItems(itemsList, currentKeywords);
+                AmazonECSXMLParser.searchAndLoadItems(host, itemsList, currentKeywords);
 
             // handling interruptions is really gross
             } catch (UnknownHostException e) {
