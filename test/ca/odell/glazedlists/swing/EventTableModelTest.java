@@ -10,6 +10,9 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Arrays;
 
 /**
  * Test EventTableModel from the Swing thread.
@@ -217,6 +220,64 @@ public class EventTableModelTest extends SwingTestCase {
     private static final class SaskLabelMatcher implements Matcher<JLabel> {
         public boolean matches(JLabel item) {
             return item.getText().startsWith("sask");
+        }
+    }
+
+    /**
+     * Perform a quick run through the basics of TableComparatorChooser.
+     */
+    public void guiTestTableComparatorChooser() {
+
+        EventList<Color> colors = new BasicEventList<Color>();
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+        colors.add(Color.BLUE);
+        SortedList<Color> sortedColors = new SortedList<Color>(colors, null);
+
+        TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        EventTableModel tableModel = new EventTableModel<Color>(colors, colorTableFormat);
+        JTable table = new JTable(tableModel);
+
+        TableComparatorChooser<Color> tableComparatorChooser = new TableComparatorChooser<Color>(table, sortedColors, false);
+
+        // sort by each column in sequence
+        clickColumnHeader(table, 0);
+        assertEquals(Arrays.asList(new Color[] { Color.GREEN, Color.BLUE, Color.RED }), sortedColors);
+        clickColumnHeader(table, 2);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE, }), sortedColors);
+        clickColumnHeader(table, 1);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
+
+        // clicking column headers shouldn't change anything after the comparator
+        // chooser is disposed
+        tableComparatorChooser.dispose();
+        clickColumnHeader(table, 0);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
+        clickColumnHeader(table, 1);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
+        clickColumnHeader(table, 2);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
+
+        // now create a new column count and change the sort order
+        TableFormat<Color> greenOnlyTableFormat = GlazedLists.tableFormat(new String[] { "green" }, new String[] { "Green" });
+        tableModel.setTableFormat(greenOnlyTableFormat);
+        tableComparatorChooser = new TableComparatorChooser(table, sortedColors, false);
+        sortedColors.setComparator(null);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE,  }), sortedColors);
+        clickColumnHeader(table, 1);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN }), sortedColors);
+    }
+
+    /**
+     * Fake a click on the specified column. This is useful for tests where the
+     * table has not been layed out on screen and may have invalid dimensions.
+     */
+    private void clickColumnHeader(JTable table, int column) {
+        Rectangle columnHeader = table.getTableHeader().getHeaderRect(column);
+        MouseEvent mouseEvent = new MouseEvent(table.getTableHeader(), 0, 0, 0, columnHeader.x, columnHeader.y, 1, false, MouseEvent.BUTTON1);
+        MouseListener[] listeners = table.getTableHeader().getMouseListeners();
+        for(int i = 0; i < listeners.length; i++) {
+            listeners[i].mouseClicked(mouseEvent);
         }
     }
 }
