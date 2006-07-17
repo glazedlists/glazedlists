@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testSuite name="ListEventPublisherPerformance" xmlns="http://www.sun.com/japex/testSuite">
 
-    <param name="japex.classPath" value="${JAPEX_HOME}/jdsl/*.jar"/>
     <param name="japex.classPath" value="classes"/>
 
     <!-- Run each test for 20 seconds -->

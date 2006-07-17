@@ -21,6 +21,8 @@
 		description="Clean up generated files, forcing them to be rebuilt.">
 		<!-- Delete the directories where generated files fall -->
 		<delete dir="classes"/>
+		<!-- Delete the directories where generated japex reports fall -->
+		<delete dir="reports"/>		
         <!-- Delete the temporary directories created for building the demo jar -->
         <delete dir="demojar"/>
         <!-- Delete the Java 1.4 build directory -->
@@ -249,20 +251,38 @@
     </target>
 
     <target name="japex" depends="compile">
-        <property environment="env"/>
+        <!-- download dependencies for japex -->
+        <mkdir dir="extensions/japex/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/37606/activation.jar"/>
+            <arg value="extensions/japex/lib/activation.jar"/>
+        </java>    	        
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/37605/japex-all.jar"/>
+            <arg value="extensions/japex/lib/japex-all.jar"/>
+        </java>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="classes"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/37607/mail.jar"/>
+            <arg value="extensions/japex/lib/mail.jar"/>
+        </java>    	
         <!-- compile the Japex performance tests -->
         <javac destdir="classes" srcdir="extensions/japex/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
-                <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
+                <fileset dir="extensions/japex/lib/" includes="*.jar"/>
             </classpath>
         </javac>
         <!-- execute the Japex performance tests -->
-        <!--<property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>-->
+    	<!--
+        <property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>
+        <property name="config" value="extensions/japex/ListEventPublisher-JapexConfig.xml"/>
+        -->
         <property name="config" value="extensions/japex/SortedList-JapexConfig.xml"/>
         <java dir="." fork="true" classname="com.sun.japex.Japex">
             <classpath>
-                <fileset dir="${env.JAPEX_HOME}/lib/" includes="*.jar"/>
-                <fileset dir="${env.JAPEX_HOME}/jdsl/" includes="*.jar"/>
+                <fileset dir="extensions/japex/lib/" includes="*.jar"/>
             </classpath>
             <arg line="${config}/"/>
         </java>
