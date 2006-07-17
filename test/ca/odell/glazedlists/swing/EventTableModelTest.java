@@ -235,7 +235,7 @@ public class EventTableModelTest extends SwingTestCase {
         SortedList<Color> sortedColors = new SortedList<Color>(colors, null);
 
         TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
-        EventTableModel tableModel = new EventTableModel<Color>(colors, colorTableFormat);
+        EventTableModel<Color> tableModel = new EventTableModel<Color>(colors, colorTableFormat);
         JTable table = new JTable(tableModel);
 
         TableComparatorChooser<Color> tableComparatorChooser = new TableComparatorChooser<Color>(table, sortedColors, false);
@@ -261,7 +261,7 @@ public class EventTableModelTest extends SwingTestCase {
         // now create a new column count and change the sort order
         TableFormat<Color> greenOnlyTableFormat = GlazedLists.tableFormat(new String[] { "green" }, new String[] { "Green" });
         tableModel.setTableFormat(greenOnlyTableFormat);
-        tableComparatorChooser = new TableComparatorChooser(table, sortedColors, false);
+        tableComparatorChooser = new TableComparatorChooser<Color>(table, sortedColors, false);
         sortedColors.setComparator(null);
         assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE,  }), sortedColors);
         clickColumnHeader(table, 1);
