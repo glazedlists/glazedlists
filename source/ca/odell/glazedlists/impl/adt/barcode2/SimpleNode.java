@@ -86,7 +86,7 @@ class SimpleNode<V> implements Element<V> {
     SimpleNode<V> left, right, parent;
 
     /** whether this node is consistent in the sorting order */
-    boolean sorted = true;
+    int sorted = SORTED;
 
     /**
      * Create a new node.
@@ -232,7 +232,7 @@ class SimpleNode<V> implements Element<V> {
     /**
      * Toggle whether this node is sorted.
      */
-    public void setSorted(boolean sorted) {
+    public void setSorted(int sorted) {
         this.sorted = sorted;
     }
 
@@ -243,7 +243,7 @@ class SimpleNode<V> implements Element<V> {
      * user expects order to be both sorted and stable during edits which would
      * otherwise change the sorting order.
      */
-    public boolean isSorted() {
+    public int getSorted() {
         return sorted;
     }
 

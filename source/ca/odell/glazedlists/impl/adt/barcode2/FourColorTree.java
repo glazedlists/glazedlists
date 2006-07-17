@@ -349,12 +349,11 @@ public class FourColorTree<V> {
                     sortSide = -1;
                     break;
                 // we've found a comparable node, use it
-                } else if(currentFollower.sorted) {
+                } else if(currentFollower.sorted == Element.SORTED) {
                     sortSide = comparator.compare(value, currentFollower.value);
                     break;
                 }
             }
-            //int sortSide = comparator.compare(value, parent.value);
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:

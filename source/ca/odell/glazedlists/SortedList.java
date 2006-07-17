@@ -235,7 +235,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             } else if(changeType == ListEvent.UPDATE) {
                 Element<Element> unsortedNode = unsorted.get(unsortedIndex);
                 Element sortedNode = unsortedNode.get();
-                sortedNode.setSorted(false);
+                sortedNode.setSorted(Element.PENDING);
                 updateNodes.add(sortedNode);
 
             // on delete, delete the index and sorted node
@@ -248,14 +248,67 @@ public final class SortedList<E> extends TransformedList<E,E> {
             }
         }
 
+        // decide which updated elements need to be shifted. We walk through the
+        // tree, marking updated elements as sorted or unsorted depending on their
+        // value relative to their neighbours
+        for(Iterator<Element<Element>> i = updateNodes.iterator(); i.hasNext(); ) {
+            Element<Element> sortedNode = i.next();
+            // we may have already handled this via a neighbour 
+            if(sortedNode.getSorted() != Element.PENDING) continue;
+
+            // find the bounds (by value) on this element. this is the last element
+            // preceeding current that's sorted and the first element after current
+            // that's sorted. If there's no such element (ie. the end of the list),
+            // then the bound element is null
+            Element lowerBound = null;
+            Element upperBound = null;
+            Element firstUnsortedNode = sortedNode;
+            for(Element leftNeighbour = sortedNode.previous(); leftNeighbour != null; leftNeighbour = leftNeighbour.previous()) {
+                if(leftNeighbour.getSorted() != Element.SORTED) {
+                    firstUnsortedNode = leftNeighbour;
+                    continue;
+                }
+                lowerBound = leftNeighbour;
+                break;
+            }
+            for(Element rightNeighbour = sortedNode.next(); rightNeighbour != null; rightNeighbour = rightNeighbour.next()) {
+                if(rightNeighbour.getSorted() != Element.SORTED) continue;
+                upperBound = rightNeighbour;
+                break;
+            }
+
+            // walk from the leader to the follower, marking elements as in sorted
+            // order or not. We simply compare them to our 2 potentially distant neighbours
+            // on either side - the lower and upper bounds
+            Comparator nodeComparator = sorted.getComparator();
+            for(Element current = firstUnsortedNode; current != upperBound; current = current.next()) {
+
+                // ensure we're less than the upper bound
+                if(upperBound != null && nodeComparator.compare(current.get(), upperBound.get()) > 0) {
+                    current.setSorted(Element.UNSORTED);
+                    continue;
+                }
+
+                // and greater than the lower bound
+                if(lowerBound != null && nodeComparator.compare(current.get(), lowerBound.get()) < 0) {
+                    current.setSorted(Element.UNSORTED);
+                    continue;
+                }
+
+                // so the node is sorted, and it's our new lower bound
+                current.setSorted(Element.SORTED);
+                lowerBound = current;
+            }
+        }
+
         // fire update events
         for(Iterator<Element<Element>> i = updateNodes.iterator(); i.hasNext(); ) {
             Element<Element> sortedNode = i.next();
+            assert(sortedNode.getSorted() != Element.PENDING);
             int originalIndex = sorted.indexOfNode(sortedNode, ALL_COLORS);
 
             // the element is still in sorted order, forward the update event
-            if(isNodeInSortedOrder(sortedNode)) {
-                sortedNode.setSorted(true);
+            if(sortedNode.getSorted() == Element.SORTED) {
                 updates.addUpdate(originalIndex);
 
             // sort order is not enforced so we lose perfect sorting order
@@ -281,33 +334,6 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // commit the changes and notify listeners
         updates.commitEvent();
-    }
-
-    /**
-     * Whether this node is greater or equal to its neighbour on the left and
-     * less than or equal to its neighbour on the right.
-     *
-     * <p>This method skips unsorted nodes, whose value should not be compared
-     * against when determining tree ordering.
-     */
-    private boolean isNodeInSortedOrder(Element sortedNode) {
-        Comparator comparator = sorted.getComparator();
-
-        // first ensure this node is greater than its predecessors
-        for(Element leftNeighbour = sortedNode.previous(); leftNeighbour != null; leftNeighbour = leftNeighbour.previous()) {
-            if(!leftNeighbour.isSorted()) continue;
-            if(comparator.compare(leftNeighbour.get(), sortedNode.get()) > 0) return false;
-            break;
-        }
-
-        // then ensure this node is less than its followers
-        for(Element rightNeighbour = sortedNode.next(); rightNeighbour != null; rightNeighbour = rightNeighbour.next()) {
-            if(!rightNeighbour.isSorted()) continue;
-            if(comparator.compare(sortedNode.get(), rightNeighbour.get()) > 0) return false;
-            break;
-        }
-
-        return true;
     }
 
     /**

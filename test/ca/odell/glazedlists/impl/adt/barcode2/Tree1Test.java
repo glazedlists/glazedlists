@@ -34,7 +34,7 @@ public class Tree1Test extends TestCase {
         Element<String> m = tree.addInSortedOrder(Tree1Test.allColors, "M", 1);
         Element<String> o = tree.addInSortedOrder(Tree1Test.allColors, "O", 1);
 
-        k.setSorted(false);
+        k.setSorted(Element.UNSORTED);
         k.set("A");
 
         Element<String> h = tree.addInSortedOrder(Tree1Test.allColors, "H", 1);
