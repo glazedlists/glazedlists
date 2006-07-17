@@ -93,11 +93,8 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * Sets this table to be rendered by a different table format. This has
      * some very important consequences. The selection will be lost - this is
      * due to the fact that the table formats may have different numbers of
-     * columns. Another consequence is that the entire table will require
-     * repainting. In a ScrollPane, only the currently displayed cells and
-     * those above (before) them will require repainting. In order to provide
-     * the best performance, the scroll pane may be scrolled to the top to
-     * prevent a delay while rendering off-screen cells.
+     * columns, and JTable has no event to specify columns changing without
+     * rows.
      */
     public void setTableFormat(TableFormat<E> tableFormat) {
         this.tableFormat = tableFormat;
