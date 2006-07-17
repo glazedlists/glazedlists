@@ -9,6 +9,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -228,44 +229,58 @@ public class EventTableModelTest extends SwingTestCase {
      */
     public void guiTestTableComparatorChooser() {
 
+        // build the data
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
         colors.add(Color.BLUE);
         SortedList<Color> sortedColors = new SortedList<Color>(colors, null);
 
-        TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
-        EventTableModel<Color> tableModel = new EventTableModel<Color>(colors, colorTableFormat);
-        JTable table = new JTable(tableModel);
+        // build a sorted table and model
+        TableFormat<Color> greenBlueTableFormat = GlazedLists.tableFormat(new String[] { "green", "blue" }, new String[] { "Green", "Blue" });
+        EventTableModel<Color> tableModel = new EventTableModel<Color>(colors, greenBlueTableFormat);
 
+        // prepare the table for sorting and rendering its header
+        JTable table = new JTable(tableModel);
         TableComparatorChooser<Color> tableComparatorChooser = new TableComparatorChooser<Color>(table, sortedColors, false);
+        TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
 
         // sort by each column in sequence
         clickColumnHeader(table, 0);
-        assertEquals(Arrays.asList(new Color[] { Color.GREEN, Color.BLUE, Color.RED }), sortedColors);
-        clickColumnHeader(table, 2);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE, }), sortedColors);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN }), sortedColors);
         clickColumnHeader(table, 1);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE }), sortedColors);
+
+        // uninstall the table comparator chooser and make sure no ill effects are left behind
+        tableComparatorChooser.dispose();
+        headerRenderer = table.getTableHeader().getDefaultRenderer();
 
         // clicking column headers shouldn't change anything after the comparator
         // chooser is disposed
-        tableComparatorChooser.dispose();
         clickColumnHeader(table, 0);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE }), sortedColors);
         clickColumnHeader(table, 1);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
-        clickColumnHeader(table, 2);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN,  }), sortedColors);
+        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE }), sortedColors);
 
-        // now create a new column count and change the sort order
-        TableFormat<Color> greenOnlyTableFormat = GlazedLists.tableFormat(new String[] { "green" }, new String[] { "Green" });
-        tableModel.setTableFormat(greenOnlyTableFormat);
+        // make sure we can still paint the header cells
+        headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 0);
+        headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 1);
+
+        // now create a three column table
+        TableFormat<Color> redGreenBlueTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        tableModel.setTableFormat(redGreenBlueTableFormat);
+
+        // make sure we can paint all three header cells
+        headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 0);
+        headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 1);
+        headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 2);
+
+        // try out the new table for sorting
         tableComparatorChooser = new TableComparatorChooser<Color>(table, sortedColors, false);
         sortedColors.setComparator(null);
         assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE,  }), sortedColors);
-        clickColumnHeader(table, 1);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN }), sortedColors);
+        clickColumnHeader(table, 0);
+        assertEquals(Arrays.asList(new Color[] { Color.GREEN, Color.BLUE, Color.RED }), sortedColors);
     }
 
     /**
