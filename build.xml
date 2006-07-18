@@ -12,6 +12,11 @@
 
     <property name="java.target.version" value="1.5"/>
     <property name="java.target.version.fileFriendlyName" value="java15"/>
+
+	<!-- filter for maven pom.xml -->
+	<filter token="glazedlists.version" value="${version}"/>
+	<filter token="glazedlists.artifactId" value="glazedlists_${java.target.version.fileFriendlyName}"/>
+	
     <property environment="env"/>
     <tstamp prefix="datestamp">
         <format property="dateAndTime" pattern="yyyy-MM-dd H:mm"/>
@@ -34,7 +39,7 @@
 			<fileset dir="${basedir}" defaultexcludes="no">
                 <!-- Delete temporary files from JEdit -->
 				<include name="**/*~"/>
-                <!-- Delete the generated .jar and demo jar -->
+                <!-- Delete the generated .jar maven bundle jar and demo jar -->
 				<include name="glazedlists*.jar"/>
                 <!-- Delete the generated source -->
 				<include name="glazedlists*.zip"/>
@@ -530,7 +535,45 @@
         </javac>
     </target>
 
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	   MAVEN-BUNDLE
+	   Construct the maven upload bundle.
+	   It contains the POM, the main artifact, source and javadoc jar
+	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<target name="maven-bundle" depends="init-maven-bundle,jar-sources,jar-javadoc,jar"
+		description="Creates glazedlists upload bundle for maven repository.">
+		<copy file="pom.xml" todir="maven_bundle" filtering="true"/>
+		<copy file="glazedlists_${java.target.version.fileFriendlyName}.jar" tofile="maven_bundle/glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
+		<jar destfile="glazedlists_${java.target.version.fileFriendlyName}-${version}-bundle.jar">
+            <fileset dir="maven_bundle">
+				<include name="pom.xml"/>
+				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
+				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
+				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}-javadoc.jar"/>            	
+            </fileset>
+		</jar>
+		<delete dir="maven_bundle"/>
+	</target>
 
+	<target name="init-maven-bundle" description="Checks version property and creates temporary bundle directory">
+		<fail unless="version" message="To build a maven upload bundle the property 'version' must be defined."/>
+		<delete dir="maven_bundle"/>
+		<mkdir dir="maven_bundle"/>
+	</target>            	
+	
+	<target name="jar-sources" depends="dist"
+		description="Create a .jar file containing the source files.">
+		<copy file="glazedlists-source_${java.target.version.fileFriendlyName}.zip" tofile="maven_bundle/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
+		<jar destfile="maven_bundle/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar" update="true">
+		</jar>
+	</target>
+	
+	<target name="jar-javadoc" depends="docs"
+		description="Create a .jar file containing the javadoc.">
+		<jar destfile="maven_bundle/glazedlists_${java.target.version.fileFriendlyName}-${version}-javadoc.jar" basedir="docs/api">
+		</jar>		
+	</target>
+	
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        M4
        Run the m4 preprocessor to generate source code, see

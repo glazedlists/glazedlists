@@ -5,8 +5,8 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.java.dev.glazedlists</groupId>
-    <artifactId>glazedlists_java15</artifactId>
-    <version>1.7.0</version>
+    <artifactId>@glazedlists.artifactId@</artifactId>
+    <version>@glazedlists.version@</version>
     <packaging>jar</packaging>
     <name>Glazed Lists</name>
     <description>Event-driven lists for dynamically filtered and sorted tables</description>
