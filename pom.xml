@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>net.java.dev.glazedlists</groupId>
+    <artifactId>glazedlists_java15</artifactId>
+    <version>1.7.0</version>
+    <packaging>jar</packaging>
+    <name>Glazed Lists</name>
+    <description>Event-driven lists for dynamically filtered and sorted tables</description>
+    <url>http://publicobject.com/glazedlists/</url>
+    <issueManagement>
+        <system>java.net</system>
+        <url>https://glazedlists.dev.java.net/issues</url>
+    </issueManagement>
+    <inceptionYear>2003</inceptionYear>
+    <mailingLists>
+        <mailingList>
+            <name>user@glazedlists.dev.java.net</name>
+            <post>user@glazedlists.dev.java.net</post>
+            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
+            <unsubscribe>
+                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
+            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+        </mailingList>
+        <mailingList>
+            <name>announce@glazedlists.dev.java.net</name>
+            <post>announce@glazedlists.dev.java.net</post>
+            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
+            <unsubscribe>
+                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
+            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+        </mailingList>
+        <mailingList>
+            <name>dev@glazedlists.dev.java.net</name>
+            <post>dev@glazedlists.dev.java.net</post>
+            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
+            <unsubscribe>
+                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
+            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+        </mailingList>
+        <mailingList>
+            <name>cvs@glazedlists.dev.java.net</name>
+            <post>cvs@glazedlists.dev.java.net</post>
+            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
+            <unsubscribe>
+                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
+            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+        </mailingList>
+        <mailingList>
+            <name>issues@glazedlists.dev.java.net</name>
+            <post>issues@glazedlists.dev.java.net</post>
+            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
+            <unsubscribe>
+                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
+            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+        </mailingList>
+    </mailingLists>
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License</name>
+            <url>http://www.gnu.org/copyleft/lesser.html</url>
+            <distribution>repo</distribution>
+        </license>
+        <license>
+            <name>Mozilla Public License Version 1.1</name>
+            <url>http://www.mozilla.org/MPL/MPL-1.1.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://glazedlists.dev.java.net/source/browse/glazedlists/</url>
+    </scm>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
