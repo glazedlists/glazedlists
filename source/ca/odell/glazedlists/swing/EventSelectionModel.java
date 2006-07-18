@@ -98,18 +98,50 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     }
 
     /**
-     * Gets an {@link EventList} that always contains the current selection.
+     * Gets an {@link EventList} that contains only selected
+     * values and modifies the source list on mutation.
+     * 
+     * Adding and removing items from this list performs the same operation on
+     * the source list.
      */
     public EventList<E> getSelected() {
         return listSelection.getSelected();
     }
 
+
     /**
-     * Gets an {@link EventList} that always contains the items from the source
-     * that are currently deselected.
+     * Gets an {@link EventList} that contains only selected
+     * values and modifies the selection state on mutation.
+     * 
+     * Adding an item to this list selects it and removing an item deselects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown.
+     */
+    public EventList<E> getTogglingSelected() {
+        return listSelection.getTogglingSelected();
+    }
+
+    /**
+     * Gets an {@link EventList} that contains only deselected values and
+     * modifies the source list on mutation.
+     * 
+     * Adding and removing items from this list performs the same operation on
+     * the source list.
      */
     public EventList<E> getDeselected() {
         return listSelection.getDeselected();
+    }
+    
+    /**
+     * Gets an {@link EventList} that contains only deselected values and
+     * modifies the selection state on mutation.
+     * 
+     * Adding an item to this list deselects it and removing an item selects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown
+     */
+    public EventList<E> getTogglingDeselected() {
+        return listSelection.getTogglingDeselected();
     }
 
     /**

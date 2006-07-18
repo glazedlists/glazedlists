@@ -41,6 +41,8 @@ public class ListSelectionTest extends TestCase {
         ListConsistencyListener.install(source);
         ListConsistencyListener.install(selectedList);
         ListConsistencyListener.install(deselectedList);
+        ListConsistencyListener.install(listSelection.getTogglingSelected());
+        ListConsistencyListener.install(listSelection.getTogglingDeselected());
     }
 
     /**
@@ -620,8 +622,8 @@ public class ListSelectionTest extends TestCase {
         source.add(new Integer(4));
         source.add(new Integer(5));
         
-        List selectedToggler = listSelection.getTogglingSelected();
-        List deselectedToggler = listSelection.getTogglingDeselected();
+        EventList selectedToggler = listSelection.getTogglingSelected();
+        EventList deselectedToggler = listSelection.getTogglingDeselected();
         assertEquals(0, selectedToggler.size());
         selectedToggler.add(source.get(0));
         assertEquals(1, selectedToggler.size());
@@ -672,8 +674,8 @@ public class ListSelectionTest extends TestCase {
     }
     
     public void testRemovingItemNotInSourceFromTogglingView() {
-        List togglingSelected = listSelection.getTogglingSelected();
-        List togglingDeselected = listSelection.getTogglingDeselected();
+        EventList togglingSelected = listSelection.getTogglingSelected();
+        EventList togglingDeselected = listSelection.getTogglingDeselected();
         assertFalse(togglingSelected.remove(new Integer(6)));
         assertFalse(togglingDeselected.remove(new Integer(6)));
         List<Integer> ints = new ArrayList<Integer>();
