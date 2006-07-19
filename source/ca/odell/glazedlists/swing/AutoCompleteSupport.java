@@ -775,7 +775,10 @@ public final class AutoCompleteSupport<E> {
         // 4. restore the original editable flag to the JComboBox
         this.comboBox.setEditable(originalComboBoxEditable);
 
-        // 5. dispose of our FilterList so that it is severed from the given items EventList
+        // 5. dispose of our ComboBoxModel
+        this.comboBoxModel.dispose();
+        
+        // 6. dispose of our FilterList so that it is severed from the given items EventList
         this.filteredItems.dispose();
 
         // null out the comboBox to indicate that this support class is uninstalled

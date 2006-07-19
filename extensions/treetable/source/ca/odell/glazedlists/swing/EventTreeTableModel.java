@@ -120,6 +120,7 @@ public class EventTreeTableModel<E> extends AbstractTableModel implements ListEv
 
     /** @inheritDoc */
     public void dispose() {
+        swingThreadSource.removeListEventListener(this);
         tableModel.dispose();
     }
 }

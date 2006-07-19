@@ -180,6 +180,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * to call any method on a {@link EventListModel} after it has been disposed.
      */
     public void dispose() {
+        swingSource.removeListEventListener(this);
         swingSource.dispose();
     }
 }

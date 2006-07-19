@@ -280,6 +280,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * to call any method on a {@link EventTableModel} after it has been disposed.
      */
     public void dispose() {
+        swingThreadSource.removeListEventListener(this);
         swingThreadSource.dispose();
     }
 }
