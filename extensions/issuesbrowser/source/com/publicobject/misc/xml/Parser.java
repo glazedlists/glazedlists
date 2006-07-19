@@ -136,21 +136,18 @@ public class Parser {
     }
 
     /**
-     * Parse the given <code>source</code> and result the value from the
-     * resulting parse context Map associated to the given
-     * <code>resultKey</code>.
+     * Parse the given <code>source</code> and return the resulting parse
+     * context Map.
      *
-     * @param resultKey a key into the parse context Map of the result to return
      * @param source the {@link InputStream} to be parsed
-     * @return the value from the resulting parse context Map associated to the given
-     *      <code>resultKey</code>
+     * @return the resulting parse context Map created from the {@link InputStream}
      * @throws IOException if an error occurs parsing the <code>source</code>
      */
-    public Object parse(XMLTagPath resultKey, InputStream source) throws IOException {
+    public Map<XMLTagPath, Object> parse(InputStream source) throws IOException {
         final Handler handler = new Handler();
         parse(source, handler);
 
-        return handler.context.get(resultKey);
+        return handler.context;
     }
 
     /**

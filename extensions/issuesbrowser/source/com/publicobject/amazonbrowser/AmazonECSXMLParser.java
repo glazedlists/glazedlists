@@ -14,18 +14,19 @@ import com.publicobject.misc.util.concurrent.QueuedExecutor;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import HTTPClient.HTTPConnection;
 import HTTPClient.ModuleException;
 import HTTPClient.HTTPResponse;
 
+import javax.swing.*;
+
 public class AmazonECSXMLParser {
 
     private static final RateGate amazonRequestRate = new RateGate(200);
 
-    private static final DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");
-    private static final DateFormat dateFormat2 = new SimpleDateFormat("yyyy");
-    private static final DateFormat[] dateFormats = {dateFormat1, dateFormat2};
+    private static final DateFormat[] dateFormats = {new SimpleDateFormat("yyyy-MM-dd"), new SimpleDateFormat("yyyy")};
     private static final Parser ITEM_LOOKUP_PARSER = new Parser();
     static {
         // configure the Parser for Item Lookups
@@ -67,6 +68,7 @@ public class AmazonECSXMLParser {
     }
 
     private static final XMLTagPath ITEM_SEARCH_RESULTS_PAGE_COUNT = XMLTagPath.endTagPath("ItemSearchResponse Items TotalPages");
+    private static final XMLTagPath ITEM_SEARCH_RESULTS_TOTAL_RESULTS = XMLTagPath.endTagPath("ItemSearchResponse Items TotalResults");
 
     private static ItemFetcher itemFetcher;
 
@@ -78,16 +80,22 @@ public class AmazonECSXMLParser {
         EventList<Item> itemsList = new BasicEventList<Item>();
 //        loadItem(itemsList, "B000B5XOW0");
 
-        final String host = "webservices.amazon.com";
-        searchAndLoadItems(host, itemsList, "king");
+        searchAndLoadItems(itemsList, "king", null);
+    }
+
+    public static void searchAndLoadItems(EventList<Item> target, String keywords, JProgressBar progressBar) throws IOException {
+        searchAndLoadItems("webservices.amazon.com", target, keywords, progressBar);
     }
 
     /**
      * Search for all Items with the given <code>keywords</code> and load them.
      */
-    public static void searchAndLoadItems(String host, EventList<Item> target, String keywords) throws IOException {
+    public static void searchAndLoadItems(String host, EventList<Item> target, String keywords, JProgressBar progressBar) throws IOException {
+        if (itemFetcher != null)
+            itemFetcher.dispose();
+
         // create a new ItemFetcher
-        itemFetcher = new ItemFetcher(target, host);
+        itemFetcher = new ItemFetcher(target, host, progressBar);
 
         // This EventList acts as a buffer between the ItemSearch and the ItemLookups.
         // As ASINs are added to it by parsing ItemSearch results, the ITEM_FETCHER
@@ -103,11 +111,27 @@ public class AmazonECSXMLParser {
 
             // prepare a stream to determine the number of pages in the result set
             final String searchUrlPath = "/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=10GN481Z3YQ4S67KNSG2&Operation=ItemSearch&SearchIndex=DVD&ResponseGroup=ItemIds&Keywords=" + keywords;
-            InputStream itemSearchResultsStream = getInputStream(searchConnection, searchUrlPath, 10);
 
-            // parse the page count from the stream
-            final String pageCountString = (String) ITEM_SEARCH_PARSER.parse(ITEM_SEARCH_RESULTS_PAGE_COUNT, itemSearchResultsStream);
+            // parse the number of results from the stream
+            InputStream itemSearchResultsStream = getInputStream(searchConnection, searchUrlPath, 10);
+            final Map<XMLTagPath, Object> parseContext = ITEM_SEARCH_PARSER.parse(itemSearchResultsStream);
+
+            // fetch the total number of results
+            final String totalResultsString = (String) parseContext.get(ITEM_SEARCH_RESULTS_TOTAL_RESULTS);
+            final int totalResults = Integer.parseInt(totalResultsString);
+
+            // fetch the total number of pages in the result set
+            final String pageCountString = (String) parseContext.get(ITEM_SEARCH_RESULTS_PAGE_COUNT);
             final int pageCount = Integer.parseInt(pageCountString);
+
+            // reset the progress bar's maximum
+            if (progressBar != null) {
+                progressBar.setString("");
+                progressBar.setStringPainted(true);
+                progressBar.setValue(0);
+                progressBar.setMaximum(totalResults);
+            }
+
             tryClose(itemSearchResultsStream);
 
             // retrieve each page in the result set and parse the ASINs out of them
@@ -186,6 +210,8 @@ public class AmazonECSXMLParser {
         /** The list of all Items to populate */
         private final EventList<Item> target;
 
+        private final ProgressBarUpdater progressBarUpdater;
+
         /** A pool of Threads servicing an unbounded Channel. */
         private final QueuedExecutor responseQueue = new QueuedExecutor();
         private final QueuedExecutor requestQueue = new QueuedExecutor();
@@ -193,9 +219,28 @@ public class AmazonECSXMLParser {
         /** a connection to the HTTP server of interest */
         private final HTTPConnection httpConnection;
 
-        public ItemFetcher(EventList<Item> target, String host) {
+        public ItemFetcher(EventList<Item> target, String host, JProgressBar progressBar) {
             this.target = target;
+            this.progressBarUpdater = new ProgressBarUpdater(progressBar);
+            this.target.addListEventListener(this.progressBarUpdater);
+
             this.httpConnection = new HTTPConnection(host);
+        }
+
+        private static class ProgressBarUpdater implements ListEventListener<Item> {
+            private final JProgressBar progressBar;
+
+            public ProgressBarUpdater(JProgressBar progressBar) {
+                this.progressBar = progressBar;
+            }
+
+            public void listChanged(ListEvent<Item> listChanges) {
+                if (progressBar != null) {
+                    final int numLoaded = listChanges.getSourceList().size();
+                    progressBar.setString(numLoaded + " of " + progressBar.getMaximum());
+                    progressBar.setValue(numLoaded);
+                }
+            }
         }
 
         public void listChanged(ListEvent<String> listChanges) {
@@ -214,6 +259,10 @@ public class AmazonECSXMLParser {
                     enqueue(requestQueue, new ItemRequester(NUMBER_OF_RETRIES, asin));
                 }
             }
+        }
+
+        public void dispose() {
+            target.removeListEventListener(this.progressBarUpdater);
         }
 
         /**
@@ -295,7 +344,7 @@ public class AmazonECSXMLParser {
         }
     }
 
-    private static final void tryClose(InputStream inputStream) {
+    private static void tryClose(InputStream inputStream) {
         try {
             if(inputStream != null) {
                 inputStream.close();

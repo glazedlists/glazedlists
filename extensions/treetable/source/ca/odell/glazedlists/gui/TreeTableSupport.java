@@ -7,7 +7,7 @@ public final class TreeTableSupport {
 
     private TreeTableSupport() {}
 
-    public static <E> int getHeight(TreeTableFormat<E> treeTableFormat, E e) {
+    public static <E> int getDepth(TreeFormat<E> treeTableFormat, E e) {
         int height = -1;
 
         while (e != null) {

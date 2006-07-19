@@ -6,27 +6,23 @@ package com.publicobject.amazonbrowser;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import com.publicobject.misc.Exceptions;
-import com.publicobject.misc.Throbber;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.security.AccessControlException;
 
-import HTTPClient.HTTPConnection;
-
 public class ItemLoader implements Runnable {
 
     private String keywords = null;
-    private Throbber throbber = null;
     private Thread itemLoaderThread = null;
     private EventList<Item> itemsList = null;
-    private final String host;
+    private final JProgressBar progressBar;
 
-    public ItemLoader(String host, EventList<Item> issuesList, Throbber throbber) {
-        this.host = host;
+    public ItemLoader(EventList<Item> issuesList, JProgressBar progressBar) {
         this.itemsList = GlazedLists.threadSafeList(issuesList);
-        this.throbber = throbber;
+        this.progressBar = progressBar;
     }
 
     public void setKeywords(String keywords) {
@@ -62,13 +58,10 @@ public class ItemLoader implements Runnable {
                     keywords = null;
                 }
 
-                // start the progress bar
-                throbber.setOn();
-
                 // load the issues
                 itemsList.clear();
 
-                AmazonECSXMLParser.searchAndLoadItems(host, itemsList, currentKeywords);
+                AmazonECSXMLParser.searchAndLoadItems(itemsList, currentKeywords, progressBar);
 
             // handling interruptions is really gross
             } catch (UnknownHostException e) {
@@ -101,9 +94,6 @@ public class ItemLoader implements Runnable {
             } catch (InterruptedException e) {
                 // do nothing, we were just interrupted as expected
 
-            } finally {
-                // stop the progress bar no matter what
-                throbber.setOff();
             }
         }
     }

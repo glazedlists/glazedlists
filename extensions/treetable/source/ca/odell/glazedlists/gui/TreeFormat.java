@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.gui;
 
-public interface TreeTableFormat<E> extends TableFormat<E> {
+public interface TreeFormat<E> {
 
     public E getParent(E e);
 }

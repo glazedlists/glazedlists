@@ -4,5 +4,5 @@ import javax.swing.table.TableModel;
 
 public interface TreeTableModel extends TableModel {
 
-    public int getHeight(int rowIndex);
+    public int getDepth(int rowIndex);
 }

@@ -5,6 +5,7 @@ package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 // Swing toolkit stuff for displaying widgets
@@ -50,7 +51,10 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         // from occurring until we fully initialize this EventTableModel
         source.getReadWriteLock().readLock().lock();
         try {
-            this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
+            if (source instanceof SwingThreadProxyEventList)
+                this.swingThreadSource = (SwingThreadProxyEventList<E>) source;
+            else
+                this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
             this.tableFormat = tableFormat;
 
             // prepare listeners
