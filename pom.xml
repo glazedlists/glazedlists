@@ -58,6 +58,69 @@
             <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
         </mailingList>
     </mailingLists>
+    <developers>
+        <developer>
+            <!-- TODO verify and complete -->
+            <id>jessewilson</id>
+            <name>Jesse Wilson</name>
+            <email/>
+            <roles>
+                <role>Java developer</role>
+            </roles>
+            <timezone/>
+        </developer>
+        <developer>
+            <!-- TODO verify and complete -->
+            <id>jplemieux</id>
+            <name>James Lemieux</name>
+            <email/>
+            <roles>
+                <role>Java developer</role>
+            </roles>
+            <timezone/>
+        </developer>
+        <developer>
+            <!-- TODO verify and complete -->
+            <id>kevinmaltby</id>
+            <name>Kevin Maltby</name>
+            <email/>
+            <roles>
+                <role>Java developer</role>
+            </roles>
+            <timezone/>
+        </developer>
+        <developer>
+            <!-- TODO verify and complete -->
+            <id>???</id>
+            <name>Rob Eden</name>
+            <email/>
+            <roles>
+                <role>Java developer</role>
+            </roles>
+            <timezone/>
+        </developer>
+        <developer>
+            <!-- TODO verify and complete -->
+            <id>brands</id>
+            <name>Holger Brands</name>
+            <email/>
+            <roles>
+                <role>Java developer</role>
+            </roles>
+            <timezone/>            
+        </developer>        
+    </developers>
+    <contributors>
+        <contributor>
+            <!--<id>ge0ffrey</id>-->
+            <name>Geoffrey De Smet</name>
+            <email>ge0ffrey.spam_AT_gmail.com</email>
+            <roles>
+                <role>Maven2izer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </contributor>
+    </contributors>    
     <licenses>
         <license>
             <name>GNU Lesser General Public License</name>
