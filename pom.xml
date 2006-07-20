@@ -60,14 +60,13 @@
     </mailingLists>
     <developers>
         <developer>
-            <!-- TODO verify and complete -->
             <id>jessewilson</id>
             <name>Jesse Wilson</name>
-            <email/>
+            <email>jesse@swank.ca</email>
             <roles>
                 <role>Java developer</role>
             </roles>
-            <timezone/>
+            <timezone>PDT</timezone>
         </developer>
         <developer>
             <!-- TODO verify and complete -->
@@ -77,7 +76,7 @@
             <roles>
                 <role>Java developer</role>
             </roles>
-            <timezone/>
+            <timezone>PDT</timezone>
         </developer>
         <developer>
             <!-- TODO verify and complete -->
@@ -87,7 +86,7 @@
             <roles>
                 <role>Java developer</role>
             </roles>
-            <timezone/>
+            <timezone>EST</timezone>
         </developer>
         <developer>
             <!-- TODO verify and complete -->
