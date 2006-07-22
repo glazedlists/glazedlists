@@ -15,7 +15,6 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Map;
-import java.nio.channels.ClosedByInterruptException;
 
 import HTTPClient.HTTPConnection;
 import HTTPClient.ModuleException;
@@ -71,7 +70,7 @@ public class AmazonECSXMLParser {
     private static final XMLTagPath ITEM_SEARCH_RESULTS_PAGE_COUNT = XMLTagPath.endTagPath("ItemSearchResponse Items TotalPages");
     private static final XMLTagPath ITEM_SEARCH_RESULTS_TOTAL_RESULTS = XMLTagPath.endTagPath("ItemSearchResponse Items TotalResults");
 
-    private static ItemFetcher itemFetcher;
+    private static ItemSearch itemSearch;
 
     /**
      * When executed, this opens a file specified on the command line, parses
@@ -92,79 +91,48 @@ public class AmazonECSXMLParser {
      * Search for all Items with the given <code>keywords</code> and load them.
      */
     public static void searchAndLoadItems(String host, EventList<Item> target, String keywords, JProgressBar progressBar) throws IOException, InterruptedException {
-        if (itemFetcher != null)
-            itemFetcher.dispose();
+        // cancel the previous item search
+        if (itemSearch != null)
+            itemSearch.cancel();
 
         // clear away an existing items
         target.clear();
 
+        Thread.sleep(300);
+
         // reset the progress bar's maximum
         if (progressBar != null) {
             progressBar.setString("");
-            progressBar.setStringPainted(true);
             progressBar.setValue(0);
         }
 
-        // This EventList acts as a buffer between the ItemSearch and the ItemLookups.
-        // As ASINs are added to it by parsing ItemSearch results, the ITEM_FETCHER
-        // is notified and responds by placing a Runnable in a Channel that will eventually
-        // be processed in a PooledExecutor. That Runnable executes the ItemLookup based on
-        // the ASIN and the Item that is parsed out of the returned XML is placed into target.
-        final EventList<String> itemASINs = new BasicEventList<String>();
-
-        // create a new ItemFetcher
-        itemFetcher = new ItemFetcher(target, itemASINs, host, progressBar);
-
         // create a connection for figuring out what we need to grab
-        HTTPConnection searchConnection = new HTTPConnection(host);
+        final HTTPConnection searchConnection = new HTTPConnection(host);
 
         // prepare a stream to determine the number of pages in the result set
         final String searchUrlPath = "/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=10GN481Z3YQ4S67KNSG2&Operation=ItemSearch&SearchIndex=DVD&ResponseGroup=ItemIds&Keywords=" + keywords;
 
         // parse the number of results from the stream
-        InputStream itemSearchResultsStream = getInputStream(searchConnection, searchUrlPath, 10);
+        final InputStream itemSearchResultsStream = getInputStream(searchConnection, searchUrlPath, 10);
         final Map<XMLTagPath, Object> parseContext = ITEM_SEARCH_PARSER.parse(itemSearchResultsStream);
 
-        // fetch the total number of results
-        final String totalResultsString = (String) parseContext.get(ITEM_SEARCH_RESULTS_TOTAL_RESULTS);
-        final int totalResults = Integer.parseInt(totalResultsString);
+        tryClose(itemSearchResultsStream);
+
+        if (progressBar != null) {
+            // fetch the total number of results
+            final String totalResultsString = (String) parseContext.get(ITEM_SEARCH_RESULTS_TOTAL_RESULTS);
+            final int totalResults = Integer.parseInt(totalResultsString);
+
+            progressBar.setMaximum(totalResults);
+        }
 
         // fetch the total number of pages in the result set
         final String pageCountString = (String) parseContext.get(ITEM_SEARCH_RESULTS_PAGE_COUNT);
         final int pageCount = Integer.parseInt(pageCountString);
 
-        if (progressBar != null)
-            progressBar.setMaximum(totalResults);
-
-        tryClose(itemSearchResultsStream);
-
-        // retrieve each page in the result set and parse the ASINs out of them
-        for (int i = 1; i <= pageCount; i++) {
-            // build a URL appropriate for fetching 1 page of 10 search results
-            final String searchPagePath = searchUrlPath + "&ItemPage=" + i;
-
-            try {
-                // parse the ASINs from the search results page
-                itemSearchResultsStream = getInputStream(searchConnection, searchPagePath, 20);
-                ITEM_SEARCH_PARSER.parse(itemASINs, itemSearchResultsStream);
-
-                if (Thread.interrupted()) {
-                    System.out.println("detected interrupted status in " + Thread.currentThread().getName());
-                    throw new InterruptedException("interrupted by user");
-                }
-
-            } catch (ClosedByInterruptException cbie) {
-                // simply log the error to Standard Error and continue - these errors are fairly routinely from Amazon's webservice
-                System.err.println("ClosedByInterruptException while fetching page " + i + " of " + pageCount + " pages in the search result, \"" + cbie.getMessage() + "\"");
-
-            } catch (IOException ioe) {
-                // simply log the error to Standard Error and continue - these errors are fairly routinely from Amazon's webservice
-                System.err.println("IOException while fetching page " + i + " of " + pageCount + " pages in the search result, \"" + ioe.getMessage() + "\"");
-
-            } finally {
-                tryClose(itemSearchResultsStream);
-            }
-        }
+        // create a new ItemSearch and start it
+        itemSearch = new ItemSearch(target, host, searchUrlPath, pageCount, progressBar);
+        itemSearch.start();
     }
 
     /**
@@ -212,36 +180,46 @@ public class AmazonECSXMLParser {
      * Separate threads are used for requests as for responses in order to
      * pipeline the request.
      */
-    private static class ItemFetcher implements ListEventListener<String> {
+    private static class ItemSearch {
         private static final int NUMBER_OF_RETRIES = 10;
 
         /** The list of all Items to populate */
         private final EventList<Item> target;
 
-        /** The list of all item ASINs to lookup */
-        private final EventList<String> itemASINs;
+        // This EventList acts as a buffer between the ItemSearch and the ItemLookups.
+        // As ASINs are added to it by parsing ItemSearch results, the ITEM_FETCHER
+        // is notified and responds by placing a Runnable in a Channel that will eventually
+        // be processed in a PooledExecutor. That Runnable executes the ItemLookup based on
+        // the ASIN and the Item that is parsed out of the returned XML is placed into target.
+        private final EventList<String> itemASINs = new BasicEventList<String>();
 
         private final ProgressBarUpdater progressBarUpdater;
+        private final RequestEnqueuer requestEnqueuer;
+
+        private final String searchUrlPath;
+        private final int pageCount;
 
         /** A pool of Threads servicing an unbounded Channel. */
-        private final QueuedExecutor responseQueue = new QueuedExecutor();
-        private final QueuedExecutor requestQueue = new QueuedExecutor();
+        private QueuedExecutor responseQueue = new QueuedExecutor();
+        private QueuedExecutor requestQueue = new QueuedExecutor();
 
         /** a connection to the HTTP server of interest */
         private final HTTPConnection httpConnection;
 
-        public ItemFetcher(EventList<Item> target, EventList<String> itemASINs, String host, JProgressBar progressBar) {
+        public ItemSearch(EventList<Item> target, String host, String searchUrlPath, int pageCount, JProgressBar progressBar) {
             this.target = target;
-            this.itemASINs = itemASINs;
+            this.searchUrlPath = searchUrlPath;
+            this.pageCount = pageCount;
             this.progressBarUpdater = new ProgressBarUpdater(progressBar);
+            this.requestEnqueuer = new RequestEnqueuer();
 
             this.target.addListEventListener(this.progressBarUpdater);
-            this.itemASINs.addListEventListener(this);
+            this.itemASINs.addListEventListener(requestEnqueuer);
 
             this.httpConnection = new HTTPConnection(host);
         }
 
-        private static class ProgressBarUpdater implements ListEventListener<Item> {
+        private class ProgressBarUpdater implements ListEventListener<Item> {
             private final JProgressBar progressBar;
 
             public ProgressBarUpdater(JProgressBar progressBar) {
@@ -251,36 +229,73 @@ public class AmazonECSXMLParser {
             public void listChanged(ListEvent<Item> listChanges) {
                 if (progressBar != null) {
                     final int numLoaded = listChanges.getSourceList().size();
+
                     progressBar.setString(numLoaded + " of " + progressBar.getMaximum());
                     progressBar.setValue(numLoaded);
                 }
             }
         }
 
-        public void listChanged(ListEvent<String> listChanges) {
-            final EventList<String> source = listChanges.getSourceList();
+        private class RequestEnqueuer implements ListEventListener<String> {
+            public void listChanged(ListEvent<String> listChanges) {
+                final EventList<String> source = listChanges.getSourceList();
 
-            while (listChanges.next()) {
-                final int changeType = listChanges.getType();
+                while (listChanges.next()) {
+                    final int changeType = listChanges.getType();
 
-                // only react to ASIN insertions
-                if (changeType == ListEvent.INSERT) {
-                    // 1. lookup the ASIN
-                    final int sourceIndex = listChanges.getIndex();
-                    final String asin = source.get(sourceIndex);
+                    // only react to ASIN insertions
+                    if (changeType == ListEvent.INSERT) {
+                        // 1. lookup the ASIN
+                        final int sourceIndex = listChanges.getIndex();
+                        final String asin = source.get(sourceIndex);
 
-                    // 2. build a Runnable that will fetch the details for the ASIN
-                    enqueue(requestQueue, new ItemRequester(NUMBER_OF_RETRIES, asin));
+                        // 2. build a Runnable that will fetch the details for the ASIN
+                        enqueue(requestQueue, new ItemRequester(NUMBER_OF_RETRIES, asin));
+                    }
                 }
             }
         }
 
-        public void dispose() {
-            target.removeListEventListener(this.progressBarUpdater);
-            itemASINs.removeListEventListener(this);
+        public void start() throws InterruptedException {
+            InputStream itemSearchResultsStream = null;
 
-            requestQueue.shutdownAfterProcessingCurrentTask();
-            responseQueue.shutdownAfterProcessingCurrentTask();
+            // retrieve each page in the result set and parse the ASINs out of them
+            for (int i = 1; i <= pageCount; i++) {
+                // build a URL appropriate for fetching 1 page of 10 search results
+                final String searchPagePath = searchUrlPath + "&ItemPage=" + i;
+
+                try {
+                    // parse the ASINs from the search results page
+                    itemSearchResultsStream = getInputStream(httpConnection, searchPagePath, 20);
+                    ITEM_SEARCH_PARSER.parse(itemASINs, itemSearchResultsStream);
+
+                    // if we have been interrupted, bail early
+                    if (Thread.interrupted()) throw new InterruptedException();
+
+                } catch (IOException ioe) {
+                    // simply log the error to Standard Error and continue - these errors are fairly routinely from Amazon's webservice
+                    System.err.println("IOException while fetching page " + i + " of " + pageCount + " pages in the search result, \"" + ioe.getMessage() + "\"");
+
+                } finally {
+                    tryClose(itemSearchResultsStream);
+                }
+            }
+        }
+
+        public void cancel() throws InterruptedException {
+            target.removeListEventListener(this.progressBarUpdater);
+            itemASINs.removeListEventListener(this.requestEnqueuer);
+
+            final Thread thread = responseQueue.getThread();
+
+            requestQueue.shutdownNow();
+            responseQueue.shutdownNow();
+
+            // we have a problem where a single response is processed after the
+            // responseQueue has been shutdown, so to accomodate this case we
+            // join on the responseQueue's Thread to ensure the queue's are
+            // fully shutdown before returning
+            thread.join();
         }
 
         /**
@@ -304,9 +319,10 @@ public class AmazonECSXMLParser {
                     HTTPResponse response = httpConnection.Get(path);
                     // tell someone else to handle the response
                     enqueue(responseQueue, new ItemReceiver(remainingRetries, asin, response));
-                } catch(IOException e) {
+
+                } catch (IOException e) {
                     handleError(remainingRetries, asin, e);
-                } catch(ModuleException e) {
+                } catch (ModuleException e) {
                     handleError(remainingRetries, asin, e);
                 }
             }
@@ -332,9 +348,7 @@ public class AmazonECSXMLParser {
                         throw new IOException("Received response code " + response.getStatusCode());
                     }
                     inputStream = response.getInputStream();
-                    // parse it
                     ITEM_LOOKUP_PARSER.parse(target, inputStream);
-//                    System.out.println("loaded item " + target.size() + ": " + asin);
                 } catch (ModuleException e) {
                     handleError(remainingRetries, asin, e);
                 } catch (IOException e) {
@@ -345,11 +359,11 @@ public class AmazonECSXMLParser {
             }
         }
 
-        public void enqueue(QueuedExecutor executor, Runnable runnable) {
+        public static void enqueue(QueuedExecutor executor, Runnable runnable) {
             try {
                 executor.execute(runnable);
-            } catch(InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
 

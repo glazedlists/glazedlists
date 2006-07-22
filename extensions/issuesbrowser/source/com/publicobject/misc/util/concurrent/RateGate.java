@@ -36,7 +36,7 @@ public class RateGate {
                 waited = true;
                 wait(wait);
             } catch(InterruptedException e) {
-                // do nothing
+                Thread.currentThread().interrupt();
             }
         }
     }

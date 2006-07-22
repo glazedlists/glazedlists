@@ -17,12 +17,16 @@ public class AmazonBrowser implements Runnable {
     /** application appearance */
     public static final Color AMAZON_SEARCH_LIGHT_BLUE = new Color(171, 208, 226);
     public static final Color AMAZON_SEARCH_DARK_BLUE = new Color(54, 127, 168);
+    public static final Icon GO = loadIcon("resources/go.gif");
 
     /** an event list to host the items */
     private EventList<Item> itemEventList = new BasicEventList<Item>();
 
     /** loads items as requested */
     private ItemLoader itemLoader;
+
+    /** the field containing the keywords to search items with */
+    private JTextField searchField;
 
     /** the progress bar that tracks the item loading progress */
     private JProgressBar progressBar;
@@ -68,21 +72,32 @@ public class AmazonBrowser implements Runnable {
      * Construct a frame for search and browsing items from Amazon.
      */
     private JPanel constructView() {
+        final StartNewSearchActionListener startNewSearch = new StartNewSearchActionListener();
+
         final JLabel searchFieldLabel = new JLabel("Search");
         searchFieldLabel.setFont(new Font("Verdana", Font.BOLD, 14));
         searchFieldLabel.setForeground(Color.WHITE);
-        final JTextField searchField = new JTextField(10);
-        searchField.addActionListener(new StartNewSearchActionListener());
+
+        searchField = new JTextField(10);
+        searchField.addActionListener(startNewSearch);
+
+        final JButton searchButton = new JButton(GO);
+        searchButton.setBorder(BorderFactory.createEmptyBorder());
+        searchButton.setContentAreaFilled(false);
+        searchButton.addActionListener(startNewSearch);
 
         progressBar = new JProgressBar();
-        progressBar.setBorder(BorderFactory.createLineBorder(AMAZON_SEARCH_DARK_BLUE));
+        progressBar.setString("");
+        progressBar.setStringPainted(true);
+        progressBar.setBorder(BorderFactory.createLineBorder(AMAZON_SEARCH_DARK_BLUE, 2));
 
         final JPanel searchPanel = new GradientPanel(AMAZON_SEARCH_LIGHT_BLUE, AMAZON_SEARCH_DARK_BLUE, true);
         searchPanel.setLayout(new GridBagLayout());
         searchPanel.add(searchFieldLabel,             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 3), 0, 0));
-        searchPanel.add(searchField,                  new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
-        searchPanel.add(progressBar,                  new GridBagConstraints(2, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
-        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        searchPanel.add(searchField,                  new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        searchPanel.add(searchButton,                 new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
+        searchPanel.add(progressBar,                  new GridBagConstraints(3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
+        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         final JPanel panel = new JPanel(new BorderLayout());
         panel.add(BorderLayout.NORTH, searchPanel);
@@ -115,8 +130,11 @@ public class AmazonBrowser implements Runnable {
 
     private class StartNewSearchActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            final JTextField searchField = (JTextField) e.getSource();
-            itemLoader.setKeywords(searchField.getText());
+            final String keywords = searchField.getText();
+
+            if (keywords.length() == 0) return;
+
+            itemLoader.setKeywords(keywords);
         }
     }
 }

@@ -26,10 +26,8 @@ public class ItemLoader implements Runnable {
     }
 
     public void setKeywords(String keywords) {
-        synchronized(this) {
+        synchronized (this) {
             this.keywords = keywords;
-
-            System.out.println("interrupting Item Loader Thread");
             itemLoaderThread.interrupt();
             notify();
         }
@@ -49,13 +47,8 @@ public class ItemLoader implements Runnable {
             try {
                 // get a project to load
                 synchronized (this) {
-                    System.out.println("Item Loader Thread sleeping...");
                     if(keywords == null) wait();
-                    System.out.println("Item Loader Thread awoke!");
-                    if (Thread.interrupted()) {
-                        System.out.println("cleared interrupted status in run() for " + Thread.currentThread().getName());
-                        System.out.println(Thread.currentThread().getName() + " now says this about interrupted: " + Thread.currentThread().isInterrupted());
-                    }
+                    Thread.interrupted();
 
                     // we should still be asleep
                     if(keywords == null) continue;
@@ -78,20 +71,18 @@ public class ItemLoader implements Runnable {
                 Exceptions.getInstance().handle(e);
 
             } catch (IOException e) {
-                System.out.println("IOException");
-                if(e.getCause() instanceof InterruptedException) {
+                if (e.getCause() instanceof InterruptedException) {
                     // do nothing, we were just interrupted as expected
-                } else if(e.getMessage().equals("Parsing failed java.lang.InterruptedException")) {
+                } else if (e.getMessage().equals("Parsing failed java.lang.InterruptedException")) {
                     // do nothing, we were just interrupted as expected
                 } else {
                     Exceptions.getInstance().handle(e);
                 }
 
             } catch (RuntimeException e) {
-                System.out.println("RuntimeException");
-                if(e.getCause() instanceof InterruptedException) {
+                if (e.getCause() instanceof InterruptedException) {
                     // do nothing, we were just interrupted as expected
-                } else if(e.getCause() instanceof IOException && e.getCause().getMessage().equals("Parsing failed Lock interrupted")) {
+                } else if (e.getCause() instanceof IOException && e.getCause().getMessage().equals("Parsing failed Lock interrupted")) {
                     // do nothing, we were just interrupted as expected
                 } else {
                     throw e;
@@ -99,9 +90,7 @@ public class ItemLoader implements Runnable {
 
             } catch (InterruptedException e) {
                 // do nothing, we were just interrupted as expected
-                System.out.println("INTERRUPTED EXCEPTION DETECTED!");
             }
-            System.out.println("LOOP");
         }
     }
 }
