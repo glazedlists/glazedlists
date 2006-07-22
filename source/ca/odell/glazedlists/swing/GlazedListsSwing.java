@@ -25,11 +25,19 @@ public final class GlazedListsSwing {
     // EventLists // // // // // // // // // // // // // // // // // // // // //
 
     /**
-     * Wraps the source in an {@link EventList} that fires all of its update events
-     * from the Swing event dispatch thread.
+     * Wraps the source in an {@link EventList} that fires all of its update
+     * events from the Swing event dispatch thread.
      */
     public static <E> TransformedList<E, E> swingThreadProxyList(EventList<E> source) {
         return new SwingThreadProxyEventList<E>(source);
+    }
+
+    /**
+     * Returns true iff <code>list</code> is an {@link EventList} that fires
+     * all of its update events from the Swing event dispatch thread.
+     */
+    public static boolean isSwingThreadProxyList(EventList list) {
+        return list instanceof SwingThreadProxyEventList;
     }
 
     // ThresholdRangeModels // // // // // // // // // // // // // // // // //

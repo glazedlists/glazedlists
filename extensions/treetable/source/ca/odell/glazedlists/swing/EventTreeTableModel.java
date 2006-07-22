@@ -4,7 +4,6 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.gui.*;
 import ca.odell.glazedlists.event.*;
 import javax.swing.table.*;
@@ -12,14 +11,14 @@ import javax.swing.table.*;
 public class EventTreeTableModel<E> extends AbstractTableModel implements ListEventListener<E>, TreeTableModel {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private final TransformedList<E,E> swingThreadSource;
+    private TransformedList<E,E> swingThreadSource;
+
+    /** <tt>true</tt> indicates that disposing this TableModel should dispose of the swingThreadSource as well */
+    private final boolean disposeSwingThreadSource;
 
     private final EventTableModel<E> tableModel;
 
     private final TreeFormat<E> treeFormat;
-
-    /** Reusable table event for broadcasting changes */
-    private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
 
     /**
      * Creates a new table that renders the specified list in the specified
@@ -30,10 +29,8 @@ public class EventTreeTableModel<E> extends AbstractTableModel implements ListEv
         // from occurring until we fully initialize this EventTableModel
         source.getReadWriteLock().readLock().lock();
         try {
-            if (source instanceof SwingThreadProxyEventList)
-                this.swingThreadSource = (SwingThreadProxyEventList<E>) source;
-            else
-                this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
+            this.disposeSwingThreadSource = !GlazedListsSwing.isSwingThreadProxyList(source);
+            this.swingThreadSource = disposeSwingThreadSource ? GlazedListsSwing.swingThreadProxyList(source) : (TransformedList<E,E>) source;
 
             this.tableModel = new EventTableModel<E>(this.swingThreadSource, tableFormat);
             this.treeFormat = treeFormat;
@@ -121,6 +118,11 @@ public class EventTreeTableModel<E> extends AbstractTableModel implements ListEv
     /** @inheritDoc */
     public void dispose() {
         swingThreadSource.removeListEventListener(this);
-        tableModel.dispose();
+
+        if (this.disposeSwingThreadSource)
+            tableModel.dispose();
+
+        // this encourages exceptions to be thrown if this model is incorrectly accessed again
+        swingThreadSource = null;
     }
 }

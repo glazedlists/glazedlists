@@ -75,6 +75,7 @@ public class AmazonBrowser implements Runnable {
         searchField.addActionListener(new StartNewSearchActionListener());
 
         progressBar = new JProgressBar();
+        progressBar.setBorder(BorderFactory.createLineBorder(AMAZON_SEARCH_DARK_BLUE));
 
         final JPanel searchPanel = new GradientPanel(AMAZON_SEARCH_LIGHT_BLUE, AMAZON_SEARCH_DARK_BLUE, true);
         searchPanel.setLayout(new GridBagLayout());

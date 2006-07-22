@@ -15,6 +15,7 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Map;
+import java.nio.channels.ClosedByInterruptException;
 
 import HTTPClient.HTTPConnection;
 import HTTPClient.ModuleException;
@@ -76,26 +77,33 @@ public class AmazonECSXMLParser {
      * When executed, this opens a file specified on the command line, parses
      * it for Issuezilla XML and writes the issues to the command line.
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         EventList<Item> itemsList = new BasicEventList<Item>();
 //        loadItem(itemsList, "B000B5XOW0");
 
         searchAndLoadItems(itemsList, "king", null);
     }
 
-    public static void searchAndLoadItems(EventList<Item> target, String keywords, JProgressBar progressBar) throws IOException {
+    public static void searchAndLoadItems(EventList<Item> target, String keywords, JProgressBar progressBar) throws IOException, InterruptedException {
         searchAndLoadItems("webservices.amazon.com", target, keywords, progressBar);
     }
 
     /**
      * Search for all Items with the given <code>keywords</code> and load them.
      */
-    public static void searchAndLoadItems(String host, EventList<Item> target, String keywords, JProgressBar progressBar) throws IOException {
+    public static void searchAndLoadItems(String host, EventList<Item> target, String keywords, JProgressBar progressBar) throws IOException, InterruptedException {
         if (itemFetcher != null)
             itemFetcher.dispose();
 
-        // create a new ItemFetcher
-        itemFetcher = new ItemFetcher(target, host, progressBar);
+        // clear away an existing items
+        target.clear();
+
+        // reset the progress bar's maximum
+        if (progressBar != null) {
+            progressBar.setString("");
+            progressBar.setStringPainted(true);
+            progressBar.setValue(0);
+        }
 
         // This EventList acts as a buffer between the ItemSearch and the ItemLookups.
         // As ASINs are added to it by parsing ItemSearch results, the ITEM_FETCHER
@@ -103,59 +111,59 @@ public class AmazonECSXMLParser {
         // be processed in a PooledExecutor. That Runnable executes the ItemLookup based on
         // the ASIN and the Item that is parsed out of the returned XML is placed into target.
         final EventList<String> itemASINs = new BasicEventList<String>();
-        itemASINs.addListEventListener(itemFetcher);
 
-        try {
-            // create a connection for figuring out what we need to grab
-            HTTPConnection searchConnection = new HTTPConnection(host);
+        // create a new ItemFetcher
+        itemFetcher = new ItemFetcher(target, itemASINs, host, progressBar);
 
-            // prepare a stream to determine the number of pages in the result set
-            final String searchUrlPath = "/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=10GN481Z3YQ4S67KNSG2&Operation=ItemSearch&SearchIndex=DVD&ResponseGroup=ItemIds&Keywords=" + keywords;
+        // create a connection for figuring out what we need to grab
+        HTTPConnection searchConnection = new HTTPConnection(host);
 
-            // parse the number of results from the stream
-            InputStream itemSearchResultsStream = getInputStream(searchConnection, searchUrlPath, 10);
-            final Map<XMLTagPath, Object> parseContext = ITEM_SEARCH_PARSER.parse(itemSearchResultsStream);
+        // prepare a stream to determine the number of pages in the result set
+        final String searchUrlPath = "/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=10GN481Z3YQ4S67KNSG2&Operation=ItemSearch&SearchIndex=DVD&ResponseGroup=ItemIds&Keywords=" + keywords;
 
-            // fetch the total number of results
-            final String totalResultsString = (String) parseContext.get(ITEM_SEARCH_RESULTS_TOTAL_RESULTS);
-            final int totalResults = Integer.parseInt(totalResultsString);
+        // parse the number of results from the stream
+        InputStream itemSearchResultsStream = getInputStream(searchConnection, searchUrlPath, 10);
+        final Map<XMLTagPath, Object> parseContext = ITEM_SEARCH_PARSER.parse(itemSearchResultsStream);
 
-            // fetch the total number of pages in the result set
-            final String pageCountString = (String) parseContext.get(ITEM_SEARCH_RESULTS_PAGE_COUNT);
-            final int pageCount = Integer.parseInt(pageCountString);
+        // fetch the total number of results
+        final String totalResultsString = (String) parseContext.get(ITEM_SEARCH_RESULTS_TOTAL_RESULTS);
+        final int totalResults = Integer.parseInt(totalResultsString);
 
-            // reset the progress bar's maximum
-            if (progressBar != null) {
-                progressBar.setString("");
-                progressBar.setStringPainted(true);
-                progressBar.setValue(0);
-                progressBar.setMaximum(totalResults);
-            }
+        // fetch the total number of pages in the result set
+        final String pageCountString = (String) parseContext.get(ITEM_SEARCH_RESULTS_PAGE_COUNT);
+        final int pageCount = Integer.parseInt(pageCountString);
 
-            tryClose(itemSearchResultsStream);
+        if (progressBar != null)
+            progressBar.setMaximum(totalResults);
 
-            // retrieve each page in the result set and parse the ASINs out of them
-            for (int i = 1; i <= pageCount; i++) {
-                // build a URL appropriate for fetching 1 page of 10 search results
-                final String searchPagePath = searchUrlPath + "&ItemPage=" + i;
+        tryClose(itemSearchResultsStream);
 
-                try {
-                    // parse the ASINs from the search results page
-                    itemSearchResultsStream = getInputStream(searchConnection, searchPagePath, 20);
-                    ITEM_SEARCH_PARSER.parse(itemASINs, itemSearchResultsStream);
+        // retrieve each page in the result set and parse the ASINs out of them
+        for (int i = 1; i <= pageCount; i++) {
+            // build a URL appropriate for fetching 1 page of 10 search results
+            final String searchPagePath = searchUrlPath + "&ItemPage=" + i;
 
-                } catch (IOException ioe) {
-                    // simply log the error to Standard Error and continue - these errors are fairly routinely from Amazon's webservice
-                    System.err.println("IOException while fetching page " + i + " of " + pageCount + " pages in the search result, \"" + ioe.getMessage() + "\"");
+            try {
+                // parse the ASINs from the search results page
+                itemSearchResultsStream = getInputStream(searchConnection, searchPagePath, 20);
+                ITEM_SEARCH_PARSER.parse(itemASINs, itemSearchResultsStream);
 
-                } finally {
-                    tryClose(itemSearchResultsStream);
+                if (Thread.interrupted()) {
+                    System.out.println("detected interrupted status in " + Thread.currentThread().getName());
+                    throw new InterruptedException("interrupted by user");
                 }
-            }
 
-        } finally {
-            // always stop listening for new ASINs to fetch when we're done parsing all pages of the search result
-            itemASINs.removeListEventListener(itemFetcher);
+            } catch (ClosedByInterruptException cbie) {
+                // simply log the error to Standard Error and continue - these errors are fairly routinely from Amazon's webservice
+                System.err.println("ClosedByInterruptException while fetching page " + i + " of " + pageCount + " pages in the search result, \"" + cbie.getMessage() + "\"");
+
+            } catch (IOException ioe) {
+                // simply log the error to Standard Error and continue - these errors are fairly routinely from Amazon's webservice
+                System.err.println("IOException while fetching page " + i + " of " + pageCount + " pages in the search result, \"" + ioe.getMessage() + "\"");
+
+            } finally {
+                tryClose(itemSearchResultsStream);
+            }
         }
     }
 
@@ -210,6 +218,9 @@ public class AmazonECSXMLParser {
         /** The list of all Items to populate */
         private final EventList<Item> target;
 
+        /** The list of all item ASINs to lookup */
+        private final EventList<String> itemASINs;
+
         private final ProgressBarUpdater progressBarUpdater;
 
         /** A pool of Threads servicing an unbounded Channel. */
@@ -219,10 +230,13 @@ public class AmazonECSXMLParser {
         /** a connection to the HTTP server of interest */
         private final HTTPConnection httpConnection;
 
-        public ItemFetcher(EventList<Item> target, String host, JProgressBar progressBar) {
+        public ItemFetcher(EventList<Item> target, EventList<String> itemASINs, String host, JProgressBar progressBar) {
             this.target = target;
+            this.itemASINs = itemASINs;
             this.progressBarUpdater = new ProgressBarUpdater(progressBar);
+
             this.target.addListEventListener(this.progressBarUpdater);
+            this.itemASINs.addListEventListener(this);
 
             this.httpConnection = new HTTPConnection(host);
         }
@@ -263,6 +277,10 @@ public class AmazonECSXMLParser {
 
         public void dispose() {
             target.removeListEventListener(this.progressBarUpdater);
+            itemASINs.removeListEventListener(this);
+
+            requestQueue.shutdownAfterProcessingCurrentTask();
+            responseQueue.shutdownAfterProcessingCurrentTask();
         }
 
         /**
@@ -316,7 +334,7 @@ public class AmazonECSXMLParser {
                     inputStream = response.getInputStream();
                     // parse it
                     ITEM_LOOKUP_PARSER.parse(target, inputStream);
-                    System.out.println("loaded item " + target.size() + ": " + asin);
+//                    System.out.println("loaded item " + target.size() + ": " + asin);
                 } catch (ModuleException e) {
                     handleError(remainingRetries, asin, e);
                 } catch (IOException e) {
