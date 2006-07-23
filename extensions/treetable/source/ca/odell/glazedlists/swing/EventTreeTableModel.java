@@ -20,6 +20,9 @@ public class EventTreeTableModel<E> extends AbstractTableModel implements ListEv
 
     private final TreeFormat<E> treeFormat;
 
+    /** reusable table event for broadcasting changes */
+    private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
+
     /**
      * Creates a new table that renders the specified list in the specified
      * format.
@@ -33,6 +36,8 @@ public class EventTreeTableModel<E> extends AbstractTableModel implements ListEv
             this.swingThreadSource = disposeSwingThreadSource ? GlazedListsSwing.swingThreadProxyList(source) : (TransformedList<E,E>) source;
 
             this.tableModel = new EventTableModel<E>(this.swingThreadSource, tableFormat);
+            this.swingThreadSource.removeListEventListener(this.tableModel);
+
             this.treeFormat = treeFormat;
 
             // prepare listeners
@@ -62,7 +67,21 @@ public class EventTreeTableModel<E> extends AbstractTableModel implements ListEv
      * this method are guaranteed to occur on the Swing EDT.
      */
     public void listChanged(ListEvent<E> listChanges) {
-
+        swingThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            // for all changes, one block at a time
+            while(listChanges.nextBlock()) {
+                // get the current change info
+                int startIndex = listChanges.getBlockStartIndex();
+                int endIndex = listChanges.getBlockEndIndex();
+                int changeType = listChanges.getType();
+                // create a table model event for this block
+                tableModelEvent.setValues(startIndex, endIndex, changeType);
+                fireTableChanged(tableModelEvent);
+            }
+        } finally {
+            swingThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /** @inheritDoc */
@@ -118,6 +137,8 @@ public class EventTreeTableModel<E> extends AbstractTableModel implements ListEv
     /** @inheritDoc */
     public void dispose() {
         swingThreadSource.removeListEventListener(this);
+
+        tableModel.dispose();
 
         if (this.disposeSwingThreadSource)
             tableModel.dispose();

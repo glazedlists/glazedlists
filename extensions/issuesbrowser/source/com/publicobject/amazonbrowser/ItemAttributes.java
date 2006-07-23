@@ -2,6 +2,11 @@ package com.publicobject.amazonbrowser;
 
 import java.util.Date;
 
+/**
+ * Models a grab bag of attributes associated with an {@link Item}. 
+ *
+ * @author James Lemieux
+ */
 public class ItemAttributes {
 
     private AudienceRating audienceRating = null;
@@ -13,7 +18,7 @@ public class ItemAttributes {
 
     /**
      * The audience rating of the movie or TV show.
-     * The value returned will be one of {G, PG, PG-13, R, NC-17, Unrated}.
+     * The value returned will be one of {G, PG, PG-13, R, NC-17, X, Unrated}.
      */
     public AudienceRating getAudienceRating() { return audienceRating; }
     public void setAudienceRating(AudienceRating audienceRating) { this.audienceRating = audienceRating; }

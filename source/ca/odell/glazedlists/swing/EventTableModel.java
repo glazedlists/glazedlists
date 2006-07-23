@@ -174,7 +174,6 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         return tableFormat.getColumnCount();
     }
 
-
 	/**
      * Gets the class of elements in the specified column. This behaviour can be
      * customized by implementing the {@link AdvancedTableFormat} interface.
@@ -278,11 +277,12 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * its source {@link EventList} is long-lived.
      * 
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
-     * to call any method on a {@link EventTableModel} after it has been disposed.
+     * to call any method on an {@link EventTableModel} after it has been disposed.
      */
     public void dispose() {
         swingThreadSource.removeListEventListener(this);
 
+        // if we created the swingThreadSource then we must also dispose it
         if (disposeSwingThreadSource)
             swingThreadSource.dispose();
 

@@ -13,6 +13,10 @@ import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.security.AccessControlException;
 
+/**
+ *
+ * @author James Lemieux
+ */
 public class ItemLoader implements Runnable {
 
     private String keywords = null;

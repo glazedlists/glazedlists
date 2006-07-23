@@ -1,5 +1,10 @@
 package com.publicobject.amazonbrowser;
 
+/**
+ * Models a price on Amazon.
+ *
+ * @author James Lemieux
+ */
 public class ListPrice {
 
     private int amount;

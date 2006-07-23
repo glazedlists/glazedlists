@@ -22,6 +22,12 @@ import HTTPClient.HTTPResponse;
 
 import javax.swing.*;
 
+/**
+ * This class knows how to fetch and parse XML streams of product data from the
+ * Amazon ECS webservice.
+ *
+ * @author James Lemieux
+ */
 public class AmazonECSXMLParser {
 
     private static final RateGate amazonRequestRate = new RateGate(200);

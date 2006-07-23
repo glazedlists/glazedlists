@@ -13,6 +13,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 /**
+ * Models an Item fetched from Amazon's ECS web service.
+ *
  * @author James Lemieux
  */
 public class Item {

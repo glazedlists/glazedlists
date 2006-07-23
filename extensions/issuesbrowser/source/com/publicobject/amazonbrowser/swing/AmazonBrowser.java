@@ -2,16 +2,28 @@ package com.publicobject.amazonbrowser.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.TreeFormat;
+import ca.odell.glazedlists.swing.EventTreeTableModel;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
 import com.publicobject.amazonbrowser.Item;
 import com.publicobject.amazonbrowser.ItemLoader;
+import com.publicobject.amazonbrowser.ItemTableFormat;
+import com.publicobject.amazonbrowser.ItemTreeFormat;
 import com.publicobject.misc.swing.GradientPanel;
+import com.publicobject.issuesbrowser.Issue;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
 
+/**
+ *
+ * @author James Lemieux
+ */
 public class AmazonBrowser implements Runnable {
 
     /** application appearance */
@@ -21,6 +33,9 @@ public class AmazonBrowser implements Runnable {
 
     /** an event list to host the items */
     private EventList<Item> itemEventList = new BasicEventList<Item>();
+
+    /** the TableModel backing the treetable of items */
+    private EventTreeTableModel itemTreeTableModel;
 
     /** loads items as requested */
     private ItemLoader itemLoader;
@@ -72,6 +87,9 @@ public class AmazonBrowser implements Runnable {
      * Construct a frame for search and browsing items from Amazon.
      */
     private JPanel constructView() {
+        // sort the original items list
+        final SortedList<Item> itemsSortedList = new SortedList<Item>(itemEventList, null);
+
         final StartNewSearchActionListener startNewSearch = new StartNewSearchActionListener();
 
         final JLabel searchFieldLabel = new JLabel("Search");
@@ -99,8 +117,16 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(progressBar,                  new GridBagConstraints(3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
+        final TableFormat itemTableFormat = new ItemTableFormat();
+        final TreeFormat itemTreeFormat = new ItemTreeFormat();
+        itemTreeTableModel = new EventTreeTableModel(itemEventList, itemTableFormat, itemTreeFormat);
+        final JTable itemTable = new JTable(itemTreeTableModel);
+
+//        new TableComparatorChooser<Item>(itemTable, itemsSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+
         final JPanel panel = new JPanel(new BorderLayout());
         panel.add(BorderLayout.NORTH, searchPanel);
+        panel.add(BorderLayout.CENTER, new JScrollPane(itemTable));
         return panel;
     }
 

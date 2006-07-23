@@ -33,13 +33,12 @@ public class IssueTableFormat implements WritableTableFormat, AdvancedTableForma
             case 5: return "Status";
             case 6: return "Result";
             case 7: return "Summary";
+            default: return null;
         }
-
-        return null;
     }
 
     public Class getColumnClass(int column) {
-        switch(column) {
+        switch (column) {
             case 0: return Integer.class;
             case 2: return Date.class;
             case 3: return Date.class;
@@ -82,8 +81,7 @@ public class IssueTableFormat implements WritableTableFormat, AdvancedTableForma
             case 5: return issue.getStatus();
             case 6: return issue.getResolution();
             case 7: return issue.getShortDescription();
+            default: return null;
         }
-
-        return null;
     }
 }

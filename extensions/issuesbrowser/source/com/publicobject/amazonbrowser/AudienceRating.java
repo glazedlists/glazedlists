@@ -4,7 +4,18 @@
 package com.publicobject.amazonbrowser;
 
 /**
- * Enumeration class that provides available audience ratings.
+ * Enumeration class that provides available audience ratings. Valid ratings
+ * include:
+ *
+ * <ul>
+ *   <li>G - General Audience
+ *   <li>PG - Parental Guidance Suggested
+ *   <li>PG-13 - Parents Strongly Cautioned
+ *   <li>R - Restricted
+ *   <li>NC-17 - No Children Under 17 Admitted
+ *   <li>X - No Children Under 17 Admitted
+ *   <li>NR - Not Rated
+ * </ul>
  *
  * @author James Lemieux
  */
