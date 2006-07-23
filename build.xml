@@ -33,25 +33,25 @@
 
 	<!-- output directory for japex reports -->
 	<property name="reports.dir" value="${target.dir}/reports"/>
-	
+
 	<!-- output directory for javadocs -->
 	<property name="docs.dir" value="${target.dir}/docs"/>
-	
+
 	<!-- output directory for demo jar contents -->
 	<property name="demojar.dir" value="${target.dir}/demojar"/>
-	
+
 	<!-- output directory for java 1.4 build -->
 	<property name="java14_glazedlists.dir" value="${target.dir}/java14_glazedlists"/>
-	
+
 	<!-- output directory for maven upload bundle -->
 	<property name="maven_bundle.dir" value="${target.dir}/maven_bundle"/>
 
 	<target name="clean"
 		description="Clean up generated files, forcing them to be rebuilt.">
-		
+
 		<!-- Delete target directory with all generated build artifacts -->
 		<delete dir="${target.dir}"/>
-		
+
 		<delete>
 			<fileset dir="${basedir}" defaultexcludes="no">
                 <!-- Delete temporary files from JEdit -->
@@ -130,7 +130,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser,swinglabs"
+	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser,swinglabs,treetable"
 		description="Compile all components of the source.">
 	</target>
 
@@ -249,6 +249,10 @@
         </javac>
     </target>
 
+    <target name="treetable" depends="core,swing">
+        <javac destdir="${classes.dir}" srcdir="extensions/treetable/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on"/>
+    </target>
+
     <target name="jfreechart" depends="swing">
         <mkdir dir="extensions/jfreechart/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
@@ -275,7 +279,7 @@
             <classpath path="${classes.dir}"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/37606/activation.jar"/>
             <arg value="extensions/japex/lib/activation.jar"/>
-        </java>    	        
+        </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/37605/japex-all.jar"/>
@@ -285,7 +289,7 @@
             <classpath path="${classes.dir}"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/37607/mail.jar"/>
             <arg value="extensions/japex/lib/mail.jar"/>
-        </java>    	
+        </java>
         <!-- compile the Japex performance tests -->
         <javac destdir="${classes.dir}" srcdir="extensions/japex/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
@@ -307,7 +311,7 @@
         </java>
     </target>
 
-    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms,nachocalendar">
+    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms,nachocalendar,treetable">
         <mkdir dir="extensions/issuesbrowser/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
@@ -473,6 +477,10 @@
 			<exclude name="tools/**"/>
 			<exclude name="extensions/**/lib/**"/>
 			<exclude name="www/**"/>
+			<exclude name="*.iml"/> <!-- Intellij IDEA Module File -->
+			<exclude name="*.ipr"/> <!-- Intellij IDEA Project File -->
+			<exclude name="*.iws"/> <!-- Intellij IDEA Workspace File -->
+			<exclude name="*.tfpt"/> <!-- Performance Test Data (mozillabugs.tfpt, mp3collection.tfpt) -->
 		</zip>
 	</target>
 
@@ -543,7 +551,7 @@
 		<mkdir dir="${testclasses.dir}"/>
 	    <javac destdir="${testclasses.dir}" srcdir="test" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
-                <pathelement location="${classes.dir}"/>            	
+                <pathelement location="${classes.dir}"/>
                 <fileset dir="extensions" includes="**/*.jar"/>
                 <fileset file="${ant.home}/lib/junit.jar"/>
             </classpath>
@@ -564,7 +572,7 @@
 				<include name="pom.xml"/>
 				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
 				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
-				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}-javadoc.jar"/>            	
+				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}-javadoc.jar"/>
             </fileset>
 		</jar>
 		<delete dir="${maven_bundle.dir}"/>
@@ -573,14 +581,14 @@
 	<target name="check-version" description="Checks version property">
 		<fail unless="version" message="To build a maven upload bundle the property 'version' must be defined."/>
 	</target>
-		
+
 	<target name="jar-sources" depends="check-version,dist"
 		description="Create a .jar file containing the source files.">
 		<mkdir dir="${maven_bundle.dir}"/>
 		<copy file="${target.dir}/glazedlists-source_${java.target.version.fileFriendlyName}.zip" tofile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
 		<jar destfile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar" update="true"/>
 	</target>
-	
+
 	<target name="jar-javadoc" depends="check-version,docs"
 		description="Create a .jar file containing the javadoc.">
 		<mkdir dir="${maven_bundle.dir}"/>
