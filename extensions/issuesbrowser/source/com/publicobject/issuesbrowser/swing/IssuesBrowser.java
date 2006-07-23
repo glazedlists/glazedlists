@@ -60,22 +60,25 @@ public class IssuesBrowser implements Runnable {
     private FilterPanel filterPanel = new FilterPanel(issuesEventList);
 
     /** the currently selected issues */
-    private EventSelectionModel issuesSelectionModel = null;
+    private EventSelectionModel issuesSelectionModel;
 
-    private EventTableModel issuesTableModel = null;
+    /** the TableModel containing the filtered and sorted issues */
+    private EventTableModel issuesTableModel;
 
-    private Issue descriptionIssue = null;
+    /** the currently selected issue for which the details are displayed */
+    private Issue descriptionIssue;
 
+    /** the component that displays the details of the selected issue, if any */
     private IssueDetailsComponent issueDetails;
 
     /** monitor loading the issues */
-    private JLabel throbber = null;
+    private JLabel throbber;
 
     /** a label to display the count of issues in the issue table */
-    private IssueCounterLabel issueCounter = null;
+    private IssueCounterLabel issueCounter;
 
     /** loads issues as requested */
-    private IssueLoader issueLoader = null;
+    private IssueLoader issueLoader;
 
     /** the application window */
     private JFrame frame;
