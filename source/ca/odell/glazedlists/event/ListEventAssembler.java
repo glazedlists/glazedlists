@@ -319,7 +319,9 @@ public final class ListEventAssembler<E> {
                 throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress by thread, "  + eventThread.getName());
             }
             this.allowNestedEvents = allowNestedEvents;
-            if(allowNestedEvents) allowContradictingEvents = true;
+            if(allowNestedEvents || (eventLevel == 0 && !isEventEmpty())) {
+                allowContradictingEvents = true;
+            }
 
             // prepare for a new event if we haven't already
             if(eventLevel == 0) {
