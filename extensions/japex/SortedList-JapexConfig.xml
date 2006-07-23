@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testSuite name="SortedListPerformance" xmlns="http://www.sun.com/japex/testSuite">
 
-    <param name="japex.classPath" value="classes"/>
+    <param name="japex.classPath" value="target/classes"/>
 
     <!-- Run each test for 20 seconds -->
     <param name="japex.warmupTime" value="10"/>
