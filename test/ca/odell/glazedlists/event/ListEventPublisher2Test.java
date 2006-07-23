@@ -4,6 +4,12 @@
 package ca.odell.glazedlists.event;
 
 import junit.framework.TestCase;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.ListConsistencyListener;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires
@@ -118,6 +124,46 @@ public class ListEventPublisher2Test extends TestCase {
         }
         public boolean isStale(SimpleSubjectListener subject, SimpleSubjectListener listener) {
             return false;
+        }
+    }
+
+
+    /**
+     * Sets up a chain of listeners so that we can have a contradicting change -
+     * an insert that is later deleted. This event will contradict so we need to
+     * make sure the contradicting event is not fired.
+     *
+     * <p>To do the setup, we create a FilterList that depends on its source
+     * both directly and through a MatcherEditor. That MatcherEditor undoes
+     * an inserted element.
+     */
+    public void testAppendContradictingEvents() {
+        EventList source = new BasicEventList();
+        NotFirstMatcherEditor matcherEditor = new NotFirstMatcherEditor();
+        FilterList filtered = new FilterList(source, matcherEditor);
+        source.addListEventListener(matcherEditor);
+        source.add("A");
+
+        ListConsistencyListener filteredListener = ListConsistencyListener.install(filtered);
+        assertEquals(0, filteredListener.getEventCount());
+    }
+    public static class NotFirstMatcherEditor extends AbstractMatcherEditor implements ListEventListener {
+        public void listChanged(ListEvent listChanges) {
+            EventList sourceList = listChanges.getSourceList();
+            if(sourceList.size() > 0) {
+                fireChanged(new NotSameMatcher(sourceList.get(0)));
+            } else {
+                fireMatchAll();
+            }
+        }
+        private static class NotSameMatcher implements Matcher {
+            Object item;
+            public NotSameMatcher(Object item) {
+                this.item = item;
+            }
+            public boolean matches(Object item) {
+                return item != this.item;
+            }
         }
     }
 }
