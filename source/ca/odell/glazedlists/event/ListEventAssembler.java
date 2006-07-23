@@ -401,6 +401,7 @@ public final class ListEventAssembler<E> {
                 while(listChanges.nextBlock()) {
                     addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
                 }
+                listChanges.reset();
             }
             commitEvent();
         }

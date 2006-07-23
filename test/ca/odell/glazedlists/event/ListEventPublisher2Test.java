@@ -6,7 +6,8 @@ package ca.odell.glazedlists.event;
 import junit.framework.TestCase;
 
 /**
- * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.
+ * Make sure that the {@link SequenceDependenciesEventPublisher} class fires
+ * events properly.
  *
  * @author jessewilson
  */

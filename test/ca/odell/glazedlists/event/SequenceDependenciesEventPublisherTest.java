@@ -571,4 +571,28 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
             return false;
         }
     }
+
+    /**
+     * Test that the ListEvent iterator isn't adjusted by calling
+     * {@link ListEventAssembler#forwardEvent}.
+     */
+    public void testEventStateAfterForwardEvent() {
+        EventList<String> source = new BasicEventList<String>();
+        CountingList<String> counting = new CountingList<String>(source);
+        source.add("Hello");
+        assertEquals(1, counting.changeCount);
+    }
+    public class CountingList<T> extends TransformedList<T,T> {
+        public int changeCount = 0;
+        protected CountingList(EventList<T> source) {
+            super(source);
+            source.addListEventListener(this);
+        }
+        public void listChanged(ListEvent<T> listChanges) {
+            updates.forwardEvent(listChanges);
+            while(listChanges.next()) {
+                changeCount++;
+            }
+        }
+    }
 }
