@@ -49,7 +49,7 @@ import ca.odell.glazedlists.event.*;
  * source {@link EventList}. This enables interested classes to read a consistent
  * (albeit potentially out of date) view of the data at all times.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     
@@ -62,8 +62,6 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     /** whether the proxy thread has been scheduled */
     private boolean scheduled = false;
     
-    public volatile boolean debug = false;
-        
     /**
      * Create a {@link ThreadProxyEventList} which delivers changes to the
      * given <code>source</code> on a particular {@link Thread}, called the
@@ -87,12 +85,10 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     public final void listChanged(ListEvent<E> listChanges) {
         // if we've haven't scheduled a commit, we need to begin a new event
         if(!scheduled) {
-            //if(debug) System.out.print("\nBEGIN[" + Thread.currentThread().getName() + "]");
             updates.beginEvent(true);
         }
         
         // add the changes for this event to our queue
-        //if(debug) System.out.print(" EVENT[" + Thread.currentThread().getName() + "]");
         updates.forwardEvent(listChanges);
         
         // commit the event on the appropriate thread
@@ -121,13 +117,59 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     protected final boolean isWritable() {
         return true;
     }
+
+    /**
+     * Apply the {@link ListEvent} to the {@link List}.
+     */
+    protected List applyChangeToCache(List<E> source, ListEvent<E> listChanges, List<E> localCache) {
+        List<E> result = new ArrayList<E>(source.size());
+
+        // cacheOffset is the running index delta between localCache and result
+        int resultIndex = 0;
+        int cacheOffset = 0;
+
+        while(true) {
+
+            // find the next change (or the end of the list)
+            int changeIndex;
+            int changeType;
+            if(listChanges.next()) {
+                changeIndex = listChanges.getIndex();
+                changeType = listChanges.getType();
+            } else {
+                changeIndex = source.size();
+                changeType = -1;
+            }
+
+            // perform all the updates before this change
+            for(; resultIndex < changeIndex; resultIndex++) {
+                result.add(resultIndex, localCache.get(resultIndex + cacheOffset));
+            }
+
+            // perform this change
+            if(changeType == ListEvent.DELETE) {
+                cacheOffset++;
+            } else if(changeType == ListEvent.UPDATE) {
+                result.add(resultIndex, source.get(changeIndex));
+                resultIndex++;
+            } else if(changeType == ListEvent.INSERT) {
+                result.add(resultIndex, source.get(changeIndex));
+                resultIndex++;
+                cacheOffset--;
+            } else if(changeType == -1) {
+                break;
+            }
+        }
+
+        return result;
+    }
     
     /**
      * Updates the internal data using the proxy thread.
      *
      * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
      */
-    private class UpdateRunner implements Runnable, ListEventListener {
+    private class UpdateRunner implements Runnable, ListEventListener<E> {
     
         /**
          * When run, this combines all events thus far and forwards them.
@@ -140,7 +182,6 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
         public void run() {
             getReadWriteLock().writeLock().lock();
             try {
-                //if(debug) System.out.print(" COMMIT[" + Thread.currentThread().getName() + "]");
                 updates.commitEvent();
                 scheduled = false;
             } finally {
@@ -151,17 +192,8 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
         /**
          * Update local state as a consequence of the change event.
          */
-        public void listChanged(ListEvent listChanges) {
-            while(listChanges.next()) {
-                final int sourceIndex = listChanges.getIndex();
-                final int changeType = listChanges.getType();
-
-                switch (changeType) {
-                    case ListEvent.DELETE: localCache.remove(sourceIndex); break;
-                    case ListEvent.INSERT: localCache.add(sourceIndex, source.get(sourceIndex)); break;
-                    case ListEvent.UPDATE: localCache.set(sourceIndex, source.get(sourceIndex)); break;
-                }
-            }
+        public void listChanged(ListEvent<E> listChanges) {
+            localCache = applyChangeToCache(source, listChanges, localCache);
         }
     }
 }
