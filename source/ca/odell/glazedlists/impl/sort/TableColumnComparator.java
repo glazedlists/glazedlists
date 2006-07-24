@@ -3,11 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.sort;
 
-// to work with Comparators
-import java.util.Comparator;
 import ca.odell.glazedlists.GlazedLists;
-// to work with TableFormats
 import ca.odell.glazedlists.gui.TableFormat;
+
+import java.util.Comparator;
 
 /**
  * A comparator that sorts a table by the column that was clicked.
@@ -45,13 +44,13 @@ public class TableColumnComparator<E> implements Comparator<E> {
      * Compares the two objects, returning a result based on how they compare.
      */
     public int compare(E alpha, E beta) {
-        Object alphaField = tableFormat.getColumnValue(alpha, column);
-        Object betaField = tableFormat.getColumnValue(beta, column);
+        final Object alphaField = tableFormat.getColumnValue(alpha, column);
+        final Object betaField = tableFormat.getColumnValue(beta, column);
         try {
             return comparator.compare(alphaField, betaField);
         // throw a 'nicer' exception if the class does not implement Comparable
-        } catch(ClassCastException e) {
-            IllegalStateException illegalStateException = null;
+        } catch (ClassCastException e) {
+            final IllegalStateException illegalStateException;
             if(comparator == GlazedLists.comparableComparator()) {
                 illegalStateException = new IllegalStateException("TableComparatorChooser can not sort objects \"" + alphaField + "\", \"" + betaField + "\" that do not implement Comparable.");
             } else {

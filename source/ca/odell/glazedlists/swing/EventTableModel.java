@@ -33,7 +33,7 @@ import javax.swing.table.*;
 public class EventTableModel<E> extends AbstractTableModel implements ListEventListener<E> {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E,E> swingThreadSource;
+    protected TransformedList<E,E> swingThreadSource;
 
     /** <tt>true</tt> indicates that disposing this TableModel should dispose of the swingThreadSource as well */
     private final boolean disposeSwingThreadSource;

@@ -12,7 +12,6 @@ import com.publicobject.amazonbrowser.ItemLoader;
 import com.publicobject.amazonbrowser.ItemTableFormat;
 import com.publicobject.amazonbrowser.ItemTreeFormat;
 import com.publicobject.misc.swing.GradientPanel;
-import com.publicobject.issuesbrowser.Issue;
 
 import javax.swing.*;
 import java.awt.*;
@@ -119,10 +118,10 @@ public class AmazonBrowser implements Runnable {
 
         final TableFormat itemTableFormat = new ItemTableFormat();
         final TreeFormat itemTreeFormat = new ItemTreeFormat();
-        itemTreeTableModel = new EventTreeTableModel(itemEventList, itemTableFormat, itemTreeFormat);
+        itemTreeTableModel = new EventTreeTableModel(itemsSortedList, itemTableFormat, itemTreeFormat);
         final JTable itemTable = new JTable(itemTreeTableModel);
 
-//        new TableComparatorChooser<Item>(itemTable, itemsSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+        new TableComparatorChooser<Item>(itemTable, itemsSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
 
         final JPanel panel = new JPanel(new BorderLayout());
         panel.add(BorderLayout.NORTH, searchPanel);

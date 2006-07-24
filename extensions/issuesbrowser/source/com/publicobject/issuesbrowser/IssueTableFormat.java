@@ -48,10 +48,9 @@ public class IssueTableFormat implements WritableTableFormat, AdvancedTableForma
     }
 
     public Comparator getColumnComparator(int column) {
-        if(column == 5) {
-            return GlazedLists.caseInsensitiveComparator();
-        } else {
-            return GlazedLists.comparableComparator();
+        switch (column) {
+            case 5: return GlazedLists.caseInsensitiveComparator();
+            default: return GlazedLists.comparableComparator();
         }
     }
 

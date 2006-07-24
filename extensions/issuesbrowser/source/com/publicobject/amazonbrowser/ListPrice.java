@@ -28,4 +28,8 @@ public class ListPrice {
      */
     public String getFormattedPrice() { return formattedPrice; }
     public void setFormattedPrice(String formattedPrice) { this.formattedPrice = formattedPrice; }
+
+    public String toString() {
+        return formattedPrice;
+    }
 }

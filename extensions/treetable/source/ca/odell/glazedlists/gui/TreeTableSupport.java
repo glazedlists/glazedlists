@@ -7,11 +7,11 @@ public final class TreeTableSupport {
 
     private TreeTableSupport() {}
 
-    public static <E> int getDepth(TreeFormat<E> treeTableFormat, E e) {
+    public static int getDepth(TreeFormat treeTableFormat, Object o) {
         int height = -1;
 
-        while (e != null) {
-            e = treeTableFormat.getParent(e);
+        while (o != null) {
+            o = treeTableFormat.getParent(o);
             height++;
         }
 

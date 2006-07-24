@@ -1,15 +1,11 @@
 package com.publicobject.amazonbrowser;
 
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.SeparatorList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import java.util.Comparator;
 import java.util.Date;
-
-import com.publicobject.issuesbrowser.Priority;
-import com.publicobject.issuesbrowser.Issue;
 
 /**
  * The ItemTableFormat specifies how an item is displayed in a table.
@@ -17,6 +13,8 @@ import com.publicobject.issuesbrowser.Issue;
  * @author James Lemieux
  */
 public class ItemTableFormat implements WritableTableFormat, AdvancedTableFormat {
+
+    private static final Comparator<ListPrice> PRICE_COMPARATOR = new PriceComparator();
 
     public int getColumnCount() {
         return 6;
@@ -43,7 +41,10 @@ public class ItemTableFormat implements WritableTableFormat, AdvancedTableFormat
     }
 
     public Comparator getColumnComparator(int column) {
-        return GlazedLists.comparableComparator();
+        switch (column) {
+            case 1: return PRICE_COMPARATOR;
+            default: return GlazedLists.comparableComparator();
+        }
     }
 
     public boolean isEditable(Object baseObject, int column) {
@@ -58,16 +59,24 @@ public class ItemTableFormat implements WritableTableFormat, AdvancedTableFormat
         if (baseObject == null) return null;
 
         final Item item = (Item) baseObject;
-        final ListPrice listPrice = item.getItemAttributes().getListPrice();
 
         switch (column) {
             case 0: return item.getASIN();
-            case 1: return listPrice == null ? null : listPrice.getFormattedPrice();
+            case 1: return item.getItemAttributes().getListPrice();
             case 2: return item.getItemAttributes().getTitle();
             case 3: return item.getItemAttributes().getAudienceRating();
             case 4: return item.getItemAttributes().getDirector();
             case 5: return item.getItemAttributes().getReleaseDate();
             default: return null;
+        }
+    }
+
+    private static final class PriceComparator implements Comparator<ListPrice> {
+        public int compare(ListPrice listPrice1, ListPrice listPrice2) {
+            final int price1 = listPrice1 == null ? -1 : listPrice1.getAmount();
+            final int price2 = listPrice2 == null ? -1 : listPrice2.getAmount();
+
+            return price1 - price2;
         }
     }
 }
