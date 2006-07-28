@@ -227,6 +227,13 @@ public final class AutoCompleteSupport<E> {
      */
     private final PopupMenuListener popupSizerHandler = new PopupSizer();
 
+    /**
+     * We ensure that selecting an item from the popup via the mouse never
+     * attempts to autocomplete for fear that we will replace the user's
+     * newly selected item.
+     */
+    private final MouseListener popupMouseHandler = new PopupMouseHandler();
+
     /** Handles the special case of the backspace key in strict mode and the enter key. */
     private final KeyListener strictModeBackspaceHandler = new AutoCompleteKeyHandler();
 
@@ -408,10 +415,13 @@ public final class AutoCompleteSupport<E> {
         }
 
         // start listening for model changes (due to filtering) so we can resize the popup vertically
-        comboBox.getModel().addListDataListener(listDataHandler);
+        this.comboBox.getModel().addListDataListener(listDataHandler);
 
         // calculate the popup's width according to the prototype value, if one exists
-        popupMenu.addPopupMenuListener(popupSizerHandler);
+        this.popupMenu.addPopupMenuListener(popupSizerHandler);
+
+        // start suppressing autocompletion on mouse selections
+        this.popup.getList().addMouseListener(popupMouseHandler);
 
         // record the original Up/Down arrow key Actions
         final ActionMap actionMap = comboBox.getActionMap();
@@ -437,13 +447,13 @@ public final class AutoCompleteSupport<E> {
 
         // add a DocumentFilter to the Document backing the editor JTextField
         this.comboBoxEditor = (JTextField) comboBox.getEditor().getEditorComponent();
-        this.document = (AbstractDocument) this.comboBoxEditor.getDocument();
-        this.document.setDocumentFilter(this.documentFilter);
+        this.document = (AbstractDocument) comboBoxEditor.getDocument();
+        this.document.setDocumentFilter(documentFilter);
 
         // add a KeyListener to the ComboBoxEditor which handles the special case of backspace when in strict mode
-        this.comboBoxEditor.addKeyListener(this.strictModeBackspaceHandler);
+        this.comboBoxEditor.addKeyListener(strictModeBackspaceHandler);
         // add a FocusListener to the ComboBoxEditor which selects all text when focus is gained
-        this.comboBoxEditor.addFocusListener(this.selectTextOnFocusGainHandler);
+        this.comboBoxEditor.addFocusListener(selectTextOnFocusGainHandler);
     }
 
     /**
@@ -460,10 +470,13 @@ public final class AutoCompleteSupport<E> {
         }
 
         // stop listening for model changes
-        comboBox.getModel().removeListDataListener(listDataHandler);
+        this.comboBox.getModel().removeListDataListener(listDataHandler);
 
         // stop adjusting the popup's width according to the prototype value
-        popupMenu.removePopupMenuListener(popupSizerHandler);
+        this.popupMenu.removePopupMenuListener(popupSizerHandler);
+
+        // stop suppressing autocompletion on mouse selections
+        this.popup.getList().removeMouseListener(popupMouseHandler);
 
         final ActionMap actionMap = comboBox.getActionMap();
         // restore the original actions for the arrow keys in all non-Apple L&Fs
@@ -480,9 +493,9 @@ public final class AutoCompleteSupport<E> {
         this.document.setDocumentFilter(null);
 
         // remove the KeyListener from the ComboBoxEditor which handles the special case of backspace when in strict mode
-        this.comboBoxEditor.removeKeyListener(this.strictModeBackspaceHandler);
+        this.comboBoxEditor.removeKeyListener(strictModeBackspaceHandler);
         // remove the FocusListener from the ComboBoxEditor which selects all text when focus is gained
-        this.originalComboBoxEditor.removeFocusListener(this.selectTextOnFocusGainHandler);
+        this.originalComboBoxEditor.removeFocusListener(selectTextOnFocusGainHandler);
 
         // erase some original settings of comboBox
         this.originalComboBoxEditor = null;
@@ -1281,6 +1294,24 @@ public final class AutoCompleteSupport<E> {
         }
 
         public void popupMenuCanceled(PopupMenuEvent e) {}
+    }
+
+    /**
+     * When the user selects a value from the popup with the mouse, we want to
+     * honour their selection *without* attempting to autocomplete it to a new
+     * term. Otherwise, it is possible that selections which are prefixes for
+     * values that appear higher in the ComboBoxModel cannot be selected by the
+     * mouse since they can always be successfully autocompleted to another
+     * term.
+     */
+    private class PopupMouseHandler extends MouseAdapter {
+        public void mousePressed(MouseEvent e) {
+            doNotAutoComplete = true;
+        }
+
+        public void mouseReleased(MouseEvent e) {
+            doNotAutoComplete = false;
+        }
     }
 
     /**

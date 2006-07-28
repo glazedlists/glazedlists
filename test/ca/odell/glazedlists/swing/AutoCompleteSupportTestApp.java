@@ -29,12 +29,24 @@ public class AutoCompleteSupportTestApp {
         "net.java.plaf.windows.WindowsLookAndFeel"
     }));
 
-    private static final String[] URL_SAMPLE_DATA = new String[10000];
-    static {
-        for(int i = 0; i < 10000; i++) {
-            URL_SAMPLE_DATA[i] = "" + i;
-        }
-    }
+    private static final String[] URL_SAMPLE_DATA = {
+        null,
+        "http://mail.google.com/mail/",
+        "http://slashdot.org/",
+        "http://www.clientjava.com/blog",
+        "del.icio.us",
+        "http://java.sun.com/javase/6/",
+        "http://java.sun.com/",
+        "http://java.sun.com/j2se/1.5.0/download.jsp",
+        "http://java.sun.com/javaone/sf/",
+        "http://www.jetbrains.com/",
+        "http://www.jetbrains.com/idea/?ggl502",
+        "http://www.wilshipley.com/blog/",
+        "http://jroller.com/page/fate",
+        "http://wilwheaton.typepad.com/",
+        "http://www.theonion.com/content/",
+        "http://www.indeed.com/",
+    };
 
     private static final Location[] STATE_CAPITALS_DATA = {
         new Location("USA", "Alabama", "Montgomery"),
