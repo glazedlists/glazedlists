@@ -534,6 +534,9 @@ public final class AutoCompleteSupport<E> {
      * {@link #uninstall} at some later time to remove the autocompletion
      * features.
      *
+     * <p>This method assumes that the <code>items</code> can be converted into
+     * reasonable String representations via {@link Object#toString()}.
+     *
      * <p>The <code>filterator</code> will be used to extract searchable text
      * strings from each of the <code>items</code>.
      *
@@ -790,7 +793,7 @@ public final class AutoCompleteSupport<E> {
 
         // 5. dispose of our ComboBoxModel
         this.comboBoxModel.dispose();
-        
+
         // 6. dispose of our FilterList so that it is severed from the given items EventList
         this.filteredItems.dispose();
 
