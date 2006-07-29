@@ -626,7 +626,6 @@ public class SeparatorListTest extends TestCase {
 
         // adjust using an event known to put the separator in the wrong place
         source.addAll(0, GlazedListsTests.stringToList("CSC"));
-        System.out.println();
         source.beginEvent(true);
         source.remove(0);
         source.remove(1);
@@ -646,5 +645,21 @@ public class SeparatorListTest extends TestCase {
         public boolean matches(String contained) {
             return enclosing.indexOf(contained) != -1;
         }
+    }
+
+
+    /**
+     * Make sure that SeparatorList handles update events properly.
+     */
+    public void testHandleUpdateEvents() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
+
+        // adjust using an event known to put the separator in the wrong place
+        source.addAll(0, GlazedListsTests.stringToList("AAAA"));
+        assertEquals(listConsistencyListener.getEventCount(), 1);
+        source.set(3, "a");
+        assertEquals(listConsistencyListener.getEventCount(), 2);
     }
 }
