@@ -228,7 +228,11 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
                 // updates are probably already accurate, don't change the state
                 } else if(changeType == ListEvent.UPDATE) {
-                    // do nothing
+                    // if its visible, fire an update event
+                    if(collapsedElements.get(changeIndex) == Barcode.BLACK) {
+                        int viewIndex = collapsedElements.getColourIndex(changeIndex, Barcode.BLACK);
+                        updates.addUpdate(viewIndex);
+                    }
 
                 // fire a delete event if this is a visible element being deleted
                 } else if(changeType == ListEvent.DELETE) {

@@ -504,7 +504,6 @@ public final class ListEventAssembler<E> {
 
         /** {@inheritDoc} */
         protected void prepareEvent() {
-            //listDeltas.reset(sourceSize);
             listDeltas.setAllowContradictingEvents(this.allowContradictingEvents);
             useListBlocksLinear = true;
         }
@@ -516,6 +515,8 @@ public final class ListEventAssembler<E> {
                 boolean success = blockSequence.addChange(type, startIndex, endIndex + 1);
                 if(success) {
                     return;
+
+                // convert from linear to tree4deltas
                 } else {
                     listDeltas.addAll(blockSequence);
                     useListBlocksLinear = false;

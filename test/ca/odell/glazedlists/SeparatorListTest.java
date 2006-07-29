@@ -647,13 +647,12 @@ public class SeparatorListTest extends TestCase {
         }
     }
 
-
     /**
      * Make sure that SeparatorList handles update events properly.
      */
     public void testHandleUpdateEvents() {
         EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        SeparatorList separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
 
         // adjust using an event known to put the separator in the wrong place
@@ -661,5 +660,13 @@ public class SeparatorListTest extends TestCase {
         assertEquals(listConsistencyListener.getEventCount(), 1);
         source.set(3, "a");
         assertEquals(listConsistencyListener.getEventCount(), 2);
+
+        // collapse the group, update events should still cause updates
+        ((SeparatorList.Separator<String>)separated.get(0)).setLimit(0);
+        assertEquals(listConsistencyListener.getEventCount(), 3);
+        assertEquals(1, separated.size());
+        source.set(2, "a");
+        assertEquals(listConsistencyListener.getEventCount(), 4);
+        assertEquals(1, separated.size());
     }
 }
