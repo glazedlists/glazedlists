@@ -59,14 +59,6 @@ public final class GraphDependenciesListEventPublisher implements ListEventPubli
             dependentListeners.add(dependentListener);
         }
         dependentListener.getDependencies().add(dependency);
-
-        /* debug
-       if(listener instanceof WeakReferenceProxy) return;
-       System.out.println("- - - - NEW DEPENDENCY: " + listener.getClass() + " DEPENDS ON " + dependency.getClass());
-       for(Iterator i = dependentListeners.iterator(); i.hasNext(); ) {
-           DependentListener dl = (DependentListener)i.next();
-           System.out.print(dl);
-       } */
     }
 
     /**

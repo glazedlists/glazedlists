@@ -34,7 +34,7 @@ class Tree4Deltas {
     private static final byte CHANGE_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
 
     private FourColorTree<String> tree = new FourColorTree<String>(Tree4Deltas.BYTE_CODER);
-    private boolean allowContradictingEvents = true;
+    private boolean allowContradictingEvents = false;
 
     /**
      * When the first change to a list happens, we need to guess what the list's

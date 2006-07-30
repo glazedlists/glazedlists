@@ -287,10 +287,12 @@ public final class ListEventAssembler<E> {
 
         /** the event level is the number of nested events */
         protected int eventLevel = 0;
+        /** whether an event has been prepared but not yet fired */
+        protected boolean eventPending = false;
         /** whether to allow nested events */
         protected boolean allowNestedEvents = true;
         /** whether to allow contradicting events */
-        protected boolean allowContradictingEvents = false;
+        private boolean allowContradictingEvents = false;
 
         protected AssemblerHelper(EventList<E> sourceList, ListEventPublisher publisher) {
             this.sourceList = sourceList;
@@ -319,12 +321,13 @@ public final class ListEventAssembler<E> {
                 throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress by thread, "  + eventThread.getName());
             }
             this.allowNestedEvents = allowNestedEvents;
-            if(allowNestedEvents || (eventLevel == 0 && !isEventEmpty())) {
-                allowContradictingEvents = true;
+            if(allowNestedEvents || (eventLevel == 0 && eventPending)) {
+                setAllowContradictingEvents(true);
             }
 
             // prepare for a new event if we haven't already
-            if(eventLevel == 0) {
+            if(!eventPending) {
+                this.eventPending = true;
                 this.eventThread = Thread.currentThread();
                 prepareEvent();
             }
@@ -334,6 +337,13 @@ public final class ListEventAssembler<E> {
         }
 
         protected abstract void prepareEvent();
+
+        protected void setAllowContradictingEvents(boolean allowContradictingEvents) {
+            this.allowContradictingEvents = allowContradictingEvents;
+        }
+        protected boolean getAllowContradictingEvents() {
+            return allowContradictingEvents;
+        }
 
         /**
          * Sets the current event as a reordering. Reordering events cannot be
@@ -378,6 +388,7 @@ public final class ListEventAssembler<E> {
                 if(!isEventEmpty()) {
                     publisherAdapter.fireEvent();
                 } else {
+                    eventPending = false;
                     cleanup();
                 }
             }
@@ -475,7 +486,7 @@ public final class ListEventAssembler<E> {
         public void cleanup() {
             listDeltas.reset(0);
             reorderMap = null;
-            allowContradictingEvents = false;
+            setAllowContradictingEvents(false);
         }
 
         protected ListEvent<E> createListEvent() {
@@ -504,8 +515,12 @@ public final class ListEventAssembler<E> {
 
         /** {@inheritDoc} */
         protected void prepareEvent() {
-            listDeltas.setAllowContradictingEvents(this.allowContradictingEvents);
             useListBlocksLinear = true;
+        }
+
+        protected void setAllowContradictingEvents(boolean allowContradictingEvents) {
+            super.setAllowContradictingEvents(allowContradictingEvents);
+            listDeltas.setAllowContradictingEvents(allowContradictingEvents);
         }
 
         /** {@inheritDoc} */
@@ -556,7 +571,7 @@ public final class ListEventAssembler<E> {
             blockSequence.reset();
             listDeltas.reset(sourceList.size());
             reorderMap = null;
-            allowContradictingEvents = false;
+            setAllowContradictingEvents(false);
         }
 
         protected ListEvent<E> createListEvent() {
@@ -621,7 +636,7 @@ public final class ListEventAssembler<E> {
 
         /** {@inheritDoc} */
         protected void beforeFireEvent() {
-            Block.sortListEventBlocks(atomicChangeBlocks, allowContradictingEvents);
+            Block.sortListEventBlocks(atomicChangeBlocks, getAllowContradictingEvents());
         }
 
         /** {@inheritDoc} */
@@ -629,7 +644,7 @@ public final class ListEventAssembler<E> {
             atomicChangeBlocks = null;
             atomicLatestBlock = null;
             reorderMap = null;
-            allowContradictingEvents = false;
+            setAllowContradictingEvents(false);
         }
 
         /**
@@ -790,6 +805,7 @@ public final class ListEventAssembler<E> {
             try {
                 publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
             } finally {
+                assemblerHelper.eventPending = false;
                 assemblerHelper.cleanup();
             }
         }
@@ -853,6 +869,7 @@ public final class ListEventAssembler<E> {
                 listener.listChanged(event);
             }
             public void postEvent(EventList<E> subject) {
+                assemblerDelegate.eventPending = false;
                 assemblerDelegate.cleanup();
                 ((ListSequencePublisherAdapter)assemblerDelegate.publisherAdapter).eventEnqueued = false;
             }
