@@ -641,6 +641,12 @@ public final class AutoCompleteSupport<E> {
      * it does not rely on the existence of a valueOf(String) method for
      * creating items out of Strings as is the default behaviour of JComboBox.
      *
+     * <p>It can be assumed that the only methods called on the given <code>format</code> are:
+     * <ul>
+     *   <li>{@link Format#format(Object)}
+     *   <li>{@link Format#parseObject(String, java.text.ParsePosition)}
+     * </ul>
+     *
      * <p>As a convenience, this method will install a custom
      * {@link ListCellRenderer} on the <code>comboBox</code> that displays the
      * String value returned by the <code>format</code>. Though this is only
