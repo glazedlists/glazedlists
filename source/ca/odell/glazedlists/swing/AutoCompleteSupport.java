@@ -16,12 +16,16 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Method;
+import java.text.Format;
+import java.text.ParsePosition;
 import java.util.Comparator;
 
 /**
@@ -40,8 +44,8 @@ import java.util.Comparator;
  *        editor's text. It also autocompletes to the first item that is
  *        prefixed with the editor's text and selects that item within the popup.
  *   <li> typing any value into the editor when the popup is visible causes
- *        the popup to be refiltered to contain values that start with the prefix
- *        and reselects an appropriate autocompletion item
+ *        the popup to be refiltered according to the editor's text and
+ *        reselects an appropriate autocompletion item
  *   <li> typing the down or up arrow keys in the editor when the popup is
  *        invisible causes the popup to appear and its contents to be filtered
  *        according to the editor's text. It also autocompletes to the first
@@ -64,7 +68,7 @@ import java.util.Comparator;
  *   <li> clicking the arrow button when the popup is invisible causes the
  *        popup to appear and its contents to be shown unfiltered
  *   <li> clicking the arrow button when the popup is visible causes the popup
- *        to disappear
+ *        to be hidden
  * </ol>
  *
  * <strong>Sizing the ComboBox Popup</strong>
@@ -72,7 +76,7 @@ import java.util.Comparator;
  *   <li> the popup is always <strong>at least</strong> as wide as the
  *        autocompleting {@link JComboBox}, but may be wider to accomodate a
  *        {@link JComboBox#getPrototypeDisplayValue() prototype display value}
- *        if a non-null value exists
+ *        if a non-null prototype display value exists
  *   <li> as items are filtered in the ComboBoxModel, the popup height is
  *        adjusted to display between 0 and {@link JComboBox#getMaximumRowCount()}
  *        rows before scrolling the popup
@@ -97,7 +101,17 @@ import java.util.Comparator;
  * <strong>ComboBoxEditor Focus</strong>
  * <p>When the ComboBoxEditor gains focus it selects the text it contains if
  * {@link #getSelectsTextOnFocusGain()} returns <tt>true</tt>; otherwise it
- * does nothing.</p>
+ * does nothing.<br><br></p>
+ *
+ * <strong>Extracting String Values</strong>
+ * <p>Each value in the ComboBoxModel must be converted to a String for many
+ * reasons: filtering, setting into the ComboBoxEditor, displaying in the
+ * renderer, etc. By default, JComboBox relies on {@link Object#toString()}
+ * to map elements to their String equivalents. Sometimes, however, toString()
+ * is not a reliable or desirable mechanism to use. To deal with this problem,
+ * AutoCompleteSupport provides an install method that takes a {@link Format}
+ * object which is used to do all converting back and forth between Strings and
+ * ComboBoxModel objects.</p>
  *
  * <p>In order to achieve all of the autocompletion and filtering behaviour,
  * the following occurs when {@link #install} is called:
@@ -106,6 +120,8 @@ import java.util.Comparator;
  *   <li> the JComboBox will be made editable
  *   <li> the JComboBox will have a custom ComboBoxModel installed on it
  *        containing the given items
+ *   <li> the ComboBoxEditor will be wrapped with functionality and set back
+ *        into the JComboBox as the editor
  *   <li> the JTextField which is the editor component for the JComboBox
  *        will have a DocumentFilter installed on its backing Document
  * </ul>
@@ -133,12 +149,14 @@ import java.util.Comparator;
  */
 public final class AutoCompleteSupport<E> {
 
+    private static final Class[] VALUE_OF_SIGNATURE = {String.class};
+
     //
     // These member variables control behaviour of the autocompletion support
     //
 
     /**
-     * <tt>true</tt> if user specified text is converted into the same case as
+     * <tt>true</tt> if user-specified text is converted into the same case as
      * the autocompletion term. <tt>false</tt> will leave user specified text
      * unaltered.
      */
@@ -175,29 +193,42 @@ public final class AutoCompleteSupport<E> {
     /** The model backing the comboBox. */
     private final AutoCompleteComboBoxModel comboBoxModel;
 
+    /** The custom renderer installed on the comboBox or <code>null</code> if one is not required. */
+    private final ListCellRenderer renderer;
+
     /** The EventList which holds the items present in the comboBoxModel. */
     private final EventList<E> items;
 
     /** The FilterList which filters the items present in the comboBoxModel. */
     private final FilterList<E> filteredItems;
 
+    /** The Format capable of producing Strings from ComboBoxModel elements and vice versa. */
+    private final Format format;
+
     /** The MatcherEditor driving the FilterList behind the comboBoxModel. */
     private final TextMatcherEditor<E> filterMatcherEditor;
 
-    /** The textfield which acts as the editor of the comboBox. */
-    private JTextField comboBoxEditor;
+    /**
+     * The custom ComboBoxEditor that does NOT assume that the text value can
+     * be computed using Object.toString(). (i.e. the default ComboBoxEditor
+     * *does* assume that, but we decorate it and remove that assumption)
+     */
+    private FormatComboBoxEditor comboBoxEditor;
 
-    /** The Document backing the comboBoxEditor. */
+    /** The textfield which acts as the editor of the comboBox. */
+    private JTextField comboBoxEditorComponent;
+
+    /** The Document backing the comboBoxEditorComponent. */
     private AbstractDocument document;
 
-    /** A DocumentFilter that controls edits to the Document behind the comboBoxEditor. */
+    /** A DocumentFilter that controls edits to the document. */
     private final AutoCompleteFilter documentFilter = new AutoCompleteFilter();
 
     /** The last prefix specified by the user. */
     private String prefix = "";
 
-    /** This matcher determines if the user-defined prefix matches the beginning of a given String. */
-    private Matcher<String> prefixMatcher = Matchers.trueMatcher();
+    /** The Matcher that decides if a ComboBoxModel element is filtered out. */
+    private Matcher<String> filterMatcher = Matchers.trueMatcher();
 
     /** Controls the selection behavior of the JComboBox when it is used in a JTable DefaultCellEditor. */
     private boolean isTableCellEditor;
@@ -214,7 +245,7 @@ public final class AutoCompleteSupport<E> {
     private ArrowButtonMouseListener arrowButtonMouseListener;
 
     /**
-     * A listener which reacts to changes in the combo box model by
+     * A listener which reacts to changes in the ComboBoxModel by
      * resizing the popup appropriately to accomodate the new data.
      */
     private final ListDataListener listDataHandler = new ListDataHandler();
@@ -230,23 +261,23 @@ public final class AutoCompleteSupport<E> {
     /**
      * We ensure that selecting an item from the popup via the mouse never
      * attempts to autocomplete for fear that we will replace the user's
-     * newly selected item.
+     * newly selected item and the item will effectively be unselectable.
      */
     private final MouseListener popupMouseHandler = new PopupMouseHandler();
 
     /** Handles the special case of the backspace key in strict mode and the enter key. */
     private final KeyListener strictModeBackspaceHandler = new AutoCompleteKeyHandler();
 
-    /** Handles selecting the text in the comboBoxEditor when it gains focus. */
+    /** Handles selecting the text in the comboBoxEditorComponent when it gains focus. */
     private final FocusListener selectTextOnFocusGainHandler = new SelectTextOnFocusGainHandler();
 
 
     //
-    // These listeners watch for invalid changes to the JComboBox which break our autocompletion and report them
+    // These listeners watch for invalid changes to the JComboBox which break our autocompletion
     //
 
     /**
-     * Watches for changes of the Document which backs comboBoxEditor and uninstalls
+     * Watches for changes of the Document which backs comboBoxEditorComponent and uninstalls
      * our DocumentFilter from the old Document and reinstalls it on the new.
      */
     private final DocumentWatcher documentWatcher = new DocumentWatcher();
@@ -265,7 +296,7 @@ public final class AutoCompleteSupport<E> {
      * (i.e. just commit changes to the Document and do not cause any side-effects). */
     private boolean doNotPostProcessDocumentChanges = false;
 
-    /** <tt>true</tt> indicates attempts to filter the combo box model should be ignored. */
+    /** <tt>true</tt> indicates attempts to filter the ComboBoxModel should be ignored. */
     private boolean doNotFilter = false;
 
     /** <tt>true</tt> indicates attempts to change the document should be ignored. */
@@ -275,14 +306,18 @@ public final class AutoCompleteSupport<E> {
     private boolean doNotAutoComplete = false;
 
     /** <tt>true</tt> indicates attempts to toggle the state of the popup should be ignored.
-     * In general, the only time we should toggle the state of a popup is due to a users keystroke. */
+     * In general, the only time we should toggle the state of a popup is due to a users keystroke
+     * (and not programmatically setting the selected item, for example). */
     private boolean doNotTogglePopup = true;
 
-    /** <tt>true</tt> indicates attempts to clear the filter when hiding the popup should be ignored. */
+    /** <tt>true</tt> indicates attempts to clear the filter when hiding the popup should be ignored.
+     * This is because sometimes we hide and reshow a popup in rapid succession and we want to avoid
+     * the work to unfiltering/refiltering it.
+     */
     private boolean doNotClearFilterOnPopupHide = false;
 
     //
-    // Values present when {@link #install} executes - and are restored when {@link @uninstall} executes
+    // Values present before {@link #install} executes - and are restored when {@link @uninstall} executes
     //
 
     /** The original setting of the editable field on the comboBox. */
@@ -291,12 +326,12 @@ public final class AutoCompleteSupport<E> {
     /** The original model installed on the comboBox. */
     private ComboBoxModel originalModel;
 
-    //
-    // Values present when {@link #decorateCurrentUI} executes - and are restored when {@link @undecorateOriginalUI} executes
-    //
+    /** The original ListCellRenderer installed on the comboBox. */
+    private ListCellRenderer originalRenderer;
 
-    /** The original editor for the comboBox. */
-    private JTextField originalComboBoxEditor;
+    //
+    // Values present before {@link #decorateCurrentUI} executes - and are restored when {@link @undecorateOriginalUI} executes
+    //
 
     /** The original Actions associated with the up and down arrow keys. */
     private Action originalSelectNextAction;
@@ -312,17 +347,25 @@ public final class AutoCompleteSupport<E> {
      * particular, a custom {@link ComboBoxModel} is installed behind the
      * <code>comboBox</code> containing the given <code>items</code>. The
      * <code>filterator</code> is consulted in order to extract searchable
-     * text from each of the <code>items</code>.
+     * text from each of the <code>items</code>. Non-null <code>format</code>
+     * objects are used to convert ComboBoxModel elements to Strings and back
+     * again for various functions like filtering, editing, and rendering.
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
      * @param items the objects to display in the <code>comboBox</code>
      * @param filterator extracts searchable text strings from each item
+     * @param format converts combobox elements into strings and vice versa
      */
-    private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
+    private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator, Format format) {
         this.comboBox = comboBox;
         this.originalComboBoxEditable = comboBox.isEditable();
         this.originalModel = comboBox.getModel();
         this.items = items;
+        this.format = format;
+
+        // only build a custom renderer if the user specified their own Format but has not installed a custom renderer of their own
+        final boolean defaultRendererInstalled = comboBox.getEditor() instanceof UIResource;
+        this.renderer = format == null && defaultRendererInstalled ? null : new StringFunctionRenderer();
 
         // is this combo box a TableCellEditor?
         this.isTableCellEditor = Boolean.TRUE.equals(comboBox.getClientProperty("JComboBox.isTableCellEditor"));
@@ -341,7 +384,7 @@ public final class AutoCompleteSupport<E> {
         // react to changes made to the key parts of JComboBox which affect autocompletion
         this.comboBox.addPropertyChangeListener("UI", this.uiWatcher);
         this.comboBox.addPropertyChangeListener("model", this.modelWatcher);
-        this.comboBoxEditor.addPropertyChangeListener("document", this.documentWatcher);
+        this.comboBoxEditorComponent.addPropertyChangeListener("document", this.documentWatcher);
     }
 
     /**
@@ -381,10 +424,10 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
-     * A convenience method to search through the given component for the
+     * A convenience method to search through the given JComboBox for the
      * JButton which toggles the popup up open and closed.
      */
-    private static JButton findArrowButton(JComponent c) {
+    private static JButton findArrowButton(JComboBox c) {
         for (int i = 0, n = c.getComponentCount(); i < n; i++) {
             final Component comp = c.getComponent(i);
             if (comp instanceof JButton)
@@ -401,7 +444,7 @@ public final class AutoCompleteSupport<E> {
      */
     private void decorateCurrentUI() {
         // record some original settings of comboBox
-        this.originalComboBoxEditor = (JTextField) comboBox.getEditor().getEditorComponent();
+        this.originalRenderer = comboBox.getRenderer();
         this.popupMenu = (JPopupMenu) comboBox.getUI().getAccessibleChild(comboBox, 0);
         this.popup = (ComboPopup) popupMenu;
         this.arrowButton = findArrowButton(comboBox);
@@ -420,7 +463,7 @@ public final class AutoCompleteSupport<E> {
         // calculate the popup's width according to the prototype value, if one exists
         this.popupMenu.addPopupMenuListener(popupSizerHandler);
 
-        // start suppressing autocompletion on mouse selections
+        // start suppressing autocompletion when selecting values from the popup with the mouse
         this.popup.getList().addMouseListener(popupMouseHandler);
 
         // record the original Up/Down arrow key Actions
@@ -432,8 +475,8 @@ public final class AutoCompleteSupport<E> {
         this.originalAquaSelectNextAction = actionMap.get("aquaSelectNext");
         this.originalAquaSelectPreviousAction = actionMap.get("aquaSelectPrevious");
 
-        final UpAction upAction = new UpAction();
-        final DownAction downAction = new DownAction();
+        final Action upAction = new MoveAction(-1);
+        final Action downAction = new MoveAction(1);
 
         // install custom actions for the arrow keys in all non-Apple L&Fs
         actionMap.put("selectPrevious", upAction);
@@ -445,15 +488,24 @@ public final class AutoCompleteSupport<E> {
         actionMap.put("aquaSelectPrevious", upAction);
         actionMap.put("aquaSelectNext", downAction);
 
+        // install a custom ComboBoxEditor that decorates the existing one, but uses the
+        // convertToString(...) method to produce text for the editor component (rather than .toString())
+        this.comboBoxEditor = new FormatComboBoxEditor(comboBox.getEditor());
+        this.comboBox.setEditor(comboBoxEditor);
+
         // add a DocumentFilter to the Document backing the editor JTextField
-        this.comboBoxEditor = (JTextField) comboBox.getEditor().getEditorComponent();
-        this.document = (AbstractDocument) comboBoxEditor.getDocument();
+        this.comboBoxEditorComponent = (JTextField) comboBox.getEditor().getEditorComponent();
+        this.document = (AbstractDocument) comboBoxEditorComponent.getDocument();
         this.document.setDocumentFilter(documentFilter);
 
+        // install a custom renderer on the combobox, if we have built one
+        if (this.renderer != null)
+            comboBox.setRenderer(renderer);
+
         // add a KeyListener to the ComboBoxEditor which handles the special case of backspace when in strict mode
-        this.comboBoxEditor.addKeyListener(strictModeBackspaceHandler);
+        this.comboBoxEditorComponent.addKeyListener(strictModeBackspaceHandler);
         // add a FocusListener to the ComboBoxEditor which selects all text when focus is gained
-        this.comboBoxEditor.addFocusListener(selectTextOnFocusGainHandler);
+        this.comboBoxEditorComponent.addFocusListener(selectTextOnFocusGainHandler);
     }
 
     /**
@@ -472,10 +524,14 @@ public final class AutoCompleteSupport<E> {
         // stop listening for model changes
         this.comboBox.getModel().removeListDataListener(listDataHandler);
 
+        // restore the original ComboBoxEditor if our custom ComboBoxEditor is still installed
+        if (this.comboBox.getEditor() == comboBoxEditor)
+            this.comboBox.setEditor(comboBoxEditor.getDelegate());
+
         // stop adjusting the popup's width according to the prototype value
         this.popupMenu.removePopupMenuListener(popupSizerHandler);
 
-        // stop suppressing autocompletion on mouse selections
+        // stop suppressing autocompletion when selecting values from the popup with the mouse
         this.popup.getList().removeMouseListener(popupMouseHandler);
 
         final ActionMap actionMap = comboBox.getActionMap();
@@ -493,13 +549,18 @@ public final class AutoCompleteSupport<E> {
         this.document.setDocumentFilter(null);
 
         // remove the KeyListener from the ComboBoxEditor which handles the special case of backspace when in strict mode
-        this.comboBoxEditor.removeKeyListener(strictModeBackspaceHandler);
+        this.comboBoxEditorComponent.removeKeyListener(strictModeBackspaceHandler);
         // remove the FocusListener from the ComboBoxEditor which selects all text when focus is gained
-        this.originalComboBoxEditor.removeFocusListener(selectTextOnFocusGainHandler);
+        this.comboBoxEditorComponent.removeFocusListener(selectTextOnFocusGainHandler);
+
+        // remove the custom renderer if it is still installed
+        if (this.comboBox.getRenderer() == renderer)
+            this.comboBox.setRenderer(originalRenderer);
 
         // erase some original settings of comboBox
-        this.originalComboBoxEditor = null;
+        this.originalRenderer = null;
         this.comboBoxEditor = null;
+        this.comboBoxEditorComponent = null;
         this.document = null;
         this.popupMenu = null;
         this.popup = null;
@@ -516,10 +577,17 @@ public final class AutoCompleteSupport<E> {
      * <p>This method assumes that the <code>items</code> can be converted into
      * reasonable String representations via {@link Object#toString()}.
      *
+     * <p>The following must be true in order to successfully install support
+     * for autocompletion on a {@link JComboBox}:
+     *
+     * <ul>
+     *   <li> The JComboBox must use a {@link JTextField} as its editor component
+     *   <li> The JTextField must use an {@link AbstractDocument} as its model
+     * </ul>
+     *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
      * @param items the objects to display in the <code>comboBox</code>
-     * @return an instance of the support class that is providing autocomplete
-     *      features
+     * @return an instance of the support class providing autocomplete features
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
@@ -544,19 +612,63 @@ public final class AutoCompleteSupport<E> {
      * for autocompletion on a {@link JComboBox}:
      *
      * <ul>
-     *   <li> The JComboBox must use a {@link JTextField} as its editor
+     *   <li> The JComboBox must use a {@link JTextField} as its editor component
      *   <li> The JTextField must use an {@link AbstractDocument} as its model
      * </ul>
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
      * @param items the objects to display in the <code>comboBox</code>
      * @param filterator extracts searchable text strings from each item
-     * @return an instance of the support class that is providing autocomplete
-     *      features
+     * @return an instance of the support class providing autocomplete features
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
     public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
+        return install(comboBox, items, filterator, null);
+    }
+
+    /**
+     * Installs support for autocompletion into the <code>comboBox</code> and
+     * returns the support object that is actually providing those facilities.
+     * The support object is returned so that the caller may invoke
+     * {@link #uninstall} at some later time to remove the autocompletion
+     * features.
+     *
+     * <p>This method uses the given <code>format</code> to convert the
+     * given <code>items</code> into Strings and back again. In other words,
+     * this method does <strong>NOT</strong> rely on {@link Object#toString()}
+     * to produce a reasonable String representation of each item. Likewise,
+     * it does not rely on the existence of a valueOf(String) method for
+     * creating items out of Strings as is the default behaviour of JComboBox.
+     *
+     * <p>As a convenience, this method will install a custom
+     * {@link ListCellRenderer} on the <code>comboBox</code> that displays the
+     * String value returned by the <code>format</code>. Though this is only
+     * done if the given <code>format</code> is not <code>null</code> and if
+     * the <code>comboBox</code> does not already use a custom renderer.
+     *
+     * <p>The <code>filterator</code> will be used to extract searchable text
+     * strings from each of the <code>items</code>.
+     *
+     * <p>The following must be true in order to successfully install support
+     * for autocompletion on a {@link JComboBox}:
+     *
+     * <ul>
+     *   <li> The JComboBox must use a {@link JTextField} as its editor component
+     *   <li> The JTextField must use an {@link AbstractDocument} as its model
+     * </ul>
+     *
+     * @param comboBox the {@link JComboBox} to decorate with autocompletion
+     * @param items the objects to display in the <code>comboBox</code>
+     * @param filterator extracts searchable text strings from each item
+     * @param format a Format object capable of converting <code>items</code>
+     *      into Strings and back. <code>null</code> indicates the standard
+     *      JComboBox methods of converting are acceptable.
+     * @return an instance of the support class providing autocomplete features
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     */
+    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator, Format format) {
         checkAccessThread();
 
         final Component editorComponent = comboBox.getEditor().getEditorComponent();
@@ -569,7 +681,7 @@ public final class AutoCompleteSupport<E> {
         if (comboBox.getModel().getClass() == AutoCompleteSupport.AutoCompleteComboBoxModel.class)
             throw new IllegalArgumentException("comboBox is already configured for autocompletion");
 
-        return new AutoCompleteSupport<E>(comboBox, items, filterator);
+        return new AutoCompleteSupport<E>(comboBox, items, filterator, format);
     }
 
     /**
@@ -589,13 +701,23 @@ public final class AutoCompleteSupport<E> {
                 "work, the following invariants must be maintained after " +
                 "AutoCompleteSupport.install() has been called:\n" +
                 "* the ComboBoxModel may not be removed\n" +
-                "* the ComboBoxEditor may not be removed\n" +
                 "* the AbstractDocument behind the JTextField can be changed but must be changed to some subclass of AbstractDocument\n" +
                 "* the DocumentFilter on the AbstractDocument behind the JTextField may not be removed\n";
 
         uninstall();
 
         throw new IllegalStateException(exceptionMsg);
+    }
+
+    /**
+     * A convenience method to produce a String from the given
+     * <code>comboBoxElement</code>.
+     */
+    private String convertToString(Object comboBoxElement) {
+        if (format != null)
+            return format.format(comboBoxElement);
+
+        return comboBoxElement == null ? "" : comboBoxElement.toString();
     }
 
     /**
@@ -652,9 +774,8 @@ public final class AutoCompleteSupport<E> {
      * keystroke must continue to match some value in the ComboBoxModel or it
      * will be discarded.
      *
-     * <p>Note: When strict mode is turned on then all user input is corrected
-     * to the case of the autocompletion term, regardless of the correctsCase
-     * setting.
+     * <p>Note: When strict mode is enabled, all user input is corrected to the
+     * case of the autocompletion term, regardless of the correctsCase setting.
      *
      * @see #setCorrectsCase(boolean)
      *
@@ -671,7 +792,7 @@ public final class AutoCompleteSupport<E> {
         // if strict mode was just turned on, ensure the comboBox contains a
         // value from the ComboBoxModel (i.e. start being strict!)
         if (strict) {
-            final String value = comboBoxEditor.getText();
+            final String value = comboBoxEditorComponent.getText();
             String strictValue = findAutoCompleteTerm(value);
 
             // if the value in the editor already IS the autocompletion term,
@@ -679,10 +800,8 @@ public final class AutoCompleteSupport<E> {
             if (value.equals(strictValue)) return;
 
             // select the first element if no autocompletion term could be found
-            if (strictValue == null && !items.isEmpty()) {
-                final Object firstItem = items.get(0);
-                strictValue = firstItem == null ? "" : firstItem.toString();
-            }
+            if (strictValue == null && !items.isEmpty())
+                strictValue = convertToString(items.get(0));
 
             // return all elements to the ComboBoxModel
             applyFilter("");
@@ -690,7 +809,7 @@ public final class AutoCompleteSupport<E> {
             // adjust the editor to contain the autocompletion term
             doNotFilter = true;
             try {
-                comboBoxEditor.setText(strictValue);
+                comboBoxEditorComponent.setText(strictValue);
             } finally {
                 doNotFilter = false;
             }
@@ -731,6 +850,10 @@ public final class AutoCompleteSupport<E> {
      * <p>{@link TextMatcherEditor#STARTS_WITH} indicates elements of the
      * {@link ComboBoxModel} are matched when they start with the text entered
      * by the user.
+     *
+     * <p>In both modes, autocompletion only occurs when a given item starts
+     * with user-specified text. The filter mode only affects the filtering
+     * aspect of autocomplete support.
      */
     public int getFilterMode() {
         return filterMatcherEditor.getMode();
@@ -779,13 +902,13 @@ public final class AutoCompleteSupport<E> {
         // 1. stop listening for changes
         this.comboBox.removePropertyChangeListener("UI", this.uiWatcher);
         this.comboBox.removePropertyChangeListener("model", this.modelWatcher);
-        this.comboBoxEditor.removePropertyChangeListener("document", this.documentWatcher);
+        this.comboBoxEditorComponent.removePropertyChangeListener("document", this.documentWatcher);
 
         // 2. undecorate the original UI components
         this.undecorateOriginalUI();
 
         // 3. restore the original model to the JComboBox
-        this.comboBox.setModel(this.originalModel);
+        this.comboBox.setModel(originalModel);
         this.originalModel = null;
 
         // 4. restore the original editable flag to the JComboBox
@@ -825,19 +948,19 @@ public final class AutoCompleteSupport<E> {
 
     /**
      * This method updates the {@link #prefix} to be the current value in the
-     * combo box editor.
+     * ComboBoxEditor.
      */
-    private void updatePrefix() {
-        prefix = comboBoxEditor.getText();
+    private void updateFilter() {
+        prefix = comboBoxEditorComponent.getText();
 
         if (prefix.length() == 0)
-            prefixMatcher = Matchers.trueMatcher();
+            filterMatcher = Matchers.trueMatcher();
         else
-            prefixMatcher = new TextMatcher<String>(new String[] {prefix}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
+            filterMatcher = new TextMatcher<String>(new String[] {prefix}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
     }
 
     /**
-     * A small convenience method to try showing the combo box popup.
+     * A small convenience method to try showing the ComboBoxPopup.
      */
     private void togglePopup() {
         // break out early if we're flagged to ignore attempts to toggle the popup state
@@ -863,11 +986,9 @@ public final class AutoCompleteSupport<E> {
 
         // search the list of ALL items for an autocompletion term for the given value
         for (int i = 0, n = items.size(); i < n; i++) {
-            final Object item = items.get(i);
-            final String itemString = item == null ? "" : item.toString();
+            final String itemString = convertToString(items.get(i));
 
-            // if the itemString starts with the given value
-            // we have found an appropriate autocompletion term
+            // if the itemString starts with the value we have found an appropriate autocompletion term
             if (prefixIsEmpty ? "".equals(itemString) : valueMatcher.matches(itemString))
                 return itemString;
         }
@@ -892,11 +1013,9 @@ public final class AutoCompleteSupport<E> {
             try {
                 super.setSelectedItem(selected);
 
-                // Windows L&F likes to selectAll() text in the comboBoxEditor when a new item
-                // is selected, but that interferes with our autocompletion usability, so we
-                // clear the selection here
-                final int caretPos = comboBoxEditor.getCaretPosition();
-                comboBoxEditor.select(caretPos, caretPos);
+                // remove any text selection that might exist when an item is selected
+                final int caretPos = comboBoxEditorComponent.getCaretPosition();
+                comboBoxEditorComponent.select(caretPos, caretPos);
             } finally {
                 // reinstall the ActionListeners we removed
                 registerAllActionListeners(comboBox, listeners);
@@ -906,9 +1025,9 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
-     * This class is the crux of the entire solution. This custom
-     * DocumentFilter controls all edits which are attempted against the combo
-     * box editor's Document. It is our hook to either control when to respect
+     * This class is the crux of the entire solution. This custom DocumentFilter
+     * controls all edits which are attempted against the Document of the
+     * ComboBoxEditor component. It is our hook to either control when to respect
      * edits as well as the side-effects the edit has on autocompletion and
      * filtering.
      */
@@ -916,15 +1035,16 @@ public final class AutoCompleteSupport<E> {
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
 
+            // collect rollback information before performing the replace
+            final String valueBeforeEdit = comboBoxEditorComponent.getText();
+            final int selectionStart = comboBoxEditorComponent.getSelectionStart();
+            final int selectionEnd = comboBoxEditorComponent.getSelectionEnd();
+
             // this short-circuit corrects the PlasticLookAndFeel behaviour. Hitting the enter key in Plastic
             // will cause the popup to reopen because the Plastic ComboBoxEditor forwards on unnecessary updates
             // to the document, including ones where the text isn't really changing
-            if (offset == 0 && document.getLength() == length && string != null && string.equals(comboBoxEditor.getText())) return;
-
-            // collect rollback information before performing the edit
-            final String valueBeforeEdit = comboBoxEditor.getText();
-            final int selectionStart = comboBoxEditor.getSelectionStart();
-            final int selectionEnd = comboBoxEditor.getSelectionEnd();
+            final boolean isReplacingAllText = offset == 0 && document.getLength() == length;
+            if (isReplacingAllText && valueBeforeEdit.equals(string)) return;
 
             super.replace(filterBypass, offset, length, string, attributeSet);
             postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd);
@@ -933,10 +1053,10 @@ public final class AutoCompleteSupport<E> {
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
 
-            // collect rollback information before performing the edit
-            final String valueBeforeEdit = comboBoxEditor.getText();
-            final int selectionStart = comboBoxEditor.getSelectionStart();
-            final int selectionEnd = comboBoxEditor.getSelectionEnd();
+            // collect rollback information before performing the insert
+            final String valueBeforeEdit = comboBoxEditorComponent.getText();
+            final int selectionStart = comboBoxEditorComponent.getSelectionStart();
+            final int selectionEnd = comboBoxEditorComponent.getSelectionEnd();
 
             super.insertString(filterBypass, offset, string, attributeSet);
             postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd);
@@ -945,10 +1065,10 @@ public final class AutoCompleteSupport<E> {
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
             if (doNotChangeDocument) return;
 
-            // collect rollback information before performing the edit
-            final String valueBeforeEdit = comboBoxEditor.getText();
-            final int selectionStart = comboBoxEditor.getSelectionStart();
-            final int selectionEnd = comboBoxEditor.getSelectionEnd();
+            // collect rollback information before performing the remove
+            final String valueBeforeEdit = comboBoxEditorComponent.getText();
+            final int selectionStart = comboBoxEditorComponent.getSelectionStart();
+            final int selectionEnd = comboBoxEditorComponent.getSelectionEnd();
 
             super.remove(filterBypass, offset, length);
 
@@ -977,23 +1097,23 @@ public final class AutoCompleteSupport<E> {
             // break out early if we're flagged to not post process the Document change
             if (doNotPostProcessDocumentChanges) return;
 
-            final String valueAfterEdit = comboBoxEditor.getText();
+            final String valueAfterEdit = comboBoxEditorComponent.getText();
 
             // if an autocomplete term could not be found and we're in strict mode, rollback the edit
             if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null) {
                 // indicate the error to the user
-                UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditor);
+                UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
 
                 // rollback the edit
                 doNotPostProcessDocumentChanges = true;
                 try {
-                    comboBoxEditor.setText(valueBeforeEdit);
+                    comboBoxEditorComponent.setText(valueBeforeEdit);
                 } finally {
                     doNotPostProcessDocumentChanges = false;
                 }
 
                 // restore the selection as it existed
-                comboBoxEditor.select(selectionStart, selectionEnd);
+                comboBoxEditorComponent.select(selectionStart, selectionEnd);
 
                 // do not continue post processing changes
                 return;
@@ -1003,18 +1123,10 @@ public final class AutoCompleteSupport<E> {
             // (we'll use this to decide whether to broadcast an ActionEvent when choosing the next selected index)
             final Object selectedItemBeforeEdit = comboBox.getSelectedItem();
 
-            updatePrefix();
+            updateFilter();
             applyFilter(prefix);
-            final boolean autocompleteTermSelected = selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit);
+            selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit);
             togglePopup();
-
-            // some L&Fs (Windows, WinLAF) actually select the text in the comboBoxEditor
-            // whenever a new item is set into it (via BasicComboBoxEditor.setItem(...))
-            // but we don't want that. So, if an autocompletion term wasn't selected
-            // (in which case we have already corrected the selected text), then clear
-            // away any text selection.
-            if (!autocompleteTermSelected)
-                comboBoxEditor.setCaretPosition(comboBoxEditor.getCaretPosition());
         }
 
         /**
@@ -1024,25 +1136,20 @@ public final class AutoCompleteSupport<E> {
          * autocomplete item and select it. If the selection changes and the
          * JComboBox is not a Table Cell Editor, an ActionEvent will be
          * broadcast from the combo box.
-         *
-         * @return <tt>true</tt> if an autocompletion term was selected;
-         *      <tt>false</tt> if either we were instructed not to, or could
-         *      not find a suitable autocomplete term
          */
-        private boolean selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
+        private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
             // break out early if we're flagged to ignore attempts to autocomplete
-            if (doNotAutoComplete) return false;
+            if (doNotAutoComplete) return;
 
-            // determine if our prefix is empty (in which case we cannot use our prefixMatcher to locate an autocompletion term)
+            // determine if our prefix is empty (in which case we cannot use our filterMatcher to locate an autocompletion term)
             final boolean prefixIsEmpty = "".equals(prefix);
 
             // search the combobox model for a value that starts with our prefix (called an autocompletion term)
             for (int i = 0, n = comboBoxModel.getSize(); i < n; i++) {
-                final Object item = comboBoxModel.getElementAt(i);
-                final String itemString = item == null ? "" : item.toString();
+                final String itemString = convertToString(comboBoxModel.getElementAt(i));
 
                 // if itemString does not match the prefix, continue searching for an autocompletion term
-                if (prefixIsEmpty ? !"".equals(itemString) : !prefixMatcher.matches(itemString))
+                if (prefixIsEmpty ? !"".equals(itemString) : !filterMatcher.matches(itemString))
                     continue;
 
                 // either keep the user's prefix or replace it with the itemString's prefix
@@ -1058,18 +1165,16 @@ public final class AutoCompleteSupport<E> {
                 final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, itemString);
                 selectItem(i, silently);
 
-                // select the text after the prefix but before the end of the text
-                // (it represents the autocomplete text)
-                comboBoxEditor.select(prefix.length(), document.getLength());
+                // select the text after the prefix but before the end of the text (it represents the autocomplete text)
+                comboBoxEditorComponent.select(prefix.length(), document.getLength());
 
-                return true;
+                return;
             }
 
             // reset the selection since we couldn't find the prefix in the model
             // (this has the side-effect of scrolling the popup to the top)
             final boolean silently = isTableCellEditor || selectedItemBeforeEdit == null;
             selectItem(-1, silently);
-            return false;
         }
 
         /**
@@ -1078,12 +1183,18 @@ public final class AutoCompleteSupport<E> {
          * broadcast an ActionEvent.
          */
         private void selectItem(int index, boolean silently) {
+            final Object valueToSelect = index == -1 ? null : comboBoxModel.getElementAt(index);
+
+            // if nothing is changing about the selection, return immediately
+            if (GlazedListsImpl.equal(comboBoxModel.getSelectedItem(), valueToSelect))
+                return;
+
             doNotChangeDocument = true;
             try {
                 if (silently)
-                    comboBoxModel.setSelectedItem(index == -1 ? null : comboBoxModel.getElementAt(index));
+                    comboBoxModel.setSelectedItem(valueToSelect);
                 else
-                    comboBox.setSelectedIndex(index);
+                    comboBox.setSelectedItem(valueToSelect);
             } finally {
                 doNotChangeDocument = false;
             }
@@ -1126,7 +1237,7 @@ public final class AutoCompleteSupport<E> {
         if (!validIndex)
             index = -1;
 
-        // adjust only the value in the comboBoxEditor, but leave the comboBoxModel unchanged
+        // adjust only the value in the comboBoxEditorComponent, but leave the comboBoxModel unchanged
         doNotPostProcessDocumentChanges = true;
         try {
             // select the index
@@ -1146,7 +1257,7 @@ public final class AutoCompleteSupport<E> {
             // if the original index wasn't valid, we've cleared the selection
             // and must set the user's prefix into the editor
             if (!validIndex) {
-                comboBoxEditor.setText(prefix);
+                comboBoxEditorComponent.setText(prefix);
 
                 // don't bother unfiltering the popup since we'll redisplay the popup immediately
                 doNotClearFilterOnPopupHide = true;
@@ -1161,36 +1272,26 @@ public final class AutoCompleteSupport<E> {
             doNotPostProcessDocumentChanges = false;
         }
 
-        // if the comboBoxEditor's values begins with the user's prefix, highlight the remainder of the value
-        final String newSelection = comboBoxEditor.getText();
-        if (prefixMatcher.matches(newSelection))
-            comboBoxEditor.select(prefix.length(), newSelection.length());
+        // if the comboBoxEditorComponent's values begins with the user's prefix, highlight the remainder of the value
+        final String newSelection = comboBoxEditorComponent.getText();
+        if (filterMatcher.matches(newSelection))
+            comboBoxEditorComponent.select(prefix.length(), newSelection.length());
     }
 
     /**
-     * The action invoked by hitting the down arrow key.
+     * The action invoked by hitting the up or down arrow key.
      */
-    private class DownAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
-            if (comboBox.isShowing()) {
-                if (comboBox.isPopupVisible()) {
-                    selectPossibleValue(comboBox.getSelectedIndex() + 1);
-                } else {
-                    applyFilter(prefix);
-                    comboBox.setPopupVisible(true);
-                }
-            }
+    private class MoveAction extends AbstractAction {
+        private final int offset;
+
+        public MoveAction(int offset) {
+            this.offset = offset;
         }
-    }
 
-    /**
-     * The action invoked by hitting the up arrow key.
-     */
-    private class UpAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
             if (comboBox.isShowing()) {
                 if (comboBox.isPopupVisible()) {
-                    selectPossibleValue(comboBox.getSelectedIndex() - 1);
+                    selectPossibleValue(comboBox.getSelectedIndex() + offset);
                 } else {
                     applyFilter(prefix);
                     comboBox.setPopupVisible(true);
@@ -1291,8 +1392,7 @@ public final class AutoCompleteSupport<E> {
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
             if (doNotClearFilterOnPopupHide) return;
 
-            // the popup menu is being hidden, so clear the filter to return
-            // the ComboBoxModel to its unfiltered state
+            // the popup menu is being hidden, so clear the filter to return the ComboBoxModel to its unfiltered state
             applyFilter("");
         }
 
@@ -1353,9 +1453,15 @@ public final class AutoCompleteSupport<E> {
      * compromise, since the editor continues to retain a valid value from the
      * ComboBoxModel, but the user may type a key at any point to replace the
      * selection with another valid entry.
+     *
+     * This KeyListener also makes up for a bug in normal JComboBox when
+     * handling the enter key. Specifically, hitting enter in an stock
+     * JComboBox that is editable produces <strong>TWO</strong> ActionEvents.
+     * When the enter key is detected we actually unregister all
+     * ActionListeners, process the keystroke as normal, then reregister the
+     * listeners and broadcast an event to them, producing a single ActionEvent.
      */
     private class AutoCompleteKeyHandler extends KeyAdapter {
-
         private ActionListener[] actionListeners;
 
         public void keyPressed(KeyEvent e) {
@@ -1370,22 +1476,22 @@ public final class AutoCompleteSupport<E> {
                 this.actionListeners = unregisterAllActionListeners(comboBox);
             }
 
-            // make sure this backspace key does not modify our comboBoxEditor's Document
+            // make sure this backspace key does not modify our comboBoxEditorComponent's Document
             if (isTrigger(e))
                 doNotChangeDocument = true;
         }
 
         public void keyTyped(KeyEvent e) {
             if (isTrigger(e)) {
-                // if no content exists in the comboBoxEditor, bail early
-                if (comboBoxEditor.getText().length() == 0) return;
+                // if no content exists in the comboBoxEditorComponent, bail early
+                if (comboBoxEditorComponent.getText().length() == 0) return;
 
                 // calculate the current beginning of the selection
-                int selectionStart = Math.min(comboBoxEditor.getSelectionStart(), comboBoxEditor.getSelectionEnd());
+                int selectionStart = Math.min(comboBoxEditorComponent.getSelectionStart(), comboBoxEditorComponent.getSelectionEnd());
 
                 // if we cannot extend the selection to the left, indicate the error
                 if (selectionStart == 0) {
-                    UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditor);
+                    UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
                     return;
                 }
 
@@ -1394,13 +1500,13 @@ public final class AutoCompleteSupport<E> {
 
                 // select the text from the end of the Document to the new selectionStart
                 // (which positions the caret at the selectionStart)
-                comboBoxEditor.setCaretPosition(comboBoxEditor.getText().length());
-                comboBoxEditor.moveCaretPosition(selectionStart);
+                comboBoxEditorComponent.setCaretPosition(comboBoxEditorComponent.getText().length());
+                comboBoxEditorComponent.moveCaretPosition(selectionStart);
             }
         }
 
         public void keyReleased(KeyEvent e) {
-            // resume the ability to modify our comboBoxEditor's Document
+            // resume the ability to modify our comboBoxEditorComponent's Document
             if (isTrigger(e))
                 doNotChangeDocument = false;
 
@@ -1408,7 +1514,7 @@ public final class AutoCompleteSupport<E> {
             // so now it is time to perform our own processing. We reattach all ActionListeners
             // and simulate exactly ONE ActionEvent in the JComboBox and then reenable Document changes.
             if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                updatePrefix();
+                updateFilter();
 
                 // reregister all ActionListeners and then notify them due to the ENTER key
                 registerAllActionListeners(comboBox, this.actionListeners);
@@ -1438,7 +1544,7 @@ public final class AutoCompleteSupport<E> {
     private class SelectTextOnFocusGainHandler extends FocusAdapter {
         public void focusGained(FocusEvent e) {
             if (getSelectsTextOnFocusGain())
-                comboBoxEditor.select(0, comboBoxEditor.getText().length());
+                comboBoxEditorComponent.select(0, comboBoxEditorComponent.getText().length());
         }
     }
 
@@ -1483,6 +1589,94 @@ public final class AutoCompleteSupport<E> {
             // add our DocumentFilter to the new Document
             document.setDocumentFilter(documentFilter);
         }
+    }
+
+    /**
+     * A custom renderer which honours the custom Format given by the user when
+     * they invoked the install method.
+     */
+    private class StringFunctionRenderer extends DefaultListCellRenderer {
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            final String string = convertToString(value);
+            return super.getListCellRendererComponent(list, string, index, isSelected, cellHasFocus);
+        }
+    }
+
+    /**
+     * A decorated version of the ComboBoxEditor that does NOT assume that
+     * Object.toString() is the proper way to convert values from the
+     * ComboBoxModel into Strings for the ComboBoxEditor's component. It uses
+     * convertToString(E) instead.
+     *
+     * We implement the UIResource interface here so that changes in the UI
+     * delegate of the JComboBox will *replace* this ComboBoxEditor with one
+     * that is correct for the new L&F. We will then react to the change of UI
+     * delegate by installing a new FormatComboBoxEditor overtop of the
+     * UI Delegate's default ComboBoxEditor.
+     */
+    private class FormatComboBoxEditor implements ComboBoxEditor, UIResource {
+
+        /** This is the ComboBoxEditor installed by the current UI Delegate of the JComboBox. */
+        private final ComboBoxEditor delegate;
+        private Object oldValue;
+
+        public FormatComboBoxEditor(ComboBoxEditor delegate) {
+            this.delegate = delegate;
+        }
+
+        public ComboBoxEditor getDelegate() {
+            return delegate;
+        }
+
+        /**
+         * BasicComboBoxEditor defines this method to call:
+         *
+         * editor.setText(anObject.toString());
+         *
+         * we intercept and replace it with our own String conversion logic
+         * to remain consistent throughout.
+         */
+        public void setItem(Object anObject) {
+            oldValue = anObject;
+            ((JTextField) getEditorComponent()).setText(convertToString(anObject));
+        }
+
+        /**
+         * BasicComboBoxEditor defines this method to use reflection to try
+         * finding a method called valueOf(String) in order to return the
+         * item. We attempt to find a user-supplied Format before
+         * resorting to the valueOf(String) call.
+         */
+        public Object getItem() {
+            final String oldValueString = convertToString(oldValue);
+            final String currentString = ((JTextField) getEditorComponent()).getText();
+
+            // if the String value in the editor matches the String version of
+            // the last item that was set in the editor, return the item
+            if (GlazedListsImpl.equal(oldValueString, currentString))
+                return oldValue;
+
+            // if the user specified a Format, use it
+            if (format != null)
+                return format.parseObject(currentString, new ParsePosition(0));
+
+            // otherwise, use the default algorithm from BasicComboBoxEditor to produce a value
+            if (oldValue != null && !(oldValue instanceof String))  {
+                try {
+                    final Method method = oldValue.getClass().getMethod("valueOf", VALUE_OF_SIGNATURE);
+                    return method.invoke(oldValue, new Object[] {currentString});
+                } catch (Exception ex) {
+                    // fail silently and return the current string
+                }
+            }
+
+            return currentString;
+        }
+
+        public Component getEditorComponent() { return delegate.getEditorComponent(); }
+        public void selectAll() { delegate.selectAll(); }
+        public void addActionListener(ActionListener l) { delegate.addActionListener(l); }
+        public void removeActionListener(ActionListener l) { delegate.removeActionListener(l); }
     }
 
     /**

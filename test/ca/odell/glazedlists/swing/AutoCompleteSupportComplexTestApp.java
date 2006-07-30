@@ -1,22 +1,22 @@
-/* Glazed Lists                                                 (c) 2003-2006 */
-/* http://publicobject.com/glazedlists/                      publicobject.com,*/
-/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.Format;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
 
-public class AutoCompleteSupportTestApp {
+public class AutoCompleteSupportComplexTestApp {
 
     private static final List<String> LOOK_AND_FEEL_SELECTIONS = new ArrayList<String>(Arrays.asList(new String[] {
         "javax.swing.plaf.metal.MetalLookAndFeel",
@@ -28,76 +28,95 @@ public class AutoCompleteSupportTestApp {
         "net.java.plaf.windows.WindowsLookAndFeel"
     }));
 
-    private static final String[] URL_SAMPLE_DATA = {
-        null,
-        "http://mail.google.com/mail/",
-        "http://slashdot.org/",
-        "http://www.clientjava.com/blog",
-        "del.icio.us",
-        "http://java.sun.com/javase/6/",
-        "http://java.sun.com/",
-        "http://java.sun.com/j2se/1.5.0/download.jsp",
-        "http://java.sun.com/javaone/sf/",
-        "http://www.jetbrains.com/",
-        "http://www.jetbrains.com/idea/?ggl502",
-        "http://www.wilshipley.com/blog/",
-        "http://jroller.com/page/fate",
-        "http://wilwheaton.typepad.com/",
-        "http://www.theonion.com/content/",
-        "http://www.indeed.com/",
+    public static final class Url {
+        private final String location;
+
+        public Url(String location) {
+            this.location = location;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+
+        public static Url valueOf(String s) {
+            return new Url(s);
+        }
+
+        public String toString() {
+            return "Url: " + getLocation();
+        }
+    }
+
+    private static final AutoCompleteSupportComplexTestApp.Url[] URL_SAMPLE_DATA = {
+        new AutoCompleteSupportComplexTestApp.Url("http://mail.google.com/mail/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://slashdot.org/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://www.clientjava.com/blog"),
+        new AutoCompleteSupportComplexTestApp.Url("del.icio.us"),
+        new AutoCompleteSupportComplexTestApp.Url("http://java.sun.com/javase/6/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://java.sun.com/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://java.sun.com/j2se/1.5.0/download.jsp"),
+        new AutoCompleteSupportComplexTestApp.Url("http://java.sun.com/javaone/sf/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://www.jetbrains.com/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://www.jetbrains.com/idea/?ggl502"),
+        new AutoCompleteSupportComplexTestApp.Url("http://www.wilshipley.com/blog/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://jroller.com/page/fate"),
+        new AutoCompleteSupportComplexTestApp.Url("http://wilwheaton.typepad.com/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://www.theonion.com/content/"),
+        new AutoCompleteSupportComplexTestApp.Url("http://www.indeed.com/")
     };
 
-    private static final Location[] STATE_CAPITALS_DATA = {
-        new Location("USA", "Alabama", "Montgomery"),
-        new Location("USA", "Alaska", "Juneau"),
-        new Location("USA", "Arizona", "Phoenix"),
-        new Location("USA", "Arkansas", "Little Rock"),
-        new Location("USA", "California", "Sacramento"),
-        new Location("USA", "Colorado", "Denver"),
-        new Location("USA", "Connecticut", "Hartford"),
-        new Location("USA", "Delaware", "Dover"),
-        new Location("USA", "Florida", "Tallahassee"),
-        new Location("USA", "Georgia", "Atlanta"),
-        new Location("USA", "Hawaii", "Honolulu"),
-        new Location("USA", "Idaho", "Boise"),
-        new Location("USA", "Illinois", "Springfield"),
-        new Location("USA", "Indiana", "Indianapolis"),
-        new Location("USA", "Iowa", "Des Moines"),
-        new Location("USA", "Kansas", "Topeka"),
-        new Location("USA", "Kentucky", "Frankfort"),
-        new Location("USA", "Louisiana", "Baton Rouge"),
-        new Location("USA", "Maine", "Augusta"),
-        new Location("USA", "Maryland", "Annapolis"),
-        new Location("USA", "Massachusetts", "Boston"),
-        new Location("USA", "Michigan", "Lansing"),
-        new Location("USA", "Minnesota", "Saint Paul"),
-        new Location("USA", "Mississippi", "Jackson"),
-        new Location("USA", "Missouri", "Jefferson City"),
-        new Location("USA", "Montana", "Helena"),
-        new Location("USA", "Nebraska", "Lincoln"),
-        new Location("USA", "Nevada", "Carson City"),
-        new Location("USA", "New Hampshire", "Concord"),
-        new Location("USA", "New Jersey", "Trenton"),
-        new Location("USA", "New Mexico", "Santa Fe"),
-        new Location("USA", "New York", "Albany"),
-        new Location("USA", "North Carolina", "Raleigh"),
-        new Location("USA", "North Dakota", "Bismarck"),
-        new Location("USA", "Ohio", "Columbus"),
-        new Location("USA", "Oklahoma", "Oklahoma City"),
-        new Location("USA", "Oregon", "Salem"),
-        new Location("USA", "Pennsylvania", "Harrisburg"),
-        new Location("USA", "Rhode Island", "Providence"),
-        new Location("USA", "South Carolina", "Columbia"),
-        new Location("USA", "South Dakota", "Pierre"),
-        new Location("USA", "Tennessee", "Nashville"),
-        new Location("USA", "Texas", "Austin"),
-        new Location("USA", "Utah", "Salt Lake City"),
-        new Location("USA", "Vermont", "Montpelier"),
-        new Location("USA", "Virginia", "Richmond"),
-        new Location("USA", "Washington", "Olympia"),
-        new Location("USA", "West Virginia", "Charleston"),
-        new Location("USA", "Wisconsin", "Madison"),
-        new Location("USA", "Wyoming", "Cheyenne")
+    private static final AutoCompleteSupportComplexTestApp.Location[] STATE_CAPITALS_DATA = {
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Alabama", "Montgomery"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Alaska", "Juneau"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Arizona", "Phoenix"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Arkansas", "Little Rock"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "California", "Sacramento"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Colorado", "Denver"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Connecticut", "Hartford"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Delaware", "Dover"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Florida", "Tallahassee"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Georgia", "Atlanta"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Hawaii", "Honolulu"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Idaho", "Boise"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Illinois", "Springfield"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Indiana", "Indianapolis"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Iowa", "Des Moines"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Kansas", "Topeka"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Kentucky", "Frankfort"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Louisiana", "Baton Rouge"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Maine", "Augusta"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Maryland", "Annapolis"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Massachusetts", "Boston"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Michigan", "Lansing"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Minnesota", "Saint Paul"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Mississippi", "Jackson"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Missouri", "Jefferson City"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Montana", "Helena"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Nebraska", "Lincoln"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Nevada", "Carson City"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "New Hampshire", "Concord"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "New Jersey", "Trenton"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "New Mexico", "Santa Fe"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "New York", "Albany"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "North Carolina", "Raleigh"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "North Dakota", "Bismarck"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Ohio", "Columbus"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Oklahoma", "Oklahoma City"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Oregon", "Salem"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Pennsylvania", "Harrisburg"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Rhode Island", "Providence"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "South Carolina", "Columbia"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "South Dakota", "Pierre"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Tennessee", "Nashville"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Texas", "Austin"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Utah", "Salt Lake City"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Vermont", "Montpelier"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Virginia", "Richmond"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Washington", "Olympia"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "West Virginia", "Charleston"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Wisconsin", "Madison"),
+        new AutoCompleteSupportComplexTestApp.Location("USA", "Wyoming", "Cheyenne")
     };
 
     /** The currently installed look and feel. */
@@ -129,8 +148,8 @@ public class AutoCompleteSupportTestApp {
     private final JRadioButton filterModeContains = new JRadioButton("Contains");
     private final ButtonGroup filterModeButtonGroup = new ButtonGroup();
     {
-        filterModeStartsWith.addActionListener(new FilterModeActionHandler(TextMatcherEditor.STARTS_WITH));
-        filterModeContains.addActionListener(new FilterModeActionHandler(TextMatcherEditor.CONTAINS));
+        filterModeStartsWith.addActionListener(new AutoCompleteSupportComplexTestApp.FilterModeActionHandler(TextMatcherEditor.STARTS_WITH));
+        filterModeContains.addActionListener(new AutoCompleteSupportComplexTestApp.FilterModeActionHandler(TextMatcherEditor.CONTAINS));
 
         filterModeButtonGroup.add(filterModeStartsWith);
         filterModeButtonGroup.add(filterModeContains);
@@ -156,14 +175,14 @@ public class AutoCompleteSupportTestApp {
     /** The ButtonGroup to which all Look & Feel radio buttons belong. */
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
-    public AutoCompleteSupportTestApp() {
+    public AutoCompleteSupportComplexTestApp() {
         final EventList<Location> locations = new BasicEventList<Location>();
-        locations.addAll(Arrays.asList(STATE_CAPITALS_DATA));
+        locations.addAll(Arrays.asList(AutoCompleteSupportComplexTestApp.STATE_CAPITALS_DATA));
         final String[] propertyNames = {"country", "state", "city"};
         final String[] columnLabels = {"Country", "State", "City"};
         final boolean[] writable = {true, true, true};
         final TableFormat<Location> tableFormat = GlazedLists.tableFormat(propertyNames, columnLabels, writable);
-        table.setModel(new EventTableModel<Location>(locations, tableFormat));
+        table.setModel(new EventTableModel<AutoCompleteSupportComplexTestApp.Location>(locations, tableFormat));
 
         // install a DefaultCellEditor with autocompleting support in each column
         for (int i = 0; i < propertyNames.length; i++) {
@@ -173,12 +192,12 @@ public class AutoCompleteSupportTestApp {
 
         autocompleteActionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
         autocompleteActionList.setPreferredSize(new Dimension(autocompleteActionList.getPreferredSize().width, 600));
-        autoCompleteComboBox.addActionListener(new RecordActionHandler(autocompleteActionListModel));
+        autoCompleteComboBox.addActionListener(new AutoCompleteSupportComplexTestApp.RecordActionHandler(autocompleteActionListModel));
         autocompleteActionPanel = createActionPanel("AutoComplete ActionEvent Log", autocompleteActionList);
 
         regularActionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
         regularActionList.setPreferredSize(new Dimension(regularActionList.getPreferredSize().width, 600));
-        regularComboBox.addActionListener(new RecordActionHandler(regularActionListModel));
+        regularComboBox.addActionListener(new AutoCompleteSupportComplexTestApp.RecordActionHandler(regularActionListModel));
         regularActionPanel = createActionPanel("Normal ActionEvent Log", regularActionList);
 
         tweakerPanel = createTweakerPanel();
@@ -191,13 +210,13 @@ public class AutoCompleteSupportTestApp {
         rebuildContentPane();
 
         // initialize the tweaker panel
-        correctsCaseCheckBox.addActionListener(new CorrectCaseActionHandler());
+        correctsCaseCheckBox.addActionListener(new AutoCompleteSupportComplexTestApp.CorrectCaseActionHandler());
         correctsCaseCheckBox.setSelected(autoCompleteSupport.getCorrectsCase());
 
-        strictModeCheckBox.addActionListener(new StrictModeActionHandler());
+        strictModeCheckBox.addActionListener(new AutoCompleteSupportComplexTestApp.StrictModeActionHandler());
         strictModeCheckBox.setSelected(autoCompleteSupport.isStrict());
 
-        selectTextOnFocusGainCheckBox.addActionListener(new SelectTextOnFocusGainActionHandler());
+        selectTextOnFocusGainCheckBox.addActionListener(new AutoCompleteSupportComplexTestApp.SelectTextOnFocusGainActionHandler());
         selectTextOnFocusGainCheckBox.setSelected(autoCompleteSupport.getSelectsTextOnFocusGain());
 
         frame.pack();
@@ -240,11 +259,11 @@ public class AutoCompleteSupportTestApp {
 
         // add the currently installed L&F to the list of available L&Fs if it isn't present
         final String currentLandF = UIManager.getLookAndFeel().getClass().getName();
-        if (!LOOK_AND_FEEL_SELECTIONS.contains(currentLandF))
-            LOOK_AND_FEEL_SELECTIONS.add(0, currentLandF);
+        if (!AutoCompleteSupportComplexTestApp.LOOK_AND_FEEL_SELECTIONS.contains(currentLandF))
+            AutoCompleteSupportComplexTestApp.LOOK_AND_FEEL_SELECTIONS.add(0, currentLandF);
 
         // add a menu item for each of the L&Fs
-        for (Iterator<String> i = LOOK_AND_FEEL_SELECTIONS.iterator(); i.hasNext();)
+        for (Iterator<String> i = AutoCompleteSupportComplexTestApp.LOOK_AND_FEEL_SELECTIONS.iterator(); i.hasNext();)
             createLafMenuItem(lafMenu, i.next());
 
         return menuBar;
@@ -255,7 +274,7 @@ public class AutoCompleteSupportTestApp {
      */
     private JMenuItem createLafMenuItem(JMenu menu, String laf) {
         final JRadioButtonMenuItem menuItem = (JRadioButtonMenuItem) menu.add(new JRadioButtonMenuItem(laf));
-        menuItem.addActionListener(new ChangeLookAndFeelAction());
+        menuItem.addActionListener(new AutoCompleteSupportComplexTestApp.ChangeLookAndFeelAction());
         menuItem.setEnabled(isAvailableLookAndFeel(laf));
 
         if (laf.equals(UIManager.getLookAndFeel().getClass().getName())) {
@@ -293,7 +312,7 @@ public class AutoCompleteSupportTestApp {
                 SwingUtilities.updateComponentTreeUI(frame);
             } catch (Exception ex) {
                 System.err.println("Failed loading L&F: " + currentLookAndFeel);
-                ex.printStackTrace();
+                System.err.println(ex);
             }
         }
     }
@@ -382,9 +401,10 @@ public class AutoCompleteSupportTestApp {
     }
 
     private JPanel createMainPanel() {
-        final TextFilterator<String> filterator = new URLTextFilterator();
-        final EventList<String> items = new BasicEventList<String>();
-        items.addAll(Arrays.asList(URL_SAMPLE_DATA));
+        final TextFilterator<Url> filterator = new AutoCompleteSupportComplexTestApp.URLTextFilterator();
+        final UrlFormat format = new UrlFormat();
+        final EventList<AutoCompleteSupportComplexTestApp.Url> items = new BasicEventList<AutoCompleteSupportComplexTestApp.Url>();
+        items.addAll(Arrays.asList(AutoCompleteSupportComplexTestApp.URL_SAMPLE_DATA));
 
         final JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -393,18 +413,18 @@ public class AutoCompleteSupportTestApp {
 
         // setting a prototype value prevents the combo box from resizing when
         // the model contents are filtered away
-        autoCompleteComboBox.setPrototypeDisplayValue("http://java.sun.com/j2se/1.5.0/download.jsp");
-        autoCompleteSupport = AutoCompleteSupport.install(autoCompleteComboBox, items, filterator);
+        autoCompleteComboBox.setPrototypeDisplayValue(new AutoCompleteSupportComplexTestApp.Url("http://java.sun.com/j2se/1.5.0/download.jsp"));
+        autoCompleteSupport = AutoCompleteSupport.install(autoCompleteComboBox, items, filterator, format);
 
         final JComboBox plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
-        plainComboBox.setModel(new EventComboBoxModel<String>(items));
+        plainComboBox.setModel(new EventComboBoxModel<AutoCompleteSupportComplexTestApp.Url>(items));
 
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));
 
-        final JButton setSelectedItemProgrammaticallyAutoComplete = new JButton(new SetValueProgrammaticallyActionHandler(autoCompleteComboBox));
-        final JButton setSelectedItemProgrammaticallyPlain = new JButton(new SetValueProgrammaticallyActionHandler(plainComboBox));
+        final JButton setSelectedItemProgrammaticallyAutoComplete = new JButton(new AutoCompleteSupportComplexTestApp.SetValueProgrammaticallyActionHandler(autoCompleteComboBox));
+        final JButton setSelectedItemProgrammaticallyPlain = new JButton(new AutoCompleteSupportComplexTestApp.SetValueProgrammaticallyActionHandler(plainComboBox));
 
         if (comboBoxCount > 1)
             panel.add(Box.createVerticalStrut(1), new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
@@ -422,12 +442,12 @@ public class AutoCompleteSupportTestApp {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Starter());
+        SwingUtilities.invokeLater(new AutoCompleteSupportComplexTestApp.Starter());
     }
 
     private static class Starter implements Runnable {
         public void run() {
-            new AutoCompleteSupportTestApp();
+            new AutoCompleteSupportComplexTestApp();
         }
     }
 
@@ -478,15 +498,28 @@ public class AutoCompleteSupportTestApp {
      * <li>slashdot.org
      * </ul>
      */
-    private static final class URLTextFilterator implements TextFilterator<String> {
-        public void getFilterStrings(List<String> baseList, String element) {
-            baseList.add(element);
-            if (element != null) {
-                if (element.startsWith("http://"))
-                    baseList.add(element.substring(7));
-                if (element.startsWith("http://www."))
-                    baseList.add(element.substring(11));
+    private static final class URLTextFilterator implements TextFilterator<AutoCompleteSupportComplexTestApp.Url> {
+        public void getFilterStrings(List<String> baseList, AutoCompleteSupportComplexTestApp.Url url) {
+            final String location = url.getLocation();
+            baseList.add(location);
+            if (location != null) {
+                if (location.startsWith("http://"))
+                    baseList.add(location.substring(7));
+                if (location.startsWith("http://www."))
+                    baseList.add(location.substring(11));
             }
+        }
+    }
+
+    private static final class UrlFormat extends Format {
+        public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+            if (obj != null)
+                toAppendTo.append(((Url) obj).getLocation());
+            return toAppendTo;
+        }
+
+        public Object parseObject(String source, ParsePosition pos) {
+            return new Url(source);
         }
     }
 }

@@ -13,6 +13,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.ComboBoxUI;
+import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -34,6 +35,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final int originalEditorKeyListenerCount = originalEditor.getEditorComponent().getKeyListeners().length;
         final AbstractDocument originalEditorDocument = (AbstractDocument) ((JTextField) combo.getEditor().getEditorComponent()).getDocument();
         final int originalComboBoxPropertyChangeListenerCount = combo.getPropertyChangeListeners().length;
+        final int originalComboBoxPopupMouseListenerCount = ((ComboPopup) combo.getUI().getAccessibleChild(combo, 0)).getList().getMouseListeners().length;
         final int originalMaxRowCount = combo.getMaximumRowCount();
         final int originalComboBoxPopupMenuListenerCount = ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length;
         final Action originalSelectNextAction = combo.getActionMap().get("selectNext");
@@ -49,8 +51,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         AbstractDocument currentEditorDocument = (AbstractDocument) currentEditor.getDocument();
 
         assertSame(originalUI, combo.getUI());
-        assertSame(originalEditor, combo.getEditor());
         assertSame(currentEditorDocument, originalEditorDocument);
+        assertNotSame(originalEditor, combo.getEditor());
         assertNotSame(originalModel, combo.getModel());
         assertNotSame(originalEditable, combo.isEditable());
         assertNotSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
@@ -67,8 +69,11 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         // * one to watch for Model changes
         assertEquals(originalComboBoxPropertyChangeListenerCount + 2, combo.getPropertyChangeListeners().length);
 
-        // one getPopupMenuListener is added to the JComboBox to size the popup before it is shown on the screen
+        // one getPopupMenuListener is added to the ComboBoxPopup to size the popup before it is shown on the screen
         assertEquals(originalComboBoxPopupMenuListenerCount + 1, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
+
+        // one getPopupMenuListener is added to the JComboBox to size the popup before it is shown on the screen
+        assertEquals(originalComboBoxPopupMouseListenerCount + 1, ((ComboPopup) combo.getUI().getAccessibleChild(combo, 0)).getList().getMouseListeners().length);
 
         // one PropertyChangeListener is added to the ComboBoxEditor to watch for Document changes
         assertEquals(originalEditorPropertyChangeListenerCount + 1, currentEditor.getPropertyChangeListeners().length);
@@ -93,6 +98,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(originalEditorKeyListenerCount, currentEditor.getKeyListeners().length);
         assertSame(originalMaxRowCount, combo.getMaximumRowCount());
         assertSame(originalComboBoxPopupMenuListenerCount, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
+        assertSame(originalComboBoxPopupMouseListenerCount, ((ComboPopup) combo.getUI().getAccessibleChild(combo, 0)).getList().getMouseListeners().length);
         assertSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
         assertSame(originalSelectPreviousAction, combo.getActionMap().get("selectPrevious"));
         assertSame(originalSelectNext2Action, combo.getActionMap().get("selectNext2"));
