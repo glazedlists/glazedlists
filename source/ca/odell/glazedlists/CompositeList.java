@@ -4,6 +4,7 @@
 package ca.odell.glazedlists;
 
 // the core Glazed Lists package
+import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.util.Iterator;
@@ -12,11 +13,10 @@ import java.util.Iterator;
  * An {@link EventList} composed of multiple source {@link EventList}s. This list
  * shows the contents of its source lists.
  *
- * <p>Note that all contained {@link EventList}s must use the same {@link ReadWriteLock}
- * if this {@link EventList} is to be used my multiple threads concurrently. To
- * construct an {@link EventList} that shares the {@link ReadWriteLock} with this
- * {@link CompositeList}, use {@link #createMemberList()} or
- * {@link BasicEventList#BasicEventList(ReadWriteLock) new BasicEventList(CompositeList.getReadWriteLock())}
+ * <p>Note that all contained {@link EventList}s must use the same {@link ListEventPublisher} and 
+ * {@link ReadWriteLock}, particularly if this {@link EventList} is to be used my multiple threads 
+ * concurrently. To construct an {@link EventList} that shares the {@link ListEventPublisher} and 
+ * {@link ReadWriteLock} with this {@link CompositeList}, use {@link #createMemberList()}.
  *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="TableHeadingColor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
@@ -42,25 +42,54 @@ public class CompositeList<E> extends CollectionList<EventList<E>, E> {
     }
 
     /**
-     * Create a {@link CompositeList} that uses the given <code>lock</code>.
-     * Note that this lock will also be used when {@link #createMemberList
-     * building new member lists}.
-     *
-     * <p>This can be a convenient constructor to use when the member lists
-     * are prebuilt ahead of time with a common {@link ReadWriteLock} and it
-     * is desirable to compose their union with a {@link CompositeList}.
-     *
+     * Create a {@link CompositeList} that uses the given <code>lock</code>. Note that this lock
+     * will also be used when {@link #createMemberList building new member lists}.
+     * <p>
+     * This can be a convenient constructor to use when the member lists are prebuilt ahead of time
+     * with a common {@link ReadWriteLock} and it is desirable to compose their union with a
+     * {@link CompositeList}.
+     * 
      * @param lock the {@link ReadWriteLock} to use within the {@link CompositeList}
+     * @deprecated replaced by {@link #CompositeList(ListEventPublisher, ReadWriteLock)}, because
+     *             prebuilt member lists should share lock <em>and</em> publisher with the
+     *             CompositeList.
      */
     public CompositeList(ReadWriteLock lock) {
-        this();
-        readWriteLock = lock;
+        super(new BasicEventList<EventList<E>>(lock), (Model)GlazedLists.listCollectionListModel());
     }
     
     /**
+     * Create a {@link CompositeList} that uses the given <code>publisher</code> and
+     * <code>lock</code>. Note that this publisher and lock will also be used when
+     * {@link #createMemberList building new member lists}.
+     * <p>
+     * This can be a convenient constructor to use when the member lists are prebuilt ahead of time
+     * with a common {@link ListEventPublisher} and {@link ReadWriteLock} and it is desirable to
+     * compose their union with a {@link CompositeList}.
+     * 
+     * @param publisher the {@link ListEventPublisher} to use within the {@link CompositeList}
+     * @param lock the {@link ReadWriteLock} to use within the {@link CompositeList}
+     */
+    public CompositeList(ListEventPublisher publisher, ReadWriteLock lock) {
+        super(new BasicEventList<EventList<E>>(publisher, lock), (Model)GlazedLists.listCollectionListModel());
+    }
+        
+    /**
      * Adds the specified {@link EventList} as a source to this {@link CompositeList}.
+     * <p>
+     * To ensure correct behaviour when this {@link CompositeList} is used by multiple threads, the
+     * specified EventList has to share the same {@link ReadWriteLock} and
+     * {@link ListEventPublisher} with this CompositeList.
+     * 
+     * @throws IllegalArgumentException if the specified EventList uses a different
+     *         {@link ReadWriteLock} or {@link ListEventPublisher}
+     * @see #createMemberList()
      */
     public void addMemberList(EventList<E> list) {
+        if(!getPublisher().equals(list.getPublisher()))
+            throw new IllegalArgumentException("Member list must share publisher with CompositeList");
+        if(!getReadWriteLock().equals(list.getReadWriteLock()))
+            throw new IllegalArgumentException("Member list must share lock with CompositeList");
         source.add(list);
     }
     
