@@ -26,7 +26,8 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.ParsePosition;
-import java.util.Comparator;
+import java.util.*;
+import java.util.List;
 
 /**
  * This class {@link #install}s support for filtering and autocompletion into
@@ -371,7 +372,7 @@ public final class AutoCompleteSupport<E> {
         this.isTableCellEditor = Boolean.TRUE.equals(comboBox.getClientProperty("JComboBox.isTableCellEditor"));
 
         // build the ComboBoxModel capable of filtering its values
-        this.filterMatcherEditor = new TextMatcherEditor<E>(filterator);
+        this.filterMatcherEditor = new TextMatcherEditor<E>(filterator == null ? new DefaultTextFilterator() : filterator);
         this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
         this.comboBoxModel = new AutoCompleteComboBoxModel(this.filteredItems);
@@ -592,7 +593,7 @@ public final class AutoCompleteSupport<E> {
      *      other than the Swing Event Dispatch Thread
      */
     public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items) {
-        return install(comboBox, items, GlazedLists.toStringTextFilterator());
+        return install(comboBox, items, null);
     }
 
     /**
@@ -606,7 +607,9 @@ public final class AutoCompleteSupport<E> {
      * reasonable String representations via {@link Object#toString()}.
      *
      * <p>The <code>filterator</code> will be used to extract searchable text
-     * strings from each of the <code>items</code>.
+     * strings from each of the <code>items</code>. A <code>null</code>
+     * filterator implies the item's toString() method should be used when
+     * filtering it.
      *
      * <p>The following must be true in order to successfully install support
      * for autocompletion on a {@link JComboBox}:
@@ -618,7 +621,9 @@ public final class AutoCompleteSupport<E> {
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
      * @param items the objects to display in the <code>comboBox</code>
-     * @param filterator extracts searchable text strings from each item
+     * @param filterator extracts searchable text strings from each item;
+     *      <code>null</code> implies the item's toString() method should be
+     *      used when filtering it
      * @return an instance of the support class providing autocomplete features
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
@@ -644,7 +649,7 @@ public final class AutoCompleteSupport<E> {
      * <p>It can be assumed that the only methods called on the given <code>format</code> are:
      * <ul>
      *   <li>{@link Format#format(Object)}
-     *   <li>{@link Format#parseObject(String, java.text.ParsePosition)}
+     *   <li>{@link Format#parseObject(String, ParsePosition)}
      * </ul>
      *
      * <p>As a convenience, this method will install a custom
@@ -654,7 +659,11 @@ public final class AutoCompleteSupport<E> {
      * the <code>comboBox</code> does not already use a custom renderer.
      *
      * <p>The <code>filterator</code> will be used to extract searchable text
-     * strings from each of the <code>items</code>.
+     * strings from each of the <code>items</code>. A <code>null</code>
+     * filterator implies one of two default strategies will be used. If the
+     * <code>format</code> is not null then the String value returned from the
+     * <code>format</code> object will be used when filtering a given item.
+     * Otherwise, the item's toString() method will be used when it is filtered.
      *
      * <p>The following must be true in order to successfully install support
      * for autocompletion on a {@link JComboBox}:
@@ -666,7 +675,11 @@ public final class AutoCompleteSupport<E> {
      *
      * @param comboBox the {@link JComboBox} to decorate with autocompletion
      * @param items the objects to display in the <code>comboBox</code>
-     * @param filterator extracts searchable text strings from each item
+     * @param filterator extracts searchable text strings from each item. If the
+     *      <code>format</code> is not null then the String value returned from
+     *      the <code>format</code> object will be used when filtering a given
+     *      item. Otherwise, the item's toString() method will be used when it
+     *      is filtered.
      * @param format a Format object capable of converting <code>items</code>
      *      into Strings and back. <code>null</code> indicates the standard
      *      JComboBox methods of converting are acceptable.
@@ -732,6 +745,14 @@ public final class AutoCompleteSupport<E> {
      */
     public JComboBox getComboBox() {
         return this.comboBox;
+    }
+
+    /**
+     * Returns the {@link TextFilterator} that extracts searchable strings from
+     * each item in the {@link ComboBoxModel}.
+     */
+    public TextFilterator<E> getTextFilterator() {
+        return this.filterMatcherEditor.getFilterator();
     }
 
     /**
@@ -1683,6 +1704,17 @@ public final class AutoCompleteSupport<E> {
         public void selectAll() { delegate.selectAll(); }
         public void addActionListener(ActionListener l) { delegate.addActionListener(l); }
         public void removeActionListener(ActionListener l) { delegate.removeActionListener(l); }
+    }
+
+    /**
+     * This default implementation of the TextFilterator interface uses the
+     * same strategy for producing Strings from ComboBoxModel objects as the
+     * renderer and editor.
+     */
+    class DefaultTextFilterator implements TextFilterator<E> {
+        public void getFilterStrings(List<String> baseList, E element) {
+            baseList.add(convertToString(element));
+        }
     }
 
     /**

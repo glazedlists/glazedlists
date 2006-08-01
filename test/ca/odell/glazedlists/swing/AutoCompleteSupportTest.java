@@ -449,6 +449,23 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Newfoundland", model.getElementAt(2));
     }
 
+    public void guiTestFilterator() {
+        AutoCompleteSupport support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<String>());
+        assertSame(AutoCompleteSupport.DefaultTextFilterator.class, support.getTextFilterator().getClass());
+
+        support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<String>(), null);
+        assertSame(AutoCompleteSupport.DefaultTextFilterator.class, support.getTextFilterator().getClass());
+
+        support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<String>(), GlazedLists.toStringTextFilterator());
+        assertSame(GlazedLists.toStringTextFilterator(), support.getTextFilterator());
+
+        support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<String>(), null, null);
+        assertSame(AutoCompleteSupport.DefaultTextFilterator.class, support.getTextFilterator().getClass());
+
+        support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<String>(), GlazedLists.toStringTextFilterator(), null);
+        assertSame(GlazedLists.toStringTextFilterator(), support.getTextFilterator());
+    }
+
     public void guiTestCreateTableCellEditor() {
         final EventList<Integer> ints = new BasicEventList<Integer>();
         ints.add(new Integer(0));

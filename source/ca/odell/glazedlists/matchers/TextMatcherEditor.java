@@ -84,7 +84,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /**
      * Get the filterator used to extract Strings from the matched elements.
      */
-    public TextFilterator getFilterator() {
+    public TextFilterator<E> getFilterator() {
         return filterator;
     }
 
