@@ -337,8 +337,7 @@ public class AutoCompleteSupportTestApp {
         }
 
         public void actionPerformed(ActionEvent e) {
-            final ComboBoxModel model = this.comboBox.getModel();
-            this.comboBox.setSelectedItem(model.getElementAt(model.getSize()-1));
+            this.comboBox.setSelectedItem(URL_SAMPLE_DATA[URL_SAMPLE_DATA.length-1]);
         }
     }
 
