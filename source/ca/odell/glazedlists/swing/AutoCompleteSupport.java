@@ -139,6 +139,7 @@ import java.util.List;
  * <ul>
  *   <li> {@link #install(JComboBox, EventList)}
  *   <li> {@link #install(JComboBox, EventList, TextFilterator)}
+ *   <li> {@link #install(JComboBox, EventList, TextFilterator, Format)}
  *   <li> {@link #uninstall()}
  *   <li> {@link #setCorrectsCase(boolean)}
  *   <li> {@link #setStrict(boolean)}
