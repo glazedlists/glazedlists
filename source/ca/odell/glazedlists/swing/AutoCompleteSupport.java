@@ -165,7 +165,7 @@ public final class AutoCompleteSupport<E> {
     private boolean correctsCase = true;
 
     /**
-     * <tt>true</tt> if the user can specified values that do not appear in the
+     * <tt>true</tt> if the user can specify values that do not appear in the
      * ComboBoxModel; <tt>false</tt> otherwise.
      */
     private boolean strict = false;
