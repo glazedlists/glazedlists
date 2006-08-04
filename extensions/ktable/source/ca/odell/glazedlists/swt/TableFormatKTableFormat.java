@@ -5,16 +5,16 @@ package ca.odell.glazedlists.swt;
 
 import de.kupzog.ktable.*;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.GlazedLists;
 
 /**
- * Adapt {@link TableFormat} to {@link KTableFormat}. This class
- * is used internally by {@link EventKTableModel} so that
- * {@link TableFormat}s and {@link KTableFormat}s can be treated
- * interchangeably.
+ * Adapt {@link TableFormat} to {@link KTableFormat}. This can be used to
+ * quickly develop a {@link KTableFormat} using existing {@link TableFormat}s,
+ * such as those created by  {@link GlazedLists#tableFormat}.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class TableFormatKTableFormat extends AbstractKTableFormat {
+public class TableFormatKTableFormat extends AbstractKTableFormat {
 
     /** the TableFormat being adapted, methods will be delegated to */
     private final TableFormat tableFormat;
