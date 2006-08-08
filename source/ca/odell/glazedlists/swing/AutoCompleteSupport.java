@@ -7,6 +7,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.swing.ScreenGeometry;
+import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
@@ -263,6 +264,11 @@ public final class AutoCompleteSupport<E> {
     private final PopupMenuListener popupSizerHandler = new PopupSizer();
 
     /**
+     * An unfortunately necessary fixer for a misplaced popup.
+     */
+    private ComboBoxPopupLocationFix popupLocationFix;
+
+    /**
      * We ensure that selecting an item from the popup via the mouse never
      * attempts to autocomplete for fear that we will replace the user's
      * newly selected item and the item will effectively be unselectable.
@@ -467,6 +473,9 @@ public final class AutoCompleteSupport<E> {
         // calculate the popup's width according to the prototype value, if one exists
         this.popupMenu.addPopupMenuListener(popupSizerHandler);
 
+        // fix the popup's location
+        this.popupLocationFix = ComboBoxPopupLocationFix.install(this.comboBox);
+
         // start suppressing autocompletion when selecting values from the popup with the mouse
         this.popup.getList().addMouseListener(popupMouseHandler);
 
@@ -534,6 +543,9 @@ public final class AutoCompleteSupport<E> {
 
         // stop adjusting the popup's width according to the prototype value
         this.popupMenu.removePopupMenuListener(popupSizerHandler);
+
+        // stop fixing the combobox's popup location
+        this.popupLocationFix.uninstall();
 
         // stop suppressing autocompletion when selecting values from the popup with the mouse
         this.popup.getList().removeMouseListener(popupMouseHandler);
@@ -1381,9 +1393,6 @@ public final class AutoCompleteSupport<E> {
 
             final JComponent popupComponent = (JComponent) e.getSource();
 
-            // adjust the combo location if necessary
-            fixPopupLocation(popupComponent);
-
             // attempt to extract the JScrollPane that scrolls the popup
             if (popupComponent.getComponent(0) instanceof JScrollPane) {
                 final JScrollPane scroller = (JScrollPane) popupComponent.getComponent(0);
@@ -1407,37 +1416,6 @@ public final class AutoCompleteSupport<E> {
                     scroller.setMinimumSize(scrollerSize);
                 }
             }
-        }
-
-        /**
-         * Adjust the location of the popup box for the Aqua look and feel.
-         * Otherwise it obscures the combo box editor. Sometimes it'll still
-         * obscure the editor, but this only happens when we can't get the
-         * insets properly and the popup is shifted up and over our editor.
-         *
-         * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=332">bug 332</a>
-         */
-        private void fixPopupLocation(JComponent popupComponent) {
-            // we only need to fix Apple's aqua look and feel
-            if(popupComponent.getClass().getName().indexOf("apple.laf") != 0) {
-                return;
-            }
-
-            // put the popup right under the combo box so it looks like a
-            // normal Aqua combo box
-            Point comboLocationOnScreen = comboBox.getLocationOnScreen();
-            int comboHeight = comboBox.getHeight();
-            int popupY = comboLocationOnScreen.y + comboHeight;
-
-            // ...unless the popup overflows the screen, in which case we put it
-            // above the combobox
-            Rectangle screenBounds = new ScreenGeometry(comboBox).getScreenBounds();
-            int popupHeight = popupComponent.getPreferredSize().height;
-            if(comboLocationOnScreen.y + comboHeight + popupHeight > screenBounds.x + screenBounds.height) {
-                popupY = comboLocationOnScreen.y - popupHeight;
-            }
-
-            popupComponent.setLocation(comboLocationOnScreen.x, popupY);
         }
 
         private Dimension getPrototypeSize(Object prototypeValue) {
