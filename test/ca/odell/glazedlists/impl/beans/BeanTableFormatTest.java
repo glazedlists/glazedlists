@@ -14,7 +14,7 @@ import ca.odell.glazedlists.gui.*;
 /**
  * This test verifies that the BeanTableFormat works as expected.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BeanTableFormatTest extends TestCase {
 

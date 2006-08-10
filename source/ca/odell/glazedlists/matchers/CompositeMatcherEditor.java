@@ -17,7 +17,7 @@ import java.util.List;
  * {@link MatcherEditor}s.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
 

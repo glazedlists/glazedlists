@@ -9,7 +9,7 @@ import junit.framework.*;
 /**
  * Validates ResourceUri.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ResourceUriTest extends TestCase {
 

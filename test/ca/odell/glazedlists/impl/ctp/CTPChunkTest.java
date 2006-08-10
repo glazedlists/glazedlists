@@ -12,7 +12,7 @@ import java.io.*;
 /**
  * A CTPChunk test verifies that the CTPConnection provides proper chunks.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class CTPChunkTest extends TestCase {
 

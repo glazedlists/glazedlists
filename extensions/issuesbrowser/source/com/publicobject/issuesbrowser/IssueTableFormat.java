@@ -14,7 +14,7 @@ import java.util.Date;
 /**
  * The IssueTableFormat specifies how an issue is displayed in a table.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
 public class IssueTableFormat implements WritableTableFormat, AdvancedTableFormat {

@@ -10,7 +10,7 @@ import java.io.*;
  * transport. For some common, general-purpose {@link ByteCoder}s, see the
  * {@link ca.odell.glazedlists.GlazedLists GlazedLists} factory class.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface ByteCoder {
 

@@ -12,7 +12,7 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
 /**
  * A resource listener subscribes to the deltas published by a resource.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface ResourceListener {
 

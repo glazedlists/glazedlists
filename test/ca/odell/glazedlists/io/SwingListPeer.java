@@ -8,7 +8,7 @@ import java.io.*;
 /**
  * A peer that publishes and subscribes to lists.
  * 
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class SwingListPeer {
     

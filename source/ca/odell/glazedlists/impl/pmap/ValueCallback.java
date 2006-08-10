@@ -16,7 +16,7 @@ import java.util.logging.*;
 /**
  * Listens for the loading of a value.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface ValueCallback {
 

@@ -26,7 +26,7 @@ import java.util.*;
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class TransformedList<S, E> extends AbstractEventList<E> implements ListEventListener<S> {
 

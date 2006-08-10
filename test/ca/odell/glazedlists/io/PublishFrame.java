@@ -16,7 +16,7 @@ import ca.odell.glazedlists.swing.*;
 /**
  * A frame that shows a published list.
  * 
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class PublishFrame implements ActionListener, NetworkListStatusListener {
     

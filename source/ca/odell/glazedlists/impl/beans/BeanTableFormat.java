@@ -11,7 +11,7 @@ import ca.odell.glazedlists.*;
  * TableFormat implementation that uses reflection to be used for any
  * JavaBean-like Object with getProperty() and setProperty() style API.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author <a href="mailto:andrea.aime@aliceposta.it">Andrea Aime</a>
  */
 public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTableFormat<E> {

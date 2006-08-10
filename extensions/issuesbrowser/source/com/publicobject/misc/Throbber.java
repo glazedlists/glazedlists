@@ -7,7 +7,7 @@ package com.publicobject.misc;
  * Simple animated monitor shows if work is taking place. This can be implemented
  * in any GUI toolkit.
  *
- * @author <a href="jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="jesse@swank.ca">Jesse Wilson</a>
  */
 public interface Throbber {
 

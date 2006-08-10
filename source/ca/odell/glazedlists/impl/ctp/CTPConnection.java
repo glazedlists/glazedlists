@@ -29,7 +29,7 @@ import java.util.logging.*;
  * <li>as a server, it sends only the header, "Transfer-Encoding"
  * <li>it interprets only the header, "Transfer-Encoding".
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class CTPConnection implements NIOAttachment {
     // client:

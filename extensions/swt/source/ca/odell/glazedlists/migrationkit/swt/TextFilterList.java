@@ -50,7 +50,7 @@ import org.eclipse.swt.events.*;
  * @deprecated This class uses inheritance when composition is preferrable. Instead
  *      of TextFilterList, use {@link FilterList} and {@link TextWidgetMatcherEditor}.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class TextFilterList extends TransformedList {
 

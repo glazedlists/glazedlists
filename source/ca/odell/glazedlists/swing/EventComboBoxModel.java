@@ -17,7 +17,7 @@ import javax.swing.event.*;
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBoxModel {
 

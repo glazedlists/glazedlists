@@ -12,7 +12,7 @@ import java.util.*;
  * A utility class containing all sorts of random things that are useful for
  * implementing Glazed Lists but not for using Glazed Lists.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class GlazedListsImpl {
 

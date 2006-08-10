@@ -167,7 +167,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
     /**
      * Updates the internal data using the proxy thread.
      *
-     * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+     * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
      */
     private class UpdateRunner implements Runnable, ListEventListener<E> {
     

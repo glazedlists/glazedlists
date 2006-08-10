@@ -18,7 +18,7 @@ import java.util.*;
  * @see <a href="https://glazedlists.dev.java.net/servlets/ReadMsg?list=users&msgNo=117">Users list #117</a>
  * @see <a href="https://glazedlists.dev.java.net/servlets/ReadMsg?list=users&msgNo=214">Users list #214</a>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class MultipleSourcesTest extends TestCase {
 

@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 /**
  * An IssueBrowser is a program for finding and viewing issues.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class IssuesBrowser implements Runnable {
 

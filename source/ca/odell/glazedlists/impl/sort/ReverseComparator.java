@@ -9,7 +9,7 @@ import java.util.Comparator;
 /**
  * A comparator that reverses the sequence of a source comparator.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class ReverseComparator<T> implements Comparator<T> {
 

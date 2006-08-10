@@ -43,7 +43,7 @@ import java.util.*;
  * @see GlazedLists#threadSafeList(EventList)
  * @see GlazedLists#weakReferenceProxy(EventList, ListEventListener)
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface EventList<E> extends List<E> {
 

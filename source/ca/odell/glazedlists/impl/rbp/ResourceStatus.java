@@ -11,7 +11,7 @@ import java.io.*;
 /**
  * Tracks the current status of a resource with respect to the network.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface ResourceStatus {
 

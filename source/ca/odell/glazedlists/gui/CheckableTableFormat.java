@@ -6,7 +6,7 @@ package ca.odell.glazedlists.gui;
 /**
  * Specifies how to check table elements.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface CheckableTableFormat<E> extends TableFormat<E> {
     

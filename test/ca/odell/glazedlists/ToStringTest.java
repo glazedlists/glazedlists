@@ -14,7 +14,7 @@ import ca.odell.glazedlists.matchers.Matchers;
  * This test verifies that the toString() method on all lists is consistent
  * with the toString() method of {@link ArrayList}.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ToStringTest extends TestCase {
 

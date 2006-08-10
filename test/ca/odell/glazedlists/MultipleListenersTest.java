@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * This test verifies that event lists can have multiple listeners.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class MultipleListenersTest extends TestCase {
 

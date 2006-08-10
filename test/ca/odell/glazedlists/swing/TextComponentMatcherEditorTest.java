@@ -13,7 +13,7 @@ import javax.swing.text.AbstractDocument;
 /**
  * Test {@link TextComponentMatcherEditor}.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class TextComponentMatcherEditorTest extends SwingTestCase {
 

@@ -15,7 +15,7 @@ import java.util.logging.*;
 /**
  * A peer manages publishing and subscribing to resources.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class Peer implements CTPHandlerFactory {
     

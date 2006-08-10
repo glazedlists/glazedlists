@@ -16,7 +16,7 @@ import java.util.*;
  * This test attempts to cause atomic change events that have change blocks
  * with indexes in random order.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class IndexOrderTest extends TestCase {
 

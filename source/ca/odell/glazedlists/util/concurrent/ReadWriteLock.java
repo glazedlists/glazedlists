@@ -16,7 +16,7 @@ package ca.odell.glazedlists.util.concurrent;
  * @see java.util.concurrent.locks.ReadWriteLock
  * @see <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">ReadWriteLock</a>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface ReadWriteLock {
 

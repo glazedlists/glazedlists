@@ -26,7 +26,7 @@ import javax.swing.SwingUtilities;
  * <p>Planned extensions include support to run code simultaneously with the
  * event dispatch thread to support testing Swing in a concurrent environment.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class SwingTestCase extends TestCase {
     

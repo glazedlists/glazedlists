@@ -22,7 +22,7 @@ import java.lang.reflect.Array;
  * <p>Documentation Note: Javadoc tags have been copied from the {@link List} API
  * because the <code>javadoc</code> tool does not inherit external descriptions.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class AbstractEventList<E> implements EventList<E> {
 

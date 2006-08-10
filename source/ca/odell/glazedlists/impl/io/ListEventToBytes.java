@@ -15,7 +15,7 @@ import ca.odell.glazedlists.io.ByteCoder;
  * An utility interface for converting Objects to bytes for storage or network
  * transport.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListEventToBytes {
     

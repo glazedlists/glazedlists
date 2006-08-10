@@ -10,7 +10,7 @@ import java.io.*;
 /**
  * A test program that acts as a client to interface with a CTP server.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class CTPClient {
 

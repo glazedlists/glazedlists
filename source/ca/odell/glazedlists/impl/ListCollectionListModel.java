@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Returns the List itself for a List of Lists.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListCollectionListModel<E> implements CollectionList.Model<List<E>,E> {
     public List<E> getChildren(List<E> parent) {

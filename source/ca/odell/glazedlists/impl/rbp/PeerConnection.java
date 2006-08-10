@@ -21,7 +21,7 @@ import java.util.logging.*;
  * <p>A connection is multiplexed and serves multiple resources. It contains a map
  * of resources being published and resources being subscribed to.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class PeerConnection implements CTPHandler {
     

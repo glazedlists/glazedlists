@@ -40,7 +40,7 @@ final class J2SE12LockFactory implements LockFactory {
  *
  * @see <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">Introduction to util.concurrent</a>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 final class J2SE12ReadWriteLock implements ReadWriteLock {
 

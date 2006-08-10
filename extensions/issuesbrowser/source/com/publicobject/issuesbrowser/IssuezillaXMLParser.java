@@ -28,7 +28,7 @@ import com.publicobject.misc.xml.SaxParserSidekick;
  * <p/>
  * <p>Dates are currently unsupported and will always have a value of "null".
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/issuezilla.dtd">Issuezilla DTD</a>
  */
 public class IssuezillaXMLParser {

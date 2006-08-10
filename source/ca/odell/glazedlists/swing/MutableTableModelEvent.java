@@ -15,7 +15,7 @@ import javax.swing.table.TableModel;
  * be created. This hurts speed. This is a mutable table model
  * event, so that the object can be recycled.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 final class MutableTableModelEvent extends TableModelEvent {
     

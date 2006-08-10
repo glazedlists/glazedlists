@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Ensures that ListEventAssembler.forwardEvent() works.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ForwardEventTest extends TestCase {
 

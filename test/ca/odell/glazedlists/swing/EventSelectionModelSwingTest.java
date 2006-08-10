@@ -11,7 +11,7 @@ import java.util.Collections;
 /**
  * This test verifies that the EventSelectionModel works.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class EventSelectionModelSwingTest extends SwingTestCase {
 

@@ -9,7 +9,7 @@ import junit.framework.*;
 /**
  * This test verifies that the TextSearchStrategy implementations work.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class TextSearchStrategyTest extends TestCase {
 

@@ -40,7 +40,7 @@ import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
  * @see CollectionList.Model
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class CollectionList<S, E> extends TransformedList<S, E> implements ListEventListener<S> {
 

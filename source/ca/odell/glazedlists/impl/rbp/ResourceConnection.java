@@ -13,7 +13,7 @@ import java.util.logging.*;
 /**
  * Maintains the state for a particular resource on a particular connection.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class ResourceConnection {
 

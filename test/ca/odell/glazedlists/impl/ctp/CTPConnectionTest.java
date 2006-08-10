@@ -10,7 +10,7 @@ import java.io.*;
 /**
  * A CTPConnectionTest verifies that behaviour is correct when connections fail.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class CTPConnectionTest extends TestCase {
 

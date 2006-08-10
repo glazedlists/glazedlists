@@ -17,7 +17,7 @@ import java.util.logging.*;
 /**
  * Opens a file for reading and writing a persistent map.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class OpenFile implements Runnable {
      

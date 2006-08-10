@@ -12,7 +12,7 @@ import java.util.List;
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  * @see GlazedLists#textFilterator(String[])
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface TextFilterator<E> {
 

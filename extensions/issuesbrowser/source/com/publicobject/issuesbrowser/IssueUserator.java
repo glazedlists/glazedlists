@@ -8,7 +8,7 @@ import ca.odell.glazedlists.CollectionList;
 import java.util.List;
 
 /**
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class IssueUserator implements CollectionList.Model<Issue, String> {
     public List<String> getChildren(Issue issue) {

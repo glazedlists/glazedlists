@@ -17,7 +17,7 @@ import java.util.logging.*;
 /**
  * Removes a chunk from the persistent map.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class RemoveChunk implements Runnable {
      

@@ -39,7 +39,7 @@ import java.util.*;
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=112">Bug 112</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=222">Bug 222</a>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class EventSelectionModel<E> implements ListSelectionModel {
 

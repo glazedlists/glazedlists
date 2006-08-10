@@ -9,7 +9,7 @@ import java.lang.reflect.*;
 /**
  * Models a getter and setter for an abstract property.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BeanProperty<T> {
 

@@ -19,7 +19,7 @@ import java.util.*;
  * should be creating a change on the same list change queue when an atomic
  * change is being created.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class ListEventAssembler<E> {
 

@@ -13,7 +13,7 @@ import java.util.Comparator;
  * <p>When this finds <code>null</code> objects, it orders them before all
  * other objects.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class ComparableComparator implements Comparator<Comparable> {
 

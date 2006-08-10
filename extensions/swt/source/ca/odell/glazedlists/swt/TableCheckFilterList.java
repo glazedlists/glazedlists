@@ -30,7 +30,7 @@ import java.util.*;
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 final class TableCheckFilterList extends TransformedList implements org.eclipse.swt.events.SelectionListener {
 

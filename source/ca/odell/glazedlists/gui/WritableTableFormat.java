@@ -13,7 +13,7 @@ package ca.odell.glazedlists.gui;
  * is not editable at all, it is sufficient to implement {@link TableFormat}
  * only.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  *
  * @see AdvancedTableFormat
  * @see TableFormat

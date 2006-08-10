@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * A ReadOnlyListTest tests the functionality of the ReadOnlyList
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ReadOnlyListTest extends TestCase {
 

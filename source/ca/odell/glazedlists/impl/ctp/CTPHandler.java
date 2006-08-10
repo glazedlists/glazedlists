@@ -10,7 +10,7 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
 /**
  * A callback interface for classes that implement a CTPConnection.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface CTPHandler {
     

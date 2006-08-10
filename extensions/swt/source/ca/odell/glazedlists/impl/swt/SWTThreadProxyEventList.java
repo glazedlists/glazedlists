@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Display;
  * any thread to write a source {@link EventList} that will be updated on the
  * SWT thread.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class SWTThreadProxyEventList extends ThreadProxyEventList {
 

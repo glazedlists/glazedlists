@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
  * enhancement.
  *
  * @author James Lemieux
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class Issue implements Comparable {
 

@@ -10,7 +10,7 @@ import java.util.*;
  * A comparator chain compares objects using a list of Comparators. The
  * first comparison where the objects differ is returned.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class ComparatorChain<T> implements Comparator<T> {
 

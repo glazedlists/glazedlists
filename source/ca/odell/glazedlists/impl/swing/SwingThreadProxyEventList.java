@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
  * any thread to write a source {@link EventList} that will be updated on the
  * Swing thread.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class SwingThreadProxyEventList<E> extends ThreadProxyEventList<E> {
 

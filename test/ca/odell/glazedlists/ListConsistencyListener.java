@@ -14,7 +14,7 @@ import junit.framework.*;
  * A very basic listener that ensures that lists are kept consistent and that
  * the change events are consistent.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListConsistencyListener<E> {
     

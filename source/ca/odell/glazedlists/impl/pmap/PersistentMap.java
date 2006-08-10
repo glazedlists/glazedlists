@@ -21,7 +21,7 @@ import java.util.logging.*;
  * operations will be immediate, but will return without having taken effect on disk.
  * To flush the disk, call {@link #flush()}.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class PersistentMap implements Map {
     // Implementation Notes

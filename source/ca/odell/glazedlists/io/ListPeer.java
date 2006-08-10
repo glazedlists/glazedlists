@@ -25,7 +25,7 @@ import java.io.*;
  * {@link NetworkList#disconnect() disconnect()} and {@link NetworkList#connect() connect()}
  * methods.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListPeer {
 

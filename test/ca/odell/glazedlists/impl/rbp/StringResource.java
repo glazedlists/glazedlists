@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * A simple resource for a String.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class StringResource implements Resource {
 

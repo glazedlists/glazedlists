@@ -13,7 +13,7 @@ import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 /**
  * Utility class for analyzing the performance of the TextFilterList.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class TextFilterPerformance {
 

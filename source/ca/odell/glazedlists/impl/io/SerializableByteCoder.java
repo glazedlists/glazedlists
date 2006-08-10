@@ -10,7 +10,7 @@ import ca.odell.glazedlists.io.ByteCoder;
 /**
  * A {@link ByteCoder} that uses {@link Serializable}.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class SerializableByteCoder implements ByteCoder {
 

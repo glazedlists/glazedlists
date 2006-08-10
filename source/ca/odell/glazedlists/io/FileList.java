@@ -32,7 +32,7 @@ import java.io.*;
  * <tr><td class="TableSubHeadingColor"><b>Issues:</b></td><td>N/A</td></tr>
  * </table>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class FileList extends TransformedList {
 

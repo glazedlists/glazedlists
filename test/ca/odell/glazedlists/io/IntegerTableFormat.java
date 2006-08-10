@@ -8,7 +8,7 @@ import ca.odell.glazedlists.gui.*;
 /**
  * The IntegerTableFormat specifies how an integer is displayed in a table.
  * 
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class IntegerTableFormat implements TableFormat<Integer> {
     

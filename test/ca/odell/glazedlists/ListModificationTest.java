@@ -17,7 +17,7 @@ import ca.odell.glazedlists.matchers.Matcher;
  *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=44">Bug 44</a>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListModificationTest extends TestCase {
 

@@ -15,7 +15,7 @@ import ca.odell.glazedlists.util.concurrent.LockFactory;
 /**
  * A CompositeListTest tests the functionality of the CompositeList.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class CompositeListTest extends TestCase {
 

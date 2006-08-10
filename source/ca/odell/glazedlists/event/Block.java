@@ -9,7 +9,7 @@ import java.util.List;
  * Models a change to a list that may require a GUI object
  * to be repainted or another object to be updated.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 final class Block {
     

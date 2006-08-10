@@ -20,7 +20,7 @@ import java.util.logging.*;
  * <p>A OpenConnection is created for each call to the connect() method, and
  * queued until it can be processed by the CTP thread.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class OpenConnection implements Runnable {
      

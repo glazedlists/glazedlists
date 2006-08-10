@@ -22,7 +22,7 @@ import ca.odell.glazedlists.GlazedLists;
  *
  * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTree BC2}
  * 
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class IndexedTree<V> {
 

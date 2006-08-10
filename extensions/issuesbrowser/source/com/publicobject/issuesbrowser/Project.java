@@ -10,7 +10,7 @@ import ca.odell.glazedlists.EventList;
 /**
  * Models a project on Java.net.
  *
- * @author <a href="jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="jesse@swank.ca">Jesse Wilson</a>
  */
 public class Project {
 

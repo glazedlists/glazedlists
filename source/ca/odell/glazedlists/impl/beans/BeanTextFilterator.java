@@ -13,7 +13,7 @@ import ca.odell.glazedlists.Filterator;
  * TextFilterator implementation that uses reflection to be used for any
  * JavaBean-like Object with getProperty() and setProperty() style API.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,E> {
 

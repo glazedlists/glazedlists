@@ -23,7 +23,7 @@ import com.publicobject.misc.Exceptions;
  *
  * <p>Issues are streamed to the issues list as they are loaded.
  *
- * @author <a href="jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="jesse@swank.ca">Jesse Wilson</a>
  */
 public class IssueLoader implements Runnable {
 

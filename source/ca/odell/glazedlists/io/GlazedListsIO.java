@@ -8,7 +8,7 @@ import ca.odell.glazedlists.impl.io.*;
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class GlazedListsIO {
 

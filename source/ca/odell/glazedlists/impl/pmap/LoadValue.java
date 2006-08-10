@@ -17,7 +17,7 @@ import java.util.logging.*;
 /**
  * Loads the value for a chunk from disk.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class LoadValue implements Runnable {
      

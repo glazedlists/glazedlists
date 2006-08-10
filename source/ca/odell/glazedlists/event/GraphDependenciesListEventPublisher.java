@@ -17,7 +17,7 @@ import java.util.Iterator;
  * {@link ListEvent}s from within the {@link ListEventListener#listChanged}
  * method shall share the {@link GraphDependenciesListEventPublisher} with its source {@link EventList}.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class GraphDependenciesListEventPublisher implements ListEventPublisher {
 

@@ -13,7 +13,7 @@ import ca.odell.glazedlists.io.ByteCoder;
  * {@link java.beans.XMLDecoder XMLDecoder} classes from java.beans. Encoded Objects
  * must be JavaBeans.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BeanXMLByteCoder implements ByteCoder {
 

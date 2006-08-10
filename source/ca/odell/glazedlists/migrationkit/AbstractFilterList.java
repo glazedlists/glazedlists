@@ -43,7 +43,7 @@ import ca.odell.glazedlists.matchers.*;
  *      and powerful than the static filtering required by AbstractFilterList.
  *
  * @since 2004
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class AbstractFilterList extends TransformedList {
 

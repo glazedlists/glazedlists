@@ -20,7 +20,7 @@ import java.util.*;
  * that it iterates, and therefore provides generic, possibly slow access
  * to its elements.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class EventListIterator<E> implements ListIterator<E>, ListEventListener<E> {
 

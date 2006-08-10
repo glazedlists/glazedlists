@@ -11,7 +11,7 @@ import javax.swing.event.*;
  * for performance gains. The class is completely re-implemented and it only
  * extends ListDataEvent to fit the ListDataListener interface.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 final class MutableListDataEvent extends ListDataEvent {
 

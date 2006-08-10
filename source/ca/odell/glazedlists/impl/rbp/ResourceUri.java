@@ -14,7 +14,7 @@ import java.text.ParseException;
  * The address of a resource. This will be either local ("/hello") or remote
  * ("glazedlists://host:port/hello").
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class ResourceUri implements Comparable {
     

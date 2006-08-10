@@ -13,7 +13,7 @@ import java.util.Iterator;
 /**
  * A factory for creating Matchers.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class Matchers {
 

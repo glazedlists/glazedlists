@@ -11,7 +11,7 @@ import ca.odell.glazedlists.event.*;
 /**
  * Validates that {@link EventList}s can recover from {@link RuntimeException}s.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class RuntimeExceptionTest extends TestCase {
 

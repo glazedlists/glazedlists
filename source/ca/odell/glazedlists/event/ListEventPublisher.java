@@ -11,7 +11,7 @@ import ca.odell.glazedlists.ListSelection;
 /**
  * Define a strategy for managing dependencies in the observer pattern.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface ListEventPublisher {
 

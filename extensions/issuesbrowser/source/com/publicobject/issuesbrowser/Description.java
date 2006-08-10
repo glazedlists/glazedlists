@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Models the description of a particular Issue.
  *
- * @author <a href="jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="jesse@swank.ca">Jesse Wilson</a>
  */
 public class Description implements TextFilterable {
 	private String who = null;

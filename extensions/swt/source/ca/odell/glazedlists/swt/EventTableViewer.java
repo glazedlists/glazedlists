@@ -23,7 +23,7 @@ import org.eclipse.swt.events.SelectionListener;
  * <p><strong>Warning:</strong> This class is a a developer preview and subject to
  * many bugs and API changes.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class EventTableViewer implements ListEventListener {
 

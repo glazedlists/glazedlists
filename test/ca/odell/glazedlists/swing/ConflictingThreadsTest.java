@@ -19,7 +19,7 @@ import java.util.Random;
  * This test attempts to modify an {@link EventList} from two threads simultaneously.
  * The first thread is the Swing thread, the second thread is a background thread.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ConflictingThreadsTest extends SwingTestCase {
 

@@ -30,7 +30,7 @@ import java.util.*;
  * </td></tr>
  * </table>
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class PopularityList<E> extends TransformedList<E, E> {
 

@@ -21,7 +21,7 @@ import java.util.logging.*;
  * all read and write operations on all connections. A pool of other threads are
  * used to notify the handlers of the data and status of a connection.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class CTPConnectionManager implements NIOServer {
     

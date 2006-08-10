@@ -15,7 +15,7 @@ import ca.odell.glazedlists.util.concurrent.*;
  * A resource is a dynamic Object that can publish its changes as a series of deltas.
  * It is also possible to construct a resource using a shapshot.
  *
- * @author <a href="mailto:jesse@odel.on.ca">Jesse Wilson</a>
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface Resource {
 
