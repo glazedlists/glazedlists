@@ -194,7 +194,6 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         throw new UnsupportedOperationException();
     }
 
-
     public void listChanged(ListEvent<TreeElement<E>> listChanges) {
         throw new UnsupportedOperationException();
     }
