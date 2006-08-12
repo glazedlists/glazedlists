@@ -3,21 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.amazonbrowser;
 
-import ca.odell.glazedlists.jfreechart.ValueSegment;
-import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import ca.odell.glazedlists.GlazedLists;
 
 /**
  * Models an Item fetched from Amazon's ECS web service.
  *
  * @author James Lemieux
  */
-public class Item {
+public class Item implements Comparable<Item> {
 
     private String asin = null;
     private String detailPageURL = null;
@@ -40,4 +33,19 @@ public class Item {
      */
     public ItemAttributes getItemAttributes() { return itemAttributes; }
     public void setItemAttributes(ItemAttributes itemAttributes) { this.itemAttributes = itemAttributes; }
+
+    /**
+     * Items are ordered by their title by default.
+     */
+    public int compareTo(Item o) {
+        return GlazedLists.comparableComparator().compare(itemAttributes.getTitle(), o.itemAttributes.getTitle());
+    }
+
+    /** inheritDoc */
+    public String toString() {
+        final String asin = getASIN() == null ? "" : (getASIN() + " ");
+        final String title = itemAttributes.getTitle() == null ? "" : itemAttributes.getTitle();
+
+        return asin + title;
+    }
 }
