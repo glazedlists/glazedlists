@@ -103,6 +103,9 @@ public class TreeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("AC"), treeList.get(8).path());
         assertEquals(GlazedListsTests.stringToList("ACE"), treeList.get(10).path());
 
+        // observe that we're firing the right events
+        ListConsistencyListener.install(treeList);
+
         // make some modifications, they should be handled in place
         source.add("ABF");
         assertEquals(GlazedListsTests.stringToList("ABF"), treeList.get(8).path());
