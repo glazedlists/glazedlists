@@ -539,7 +539,7 @@ public final class GlazedLists {
      *
      * <p>This can be useful when it is known that an <code>EventList</code>
      * will experience very few mutations compared to read operation and wants
-     * provide a data structure that guarantees fast O(1) reads.
+     * to provide a data structure that guarantees fast O(1) reads.
      *
      * <p>The keys of the MultiMap are determined by evaluating each
      * <code>source</code> element with the <code>keyMaker</code> function. If
