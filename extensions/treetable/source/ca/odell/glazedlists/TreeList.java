@@ -219,6 +219,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         updates.beginEvent(true);
 
         // add the new data, remove the old data, and mark the updated data
+        List<TreeElement<E>> parentsToVerify = new ArrayList<TreeElement<E>>();
         while(listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
@@ -234,6 +235,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 treeElement.parent = (TreeElement<E>)findParentByValue(treeElement, true, true);
 
                 // todo: repair siblings
+                // todo: handle case where an identical virtual element already exists
 
             } else if(type == ListEvent.UPDATE) {
                 Element<TreeElement<E>> element = data.get(sourceIndex, REAL_NODES);
@@ -247,9 +249,15 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 data.remove(sourceIndex, REAL_NODES, 1);
                 updates.addDelete(viewIndex);
 
-                // todo: remove parents, repair siblings
+                // remove the parent if necessary in the next iteration
+                parentsToVerify.add(element.get().parent);
+
+                // todo: repair siblings
             }
         }
+
+        // blow away obsolete parent nodes, and their parents recursively
+        deleteObsoleteParents(parentsToVerify);
 
         // we're currently too lazy to rebuild the sibling links properly, so
         // just brute-force through all of them!
@@ -258,6 +266,48 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         assert(isValid());
 
         updates.commitEvent();
+    }
+
+    /**
+     * Ensure all of the specified parents are still required. If they're not,
+     * they'll be removed and the appropriate events fired.
+     */
+    private void deleteObsoleteParents(List<TreeElement<E>> parentsToVerify) {
+        deleteObsoleteParents:
+        for(Iterator<TreeElement<E>> i = parentsToVerify.iterator(); i.hasNext(); ) {
+            TreeElement<E> parent = i.next();
+
+            // walk up the tree, deleting nodes
+            while(parent != null) {
+                // we've reached a real parent, don't delete it!
+                if(!parent.virtual) break;
+
+                // if this is a legit parent, then we'll still have a child element.
+                // if it turns out that that child is also unnecessary, we'll clean
+                // everything up in the next iteration
+                boolean stillRequired;
+                int index = data.indexOfNode(parent.element, ALL_NODES);
+                if(index + 1< data.size(ALL_NODES)) {
+                    TreeElement<E> possibleChild = data.get(index + 1, ALL_NODES).get();
+                    stillRequired = possibleChild.parent == parent;
+                } else {
+                    stillRequired = false;
+                }
+
+                // this is a legit parent, nothing to see here
+                if(stillRequired) {
+                    continue deleteObsoleteParents;
+                }
+
+                // we need to destroy this parent
+                int viewIndex = data.indexOfNode(parent.element, VISIBLE_NODES);
+                data.remove(index, ALL_NODES, 1);
+                updates.addDelete(viewIndex);
+
+                // now we might need to delete the parent's parent
+                parent = parent.parent;
+            }
+        }
     }
 
     /**
@@ -359,7 +409,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         /**
          * @return the path elements for this element, it is an error to modify.
          */
-        public List path() {
+        public List<E> path() {
             return path;
         }
 
@@ -402,6 +452,10 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * Sanity check the entire datastructure.
      */
     private boolean isValid() {
+        // we should have the correct number of real nodes
+        assert(source.size() == data.size(REAL_NODES));
+
+        // walk through the tree, validating structure and each subtree
         int lastPathLengthSeen = 0;
         for(int i = 0; i < data.size(ALL_NODES); i++) {
             TreeElement<E> element = data.get(i, ALL_NODES).get();
@@ -409,6 +463,14 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             // path lengths should only grow by one from one child to the next
             assert(element.pathLength() <= lastPathLengthSeen + 1);
             lastPathLengthSeen = element.pathLength();
+
+            // the virtual flag should be consistent with the node color
+            if(element.virtual) {
+                assert(element.element.getColor() == HIDDEN_VIRTUAL|| element.element.getColor() == VISIBLE_VIRTUAL);
+            } else {
+                assert(source.get(data.convertIndexColor(i, ALL_NODES, REAL_NODES)) == element);
+                assert(element.element.getColor() == HIDDEN_REAL || element.element.getColor() == VISIBLE_REAL);
+            }
 
             // only validate the roots, they'll validate the rest recursively
             if(element.pathLength() == 1) {

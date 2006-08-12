@@ -13,12 +13,10 @@ import java.lang.reflect.Method;
 public class TreeListTest extends TestCase {
 
     /**
-     * Validates that removeAll() works.
-     *
-     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=169">Bug 169</a>
+     * Can we build a tree list?
      */
     public void testCreate() throws Exception {
-        BasicEventList source = new BasicEventList();
+        BasicEventList<Method> source = new BasicEventList<Method>();
         source.add(List.class.getMethod("add", Object.class));
         source.add(List.class.getMethod("add", int.class, Object.class));
         source.add(List.class.getMethod("set", int.class, Object.class));
@@ -30,9 +28,6 @@ public class TreeListTest extends TestCase {
         source.add(BasicEventList.class.getMethod("add", int.class, Object.class));
 
         TreeList treeList = new TreeList(source, new JavaStructureTreeFormat());
-        for(Object i : treeList) {
-            System.out.println(i);
-        }
     }
 
     /**
@@ -78,30 +73,27 @@ public class TreeListTest extends TestCase {
 
 
     public void testAddsAndRemoves() {
-
-        //    [A]
-        //    [A, B]
-        //    [A, B, C]
-        //    [A, B, D]
-        //    [A, B, E]
-        //    [A, B, E, F]
-        //    [A, B, E, F, G]
-        //    [A, B, E, F, H]
-        //    [A, C]
-        //    [A, C, D]
-        //    [A, C, E]
-        BasicEventList source = new BasicEventList();
+        BasicEventList<String> source = new BasicEventList<String>();
         source.add("ABC");
         source.add("ABD");
         source.add("ABEFG");
         source.add("ABEFH");
         source.add("ACD");
         source.add("ACE");
-        TreeList treeList = new TreeList(source, new CharacterTreeFormat());
-        assertEquals(11, treeList.size());
-        assertEquals(GlazedListsTests.stringToList("ABEF"), treeList.get(5).path());
-        assertEquals(GlazedListsTests.stringToList("AC"), treeList.get(8).path());
-        assertEquals(GlazedListsTests.stringToList("ACE"), treeList.get(10).path());
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABEF",
+                "ABEFG",
+                "ABEFH",
+                "AC",
+                "ACD",
+                "ACE",
+        });
 
         // observe that we're firing the right events
         ListConsistencyListener.install(treeList);
@@ -115,10 +107,6 @@ public class TreeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("ACB"), treeList.get(11).path());
         assertEquals(GlazedListsTests.stringToList("ACBA"), treeList.get(12).path());
 
-        for(Object i : treeList) {
-            System.out.println(i);
-        }
-
         // now some removes
         source.remove("ABD");
         assertEquals(14, treeList.size());
@@ -131,25 +119,26 @@ public class TreeListTest extends TestCase {
     public void testSubtreeSize() {
 
         // try a simple hierarchy
-        BasicEventList source = new BasicEventList();
+        BasicEventList<String> source = new BasicEventList<String>();
         source.add("ABCD");
         source.add("ABEFG");
         source.add("ACDC");
         source.add("ACE");
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABCD",
+                "ABE",
+                "ABEF",
+                "ABEFG",
+                "AC",
+                "ACD",
+                "ACDC",
+                "ACE",
+        });
 
-        //    [A]
-        //    [A, B]
-        //    [A, B, C]
-        //    [A, B, C, D]
-        //    [A, B, E]
-        //    [A, B, E, F]
-        //    [A, B, E, F, G]
-        //    [A, C]
-        //    [A, C, D]
-        //    [A, C, D, C]
-        //    [A, C, E]
-
-        TreeList treeList = new TreeList(source, new CharacterTreeFormat());
         assertEquals(11, treeList.subtreeSize(0, true));
         assertEquals(6, treeList.subtreeSize(1, true));
         assertEquals(2, treeList.subtreeSize(2, true));
@@ -162,4 +151,66 @@ public class TreeListTest extends TestCase {
         assertEquals(1, treeList.subtreeSize(9, true));
         assertEquals(1, treeList.subtreeSize(10, true));
     }
+
+    public void testVirtualParentsAreCleanedUp() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("ABG");
+        source.add("ACDEF");
+        source.add("AHI");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABG",
+                "AC",
+                "ACD",
+                "ACDE",
+                "ACDEF",
+                "AH",
+                "AHI",
+        });
+
+        source.remove("ACDEF");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABG",
+                "AH",
+                "AHI",
+        });
+
+        source.remove("ABG");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AH",
+                "AHI",
+        });
+
+        source.remove("AHI");
+        assertEquals(0, treeList.size());
+
+        source.add("ABC");
+        source.add("ABCDEF");
+        source.remove("ABCDEF");
+        assertEquals(3, treeList.size());
+    }
+
+    public void assertTreeStructure(TreeList<String>treeList, String[] structure) {
+
+        // convert the list of TreeElements into a list of Strings
+        List<String> treeAsStrings = new ArrayList<String>();
+        for(Iterator<TreeList.TreeElement<String>> i = treeList.iterator(); i.hasNext(); ) {
+            TreeList.TreeElement<String> treeElement = i.next();
+            StringBuffer asString = new StringBuffer(treeElement.path().size());
+            for(Iterator<String> n = treeElement.path().iterator(); n.hasNext(); ) {
+                asString.append(n.next());
+            }
+            treeAsStrings.add(asString.toString());
+        }
+
+        assertEquals(Arrays.asList(structure), treeAsStrings);
+    }
+
 }
