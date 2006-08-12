@@ -17,6 +17,8 @@ import java.util.*;
  */
 public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeList.TreeElement<E>> {
 
+    private static final Comparator comparableComparator = GlazedLists.comparableComparator();
+
     /** node colors define where it is in the source and where it is here */
     private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList(new String[] { "R", "V", "r", "v" }));
     private static final byte VISIBLE_REAL = BYTE_CODER.colorToByte("R");
@@ -48,24 +50,41 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             treeElement.element = element;
         }
 
-        // populate the lead sibling and parent links, including virtual elements
+        // populate parent links
         for(int i = 0; i < super.source.size(); i++) {
             TreeElement<E> node = super.source.get(i);
-
-            // populate parent relations
             node.parent = (TreeElement<E>)findParentByValue(node, true, false);
+        }
+
+        // prepare sibling links
+        rebuildAllSiblingLinks();
+
+        assert(isValid());
+
+        super.source.addListEventListener(this);
+    }
+
+    /**
+     * Iterate through all elements in the tree, updating their sibling links.
+     * This should only be used by the constructor since it takes a long time
+     * to execute.
+     */
+    private void rebuildAllSiblingLinks() {
+        for(int i = 0; i < data.size(ALL_NODES); i++) {
+            TreeElement<E> node = data.get(i, ALL_NODES).get();
 
             // populate sibling relations
             TreeElement<E> siblingBefore = findSiblingBeforeByValue(node);
             if(siblingBefore != null) {
                 node.siblingBefore = siblingBefore;
                 siblingBefore.siblingAfter = node;
+            } else {
+                node.siblingBefore = null;
             }
+
+            // sibling after may be set in a future iteration of this loop
+            node.siblingAfter = null;
         }
-
-        assert(isValid());
-
-        super.source.addListEventListener(this);
     }
 
     /**
@@ -75,7 +94,6 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      *      constructor of {@link TreeList}.
      */
     private TreeElement<E> findParentByValue(TreeElement<E> node, boolean createIfNecessary, boolean fireEvents) {
-        if(fireEvents) throw new UnsupportedOperationException();
 
         // no parents for root nodes
         if(node.pathLength() == 1) return null;
@@ -83,7 +101,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // figure out what our parent would look like and where it would be
         TreeElement<E> parentPrototype = node.describeParent();
         int expectedParentIndex = data.indexOfValue(parentPrototype, true, true, ALL_NODES);
-        assert(expectedParentIndex <= data.indexOfNode(node.element, ALL_NODES));
+        assert(node.element == null || expectedParentIndex <= data.indexOfNode(node.element, ALL_NODES));
         TreeElement<E> possibleParent = data.get(expectedParentIndex, ALL_NODES).get();
 
         // we already have a parent!
@@ -95,6 +113,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             Element<TreeElement<E>> element = data.add(expectedParentIndex, ALL_NODES, VISIBLE_VIRTUAL, parentPrototype, 1);
             parentPrototype.element = element;
             parentPrototype.parent = findParentByValue(parentPrototype, true, fireEvents);
+            if(fireEvents) updates.addInsert(expectedParentIndex);
             return parentPrototype;
 
         // no parent exists, and we're not going to make one
@@ -112,7 +131,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // Currently we do a linear scan backwards looking for a node with the
         // same path length
         int nodeIndex = data.indexOfNode(node.element, ALL_NODES);
-        for(int i = nodeIndex - 1; i >= 0; i++) {
+        for(int i = nodeIndex - 1; i >= 0; i--) {
             TreeElement<E> beforeNode = data.get(i, ALL_NODES).get();
 
             // our sibling will have the same path length
@@ -140,6 +159,8 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * The number of elements including the node itself in its subtree.
      */
     public int subtreeSize(int index, boolean includeCollapsed) {
+        byte colorsOut = includeCollapsed ? ALL_NODES : VISIBLE_NODES;
+
         // get the subtree size by finding the next element not in the subtree.
         // We could also calculate this by looking at the first child, then
         // traversing across all children until we get to the end of the
@@ -150,13 +171,12 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // find the next node that's not a child to find the delta
         TreeElement<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOf(treeElement);
 
-        // if we don't have a sibling after us, we have no children
+        // if we don't have a sibling after us, we've hit the end of the tree
         if(nextNodeNotInSubtree == null) {
-            return 1;
+            return data.size(colorsOut) - index;
         }
 
-        byte colorsOut = includeCollapsed ? ALL_NODES : VISIBLE_NODES;
-        return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - index + 1;
+        return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - index;
     }
     private TreeElement<E> getTreeElement(int visibleIndex) {
         return data.get(visibleIndex, VISIBLE_NODES).get();
@@ -195,7 +215,85 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     public void listChanged(ListEvent<TreeElement<E>> listChanges) {
-        throw new UnsupportedOperationException();
+
+        updates.beginEvent(true);
+
+        // add the new data, remove the old data, and mark the updated data
+        while(listChanges.next()) {
+            int sourceIndex = listChanges.getIndex();
+            int type = listChanges.getType();
+
+            if(type == ListEvent.INSERT) {
+                int insertIndex = findInsertIndex(sourceIndex);
+                TreeElement<E> treeElement = source.get(sourceIndex);
+                Element<TreeElement<E>> element = data.add(insertIndex, ALL_NODES, VISIBLE_REAL, treeElement, 1);
+                treeElement.element = element;
+                updates.addInsert(insertIndex);
+
+                // populate parent relations
+                treeElement.parent = (TreeElement<E>)findParentByValue(treeElement, true, true);
+
+                // todo: repair siblings
+
+            } else if(type == ListEvent.UPDATE) {
+                Element<TreeElement<E>> element = data.get(sourceIndex, REAL_NODES);
+                int viewIndex = data.indexOfNode(element, VISIBLE_NODES);
+                updates.addUpdate(viewIndex);
+                // todo: repair parents, repair siblings
+
+            } else if(type == ListEvent.DELETE) {
+                Element<TreeElement<E>> element = data.get(sourceIndex, REAL_NODES);
+                int viewIndex = data.indexOfNode(element, VISIBLE_NODES);
+                data.remove(sourceIndex, REAL_NODES, 1);
+                updates.addDelete(viewIndex);
+
+                // todo: remove parents, repair siblings
+            }
+        }
+
+        // we're currently too lazy to rebuild the sibling links properly, so
+        // just brute-force through all of them!
+        rebuildAllSiblingLinks();
+
+        assert(isValid());
+
+        updates.commitEvent();
+    }
+
+    /**
+     * Figure out where to insert the specified value in the data list,
+     * accounting for virtual parents that may already exist and require
+     * skipping.
+     */
+    private int findInsertIndex(int sourceIndex) {
+        TreeElement<E> treeElement = super.source.get(sourceIndex);
+
+        // figure out where the source element immediately before us lies. All
+        // elements between it and us must me our virtual parents
+        int predecessorIndex = sourceIndex > 0 ? data.convertIndexColor(sourceIndex - 1, REAL_NODES, ALL_NODES) : -1;
+        int followerIndex = data.size(REAL_NODES) > sourceIndex ? data.convertIndexColor(sourceIndex, REAL_NODES, ALL_NODES) : data.size(ALL_NODES);
+
+        // walk through all our parent nodes already in the tree
+        int insertIndex = predecessorIndex + 1;
+        skipAllAncestors:
+        while(insertIndex < followerIndex) {
+            TreeElement<E> possibleAncestor = data.get(insertIndex, ALL_NODES).get();
+
+            // this element is definitely not our parent, it's path is too long
+            if(possibleAncestor.pathLength() > treeElement.pathLength() - 1) return insertIndex;
+
+            // make sure the data is consistent with our parent's data
+            List<E> possibleAncestorPath = possibleAncestor.path;
+            for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
+                E possibleAncestorPathElement = possibleAncestorPath.get(d);
+                E pathElement = treeElement.path.get(d);
+                if(comparableComparator.compare(possibleAncestorPathElement, pathElement) != 0) return insertIndex;
+            }
+
+            // we found a parent, skip past it when inserting
+            insertIndex++;
+        }
+        return insertIndex;
     }
 
     /**
@@ -236,7 +334,6 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      */
     public static class TreeElement<E> implements Comparable<TreeElement<E>> {
 
-        private static final Comparator comparableComparator = GlazedLists.comparableComparator();
         private List<E> path;
 
         /** true if this element isn't in the source list */
@@ -257,6 +354,13 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
          */
         private int pathLength() {
             return path.size();
+        }
+
+        /**
+         * @return the path elements for this element, it is an error to modify.
+         */
+        public List path() {
+            return path;
         }
 
         /**
@@ -342,6 +446,6 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         }
 
         // make sure we don't have a trailing sibling
-        if(lastChildSeen != null) assert(lastChildSeen.siblingAfter == null);
+        assert(lastChildSeen == null || lastChildSeen.siblingAfter == null);
     }
 }
