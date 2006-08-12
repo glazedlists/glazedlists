@@ -191,10 +191,85 @@ public class TreeListTest extends TestCase {
         source.remove("AHI");
         assertEquals(0, treeList.size());
 
+        // but only virtual parents are cleaned up
         source.add("ABC");
         source.add("ABCDEF");
         source.remove("ABCDEF");
         assertEquals(3, treeList.size());
+    }
+
+    public void testInsertRealOverVirtualParent() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("ABCDEF");
+        source.add("ABC");
+        assertEquals(6, treeList.size());
+    }
+
+    public void testStructureChangingUpdates() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("A");
+        source.add("DEF");
+        source.add("GJ");
+
+        // swap dramatically, moving to a new subtree
+        source.set(2, "DHI");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "D",
+                "DH",
+                "DHI",
+                "G",
+                "GJ",
+        });
+
+        // now move deeper
+        source.set(2, "DHIJK");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "D",
+                "DH",
+                "DHI",
+                "DHIJ",
+                "DHIJK",
+                "G",
+                "GJ",
+        });
+
+        // now move shallower
+        source.set(2, "DH");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "D",
+                "DH",
+                "G",
+                "GJ",
+        });
+
+        // now move to another subtree after this one
+        source.set(2, "GAB");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "G",
+                "GA",
+                "GAB",
+                "GJ",
+        });
+        
+        // now move to another subtree before this one
+        source.set(2, "ABC");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "G",
+                "GJ",
+        });
     }
 
     public void assertTreeStructure(TreeList<String>treeList, String[] structure) {
