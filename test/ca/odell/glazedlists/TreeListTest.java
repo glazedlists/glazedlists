@@ -272,6 +272,19 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    public void testClear() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("ABC");
+        source.add("DEF");
+        source.add("ABH");
+        source.add("DZK");
+        source.clear();
+        assertEquals(0, treeList.size());
+    }
+
     public void assertTreeStructure(TreeList<String>treeList, String[] structure) {
 
         // convert the list of TreeElements into a list of Strings

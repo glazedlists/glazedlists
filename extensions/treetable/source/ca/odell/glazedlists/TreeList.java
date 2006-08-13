@@ -251,13 +251,14 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 // todo: repair siblings
 
             } else if(type == ListEvent.DELETE) {
-                Element<TreeElement<E>> element = data.get(sourceIndex, REAL_NODES);
-                int viewIndex = data.indexOfNode(element, VISIBLE_NODES);
-                data.remove(sourceIndex, REAL_NODES, 1);
+                TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
+                int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+                data.remove(treeElement.element);
                 updates.addDelete(viewIndex);
+                treeElement.element = null; // null out the element
 
                 // remove the parent if necessary in the next iteration
-                parentsToVerify.add(element.get().parent);
+                parentsToVerify.add(treeElement.parent);
 
                 // todo: repair siblings
             }
@@ -288,6 +289,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             while(parent != null) {
                 // we've reached a real parent, don't delete it!
                 if(!parent.virtual) break;
+                // we've already deleted this parent, we're done
+                if(parent.element == null) break;
+
 
                 // if this is a legit parent, then we'll still have a child element.
                 // if it turns out that that child is also unnecessary, we'll clean
@@ -308,8 +312,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
                 // we need to destroy this parent
                 int viewIndex = data.indexOfNode(parent.element, VISIBLE_NODES);
-                data.remove(index, ALL_NODES, 1);
+                data.remove(parent.element);
                 updates.addDelete(viewIndex);
+                parent.element = null; // null out the element
 
                 // now we might need to delete the parent's parent
                 parent = parent.parent;
