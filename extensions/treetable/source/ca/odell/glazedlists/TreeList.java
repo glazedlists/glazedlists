@@ -238,10 +238,17 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 // todo: handle case where an identical virtual element already exists
 
             } else if(type == ListEvent.UPDATE) {
-                Element<TreeElement<E>> element = data.get(sourceIndex, REAL_NODES);
-                int viewIndex = data.indexOfNode(element, VISIBLE_NODES);
+                TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
+                int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
                 updates.addUpdate(viewIndex);
-                // todo: repair parents, repair siblings
+
+                // shift as necessary, so if the parents are immediately after, they're used
+                shiftParentsAsNecessary(treeElement);
+
+                // add new parents, validate the old ones are still necessary
+                parentsToVerify.add(treeElement.parent);
+                treeElement.parent = findParentByValue(treeElement, true, true);
+                // todo: repair siblings
 
             } else if(type == ListEvent.DELETE) {
                 Element<TreeElement<E>> element = data.get(sourceIndex, REAL_NODES);
@@ -311,6 +318,53 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
+     * Adjust the location of the updated tree element so if it now fits under
+     * it's neighbours parents, those parents are in the correct place.
+     */
+    private void shiftParentsAsNecessary(TreeElement<E> treeElement) {
+        int index = data.indexOfNode(treeElement.element, ALL_NODES);
+
+        // swap forward through misplaced followers until we're in the right place
+        boolean shiftedForward = false;
+        while(index - 1 > 0) {
+            TreeElement<E> predecessor = data.get(index - 1, ALL_NODES).get();
+            // the follower's not virtual
+            if(!predecessor.virtual) break;
+            // no swap is necessary, the element is supposed to be before us
+            if(predecessor.compareTo(treeElement) <= 0) break;
+
+            // swap this with its precessor
+            data.remove(predecessor.element);
+            updates.addDelete(index - 1);
+            Element<TreeElement<E>> element = data.add(index, ALL_NODES, predecessor.element.getColor(), predecessor, 1);
+            predecessor.element = element;
+            updates.addInsert(index);
+            index--;
+            shiftedForward = true;
+        }
+
+        // don't shift backwards if we shifted forwards
+        if(shiftedForward) return;
+
+        // shift backwards through virtual followers until we're in the right place
+        while(index + 1 < data.size(ALL_NODES)) {
+            TreeElement<E> possiblePredecessor = data.get(index + 1, ALL_NODES).get();
+            // the predecessor's not virtual
+            if(!possiblePredecessor.virtual) break;
+            // no swap is necessary, the element is supposed to be after us
+            if(possiblePredecessor.compareTo(treeElement) >= 0) break;
+
+            // swap this with its follower
+            data.remove(possiblePredecessor.element);
+            updates.addDelete(index + 1);
+            Element<TreeElement<E>> element = data.add(index, ALL_NODES, possiblePredecessor.element.getColor(), possiblePredecessor, 1);
+            possiblePredecessor.element = element;
+            updates.addInsert(index);
+            index++;
+        }
+    }
+
+    /**
      * Figure out where to insert the specified value in the data list,
      * accounting for virtual parents that may already exist and require
      * skipping.
@@ -333,12 +387,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             if(possibleAncestor.pathLength() > treeElement.pathLength() - 1) return insertIndex;
 
             // make sure the data is consistent with our parent's data
-            List<E> possibleAncestorPath = possibleAncestor.path;
-            for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
-                E possibleAncestorPathElement = possibleAncestorPath.get(d);
-                E pathElement = treeElement.path.get(d);
-                if(comparableComparator.compare(possibleAncestorPathElement, pathElement) != 0) return insertIndex;
-            }
+            if(!treeElement.isAncestorByValue(possibleAncestor)) return insertIndex;
 
             // we found a parent, skip past it when inserting
             insertIndex++;
@@ -444,6 +493,25 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         public String toString() {
             return path.toString();
         }
+
+        /**
+         * @return true if the path of possibleAncestor is a proper prefix of
+         *      the path of this element.
+         */
+        public boolean isAncestorByValue(TreeElement<E> possibleAncestor) {
+            List<E> possibleAncestorPath = possibleAncestor.path;
+
+            // this is too long a bath to be an ancestor's
+            if(possibleAncestorPath.size() >= path.size()) return false;
+
+            // make sure the whole trail of the ancestor is common with our trail
+            for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
+                E possibleAncestorPathElement = possibleAncestorPath.get(d);
+                E pathElement = path.get(d);
+                if(comparableComparator.compare(possibleAncestorPathElement, pathElement) != 0) return false;
+            }
+            return true;
+        }
     }
 
     public String toString() {
@@ -505,6 +573,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
             // if this is a direct child, validate it
             if(descendent.pathLength() == node.pathLength() + 1) {
+                if(descendent.parent != node) {
+                    throw new IllegalStateException();
+                }
                 assert(descendent.parent == node);
                 assert(lastChildSeen == descendent.siblingBefore);
                 if(lastChildSeen != null) assert(lastChildSeen.siblingAfter == descendent);

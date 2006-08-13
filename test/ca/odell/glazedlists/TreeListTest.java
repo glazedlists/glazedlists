@@ -218,7 +218,7 @@ public class TreeListTest extends TestCase {
         source.add("GJ");
 
         // swap dramatically, moving to a new subtree
-        source.set(2, "DHI");
+        source.set(1, "DHI");
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "D",
@@ -229,7 +229,7 @@ public class TreeListTest extends TestCase {
         });
 
         // now move deeper
-        source.set(2, "DHIJK");
+        source.set(1, "DHIJK");
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "D",
@@ -242,7 +242,7 @@ public class TreeListTest extends TestCase {
         });
 
         // now move shallower
-        source.set(2, "DH");
+        source.set(1, "DH");
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "D",
@@ -252,7 +252,7 @@ public class TreeListTest extends TestCase {
         });
 
         // now move to another subtree after this one
-        source.set(2, "GAB");
+        source.set(1, "GAB");
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "G",
@@ -260,9 +260,9 @@ public class TreeListTest extends TestCase {
                 "GAB",
                 "GJ",
         });
-        
+
         // now move to another subtree before this one
-        source.set(2, "ABC");
+        source.set(1, "ABC");
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
