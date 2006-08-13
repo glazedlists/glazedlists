@@ -38,10 +38,16 @@ class TreeTableCellPanel extends JPanel {
     /** The button to toggle the expanded/collapsed state of the tree node. */
     private JButton expanderButton = new JButton();
 
-    public TreeTableCellPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+    /** A panel containing the spacer component and expander button. */
+    private final JPanel spacerAndExpanderPanel = new JPanel();
 
-        // configure the expander button to only display its icon
+    public TreeTableCellPanel() {
+        super(new BorderLayout());
+
+        spacerAndExpanderPanel.setOpaque(false);
+        spacerAndExpanderPanel.setLayout(new BoxLayout(spacerAndExpanderPanel, BoxLayout.X_AXIS));
+
+        // configure the expander button to display its icon with no margins
         this.expanderButton.setBorder(BorderFactory.createEmptyBorder());
         this.expanderButton.setContentAreaFilled(false);
         this.expanderButton.setFocusable(false);
@@ -57,32 +63,46 @@ class TreeTableCellPanel extends JPanel {
      * <code>depth</code> of the tree node.
      *
      * <p>The <strong>expand/collapse button</strong> is visible if
-     * <code>isLeaf</code> is <tt>false</tt>. The expander button's icon is
-     * either a traditional plus or minus icon depending on the value of
+     * <code>isExpandable</code> is <tt>true</tt>. The expander button's icon
+     * is either a traditional plus or minus icon depending on the value of
      * <code>isExpanded</code>.
      *
      * <p>The <strong>nodeComponent</strong> is displayed unmodified.
      *
      * @param depth the depth of the tree node in the hierarchy
+     * @param isExpandable <tt>true</tt> if the tree node can be expanded/collapsed;
+     *      <tt>false</tt> otherwise
      * @param isExpanded <tt>true</tt> if the node is expanded and its children are thus visible;
-     *      <tt>false</tt> if it is collapsed and its children are thus hidden
-     * @param isLeaf <tt>true</tt> if the tree node 
-     * @param nodeComponent
+     *      <tt>false</tt> if it is collapsed and its children are thus hidden. This argument
+     *      only has meaning when <code>isExpandable</code> is true; otherwise it is ignored.
+     * @param nodeComponent a Component which displays the data of the tree node
      */
-    public void configure(int depth, boolean isExpanded, boolean isLeaf, Component nodeComponent) {
-        expanderButton.setVisible(!isLeaf);
+    public void configure(int depth, boolean isExpandable, boolean isExpanded, Component nodeComponent) {
+        // the expander button is only visible when the node can be expanded/collapsed
+        expanderButton.setVisible(isExpandable);
 
-        if (!isLeaf)
+        // if the tree node is expandable, pick an icon for the expander button
+        if (isExpandable)
             expanderButton.setIcon(isExpanded ? TreeTableSupport.getExpandedIcon() : TreeTableSupport.getCollapsedIcon());
 
+        // synchronize the background color of this entire panel with nodeComponent
         setBackground(nodeComponent.getBackground());
 
+        // configure the spacer/expander button panel with the new spacer
+        spacerAndExpanderPanel.removeAll();
+        spacerAndExpanderPanel.add(getSpacerComponent(depth));
+        spacerAndExpanderPanel.add(expanderButton);
+
+        // configure this panel with the updated space/expander button and the supplied nodeComponent
+        // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
         removeAll();
-        add(getSpacerComponent(depth));
-        add(expanderButton);
-        add(nodeComponent);
+        add(spacerAndExpanderPanel, BorderLayout.WEST);
+        add(nodeComponent, BorderLayout.CENTER);
     }
 
+    /**
+     * Return a spacer component and update the spacer component cache as needed.
+     */
     private Component getSpacerComponent(int depth) {
         if (depth >= spacerComponentsCache.size()) {
             for (int i = spacerComponentsCache.size(); i <= depth; i++) {
