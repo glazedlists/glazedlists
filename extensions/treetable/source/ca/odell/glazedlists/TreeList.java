@@ -231,8 +231,6 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 treeElement.element = element;
                 updates.addInsert(insertIndex);
 
-                System.out.println("inserted: " + treeElement);
-
                 // populate parent relations
                 treeElement.parent = findParentByValue(treeElement, true, true);
 
@@ -266,8 +264,6 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         rebuildAllSiblingLinks();
 
         assert(isValid());
-
-        System.out.println("tree now resembles:\n" + this);
 
         updates.commitEvent();
     }
