@@ -1,21 +1,20 @@
 package com.publicobject.amazonbrowser;
 
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The ItemTableFormat specifies how an item is displayed in a table.
  *
  * @author James Lemieux
  */
-public class ItemTableFormat implements WritableTableFormat, AdvancedTableFormat {
-
-    private static final Comparator<ListPrice> PRICE_COMPARATOR = new PriceComparator();
-
+public class ItemTableFormat implements WritableTableFormat<TreeList.TreeElement<Item>>, AdvancedTableFormat<TreeList.TreeElement<Item>> {
     public int getColumnCount() {
         return 6;
     }
@@ -41,24 +40,22 @@ public class ItemTableFormat implements WritableTableFormat, AdvancedTableFormat
     }
 
     public Comparator getColumnComparator(int column) {
-        switch (column) {
-            case 1: return PRICE_COMPARATOR;
-            default: return GlazedLists.comparableComparator();
-        }
+        return GlazedLists.comparableComparator();
     }
 
-    public boolean isEditable(Object baseObject, int column) {
+    public boolean isEditable(TreeList.TreeElement<Item> baseObject, int column) {
         return false;
     }
 
-    public Object setColumnValue(Object baseObject, Object editedValue, int column) {
+    public TreeList.TreeElement<Item> setColumnValue(TreeList.TreeElement<Item> baseObject, Object editedValue, int column) {
         return null;
     }
 
-    public Object getColumnValue(Object baseObject, int column) {
+    public Object getColumnValue(TreeList.TreeElement<Item> baseObject, int column) {
         if (baseObject == null) return null;
 
-        final Item item = (Item) baseObject;
+        final List<Item> treePath = baseObject.path();
+        final Item item = treePath.get(treePath.size()-1);
 
         switch (column) {
             case 0: return item.getASIN();
@@ -68,15 +65,6 @@ public class ItemTableFormat implements WritableTableFormat, AdvancedTableFormat
             case 4: return item.getItemAttributes().getDirector();
             case 5: return item.getItemAttributes().getReleaseDate();
             default: return null;
-        }
-    }
-
-    private static final class PriceComparator implements Comparator<ListPrice> {
-        public int compare(ListPrice listPrice1, ListPrice listPrice2) {
-            final int price1 = listPrice1 == null ? -1 : listPrice1.getAmount();
-            final int price2 = listPrice2 == null ? -1 : listPrice2.getAmount();
-
-            return price1 - price2;
         }
     }
 }

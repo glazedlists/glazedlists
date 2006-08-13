@@ -1,11 +1,13 @@
 package com.publicobject.amazonbrowser;
 
+import ca.odell.glazedlists.GlazedLists;
+
 /**
  * Models a price on Amazon.
  *
  * @author James Lemieux
  */
-public class ListPrice {
+public class ListPrice implements Comparable<ListPrice> {
 
     private int amount;
     private String currencyCode;
@@ -29,6 +31,14 @@ public class ListPrice {
     public String getFormattedPrice() { return formattedPrice; }
     public void setFormattedPrice(String formattedPrice) { this.formattedPrice = formattedPrice; }
 
+    /**
+     * ListPrice are ordered by their amount by default.
+     */
+    public int compareTo(ListPrice o) {
+        return GlazedLists.comparableComparator().compare(getAmount(), o.getAmount());
+    }
+
+    /** inheritDoc */
     public String toString() {
         return formattedPrice;
     }

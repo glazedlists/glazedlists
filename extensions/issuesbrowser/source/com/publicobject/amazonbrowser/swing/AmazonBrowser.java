@@ -3,10 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.amazonbrowser.swing;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
@@ -39,7 +36,7 @@ public class AmazonBrowser implements Runnable {
     private EventList<Item> itemEventList = new BasicEventList<Item>();
 
     /** the TableModel backing the treetable of items */
-    private EventTableModel<Item> itemTableModel;
+    private EventTableModel<TreeList.TreeElement<Item>> itemTableModel;
 
     /** loads items as requested */
     private ItemLoader itemLoader;
@@ -121,16 +118,18 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(progressBar,                  new GridBagConstraints(3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
+        final TreeList<Item> treeList = new TreeList<Item>(itemsSortedList, new ItemTreeFormat());
+
         // create a JTable to display the items
-        final TableFormat<Item> itemTableFormat = new ItemTableFormat();
-        itemTableModel = new EventTableModel<Item>(itemsSortedList, itemTableFormat);
+        final TableFormat<TreeList.TreeElement<Item>> itemTableFormat = new ItemTableFormat();
+        itemTableModel = new EventTableModel<TreeList.TreeElement<Item>>(treeList, itemTableFormat);
         final JTable itemTable = new JTable(itemTableModel);
 
         // add sorting to the table
         new TableComparatorChooser<Item>(itemTable, itemsSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
 
         // add a hierarchical column to the table
-        final TreeList<Item> treeList = new TreeList<Item>(itemEventList, new ItemTreeFormat());
+        ListConsistencyListener.install(treeList);
         TreeTableSupport.install(itemTable, treeList, 2);
 
         // build a panel for the search panel and results table

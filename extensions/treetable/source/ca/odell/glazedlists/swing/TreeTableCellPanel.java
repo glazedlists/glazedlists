@@ -10,9 +10,10 @@ import java.util.ArrayList;
 
 /**
  * This panel exists to relieve the burdens of creating a
- * {@link javax.swing.table.TableCellRenderer} that is appropriate for use in a
+ * {@link javax.swing.table.TableCellRenderer} or
+ * {@link javax.swing.table.TableCellEditor} that is appropriate for use in a
  * hierarchy column of a tree table. Specifically, it combines three different
- * components to product a single panel. Those components are:
+ * components to produce a single panel. Those components are:
  *
  * <ul>
  *   <li>A spacer component whose width reflects the depth of the tree node being rendered.
@@ -22,6 +23,10 @@ import java.util.ArrayList;
  *       expanded or collapsed state of the row.
  *   <li>A user supplied component representing the actual data for the tree node.
  * </ul>
+ *
+ * The components are arranged on the panel like this:
+ *
+ * <p><strong>[spacer component] [expand/collapse button] [nodeComponent]</strong>
  *
  * @author James Lemieux
  */
@@ -59,8 +64,9 @@ class TreeTableCellPanel extends JPanel {
      * <p>The <strong>nodeComponent</strong> is displayed unmodified.
      *
      * @param depth the depth of the tree node in the hierarchy
-     * @param isExpanded <tt>true</tt> if the node is expanded and its children are thus visible; <tt>false</tt> if it is collapsed and the 
-     * @param isLeaf
+     * @param isExpanded <tt>true</tt> if the node is expanded and its children are thus visible;
+     *      <tt>false</tt> if it is collapsed and its children are thus hidden
+     * @param isLeaf <tt>true</tt> if the tree node 
      * @param nodeComponent
      */
     public void configure(int depth, boolean isExpanded, boolean isLeaf, Component nodeComponent) {
@@ -80,7 +86,8 @@ class TreeTableCellPanel extends JPanel {
     private Component getSpacerComponent(int depth) {
         if (depth >= spacerComponentsCache.size()) {
             for (int i = spacerComponentsCache.size(); i <= depth; i++) {
-                spacerComponentsCache.add(Box.createHorizontalStrut(TreeTableSupport.getExpandedIcon().getIconWidth() * i));
+                final Component spacer = Box.createHorizontalStrut(TreeTableSupport.getExpandedIcon().getIconWidth() * i);
+                spacerComponentsCache.add(spacer);
             }
         }
 

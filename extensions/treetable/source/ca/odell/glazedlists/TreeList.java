@@ -430,7 +430,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 if(result != 0) return result;
             }
 
-            // and path lenght second
+            // and path length second
             return myPathLength - otherPathLength;
         }
 
