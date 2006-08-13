@@ -53,7 +53,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // populate parent links
         for(int i = 0; i < super.source.size(); i++) {
             TreeElement<E> node = super.source.get(i);
-            node.parent = (TreeElement<E>)findParentByValue(node, true, false);
+            node.parent = findParentByValue(node, true, false);
         }
 
         // prepare sibling links
@@ -151,7 +151,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     public int depth(int index) {
-        return getTreeElement(index).path.size();
+        return getTreeElement(index).path.size()-1;
     }
 
 
@@ -231,8 +231,10 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 treeElement.element = element;
                 updates.addInsert(insertIndex);
 
+                System.out.println("inserted: " + treeElement);
+
                 // populate parent relations
-                treeElement.parent = (TreeElement<E>)findParentByValue(treeElement, true, true);
+                treeElement.parent = findParentByValue(treeElement, true, true);
 
                 // todo: repair siblings
                 // todo: handle case where an identical virtual element already exists
@@ -264,6 +266,8 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         rebuildAllSiblingLinks();
 
         assert(isValid());
+
+        System.out.println("tree now resembles:\n" + this);
 
         updates.commitEvent();
     }
@@ -446,6 +450,20 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         }
     }
 
+    public String toString() {
+        final StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < size(); i++) {
+            final int depth = depth(i);
+            final TreeElement<E> treeElement = get(i);
+
+            for (int j = 0; j < depth; j++)
+                buffer.append("\t");
+
+            buffer.append(treeElement).append("\n");
+        }
+
+        return buffer.toString();
+    }
 
 
     /**

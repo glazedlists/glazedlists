@@ -1,12 +1,16 @@
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.amazonbrowser.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.TreeFormat;
-import ca.odell.glazedlists.swing.EventTreeTableModel;
+import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
+import ca.odell.glazedlists.swing.TreeTableSupport;
 import com.publicobject.amazonbrowser.Item;
 import com.publicobject.amazonbrowser.ItemLoader;
 import com.publicobject.amazonbrowser.ItemTableFormat;
@@ -20,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.net.URL;
 
 /**
+ * An AmazonBrowser is a program for searching and viewing the products amazon.com.
  *
  * @author James Lemieux
  */
@@ -34,7 +39,7 @@ public class AmazonBrowser implements Runnable {
     private EventList<Item> itemEventList = new BasicEventList<Item>();
 
     /** the TableModel backing the treetable of items */
-    private EventTreeTableModel itemTreeTableModel;
+    private EventTableModel<Item> itemTableModel;
 
     /** loads items as requested */
     private ItemLoader itemLoader;
@@ -116,13 +121,19 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(progressBar,                  new GridBagConstraints(3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        final TableFormat itemTableFormat = new ItemTableFormat();
-        final TreeFormat itemTreeFormat = new ItemTreeFormat();
-        itemTreeTableModel = new EventTreeTableModel(itemsSortedList, itemTableFormat, itemTreeFormat);
-        final JTable itemTable = new JTable(itemTreeTableModel);
+        // create a JTable to display the items
+        final TableFormat<Item> itemTableFormat = new ItemTableFormat();
+        itemTableModel = new EventTableModel<Item>(itemsSortedList, itemTableFormat);
+        final JTable itemTable = new JTable(itemTableModel);
 
+        // add sorting to the table
         new TableComparatorChooser<Item>(itemTable, itemsSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
 
+        // add a hierarchical column to the table
+        final TreeList<Item> treeList = new TreeList<Item>(itemEventList, new ItemTreeFormat());
+        TreeTableSupport.install(itemTable, treeList, 2);
+
+        // build a panel for the search panel and results table
         final JPanel panel = new JPanel(new BorderLayout());
         panel.add(BorderLayout.NORTH, searchPanel);
         panel.add(BorderLayout.CENTER, new JScrollPane(itemTable));
@@ -153,13 +164,15 @@ public class AmazonBrowser implements Runnable {
         }
     }
 
+    /**
+     * Notified when the user wishes to begin a new Search of Amazon Items.
+     */
     private class StartNewSearchActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             final String keywords = searchField.getText();
 
-            if (keywords.length() == 0) return;
-
-            itemLoader.setKeywords(keywords);
+            if (keywords.length() > 0)
+                itemLoader.setKeywords(keywords);
         }
     }
 }
