@@ -11,10 +11,10 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * This renderer removes some of the burder of producing an appropriate looking
+ * This renderer removes some of the burden of producing an appropriate looking
  * component for the hierarchy column of a tree table. Specifically, it takes
  * care of adding components to a panel that render a node location within the
- * tree, but leave the rendering of the <strong>data</strong> of the node up to
+ * tree, but leaves the rendering of the <strong>data</strong> of the node to
  * a delegate {@link TableCellRenderer} that is supplied in the constructor.
  *
  * <p>For example, in the following tree representation, the spacing and +/-
