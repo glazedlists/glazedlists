@@ -36,13 +36,20 @@ class TreeTableCellPanel extends JPanel {
     private final List<Component> spacerComponentsCache = new ArrayList<Component>();
 
     /** The button to toggle the expanded/collapsed state of the tree node. */
-    private JButton expanderButton = new JButton();
+    public JButton expanderButton = new JButton();
 
     /** A panel containing the spacer component and expander button. */
     private final JPanel spacerAndExpanderPanel = new JPanel();
 
+    /** The last installed node component, if any. */
+    public Component spaceComponent;
+
+    /** The last installed node component, if any. */
+    private Component nodeComponent;
+
     public TreeTableCellPanel() {
         super(new BorderLayout());
+        setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
 
         spacerAndExpanderPanel.setOpaque(false);
         spacerAndExpanderPanel.setLayout(new BoxLayout(spacerAndExpanderPanel, BoxLayout.X_AXIS));
@@ -98,6 +105,32 @@ class TreeTableCellPanel extends JPanel {
         removeAll();
         add(spacerAndExpanderPanel, BorderLayout.WEST);
         add(nodeComponent, BorderLayout.CENTER);
+
+        spaceComponent = getSpacerComponent(depth);
+        this.nodeComponent = nodeComponent;
+    }
+
+    /**
+     * Return the {@link Component} that displays the data of the tree node.
+     */
+    public JButton getNodeComponent() {
+        return expanderButton;
+    }
+
+    /**
+     * Returns <tt>true</tt> if <code>p</code> occurs within the bounds of the
+     * expander button; <tt>false</tt> otherwise.
+     */
+    public boolean isPointOverExpanderButton(Point p) {
+        return expanderButton.isVisible() && SwingUtilities.getDeepestComponentAt(spacerAndExpanderPanel, p.x, p.y) == expanderButton;
+    }
+
+    /**
+     * Returns <tt>true</tt> if <code>p</code> occurs within the bounds of the
+     * node component; <tt>false</tt> otherwise.
+     */
+    public boolean isPointOverNodeComponent(Point p) {
+        return nodeComponent != null && nodeComponent.isVisible() && nodeComponent.getBounds().contains(p);
     }
 
     /**

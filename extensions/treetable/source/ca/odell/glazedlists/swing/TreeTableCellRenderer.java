@@ -76,8 +76,8 @@ public class TreeTableCellRenderer implements TableCellRenderer {
 
         // extract information about the tree node from the TreeList
         final int depth = treeList.depth(row);
-        final boolean isExpanded = true; // treeList.isExpanded(row);
-        final boolean isExpandable = true; // treeList.isExpandable(row);
+        final boolean isExpanded = treeList.isExpanded(row);
+        final boolean isExpandable = treeList.isExpandable(row);
 
         // ask our special component to configure itself for this tree node
         component.configure(depth, isExpandable, isExpanded, c);

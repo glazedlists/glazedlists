@@ -24,6 +24,7 @@ public final class TreeTableSupport {
     private final TreeList treeList;
     private final int modelColumnIndex;
     private final TreeTableCellRenderer treeTableCellRenderer;
+    private final TreeTableCellEditor treeTableCellEditor;
 
     private TreeTableSupport(JTable table, TreeList treeList, int modelColumnIndex) {
         this.table = table;
@@ -32,10 +33,12 @@ public final class TreeTableSupport {
 
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
         final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
-        final TableCellRenderer renderer = viewColumn.getCellRenderer();
 
-        this.treeTableCellRenderer = new TreeTableCellRenderer(renderer, treeList);
+        this.treeTableCellRenderer = new TreeTableCellRenderer(viewColumn.getCellRenderer(), treeList);
         viewColumn.setCellRenderer(treeTableCellRenderer);
+
+        this.treeTableCellEditor = new TreeTableCellEditor(viewColumn.getCellEditor(), treeList);
+        viewColumn.setCellEditor(treeTableCellEditor);
     }
 
     /**

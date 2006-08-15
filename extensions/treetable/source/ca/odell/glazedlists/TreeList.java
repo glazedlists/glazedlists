@@ -207,11 +207,22 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         return data.get(index, VISIBLE_NODES).get();
     }
 
+    public boolean isExpandable(int index) {
+        return true;
+//        throw new UnsupportedOperationException();
+    }
+
+    private boolean dummyExpandVar_REMOVE_ME = true;
+    public boolean isExpanded(int index) {
+        return dummyExpandVar_REMOVE_ME;
+//        throw new UnsupportedOperationException();
+    }
     /**
      * @param expanded true to expand the node, false to collapse it.
      */
-    public int setExpanded(int index, boolean expanded) {
-        throw new UnsupportedOperationException();
+    public void setExpanded(int index, boolean expanded) {
+        this.dummyExpandVar_REMOVE_ME = expanded;
+//        throw new UnsupportedOperationException();
     }
 
     public void listChanged(ListEvent<TreeElement<E>> listChanges) {

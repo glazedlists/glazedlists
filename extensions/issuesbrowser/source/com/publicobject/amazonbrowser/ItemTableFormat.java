@@ -44,7 +44,7 @@ public class ItemTableFormat implements WritableTableFormat<TreeList.TreeElement
     }
 
     public boolean isEditable(TreeList.TreeElement<Item> baseObject, int column) {
-        return false;
+        return column == 2;
     }
 
     public TreeList.TreeElement<Item> setColumnValue(TreeList.TreeElement<Item> baseObject, Object editedValue, int column) {
