@@ -6,6 +6,7 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.ThreadRecorderEventList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.awt.*;
@@ -62,7 +63,7 @@ public class EventListModelTest extends SwingTestCase {
         Thread.sleep(200);
 
         // create a list whose get() method pauses for 50 ms before returning the value
-        final EventList<Integer> delayList = GlazedListsTests.delayList(atomicList, 50);
+        final EventList<Integer> delayList = new DelayList<Integer>(atomicList, 50);
 
         // the test: creating the EventListModel should be atomic and pause the writerThread while it initializes its internal state
         new EventListModel<Integer>(delayList);

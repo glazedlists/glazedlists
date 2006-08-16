@@ -7,7 +7,6 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.DelayList;
 
 import java.util.*;
 import java.io.*;
@@ -97,14 +96,6 @@ public class GlazedListsTests {
             if(matcher.matches(element)) result.add(element);
         }
         return result;
-    }
-
-    /**
-     * Returns an EventList which delays each read and write operation by
-     * the given <code>delay</code> (in milliseconds).
-     */
-    public static <E> EventList<E> delayList(EventList<E> source, long delay) {
-        return new DelayList<E>(source, delay);
     }
 
     /**

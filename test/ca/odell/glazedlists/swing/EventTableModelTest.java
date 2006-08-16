@@ -96,7 +96,7 @@ public class EventTableModelTest extends SwingTestCase {
         Thread.sleep(200);
 
         // create a list whose get() method pauses for 50 ms before returning the value
-        final EventList<Integer> delayList = GlazedListsTests.delayList(atomicList, 50);
+        final EventList<Integer> delayList = new DelayList<Integer>(atomicList, 50);
 
         // the test: creating the EventTableModel should be atomic and pause the writerThread while it initializes its internal state
         new EventTableModel(delayList, GlazedLists.tableFormat(new String[0], new String[0]));
