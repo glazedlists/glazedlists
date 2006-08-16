@@ -6,11 +6,10 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 import junit.framework.TestCase;
 
 import java.util.List;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
 
-import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 /**
  * Make sure we can encode to bytes and back consistently.

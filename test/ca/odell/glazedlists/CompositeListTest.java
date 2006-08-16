@@ -11,6 +11,8 @@ import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * A CompositeListTest tests the functionality of the CompositeList.
@@ -123,7 +125,7 @@ public class CompositeListTest extends TestCase {
     public void testRemoveByReference() {
         CompositeList<String> fastFood = new CompositeList<String>();
         ListConsistencyListener.install(fastFood);
-        
+
         EventList<String> wendys = fastFood.createMemberList();
         EventList<String> mcDonalds = fastFood.createMemberList();
         EventList<String> tacoBell = fastFood.createMemberList();
@@ -206,7 +208,7 @@ public class CompositeListTest extends TestCase {
     public void testPublisherAndLockConstructor() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
-        
+
         final EventList<Object> alpha = new BasicEventList<Object>(sharedPublisher, sharedLock);
         final EventList<Object> beta = new BasicEventList<Object>(sharedPublisher, sharedLock);
 
@@ -220,12 +222,12 @@ public class CompositeListTest extends TestCase {
         assertSame(sharedLock, beta.getReadWriteLock());
         assertSame(sharedLock, gamma.getReadWriteLock());
         assertSame(sharedLock, uber.getReadWriteLock());
-        
+
         assertSame(sharedPublisher, alpha.getPublisher());
         assertSame(sharedPublisher, beta.getPublisher());
         assertSame(sharedPublisher, gamma.getPublisher());
         assertSame(sharedPublisher, uber.getPublisher());
-        
+
     }
 
     /**
@@ -235,8 +237,8 @@ public class CompositeListTest extends TestCase {
     public void testAddMemberList() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
-        
-        final CompositeList<Object> uber = new CompositeList<Object>(sharedPublisher, sharedLock);        
+
+        final CompositeList<Object> uber = new CompositeList<Object>(sharedPublisher, sharedLock);
         final EventList<Object> alpha = new BasicEventList<Object>();
         final EventList<Object> beta = new BasicEventList<Object>(sharedLock);
         final EventList<Object> gamma = new BasicEventList<Object>(sharedPublisher, sharedLock);
@@ -245,27 +247,27 @@ public class CompositeListTest extends TestCase {
             fail("Expected IllegalArgumentException for addMemberList");
         } catch (IllegalArgumentException ex) {
             // expected
-        }        
+        }
         try {
             uber.addMemberList(beta);
             fail("Expected IllegalArgumentException for addMemberList");
         } catch (IllegalArgumentException ex) {
             // expected
-        }        
+        }
         uber.addMemberList(gamma);
         assertSame(sharedLock, gamma.getReadWriteLock());
         assertSame(sharedLock, uber.getReadWriteLock());
         assertSame(sharedPublisher, gamma.getPublisher());
-        assertSame(sharedPublisher, uber.getPublisher());        
+        assertSame(sharedPublisher, uber.getPublisher());
     }
-    
+
     /**
      * Tests that after disposing {@link CompositeList}, all installed ListEventListeners
      * have been removed, e.g. changes to member lists are ignored.
      */
     public void testDispose() {
         final CompositeList<String> composite = new CompositeList<String>();
-        
+
         final EventList<String> memberListOne = composite.createMemberList();
         memberListOne.addAll(GlazedListsTests.stringToList("ABC"));
         final EventList<String> memberListTwo = composite.createMemberList();

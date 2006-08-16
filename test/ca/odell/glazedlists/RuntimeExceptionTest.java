@@ -7,6 +7,7 @@ package ca.odell.glazedlists;
 import junit.framework.*;
 // the Glazed Lists' change objects
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * Validates that {@link EventList}s can recover from {@link RuntimeException}s.
@@ -17,7 +18,7 @@ public class RuntimeExceptionTest extends TestCase {
 
     /** the exception fired by the event lists */
     private RuntimeException luckyException = new RuntimeException();
-    
+
     /** list to fire events */
     private BasicEventList source = new BasicEventList();
 
@@ -33,13 +34,13 @@ public class RuntimeExceptionTest extends TestCase {
     public void testExceptionRethrown() {
         source.addListEventListener(exceptionThrower);
         listConsistencyListener = ListConsistencyListener.install(source);
-        
+
         // make sure the plumbing is working
         source.add("Dan");
         source.add("Frank");
         source.add("Larry");
         listConsistencyListener.assertConsistent();
-        
+
         // throw an exception, make sure its handled gracefully
         exceptionThrower.setNextException(luckyException);
         try {
@@ -50,7 +51,7 @@ public class RuntimeExceptionTest extends TestCase {
             listConsistencyListener.assertConsistent();
         }
     }
-    
+
 
     /**
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
@@ -58,13 +59,13 @@ public class RuntimeExceptionTest extends TestCase {
     public void testExceptionRethrownListenerSecond() {
         listConsistencyListener = ListConsistencyListener.install(source);
         source.addListEventListener(exceptionThrower);
-        
+
         // make sure the plumbing is working
         source.add("Matt");
         source.add("Kevin");
         source.add("Julie");
         listConsistencyListener.assertConsistent();
-        
+
         // throw an exception, make sure its handled gracefully
         exceptionThrower.setNextException(luckyException);
         try {
@@ -75,7 +76,7 @@ public class RuntimeExceptionTest extends TestCase {
             listConsistencyListener.assertConsistent();
         }
     }
-    
+
     /**
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
      */
@@ -84,13 +85,13 @@ public class RuntimeExceptionTest extends TestCase {
         listConsistencyListener = ListConsistencyListener.install(source);
         ExceptionThrower exceptionThrower2 = new ExceptionThrower();
         source.addListEventListener(exceptionThrower2);
-        
+
         // make sure the plumbing is working
         source.add("Leanne");
         source.add("Bev");
         source.add("Jesse");
         listConsistencyListener.assertConsistent();
-        
+
         // throw an exception, make sure its handled gracefully
         exceptionThrower.setNextException(luckyException);
         exceptionThrower2.setNextException(new NullPointerException());

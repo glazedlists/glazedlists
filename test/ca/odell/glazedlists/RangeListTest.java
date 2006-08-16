@@ -7,6 +7,9 @@ import junit.framework.TestCase;
 
 import java.util.Collections;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 /**
  * Test {@link RangeList}.
  *

@@ -1,12 +1,13 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.impl.testing;
 
 // Java collections are used for underlying data storage
 import java.util.*;
 // the Glazed Lists
 import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.EventList;
 // for being a JUnit test case
 import junit.framework.*;
 

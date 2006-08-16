@@ -11,6 +11,8 @@ import java.util.*;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * Verifies that EventList matches the List API.

@@ -4,6 +4,7 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.beans.JavaBeanEventListConnector;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
 
 import javax.swing.*;

@@ -9,6 +9,8 @@ import junit.framework.*;
 import java.util.*;
 
 import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * A UniqueListTest tests the functionality of the UniqueList

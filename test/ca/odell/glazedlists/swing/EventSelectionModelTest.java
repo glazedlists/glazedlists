@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matchers;
 
 import javax.swing.event.ListSelectionEvent;

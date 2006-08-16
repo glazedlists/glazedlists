@@ -1,6 +1,7 @@
 package ca.odell.glazedlists.impl;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
 
 import java.util.*;

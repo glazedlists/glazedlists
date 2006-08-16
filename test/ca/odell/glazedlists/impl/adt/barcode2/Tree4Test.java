@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 import java.util.*;
 
-import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

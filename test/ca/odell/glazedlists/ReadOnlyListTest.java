@@ -8,6 +8,8 @@ import junit.framework.*;
 // Java collections are used for underlying data storage
 import java.util.*;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+
 /**
  * A ReadOnlyListTest tests the functionality of the ReadOnlyList
  *
@@ -30,7 +32,7 @@ public class ReadOnlyListTest extends TestCase {
         readOnlyData.add("A");
         readOnlyData.add("B");
         readOnlyData.add("C");
-        
+
         // our list is that data, but read only
         readOnly = GlazedLists.readOnlyList(readOnlyData);
     }

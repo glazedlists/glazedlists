@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.

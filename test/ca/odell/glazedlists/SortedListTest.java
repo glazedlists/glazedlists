@@ -8,6 +8,9 @@ import junit.framework.*;
 // standard collections
 import java.util.*;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 /**
  * This test verifies that the SortedList works.
  *

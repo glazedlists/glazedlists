@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 import java.util.List;
 import java.util.ArrayList;
 
-import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 /**
  * Validate that the {@link ca.odell.glazedlists.impl.IndexSnapshot} class works as expected.

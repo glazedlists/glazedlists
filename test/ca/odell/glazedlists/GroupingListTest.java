@@ -4,6 +4,9 @@ import junit.framework.TestCase;
 
 import java.util.*;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 public class GroupingListTest extends TestCase {
 
     public void testConstruct() {

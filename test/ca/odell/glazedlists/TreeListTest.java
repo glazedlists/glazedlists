@@ -5,6 +5,9 @@ import junit.framework.TestCase;
 import java.util.*;
 import java.lang.reflect.Method;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 /**
  * Verifies that EventList matches the List API.
  *

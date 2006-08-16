@@ -9,7 +9,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.ListConsistencyListener;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires

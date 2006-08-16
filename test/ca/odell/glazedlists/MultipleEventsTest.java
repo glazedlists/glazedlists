@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import junit.framework.*;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * Tests to verify that for each list change, only one event is fired.
@@ -26,7 +27,7 @@ public class MultipleEventsTest extends TestCase {
         source.add(new int[] { 0 });
         source.add(new int[] { 1 });
         source.add(new int[] { 0 });
-        
+
         // prepare a filter list
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         matcherEditor.setFilter(0, 1);
@@ -37,7 +38,7 @@ public class MultipleEventsTest extends TestCase {
 
         // clear the filter list
         filterList.clear();
-        
+
         // verify that only one event has occured
         assertEquals(1, counter.getEventCount());
     }
@@ -53,16 +54,16 @@ public class MultipleEventsTest extends TestCase {
         source.add("B");
         source.add("C");
         source.add("D");
-        
+
         // prepare a sub list
         EventList<String> subList = (EventList<String>)source.subList(1, 3);
-        
+
         // listen to changes on the sub list
         ListConsistencyListener<String> counter = ListConsistencyListener.install(subList);
 
         // clear the sub list
         subList.clear();
-        
+
         // verify that only one event has occured
         assertEquals(1, counter.getEventCount());
     }
@@ -78,16 +79,16 @@ public class MultipleEventsTest extends TestCase {
         source.add("B");
         source.add("B");
         source.add("C");
-        
+
         // prepare a unique list
         EventList<String> uniqueList = new UniqueList<String>(source);
-        
+
         // listen to changes on the unique list
         ListConsistencyListener<String> counter = ListConsistencyListener.install(uniqueList);
 
         // clear the unique list
         uniqueList.clear();
-        
+
         // verify that only one event has occured
         assertEquals(1, counter.getEventCount());
     }

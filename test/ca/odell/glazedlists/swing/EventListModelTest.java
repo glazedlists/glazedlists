@@ -6,7 +6,7 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.ThreadRecorderEventList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.awt.*;
 

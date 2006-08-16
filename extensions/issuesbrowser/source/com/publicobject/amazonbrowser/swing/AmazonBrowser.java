@@ -4,6 +4,7 @@
 package com.publicobject.amazonbrowser.swing;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;

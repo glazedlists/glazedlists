@@ -6,7 +6,7 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.ListConsistencyListener;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import junit.framework.TestCase;

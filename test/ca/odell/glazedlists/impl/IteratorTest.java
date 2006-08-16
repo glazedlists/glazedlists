@@ -7,6 +7,7 @@ package ca.odell.glazedlists.impl;
 import junit.framework.*;
 // the core Glazed Lists package
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 // standard collections
 import java.util.*;
 

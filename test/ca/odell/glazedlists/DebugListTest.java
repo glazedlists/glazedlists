@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 public class DebugListTest extends TestCase {
 
     private static final Pattern BAD_READER_THREAD_PATTERN = Pattern.compile("DebugList detected an unexpected Thread (.*) attempting to perform a read operation");

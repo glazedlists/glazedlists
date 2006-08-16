@@ -8,6 +8,8 @@ import junit.framework.*;
 // standard collections
 import java.util.*;
 
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 /**
  * Verifies that {@link ListSelection} works as expected.
  *
@@ -612,7 +614,7 @@ public class ListSelectionTest extends TestCase {
         assertEquals(2, listSelection.getMinSelectionIndex());
         assertEquals(5, listSelection.getMaxSelectionIndex());
     }
-    
+
     public void testTogglingViewAddingAndRemoving(){
 
         source.add(new Integer(0));
@@ -621,7 +623,7 @@ public class ListSelectionTest extends TestCase {
         source.add(new Integer(3));
         source.add(new Integer(4));
         source.add(new Integer(5));
-        
+
         EventList selectedToggler = listSelection.getTogglingSelected();
         EventList deselectedToggler = listSelection.getTogglingDeselected();
         assertEquals(0, selectedToggler.size());
@@ -638,7 +640,7 @@ public class ListSelectionTest extends TestCase {
         assertEquals(0, selectedToggler.size());
         assertEquals(6, source.size());
         assertEquals(6, deselectedToggler.size());
-        
+
 
         try {
             listSelection.getTogglingSelected().remove(6);
@@ -648,9 +650,9 @@ public class ListSelectionTest extends TestCase {
             listSelection.getTogglingDeselected().remove(6);
             fail("IndexOutOfBoundsException not thrown when removing beyond end");
         } catch(IndexOutOfBoundsException e) {}
-        
+
     }
-    
+
     public void testAddingItemNotInSourceToTogglingView(){
         try {
             listSelection.getTogglingSelected().add(new Integer(6));
@@ -672,7 +674,7 @@ public class ListSelectionTest extends TestCase {
             fail("IllegalArgumentException not thrown when item not in source list added");
         } catch(IllegalArgumentException e) {}
     }
-    
+
     public void testRemovingItemNotInSourceFromTogglingView() {
         EventList togglingSelected = listSelection.getTogglingSelected();
         EventList togglingDeselected = listSelection.getTogglingDeselected();
@@ -684,7 +686,7 @@ public class ListSelectionTest extends TestCase {
         assertFalse(togglingSelected.removeAll(ints));
         assertFalse(togglingDeselected.removeAll(ints));
     }
-    
+
     public void testTogglingViewBulkOperations(){
         List<Integer> ints = new ArrayList<Integer>();
         ints.add(0);

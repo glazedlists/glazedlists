@@ -6,6 +6,8 @@ package ca.odell.glazedlists.event;
 import junit.framework.TestCase;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 import java.util.List;
 import java.util.ArrayList;

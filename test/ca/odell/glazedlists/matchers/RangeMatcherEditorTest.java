@@ -1,6 +1,6 @@
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
 
 import java.util.Date;
