@@ -36,23 +36,13 @@ class TreeTableCellPanel extends JPanel {
     private final List<Component> spacerComponentsCache = new ArrayList<Component>();
 
     /** The button to toggle the expanded/collapsed state of the tree node. */
-    public JButton expanderButton = new JButton();
-
-    /** A panel containing the spacer component and expander button. */
-    private final JPanel spacerAndExpanderPanel = new JPanel();
-
-    /** The last installed node component, if any. */
-    public Component spaceComponent;
+    private final JButton expanderButton = new JButton();
 
     /** The last installed node component, if any. */
     private Component nodeComponent;
 
     public TreeTableCellPanel() {
-        super(new BorderLayout());
-        setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
-
-        spacerAndExpanderPanel.setOpaque(false);
-        spacerAndExpanderPanel.setLayout(new BoxLayout(spacerAndExpanderPanel, BoxLayout.X_AXIS));
+        super(new TreeTableCellLayout());
 
         // configure the expander button to display its icon with no margins
         this.expanderButton.setBorder(BorderFactory.createEmptyBorder());
@@ -95,26 +85,21 @@ class TreeTableCellPanel extends JPanel {
         // synchronize the background color of this entire panel with nodeComponent
         setBackground(nodeComponent.getBackground());
 
-        // configure the spacer/expander button panel with the new spacer
-        spacerAndExpanderPanel.removeAll();
-        spacerAndExpanderPanel.add(getSpacerComponent(depth));
-        spacerAndExpanderPanel.add(expanderButton);
-
         // configure this panel with the updated space/expander button and the supplied nodeComponent
         // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
         removeAll();
-        add(spacerAndExpanderPanel, BorderLayout.WEST);
-        add(nodeComponent, BorderLayout.CENTER);
+        add(getSpacerComponent(depth), TreeTableCellLayout.SPACER);
+        add(expanderButton, TreeTableCellLayout.EXPANDER_BUTTON);
+        add(nodeComponent, TreeTableCellLayout.NODE_COMPONENT);
 
-        spaceComponent = getSpacerComponent(depth);
         this.nodeComponent = nodeComponent;
     }
 
     /**
      * Return the {@link Component} that displays the data of the tree node.
      */
-    public JButton getNodeComponent() {
-        return expanderButton;
+    public Component getNodeComponent() {
+        return nodeComponent;
     }
 
     /**
@@ -122,7 +107,7 @@ class TreeTableCellPanel extends JPanel {
      * expander button; <tt>false</tt> otherwise.
      */
     public boolean isPointOverExpanderButton(Point p) {
-        return expanderButton.isVisible() && SwingUtilities.getDeepestComponentAt(spacerAndExpanderPanel, p.x, p.y) == expanderButton;
+        return expanderButton.isVisible() && SwingUtilities.getDeepestComponentAt(this, p.x, p.y) == expanderButton;
     }
 
     /**
@@ -130,7 +115,7 @@ class TreeTableCellPanel extends JPanel {
      * node component; <tt>false</tt> otherwise.
      */
     public boolean isPointOverNodeComponent(Point p) {
-        return nodeComponent != null && nodeComponent.isVisible() && nodeComponent.getBounds().contains(p);
+        return nodeComponent != null && nodeComponent.isVisible() && SwingUtilities.getDeepestComponentAt(this, p.x, p.y) == nodeComponent;
     }
 
     /**
@@ -145,5 +130,85 @@ class TreeTableCellPanel extends JPanel {
         }
 
         return spacerComponentsCache.get(depth);
+    }
+
+    private static class TreeTableCellLayout implements LayoutManager2 {
+
+        public static final Object SPACER = new Object();
+        public static final Object EXPANDER_BUTTON = new Object();
+        public static final Object NODE_COMPONENT = new Object();
+
+        private Component spacer;
+        private Component expanderButton;
+        private Component nodeComponent;
+
+        public void addLayoutComponent(Component comp, Object constraints) {
+            if (constraints == SPACER) spacer = comp;
+            else if (constraints == EXPANDER_BUTTON) expanderButton = comp;
+            else if (constraints == NODE_COMPONENT) nodeComponent = comp;
+            else throw new IllegalArgumentException("Unexpected constraints object: " + constraints);
+        }
+
+        public void removeLayoutComponent(Component comp) {
+            if (comp == spacer) spacer = null;
+            if (comp == expanderButton) expanderButton = null;
+            if (comp == nodeComponent) nodeComponent = null;
+        }
+
+        public void layoutContainer(Container target) {
+            final Insets insets = target.getInsets();
+            final int totalWidth = target.getWidth() - insets.left - insets.right;
+            final int totalHeight = target.getHeight() - insets.top - insets.bottom;
+            int availableWidth = totalWidth;
+
+            // no height means no reason to layout
+            if (totalHeight <= 0) return;
+
+            // 1. layout the spacer
+            if (availableWidth > 0 && spacer != null) {
+                final int spacerWidth = spacer.getPreferredSize().width;
+                spacer.setBounds(0, 0, spacerWidth, totalHeight);
+                availableWidth -= spacerWidth;
+            }
+
+            // 2. layout the expander button (centered vertically if necessary)
+            if (availableWidth > 0 && expanderButton != null) {
+                int expanderButtonX = totalWidth - availableWidth;
+                int expanderButtonY = 0;
+                int expanderButtonWidth = expanderButton.getPreferredSize().width;
+                int expanderButtonHeight = expanderButton.getPreferredSize().height;
+
+                if (expanderButtonHeight > totalHeight)
+                    expanderButtonHeight = totalHeight;
+                else if (expanderButtonHeight < totalHeight)
+                    expanderButtonY = (totalHeight - expanderButtonHeight) / 2;
+
+                expanderButton.setBounds(expanderButtonX, expanderButtonY, expanderButtonWidth, expanderButtonHeight);
+                availableWidth -= expanderButtonWidth;
+            }
+
+            // 3. layout the node component (centered vertically if necessary and getting all remaining horizontal space)
+            if (availableWidth > 0 && nodeComponent != null) {
+                int nodeComponentX = totalWidth - availableWidth;
+                int nodeComponentY = 0;
+                int nodeComponentWidth = availableWidth;
+                int nodeComponentHeight = nodeComponent.getPreferredSize().height;
+
+                if (nodeComponentHeight > totalHeight)
+                    nodeComponentHeight = totalHeight;
+                else if (nodeComponentHeight < totalHeight)
+                    nodeComponentY = (totalHeight - nodeComponentHeight) / 2;
+
+                nodeComponent.setBounds(nodeComponentX, nodeComponentY, nodeComponentWidth, nodeComponentHeight);
+            }
+        }
+
+        public void invalidateLayout(Container target) { }
+        public float getLayoutAlignmentX(Container target) { throw new UnsupportedOperationException(); }
+        public float getLayoutAlignmentY(Container target) { throw new UnsupportedOperationException(); }
+        public void addLayoutComponent(String name, Component comp) { throw new UnsupportedOperationException(); }
+        public Dimension minimumLayoutSize(Container parent) { throw new UnsupportedOperationException(); }
+        public Dimension maximumLayoutSize(Container target) { throw new UnsupportedOperationException(); }
+        public Dimension preferredLayoutSize(Container parent) { throw new UnsupportedOperationException(); }
     }
 }

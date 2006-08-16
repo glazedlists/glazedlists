@@ -103,8 +103,8 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
             final MouseEvent me = (MouseEvent) anEvent;
 
             // we're going to check if the single click was overtop of the
-            // expand button, and toggle the expansion state of the row object if it was
-            // but return false so we don't begin the cell edit
+            // expand button, and toggle the expansion state of the row if
+            // it was but return false so we don't begin the cell edit
 
             // extract information about the location of the click
             final JTable table = (JTable) anEvent.getSource();
@@ -120,14 +120,10 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
             final Component renderedComponent = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
             final TreeTableCellPanel renderedPanel = (TreeTableCellPanel) renderedComponent;
             renderedPanel.setBounds(cellRect);
-            renderedPanel.validate();
-//            renderedPanel.doLayout();
-
-            System.out.println("clickpoint in cell (" + row + "," + column + ") is: " + clickPoint + " and target zone is: " + renderedPanel.expanderButton.getBounds() + " (space width = " + renderedPanel.spaceComponent.getBounds().width);
+            renderedPanel.doLayout();
 
             // if a left-click occurred over the expand/collapse button
             if (SwingUtilities.isLeftMouseButton(me) && renderedPanel.isPointOverExpanderButton(clickPoint)) {
-                System.out.println("click occurred over expander button");
                 // expand/collapse the rowObject if possible
                 if (treeList.isExpandable(row))
                     treeList.setExpanded(row, !treeList.isExpanded(row));
