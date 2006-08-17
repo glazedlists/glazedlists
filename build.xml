@@ -79,6 +79,7 @@
 			<packageset dir="extensions/nachocalendar/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/jfreechart/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/swinglabs/source"><exclude name="**/impl/**"/></packageset>
+			<packageset dir="extensions/hibernate/source"><exclude name="**/impl/**"/></packageset>			
             <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
             <link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
             <link href="http://help.eclipse.org/help31/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
@@ -86,7 +87,7 @@
             <link href="http://nachocalendar.sourceforge.net/doc/"/>
             <link href="http://www.jfree.org/jfreechart/javadoc/"/>
             <link href="http://download.java.net/javadesktop/swinglabs/releases/0.8/docs/api/"/>
-
+			<link href="http://www.hibernate.org/hib_docs/v3/api/"/>
             <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
 			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2006 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
 		</javadoc>
@@ -130,7 +131,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser,swinglabs,treetable"
+	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser,swinglabs,treetable,hibernate"
 		description="Compile all components of the source.">
 	</target>
 
@@ -268,6 +269,20 @@
         <javac destdir="${classes.dir}" srcdir="extensions/jfreechart/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+	<target name="hibernate" depends="core">
+        <mkdir dir="extensions/hibernate/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/39164/hibernate.jar"/>
+            <arg value="extensions/hibernate/lib/hibernate.jar"/>
+        </java>		
+        <javac destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
+            <classpath>
+                <fileset dir="extensions/hibernate/lib/" includes="*.jar"/>
             </classpath>
         </javac>
     </target>
@@ -440,6 +455,14 @@
             <arg value="extensions/jgoodiesforms/source"/>
             <arg value="${classes.dir}${path.separator}extensions/jgoodiesforms/lib/forms.jar"/>
             <arg value="${java14_glazedlists.dir}/extensions/jgoodiesforms/source"/>
+        </java>
+
+    	<!-- Declaw hibernate/ -->
+        <mkdir dir="${java14_glazedlists.dir}/extensions/hibernate/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/hibernate/source"/>
+            <arg value="${classes.dir}${path.separator}extensions/hibernate/lib/hibernate.jar"/>
+            <arg value="${java14_glazedlists.dir}/extensions/hibernate/source"/>
         </java>
 
         <!-- Declaw issuesbrowser/ -->

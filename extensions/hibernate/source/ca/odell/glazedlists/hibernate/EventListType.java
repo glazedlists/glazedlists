@@ -18,7 +18,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 /**
- * A Hibernate custom collection type for mapping and persisting a {@link BasisEventList} with
+ * A Hibernate custom collection type for mapping and persisting a {@link BasicEventList} with
  * the help of a {@link PersistentEventList}.
  * 
  * @author Bruce Alspaugh
@@ -44,7 +44,7 @@ public class EventListType implements UserCollectionType {
      * {@inheritDoc}
      */    
     public Object indexOf(Object collection, Object obj) {
-        return ((EventList) collection).indexOf(obj);
+        return new Integer(((EventList) collection).indexOf(obj));
     }
     
     /**
