@@ -48,7 +48,15 @@ public class ItemTableFormat implements WritableTableFormat<TreeList.TreeElement
     }
 
     public TreeList.TreeElement<Item> setColumnValue(TreeList.TreeElement<Item> baseObject, Object editedValue, int column) {
-        return null;
+        final List<Item> treePath = baseObject.path();
+        final Item item = treePath.get(treePath.size()-1);
+
+        switch (column) {
+            case 2: item.getItemAttributes().setTitle((String) editedValue); break;
+            default: throw new IllegalStateException("column " + column + " is not editable");
+        }
+
+        return baseObject;
     }
 
     public Object getColumnValue(TreeList.TreeElement<Item> baseObject, int column) {
