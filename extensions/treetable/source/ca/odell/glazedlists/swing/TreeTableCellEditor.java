@@ -112,7 +112,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
             final int row = table.rowAtPoint(clickPoint);
             final int column = table.columnAtPoint(clickPoint);
 
-            // translate the click to be relative to the cellRect (and thus it's rendered component)
+            // translate the click to be relative to the cellRect (and thus its rendered component)
             final Rectangle cellRect = table.getCellRect(row, column, true);
             clickPoint.translate(-cellRect.x, -cellRect.y);
 

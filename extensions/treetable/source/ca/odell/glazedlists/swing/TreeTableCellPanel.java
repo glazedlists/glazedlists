@@ -19,8 +19,8 @@ import java.util.ArrayList;
  *   <li>A spacer component whose width reflects the depth of the tree node being rendered.
  *       This component really determines the look of the hierarchy.
  *   <li>A collapse/expand button that is visible for parent tree nodes but invisible for
- *       leaves. If the button is visible it will display one of two icon to represent the
- *       expanded or collapsed state of the row.
+ *       leaf nodes. If the button is visible it will display one of two icons to represent
+ *       the expanded or collapsed state of the row.
  *   <li>A user supplied component representing the actual data for the tree node.
  * </ul>
  *
@@ -132,12 +132,19 @@ class TreeTableCellPanel extends JPanel {
         return spacerComponentsCache.get(depth);
     }
 
+    /**
+     * A custom layout that grants preferred width to a spacer component and
+     * expander button and the remaining width to the node component. When
+     * insufficient space exists for all 3 components, they are simply cropped.
+     */
     private static class TreeTableCellLayout implements LayoutManager2 {
 
+        // constraints Objects to be used when adding components to the layout
         public static final Object SPACER = new Object();
         public static final Object EXPANDER_BUTTON = new Object();
         public static final Object NODE_COMPONENT = new Object();
 
+        // each of the known components layed out by this layout manager
         private Component spacer;
         private Component expanderButton;
         private Component nodeComponent;
@@ -156,6 +163,7 @@ class TreeTableCellPanel extends JPanel {
         }
 
         public void layoutContainer(Container target) {
+            // 0. calculate the amount of space we have to work with
             final Insets insets = target.getInsets();
             final int totalWidth = target.getWidth() - insets.left - insets.right;
             final int totalHeight = target.getHeight() - insets.top - insets.bottom;
@@ -171,7 +179,7 @@ class TreeTableCellPanel extends JPanel {
                 availableWidth -= spacerWidth;
             }
 
-            // 2. layout the expander button (centered vertically if necessary)
+            // 2. layout the expander button (centered vertically)
             if (availableWidth > 0 && expanderButton != null) {
                 int expanderButtonX = totalWidth - availableWidth;
                 int expanderButtonY = 0;
@@ -187,7 +195,7 @@ class TreeTableCellPanel extends JPanel {
                 availableWidth -= expanderButtonWidth;
             }
 
-            // 3. layout the node component (centered vertically if necessary and getting all remaining horizontal space)
+            // 3. layout the node component (centered vertically and getting all remaining horizontal space)
             if (availableWidth > 0 && nodeComponent != null) {
                 int nodeComponentX = totalWidth - availableWidth;
                 int nodeComponentY = 0;
