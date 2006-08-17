@@ -7,7 +7,9 @@ import ca.odell.glazedlists.TreeList;
 
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 /**
@@ -57,8 +59,16 @@ public class TreeTableCellRenderer implements TableCellRenderer {
      *      node and the tree that contains it
      */
     public TreeTableCellRenderer(TableCellRenderer delegate, TreeList treeList) {
-        this.delegate = delegate == null ? new DefaultTableCellRenderer() : delegate;
+        this.delegate = delegate == null ? createDelegateRenderer() : delegate;
         this.treeList = treeList;
+    }
+
+    /**
+     * Build the delegate TableCellEditor that handles rendering the data of
+     * each tree node.
+     */
+    protected TableCellRenderer createDelegateRenderer() {
+        return new DefaultTableCellRenderer();
     }
 
     /**
@@ -67,12 +77,6 @@ public class TreeTableCellRenderer implements TableCellRenderer {
      */
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         final Component c = delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-        // synchronize some values from the delegate component into ourselves
-        if (c instanceof JComponent) {
-            final JComponent jc = (JComponent) c;
-            component.setToolTipText(jc.getToolTipText());
-        }
 
         // extract information about the tree node from the TreeList
         final int depth = treeList.depth(row);

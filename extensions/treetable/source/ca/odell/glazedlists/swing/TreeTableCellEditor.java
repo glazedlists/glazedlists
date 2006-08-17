@@ -3,6 +3,8 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.TreeList;
 
 import javax.swing.*;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -35,14 +37,17 @@ import java.util.EventObject;
  */
 public class TreeTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 
-    /** The user-supplied editor that produces the look of the tree node's data. */
-    private TableCellEditor delegate;
+    /** The panel capable of laying out a spacer component, expander button, and data Component to produce the entire tree node display. */
+    private final TreeTableCellPanel component = new TreeTableCellPanel();
 
     /** The data structure that answers questions about the tree node. */
     private TreeList treeList;
 
-    /** The panel capable of laying out a spacer component, expander button, and data Component to produce the entire tree node display. */
-    private final TreeTableCellPanel component = new TreeTableCellPanel();
+    /** The user-supplied editor that produces the look of the tree node's data. */
+    private TableCellEditor delegate;
+
+    /** Respond to editing changes in the delegate TableCellEditor. */
+    private final CellEditorListener delegateListener = new DelegateTableCellEditorListener();
 
     /**
      * Decorate the component returned from the <code>delegate</code> with
@@ -56,27 +61,30 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
      *      node and the tree that contains it
      */
     public TreeTableCellEditor(TableCellEditor delegate, TreeList treeList) {
-        this.delegate = delegate == null ? new DefaultCellEditor(new JTextField()) : delegate;
+        this.delegate = delegate == null ? createDelegateEditor() : delegate;
+        this.delegate.addCellEditorListener(delegateListener);
         this.treeList = treeList;
     }
 
     /**
-     * Return decorated form of the component returned by the data
+     * Build the delegate TableCellEditor that handles editing the data of
+     * each tree node.
+     */
+    protected TableCellEditor createDelegateEditor() {
+        return new DefaultCellEditor(new JTextField());
+    }
+
+    /**
+     * Return a decorated form of the component returned by the data
      * {@link TableCellEditor}.
      */
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         final Component c = delegate.getTableCellEditorComponent(table, value, isSelected, row, column);
 
-        // synchronize some values from the delegate component into ourselves
-        if (c instanceof JComponent) {
-            final JComponent jc = (JComponent) c;
-            component.setToolTipText(jc.getToolTipText());
-        }
-
         // extract information about the tree node from the TreeList
         final int depth = treeList.depth(row);
-        final boolean isExpanded = true; // treeList.isExpanded(row);
-        final boolean isExpandable = true; // treeList.isExpandable(row);
+        final boolean isExpanded = treeList.isExpanded(row);
+        final boolean isExpandable = treeList.isExpandable(row);
 
         // ask our special component to configure itself for this tree node
         component.configure(depth, isExpandable, isExpanded, c);
@@ -170,5 +178,17 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     public void dispose() {
         this.delegate = null;
         this.treeList = null;
+    }
+
+    /**
+     * When the delegate TableCellEditor changes its editing state, we follow suit.
+     */
+    private class DelegateTableCellEditorListener implements CellEditorListener {
+        public void editingCanceled(ChangeEvent e) {
+            cancelCellEditing();
+        }
+        public void editingStopped(ChangeEvent e) {
+            stopCellEditing();
+        }
     }
 }

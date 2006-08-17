@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.swing;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -31,6 +32,9 @@ import java.util.ArrayList;
  * @author James Lemieux
  */
 class TreeTableCellPanel extends JPanel {
+
+    /** The border that spaces the delegate component over from the expander button. */
+    static final Border NODE_COMPONENT_BORDER = BorderFactory.createEmptyBorder(0, 3, 0, 0);
 
     /** A cache of appropriate spacer components for each depth in the tree. */
     private final List<Component> spacerComponentsCache = new ArrayList<Component>();
@@ -84,6 +88,13 @@ class TreeTableCellPanel extends JPanel {
 
         // synchronize the background color of this entire panel with nodeComponent
         setBackground(nodeComponent.getBackground());
+
+        // replace any kind of border with an empty one that tabs the node component over from the expander button
+        if (nodeComponent instanceof JComponent) {
+            final JComponent jNodeComponent = (JComponent) nodeComponent;
+            jNodeComponent.setBorder(NODE_COMPONENT_BORDER);
+            setToolTipText(jNodeComponent.getToolTipText());
+        }
 
         // configure this panel with the updated space/expander button and the supplied nodeComponent
         // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
