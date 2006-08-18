@@ -4,7 +4,6 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.gui.TreeIconFactory;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -16,9 +15,6 @@ import javax.swing.table.TableColumn;
  * @author jessewilson
  */
 public final class TreeTableSupport {
-
-    /** the sort icons to use */
-    private static Icon[] icons = TreeIconFactory.loadIcons();
 
     private final JTable table;
     private final TreeList treeList;
@@ -64,36 +60,6 @@ public final class TreeTableSupport {
             viewColumn.setCellRenderer(treeTableCellRenderer.getDelegate());
 
         this.treeTableCellRenderer.dispose();
-    }
-
-    /**
-     * // todo doc this better when we actually use pngs (we currently use Icons defined in code)
-     * Set all {@link TableComparatorChooser}s to use the icons from the directory
-     * specified. The folder should contain the following eight icon files:
-     * <li>primary_sorted.png                      <li>secondary_sorted.png
-     * <li>primary_sorted_alternate.png            <li>secondary_sorted_alternate.png
-     * <li>primary_sorted_alternate_reverse.png    <li>secondary_sorted_alternate_reverse.png
-     * <li>primary_sorted_reverse.png              <li>secondary_sorted_reverse.png
-     *
-     * <p>Note that this path must be on the system classpath. It may be within a
-     * jar file.
-     */
-    public static void setIconPath(String path) {
-        icons = TreeIconFactory.loadIcons(path);
-    }
-
-    /**
-     * Returns the icon representing an expanded tree node for all TreeTables.
-     */
-    public static Icon getExpandedIcon() {
-        return icons[0];
-    }
-
-    /**
-     * Returns the icon representing a collapsed tree node for all TreeTables.
-     */
-    public static Icon getCollapsedIcon() {
-        return icons[1];
     }
 
     /**

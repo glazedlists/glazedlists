@@ -84,7 +84,7 @@ class TreeTableCellPanel extends JPanel {
 
         // if the tree node is expandable, pick an icon for the expander button
         if (isExpandable)
-            expanderButton.setIcon(isExpanded ? TreeTableSupport.getExpandedIcon() : TreeTableSupport.getCollapsedIcon());
+            expanderButton.setIcon(UIManager.getIcon(isExpanded ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
 
         // synchronize the background color of this entire panel with nodeComponent
         setBackground(nodeComponent.getBackground());
@@ -135,7 +135,7 @@ class TreeTableCellPanel extends JPanel {
     private Component getSpacerComponent(int depth) {
         if (depth >= spacerComponentsCache.size()) {
             for (int i = spacerComponentsCache.size(); i <= depth; i++) {
-                final Component spacer = Box.createHorizontalStrut(TreeTableSupport.getExpandedIcon().getIconWidth() * i);
+                final Component spacer = Box.createHorizontalStrut(UIManager.getIcon("Tree.expandedIcon").getIconWidth() * i);
                 spacerComponentsCache.add(spacer);
             }
         }
