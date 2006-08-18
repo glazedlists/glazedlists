@@ -3,29 +3,25 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
-import java.util.List;
-
-import org.hibernate.collection.PersistentList;
-import org.hibernate.engine.SessionImplementor;
-import org.hibernate.persister.collection.CollectionPersister;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+import org.hibernate.collection.PersistentList;
+import org.hibernate.engine.SessionImplementor;
+import org.hibernate.persister.collection.CollectionPersister;
 
 /**
- * A Hibernate persistent wrapper for an {@link EventList}. Underlying collection implementation is
- * {@link BasicEventList}.
+ * A Hibernate persistent wrapper for an {@link EventList}. Underlying
+ * collection implementation is {@link BasicEventList}.
  * 
  * @author Bruce Alspaugh
  * @author Holger Brands
  */
 public final class PersistentEventList extends PersistentList implements EventList {
 
-    /** SerialUID. */
-    static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructor with session.
@@ -34,7 +30,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
      */
     public PersistentEventList(SessionImplementor session) {
         super(session);
-        // instantiate list here to avoid NullPointerExceptions with lazy loading.
+        // instantiate list here to avoid NullPointerExceptions with lazy loading
         list = new BasicEventList();
     }
 
@@ -49,37 +45,27 @@ public final class PersistentEventList extends PersistentList implements EventLi
         if (newList == null) throw new IllegalArgumentException("EventList parameter must not be null");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void beforeInitialize(CollectionPersister persister) {
         if (this.list == null) throw new IllegalStateException("'list' member is undefined");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void addListEventListener(ListEventListener listChangeListener) {
         ((EventList) list).addListEventListener(listChangeListener);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public ListEventPublisher getPublisher() {
         return ((EventList) list).getPublisher();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public ReadWriteLock getReadWriteLock() {
         return ((EventList) list).getReadWriteLock();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void removeListEventListener(ListEventListener listChangeListener) {
         ((EventList) list).removeListEventListener(listChangeListener);
     }
