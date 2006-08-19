@@ -35,7 +35,8 @@ public class EventListType implements UserCollectionType {
     
     /** {@inheritDoc} */
     public Object indexOf(Object collection, Object obj) {
-        return new Integer(((EventList) collection).indexOf(obj));
+        final int index = ((EventList) collection).indexOf(obj);
+        return (index < 0) ? null : new Integer(index); 
     }
     
     /** {@inheritDoc} */
