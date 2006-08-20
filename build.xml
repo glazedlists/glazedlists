@@ -46,6 +46,10 @@
 	<!-- output directory for maven upload bundle -->
 	<property name="maven_bundle.dir" value="${target.dir}/maven_bundle"/>
 
+	<patternset id="test.files">
+		<include name="**/*.xml"/>
+	</patternset>
+
 	<target name="clean"
 		description="Clean up generated files, forcing them to be rebuilt.">
 
@@ -280,6 +284,16 @@
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/39164/hibernate.jar"/>
             <arg value="extensions/hibernate/lib/hibernate.jar"/>
         </java>		
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/39275/hibernate-libs.jar"/>
+            <arg value="extensions/hibernate/lib/hibernate-libs.jar"/>
+        </java>				
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/39276/hsqldb.jar"/>
+            <arg value="extensions/hibernate/lib/hsqldb.jar"/>
+        </java>				
         <javac destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="on">
             <classpath>
                 <fileset dir="extensions/hibernate/lib/" includes="*.jar"/>
@@ -559,6 +573,7 @@
                         <pathelement location="${testclasses.dir}"/>
                         <fileset dir="extensions" includes="**/*.jar"/>
                         <fileset file="${ant.home}/lib/junit.jar"/>
+                    	<pathelement location="extensions/hibernate/etc"/>
                     </classpath>
                     <formatter type="brief" usefile="false"/>
                     <batchtest>
@@ -580,6 +595,13 @@
                 <fileset file="${ant.home}/lib/junit.jar"/>
             </classpath>
         </javac>
+
+		<!-- Copy over the mapping files -->
+		<copy todir="${testclasses.dir}">
+			<fileset dir="test">
+				<patternset refid="test.files"/>
+			</fileset>
+		</copy>
     </target>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

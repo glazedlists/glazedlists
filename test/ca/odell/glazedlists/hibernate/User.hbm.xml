@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<!--
+    This mapping is a basic example of how to use the EventListType.
+-->
+
+<hibernate-mapping package="ca.odell.glazedlists.hibernate">
+
+    <class name="User" table="`Users`">
+        <id name="userName"/>
+        <list name="emailAddresses" cascade="all, delete-orphan"
+            collection-type="ca.odell.glazedlists.hibernate.EventListType">
+            <key column="userName"/>
+            <list-index column="displayOrder" base="1"/>
+            <one-to-many class="Email"/>
+        </list>
+    </class>
+
+    <class name="Email">
+        <id name="id">
+            <generator class="native"/>
+        </id>
+        <property name="address"/>
+    </class>
+
+</hibernate-mapping>
