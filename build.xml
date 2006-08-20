@@ -435,7 +435,7 @@
         <mkdir dir="${java14_glazedlists.dir}/test"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="test"/>
-            <arg value="${classes.dir}${path.separator}${ant.home}/lib/junit.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar"/>
+            <arg value="${classes.dir}${path.separator}${ant.home}/lib/junit.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/hibernate/lib/hibernate.jar"/>
             <arg value="${java14_glazedlists.dir}/test"/>
         </java>
 
@@ -483,7 +483,7 @@
         <mkdir dir="${java14_glazedlists.dir}/extensions/issuesbrowser/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/issuesbrowser/source"/>
-            <arg value="${classes.dir}${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/nachocalendar/lib/nachocalendar.jar"/>
+            <arg value="${classes.dir}${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/nachocalendar/lib/nachocalendar.jar${path.separator}extensions/issuesbrowser/lib/http.jar"/>
             <arg value="${java14_glazedlists.dir}/extensions/issuesbrowser/source"/>
         </java>
 
