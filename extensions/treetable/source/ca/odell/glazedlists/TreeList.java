@@ -534,7 +534,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         final StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < size(); i++) {
             final int depth = depth(i);
-            final TreeElement<E> treeElement = get(i);
+            final TreeElement<E> treeElement = (TreeElement<E>) get(i);
 
             for (int j = 0; j < depth; j++)
                 buffer.append("\t");
