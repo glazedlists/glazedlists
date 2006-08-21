@@ -471,6 +471,13 @@
             <arg value="${java14_glazedlists.dir}/extensions/jgoodiesforms/source"/>
         </java>
 
+        <!-- Declaw treetable/ -->
+        <mkdir dir="${java14_glazedlists.dir}/extensions/treetable/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/treetable/source"/>
+            <arg value="${java14_glazedlists.dir}/extensions/treetable/source"/>
+        </java>
+
     	<!-- Declaw hibernate/ -->
         <mkdir dir="${java14_glazedlists.dir}/extensions/hibernate/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
