@@ -44,7 +44,7 @@ public class QueuedExecutor {
   protected Thread thread_;
 
   /** Special queue element to signal termination **/
-  protected static Runnable ENDTASK = new Runnable() { public void run() {} };
+  protected static Runnable ENDTASK = new EndTaskRunnable();
 
   /** true if thread should shut down after processing current task **/
   protected volatile boolean shutdown_; // latches true;
@@ -208,5 +208,13 @@ public class QueuedExecutor {
     if (t != null)
       t.interrupt();
     shutdownAfterProcessingCurrentTask();
+  }
+
+  /**
+   * A special Runnable which is placed in the queue and signals termination of
+   * this Executor.
+   */
+  private static class EndTaskRunnable implements Runnable {
+      public void run() {}
   }
 }
