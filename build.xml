@@ -475,6 +475,7 @@
         <mkdir dir="${java14_glazedlists.dir}/extensions/treetable/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/treetable/source"/>
+            <arg value="${classes.dir}"/>
             <arg value="${java14_glazedlists.dir}/extensions/treetable/source"/>
         </java>
 
