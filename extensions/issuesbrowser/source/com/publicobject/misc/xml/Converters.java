@@ -18,14 +18,6 @@ public final class Converters {
 
     /**
      * Returns a {@link Converter} capable of converting date Strings into
-     * {@link java.util.Date} objects using the given <code>format</code>.
-     */
-    public static Converter date(DateFormat format) {
-        return date(new DateFormat[] {format});
-    }
-
-    /**
-     * Returns a {@link Converter} capable of converting date Strings into
      * {@link java.util.Date} objects using any of the given <code>formats</code>.
      */
     public static Converter date(DateFormat[] formats) {
@@ -40,6 +32,23 @@ public final class Converters {
         return new IntegerConverter();
     }
 
+    /**
+     * Returns a {@link Converter} capable of trimming whitespace from the
+     * beginning and end of String objects.
+     */
+    public static Converter trim() {
+        return new TrimConverter();
+    }
+
+    /**
+     * Returns a {@link Converter} capable of trimming whitespace from the
+     * beginning and end of String objects and then
+     * {@link String#intern interning} the resulting String.
+     */
+    public static Converter trimAndIntern() {
+        return new TrimAndInternConverter();
+    }
+
     private static class DateConverter implements Converter {
         private final DateFormat[] format;
 
@@ -48,7 +57,9 @@ public final class Converters {
         }
 
         public Object convert(String value) {
-            // Format is most like a SimpleDateFormat. From the SimpleDateFormat class doc:
+            value = value.trim();
+
+            // Format is most likely a SimpleDateFormat. From the SimpleDateFormat class doc:
             //
             // Date formats are not synchronized. It is recommended to create separate
             // format instances for each thread. If multiple threads access a format
@@ -71,7 +82,19 @@ public final class Converters {
 
     private static class IntegerConverter implements Converter {
         public Object convert(String value) {
-            return Integer.valueOf(value);
+            return Integer.valueOf(value.trim());
+        }
+    }
+
+    private static class TrimConverter implements Converter {
+        public Object convert(String value) {
+            return value.trim();
+        }
+    }
+
+    private static class TrimAndInternConverter implements Converter {
+        public Object convert(String value) {
+            return value.trim().intern();
         }
     }
 }

@@ -27,10 +27,10 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
 
     /** a list of users */
     private CollectionList<Issue, String> usersForIssues;
-    private UniqueList<String> allUsers = null;
+    private UniqueList<String> allUsers;
 
     /** a list that maintains selection */
-    private EventList<String> selectedUsers = null;
+    private EventList<String> selectedUsers;
 
     /**
      * Create a filter list that filters the specified source list, which

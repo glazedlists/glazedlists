@@ -9,12 +9,12 @@ import java.util.Date;
  */
 public class ItemAttributes {
 
-    private AudienceRating audienceRating = null;
-    private String director = null;
-    private ListPrice listPrice = null;
-    private Date releaseDate = null;
-    private Date theatricalReleaseDate = null;
-    private String title = null;
+    private AudienceRating audienceRating;
+    private String director;
+    private ListPrice listPrice;
+    private Date releaseDate;
+    private Date theatricalReleaseDate;
+    private String title;
 
     /**
      * The audience rating of the movie or TV show.

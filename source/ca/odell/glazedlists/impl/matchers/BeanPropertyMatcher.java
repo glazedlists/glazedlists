@@ -6,7 +6,6 @@ package ca.odell.glazedlists.impl.matchers;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.GlazedLists;
 
 /**
  * A {@link Matcher} which uses a {@link BeanProperty} to read a bean property

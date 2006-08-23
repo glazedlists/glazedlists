@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-// for access to volatile classes
 import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.impl.matchers.*;
 
@@ -80,6 +79,14 @@ public final class Matchers {
      */
     public static <E> Matcher<E> invert(Matcher<E> original) {
          return new NotMatcher<E>(original);
+    }
+
+    /**
+     * Get a {@link Matcher} that returns <tt>true</tt> iff it is given a
+     * <code>non-null</code> and <code>non-empty</code> String.
+     */
+    public static Matcher<String> nonNullAndNonEmptyString() {
+        return NonNullAndNonEmptyStringMatcher.getInstance();
     }
 
     /**

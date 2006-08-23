@@ -5,15 +5,14 @@ package com.publicobject.issuesbrowser;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import com.publicobject.misc.Exceptions;
+import com.publicobject.misc.Throbber;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.security.AccessControlException;
-
-import com.publicobject.misc.Throbber;
-import com.publicobject.misc.Exceptions;
 
 /**
  * This loads issues by project as they are requested. When a new project is

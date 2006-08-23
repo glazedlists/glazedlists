@@ -28,28 +28,27 @@ public class Issue implements Comparable {
     private Project owner;
 
     // mandatory issue fields
-    private Integer id = null;
-    private Integer statusCode = null;
-    private String status = null;
-    private Priority priority = null;
-    private String resolution = null;
-    private String component = null;
-    private String version = null;
-    private String repPlatform = null;
-    private String assignedTo = null;
-    private Date deltaTimestamp = null;
-    private String subcomponent = null;
-    private String reporter = null;
-    private String targetMilestone = null;
-    private String issueType = null;
-    private Date creationTimestamp = null;
-    private String qaContact = null;
-    private String statusWhiteboard = null;
-    private String fileLocation = null;
-    private String votes = null;
-    private String operatingSystem = null;
-    private String shortDescription = null;
-    private PeerIssue isDuplicate = null;
+    private Integer id;
+    private String status;
+    private Priority priority;
+    private String resolution;
+    private String component;
+    private String version;
+    private String repPlatform;
+    private String assignedTo;
+    private Date deltaTimestamp;
+    private String subcomponent;
+    private String reporter;
+    private String targetMilestone;
+    private String issueType;
+    private Date creationTimestamp;
+    private String qaContact;
+    private String statusWhiteboard;
+    private String fileLocation;
+    private String votes;
+    private String operatingSystem;
+    private String shortDescription;
+    private PeerIssue isDuplicate;
     // optional fields
     private List<String> keywords = new ArrayList<String>();
     private List<PeerIssue> blocks = new ArrayList<PeerIssue>();
@@ -62,25 +61,7 @@ public class Issue implements Comparable {
     private List<PeerIssue> duplicates = new ArrayList<PeerIssue>();
     private List<PeerIssue> dependsOn = new ArrayList<PeerIssue>();
 
-    private List<String> allUsers = null;
-
-    /**
-     * Gets all users related to this issue.
-     */
-    public List<String> getAllUsers() {
-        // init the users list if necessary
-        if(allUsers == null) {
-            allUsers = new ArrayList<String>();
-            if(assignedTo != null) allUsers.add(assignedTo);
-            if(reporter != null) allUsers.add(reporter);
-            if(qaContact != null) allUsers.add(qaContact);
-            for(Iterator<Description> d = descriptions.iterator(); d.hasNext(); ) {
-                allUsers.add(d.next().getWho());
-            }
-        }
-
-        return allUsers;
-    }
+    private List<String> allUsers;
 
     /**
      * Creates a new empty issue.
@@ -95,7 +76,6 @@ public class Issue implements Comparable {
     public Issue(Project owner, Issue template) {
         this.owner = owner;
         id = template.id;
-        statusCode = template.statusCode;
         status = template.status;
         priority = template.priority;
         resolution = template.resolution;
@@ -169,6 +149,24 @@ public class Issue implements Comparable {
     }
 
     /**
+     * Gets all users related to this issue.
+     */
+    public List<String> getAllUsers() {
+        // init the users list if necessary
+        if(allUsers == null) {
+            allUsers = new ArrayList<String>();
+            if(assignedTo != null) allUsers.add(assignedTo);
+            if(reporter != null) allUsers.add(reporter);
+            if(qaContact != null) allUsers.add(qaContact);
+            for(Iterator<Description> d = descriptions.iterator(); d.hasNext(); ) {
+                allUsers.add(d.next().getWho());
+            }
+        }
+
+        return allUsers;
+    }
+
+    /**
      * ID of this issue (unique key).
      */
     public Integer getId() { return id; }
@@ -184,12 +182,6 @@ public class Issue implements Comparable {
             throw new RuntimeException(e);
         }
     }
-
-    /**
-     * Status code of this issue (load status).
-     */
-    public Integer getStatusCode() { return statusCode; }
-    public void setStatusCode(Integer statusCode) { this.statusCode = statusCode; }
 
     /**
      * Current status of this issue.
@@ -328,7 +320,7 @@ public class Issue implements Comparable {
     public List<Attachment> getAttachments() { return attachments; }
 
     /**
-     * Get the activity upon this issue.
+     * Get the activities upon this issue.
      */
     public List<Activity> getActivities() { return activities; }
 
@@ -374,108 +366,4 @@ public class Issue implements Comparable {
         Issue otherIssue = (Issue) other;
         return id.compareTo(otherIssue.id);
     }
-}
-
-/**
- * Reference to this issue's duplicate.
- */
-class PeerIssue {
-    private String issueId = null;
-    private String who = null;
-    private Date when = null;
-
-    /**
-     * user who created the duplicate.
-     */
-    public String getWho() { return who; }
-    public void setWho(String who) { this.who = who; }
-
-    /**
-     * date the described change was made
-     */
-    public Date getWhen() { return when; }
-    public void setWhen(Date when) { this.when = when; }
-
-    /**
-     * ID of the duplicate.
-     */
-    public String getIssueId() { return issueId; }
-    public void setIssueId(String issueId) { this.issueId = issueId; }
-}
-
-/**
- * Data pertaining to attachments.  NOTE - some of these fields
- * are currently unimplemented (ispatch, filename, etc.).
- */
-class Attachment {
-    private String mimeType = null;
-    private String attachId = null;
-    private Date date = null;
-    private String description = null;
-    private String isPatch = null;
-    private String filename = null;
-    private String submitterId = null;
-    private String submitterUsername = null;
-    private String data = null;
-    private String attachmentIzUrl = null;
-
-    /**
-     * Mime type for the attachment.
-     */
-    public String getMimeType() { return mimeType; }
-    public void setMimeType(String mimeType) { this.mimeType = mimeType; }
-
-    /**
-     * A unique id for this attachment.
-     */
-    public String getAttachId() { return attachId; }
-    public void setAttachId(String attachId) { this.attachId = attachId; }
-
-    /**
-     * Timestamp of when added 'yyyy-mm-dd hh:mm'
-     */
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
-
-    /**
-     * Short description for attachment.
-     */
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    /**
-     * Whether attachment is a patch file.
-     */
-    public String getIsPatch() { return isPatch; }
-    public void setIsPatch(String isPatch) { this.isPatch = isPatch; }
-
-    /**
-     * Filename of attachment.
-     */
-    public String getFilename() { return filename; }
-    public void setFilename(String filename) { this.filename = filename; }
-
-    /**
-     * Issuezilla ID of attachment submitter.
-     */
-    public String getSubmitterId() { return submitterId; }
-    public void setSubmitterId(String submitterId) { this.submitterId = submitterId; }
-
-    /**
-     * username of attachment submitter.
-     */
-    public String getSubmitterUsername() { return submitterUsername; }
-    public void setSubmitterUsername(String submitterUsername) { this.submitterUsername = submitterUsername; }
-
-    /**
-     * Encoded attachment.
-     */
-    public String getData() { return data; }
-    public void setData(String data) { this.data = data; }
-
-    /**
-     * URL to attachment in iz.
-     */
-    public String getAttachmentIzUrl() { return attachmentIzUrl; }
-    public void setAttachmentIzUrl(String attachmentIzUrl) { this.attachmentIzUrl = attachmentIzUrl; }
 }

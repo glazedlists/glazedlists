@@ -34,7 +34,11 @@ import java.util.*;
  *   &lt;/customer&gt;
  * </pre>
  *
- * This class is intentionally immutable. All methods produce new XMLTagPath objects.
+ * An XMLTagPath can also be used to represent the path to an attribute
+ * within an opening XML tag. Attribute based XMLTagPath objects are only
+ * created using {@link #attribute(String)}.
+ *
+ * <p>This class is intentionally immutable. All methods produce new XMLTagPath objects.
  *
  * @author James Lemieux
  */
@@ -51,6 +55,9 @@ public final class XMLTagPath {
 
     /** The list of tag names specifying the location of this XMLTagPath relative to the Document root. */
     private final List<String> parts;
+
+    /** The optional name of an attribute within the tag. (Only applicable for start tags) */
+    private final String attribute;
 
     /**
      * One of either {@link START_TAG} or {@link END_TAG} which indicates whether
@@ -78,11 +85,27 @@ public final class XMLTagPath {
      *      the opening or closing tag.
      */
     public XMLTagPath(List<String> parts, Object location) {
+        this(parts, location, null);
+    }
+
+    /**
+     * Constructs a new XMLTagPath representing an attribute within a start
+     * tag.
+     *
+     * @param parts a List of individual XML tag names in order of occurrence
+     *      from the root Document tag
+     * @param location one of either {@link START_TAG} or {@link END_TAG} which
+     *      indicates whether the last entry in <code>parts</code> refers to
+     *      the opening or closing tag.
+     * @param attribute the name of the attribute within the specified tag
+     */
+    private XMLTagPath(List<String> parts, Object location, String attribute) {
         if (parts == null)
             throw new IllegalArgumentException("parts may not be null");
 
         this.parts = Collections.unmodifiableList(parts);
         this.location = location;
+        this.attribute = attribute;
     }
 
     /**
@@ -120,6 +143,14 @@ public final class XMLTagPath {
     }
 
     /**
+     * Produces a new XMLTagPath representing the given <code>attribute</code>
+     * within the current tag.
+     */
+    public XMLTagPath attribute(String attribute) {
+        return new XMLTagPath(new LinkedList<String>(parts), location, attribute);
+    }
+
+    /**
      * Produces a new XMLTagPath by removing the last <code>part</code> from
      * this XMLTagPath.
      */
@@ -153,6 +184,7 @@ public final class XMLTagPath {
         final XMLTagPath xmlTagPath = (XMLTagPath) o;
 
         if (location != null ? !location.equals(xmlTagPath.location) : xmlTagPath.location != null) return false;
+        if (attribute != null ? !attribute.equals(xmlTagPath.attribute) : xmlTagPath.attribute != null) return false;
         if (!parts.equals(xmlTagPath.parts)) return false;
 
         return true;
@@ -163,6 +195,7 @@ public final class XMLTagPath {
         int result;
         result = parts.hashCode();
         result = 29 * result + (location != null ? location.hashCode() : 0);
+        result = 29 * result + (attribute != null ? attribute.hashCode() : 0);
         return result;
     }
 
@@ -174,6 +207,10 @@ public final class XMLTagPath {
             formattedPath.append(i.next());
             if (i.hasNext()) formattedPath.append(" / ");
         }
+
+        // "$" delimits an attribute from the XML tags within an XMLTagPath
+        if (attribute != null)
+            formattedPath.append(" $ ").append(attribute);
 
         return formattedPath.toString();
     }

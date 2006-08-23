@@ -19,9 +19,9 @@ import java.security.AccessControlException;
  */
 public class ItemLoader implements Runnable {
 
-    private String keywords = null;
-    private Thread itemLoaderThread = null;
-    private EventList<Item> itemsList = null;
+    private String keywords;
+    private Thread itemLoaderThread;
+    private EventList<Item> itemsList;
     private final JProgressBar progressBar;
 
     public ItemLoader(EventList<Item> issuesList, JProgressBar progressBar) {

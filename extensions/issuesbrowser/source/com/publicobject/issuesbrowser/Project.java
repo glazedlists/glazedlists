@@ -31,9 +31,9 @@ public class Project {
 		projects.add(new Project("swingx", "SwingX"));
     }
 
-    private String projectName = null;
-    private String projectTitle = null;
-    private String fileName = null;
+    private String projectName;
+    private String projectTitle;
+    private String fileName;
 
     public Project(String projectName, String projectTitle) {
         this.projectName = projectName;

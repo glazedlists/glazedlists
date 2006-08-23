@@ -3,24 +3,23 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.amazonbrowser;
 
+import HTTPClient.HTTPConnection;
+import HTTPClient.HTTPResponse;
+import HTTPClient.ModuleException;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
-import com.publicobject.misc.xml.*;
-import com.publicobject.misc.util.concurrent.RateGate;
+import ca.odell.glazedlists.event.ListEventListener;
 import com.publicobject.misc.util.concurrent.QueuedExecutor;
+import com.publicobject.misc.util.concurrent.RateGate;
+import com.publicobject.misc.xml.*;
 
-import java.io.*;
+import javax.swing.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Map;
-
-import HTTPClient.HTTPConnection;
-import HTTPClient.ModuleException;
-import HTTPClient.HTTPResponse;
-
-import javax.swing.*;
 
 /**
  * This class knows how to fetch and parse XML streams of product data from the

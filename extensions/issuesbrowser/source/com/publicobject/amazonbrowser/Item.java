@@ -12,9 +12,9 @@ import ca.odell.glazedlists.GlazedLists;
  */
 public class Item implements Comparable<Item> {
 
-    private String asin = null;
-    private String detailPageURL = null;
-    private ItemAttributes itemAttributes = null;
+    private String asin;
+    private String detailPageURL;
+    private ItemAttributes itemAttributes;
 
     /**
      * The Amazon Standard Item Number uniquely identifying this item.

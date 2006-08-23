@@ -22,15 +22,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.NoRouteToHostException;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.security.AccessControlException;
 import java.text.MessageFormat;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -100,11 +93,11 @@ public class IssuesBrowser implements Runnable {
         constructStandalone();
 
         // we have advice for the user when we cannot connect to a host
-        Exceptions.getInstance().addHandler(new UnknownHostExceptionHandler());
-        Exceptions.getInstance().addHandler(new ConnectExceptionHandler());
-        Exceptions.getInstance().addHandler(new NoRouteToHostExceptionHandler());
-        Exceptions.getInstance().addHandler(new AccessControlExceptionHandler());
-        Exceptions.getInstance().addHandler(new IOExceptionCode500Handler());
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.unknownHostExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.connectExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.noRouteToHostExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.accessControlExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.ioExceptionCode500Handler(frame));
 
         // create the issue loader and start loading issues
         issueLoader = new IssueLoader(issuesEventList, new IndeterminateToggler(throbber, THROBBER_ACTIVE, THROBBER_STATIC));
@@ -318,172 +311,6 @@ public class IssuesBrowser implements Runnable {
         }
         public void listChanged(ListEvent<Issue> listChanges) {
             setIssueCount(listChanges.getSourceList().size());
-        }
-    }
-
-    /**
-     * Returns <tt>true</tt> if this application is executing on a Windows
-     * operating system; <tt>false</tt> otherwise.
-     */
-    private static boolean isWindowsOS() {
-        final String osname = System.getProperty("os.name");
-        return osname != null && osname.toLowerCase().indexOf("windows") == 0;
-    }
-
-    /**
-     * An abstract Exceptions.Handler for all types of Exceptions that indicate
-     * a connection to the internet could not be established. It displays an
-     * informative message stating how to configure Java to use a proxy
-     * server.
-     */
-    private abstract class AbstractCannotConnectExceptionHandler implements Exceptions.Handler {
-        public void handle(Exception e) {
-            final String title = "Unable to connect to the Internet";
-
-            final String message;
-            if (isWindowsOS()) {
-                // explain how to configure a Proxy Server for Java on Windows
-                message = "If connecting to the Internet via a proxy server,\n" +
-                          "ensure you have configured Java correctly in\n" +
-                          "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
-                          "You must restart this application if you adjust the settings.";
-            } else {
-                message = "Please check your Internet connection settings.";
-            }
-
-            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
-        }
-    }
-
-    /**
-     * An Exceptions.Handler for UnknownHostExceptions that displays an
-     * informative message stating how to configure Java to use a proxy
-     * server.
-     */
-    private class UnknownHostExceptionHandler extends AbstractCannotConnectExceptionHandler {
-        public boolean recognize(Exception e) {
-            return e instanceof UnknownHostException;
-        }
-    }
-
-    /**
-     * An Exceptions.Handler for ConnectExceptions that displays an
-     * informative message stating how to configure Java to use a proxy
-     * server.
-     */
-    private class ConnectExceptionHandler extends AbstractCannotConnectExceptionHandler {
-        public boolean recognize(Exception e) {
-            return e instanceof ConnectException;
-        }
-    }
-
-    /**
-     * An Exceptions.Handler for NoRouteToHostException that displays an
-     * informative message stating the probable cause and how to configure
-     * Java to use a proxy server.
-     */
-    private class NoRouteToHostExceptionHandler implements Exceptions.Handler {
-        public boolean recognize(Exception e) {
-            return e instanceof NoRouteToHostException;
-        }
-
-        public void handle(Exception e) {
-            final String title = "Unable to find a route to the Host";
-
-            final String message;
-            if (isWindowsOS()) {
-                // explain how to configure a Proxy Server for Java on Windows
-                message = "Typically, the remote host cannot be reached because of an\n" +
-                          "intervening firewall, or if an intermediate router is down.\n\n" +
-                          "If connecting to the Internet via a proxy server,\n" +
-                          "ensure you have configured Java correctly in\n" +
-                          "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
-                          "You must restart this application if you adjust the settings.";
-            } else {
-                message = "Please check your Internet connection settings.";
-            }
-
-            // explain how to configure a Proxy Server for Java on Windows
-            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
-        }
-    }
-
-    /**
-     * An Exceptions.Handler for an AccessControlException when attempting to resolve
-     * a hostname to an IP address or connect to that IP. It displays an informative
-     * message stating the probable cause and how to configure Java to use a proxy server.
-     */
-    private class AccessControlExceptionHandler implements Exceptions.Handler {
-        // sample message 1: "access denied (java.net.SocketPermission javacc.dev.java.net resolve)"
-        // sample message 2: "access denied (java.net.SocketPermission beavertn-svr-eh.ad.nike.com:8080 connect,resolve)"
-        private final Matcher messageMatcher = Pattern.compile(".*access denied \\p{Punct}java.net.SocketPermission (\\S*) (.*)").matcher("");
-
-        public boolean recognize(Exception e) {
-            return e instanceof AccessControlException && messageMatcher.reset(e.getMessage()).matches();
-        }
-
-        public void handle(Exception e) {
-            final String title = "Unable to connect to Host";
-
-            final String message;
-            if (isWindowsOS()) {
-                final String hostname = messageMatcher.group(1);
-
-                // explain how to configure a Proxy Server for Java on Windows
-                message = MessageFormat.format(
-                          "Insufficient security privileges to connect to:\n\n\t{0} \n\n" +
-                          "If connecting to the Internet via a proxy server,\n" +
-                          "ensure you have configured Java correctly in\n" +
-                          "Control Panel \u2192 Java \u2192 General \u2192 Network Settings...\n\n" +
-                          "You must restart this application if you adjust the settings.", new Object[] {hostname});
-            } else {
-                message = "Please check your Internet connection settings.";
-            }
-
-            // explain how to configure a Proxy Server for Java on Windows
-            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
-        }
-    }
-
-    /**
-     * An Exceptions.Handler for an IOException containing a HTTP response code of 500
-     * indicating some error occurred within the java.net webserver. All a use can do
-     * at this point is retry the operation later.
-     */
-    private class IOExceptionCode500Handler implements Exceptions.Handler {
-        // sample message: "Server returned HTTP response code: 500 for URL: https://javanettasks.dev.java.net/issues/xml.cgi?id=1:2:3:4:5:6:..."
-        private final Matcher messageMatcher = Pattern.compile("Server returned HTTP response code: 500 (.*)").matcher("");
-
-        public boolean recognize(Exception e) {
-            return e instanceof IOException && messageMatcher.reset(e.getMessage()).matches();
-        }
-
-        public void handle(Exception e) {
-            final String title = "Internal Server Error";
-
-            // explain that this is not our fault
-            final String message = "An error occurred within the java.net webserver.\n" +
-                                   "Please retry your operation later.";
-
-            // explain that this is java.net's fault
-            SwingUtilities.invokeLater(new ShowMessageDialogRunnable(title, message));
-        }
-    }
-
-    /**
-     * A convenience class to show a message dialog to the user.
-     */
-    private class ShowMessageDialogRunnable implements Runnable {
-        private final String title;
-        private final String message;
-
-        public ShowMessageDialogRunnable(String title, String message) {
-            this.title = title;
-            this.message = message;
-        }
-
-        public void run() {
-            JOptionPane.showMessageDialog(frame, message, title, JOptionPane.WARNING_MESSAGE);
         }
     }
 

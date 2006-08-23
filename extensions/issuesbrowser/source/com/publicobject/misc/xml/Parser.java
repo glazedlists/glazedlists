@@ -3,19 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.xml;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
-
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
-
+import ca.odell.glazedlists.EventList;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This XML Parser greatly simplifies the task of parsing an XML document and
@@ -93,8 +91,8 @@ public class Parser {
     }
 
     /**
-     * Parse the objects in the given <code>source</code> and inserts them into
-     * the given <code>target</code> as they are created. In this way, the
+     * Parses the objects in the given <code>source</code> and inserts them
+     * into the given <code>target</code> as they are created. In this way, the
      * objects will "stream" into the <code>target</code> EventList.
      *
      * @param source the stream containing XML Documents of data
@@ -151,29 +149,6 @@ public class Parser {
     }
 
     /**
-     * ParserSidekick performs various services for the SaxParser.
-     *
-     * @see <a href="http://forum.java.sun.com/thread.jspa?forumID=34&threadID=284209">Java Forums</a>
-     */
-    private static class ParserSidekick implements EntityResolver, ErrorHandler {
-        public InputSource resolveEntity(String publicId, String systemId) {
-            return null;
-        }
-        public void error(SAXParseException exception) {
-            System.out.println("Error: ");
-            exception.printStackTrace();
-        }
-        public void fatalError(SAXParseException exception) {
-            System.out.println("Fatal error: ");
-            exception.printStackTrace();
-        }
-        public void warning(SAXParseException exception) {
-            System.out.println("Warning: ");
-            exception.printStackTrace();
-        }
-    }
-
-    /**
      * This Handler receives the callbacks from the SAX parser as tags are
      * visited. It performs two duties:
      *
@@ -222,6 +197,13 @@ public class Parser {
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             // update the XMLTagPath by pushing on the latest start tag
             currentTagPath = currentTagPath.child(qName).start();
+
+            // add entries in the parser context Map for each of the attributes
+            for (int i = 0; i < attributes.getLength(); i++) {
+                final XMLTagPath attributeTagPath = currentTagPath.attribute(attributes.getQName(i));
+                final String attributeValue = attributes.getValue(i);
+                context.put(attributeTagPath, attributeValue);
+            }
 
             // null out any value at the position within the parse context Map
             context.put(currentTagPath.end(), null);

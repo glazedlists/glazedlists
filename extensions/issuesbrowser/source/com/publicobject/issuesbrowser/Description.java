@@ -15,9 +15,9 @@ import java.util.List;
  * @author <a href="jesse@swank.ca">Jesse Wilson</a>
  */
 public class Description implements TextFilterable {
-	private String who = null;
-	private Date when = null;
-	private String text = null;
+	private String who;
+	private Date when;
+	private String text;
 
 	/**
 	 * Email of person posting long_desc.

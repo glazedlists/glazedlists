@@ -5,109 +5,147 @@ package com.publicobject.issuesbrowser;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
+import ca.odell.glazedlists.matchers.Matchers;
+import com.publicobject.misc.xml.*;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.text.ParseException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import com.publicobject.misc.xml.SaxParserSidekick;
+import java.util.TimeZone;
+import java.util.Map;
+import java.util.Date;
 
 /**
- * Parses IssueZilla issue as described by their XML.
- * <p/>
+ * Parses IssueZilla issues as described by their XML.
+ *
  * <p>Parsing supports DTD revision 1.2 only and may not work with prior or
- * later versions of the issuezilla XML format.
- * <p/>
- * <p>Dates are currently unsupported and will always have a value of "null".
+ * later versions of the IssueZilla XML format.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ * @author James Lemieux
  * @see <a href="https://glazedlists.dev.java.net/issues/issuezilla.dtd">Issuezilla DTD</a>
  */
 public class IssuezillaXMLParser {
 
-    /** the date format for "issue_when" is supposed to be 'yyyy-MM-dd HH:mm' but is actually 'yyyy-MM-dd HH:mm:ss' */
-    private static final SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    /** the date format for "delta_ts" is supposed to be 'yyyy-MM-dd HH:mm' but is actually 'yyyyMMddHHmmss' */
-    private static final SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyyMMddHHmmss");
+    /** the date format for "issue_when" is documented in the DTD to be 'yyyy-MM-dd HH:mm' but is actually 'yyyy-MM-dd HH:mm:ss' */
+    /** the date format for "delta_ts" is documented in the DTD to be 'yyyy-MM-dd HH:mm' but is actually 'yyyyMMddHHmmss' */
+    private static final DateFormat[] dateFormats = {new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"), new SimpleDateFormat("yyyyMMddHHmmss")};
 
     // hardcode the servers in California
     static {
-        dateFormat1.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
-        dateFormat2.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
+        final TimeZone laTimeZone = TimeZone.getTimeZone("America/Los_Angeles");
+        for (int i = 0; i < dateFormats.length; i++)
+            dateFormats[i].setTimeZone(laTimeZone);
     }
 
-    private static Set<String> ISSUE_SIMPLE_FIELDS = new HashSet<String>();
-    static {
-        ISSUE_SIMPLE_FIELDS.add("issue_id");
-        ISSUE_SIMPLE_FIELDS.add("issue_status");
-        ISSUE_SIMPLE_FIELDS.add("priority");
-        ISSUE_SIMPLE_FIELDS.add("resolution");
-        ISSUE_SIMPLE_FIELDS.add("component");
-        ISSUE_SIMPLE_FIELDS.add("version");
-        ISSUE_SIMPLE_FIELDS.add("rep_platform");
-        ISSUE_SIMPLE_FIELDS.add("assigned_to");
-        ISSUE_SIMPLE_FIELDS.add("delta_ts");
-        ISSUE_SIMPLE_FIELDS.add("subcomponent");
-        ISSUE_SIMPLE_FIELDS.add("reporter");
-        ISSUE_SIMPLE_FIELDS.add("target_milestone");
-        ISSUE_SIMPLE_FIELDS.add("issue_type");
-        ISSUE_SIMPLE_FIELDS.add("creation_ts");
-        ISSUE_SIMPLE_FIELDS.add("qa_contact");
-        ISSUE_SIMPLE_FIELDS.add("status_whiteboard");
-        ISSUE_SIMPLE_FIELDS.add("issue_file_loc");
-        ISSUE_SIMPLE_FIELDS.add("votes");
-        ISSUE_SIMPLE_FIELDS.add("op_sys");
-        ISSUE_SIMPLE_FIELDS.add("short_desc");
-        // optional
-        ISSUE_SIMPLE_FIELDS.add("keywords");
-        ISSUE_SIMPLE_FIELDS.add("cc");
-    }
+    private static Parser createParser(Project project) {
+        final Parser issueParser = new Parser();
+        // configure the Parser for Issues
 
-    private static SortedSet<String> DESCRIPTION_SIMPLE_FIELDS = new TreeSet<String>();
-    static {
-        DESCRIPTION_SIMPLE_FIELDS.add("who");
-        DESCRIPTION_SIMPLE_FIELDS.add("issue_when");
-        DESCRIPTION_SIMPLE_FIELDS.add("thetext");
-    }
+        // Parsing instructions for Issue
+        final XMLTagPath startIssueTag = XMLTagPath.startTagPath("issuezilla issue");
+        final XMLTagPath endIssueTag = startIssueTag.end();
+        issueParser.addProcessor(startIssueTag,                                 Processors.createNewObject(Issue.class, new Class[] {Project.class}, new Object[] {project}));
+        issueParser.addProcessor(endIssueTag.child("issue_id"),                 Processors.setterMethod(Issue.class, "id", Converters.integer()));
+        issueParser.addProcessor(endIssueTag.child("issue_status"),             Processors.setterMethod(Issue.class, "status", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("priority"),                 Processors.setterMethod(Issue.class, "priority", new PriorityConverter()));
+        issueParser.addProcessor(endIssueTag.child("resolution"),               Processors.setterMethod(Issue.class, "resolution", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("component"),                Processors.setterMethod(Issue.class, "component", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("version"),                  Processors.setterMethod(Issue.class, "version", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("rep_platform"),             Processors.setterMethod(Issue.class, "repPlatform", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("assigned_to"),              Processors.setterMethod(Issue.class, "assignedTo", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("delta_ts"),                 Processors.setterMethod(Issue.class, "deltaTimestamp", Converters.date(dateFormats)));
+        issueParser.addProcessor(endIssueTag.child("subcomponent"),             Processors.setterMethod(Issue.class, "subcomponent", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("reporter"),                 Processors.setterMethod(Issue.class, "reporter", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("target_milestone"),         Processors.setterMethod(Issue.class, "targetMilestone", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("issue_type"),               Processors.setterMethod(Issue.class, "issueType", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("creation_ts"),              Processors.setterMethod(Issue.class, "creationTimestamp", Converters.date(dateFormats)));
+        issueParser.addProcessor(endIssueTag.child("qa_contact"),               Processors.setterMethod(Issue.class, "qAContact", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("status_whiteboard"),        Processors.setterMethod(Issue.class, "statusWhiteboard", Converters.trim()));
+        issueParser.addProcessor(endIssueTag.child("issue_file_loc"),           Processors.setterMethod(Issue.class, "fileLocation", Converters.trim()));
+        issueParser.addProcessor(endIssueTag.child("votes"),                    Processors.setterMethod(Issue.class, "votes", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("op_sys"),                   Processors.setterMethod(Issue.class, "operatingSystem", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("short_desc"),               Processors.setterMethod(Issue.class, "shortDescription", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIssueTag.child("keywords"),                 Processors.addToCollection(Issue.class, "keywords", Converters.trimAndIntern(), Matchers.nonNullAndNonEmptyString()));
+        issueParser.addProcessor(endIssueTag.child("cc"),                       Processors.addToCollection(Issue.class, "cC", Converters.trimAndIntern(), Matchers.nonNullAndNonEmptyString()));
+        issueParser.addProcessor(endIssueTag,                                   new AddIssueToTargetListProcessor());
 
-    private static SortedSet<String> ATTACHMENT_SIMPLE_FIELDS = new TreeSet<String>();
-    static {
-        ATTACHMENT_SIMPLE_FIELDS.add("mimetype");
-        ATTACHMENT_SIMPLE_FIELDS.add("attachid");
-        ATTACHMENT_SIMPLE_FIELDS.add("date");
-        ATTACHMENT_SIMPLE_FIELDS.add("desc");
-        ATTACHMENT_SIMPLE_FIELDS.add("ispatch");
-        ATTACHMENT_SIMPLE_FIELDS.add("filename");
-        ATTACHMENT_SIMPLE_FIELDS.add("submitter_id");
-        ATTACHMENT_SIMPLE_FIELDS.add("submitting_username");
-        ATTACHMENT_SIMPLE_FIELDS.add("data");
-        ATTACHMENT_SIMPLE_FIELDS.add("attachment_iz_url");
-    }
+        // Parsing instructions for Description
+        final XMLTagPath startDescriptionTag = XMLTagPath.startTagPath("issuezilla issue long_desc");
+        final XMLTagPath endDescriptionTag = startDescriptionTag.end();
+        issueParser.addProcessor(startDescriptionTag,                           Processors.createNewObject(Description.class));
+        issueParser.addProcessor(endDescriptionTag.child("who"),                Processors.setterMethod(Description.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(endDescriptionTag.child("issue_when"),         Processors.setterMethod(Description.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(endDescriptionTag.child("thetext"),            Processors.setterMethod(Description.class, "text", Converters.trim()));
+        issueParser.addProcessor(endDescriptionTag,                             Processors.addToCollection(Issue.class, "descriptions"));
 
-    private static SortedSet<String> ACTIVITY_SIMPLE_FIELDS = new TreeSet<String>();
-    static {
-        ACTIVITY_SIMPLE_FIELDS.add("user");
-        ACTIVITY_SIMPLE_FIELDS.add("when");
-        ACTIVITY_SIMPLE_FIELDS.add("field_name");
-        ACTIVITY_SIMPLE_FIELDS.add("field_desc");
-        ACTIVITY_SIMPLE_FIELDS.add("oldvalue");
-        ACTIVITY_SIMPLE_FIELDS.add("newvalue");
-    }
+        // Parsing instructions for Activity
+        final XMLTagPath startActivityTag = XMLTagPath.startTagPath("issuezilla issue activity");
+        final XMLTagPath endActivityTag = startActivityTag.end();
+        issueParser.addProcessor(startActivityTag,                              Processors.createNewObject(Activity.class));
+        issueParser.addProcessor(endActivityTag.child("user"),                  Processors.setterMethod(Activity.class, "user", Converters.trimAndIntern()));
+        issueParser.addProcessor(endActivityTag.child("when"),                  Processors.setterMethod(Activity.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(endActivityTag.child("field_name"),            Processors.setterMethod(Activity.class, "field", Converters.trimAndIntern()));
+        issueParser.addProcessor(endActivityTag.child("field_desc"),            Processors.setterMethod(Activity.class, "fieldDescription", Converters.trimAndIntern()));
+        issueParser.addProcessor(endActivityTag.child("oldvalue"),              Processors.setterMethod(Activity.class, "oldValue", Converters.trimAndIntern()));
+        issueParser.addProcessor(endActivityTag.child("newvalue"),              Processors.setterMethod(Activity.class, "newValue", Converters.trimAndIntern()));
+        issueParser.addProcessor(endActivityTag,                                Processors.addToCollection(Issue.class, "activities"));
 
-    private static SortedSet<String> RELATIONSHIP_SIMPLE_FIELDS = new TreeSet<String>();
-    static {
-        RELATIONSHIP_SIMPLE_FIELDS.add("issue_id");
-        RELATIONSHIP_SIMPLE_FIELDS.add("who");
-        RELATIONSHIP_SIMPLE_FIELDS.add("when");
+        // Parsing instructions for Attachment
+        final XMLTagPath startAttachmentTag = XMLTagPath.startTagPath("issuezilla issue attachment");
+        final XMLTagPath endAttachmentTag = startAttachmentTag.end();
+        issueParser.addProcessor(startAttachmentTag,                            Processors.createNewObject(Attachment.class));
+        issueParser.addProcessor(endAttachmentTag.child("mimetype"),            Processors.setterMethod(Attachment.class, "mimeType", Converters.trimAndIntern()));
+        issueParser.addProcessor(endAttachmentTag.child("attachid"),            Processors.setterMethod(Attachment.class, "attachId", Converters.trimAndIntern()));
+        issueParser.addProcessor(endAttachmentTag.child("date"),                Processors.setterMethod(Attachment.class, "date", Converters.date(dateFormats)));
+        issueParser.addProcessor(endAttachmentTag.child("desc"),                Processors.setterMethod(Attachment.class, "description", Converters.trim()));
+        issueParser.addProcessor(endAttachmentTag.child("ispatch"),             Processors.setterMethod(Attachment.class, "isPatch", Converters.trim()));
+        issueParser.addProcessor(endAttachmentTag.child("filename"),            Processors.setterMethod(Attachment.class, "filename", Converters.trim()));
+        issueParser.addProcessor(endAttachmentTag.child("submitter_id"),        Processors.setterMethod(Attachment.class, "submitterId", Converters.trimAndIntern()));
+        issueParser.addProcessor(endAttachmentTag.child("submitting_username"), Processors.setterMethod(Attachment.class, "submitterUsername", Converters.trimAndIntern()));
+        issueParser.addProcessor(endAttachmentTag.child("data"),                Processors.setterMethod(Attachment.class, "data", Converters.trim()));
+        issueParser.addProcessor(endAttachmentTag.child("attachment_iz_url"),   Processors.setterMethod(Attachment.class, "attachmentIzUrl", Converters.trim()));
+        issueParser.addProcessor(endAttachmentTag,                              Processors.addToCollection(Issue.class, "attachments"));
+
+        // Parsing instructions for duplicate PeerIssues
+        final XMLTagPath startHasDuplicatesTag = XMLTagPath.startTagPath("issuezilla issue has_duplicates");
+        final XMLTagPath endHasDuplicatesTag = startHasDuplicatesTag.end();
+        issueParser.addProcessor(startHasDuplicatesTag,                         Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(endHasDuplicatesTag.child("issue_id"),         Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(endHasDuplicatesTag.child("who"),              Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(endHasDuplicatesTag.child("when"),             Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(endHasDuplicatesTag,                           Processors.addToCollection(Issue.class, "duplicates"));
+
+        // Parsing instructions for a duplicate PeerIssue
+        final XMLTagPath startIsDuplicateTag = XMLTagPath.startTagPath("issuezilla issue is_duplicate");
+        final XMLTagPath endIsDuplicateTag = startIsDuplicateTag.end();
+        issueParser.addProcessor(startIsDuplicateTag,                           Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(endIsDuplicateTag.child("issue_id"),           Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIsDuplicateTag.child("who"),                Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(endIsDuplicateTag.child("when"),               Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(endIsDuplicateTag,                             Processors.setterMethod(Issue.class, "duplicate"));
+
+        // Parsing instructions for a dependent PeerIssue
+        final XMLTagPath startDependsOnTag = XMLTagPath.startTagPath("issuezilla issue dependson");
+        final XMLTagPath endDependsOnTag = startDependsOnTag.end();
+        issueParser.addProcessor(startDependsOnTag,                             Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(endDependsOnTag.child("issue_id"),             Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(endDependsOnTag.child("who"),                  Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(endDependsOnTag.child("when"),                 Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(endDependsOnTag,                               Processors.addToCollection(Issue.class, "dependsOn"));
+
+        // Parsing instructions for a blocking PeerIssue
+        final XMLTagPath startBlocksTag = XMLTagPath.startTagPath("issuezilla issue blocks");
+        final XMLTagPath endBlocksTag = startBlocksTag.end();
+        issueParser.addProcessor(startBlocksTag,                                Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(endBlocksTag.child("issue_id"),                Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(endBlocksTag.child("who"),                     Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(endBlocksTag.child("when"),                    Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(endBlocksTag,                                  Processors.addToCollection(Issue.class, "blocks"));
+
+        return issueParser;
     }
 
     /**
@@ -115,14 +153,9 @@ public class IssuezillaXMLParser {
      * it for Issuezilla XML and writes the issues to the command line.
      */
     public static void main(String[] args) throws IOException {
-        if(args.length != 1) {
-            System.out.println("Usage: IssuezillaXMLParser <file>");
-            return;
-        }
+        final EventList<Issue> issuesList = new BasicEventList<Issue>();
 
-        EventList<Issue> issuesList = new BasicEventList<Issue>();
-        loadIssues(issuesList, new FileInputStream(args[0]), new Project(null, null));
-        System.out.println(issuesList);
+        loadIssues(issuesList, "https://glazedlists.dev.java.net/issues/xml.cgi", Project.getProjects().get(0));
     }
 
     /**
@@ -132,7 +165,7 @@ public class IssuezillaXMLParser {
         int issuesPerRequest = 100;
 
         // continuously load issues until there's no more
-        while(true) {
+        while (true) {
             // figure out how many to load
             int currentTotal = target.size();
             int nextTotal = currentTotal + issuesPerRequest;
@@ -163,367 +196,45 @@ public class IssuezillaXMLParser {
      * to load the issues as code rather than XML.
      */
     public static void loadIssues(EventList<Issue> target, InputStream source, Project owner) throws IOException {
-        try {
-            // configure a SAX parser
-            XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
-            SaxParserSidekick.install(xmlReader);
-            xmlReader.setContentHandler(new IssueHandler(target, owner));
+        createParser(owner).parse(target, source);
+    }
 
-            // parse away
-            xmlReader.parse(new InputSource(source));
-        } catch(SAXException e) {
-            e.printStackTrace();
-            throw new IOException("Parsing failed " + e.getMessage());
-        } catch(ParserConfigurationException e) {
-            e.printStackTrace();
-            throw new IOException("Parsing failed " + e.getMessage());
+    /**
+     * This Converter can lookup Priority objects using Strings.
+     */
+    private static class PriorityConverter implements Converter {
+        public Object convert(String value) {
+            return Priority.lookup(value.trim());
         }
     }
 
-
     /**
-     * The IssueHandler does the real parsing.
+     * This Processor adds a completely built Issue to the target EventList.
+     * It also performs some late processing of the Issue, namely computing the
+     * state changes of the Issue. This Processor only adds the Issue to the
+     * target EventList if the status code is 200, indicating that the Issue
+     * was loaded successfully.
      */
-    static class IssueHandler extends AbstractSimpleElementHandler {
-        private EventList<Issue> issues = null;
-        private Issue currentIssue;
-        private AbstractSimpleElementHandler simpleElementHandler = null;
-        private Project owner;
+    private static class AddIssueToTargetListProcessor implements Processor {
+        private static final Processor delegate = Processors.addObjectToTargetList();
+        private static final XMLTagPath status_code_attribute = XMLTagPath.startTagPath("issuezilla issue").attribute("status_code");
+
         private final Date loadingStarted = new Date();
 
-        public IssueHandler(EventList<Issue> issues, Project owner) {
-            super(null, "issue", ISSUE_SIMPLE_FIELDS);
-            this.owner = owner;
-            this.issues = issues;
-            parent = this;
-        }
+        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
+            final String status_code = (String) context.get(status_code_attribute);
 
-        /**
-         * Gets the list of issues parsed by this handler.
-         */
-        public List<Issue> getIssues() {
-            return issues;
-        }
+            // add the issue to the list if it was found okay
+            if ("200".equals(status_code)) {
+                // locate the newly built object keyed by the starting tag of the current XMLTagPath
+                final Issue currentIssue = (Issue) context.get(path.end());
 
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
-            // ignore issuezilla tags
-            if(qName.equals("issuezilla")) {
-                // ignore
-            // create a new issue
-            } else if(currentIssue == null) {
-                if(qName.equals("issue")) {
-                    currentIssue = new Issue(owner);
+                // compute the timeline of state changes now that we have loaded the entire Issue
+                currentIssue.getStateChanges().addAll(Issue.computeStateChanges(currentIssue, loadingStarted));
 
-                    // save the status code
-                    String statusCode = attributes.getValue("status_code");
-                    currentIssue.setStatusCode(statusCode != null ? Integer.valueOf(statusCode) : new Integer(404));
-
-                } else {
-                    addException(this + " encountered unexpected element \"" + qName + "\"");
-                }
-            // attempt to delegate to a specialized handler
-            } else if(simpleElementHandler != null) {
-                simpleElementHandler.startElement(uri, localName, qName, attributes);
-            // handle a sophisticated description field
-            } else if(qName.equals("long_desc")) {
-                simpleElementHandler = new DescriptionHandler(this);
-            // handle a sophisticated attachment field
-            } else if(qName.equals("attachment")) {
-                simpleElementHandler = new AttachmentHandler(this);
-            // handle a sophisticated activity field
-            } else if(qName.equals("activity")) {
-                simpleElementHandler = new ActivityHandler(this);
-            // handle a sophisticated duplicate field
-            } else if(qName.equals("has_duplicates")) {
-                simpleElementHandler = new RelationshipHandler(this, "has_duplicates");
-            } else if(qName.equals("dependson")) {
-                simpleElementHandler = new RelationshipHandler(this, "dependson");
-            } else if(qName.equals("blocks")) {
-                simpleElementHandler = new RelationshipHandler(this, "blocks");
-            } else if(qName.equals("is_duplicate")) {
-                simpleElementHandler = new RelationshipHandler(this, "is_duplicate");
-            // handle all other cases in the base class
-            } else {
-                super.startElement(uri, localName, qName, attributes);
+                // add the Issue to the list of Issues
+                delegate.process(path, context);
             }
-        }
-
-        public void endElement(String uri, String localName, String qName) {
-            // if we are within a simple field
-            if(currentField != null) {
-                super.endElement(uri, localName, qName);
-            // if we can delegate to a specialized handler
-            } else if(simpleElementHandler != null) {
-                simpleElementHandler.endElement(uri, localName, qName);
-            // if this is the end of an issue
-            } else if(qName.equals("issue")) {
-                // break out if this request is cancelled
-                if(Thread.interrupted()) throw new RuntimeException(new InterruptedException());
-
-                // add the issue to the list if it was found okay
-                if(currentIssue.getStatusCode() != null && currentIssue.getStatusCode().intValue() == 200) {
-                    // compute the timeline of state changes now that we have loaded the entire Issue
-                    currentIssue.getStateChanges().addAll(Issue.computeStateChanges(currentIssue, loadingStarted));
-
-                    // add the Issue to the list of Issues
-                    issues.add(currentIssue);
-                }
-
-                // prepare for the next issue
-                currentIssue = null;
-
-            // ignore issuezilla tags
-            } else if(qName.equals("issuezilla")) {
-                // do nothing
-
-            // handle all other cases in an error
-            } else {
-                addException(this + " encountered unexpected end of element \"" + qName + "\"");
-            }
-        }
-
-        public void characters(char[] ch, int start, int length) {
-            // if we can delegate to a specialized handler
-            if(simpleElementHandler != null) {
-                simpleElementHandler.characters(ch, start, length);
-            } else {
-                super.characters(ch, start, length);
-            }
-        }
-
-        public void addFieldAndValue(String currentField, String value) {
-            try {
-                if(currentField == "issue_id") currentIssue.setId(Integer.valueOf(value));
-                else if(currentField == "issue_status") currentIssue.setStatus(value.intern());
-                else if(currentField == "priority") currentIssue.setPriority(Priority.lookup(value));
-                else if(currentField == "resolution") currentIssue.setResolution(value.intern());
-                else if(currentField == "component") currentIssue.setComponent(value);
-                else if(currentField == "version") currentIssue.setVersion(value);
-                else if(currentField == "rep_platform") currentIssue.setRepPlatform(value);
-                else if(currentField == "assigned_to") currentIssue.setAssignedTo(value);
-                else if(currentField == "delta_ts") currentIssue.setDeltaTimestamp(parse(value));
-                else if(currentField == "subcomponent") currentIssue.setSubcomponent(value);
-                else if(currentField == "reporter") currentIssue.setReporter(value);
-                else if(currentField == "target_milestone") currentIssue.setTargetMilestone(value);
-                else if(currentField == "issue_type") currentIssue.setIssueType(value.intern());
-                else if(currentField == "creation_ts") currentIssue.setCreationTimestamp(parse(value));
-                else if(currentField == "qa_contact") currentIssue.setQAContact(value);
-                else if(currentField == "status_whiteboard") currentIssue.setStatusWhiteboard(value);
-                else if(currentField == "issue_file_loc") currentIssue.setFileLocation(value);
-                else if(currentField == "votes") currentIssue.setVotes(value);
-                else if(currentField == "op_sys") currentIssue.setOperatingSystem(value);
-                else if(currentField == "short_desc") currentIssue.setShortDescription(value);
-                else if(currentField == "keywords") currentIssue.getKeywords().add(value);
-                else if(currentField == "cc") currentIssue.getCC().add(value);
-                else parent.addException(this + " encountered unexpected element " + currentField);
-            } catch (ParseException pe) {
-                parent.addException(this + " unable to parse date in field " + currentField + ": " + value);
-            }
-        }
-
-        public void endSimpleElement() {
-            if (simpleElementHandler.hostElement.equals("long_desc")) {
-                DescriptionHandler descriptionHandler = (DescriptionHandler)simpleElementHandler;
-                currentIssue.getDescriptions().add(descriptionHandler.description);
-                simpleElementHandler = null;
-            } else if (simpleElementHandler.hostElement.equals("attachment")) {
-                AttachmentHandler attachmentHandler = (AttachmentHandler)simpleElementHandler;
-                currentIssue.getAttachments().add(attachmentHandler.attachment);
-                simpleElementHandler = null;
-            } else if (simpleElementHandler.hostElement.equals("activity")) {
-                ActivityHandler activityHandler = (ActivityHandler)simpleElementHandler;
-                currentIssue.getActivities().add(activityHandler.activity);
-                simpleElementHandler = null;
-            } else if (simpleElementHandler.hostElement.equals("has_duplicates")) {
-                RelationshipHandler duplicateHandler = (RelationshipHandler)simpleElementHandler;
-                currentIssue.getDuplicates().add(duplicateHandler.peerIssue);
-                simpleElementHandler = null;
-            } else if (simpleElementHandler.hostElement.equals("dependson")) {
-                RelationshipHandler dependsOnHandler = (RelationshipHandler)simpleElementHandler;
-                currentIssue.getDependsOn().add(dependsOnHandler.peerIssue);
-                simpleElementHandler = null;
-            } else if (simpleElementHandler.hostElement.equals("blocks")) {
-                RelationshipHandler blocksHandler = (RelationshipHandler)simpleElementHandler;
-                currentIssue.getBlocks().add(blocksHandler.peerIssue);
-                simpleElementHandler = null;
-            } else if (simpleElementHandler.hostElement.equals("is_duplicate")) {
-                RelationshipHandler isDuplicateHandler = (RelationshipHandler)simpleElementHandler;
-                currentIssue.setDuplicate(isDuplicateHandler.peerIssue);
-                simpleElementHandler = null;
-            } else {
-                addException(this + " encountered unexpected end of element " + simpleElementHandler);
-            }
-        }
-
-        public void addException(String message) {
-            new Exception(message).printStackTrace();
-        }
-    }
-
-    /**
-     * Parse the specified date.
-     */
-    private static Date parseLenient(String date) {
-        try {
-            return parse(date);
-        } catch (ParseException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Parse the specified date.
-     */
-    private static Date parse(String date) throws ParseException {
-        try {
-            return dateFormat1.parse(date);
-        } catch (ParseException e) {
-            // try another format
-        }
-
-        try {
-            return dateFormat2.parse(date);
-        } catch (ParseException e) {
-            throw e;
-        }
-    }
-
-
-    /**
-     * Handles nested description tags.
-     */
-    static class DescriptionHandler extends AbstractSimpleElementHandler {
-        public Description description;
-        public DescriptionHandler(IssueHandler parent) {
-            super(parent, "long_desc", DESCRIPTION_SIMPLE_FIELDS);
-            description = new Description();
-        }
-        public void addFieldAndValue(String currentField, String value) {
-            if(currentField == "who") description.setWho(value);
-            else if(currentField == "issue_when") description.setWhen(parseLenient(value));
-            else if(currentField == "thetext") description.setText(value);
-            else parent.addException(this + " encountered unexpected element " + currentField);
-        }
-    }
-
-
-    /**
-     * Handles nested attachment tags.
-     */
-    static class AttachmentHandler extends AbstractSimpleElementHandler {
-        public Attachment attachment;
-        public AttachmentHandler(IssueHandler parent) {
-            super(parent, "attachment", ATTACHMENT_SIMPLE_FIELDS);
-            attachment = new Attachment();
-        }
-        public void addFieldAndValue(String currentField, String value) {
-            if(currentField == "mimetype") attachment.setMimeType(value);
-            else if(currentField == "attachid") attachment.setAttachId(value);
-            else if(currentField == "date") attachment.setDate(parseLenient(value));
-            else if(currentField == "desc") attachment.setDescription(value);
-            else if(currentField == "ispatch") attachment.setIsPatch(value);
-            else if(currentField == "filename") attachment.setFilename(value);
-            else if(currentField == "submitter_id") attachment.setSubmitterId(value);
-            else if(currentField == "submitting_username") attachment.setSubmitterUsername(value);
-            else if(currentField == "data") attachment.setData(value);
-            else if(currentField == "attachment_iz_url") attachment.setAttachmentIzUrl(value);
-            else parent.addException(this + " encountered unexpected element " + currentField);
-        }
-    }
-
-
-    /**
-     * Handles nested activity tags.
-     */
-    static class ActivityHandler extends AbstractSimpleElementHandler {
-        public Activity activity;
-        public ActivityHandler(IssueHandler parent) {
-            super(parent, "activity", ACTIVITY_SIMPLE_FIELDS);
-            activity = new Activity();
-        }
-        public void addFieldAndValue(String currentField, String value) {
-            if(currentField == "user") activity.setUser(value);
-            else if(currentField == "when") activity.setWhen(parseLenient(value));
-            else if(currentField == "field_name") activity.setField(value);
-            else if(currentField == "field_desc") activity.setFieldDescription(value);
-            else if(currentField == "oldvalue") activity.setOldValue(value);
-            else if(currentField == "newvalue") activity.setNewValue(value);
-            else parent.addException(this + " encountered unexpected element " + currentField);
-        }
-    }
-
-
-    /**
-     * Handles nested dependson, blocks, is_duplicate and has_duplicates tags.
-     */
-    static class RelationshipHandler extends AbstractSimpleElementHandler {
-        public PeerIssue peerIssue;
-        /**
-         * @param type either 'dependson' or 'hasduplicate'
-         */
-        public RelationshipHandler(IssueHandler parent, String type) {
-            super(parent, type, RELATIONSHIP_SIMPLE_FIELDS);
-            peerIssue = new PeerIssue();
-        }
-        public void addFieldAndValue(String currentField, String value) {
-            if(currentField == "issue_id") peerIssue.setIssueId(value);
-            else if(currentField == "who") peerIssue.setWho(value);
-            else if(currentField == "when") peerIssue.setWhen(parseLenient(value));
-            else parent.addException(this + " encountered unexpected element " + currentField);
-        }
-    }
-
-    /**
-     * A simple class for parsing issuezilla element blocks that contain no
-     * smaller blocks within.
-     */
-    static abstract class AbstractSimpleElementHandler extends DefaultHandler {
-        protected String currentField = null;
-        protected IssueHandler parent;
-        protected String hostElement = null;
-        private Set acceptableFields = null;
-        private StringBuffer currentValue;
-
-        protected AbstractSimpleElementHandler(IssueHandler parent, String hostElement, Set acceptableFields) {
-            this.parent = parent;
-            this.hostElement = hostElement;
-            this.acceptableFields = acceptableFields;
-        }
-
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
-            if(currentField != null) {
-                parent.addException(this + " expected end of element " + currentField + " but found " + qName);
-            } else if(acceptableFields.contains(qName)) {
-                currentField = qName;
-                currentValue = new StringBuffer();
-            } else {
-                parent.addException(this + " encountered unexpected element " + qName);
-            }
-        }
-
-        public void endElement(String uri, String localName, String qName) {
-            if(qName.equals(hostElement)) {
-                parent.endSimpleElement();
-            } else if(currentField == null) {
-                parent.addException(this + " expected new element but found end of " + qName);
-            } else if(currentField.equals(qName)) {
-                addFieldAndValue(currentField, currentValue.toString().intern());
-                currentField = null;
-                currentValue = null;
-            } else {
-                parent.addException(this + " expected end of element " + currentField + " but found end of " + qName);
-            }
-        }
-
-        public void characters(char[] ch, int start, int length) {
-            if (currentField == null) return;
-            currentValue.append(ch, start, length);
-        }
-
-        protected abstract void addFieldAndValue(String currentField, String value);
-
-        public String toString() {
-            return "<" + hostElement + ">";
         }
     }
 }

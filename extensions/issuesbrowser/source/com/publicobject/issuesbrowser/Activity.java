@@ -9,12 +9,12 @@ import java.util.Date;
  * Data pertaining to an {@link Issue}'s activity record.
  */
 public class Activity {
-    private String user = null;
-    private Date when = null;
-    private String field = null;
-    private String fieldDescription = null;
-    private String oldValue = null;
-    private String newValue = null;
+    private String user;
+    private Date when;
+    private String field;
+    private String fieldDescription;
+    private String oldValue;
+    private String newValue;
 
     /**
      * user who performed the change action

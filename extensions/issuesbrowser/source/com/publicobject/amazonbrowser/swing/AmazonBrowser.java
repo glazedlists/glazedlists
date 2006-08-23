@@ -14,6 +14,8 @@ import com.publicobject.amazonbrowser.ItemLoader;
 import com.publicobject.amazonbrowser.ItemTableFormat;
 import com.publicobject.amazonbrowser.ItemTreeFormat;
 import com.publicobject.misc.swing.GradientPanel;
+import com.publicobject.misc.swing.ExceptionHandlerFactory;
+import com.publicobject.misc.Exceptions;
 
 import javax.swing.*;
 import java.awt.*;
@@ -76,6 +78,13 @@ public class AmazonBrowser implements Runnable {
      * Constructs the browser as a standalone frame.
      */
     private void constructStandalone() {
+        // we have advice for the user when we cannot connect to a host
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.unknownHostExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.connectExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.noRouteToHostExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.accessControlExceptionHandler(frame));
+        Exceptions.getInstance().addHandler(ExceptionHandlerFactory.ioExceptionCode500Handler(frame));
+
         frame = new JFrame("Amazon Browser");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);

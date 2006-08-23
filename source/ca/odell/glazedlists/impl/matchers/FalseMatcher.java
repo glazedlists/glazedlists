@@ -3,12 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.matchers;
 
-
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
- * A {@link Matcher} implementation that never matches. Use {@link #getInstance()} to
- * obtain a singleton instance.
+ * A {@link Matcher} implementation that never matches. Use
+ * {@link #getInstance()} to obtain the singleton instance.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */

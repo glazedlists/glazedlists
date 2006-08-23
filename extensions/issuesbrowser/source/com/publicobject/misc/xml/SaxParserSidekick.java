@@ -1,10 +1,10 @@
-// Copyright 2006 Google Inc. All Rights Reserved.
-
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.xml;
 
 import org.xml.sax.*;
 
-import java.io.IOException;
 import java.io.ByteArrayInputStream;
 
 /**
@@ -13,7 +13,7 @@ import java.io.ByteArrayInputStream;
  *
  * @see <a href="http://forum.java.sun.com/thread.jspa?forumID=34&threadID=284209">Java Forums</a>
  */
-public class SaxParserSidekick implements EntityResolver, ErrorHandler {
+public final class SaxParserSidekick implements EntityResolver, ErrorHandler {
 
     private SaxParserSidekick() {
         // prevent instantiation
@@ -28,7 +28,7 @@ public class SaxParserSidekick implements EntityResolver, ErrorHandler {
     /**
      * Don't fetch a DTD from a remote webserver.
      */
-    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+    public InputSource resolveEntity(String publicId, String systemId) {
         // skip the DTD
         if(systemId.endsWith("issuezilla.dtd")) {
             byte[] emptyDTDBytes = "<?xml version='1.0' encoding='UTF-8'?>".getBytes();
