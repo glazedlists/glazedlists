@@ -37,7 +37,14 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      * on list elements, so we cache the Object[] used in the reflection call
      * for a speed increase.
      */
-    private Object[] reflectionParameters = new Object[] {this.propertyChangeListener};
+    private Object[] reflectionArguments = {this.propertyChangeListener};
+
+    /**
+     * Reflection is used to install/uninstall the {@link #propertyChangeListener}
+     * on list elements, so we cache the Class[] used in the reflection call
+     * for a speed increase.
+     */
+    private static final Class[] reflectionParameters = {PropertyChangeListener.class};
 
     /**
      * Constructs a new Connector which uses reflection to add and remove a
@@ -86,8 +93,8 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      */
     public JavaBeanEventListConnector(Class<E> beanClass, String addListenerMethodName, String removeListenerMethodName) {
         try {
-            this.addListenerMethod = beanClass.getMethod(addListenerMethodName, new Class[] { PropertyChangeListener.class });
-            this.removeListenerMethod = beanClass.getMethod(removeListenerMethodName, new Class[] { PropertyChangeListener.class });
+            this.addListenerMethod = beanClass.getMethod(addListenerMethodName, reflectionParameters);
+            this.removeListenerMethod = beanClass.getMethod(removeListenerMethodName, reflectionParameters);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Failed to find method " + e.getMessage() + " in " + beanClass);
         }
@@ -106,7 +113,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      */
     public EventListener installListener(E element) {
         try {
-            this.addListenerMethod.invoke(element, this.reflectionParameters);
+            this.addListenerMethod.invoke(element, this.reflectionArguments);
             return this.propertyChangeListener;
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
@@ -128,7 +135,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      */
     public void uninstallListener(E element, EventListener listener) {
         try {
-            this.removeListenerMethod.invoke(element, this.reflectionParameters);
+            this.removeListenerMethod.invoke(element, this.reflectionArguments);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
