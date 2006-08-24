@@ -285,6 +285,39 @@ public class EventTableModelTest extends SwingTestCase {
     }
 
     /**
+     * Ensure correct locking of EventTableModel such that it does not block calls to
+     * ListSelectionModel.
+     */
+    public void guiTestLocking1() {
+        final BasicEventList<String> list = new BasicEventList<String>();
+        list.add("Member_one");        
+        final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"}); 
+        final EventTableModel model = new EventTableModel<String>(list, tableFormat);        
+        final JTable table = new JTable(model);
+        final EventSelectionModel selectionModel = new EventSelectionModel<String>(list);      
+        selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setSelectionModel(selectionModel);
+        list.add("Member_two");
+    }
+
+    /**
+     * Ensure correct locking of EventTableModel such that it does not block calls to
+     * ListSelectionModel.
+     */
+    public void guiTestLocking2() {
+        final BasicEventList<String> list = new BasicEventList<String>();
+        list.add("Member_one");
+        final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"});
+        final EventTableModel model = new EventTableModel<String>(list, tableFormat);        
+        final JTable table = new JTable(model);
+        final EventSelectionModel selectionModel = new EventSelectionModel<String>(list);      
+        selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setSelectionModel(selectionModel);
+        selectionModel.setSelectionInterval(0, 0);
+        list.remove(0);
+    }
+
+    /**
      * Fake a click on the specified column. This is useful for tests where the
      * table has not been layed out on screen and may have invalid dimensions.
      */

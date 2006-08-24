@@ -131,20 +131,15 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * this method are guaranteed to occur on the Swing EDT.
      */
     public void listChanged(ListEvent<E> listChanges) {
-        swingThreadSource.getReadWriteLock().readLock().lock();
-        try {
-            // for all changes, one block at a time
-            while(listChanges.nextBlock()) {
-                // get the current change info
-                int startIndex = listChanges.getBlockStartIndex();
-                int endIndex = listChanges.getBlockEndIndex();
-                int changeType = listChanges.getType();
-                // create a table model event for this block
-                tableModelEvent.setValues(startIndex, endIndex, changeType);
-                fireTableChanged(tableModelEvent);
-            }
-        } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
+        // for all changes, one block at a time
+        while (listChanges.nextBlock()) {
+            // get the current change info
+            int startIndex = listChanges.getBlockStartIndex();
+            int endIndex = listChanges.getBlockEndIndex();
+            int changeType = listChanges.getType();
+            // create a table model event for this block
+            tableModelEvent.setValues(startIndex, endIndex, changeType);
+            fireTableChanged(tableModelEvent);
         }
     }
 
