@@ -5,6 +5,7 @@ package ca.odell.glazedlists.event;
 
 import junit.framework.TestCase;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -303,7 +304,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
          * latestRevision of all upstream {@link DependentSubjectListener}s.
          */
         public void assertDependenciesSatisfiedRecursively(DependentSubjectListener notified) {
-            for(DependentSubjectListener upstream : upstreamSubjects) {
+            final Iterator<DependentSubjectListener> iter = upstreamSubjects.iterator();
+            while(iter.hasNext()) {
+                final DependentSubjectListener upstream = iter.next();
                 upstream.assertDependenciesSatisfiedRecursively(notified);
                 if(latestRevision < upstream.latestRevision)
                     throw new IllegalStateException("Dependencies not satisfied for " + notified + ", dependency " + this + " not updated by " + upstream + "!");
@@ -535,7 +538,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
          * latestRevision of all upstream {@link DependentSubjectListener}s.
          */
         public void assertDependenciesSatisfiedRecursively(DetachedSubject notified) {
-            for(DetachedSubject upstream : upstreamSubjects) {
+            final Iterator<DetachedSubject> iter = upstreamSubjects.iterator();
+            while(iter.hasNext()) {
+                final DetachedSubject upstream = iter.next();
                 upstream.assertDependenciesSatisfiedRecursively(notified);
                 if(latestRevision < upstream.latestRevision) {
                     throw new IllegalStateException("Dependencies not satisfied for " + notified + ", dependency " + this + " not updated by " + upstream + "!");
