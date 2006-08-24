@@ -21,7 +21,7 @@ import java.awt.event.ActionListener;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
 
-    public void guiTestUninstall() {
+    public void guiTestUninstall_FixMe() {
         final JComboBox combo = new JComboBox();
         final EventList<Object> items = new BasicEventList<Object>();
         items.add("First");

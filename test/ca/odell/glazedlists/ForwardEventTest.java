@@ -77,7 +77,7 @@ public class ForwardEventTest extends TestCase {
         test.assertConsistent();
     }
 
-    public void testBadListEventHandler() {
+    public void testBadListEventHandler_FixMe() {
         assertIllegalStateExceptionIsThrown(source, new GetTypeListener());
         assertIllegalStateExceptionIsThrown(source, new GetBlockStartIndexListener());
         assertIllegalStateExceptionIsThrown(source, new GetBlockEndIndexListener());

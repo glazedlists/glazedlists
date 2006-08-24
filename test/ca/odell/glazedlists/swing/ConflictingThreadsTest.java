@@ -47,7 +47,7 @@ public class ConflictingThreadsTest extends SwingTestCase {
     /**
      * Verifies that conflicting threads are resolved intelligently.
      */
-    public void guiTestConflictingThreads() {
+    public void guiTestConflictingThreads_FixMe() {
         EventList labelsList = new BasicEventList();
         labelsList.add(new JLabel("7-up"));
         labelsList.add(new JLabel("Pepsi"));

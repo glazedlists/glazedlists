@@ -139,7 +139,7 @@ public class EventSelectionModelTest extends SwingTestCase {
         assertEquals(3, atomicList.getReadWriteBlockCount());
     }
 
-    public void guiTestDeleteSelectedRows() {
+    public void guiTestDeleteSelectedRows_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("one two three"));
 
