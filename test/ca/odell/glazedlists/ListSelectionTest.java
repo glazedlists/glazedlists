@@ -663,8 +663,8 @@ public class ListSelectionTest extends TestCase {
             fail("IllegalArgumentException not thrown when item not in source list added");
         } catch(IllegalArgumentException e) {}
         List<Integer> ints = new ArrayList<Integer>();
-        ints.add(0);
-        ints.add(1);
+        ints.add(new Integer(0));
+        ints.add(new Integer(1));
         try {
             listSelection.getTogglingSelected().addAll(ints);
             fail("IllegalArgumentException not thrown when item not in source list added");
@@ -681,16 +681,16 @@ public class ListSelectionTest extends TestCase {
         assertFalse(togglingSelected.remove(new Integer(6)));
         assertFalse(togglingDeselected.remove(new Integer(6)));
         List<Integer> ints = new ArrayList<Integer>();
-        ints.add(0);
-        ints.add(1);
+        ints.add(new Integer(0));
+        ints.add(new Integer(1));
         assertFalse(togglingSelected.removeAll(ints));
         assertFalse(togglingDeselected.removeAll(ints));
     }
 
     public void testTogglingViewBulkOperations(){
         List<Integer> ints = new ArrayList<Integer>();
-        ints.add(0);
-        ints.add(1);
+        ints.add(new Integer(0));
+        ints.add(new Integer(1));
         source.addAll(ints);
         listSelection.getTogglingSelected().addAll(ints);
         assertEquals(2, listSelection.getTogglingSelected().size());

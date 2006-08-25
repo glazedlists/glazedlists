@@ -378,9 +378,9 @@ public class GroupingListTest extends TestCase {
         final GroupingList<String> groupingList = new GroupingList<String>(source);
 
         source.addAll(GlazedListsTests.stringToList("AAABBBCCC"));
-        List<String> as = groupingList.get(0);
-        List<String> bs = groupingList.get(1);
-        List<String> cs = groupingList.get(2);
+        List<String> as = (List<String>) groupingList.get(0);
+        List<String> bs = (List<String>) groupingList.get(1);
+        List<String> cs = (List<String>) groupingList.get(2);
         assertEquals(3, as.size());
         assertEquals(3, bs.size());
         assertEquals(3, cs.size());
@@ -398,8 +398,8 @@ public class GroupingListTest extends TestCase {
 
         source.addAll(GlazedListsTests.delimitedStringToList("Jesse James Jodie Mark Mariusz"));
 
-        List<String> jNames = groupingList.get(0);
-        List<String> mNames = groupingList.get(1);
+        List<String> jNames = (List<String>) groupingList.get(0);
+        List<String> mNames = (List<String>) groupingList.get(1);
 
         assertEquals(GlazedListsTests.delimitedStringToList("Jesse James Jodie"), jNames);
         assertEquals(GlazedListsTests.delimitedStringToList("Mark Mariusz"), mNames);
