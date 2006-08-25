@@ -69,10 +69,12 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         // * one to watch for Model changes
         assertEquals(originalComboBoxPropertyChangeListenerCount + 2, combo.getPropertyChangeListeners().length);
 
-        // one getPopupMenuListener is added to the ComboBoxPopup to size the popup before it is shown on the screen
-        assertEquals(originalComboBoxPopupMenuListenerCount + 1, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
+        // one PopupMenuListener is added to the ComboBoxPopup to size the popup before it is shown on the screen -
+        // the other PopupMenuListener is added to the ComboBoxPopup by ComboBoxPopupLocationFix, which fixes location
+        // problems that occur only on the Apple L&F
+        assertEquals(originalComboBoxPopupMenuListenerCount + 2, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
 
-        // one getPopupMenuListener is added to the JComboBox to size the popup before it is shown on the screen
+        // one PopupMenuListener is added to the JComboBox to size the popup before it is shown on the screen
         assertEquals(originalComboBoxPopupMouseListenerCount + 1, ((ComboPopup) combo.getUI().getAccessibleChild(combo, 0)).getList().getMouseListeners().length);
 
         // one PropertyChangeListener is added to the ComboBoxEditor to watch for Document changes
