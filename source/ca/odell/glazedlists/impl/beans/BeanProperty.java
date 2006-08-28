@@ -136,6 +136,10 @@ public class BeanProperty<T> {
         if(Void.TYPE.equals(method.getReturnType())) {
             throw new IllegalArgumentException("Getter \"" + method + "\" returns void");
         }
+
+        if(method.getParameterTypes().length != 0) {
+            throw new IllegalArgumentException("Getter \"" + method + "\" has too many parameters; expected 0 but found " + method.getParameterTypes().length);
+        }
     }
 
     /**
@@ -148,7 +152,7 @@ public class BeanProperty<T> {
         }
 
         if(method.getParameterTypes().length != 1) {
-            throw new IllegalArgumentException("Setter \"" + method + "\" does not take one paramter");
+            throw new IllegalArgumentException("Setter \"" + method + "\" takes the wrong number of parameters; expected 1 but found " + method.getParameterTypes().length);
         }
     }
 
