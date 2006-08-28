@@ -105,14 +105,38 @@
 
 	<target name="jar" depends="compileall"
 		description="Creates glazedlists jar file containing all UI libraries.">
-		<jar destfile="${target.dir}/glazedlists_${java.target.version.fileFriendlyName}.jar" update="true" index="true">
+
+        <!-- download the OSGibundleinfo library for creating entries in the manifest.mf file which make it a compliant OSGi bundle. See http://www.osgi.org/ -->
+        <mkdir dir="tools"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/39631/OSGiBundleInfo.jar"/>
+            <arg value="tools/OSGiBundleInfo.jar"/>
+        </java>
+
+        <!-- prepare the osgiBundleInfo task which extracts information required to make a compliant OSGi bundle -->
+        <taskdef name="osgiBundleInfo" classname="org.knopflerfish.ant.taskdefs.bundle.BundleInfoTask" classpath="tools/OSGiBundleInfo.jar"/>
+
+        <!-- execute the osgiBundleInfo task to extract the packagelist value -->
+        <osgiBundleInfo exports="packagelist">
+            <fileset dir="${basedir}">
+                <include name="**/source/**/*.java"/>
+                <exclude name="**/com/publicobject/**/*.java"/>
+                <exclude name="**/impl/**/*.java"/>
+            </fileset>
+            <fileset dir="resources"/>
+        </osgiBundleInfo>
+
+        <jar destfile="${target.dir}/glazedlists_${java.target.version.fileFriendlyName}.jar" update="true" index="true">
 			<fileset dir="${classes.dir}">
-                <exclude name="com/publicobject/**"/> <!-- IssuesBrowser -->
+                <exclude name="com/publicobject/**"/>                  <!-- IssuesBrowser -->
+                <exclude name="ca/odell/glazedlists/impl/testing/**"/> <!-- Testing classes -->
             </fileset>
             <fileset dir=".">
 				<include name="resources/**"/>
             </fileset>
 			<manifest>
+                <attribute name="Manifest-Version" value="1.0"/>
 				<attribute name="Main-Class" value="ca.odell.glazedlists.impl.Main"/>
 				<attribute name="Sealed" value="true"/>
 				<attribute name="Built-By" value="${user.name}"/>
@@ -122,10 +146,18 @@
 				<attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
 				<attribute name="Contributors" value="Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden, Holger Brands"/>
                 <attribute name="Source-Version" value="JDK ${java.target.version}"/>
-			</manifest>
-		</jar>
-	</target>
 
+                <attribute name="Bundle-ManifestVersion" value="2"/>
+                <attribute name="Bundle-Name" value="Glazed Lists Plug-in"/>
+                <attribute name="Bundle-SymbolicName" value="ca.odell.glazedlists"/>
+                <attribute name="Bundle-Version" value="${version}"/>
+                <attribute name="Bundle-ClassPath" value="."/>
+                <attribute name="Bundle-Localization" value="plugin"/>
+                <attribute name="Export-Package" value="${packagelist}"/>
+                <attribute name="Require-Bundle" value="org.eclipse.swt,org.eclipse.jface"/>
+            </manifest>
+		</jar>
+    </target>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	   COMPILE
@@ -656,7 +688,6 @@
        Windows; http://gnuwin32.sourceforge.net/packages/m4.htm
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <target name="m4">
-
         <!-- generate the four color tree -->
         <mapper id="bcii_to_fourcolorintermediate" type="glob"
            from="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"
@@ -721,7 +752,6 @@
                 <include name="source/ca/odell/glazedlists/impl/adt/barcode2/*.java_intermediate"/>
             </fileset>
         </delete>
-
     </target>
 
 </project>
