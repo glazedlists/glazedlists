@@ -81,10 +81,19 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         final Component c = delegate.getTableCellEditorComponent(table, value, isSelected, row, column);
 
-        // extract information about the tree node from the TreeList
-        final int depth = treeList.depth(row);
-        final boolean isExpanded = treeList.isExpanded(row);
-        final boolean isExpandable = treeList.isExpandable(row);
+        final int depth;
+        final boolean isExpanded;
+        final boolean isExpandable;
+
+        treeList.getReadWriteLock().readLock().lock();
+        try {
+            // read information about the tree node from the TreeList
+            depth = treeList.depth(row);
+            isExpanded = treeList.isExpanded(row);
+            isExpandable = treeList.isExpandable(row);
+        } finally {
+            treeList.getReadWriteLock().readLock().unlock();
+        }
 
         // ask our special component to configure itself for this tree node
         component.configure(depth, isExpandable, isExpanded, c);
@@ -100,10 +109,9 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     * <code>DefaultTreeTableCellPanel</code> then this method actually toggles
     * the expanded/collapsed state of the rowObject and then returns
     * <tt>false</tt> from this method to indicate that we should not enter
-    * edit mode. So, this method does have a side effect for one specific type
-    * of EventObject it evaluates.
+    * edit mode.
     *
-    * @param anEvent the event
+    * @param anEvent the event attempting to begin a cell edit
     * @return true if cell is ready for editing, false otherwise
     */
     public boolean isCellEditable(EventObject anEvent) {
@@ -132,10 +140,14 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
 
             // if a left-click occurred over the expand/collapse button
             if (SwingUtilities.isLeftMouseButton(me) && renderedPanel.isPointOverExpanderButton(clickPoint)) {
-                // expand/collapse the rowObject if possible
-                if (treeList.isExpandable(row))
-                    treeList.setExpanded(row, !treeList.isExpanded(row));
-
+                treeList.getReadWriteLock().writeLock().lock();
+                try {
+                    // expand/collapse the rowObject if possible
+                    if (treeList.isExpandable(row))
+                        treeList.setExpanded(row, !treeList.isExpanded(row));
+                } finally {
+                    treeList.getReadWriteLock().writeLock().unlock();
+                }
                 return false;
             }
 
@@ -176,8 +188,10 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
      * must be prepared for garbage collection.
      */
     public void dispose() {
-        this.delegate = null;
-        this.treeList = null;
+        delegate.removeCellEditorListener(delegateListener);
+
+        delegate = null;
+        treeList = null;
     }
 
     /**
