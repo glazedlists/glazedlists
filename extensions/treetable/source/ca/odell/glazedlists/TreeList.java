@@ -235,10 +235,8 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 //        throw new UnsupportedOperationException();
     }
 
-    private boolean dummyExpandVar_REMOVE_ME = true;
     public boolean isExpanded(int index) {
-        return dummyExpandVar_REMOVE_ME;
-//        throw new UnsupportedOperationException();
+        return data.get(index, VISIBLE_NODES).get().expanded;
     }
     /**
      * @param expanded true to expand the node, false to collapse it.
