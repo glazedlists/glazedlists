@@ -39,7 +39,7 @@ class BciiNode<V> implements Element<V> {
 
     /*[ COLORED_START ]*/
     /** the node's color */
-    final byte color;
+    byte color;
     /*[ COLORED_END ]*/
 
 

@@ -80,7 +80,7 @@ class FourColorNode<V> implements Element<V> {
 
      
     /** the node's color */
-    final byte color;
+    byte color;
       
 
 

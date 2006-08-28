@@ -571,4 +571,38 @@ public class Tree4Test extends TestCase {
         assertEquals(false, iterator.hasNextNode(allColors));
     }
 
+
+    public void testSetColor() {
+        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+
+        Element<String> january = tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 3);
+        Element<String> february = tree.add(3, Tree4Test.allColors, Tree4Test.a, Tree4Test.february, 2);
+        Element<String> march = tree.add(5, Tree4Test.allColors, Tree4Test.a, Tree4Test.march, 3);
+        Element<String> april = tree.add(8, Tree4Test.allColors, Tree4Test.a, Tree4Test.april, 3);
+        Element<String> may = tree.add(11, Tree4Test.allColors, Tree4Test.a, Tree4Test.may, 3);
+        assertEquals(0, tree.size(Tree4Test.b));
+        assertEquals(14, tree.size(Tree4Test.a));
+        assertEquals(8, tree.indexOfNode(april, Tree4Test.a));
+
+        tree.setColor(february, Tree4Test.b);
+        assertEquals(12, tree.size(Tree4Test.a));
+        assertEquals(2, tree.size(Tree4Test.b));
+        assertEquals(6, tree.indexOfNode(april, Tree4Test.a));
+
+        tree.setColor(march, Tree4Test.b);
+        assertEquals(9, tree.size(Tree4Test.a));
+        assertEquals(5, tree.size(Tree4Test.b));
+        assertEquals(3, tree.indexOfNode(april, Tree4Test.a));
+
+        tree.setColor(may, Tree4Test.b);
+        assertEquals(6, tree.size(Tree4Test.a));
+        assertEquals(8, tree.size(Tree4Test.b));
+        assertEquals(3, tree.indexOfNode(april, Tree4Test.a));
+
+        tree.setColor(january, Tree4Test.b);
+        assertEquals(3, tree.size(Tree4Test.a));
+        assertEquals(11, tree.size(Tree4Test.b));
+        assertEquals(0, tree.indexOfNode(april, Tree4Test.a));
+    }
+
 }

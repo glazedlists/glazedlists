@@ -429,6 +429,21 @@ public class FourColorTree<V> {
          
     }
 
+     
+    /**
+     * Change the color of the specified element.
+     */
+    public final void setColor(Element<V> element, byte color) {
+        FourColorNode<V> node = (FourColorNode<V>)element;
+        byte oldColor  = node.getColor();
+        if(oldColor == color) return;
+
+        fixCountsThruRoot(node, oldColor, -node.size);
+        node.color = color;
+        fixCountsThruRoot(node, color, node.size);
+    }
+      
+
     /**
      * Fix the height of the specified ancestor after inserting a child node.
      * This method short circuits when it finds the first node where the size

@@ -409,6 +409,8 @@ public class SimpleTree<V> {
          
     }
 
+      
+
     /**
      * Fix the height of the specified ancestor after inserting a child node.
      * This method short circuits when it finds the first node where the size

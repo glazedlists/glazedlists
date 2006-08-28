@@ -201,7 +201,7 @@ public class TreeListTest extends TestCase {
         assertEquals(3, treeList.size());
     }
 
-    public void testInsertRealOverVirtualParent_FixMe() {
+    public void testInsertRealOverVirtualParent() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener.install(treeList);
@@ -288,6 +288,82 @@ public class TreeListTest extends TestCase {
         assertEquals(0, treeList.size());
     }
 
+    public void testSourceChangesOnCollapsedSubtrees() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("A");
+        treeList.setExpanded(0, false);
+        source.add("ABC");
+        assertEquals(1, treeList.size());
+
+        treeList.setExpanded(0, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+        });
+
+        treeList.setExpanded(1, false);
+        source.add("AD");
+        source.addAll(Arrays.asList(new String[] {
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABG",
+        }));
+
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "AD",
+        });
+
+        treeList.setExpanded(0, false);
+        source.addAll(Arrays.asList(new String[] {
+                "ABH",
+                "ABI",
+        }));
+        treeList.setExpanded(0, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "AD",
+        });
+
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABG",
+                "ABH",
+                "ABI",
+                "AD",
+        });
+
+        treeList.setExpanded(0, false);
+        source.removeAll(Arrays.asList(new String[] {
+                "ABF",
+                "ABG",
+        }));
+        treeList.setExpanded(0, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABH",
+                "ABI",
+                "AD",
+        });
+    }
+
     public void assertTreeStructure(TreeList<String>treeList, String[] structure) {
 
         // convert the list of TreeElements into a list of Strings
@@ -304,4 +380,147 @@ public class TreeListTest extends TestCase {
         assertEquals(Arrays.asList(structure), treeAsStrings);
     }
 
+    public void testCollapseExpand() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("ABC");
+        source.add("ABD");
+        source.add("ABE");
+        source.add("ABFG");
+        source.add("ABFH");
+        source.add("DEF");
+        source.add("GJ");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABFG",
+                "ABFH",
+                "D",
+                "DE",
+                "DEF",
+                "G",
+                "GJ",
+        });
+
+        // collapse 'E'
+        treeList.setExpanded(9, false);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABFG",
+                "ABFH",
+                "D",
+                "DE",
+                "G",
+                "GJ",
+        });
+
+        // collapse 'F'
+        treeList.setExpanded(5, false);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "D",
+                "DE",
+                "G",
+                "GJ",
+        });
+
+        // collapse 'B'
+        treeList.setExpanded(1, false);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "D",
+                "DE",
+                "G",
+                "GJ",
+        });
+
+        // collapse 'D'
+        treeList.setExpanded(2, false);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "D",
+                "G",
+                "GJ",
+        });
+
+        // expand 'B'
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "D",
+                "G",
+                "GJ",
+        });
+
+        // collapse 'A'
+        treeList.setExpanded(0, false);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "D",
+                "G",
+                "GJ",
+        });
+
+        // expand 'A', 'F'
+        treeList.setExpanded(0, true);
+        treeList.setExpanded(5, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABFG",
+                "ABFH",
+                "D",
+                "G",
+                "GJ",
+        });
+    }
+
+    public void testSourceUpdateEvents() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("ABC");
+        source.add("DEF");
+        treeList.setExpanded(0, false);
+        source.set(0, "ABD");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "D",
+                "DE",
+                "DEF",
+        });
+
+        source.set(1, "ABE");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+        });
+    }
 }

@@ -53,7 +53,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // populate parent links
         for(int i = 0; i < super.source.size(); i++) {
             TreeElement<E> node = super.source.get(i);
-            node.parent = findParentByValue(node, true, false);
+            attachParent(node, true, false);
         }
 
         // prepare sibling links
@@ -88,11 +88,32 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
+     * Find the parent for the specified node, creating it if necessary. When
+     * a parent is found, this node is attached to that parent and its
+     * visibility is inherited from its parent's 'visible' and 'expanded'
+     * flags.
+     *
      * @param createIfNecessary true to recursively create as many parents
      *      as necessary.
      * @param fireEvents false to suppress event firing, for use only in the
      *      constructor of {@link TreeList}.
+     * @return true if the attached element is visible, false otherwise
      */
+    private boolean attachParent(TreeElement<E> node, boolean createIfNecessary, boolean fireEvents) {
+        TreeElement<E> parent = findParentByValue(node, createIfNecessary, fireEvents);
+        node.parent = parent;
+
+        // toggle the visibility of the attached node
+        if(parent != null) {
+            boolean visible = parent.expanded && parent.isVisible();
+            setVisible(node, visible);
+            return visible;
+        }
+
+        // parentless elements are always visible
+        return true;
+    }
+
     private TreeElement<E> findParentByValue(TreeElement<E> node, boolean createIfNecessary, boolean fireEvents) {
 
         // no parents for root nodes
@@ -108,12 +129,15 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         if(parentPrototype.compareTo(possibleParent) == 0) {
             return possibleParent;
 
-        // we need to create a parent
+        // create a parent
         } else if(createIfNecessary) {
             Element<TreeElement<E>> element = data.add(expectedParentIndex, ALL_NODES, VISIBLE_VIRTUAL, parentPrototype, 1);
             parentPrototype.element = element;
-            parentPrototype.parent = findParentByValue(parentPrototype, true, fireEvents);
-            if(fireEvents) updates.addInsert(expectedParentIndex);
+            boolean visible = attachParent(parentPrototype, true, fireEvents);
+            if(fireEvents && visible) {
+                int visibleIndex = data.indexOfNode(parentPrototype.element, VISIBLE_NODES);
+                updates.addInsert(visibleIndex);
+            }
             return parentPrototype;
 
         // no parent exists, and we're not going to make one
@@ -165,8 +189,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // We could also calculate this by looking at the first child, then
         // traversing across all children until we get to the end of the
         // children.
-
-        TreeElement<E> treeElement = getTreeElement(index);
+        TreeElement<E> treeElement = data.get(index, colorsOut).get();
 
         // find the next node that's not a child to find the delta
         TreeElement<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOf(treeElement);
@@ -221,8 +244,77 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * @param expanded true to expand the node, false to collapse it.
      */
     public void setExpanded(int index, boolean expanded) {
-        this.dummyExpandVar_REMOVE_ME = expanded;
-//        throw new UnsupportedOperationException();
+        TreeElement<E> toExpand = data.get(index, VISIBLE_NODES).get();
+
+        // if we're already in the desired state, give up!
+        if(toExpand.expanded == expanded) return;
+
+        // first toggle the active node. Note that it's visibility does not
+        // change, only that of its children
+        toExpand.expanded = expanded;
+
+        updates.beginEvent();
+
+        TreeElement<E> toExpandNextSibling = nextNodeThatsNotAChildOf(toExpand);
+
+        // walk through the subtree, looking for all the descendents we need
+        // to change. As we encounter them, change them and fire events
+        for(Element<TreeElement<E>> descendentElement = toExpand.element.next(); descendentElement != null; descendentElement = descendentElement.next()) {
+            TreeElement<E> descendent = descendentElement.get();
+            if(descendent == toExpandNextSibling) break;
+
+            // figure out if this node should be visible by walking up the ancestors
+            // to the node being expanded, searching for a parent that's not
+            // expanded
+            boolean shouldBeVisible = expanded;
+            for(TreeElement<E> ancestor = descendent.parent; shouldBeVisible && ancestor != toExpand; ancestor = ancestor.parent) {
+                if(!ancestor.expanded) {
+                    shouldBeVisible = false;
+                }
+            }
+            if(shouldBeVisible == descendent.isVisible()) continue;
+
+            // show a non-visible node
+            if(shouldBeVisible) {
+                setVisible(descendent, true);
+                int insertIndex = data.indexOfNode(descendent.element, VISIBLE_NODES);
+                updates.addInsert(insertIndex);
+
+            // hide a visible node
+            } else {
+                int deleteIndex = data.indexOfNode(descendent.element, VISIBLE_NODES);
+                updates.addDelete(deleteIndex);
+                setVisible(descendent, false);
+            }
+        }
+        assert(isValid());
+        updates.commitEvent();
+    }
+
+    /**
+     * Set the visibility of the specified element without firing any events.
+     */
+    private void setVisible(TreeElement<E> node, boolean visible) {
+        byte newColor;
+        if(visible) {
+            newColor = node.virtual ? VISIBLE_VIRTUAL : VISIBLE_REAL;
+        } else {
+            newColor = node.virtual ? HIDDEN_VIRTUAL : HIDDEN_REAL;
+        }
+        data.setColor(node.element, newColor);
+    }
+
+    /**
+     * Set the virtualness of the specified element without firing events.
+     */
+    private void setVirtual(TreeElement<E> node, boolean virtual) {
+        byte newColor;
+        if(virtual) {
+            newColor = node.isVisible() ? VISIBLE_VIRTUAL : HIDDEN_VIRTUAL;
+        } else {
+            newColor = node.virtual ? VISIBLE_REAL : HIDDEN_REAL;
+        }
+        data.setColor(node.element, newColor);
     }
 
     public void listChanged(ListEvent<TreeElement<E>> listChanges) {
@@ -236,17 +328,8 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             int type = listChanges.getType();
 
             if(type == ListEvent.INSERT) {
-                int insertIndex = findInsertIndex(sourceIndex);
-                TreeElement<E> treeElement = source.get(sourceIndex);
-                Element<TreeElement<E>> element = data.add(insertIndex, ALL_NODES, VISIBLE_REAL, treeElement, 1);
-                treeElement.element = element;
-                updates.addInsert(insertIndex);
-
-                // populate parent relations
-                treeElement.parent = findParentByValue(treeElement, true, true);
-
+                handleInsert(sourceIndex);
                 // todo: repair siblings
-                // todo: handle case where an identical virtual element already exists
 
             } else if(type == ListEvent.UPDATE) {
                 TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
@@ -258,14 +341,20 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
                 // add new parents, validate the old ones are still necessary
                 parentsToVerify.add(treeElement.parent);
-                treeElement.parent = findParentByValue(treeElement, true, true);
+                attachParent(treeElement, true, true);
                 // todo: repair siblings
+
+                // todo: handle case where it went from visible to invisible
+                // due to moving from one subtree to another
 
             } else if(type == ListEvent.DELETE) {
                 TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
-                int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+                boolean visible = treeElement.isVisible();
+                if(visible) {
+                    int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+                    updates.addDelete(viewIndex);
+                }
                 data.remove(treeElement.element);
-                updates.addDelete(viewIndex);
                 treeElement.element = null; // null out the element
 
                 // remove the parent if necessary in the next iteration
@@ -303,13 +392,12 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 // we've already deleted this parent, we're done
                 if(parent.element == null) break;
 
-
                 // if this is a legit parent, then we'll still have a child element.
                 // if it turns out that that child is also unnecessary, we'll clean
                 // everything up in the next iteration
                 boolean stillRequired;
                 int index = data.indexOfNode(parent.element, ALL_NODES);
-                if(index + 1< data.size(ALL_NODES)) {
+                if(index + 1 < data.size(ALL_NODES)) {
                     TreeElement<E> possibleChild = data.get(index + 1, ALL_NODES).get();
                     stillRequired = possibleChild.parent == parent;
                 } else {
@@ -336,6 +424,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     /**
      * Adjust the location of the updated tree element so if it now fits under
      * it's neighbours parents, those parents are in the correct place.
+     *
+     * <p>This method could benefit highly from the addition of a Glazed Lists
+     * 'move' event.
      */
     private void shiftParentsAsNecessary(TreeElement<E> treeElement) {
         int index = data.indexOfNode(treeElement.element, ALL_NODES);
@@ -351,6 +442,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
             // swap this with its precessor
             data.remove(predecessor.element);
+            // todo - fire events in the 'visible' index range
             updates.addDelete(index - 1);
             Element<TreeElement<E>> element = data.add(index, ALL_NODES, predecessor.element.getColor(), predecessor, 1);
             predecessor.element = element;
@@ -385,7 +477,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * accounting for virtual parents that may already exist and require
      * skipping.
      */
-    private int findInsertIndex(int sourceIndex) {
+    private void handleInsert(int sourceIndex) {
         TreeElement<E> treeElement = super.source.get(sourceIndex);
 
         // figure out where the source element immediately before us lies. All
@@ -395,20 +487,55 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         // walk through all our parent nodes already in the tree
         int insertIndex = predecessorIndex + 1;
-        skipAllAncestors:
         while(insertIndex < followerIndex) {
             TreeElement<E> possibleAncestor = data.get(insertIndex, ALL_NODES).get();
 
+            // this ancestor is a virtual copy of the node to be inserted,
+            // in which case we want to update over it. For example, if we
+            // simulated a node and then that value gets inserted 'for real',
+            // we keep the state of that node
+            if(possibleAncestor.virtual && possibleAncestor.compareTo(treeElement) == 0) {
+
+                // make the real element copy the state of the virtual
+                treeElement.updateFrom(possibleAncestor);
+
+                // replace the virtual with the real in the tree structure
+                possibleAncestor.element.set(treeElement);
+                setVirtual(possibleAncestor, false);
+                for(TreeElement<E> child = firstChildOf(possibleAncestor); child != null; child = child.siblingAfter) {
+                    child.parent = treeElement;
+                }
+
+                // fire an 'update' event so selection is not destroyed
+                if(possibleAncestor.isVisible()) {
+                    int visibleIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+                    updates.addUpdate(visibleIndex);
+                }
+                return;
+            }
+
             // this element is definitely not our parent, it's path is too long
-            if(possibleAncestor.pathLength() > treeElement.pathLength() - 1) return insertIndex;
+            if(possibleAncestor.pathLength() > treeElement.pathLength() - 1) break;
 
             // make sure the data is consistent with our parent's data
-            if(!treeElement.isAncestorByValue(possibleAncestor)) return insertIndex;
+            if(!treeElement.isAncestorByValue(possibleAncestor)) break;
 
-            // we found a parent, skip past it when inserting
+            // we found an ancestor, skip past it when inserting
             insertIndex++;
         }
-        return insertIndex;
+
+        // insert a new element
+        Element<TreeElement<E>> element = data.add(insertIndex, ALL_NODES, VISIBLE_REAL, treeElement, 1);
+        treeElement.element = element;
+
+        // link to the parent to determine visibility
+        boolean visible = attachParent(treeElement, true, true);
+
+        // set visibility and fire an event
+        if(visible) {
+            int visibleIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+            updates.addInsert(visibleIndex);
+        }
     }
 
     /**
@@ -445,6 +572,20 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
+     * Get the first child of the specified node, or <code>null</code> if no
+     * such child exists. This is <strong>not</strong> by value, but by the
+     * current tree structure.
+     */
+    public TreeElement<E> firstChildOf(TreeElement<E> node) {
+        // the first child is always the node immediately after
+        Element<TreeElement<E>> possibleChildElement = node.element.next();
+        if(possibleChildElement == null) return null;
+        TreeElement<E> possibleChild = possibleChildElement.get();
+        if(possibleChild.parent != node) return null;
+        return possibleChild;
+    }
+
+    /**
      * A node in the display tree.
      */
     public static class TreeElement<E> implements Comparable<TreeElement<E>> {
@@ -453,6 +594,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         /** true if this element isn't in the source list */
         private boolean virtual;
+
+        /** true if this element's children should be visible */
+        private boolean expanded = true;
 
         /** the element object points back at this */
         private Element<TreeElement<E>> element;
@@ -511,6 +655,15 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         }
 
         /**
+         * @return <code>true</code> if this node shows up in the output
+         *      EventList, or <code>false</code> if it's a descendent of a
+         *      collapsed node.
+         */
+        public boolean isVisible() {
+            return (element.getColor() & VISIBLE_NODES) > 0;
+        }
+
+        /**
          * @return true if the path of possibleAncestor is a proper prefix of
          *      the path of this element.
          */
@@ -527,6 +680,20 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 if(comparableComparator.compare(possibleAncestorPathElement, pathElement) != 0) return false;
             }
             return true;
+        }
+
+        /**
+         * Copy the values from that object into this object. This is useful
+         * when a virtual node is replaced by a real one, and we want the real
+         * one to have the attributes of its predecessor.
+         */
+        private void updateFrom(TreeElement<E> other) {
+            element = other.element;
+            virtual = false;
+            expanded = other.expanded;
+            siblingAfter = other.siblingAfter;
+            siblingBefore = other.siblingBefore;
+            parent = other.parent;
         }
     }
 
