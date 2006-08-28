@@ -92,8 +92,10 @@ class TreeTableCellPanel extends JPanel {
         // replace any kind of border with an empty one that tabs the node component over from the expander button
         if (nodeComponent instanceof JComponent) {
             final JComponent jNodeComponent = (JComponent) nodeComponent;
-            jNodeComponent.setBorder(NODE_COMPONENT_BORDER);
             setToolTipText(jNodeComponent.getToolTipText());
+
+            setBorder(jNodeComponent.getBorder());
+            jNodeComponent.setBorder(NODE_COMPONENT_BORDER);
         }
 
         // configure this panel with the updated space/expander button and the supplied nodeComponent
@@ -193,14 +195,14 @@ class TreeTableCellPanel extends JPanel {
             // 2. layout the expander button (centered vertically)
             if (availableWidth > 0 && expanderButton != null) {
                 int expanderButtonX = totalWidth - availableWidth;
-                int expanderButtonY = 0;
+                int expanderButtonY = insets.top;
                 int expanderButtonWidth = expanderButton.getPreferredSize().width;
                 int expanderButtonHeight = expanderButton.getPreferredSize().height;
 
                 if (expanderButtonHeight > totalHeight)
                     expanderButtonHeight = totalHeight;
                 else if (expanderButtonHeight < totalHeight)
-                    expanderButtonY = (totalHeight - expanderButtonHeight) / 2;
+                    expanderButtonY += (totalHeight - expanderButtonHeight) / 2;
 
                 expanderButton.setBounds(expanderButtonX, expanderButtonY, expanderButtonWidth, expanderButtonHeight);
                 availableWidth -= expanderButtonWidth;
@@ -209,14 +211,14 @@ class TreeTableCellPanel extends JPanel {
             // 3. layout the node component (centered vertically and getting all remaining horizontal space)
             if (availableWidth > 0 && nodeComponent != null) {
                 int nodeComponentX = totalWidth - availableWidth;
-                int nodeComponentY = 0;
+                int nodeComponentY = insets.top;
                 int nodeComponentWidth = availableWidth;
                 int nodeComponentHeight = nodeComponent.getPreferredSize().height;
 
                 if (nodeComponentHeight > totalHeight)
                     nodeComponentHeight = totalHeight;
                 else if (nodeComponentHeight < totalHeight)
-                    nodeComponentY = (totalHeight - nodeComponentHeight) / 2;
+                    nodeComponentY += (totalHeight - nodeComponentHeight) / 2;
 
                 nodeComponent.setBounds(nodeComponentX, nodeComponentY, nodeComponentWidth, nodeComponentHeight);
             }
