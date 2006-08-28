@@ -22,6 +22,24 @@
         <format property="dateAndTime" pattern="yyyy-MM-dd H:mm"/>
     </tstamp>
 
+	<!-- Default implementation version for jar file, overridden by release target -->
+	<property name="implementation.version" value="${datestamp.dateAndTime}"/>
+
+	<!-- Default title for javadocs, overridden by release target -->
+	<property name="doctitle" value="Glazed Lists"/>
+
+	<!-- Default name for distribution zip file, overridden by release target -->
+	<property name="dist.file" value="glazedlists-source_${java.target.version.fileFriendlyName}.zip"/>
+
+	<!-- Release name for distribution zip file -->
+	<property name="release.dist.file" value="glazedlists-${version}-source_${java.target.version.fileFriendlyName}.zip"/>
+
+	<!-- Default name for jar file, overridden by release target -->
+	<property name="jar.file" value="glazedlists_${java.target.version.fileFriendlyName}.jar"/>
+
+	<!-- Release name for jar file -->
+	<property name="release.jar.file" value="glazedlists-${version}_${java.target.version.fileFriendlyName}.jar"/>
+
 	<!-- base output directory for build artefacts -->
 	<property name="target.dir" value="target"/>
 
@@ -45,6 +63,9 @@
 
 	<!-- output directory for maven upload bundle -->
 	<property name="maven_bundle.dir" value="${target.dir}/maven_bundle"/>
+
+	<!-- name of maven upload bundle -->
+	<property name="maven_bundle.file" value="glazedlists_${java.target.version.fileFriendlyName}-${version}-bundle.jar"/>	
 
 	<patternset id="test.files">
 		<include name="**/*.xml"/>
@@ -92,7 +113,7 @@
             <link href="http://www.jfree.org/jfreechart/javadoc/"/>
             <link href="http://download.java.net/javadesktop/swinglabs/releases/0.8/docs/api/"/>
 			<link href="http://www.hibernate.org/hib_docs/v3/api/"/>
-            <doctitle><![CDATA[<h1>Glazed Lists</h1>]]></doctitle>
+            <doctitle><![CDATA[<h1>${doctitle}</h1>]]></doctitle>
 			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2006 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
 		</javadoc>
 	</target>
@@ -127,7 +148,7 @@
             <fileset dir="resources"/>
         </osgiBundleInfo>
 
-        <jar destfile="${target.dir}/glazedlists_${java.target.version.fileFriendlyName}.jar" update="true" index="true">
+        <jar destfile="${target.dir}/${jar.file}" update="true" index="true">
 			<fileset dir="${classes.dir}">
                 <exclude name="com/publicobject/**"/>                  <!-- IssuesBrowser -->
                 <exclude name="ca/odell/glazedlists/impl/testing/**"/> <!-- Testing classes -->
@@ -141,7 +162,7 @@
 				<attribute name="Sealed" value="true"/>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Built-At" value="${datestamp.dateAndTime}"/>
-				<attribute name="Implementation-Version" value="${datestamp.dateAndTime}"/>
+				<attribute name="Implementation-Version" value="${implementation.version}"/>
 				<attribute name="Implementation-Title" value="Glazed Lists"/>
 				<attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
 				<attribute name="Contributors" value="Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden, Holger Brands"/>
@@ -550,7 +571,7 @@
 	<target name="dist" depends="clean"
 		description="Create a .zip file of the source for backup or distribution.">
 		<mkdir dir="${target.dir}"/>
-		<zip destfile="${target.dir}/glazedlists-source_${java.target.version.fileFriendlyName}.zip" basedir=".">
+		<zip destfile="${target.dir}/${dist.file}" basedir=".">
 			<exclude name="${target.dir}/**"/>
 			<exclude name="tools/**"/>
 			<exclude name="extensions/**/lib/**"/>
@@ -559,6 +580,9 @@
 			<exclude name="*.ipr"/> <!-- Intellij IDEA Project File -->
 			<exclude name="*.iws"/> <!-- Intellij IDEA Workspace File -->
 			<exclude name="*.tfpt"/> <!-- Performance Test Data (mozillabugs.tfpt, mp3collection.tfpt) -->
+			<exclude name=".project"/> <!-- Eclipse project file -->
+			<exclude name=".classpath"/> <!-- Eclipse project classpath -->
+			<exclude name=".settings/**"/>	<!-- Eclipse project settings -->
 		</zip>
 	</target>
 
@@ -578,16 +602,16 @@
 
         <!-- upload source -->
         <javaNetUpload projectName="glazedlists"
-            toFile="/latest_build/glazedlists-source_${java.target.version.fileFriendlyName}.zip"
-            fromFile="${target.dir}/glazedlists-source_${java.target.version.fileFriendlyName}.zip"
+            toFile="/latest_build/${dist.file}"
+            fromFile="${target.dir}/${dist.file}"
             fileDescription="Source build by ${user.name} at ${datestamp.dateAndTime}"
             overwrite="yes"
             fileStatus="Draft"/>
 
         <!-- upload binary -->
         <javaNetUpload projectName="glazedlists"
-            toFile="/latest_build/glazedlists_${java.target.version.fileFriendlyName}.jar"
-            fromFile="${target.dir}/glazedlists_${java.target.version.fileFriendlyName}.jar"
+            toFile="/latest_build/${jar.file}"
+            fromFile="${target.dir}/${jar.file}"
             fileDescription="Binary build by ${user.name} at ${datestamp.dateAndTime}"
             overwrite="yes"
             fileStatus="Draft"/>
@@ -652,8 +676,8 @@
 	<target name="maven-bundle" depends="jar-sources,jar-javadoc,jar"
 		description="Creates glazedlists upload bundle for maven repository.">
 		<copy file="pom.xml" todir="${maven_bundle.dir}" filtering="true"/>
-		<copy file="${target.dir}/glazedlists_${java.target.version.fileFriendlyName}.jar" tofile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
-		<jar destfile="${target.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-bundle.jar">
+		<copy file="${target.dir}/${jar.file}" tofile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
+		<jar destfile="${target.dir}/${maven_bundle.file}">
             <fileset dir="${maven_bundle.dir}">
 				<include name="pom.xml"/>
 				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
@@ -671,7 +695,7 @@
 	<target name="jar-sources" depends="check-version,dist"
 		description="Create a .jar file containing the source files.">
 		<mkdir dir="${maven_bundle.dir}"/>
-		<copy file="${target.dir}/glazedlists-source_${java.target.version.fileFriendlyName}.zip" tofile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
+		<copy file="${target.dir}/${dist.file}" tofile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
 		<jar destfile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar" update="true"/>
 	</target>
 
@@ -679,6 +703,82 @@
 		description="Create a .jar file containing the javadoc.">
 		<mkdir dir="${maven_bundle.dir}"/>
 		<jar destfile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-javadoc.jar" basedir="${docs.dir}/api"/>
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	   RELEASE
+	   Build a Glazed Lists release with version number.
+	   It builds source distribution, binary jar and maven upload bundle with correct file names.
+	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<target name="check-release-version" description="Checks version property">
+		<fail unless="version" message="To build or upload a release the property 'version' must be defined."/>
+	</target>
+	
+	<target name="release" depends="check-release-version"
+		description="Builds a release with binary jar, source distribution and maven upload bundle">
+		<antcall target="maven-bundle">
+			<param name="doctitle" value="Glazed Lists ${version}"/>
+			<param name="implementation.version" value="${version}"/>
+			<param name="jar.file" value="${release.jar.file}"/>
+			<param name="dist.file" value="${release.dist.file}"/>
+		</antcall>
+	</target>
+
+	<target name="check-release-artifacts">
+		<fail message="Files for release upload are missing, build a release first.">
+	    	<condition>
+	    		<or>
+	       			<not>
+			       		<available file="${target.dir}/${release.jar.file}" property="jar.file.present"/>
+	    	   		</not>
+	       			<not>
+			       		<available file="${target.dir}/${release.dist.file}" property="dist.file.present"/>
+	    	   		</not>
+	       			<not>
+			       		<available file="${target.dir}/${maven_bundle.file}" property="maven_bundle.file.present"/>
+	    	   		</not>
+	    		</or>
+	     	</condition>
+		</fail>
+	</target>
+	
+	<target name="upload-release" depends="check-release-version, check-release-artifacts"
+		description="Uploads a release to glazedlists.dev.java.net">
+        <!-- download the javanettasks library for uploading jars to the java.net webserver -->
+        <mkdir dir="tools"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/25945/javanettasks.jar"/>
+            <arg value="tools/javanettasks.jar"/>
+        </java>
+
+        <!-- prepare the javaNetUpload task -->
+        <taskdef resource="org/kohsuke/javanettasks.properties" classpath="tools/javanettasks.jar"/>
+		
+        <!-- upload source distribution -->
+		<echo message="Uploading to /glazedlists-${version}/${release.dist.file}"/>
+        <javaNetUpload projectName="glazedlists"
+            toFile="/glazedlists-${version}/${release.dist.file}"
+            fromFile="${target.dir}/${release.dist.file}"
+            fileDescription="Source release by ${user.name} at ${datestamp.dateAndTime}"
+            fileStatus="Archival"/>
+
+        <!-- upload binary jar -->
+		<echo message="Uploading to /glazedlists-${version}/${release.jar.file}"/>		
+        <javaNetUpload projectName="glazedlists"
+            toFile="/glazedlists-${version}/${release.jar.file}"
+            fromFile="${target.dir}/${release.jar.file}"
+            fileDescription="Binary release by ${user.name} at ${datestamp.dateAndTime}"
+            fileStatus="Archival"/>
+
+		<!-- upload maven bundle -->
+		<echo message="Uploading to /maven_upload/${maven_bundle.file}"/>
+        <javaNetUpload projectName="glazedlists"
+            toFile="/maven_upload/${maven_bundle.file}"
+            fromFile="${target.dir}/${maven_bundle.file}"
+            fileDescription="Maven upload bundle by ${user.name} at ${datestamp.dateAndTime}"
+            fileStatus="Archival"/>		
 	</target>
 	
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
