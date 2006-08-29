@@ -616,7 +616,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 // Grouper works to fire a special flag called 'shift' with the
                 // value true whenever the group joined is a RIGHT_GROUP
                 int shiftGroupIndex = groupIndex + 1;
-                if(groupChangeType == ListEvent.DELETE && elementChangeType == ListEvent.DELETE
+                if(groupChangeType == ListEvent.DELETE && elementChangeType != ListEvent.INSERT
                         && shiftGroupIndex < insertedSeparators.colourSize(SEPARATOR)
                         && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)) {
                     int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
