@@ -17,6 +17,23 @@ import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
  */
 public class SeparatorListTest extends TestCase {
 
+    /**
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=364">Bug 364</a>
+     */
+    public void testUpdateProblem() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+
+        source.addAll(0, GlazedListsTests.stringToList("ABB"));
+    	source.set(0, "B");
+        assertSeparatorEquals(separatorList.get(0), 3, "B");
+
+    	source.set(0, "A");
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 2, "B");
+    }
+
     public void testSimpleSetup() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AAAABBBDDD"));
