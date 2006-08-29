@@ -143,7 +143,6 @@
             <fileset dir="${basedir}">
                 <include name="**/source/**/*.java"/>
                 <exclude name="**/com/publicobject/**/*.java"/>
-                <exclude name="**/impl/**/*.java"/>
             </fileset>
             <fileset dir="resources"/>
         </osgiBundleInfo>
