@@ -4,15 +4,14 @@
 package com.publicobject.amazonbrowser.swing;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 import ca.odell.glazedlists.swing.TreeTableSupport;
-import com.publicobject.amazonbrowser.Item;
-import com.publicobject.amazonbrowser.ItemLoader;
-import com.publicobject.amazonbrowser.ItemTableFormat;
-import com.publicobject.amazonbrowser.ItemTreeFormat;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import com.publicobject.amazonbrowser.*;
 import com.publicobject.misc.swing.GradientPanel;
 import com.publicobject.misc.swing.ExceptionHandlerFactory;
 import com.publicobject.misc.Exceptions;
@@ -24,7 +23,7 @@ import java.awt.event.ActionListener;
 import java.net.URL;
 
 /**
- * An AmazonBrowser is a program for searching and viewing the products amazon.com.
+ * An AmazonBrowser is a program for searching and viewing products from amazon.com.
  *
  * @author James Lemieux
  */
@@ -49,6 +48,9 @@ public class AmazonBrowser implements Runnable {
 
     /** the progress bar that tracks the item loading progress */
     private JProgressBar progressBar;
+
+    /** the field containing the terms to filter the treetable of items with */
+    private JTextField filterField;
 
     /** the application window */
     private JFrame frame;
@@ -98,8 +100,16 @@ public class AmazonBrowser implements Runnable {
      * Construct a frame for search and browsing items from Amazon.
      */
     private JPanel constructView() {
+        final JLabel filterFieldLabel = new JLabel("Filter");
+        filterFieldLabel.setFont(new Font("Verdana", Font.BOLD, 14));
+        filterFieldLabel.setForeground(Color.WHITE);
+
+        filterField = new JTextField(10);
+        final MatcherEditor<Item> filterFieldMatcherEditor = new TextComponentMatcherEditor<Item>(filterField, new ItemTextFilterator());
+
         // sort the original items list
-        final SortedList<Item> itemsSortedList = new SortedList<Item>(itemEventList, null);
+        final SortedList<Item> sortedItemsList = new SortedList<Item>(itemEventList, null);
+        final FilterList<Item> filteredItemsList = new FilterList<Item>(sortedItemsList, filterFieldMatcherEditor);
 
         final StartNewSearchActionListener startNewSearch = new StartNewSearchActionListener();
 
@@ -126,9 +136,11 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(searchField,                  new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
         searchPanel.add(searchButton,                 new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(progressBar,                  new GridBagConstraints(3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
-        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        searchPanel.add(filterFieldLabel,             new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        searchPanel.add(filterField,                  new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
+        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        final TreeList<Item> treeList = new TreeList<Item>(itemsSortedList, new ItemTreeFormat());
+        final TreeList<Item> treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat());
 
         // create a JTable to display the items
         final TableFormat<TreeList.TreeElement<Item>> itemTableFormat = new ItemTableFormat();
@@ -136,7 +148,7 @@ public class AmazonBrowser implements Runnable {
         final JTable itemTable = new JTable(itemTableModel);
 
         // add sorting to the table
-        new TableComparatorChooser<Item>(itemTable, itemsSortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+        new TableComparatorChooser<Item>(itemTable, sortedItemsList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
 
         // add a hierarchical column to the table
         ListConsistencyListener.install(treeList);

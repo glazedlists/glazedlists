@@ -5,12 +5,16 @@ package com.publicobject.amazonbrowser;
 
 import ca.odell.glazedlists.GlazedLists;
 
+import java.text.DateFormat;
+
 /**
  * Models an Item fetched from Amazon's ECS web service.
  *
  * @author James Lemieux
  */
 public class Item implements Comparable<Item> {
+
+    public static final DateFormat TABLE_DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM);
 
     private String asin;
     private String detailPageURL;
