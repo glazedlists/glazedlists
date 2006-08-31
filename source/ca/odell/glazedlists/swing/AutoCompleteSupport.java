@@ -6,7 +6,6 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.impl.swing.ScreenGeometry;
 import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.matchers.Matcher;
