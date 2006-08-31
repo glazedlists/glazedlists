@@ -8,41 +8,136 @@ import ca.odell.glazedlists.TreeList;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableCellEditor;
 
 /**
- * Prototype interface...
+ * This class {@link #install}s support for a single hierarchical column within
+ * a standard {@link JTable} that is backed by an {@link EventTableModel}. The
+ * {@link EventTableModel}, in turn <strong>must</strong> be backed by the same
+ * {@link TreeList} which is given as a parameter to {@link #install}.
  *
- * @author jessewilson
+ * <p>Typical usage of {@link TreeTableSupport} resembles this:
+ * <br><br>
+ * <pre>
+ * // create an EventList of data
+ * EventList myEventList = ...
+ *
+ * // create a TreeList which uses a TreeFormat object to infer a hierarchy for each element in myEventList
+ * TreeList treeList = new TreeList(myEventList, new MyTreeFormat());
+ *
+ * // create a JTable that displays the contents of treeList in a tabular format
+ * EventTableModel myTableModel = new EventTableModel(treeList, new MyTableFormat());
+ * JTable myTable = new JTable(myTableModel);
+ *
+ * // make the 3rd table column a hierarchical column to create a TreeTable
+ * TreeTableSupport.install(myTable, treeList, 2);
+ * </pre>
+ *
+ * <p>In order to achieve all of the treetable behaviours, the following occurs
+ * when {@link #install} is called:
+ *
+ * <ul>
+ *   <li>a {@link TreeTableCellRenderer} will be installed on the hierarchical
+ *       {@link TableColumn}. It wraps any {@link TableCellRenderer} previously
+ *       installed on the {@link TableColumn}, or if none was present, a
+ *       DefaultTableCellRenderer.
+ *   <li>a {@link TreeTableCellEditor} will be installed on the hierarchical
+ *       {@link TableColumn}. It wraps any {@link TableCellEditor} previously
+ *       installed on the {@link TableColumn}, or if none was present, a
+ *       DefaultCellEditor.
+ * </ul>
+ *
+ * @author James Lemieux
  */
 public final class TreeTableSupport {
 
+    /** The table to decorate with tree table behaviour */
     private final JTable table;
-    private final TreeList treeList;
+
+    /** The model index of the table column that is the hierarchical column */
     private final int modelColumnIndex;
+
+    /** The renderer installed on the hierarchical TableColumn */
     private final TreeTableCellRenderer treeTableCellRenderer;
+
+    /** The editor installed on the hierarchical TableColumn */
     private final TreeTableCellEditor treeTableCellEditor;
 
+    /** The orignal TableCellRenderer, if any, to be replaced when TreeTableSupport is {@link #uninstall() uninstalled} */
+    private final TableCellRenderer originalRenderer;
+
+    /** The orignal TableCellEditor, if any, to be replaced when TreeTableSupport is {@link #uninstall() uninstalled} */
+    private final TableCellEditor originalEditor;
+
+    /**
+     * This private constructor creates a TreeTableSupport object which adds
+     * tree table behaviours to a single column that is nominated as the
+     * "hierarchical column." Specifically, the rendering and editing of values
+     * in the hierarchical column will be augmented to display position within
+     * a hierarchy by indenting the "normal renderer and editor" according to
+     * the height within a tree and adding a collapse/expand button.
+     *
+     * @param table the table to convert into a tree table
+     * @param treeList The TreeList capable of answering hierarchical questions
+     *        for the hierachical TableColumn's renderer and editor
+     * @param modelColumnIndex the model index of the hierarchical column
+     */
     private TreeTableSupport(JTable table, TreeList treeList, int modelColumnIndex) {
         this.table = table;
-        this.treeList = treeList;
         this.modelColumnIndex = modelColumnIndex;
 
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
+
+        // ensure we can find the view column index of the hierarchical column
+        if (viewColumnIndex == -1)
+            throw new IllegalArgumentException("Unable to locate a view index for the given model index: " + modelColumnIndex);
+
+        // if we have data, check that the hierarchical column is editable
+        if (!treeList.isEmpty() && !table.isCellEditable(0, viewColumnIndex))
+            throw new IllegalStateException("The hierarchy view column at index " + viewColumnIndex + " must be editable to support expanding and collapsing tree nodes");
+
+        // look up the hierarchical TableColumn
         final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
 
-        this.treeTableCellRenderer = new TreeTableCellRenderer(viewColumn.getCellRenderer(), treeList);
+        // wrap the existing TableCellRenderer with a TreeTableCellRenderer
+        this.originalRenderer = viewColumn.getCellRenderer();
+        this.treeTableCellRenderer = new TreeTableCellRenderer(originalRenderer, treeList);
         viewColumn.setCellRenderer(treeTableCellRenderer);
 
-        this.treeTableCellEditor = new TreeTableCellEditor(viewColumn.getCellEditor(), treeList);
+        // wrap the existing TableCellEditor with a TreeTableCellEditor
+        this.originalEditor = viewColumn.getCellEditor();
+        this.treeTableCellEditor = new TreeTableCellEditor(originalEditor, treeList);
         viewColumn.setCellEditor(treeTableCellEditor);
     }
 
     /**
-     * Some things this could do:
+     * Installs support for a hierarchical table column into the
+     * <code>table</code> on the column with the given
+     * <code>modelColumnIndex</code>. The data returned by the
+     * <code>TableModel</code> for the hierarchical column will remain
+     * unchanged. But, the renderer and editor will be wrapped with instances
+     * of {@link TreeTableCellRenderer} and {@link TreeTableCellEditor}
+     * which take care of displaying the hierarchical information (namely the
+     * whitespace indenting and expand/collapse button).
      *
-     * 1. Install custom renderer that wraps the renderer in place
-     * 2. Install custom editor that wraps the editor in place
-     * 3. Install keyboard listeners for tree navigation via keyboard
+     * <p>The following must be true in order to successfully install
+     * TreeTableSupport on a {@link JTable}:
+     *
+     * <ul>
+     *   <li>the <code>modelColumnIndex</code> must correspond to a valid
+     *       view column index
+     *   <li>the table column at the given <code>modelColumnIndex</code> must
+     *       be editable so that tree node collapsing and expanding is possible
+     *       (collapsing/expanding is accomplished via the TreeTableCellEditor)
+     * </ul>
+     *
+     * @param table the table to convert into a tree table
+     * @param treeList The TreeList capable of answering hierarchical questions
+     *        for the hierachical TableColumn's renderer and editor
+     * @param modelColumnIndex the model index of the hierarchical column
+     * @return an instance of the support class providing treetable behaviour
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
      */
     public static TreeTableSupport install(JTable table, TreeList treeList, int modelColumnIndex) {
         checkAccessThread();
@@ -50,24 +145,44 @@ public final class TreeTableSupport {
         return new TreeTableSupport(table, treeList, modelColumnIndex);
     }
 
+    /**
+     * This method removes treetable support from the {@link JTable} it was
+     * installed on. This method is useful when the {@link TreeList} of items
+     * that backs the JTable must outlive the JTable itself. Calling this method
+     * will return the hierarchical column to its original state before
+     * treetable support was installed, and it will be available for garbage
+     * collection independently of the {@link TreeList} of items.
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     */
     public void uninstall() {
+        checkAccessThread();
+
+        // fetch information about the hierarchical column
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
         final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
         final TableCellRenderer renderer = viewColumn.getCellRenderer();
+        final TableCellEditor editor = viewColumn.getCellEditor();
 
-        // if the tree table cell renderer is still installed, reinstall its delegate
+        // if the TreeTableCellRenderer is still installed, reinstall the original TableCellRenderer
         if (renderer == treeTableCellRenderer)
-            viewColumn.setCellRenderer(treeTableCellRenderer.getDelegate());
+            viewColumn.setCellRenderer(originalRenderer);
 
-        this.treeTableCellRenderer.dispose();
+        // if the TreeTableCellEditor is still installed, reinstall the original TableCellEditor
+        if (editor == treeTableCellEditor)
+            viewColumn.setCellEditor(originalEditor);
+
+        treeTableCellRenderer.dispose();
+        treeTableCellEditor.dispose();
     }
 
     /**
-     * A convenience method to ensure {@link AutoCompleteSupport} is being
+     * A convenience method to ensure {@link TreeTableSupport} is being
      * accessed from the Event Dispatch Thread.
      */
     private static void checkAccessThread() {
         if (!SwingUtilities.isEventDispatchThread())
-            throw new IllegalStateException("AutoCompleteSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \"" + Thread.currentThread().getName() + "\"");
+            throw new IllegalStateException("TreeTableSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \"" + Thread.currentThread().getName() + "\"");
     }
 }
