@@ -5,11 +5,9 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TreeList;
 
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
 import javax.swing.*;
-import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 /**
@@ -78,10 +76,19 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         final Component c = delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        // extract information about the tree node from the TreeList
-        final int depth = treeList.depth(row);
-        final boolean isExpanded = treeList.isExpanded(row);
-        final boolean isExpandable = treeList.isExpandable(row);
+        final int depth;
+        final boolean isExpanded;
+        final boolean isExpandable;
+
+        treeList.getReadWriteLock().readLock().lock();
+        try {
+            // read information about the tree node from the TreeList
+            depth = treeList.depth(row);
+            isExpanded = treeList.isExpanded(row);
+            isExpandable = treeList.isExpandable(row);
+        } finally {
+            treeList.getReadWriteLock().readLock().unlock();
+        }
 
         // ask our special component to configure itself for this tree node
         component.configure(depth, isExpandable, isExpanded, c);
