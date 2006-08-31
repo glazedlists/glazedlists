@@ -39,7 +39,7 @@ import java.util.*;
  * clicks subsequent columns. The list is sorted by the first column and ties
  * are broken by the second column.
  *
- * <p>If the {@link EventTableModel} uses a {@link AdvancedTableFormat}, its
+ * <p>If the {@link EventTableModel} uses an {@link AdvancedTableFormat}, its
  * {@link AdvancedTableFormat#getColumnComparator} method will be used to
  * populate the initial column {@link Comparator}s.
  *
