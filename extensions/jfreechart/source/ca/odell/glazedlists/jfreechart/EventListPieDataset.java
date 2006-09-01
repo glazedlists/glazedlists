@@ -9,8 +9,8 @@ import ca.odell.glazedlists.GroupingList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import org.jfree.data.general.AbstractDataset;
-import org.jfree.data.general.PieDataset;
 import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.PieDataset;
 
 import java.util.Comparator;
 import java.util.List;

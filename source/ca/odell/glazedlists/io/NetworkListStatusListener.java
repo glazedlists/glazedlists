@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.io;
 
 // NIO is used for BRP
-import java.util.*;
+import java.util.EventListener;
 
 /**
  * Listens to the current status of a {@link NetworkList}.

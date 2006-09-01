@@ -5,8 +5,8 @@ package com.publicobject.misc.swing;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Factory method for a handful of icons.

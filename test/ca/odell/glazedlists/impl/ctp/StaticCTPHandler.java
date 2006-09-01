@@ -3,11 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.ctp;
 
-import java.util.*;
-// Glazed Lists I/O
 import ca.odell.glazedlists.impl.io.Bufferlo;
+
+import java.io.IOException;
 import java.text.ParseException;
-import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A CTPHandler where all data is known beforehand.

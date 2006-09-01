@@ -3,12 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.matchers.*;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.*;
+import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Tests the generic FilterList class.

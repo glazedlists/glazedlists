@@ -3,8 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
-import java.io.*;
 
 /**
  * Utility class for analyzing the performance of the UniqueList.

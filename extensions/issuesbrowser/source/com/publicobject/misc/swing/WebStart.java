@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.swing;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 
 /**

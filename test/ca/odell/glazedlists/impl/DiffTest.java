@@ -4,12 +4,13 @@
 package ca.odell.glazedlists.impl;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
-// standard collections
+import ca.odell.glazedlists.event.ListEventListener;
+import junit.framework.TestCase;
+
 import java.util.*;
 
 /**

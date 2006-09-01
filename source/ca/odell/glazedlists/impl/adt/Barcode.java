@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt;
 
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * A Barcode is an ADT to replace the more general CompressableList

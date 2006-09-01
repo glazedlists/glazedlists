@@ -3,11 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.*;
 

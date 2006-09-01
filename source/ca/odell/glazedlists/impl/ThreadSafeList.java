@@ -4,12 +4,12 @@
 package ca.odell.glazedlists.impl;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.*;
-// for access to the Collection interface
-import java.util.*;
-// for locking
-import ca.odell.glazedlists.util.concurrent.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
+import java.util.Collection;
 
 /**
  * An {@link EventList} that obtains a {@link ReadWriteLock} for all operations.

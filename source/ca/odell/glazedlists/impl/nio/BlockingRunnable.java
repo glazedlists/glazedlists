@@ -4,14 +4,6 @@
 package ca.odell.glazedlists.impl.nio;
 
 // NIO is used for CTP
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
-import java.io.*;
-// logging
-import java.util.logging.*;
-
 /**
  * A Runnable that unblocks the calling thread when it finishes executing.
  *
@@ -19,13 +11,13 @@ import java.util.logging.*;
  * via this API. They will not be propagated up.
  */
 class BlockingRunnable implements Runnable {
-    
+
     /** the target runnable */
     private Runnable target;
-    
+
     /** any exception thrown during invocation */
     private RuntimeException problem = null;
-    
+
     /**
      * Creates a BlockingRunnable that runs the specified target while the calling
      * thread waits.
@@ -33,7 +25,7 @@ class BlockingRunnable implements Runnable {
     public BlockingRunnable(Runnable target) {
         this.target = target;
     }
-    
+
     /**
      * Runs the specified task.
      */
@@ -44,13 +36,13 @@ class BlockingRunnable implements Runnable {
         } catch(RuntimeException e) {
             this.problem = e;
         }
-         
+
         // wake up the waiting thread
         synchronized(this) {
             notify();
         }
     }
-    
+
     /**
      * Get any exception that was thrown during invocation.
      */

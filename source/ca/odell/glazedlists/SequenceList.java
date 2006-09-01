@@ -5,9 +5,9 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * A SequenceList contains values in adjacent indices which occur at predictable

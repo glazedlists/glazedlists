@@ -3,10 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.gui;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
+import junit.framework.TestCase;
 
 /**
  * Verify that the {@link AbstractTableComparatorChooser} works, especially

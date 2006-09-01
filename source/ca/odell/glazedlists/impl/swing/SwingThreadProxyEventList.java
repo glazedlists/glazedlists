@@ -4,10 +4,10 @@
 package ca.odell.glazedlists.impl.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.gui.*;
-// for calling the notification on the Swing thread
-import javax.swing.SwingUtilities;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.gui.ThreadProxyEventList;
+
+import javax.swing.*;
 
 /**
  * Proxies events from all threads to the Swing event dispatch thread. This allows

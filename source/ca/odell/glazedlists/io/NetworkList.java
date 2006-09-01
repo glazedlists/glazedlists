@@ -4,16 +4,21 @@
 package ca.odell.glazedlists.io;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-// access to the volatile implementation pacakge
-import ca.odell.glazedlists.impl.rbp.*;
-import ca.odell.glazedlists.impl.io.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
-// NIO is used for BRP
-import java.util.*;
-import java.io.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.io.Bufferlo;
+import ca.odell.glazedlists.impl.io.ListEventToBytes;
+import ca.odell.glazedlists.impl.rbp.Resource;
+import ca.odell.glazedlists.impl.rbp.ResourceListener;
+import ca.odell.glazedlists.impl.rbp.ResourceStatus;
+import ca.odell.glazedlists.impl.rbp.ResourceStatusListener;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An {@link EventList} that is either published to the network or subscribed from

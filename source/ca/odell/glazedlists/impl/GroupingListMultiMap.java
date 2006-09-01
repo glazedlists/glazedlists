@@ -4,8 +4,8 @@
 package ca.odell.glazedlists.impl;
 
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import java.util.*;
 

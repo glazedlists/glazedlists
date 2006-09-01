@@ -4,8 +4,9 @@
 package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.FilterList;
-import java.util.EventObject;
+
 import java.util.EventListener;
+import java.util.EventObject;
 
 /**
  * A facility for modifying the {@link Matcher}s which specify the behaviour of a

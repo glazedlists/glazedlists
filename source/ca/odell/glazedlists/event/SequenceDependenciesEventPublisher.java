@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import ca.odell.glazedlists.impl.adt.IdentityMultimap;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.adt.IdentityMultimap;
 
 import java.util.*;
 

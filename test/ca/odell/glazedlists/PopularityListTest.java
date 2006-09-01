@@ -4,11 +4,11 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-// Java collections are used for underlying data storage
+import junit.framework.TestCase;
+
 import java.util.*;
 
 /**

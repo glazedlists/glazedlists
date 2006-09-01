@@ -4,10 +4,13 @@
 package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.Grouper;
-// Java collections are used for underlying data storage
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * An {@link EventList} that shows the unique elements from its source

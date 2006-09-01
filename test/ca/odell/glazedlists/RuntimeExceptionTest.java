@@ -4,10 +4,10 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import junit.framework.TestCase;
 
 /**
  * Validates that {@link EventList}s can recover from {@link RuntimeException}s.

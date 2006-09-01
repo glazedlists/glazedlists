@@ -4,10 +4,10 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;

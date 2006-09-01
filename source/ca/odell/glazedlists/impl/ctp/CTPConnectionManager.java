@@ -4,14 +4,14 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
-import ca.odell.glazedlists.impl.nio.*;
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
-import java.io.*;
-// logging
-import java.util.logging.*;
+import ca.odell.glazedlists.impl.nio.NIODaemon;
+import ca.odell.glazedlists.impl.nio.NIOServer;
+
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 /**
  * The CTPConnectionManager provides managed access to multiple CTP connections

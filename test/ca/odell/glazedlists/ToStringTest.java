@@ -4,11 +4,10 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// standard collections
-import java.util.*;
-
 import ca.odell.glazedlists.matchers.Matchers;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
 
 /**
  * This test verifies that the toString() method on all lists is consistent

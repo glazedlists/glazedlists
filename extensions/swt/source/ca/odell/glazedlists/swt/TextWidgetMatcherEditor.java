@@ -4,12 +4,15 @@
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.*;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-// for working with SWT Text widgets
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Text;
 
 import javax.swing.*;
 

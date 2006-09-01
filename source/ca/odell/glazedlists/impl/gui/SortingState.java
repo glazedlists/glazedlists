@@ -4,18 +4,18 @@
 package ca.odell.glazedlists.impl.gui;
 
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.sort.ComparatorChain;
 import ca.odell.glazedlists.impl.sort.ReverseComparator;
 import ca.odell.glazedlists.impl.sort.TableColumnComparator;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
 
 /**
  * Keep track of which columns are sorted and how. This is

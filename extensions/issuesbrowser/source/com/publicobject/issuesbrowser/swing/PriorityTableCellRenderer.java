@@ -8,8 +8,8 @@ import com.publicobject.issuesbrowser.Priority;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.util.Map;
 import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * Displays Priority cells with pretty colors.

@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.ctp;
 
-import java.util.*;
-import java.nio.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
 
 /**

@@ -4,10 +4,12 @@
 package ca.odell.glazedlists;
 
 // core glazed lists
-import ca.odell.glazedlists.event.*;
-// access to the volatile implementation classes
-import ca.odell.glazedlists.impl.adt.*;
-// to store event info for forwarding on the deselected EventList
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.impl.adt.Barcode;
+import ca.odell.glazedlists.impl.adt.BarcodeIterator;
+
 import java.util.*;
 
 /**

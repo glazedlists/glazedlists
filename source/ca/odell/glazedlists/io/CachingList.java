@@ -4,15 +4,17 @@
 package ca.odell.glazedlists.io;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
-// volatile implementation support
-import ca.odell.glazedlists.impl.adt.*;
-import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
-import ca.odell.glazedlists.impl.adt.barcode2.Element;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.AgedNode;
+import ca.odell.glazedlists.impl.adt.AgedNodeComparator;
+import ca.odell.glazedlists.impl.adt.SparseList;
+import ca.odell.glazedlists.impl.adt.SparseListNode;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
+import ca.odell.glazedlists.util.concurrent.Lock;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 // For the execution of the performance test
 
 /**

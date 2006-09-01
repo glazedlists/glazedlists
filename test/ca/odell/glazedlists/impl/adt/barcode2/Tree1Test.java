@@ -3,12 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
 
-import java.util.*;
-
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.GlazedLists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

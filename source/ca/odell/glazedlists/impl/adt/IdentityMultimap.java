@@ -3,10 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt;
 
-import java.util.List;
-import java.util.IdentityHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
 
 /**
  * A poor man's multimap, used only to reduce the complexity code that deals

@@ -4,12 +4,13 @@
 package ca.odell.glazedlists.impl.testing;
 
 // Java collections are used for underlying data storage
-import java.util.*;
-// the Glazed Lists
-import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.EventList;
-// for being a JUnit test case
-import junit.framework.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import junit.framework.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A very basic listener that ensures that lists are kept consistent and that

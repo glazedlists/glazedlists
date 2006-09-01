@@ -4,12 +4,11 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the volatile Glazed Lists package
-import ca.odell.glazedlists.impl.sort.*;
+import ca.odell.glazedlists.impl.sort.ReverseComparator;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
-// standard collections
+import junit.framework.TestCase;
+
 import java.util.*;
 
 /**

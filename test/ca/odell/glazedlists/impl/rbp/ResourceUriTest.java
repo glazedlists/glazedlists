@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // for being a JUnit test case
-import junit.framework.*;
+import junit.framework.TestCase;
 
 /**
  * Validates ResourceUri.

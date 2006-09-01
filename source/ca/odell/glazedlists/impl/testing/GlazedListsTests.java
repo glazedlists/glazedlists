@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.testing;
 
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.matchers.Matcher;
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 /**
  * A factory class useful for testing!

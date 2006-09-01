@@ -3,12 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import java.util.*;
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.io.*;
-import java.io.*;
-// for being a JUnit test case
-import junit.framework.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.io.ByteCoder;
+import junit.framework.TestCase;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests the ListEventCoder.

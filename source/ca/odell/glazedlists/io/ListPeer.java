@@ -4,10 +4,12 @@
 package ca.odell.glazedlists.io;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-// access to the volatile implementation pacakge
-import ca.odell.glazedlists.impl.rbp.*;
-import java.io.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.rbp.Peer;
+import ca.odell.glazedlists.impl.rbp.ResourceStatus;
+
+import java.io.IOException;
 
 /**
  * A {@link ListPeer} manages the network resources for publishing and subscribing

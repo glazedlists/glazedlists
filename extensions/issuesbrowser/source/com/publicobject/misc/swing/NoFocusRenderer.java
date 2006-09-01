@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.swing;
 
-import javax.swing.table.TableCellRenderer;
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 /**

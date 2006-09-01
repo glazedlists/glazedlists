@@ -3,10 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-import java.util.*;
-// the core glazed lists packages
-import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
+import java.util.List;
 
 /**
  * This {@link ListEventListener} updates a plain old {@link List} so that

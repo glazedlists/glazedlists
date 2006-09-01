@@ -5,9 +5,9 @@ package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.EventList;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Manager for distributing {@link ListEvent}s to {@link ListEventListener}s.

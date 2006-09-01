@@ -4,14 +4,10 @@
 package ca.odell.glazedlists.impl;
 
 // to match icons to the current look and feel
-import javax.swing.UIManager;
-// for looking up icon files in jars
+import javax.swing.*;
 import java.net.URL;
-// for keeping a map of resources
-import java.util.*;
-// to provide icons
-import javax.swing.ImageIcon;
-import javax.swing.Icon;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A Factory to provide access to sort-arrow icons for table

@@ -3,13 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import java.util.*;
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-import java.nio.*;
-import java.io.*;
-// Glazed Lists' pluggable object to bytes interface
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.io.ByteCoder;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An utility interface for converting Objects to bytes for storage or network

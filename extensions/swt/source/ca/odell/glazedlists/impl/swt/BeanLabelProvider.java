@@ -4,9 +4,8 @@
 package ca.odell.glazedlists.impl.swt;
 
 // beans
-import ca.odell.glazedlists.impl.beans.*;
-// to implement the LabelProvider interface
-import org.eclipse.jface.viewers.*;
+import ca.odell.glazedlists.impl.beans.BeanProperty;
+import org.eclipse.jface.viewers.LabelProvider;
 
 /**
  * A LabelProvider that uses Reflection on JavaBeans to provide a label

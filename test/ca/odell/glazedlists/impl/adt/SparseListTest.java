@@ -4,9 +4,12 @@
 package ca.odell.glazedlists.impl.adt;
 
 // for being a JUnit test case
-import junit.framework.*;
-// standard collections
-import java.util.*;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 /**
  * This test verifies that the SparseList works as expected.

@@ -4,12 +4,12 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-// Java collections are used for underlying data storage
-import java.util.*;
+import junit.framework.TestCase;
+
+import java.util.Arrays;
 
 /**
  * Ensures that ListEventAssembler.forwardEvent() works.

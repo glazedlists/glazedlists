@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
-import java.util.List;
 import java.util.AbstractList;
+import java.util.List;
 
 /*
  # some M4 Macros that make it easy to use m4 with Java

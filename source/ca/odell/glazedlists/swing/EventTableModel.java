@@ -4,13 +4,18 @@
 package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.event.*;
-// Swing toolkit stuff for displaying widgets
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
+
 import javax.swing.*;
-// tables for displaying lists
-import javax.swing.table.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  * A {@link TableModel} that holds an {@link EventList}. Each element of the list

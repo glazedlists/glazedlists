@@ -4,14 +4,7 @@
 package ca.odell.glazedlists.impl.pmap;
 
 // NIO is used for CTP
-import ca.odell.glazedlists.impl.nio.*;
-import ca.odell.glazedlists.impl.io.*;
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
-// logging
-import java.util.logging.*;
+import ca.odell.glazedlists.impl.io.Bufferlo;
 
 /**
  * Listens for the loading of a value.

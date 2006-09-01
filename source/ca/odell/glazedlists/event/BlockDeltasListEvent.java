@@ -4,9 +4,9 @@
 package ca.odell.glazedlists.event;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
-// for keeping a list of changes
-import java.util.*;
+import ca.odell.glazedlists.EventList;
+
+import java.util.List;
 
 /**
  * A ListEvent models a change to a list.

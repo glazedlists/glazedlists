@@ -4,9 +4,9 @@
 package ca.odell.glazedlists.impl.beans;
 
 // for being a JUnit test case
-import junit.framework.*;
-// test objects
-import java.awt.Color;
+import junit.framework.TestCase;
+
+import java.awt.*;
 
 /**
  * This test verifies that the BeanProperty works as expected.

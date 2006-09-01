@@ -4,10 +4,10 @@
 package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-// Swing toolkit stuff for displaying widgets
+import ca.odell.glazedlists.EventList;
+
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.ListDataEvent;
 
 /**
  * A combo box model for displaying Glazed Lists in a combo box.

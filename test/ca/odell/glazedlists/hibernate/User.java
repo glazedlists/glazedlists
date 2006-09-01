@@ -6,9 +6,6 @@ package ca.odell.glazedlists.hibernate;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Helper class for User.
  * 

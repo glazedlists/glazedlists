@@ -4,8 +4,8 @@
 package ca.odell.glazedlists.impl.adt;
 
 // for being a JUnit test case
-import junit.framework.*;
-// standard collections
+import junit.framework.TestCase;
+
 import java.util.*;
 
 /**

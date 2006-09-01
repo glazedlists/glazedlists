@@ -5,8 +5,8 @@ package com.publicobject.amazonbrowser;
 
 import ca.odell.glazedlists.TextFilterator;
 
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Provide text filter strings for {@link Item} objects.

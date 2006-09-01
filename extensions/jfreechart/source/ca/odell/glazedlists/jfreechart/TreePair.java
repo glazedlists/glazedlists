@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.jfreechart;
 
-import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 
 /**
  * A TreePair contains two tree structures which store the start and end

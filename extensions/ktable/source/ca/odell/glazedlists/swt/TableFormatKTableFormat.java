@@ -3,9 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-import de.kupzog.ktable.*;
-import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.gui.TableFormat;
+import de.kupzog.ktable.KTable;
+import de.kupzog.ktable.KTableCellEditor;
+import de.kupzog.ktable.KTableCellRenderer;
 
 /**
  * Adapt {@link TableFormat} to {@link KTableFormat}. This can be used to

@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.swing;
 
 // Swing toolkit stuff for displaying widgets
-import javax.swing.event.*;
+import javax.swing.event.ListDataEvent;
 
 /**
  * The mutable list data event is a list data event that can be rewritten

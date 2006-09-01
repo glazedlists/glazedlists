@@ -1,10 +1,10 @@
 package ca.odell.glazedlists.impl.matchers;
 
-import junit.framework.TestCase;
+import ca.odell.glazedlists.matchers.CountingMatcherEditorListener;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-import ca.odell.glazedlists.matchers.CountingMatcherEditorListener;
+import junit.framework.TestCase;
 
 import java.lang.ref.WeakReference;
 

@@ -3,12 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.*;
-import java.io.*;
-// the core Glazed Lists packages
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Utility class for analyzing the performance of the TextFilterList.

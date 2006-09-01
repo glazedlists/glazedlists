@@ -4,9 +4,10 @@
 package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
-// for access to iterators and the Collection interface
-import java.util.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
+import java.util.Collection;
 
 /**
  * A convenience class for {@link EventList}s that decorate another {@link EventList}.

@@ -4,15 +4,13 @@
 package ca.odell.glazedlists.swt;
 
 // for swt Lists
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.events.SelectionListener;
-// glazed lists
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.event.*;
-// JFace label providers
-import org.eclipse.jface.viewers.*;
 
 /**
  * A view helper that displays an {@link EventList} in a {@link Combo} component.

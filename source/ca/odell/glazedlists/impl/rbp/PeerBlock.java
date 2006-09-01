@@ -4,11 +4,12 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // NIO is used for BRP
-import java.util.*;
-import java.nio.*;
-import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
+
 import java.text.ParseException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A binary message between peers.

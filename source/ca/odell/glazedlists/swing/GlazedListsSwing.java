@@ -4,9 +4,14 @@
 package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.swing.*;
-import javax.swing.BoundedRangeModel;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ThresholdList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.impl.swing.LowerThresholdRangeModel;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
+import ca.odell.glazedlists.impl.swing.UpperThresholdRangeModel;
+
+import javax.swing.*;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.

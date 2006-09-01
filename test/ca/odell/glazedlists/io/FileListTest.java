@@ -4,9 +4,10 @@
 package ca.odell.glazedlists.io;
 
 // for being a JUnit test case
-import junit.framework.*;
-// for testing files
-import java.io.*;
+import junit.framework.TestCase;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * This test verifies that the FileList works.

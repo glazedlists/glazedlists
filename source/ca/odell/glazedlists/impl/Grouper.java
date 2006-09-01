@@ -3,9 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-import ca.odell.glazedlists.impl.adt.Barcode;
-import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.Barcode;
 
 import java.util.Comparator;
 import java.util.LinkedList;

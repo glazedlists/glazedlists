@@ -4,11 +4,11 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// standard collections
-import java.util.*;
-
 import ca.odell.glazedlists.matchers.Matcher;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The ListModificationTest verifies that modifications made to lists are

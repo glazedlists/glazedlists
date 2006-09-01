@@ -3,9 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.java15;
 
-import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.Lock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 

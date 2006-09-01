@@ -4,7 +4,10 @@
 package ca.odell.glazedlists.impl.adt;
 
 // For Lists and Iterators
-import java.util.*;
+import java.util.AbstractList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A SparseList is an ADT to complement the CompressableList and IndexedTree

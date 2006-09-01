@@ -3,13 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import java.util.*;
-// the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-// for being a JUnit test case
-import junit.framework.*;
-// NIO is used for CTP
-import java.io.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import junit.framework.TestCase;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Verifies that NetworkList works.

@@ -4,13 +4,13 @@
 package ca.odell.glazedlists.impl.pmap;
 
 // for being a JUnit test case
-import junit.framework.*;
-import ca.odell.glazedlists.io.*;
-import ca.odell.glazedlists.impl.io.*;
-// for testing files
-import java.io.*;
-// for testing colors
-import java.awt.Color;
+import ca.odell.glazedlists.impl.io.Bufferlo;
+import ca.odell.glazedlists.io.GlazedListsIO;
+import junit.framework.TestCase;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 
 /**

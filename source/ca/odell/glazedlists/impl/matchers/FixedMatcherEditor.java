@@ -3,8 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.matchers;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.*;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 
 /**
  * A {@link MatcherEditor} whose {@link Matcher} never changes.

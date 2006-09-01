@@ -4,8 +4,9 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // for being a JUnit test case
-import junit.framework.*;
-import java.io.*;
+import junit.framework.TestCase;
+
+import java.io.IOException;
 
 /**
  * A CTPChunk test verifies that the CTPConnection provides proper chunks.

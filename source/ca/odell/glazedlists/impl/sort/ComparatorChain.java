@@ -4,7 +4,9 @@
 package ca.odell.glazedlists.impl.sort;
 
 // for specifying a sorting algorithm
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A comparator chain compares objects using a list of Comparators. The

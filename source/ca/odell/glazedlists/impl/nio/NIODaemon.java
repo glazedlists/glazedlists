@@ -4,12 +4,13 @@
 package ca.odell.glazedlists.impl.nio;
 
 // NIO is used for CTP
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
-// logging
-import java.util.logging.*;
+import java.io.IOException;
+import java.nio.channels.Selector;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An event queue of I/O events and a thread to run them on.

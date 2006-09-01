@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.util.concurrent;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An implementation of {@link LockFactory} that has been derived from Doug Lea's

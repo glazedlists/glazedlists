@@ -3,14 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import ca.odell.glazedlists.jfreechart.ValueSegment;
 import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
+import ca.odell.glazedlists.jfreechart.ValueSegment;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An issue models a work effort either due to an existing problem or a desired

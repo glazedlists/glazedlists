@@ -5,10 +5,10 @@ package ca.odell.glazedlists.impl.beans;
 
 import ca.odell.glazedlists.ObservableElementList;
 
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.lang.reflect.Method;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.EventListener;
 
 /**

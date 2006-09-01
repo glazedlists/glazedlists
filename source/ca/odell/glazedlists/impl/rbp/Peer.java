@@ -4,13 +4,13 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // NIO is used for BRP
+import ca.odell.glazedlists.impl.ctp.CTPConnectionManager;
+import ca.odell.glazedlists.impl.ctp.CTPHandler;
+import ca.odell.glazedlists.impl.ctp.CTPHandlerFactory;
+
+import java.io.IOException;
 import java.util.*;
-import java.nio.*;
-import java.io.*;
-// BRP sits atop Chunk Transfer Protocol
-import ca.odell.glazedlists.impl.ctp.*;
-// logging
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 /**
  * A peer manages publishing and subscribing to resources.

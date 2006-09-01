@@ -4,15 +4,16 @@
 package ca.odell.glazedlists;
 
 // concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
-// Java collections are used for underlying data storage
-import java.util.*;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.*;
 
 /**
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}

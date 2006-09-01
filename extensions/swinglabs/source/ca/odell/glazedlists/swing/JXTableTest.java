@@ -3,20 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.*;
+import com.publicobject.issuesbrowser.*;
 import org.jdesktop.swingx.JXTable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-import ca.odell.glazedlists.swing.EventListJXTableSorting;
-import ca.odell.glazedlists.*;
-import com.publicobject.issuesbrowser.*;
 
 /**
  * Demonstrate sorting using JXTable's header indicator icons and Glazed Lists'

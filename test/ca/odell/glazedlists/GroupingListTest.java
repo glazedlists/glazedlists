@@ -1,11 +1,12 @@
 package ca.odell.glazedlists;
 
-import junit.framework.TestCase;
-
-import java.util.*;
-
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class GroupingListTest extends TestCase {
 

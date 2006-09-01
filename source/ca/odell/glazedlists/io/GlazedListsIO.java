@@ -3,7 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import ca.odell.glazedlists.impl.io.*;
+import ca.odell.glazedlists.impl.io.BeanXMLByteCoder;
+import ca.odell.glazedlists.impl.io.SerializableByteCoder;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.

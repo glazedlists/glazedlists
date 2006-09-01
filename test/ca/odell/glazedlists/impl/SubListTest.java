@@ -4,12 +4,17 @@
 package ca.odell.glazedlists.impl;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-// standard collections
-import java.util.*;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This test verifies that the SubList works.

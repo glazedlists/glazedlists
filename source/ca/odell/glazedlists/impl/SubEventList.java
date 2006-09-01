@@ -4,9 +4,11 @@
 package ca.odell.glazedlists.impl;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * A SubEventList is a view of a sub-range of an EventList.

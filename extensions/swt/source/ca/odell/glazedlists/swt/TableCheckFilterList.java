@@ -4,21 +4,23 @@
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.gui.CheckableTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.event.*;
-// SWT toolkit stuff for displaying widgets
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.graphics.*;
-// standard collections as support
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A FilterList for elements that are checked in the EventTableViewer.

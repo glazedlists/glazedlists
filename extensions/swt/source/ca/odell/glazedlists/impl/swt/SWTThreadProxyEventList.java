@@ -4,12 +4,8 @@
 package ca.odell.glazedlists.impl.swt;
 
 // Java collections are used for underlying data storage
-import java.util.*;
-// the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.impl.gui.*;
-// for calling the notification on the SWT thread
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.gui.ThreadProxyEventList;
 import org.eclipse.swt.widgets.Display;
 
 /**

@@ -4,8 +4,8 @@
 package ca.odell.glazedlists.event;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.CompositeList;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 
 /**

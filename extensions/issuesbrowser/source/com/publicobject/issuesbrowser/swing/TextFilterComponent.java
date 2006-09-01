@@ -3,14 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-import ca.odell.glazedlists.TextFilterator;
-
-import javax.swing.*;
-
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueTextFilterator;
+
+import javax.swing.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

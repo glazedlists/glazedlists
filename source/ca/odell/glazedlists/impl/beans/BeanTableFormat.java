@@ -3,9 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
-import java.util.*;
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * TableFormat implementation that uses reflection to be used for any

@@ -3,12 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.Description;
+import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.misc.swing.WebStart;
 
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Iterator;

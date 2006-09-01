@@ -1,8 +1,6 @@
 package ca.odell.glazedlists;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Comparator;
 
 /**
  * An interface for extracting a list of values to be considered by a Matcher

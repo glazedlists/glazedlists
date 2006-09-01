@@ -4,10 +4,12 @@
 package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.event.*;
-import ca.odell.glazedlists.matchers.*;
-// volatile implementation support
-import ca.odell.glazedlists.impl.adt.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.Barcode;
+import ca.odell.glazedlists.impl.adt.BarcodeIterator;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.Matchers;
 
 /**
  * An {@link EventList} that shows a subset of the elements of a source

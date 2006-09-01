@@ -5,7 +5,8 @@ package ca.odell.glazedlists.impl.swt;
 
 // to proxy adding of SelectionListeners
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Slider;
 
 /**
  * A Factory to simplify the wrapping of {@link Scale} and {@link Slider}

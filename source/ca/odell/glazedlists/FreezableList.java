@@ -4,8 +4,8 @@
 package ca.odell.glazedlists;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.event.*;
-// an arraylist holds the frozen data
+import ca.odell.glazedlists.event.ListEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -4,13 +4,12 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// Java collections are used for underlying data storage
-import java.util.*;
-
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import junit.framework.TestCase;
+
+import java.util.*;
 
 /**
  * A UniqueListTest tests the functionality of the UniqueList

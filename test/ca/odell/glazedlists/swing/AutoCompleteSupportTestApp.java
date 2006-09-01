@@ -3,9 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 import javax.swing.*;
 import java.awt.*;

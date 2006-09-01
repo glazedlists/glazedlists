@@ -5,13 +5,11 @@ package ca.odell.glazedlists.migrationkit.swt;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swt.TextWidgetMatcherEditor;
-import ca.odell.glazedlists.event.*;
-// access to the volatile implementation pacakge
-import ca.odell.glazedlists.impl.filter.*;
-// for working with SWT Text widgets
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * An {@link EventList} that shows only elements that contain a filter text

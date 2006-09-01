@@ -4,10 +4,13 @@
 package ca.odell.glazedlists.impl;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-// for being a list iterator
-import java.util.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 /**
  * The EventListIterator is an iterator that allows the user to iterate

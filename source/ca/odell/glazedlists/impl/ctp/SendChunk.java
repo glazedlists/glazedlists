@@ -4,15 +4,9 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
-import ca.odell.glazedlists.impl.nio.*;
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
-import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
-// logging
-import java.util.logging.*;
+
+import java.io.IOException;
 
 /**
  * Sends a chunk of data on the NIO thread.

@@ -3,16 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.*;
-// for being a JUnit test case
-import junit.framework.*;
-
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
-import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
-import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A CompositeListTest tests the functionality of the CompositeList.

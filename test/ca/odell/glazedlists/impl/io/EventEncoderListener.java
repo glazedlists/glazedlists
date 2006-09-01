@@ -3,10 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import java.util.*;
-import ca.odell.glazedlists.io.*;
-import ca.odell.glazedlists.event.*;
-import java.io.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.io.ByteCoder;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Encodes List events as they arrive.

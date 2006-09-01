@@ -4,11 +4,8 @@
 package ca.odell.glazedlists.matchers;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the Glazed Lists' change objects
-import ca.odell.glazedlists.*;
-// Java collections are used for underlying data storage
-import java.util.*;
+import ca.odell.glazedlists.GlazedLists;
+import junit.framework.TestCase;
 
 /**
  * Test the {@link CompositeMatcherEditor}.

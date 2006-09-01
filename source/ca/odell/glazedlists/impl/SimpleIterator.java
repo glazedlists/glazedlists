@@ -4,7 +4,9 @@
 package ca.odell.glazedlists.impl;
 
 // for being a list iterator
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * The SimpleTreeIterator is an iterator that allows the user to iterate

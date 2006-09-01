@@ -4,10 +4,10 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // for being a JUnit test case
-import junit.framework.*;
-import ca.odell.glazedlists.*;
-// NIO is used for CTP
-import java.io.*;
+import ca.odell.glazedlists.RandomDataFactory;
+import junit.framework.TestCase;
+
+import java.io.IOException;
 
 /**
  * A CTPChunk test verifies that the CTPConnection provides proper chunks.

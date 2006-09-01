@@ -4,9 +4,10 @@
 package ca.odell.glazedlists.impl;
 
 // for inspecting themes
-import javax.swing.UIManager;
-import javax.swing.plaf.metal.*;
-import java.lang.reflect.*;
+import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.metal.MetalTheme;
+import java.lang.reflect.Method;
 import java.security.AccessControlException;
 
 /**

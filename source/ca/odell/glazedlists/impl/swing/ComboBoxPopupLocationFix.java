@@ -4,8 +4,8 @@
 package ca.odell.glazedlists.impl.swing;
 
 import javax.swing.*;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 
 /**

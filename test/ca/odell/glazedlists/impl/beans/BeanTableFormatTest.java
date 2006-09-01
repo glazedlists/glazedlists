@@ -4,12 +4,13 @@
 package ca.odell.glazedlists.impl.beans;
 
 // for being a JUnit test case
-import junit.framework.*;
-// test objects
-import java.awt.Color;
-// table forms
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.*;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
+import junit.framework.TestCase;
+
+import java.awt.*;
 
 /**
  * This test verifies that the BeanTableFormat works as expected.

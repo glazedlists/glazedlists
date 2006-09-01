@@ -4,10 +4,11 @@
 package ca.odell.glazedlists.impl;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-// for managing weak references
-import java.lang.ref.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
+import java.lang.ref.WeakReference;
 
 /**
  * This class is a proxy to another ListEventListener that may go out of scope

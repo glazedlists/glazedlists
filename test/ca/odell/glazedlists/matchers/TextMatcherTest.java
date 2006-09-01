@@ -3,13 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.impl.filter.*;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.TextFilterator;
-// standard collections
+import ca.odell.glazedlists.impl.filter.StringTextFilterator;
+import ca.odell.glazedlists.impl.filter.TextMatcher;
+import junit.framework.TestCase;
+
 import java.util.*;
 
 public class TextMatcherTest extends TestCase {

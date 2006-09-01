@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.TextFilterator;
+
 import java.util.List;
 
 /**

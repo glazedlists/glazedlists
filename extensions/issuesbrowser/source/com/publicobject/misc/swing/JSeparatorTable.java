@@ -3,14 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.swing;
 
-import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.SeparatorList;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.*;
-
 import java.awt.*;
 
 /**

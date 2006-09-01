@@ -5,9 +5,9 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 
 import ca.odell.glazedlists.GlazedLists;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /*
  # some M4 Macros that make it easy to use m4 with Java

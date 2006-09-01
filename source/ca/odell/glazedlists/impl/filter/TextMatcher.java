@@ -4,10 +4,15 @@
 package ca.odell.glazedlists.impl.filter;
 
 // standard collections
-import java.util.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.*;
+import ca.odell.glazedlists.TextFilterable;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Matcher for matching text.

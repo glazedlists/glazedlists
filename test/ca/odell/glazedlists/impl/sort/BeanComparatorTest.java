@@ -4,12 +4,14 @@
 package ca.odell.glazedlists.impl.sort;
 
 // for being a JUnit test case
-import junit.framework.*;
-// standard collections
-import java.util.*;
-// test objects
-import java.awt.Color;
 import ca.odell.glazedlists.GlazedLists;
+import junit.framework.TestCase;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * This test verifies that the BeanComparator works as expected.

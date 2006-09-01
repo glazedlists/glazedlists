@@ -4,8 +4,8 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import junit.framework.TestCase;
 
 /**
  * Tests to verify that for each list change, only one event is fired.

@@ -4,8 +4,9 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // for being a JUnit test case
-import junit.framework.*;
-import java.io.*;
+import junit.framework.TestCase;
+
+import java.io.IOException;
 
 /**
  * A CTPConnectionTest verifies that behaviour is correct when connections fail.

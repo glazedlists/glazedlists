@@ -3,12 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
 
-import java.util.List;
 import java.util.ArrayList;
-
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import java.util.List;
 
 /**
  * Validate that the {@link ca.odell.glazedlists.impl.IndexSnapshot} class works as expected.

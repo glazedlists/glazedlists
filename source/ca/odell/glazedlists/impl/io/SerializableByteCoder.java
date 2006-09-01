@@ -3,9 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import java.io.*;
-// Glazed Lists' pluggable object to bytes interface
 import ca.odell.glazedlists.io.ByteCoder;
+
+import java.io.*;
 
 /**
  * A {@link ByteCoder} that uses {@link Serializable}.

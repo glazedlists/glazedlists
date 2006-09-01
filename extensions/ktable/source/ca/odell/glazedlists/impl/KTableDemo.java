@@ -3,17 +3,20 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import de.kupzog.ktable.*;
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.swt.EventKTableModel;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.swt.EventKTableModel;
+import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueLoader;
 import com.publicobject.issuesbrowser.Project;
 import com.publicobject.misc.Throbber;
-import com.publicobject.issuesbrowser.Issue;
+import de.kupzog.ktable.KTable;
+import de.kupzog.ktable.SWTX;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

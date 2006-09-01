@@ -3,20 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-import de.kupzog.ktable.KTableModel;
-import de.kupzog.ktable.KTableCellEditor;
-import de.kupzog.ktable.KTableCellRenderer;
-import de.kupzog.ktable.KTable;
-import org.eclipse.swt.graphics.Point;
-import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.swt.GlazedListsSWT;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.gui.WritableTableFormat;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Make implementing {@link KTableFormat} easier.

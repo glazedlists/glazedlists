@@ -4,15 +4,12 @@
 package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.gui.*;
-// the objects to play with
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.gui.TableFormat;
+
 import javax.swing.*;
-import java.util.Random;
 
 
 /**

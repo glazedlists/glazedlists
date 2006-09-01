@@ -4,8 +4,8 @@
 package ca.odell.glazedlists.impl.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-// Swing toolkit stuff for implementing models
+import ca.odell.glazedlists.ThresholdList;
+
 import javax.swing.*;
 
 /**

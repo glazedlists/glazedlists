@@ -3,10 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-import java.net.URL;
-import java.net.HttpURLConnection;
 import java.io.*;
-import java.util.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Overcome flaws in {@link HttpURLConnection} to download files from http://java.net,

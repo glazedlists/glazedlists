@@ -3,9 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
+import junit.framework.TestCase;
+
 import java.io.*;
-// for being a JUnit test case
-import junit.framework.*;
 import java.text.ParseException;
 
 /**

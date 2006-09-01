@@ -5,8 +5,8 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This EventList acts as a pass-through transformation which records

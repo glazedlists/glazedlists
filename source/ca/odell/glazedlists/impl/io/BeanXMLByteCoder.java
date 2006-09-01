@@ -3,10 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import java.beans.*;
-import java.io.*;
-// Glazed Lists' pluggable object to bytes interface
 import ca.odell.glazedlists.io.ByteCoder;
+
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A {@link ByteCoder} that uses the {@link java.beans.XMLEncoder XMLEncoder} and

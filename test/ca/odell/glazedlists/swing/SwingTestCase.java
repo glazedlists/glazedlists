@@ -4,11 +4,11 @@
 package ca.odell.glazedlists.swing;
 
 // for being a JUnit test case
-import junit.framework.*;
-// reflection for invoking methods by name
-import java.lang.reflect.*;
-// swing utilities for interacting with the event dispatch thread
-import javax.swing.SwingUtilities;
+import junit.framework.TestCase;
+
+import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Utility class for running JUnit tests with Swing code.

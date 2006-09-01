@@ -4,11 +4,10 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// the core Glazed Lists package
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-// standard collections
+import junit.framework.TestCase;
+
 import java.util.*;
 
 /**

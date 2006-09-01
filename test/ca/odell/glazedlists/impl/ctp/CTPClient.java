@@ -3,9 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.ctp;
 
-import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * A test program that acts as a client to interface with a CTP server.

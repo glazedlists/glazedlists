@@ -1,6 +1,9 @@
 package ca.odell.glazedlists.impl;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
 

@@ -3,7 +3,6 @@ package ca.odell.glazedlists.impl.matchers;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.matchers.Matchers;
 import junit.framework.TestCase;
 

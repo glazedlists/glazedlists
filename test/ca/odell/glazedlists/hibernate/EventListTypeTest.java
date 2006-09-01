@@ -4,15 +4,10 @@
 package ca.odell.glazedlists.hibernate;
 
 import ca.odell.glazedlists.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-
 import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import java.util.List;
 

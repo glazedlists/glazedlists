@@ -4,9 +4,9 @@
 package ca.odell.glazedlists.impl.sort;
 
 // for specifying a sorting algorithm
-import java.util.Comparator;
-// Bean reflection
 import ca.odell.glazedlists.impl.beans.BeanProperty;
+
+import java.util.Comparator;
 
 /**
  * A {@link Comparator} that uses Reflection to compare two instances

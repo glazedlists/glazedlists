@@ -4,17 +4,17 @@
 package com.publicobject.amazonbrowser.swing;
 
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
-import ca.odell.glazedlists.swing.TreeTableSupport;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import ca.odell.glazedlists.swing.TreeTableSupport;
 import com.publicobject.amazonbrowser.*;
-import com.publicobject.misc.swing.GradientPanel;
-import com.publicobject.misc.swing.ExceptionHandlerFactory;
 import com.publicobject.misc.Exceptions;
+import com.publicobject.misc.swing.ExceptionHandlerFactory;
+import com.publicobject.misc.swing.GradientPanel;
 
 import javax.swing.*;
 import java.awt.*;

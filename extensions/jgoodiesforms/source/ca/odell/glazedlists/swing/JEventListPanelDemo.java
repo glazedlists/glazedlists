@@ -3,14 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+
 import javax.swing.*;
-import java.awt.event.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
-// JGoodies is industrial layout
-// observable lists are used to store rules
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.swing.JEventListPanel;
 
 /**
  * A panel that shows the contents of an EventList containing JComponents.

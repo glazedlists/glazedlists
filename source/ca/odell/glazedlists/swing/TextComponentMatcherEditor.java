@@ -4,16 +4,16 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.matchers.*;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import javax.swing.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * A MatcherEditor that matches Objects that contain the filter text located

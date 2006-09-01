@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.gui;
 
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @see ca.odell.glazedlists.gui.AbstractTableComparatorChooser.SINGLE_COLUMN

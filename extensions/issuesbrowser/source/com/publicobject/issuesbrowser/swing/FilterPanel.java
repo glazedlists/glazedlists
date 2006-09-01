@@ -6,12 +6,12 @@ package com.publicobject.issuesbrowser.swing;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.swing.JEventListPanel;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
+import ca.odell.glazedlists.swing.JEventListPanel;
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.misc.swing.RoundedBorder;
 
@@ -20,8 +20,8 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 /**
  * Manage a bunch of issue filters in a panel.

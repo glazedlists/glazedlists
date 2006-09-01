@@ -2,8 +2,8 @@ package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FunctionListTest extends TestCase {
 

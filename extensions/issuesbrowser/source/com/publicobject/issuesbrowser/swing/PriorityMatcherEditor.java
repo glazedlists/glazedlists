@@ -3,19 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import ca.odell.glazedlists.Filterator;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.RangeMatcherEditor;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.Filterator;
-
-import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-
 import com.publicobject.issuesbrowser.Issue;
 
-import java.util.Hashtable;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.util.Hashtable;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

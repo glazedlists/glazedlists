@@ -4,10 +4,12 @@
 package ca.odell.glazedlists.impl;
 
 // standard collections
-import java.util.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * An {@link EventList} that does not allow writing operations.

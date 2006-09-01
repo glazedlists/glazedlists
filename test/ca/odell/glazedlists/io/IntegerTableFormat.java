@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import ca.odell.glazedlists.gui.*;
+import ca.odell.glazedlists.gui.TableFormat;
 
 /**
  * The IntegerTableFormat specifies how an integer is displayed in a table.

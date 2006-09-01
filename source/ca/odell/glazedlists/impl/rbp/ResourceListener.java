@@ -4,9 +4,6 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // NIO is used for BRP
-import java.util.*;
-import java.nio.*;
-import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
 
 /**

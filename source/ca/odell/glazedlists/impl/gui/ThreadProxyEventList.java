@@ -4,10 +4,16 @@
 package ca.odell.glazedlists.impl.gui;
 
 // Java collections are used for underlying data storage
-import java.util.*;
-// the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.event.ListEventListener;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * An {@link EventList} that only forwards its events on a proxy thread,

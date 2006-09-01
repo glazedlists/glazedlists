@@ -4,11 +4,11 @@
 package ca.odell.glazedlists.swt;
 
 // core glazed lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-// to work with SWT
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 
 /**
  * Provides two {@link EventList}s that represent the selected and deselected

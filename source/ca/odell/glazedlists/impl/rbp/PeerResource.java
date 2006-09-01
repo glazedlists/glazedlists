@@ -4,12 +4,12 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // NIO is used for BRP
-import java.util.*;
-import java.nio.*;
-import java.io.*;
 import ca.odell.glazedlists.impl.io.Bufferlo;
-// logging
-import java.util.logging.*;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 /**
  * A resource that is being published on the network.

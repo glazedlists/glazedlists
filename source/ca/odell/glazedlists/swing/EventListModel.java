@@ -4,13 +4,16 @@
 package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
-// Swing toolkit stuff for displaying widgets
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
 import javax.swing.*;
-import javax.swing.event.*;
-// this class uses tables for displaying message lists
-import java.util.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An EventListModel adapts a EventList to the ListModel interface making it

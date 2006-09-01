@@ -4,13 +4,15 @@
 package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
-// volatile implementation support
-import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
-import ca.odell.glazedlists.impl.adt.barcode2.Element;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.Grouper;
-// Java collections are used for underlying data storage
-import java.util.*;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
+
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A grouping list contains elements which are themselves Lists. Those Lists

@@ -4,11 +4,13 @@
 package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.event.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
-// To extend the List interface from Java Collections
-import java.util.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * An observable {@link List}. {@link ListEventListener}s can register to be

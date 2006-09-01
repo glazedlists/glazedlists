@@ -5,12 +5,11 @@ package ca.odell.glazedlists;
 
 // the Glazed Lists
 // for being a JUnit test case
-import junit.framework.*;
-// standard collections
-import java.util.*;
-
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import junit.framework.TestCase;
+
+import java.util.List;
 
 /**
  * Verifies that list events are nested properly.

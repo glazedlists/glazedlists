@@ -4,7 +4,7 @@
 package ca.odell.glazedlists;
 
 // to use standard collections
-import java.util.*;
+import java.util.Comparator;
 
 /**
  * An {@link EventList} that shows a range of the elements of the source

@@ -4,9 +4,10 @@
 package ca.odell.glazedlists.impl;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
-// Java collections are used for underlying data storage
-import java.util.*;
+import ca.odell.glazedlists.CollectionList;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Returns the List itself for a List of Lists.

@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.event;
 
 // standard java event and observer
-import java.util.*;
+import java.util.EventListener;
 
 /**
  * Listens and responds to changes in a dynamic list of objects. This could be

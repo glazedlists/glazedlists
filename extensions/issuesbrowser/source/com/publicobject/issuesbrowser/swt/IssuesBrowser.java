@@ -4,18 +4,21 @@
 package com.publicobject.issuesbrowser.swt;
 
 // swt
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.custom.*;
-// glazed lists
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.swt.*;
-import ca.odell.glazedlists.matchers.*;
 import com.publicobject.issuesbrowser.*;
 import com.publicobject.misc.Throbber;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.*;
 
 
 /**

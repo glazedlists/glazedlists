@@ -4,7 +4,8 @@
 package ca.odell.glazedlists.impl.adt;
 
 // for iterators
-import java.util.*;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * A SparseListNode models a node in an SparseList.  This class

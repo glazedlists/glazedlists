@@ -4,13 +4,11 @@
 package ca.odell.glazedlists.impl.nio;
 
 // NIO is used for CTP
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
-import java.io.*;
-// logging
-import java.util.logging.*;
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The SelectAndHandle selects ready keys and handles them.

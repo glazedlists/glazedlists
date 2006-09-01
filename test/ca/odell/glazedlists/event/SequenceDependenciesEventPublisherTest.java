@@ -3,15 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import junit.framework.TestCase;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.

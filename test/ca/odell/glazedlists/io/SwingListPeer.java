@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * A peer that publishes and subscribes to lists.

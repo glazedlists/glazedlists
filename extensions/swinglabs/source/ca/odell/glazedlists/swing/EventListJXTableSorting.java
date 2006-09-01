@@ -3,21 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.impl.sort.TableColumnComparator;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.decorator.SortController;
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
-import org.jdesktop.swingx.decorator.FilterPipeline;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 
 import java.util.*;
-
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.AdvancedTableFormat;
-import ca.odell.glazedlists.impl.sort.TableColumnComparator;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.GlazedLists;
 
 /**
  * Sort a {@link JXTable} using {@link ca.odell.glazedlists.SortedList}.

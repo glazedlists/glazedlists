@@ -4,10 +4,10 @@
 package ca.odell.glazedlists.impl.beans;
 
 // To work with Lists
-import java.util.*;
-// To implement the interface
-import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.Filterator;
+import ca.odell.glazedlists.TextFilterator;
+
+import java.util.List;
 
 /**
  * TextFilterator implementation that uses reflection to be used for any

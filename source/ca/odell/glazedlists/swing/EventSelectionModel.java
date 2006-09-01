@@ -4,12 +4,16 @@
 package ca.odell.glazedlists.swing;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-// for listening to list selection events
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.TransformedList;
+
 import javax.swing.*;
-import javax.swing.event.*;
-// for lists of listeners
-import java.util.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An {@link EventSelectionModel} is a class that performs two simulaneous

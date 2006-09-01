@@ -4,12 +4,9 @@
 package ca.odell.glazedlists.impl.swt;
 
 // to interact with Sliders
-import org.eclipse.swt.widgets.Slider;
-import org.eclipse.swt.widgets.Scale;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.SelectionEvent;
-// to access the ThresholdList
 import ca.odell.glazedlists.ThresholdList;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 
 /**
  * A Viewer class that binds a BoundedRangeControl to the upper threshold on a

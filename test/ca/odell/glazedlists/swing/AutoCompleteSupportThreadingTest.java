@@ -1,11 +1,10 @@
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.GlazedLists;
 import junit.framework.TestCase;
 
 import javax.swing.*;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.GlazedLists;
 
 public class AutoCompleteSupportThreadingTest extends TestCase {
 

@@ -4,15 +4,17 @@
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.event.*;
-// to make of use Barcode
-import ca.odell.glazedlists.impl.adt.*;
-// SWT toolkit stuff for displaying widgets
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.impl.adt.Barcode;
+import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.*;
 
 /**
  * A view helper that displays an EventList in an SWT table.

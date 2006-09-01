@@ -4,16 +4,15 @@
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-// for access to volatile classes
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ThresholdList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.impl.swt.*;
-// implemented interfaces
 import org.eclipse.jface.viewers.ILabelProvider;
-// SWT components
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Slider;
 
 
 /**

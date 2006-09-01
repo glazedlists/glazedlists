@@ -3,14 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.*;
-// the core Glazed Lists package
-import ca.odell.glazedlists.event.*;
-// volatile implementation support
-import ca.odell.glazedlists.impl.adt.*;
-import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
+import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
+
+import java.util.Collections;
+import java.util.List;
 
 
 /**

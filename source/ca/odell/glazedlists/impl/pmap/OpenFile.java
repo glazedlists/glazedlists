@@ -4,15 +4,12 @@
 package ca.odell.glazedlists.impl.pmap;
 
 // NIO is used for CTP
-import ca.odell.glazedlists.impl.nio.*;
-import ca.odell.glazedlists.impl.io.*;
-import java.util.*;
-import java.nio.*;
-import java.nio.channels.*;
+import ca.odell.glazedlists.impl.io.Bufferlo;
+
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.ParseException;
-import java.io.*;
-// logging
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 /**
  * Opens a file for reading and writing a persistent map.

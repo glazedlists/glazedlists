@@ -1,9 +1,9 @@
 package com.publicobject.issuesbrowser.swing;
 
-import com.publicobject.issuesbrowser.Issue;
-import ca.odell.glazedlists.nachocalendar.NachoDateRangeMatcherEditor;
 import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.nachocalendar.NachoDateRangeMatcherEditor;
+import com.publicobject.issuesbrowser.Issue;
 
 import java.util.Date;
 import java.util.List;

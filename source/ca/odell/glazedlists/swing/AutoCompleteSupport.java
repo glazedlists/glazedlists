@@ -6,8 +6,8 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
+import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
@@ -27,7 +27,7 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.ParsePosition;
-import java.util.*;
+import java.util.Comparator;
 import java.util.List;
 
 /**

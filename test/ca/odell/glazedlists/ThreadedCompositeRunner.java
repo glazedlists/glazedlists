@@ -4,7 +4,10 @@
 package ca.odell.glazedlists;
 
 // Java collections are used for underlying data storage
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 /**
  * The ThreadedCompositeRunner is a manually-executed test that verifies that

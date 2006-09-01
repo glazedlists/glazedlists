@@ -4,9 +4,9 @@
 package ca.odell.glazedlists.event;
 
 // the core Glazed Lists package
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
-// for keeping a list of changes
+
 import java.util.*;
 
 /**

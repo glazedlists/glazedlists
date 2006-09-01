@@ -6,6 +6,7 @@ package com.publicobject.misc.swing;
 import com.publicobject.misc.Exceptions;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
@@ -14,7 +15,6 @@ import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.awt.*;
 
 /**
  * This static factory class produces implementations of the

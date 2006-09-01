@@ -6,8 +6,8 @@ package ca.odell.glazedlists.swing;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This panel exists to relieve the burdens of creating a

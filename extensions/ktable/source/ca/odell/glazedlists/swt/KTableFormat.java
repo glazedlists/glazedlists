@@ -4,8 +4,9 @@
 package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.WritableTableFormat;
-import de.kupzog.ktable.*;
+import de.kupzog.ktable.KTable;
+import de.kupzog.ktable.KTableCellEditor;
+import de.kupzog.ktable.KTableCellRenderer;
 
 /**
  * Specify how to split row objects into cells for use with {@link KTable}.

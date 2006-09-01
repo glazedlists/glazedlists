@@ -7,10 +7,10 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A list that fires update events whenever elements are modified in place.

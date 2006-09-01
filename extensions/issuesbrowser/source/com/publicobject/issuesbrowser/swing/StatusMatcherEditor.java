@@ -5,12 +5,12 @@ package com.publicobject.issuesbrowser.swing;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GroupingList;
-import ca.odell.glazedlists.swing.GlazedListsSwing;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueStatusComparator;
 

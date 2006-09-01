@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import junit.framework.TestCase;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
@@ -15,8 +16,6 @@ import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.SimpleValue;
-
-import junit.framework.TestCase;
 
 import java.sql.Blob;
 import java.sql.Clob;

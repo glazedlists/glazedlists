@@ -4,19 +4,20 @@
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
-import ca.odell.glazedlists.*;
-// the Glazed Lists util and volatile packages for default comparators
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.impl.gui.SortingStrategy;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
 import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
-// for keeping lists of comparators
-import java.util.*;
-// SWT toolkit stuff for displaying widgets
+import ca.odell.glazedlists.impl.gui.SortingStrategy;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.events.*;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking

@@ -4,14 +4,17 @@
 package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.event.*;
-// volatile implementation support
-import ca.odell.glazedlists.impl.*;
-// concurrency is similar to java.util.concurrent in J2SE 1.5
-import ca.odell.glazedlists.util.concurrent.*;
-// for iterators
-import java.util.*;
+import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.impl.EventListIterator;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.impl.SimpleIterator;
+import ca.odell.glazedlists.impl.SubEventList;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
 import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * A convenience class that implements common functionality for all {@link EventList}s.

@@ -3,19 +3,20 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.*;
-// for weak reference proxying
 import ca.odell.glazedlists.event.ListEventListener;
-// for access to volatile classes
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.*;
-import ca.odell.glazedlists.impl.filter.StringTextFilterator;
-import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.impl.beans.*;
-import ca.odell.glazedlists.impl.matchers.*;
-// implemented interfaces
-import ca.odell.glazedlists.gui.*;
-import ca.odell.glazedlists.matchers.*;
-import java.util.Comparator;
+import ca.odell.glazedlists.impl.filter.StringTextFilterator;
+import ca.odell.glazedlists.impl.matchers.FixedMatcherEditor;
+import ca.odell.glazedlists.impl.sort.*;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.Matchers;
+
+import java.util.*;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.

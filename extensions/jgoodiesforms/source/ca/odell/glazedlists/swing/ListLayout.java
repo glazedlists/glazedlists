@@ -4,15 +4,14 @@
 package ca.odell.glazedlists.swing;
 
 import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.ColumnSpec;
 
-import java.util.List;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Layout list elements by delegating to a {@link FormLayout}. This layout manages

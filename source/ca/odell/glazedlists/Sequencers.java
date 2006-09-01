@@ -5,8 +5,8 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 
-import java.util.Date;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A factory for creating Sequencers.

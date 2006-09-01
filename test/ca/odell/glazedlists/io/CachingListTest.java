@@ -3,11 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import junit.framework.TestCase;
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
+import junit.framework.TestCase;
 
 import java.util.Random;
 

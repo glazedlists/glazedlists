@@ -3,12 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import javax.swing.JLabel;
-import java.io.*;
-// Glazed Lists in bytes
-import ca.odell.glazedlists.io.*;
-// for being a JUnit test case
-import junit.framework.*;
+import ca.odell.glazedlists.io.ByteCoder;
+import junit.framework.TestCase;
+
+import javax.swing.*;
+import java.io.IOException;
 
 /**
  * Tests the BeanXMLByteCoder..

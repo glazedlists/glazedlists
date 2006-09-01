@@ -4,11 +4,13 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import junit.framework.*;
-// Java collections are used for underlying data storage
-import java.util.*;
-
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import junit.framework.TestCase;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A ReadOnlyListTest tests the functionality of the ReadOnlyList

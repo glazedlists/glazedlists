@@ -4,12 +4,6 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // NIO is used for BRP
-import java.util.*;
-import java.nio.*;
-import java.io.*;
-// logging
-import java.util.logging.*;
-
 /**
  * Maintains the state for a particular resource on a particular connection.
  *
@@ -19,13 +13,13 @@ class ResourceConnection {
 
     /** the connection */
     private PeerConnection connection;
-    
+
     /** the resource */
     private PeerResource resource;
-    
+
     /** the resource's current update */
     private int updateId = -1;
-    
+
     /**
      * Create a new {@link ResourceConnection} to manage the state of the specified
      * connection and resource.
@@ -34,7 +28,7 @@ class ResourceConnection {
         this.connection = connection;
         this.resource = resource;
     }
-    
+
     /**
      * The current update of this resource connection.
      */
@@ -44,14 +38,14 @@ class ResourceConnection {
     public int getUpdateId() {
         return updateId;
     }
-    
+
     /**
      * Gets the connection that is interested in this resource.
      */
     public PeerConnection getConnection() {
         return connection;
     }
-    
+
     /**
      * Gets the resource that is attached to this connection.
      */

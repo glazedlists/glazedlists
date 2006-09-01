@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 import javax.swing.*;
 

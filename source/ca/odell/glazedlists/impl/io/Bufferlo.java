@@ -3,17 +3,20 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import javax.swing.*;
-import java.util.*;
-// NIO
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
-// regular expressions
-import java.util.regex.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.channels.GatheringByteChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SelectionKey;
 import java.text.ParseException;
-// logging
-import java.util.logging.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A high-level class for moving data and parsing protocols.

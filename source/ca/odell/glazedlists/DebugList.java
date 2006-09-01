@@ -6,9 +6,9 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
-import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.Lock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.util.*;
 

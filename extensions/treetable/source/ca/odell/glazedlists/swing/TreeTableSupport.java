@@ -6,9 +6,9 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.TreeList;
 
 import javax.swing.*;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableCellEditor;
 
 /**
  * This class {@link #install}s support for a single hierarchical column within

@@ -5,15 +5,13 @@ package ca.odell.glazedlists.migrationkit.swing;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-import ca.odell.glazedlists.event.*;
-// Swing toolkit stuff for displaying widgets
+
 import javax.swing.*;
-// for automatically responding to changes in the filter field
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * An {@link EventList} that shows only elements that contain a filter text string.

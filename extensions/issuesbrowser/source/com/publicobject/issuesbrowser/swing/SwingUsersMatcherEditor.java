@@ -7,8 +7,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
-import com.publicobject.issuesbrowser.UsersMatcherEditor;
 import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.UsersMatcherEditor;
 import com.publicobject.misc.swing.NoFocusRenderer;
 
 import javax.swing.*;

@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.gui;
 
-import ca.odell.glazedlists.impl.gui.SortingState;
-
 import java.util.List;
 
 /**

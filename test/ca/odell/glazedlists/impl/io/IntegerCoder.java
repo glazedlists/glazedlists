@@ -3,7 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import ca.odell.glazedlists.io.*;
+import ca.odell.glazedlists.io.ByteCoder;
+
 import java.io.*;
 
 /**

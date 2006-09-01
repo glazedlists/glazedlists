@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
@@ -10,8 +11,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 public class DebugListTest extends TestCase {
 

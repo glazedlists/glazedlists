@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.*;
+import java.util.Random;
 
 /**
  * Produces random data for test cases to consume.
