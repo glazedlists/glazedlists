@@ -112,7 +112,6 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer);
 
         // listen for events on the specified table
-        table.setColumnSelectionAllowed(false);
         table.getModel().addTableModelListener(tableModelHandler);
 
         // install the sorting strategy to interpret clicks
