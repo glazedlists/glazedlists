@@ -1015,9 +1015,14 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
-     * Returns <tt>true</tt> if the list of all possible values in the
-     * ComboBoxModel includes one which meets the criteria to be the
-     * autocompletion term for the given <code>value</code>.
+     * Performs a linear scan of ALL ITEMS, regardless of the filtering state
+     * of the ComboBoxModel, to locate the autocomplete term. If an exact
+     * match of the given <code>value</code> can be found, then the value is
+     * returned. If an exact match cannot be found, the first term that
+     * <strong>starts with</strong> the given <code>value</code> is returned.
+     *
+     * <p>If no exact or partial match can be located, <code>null</code> is
+     * returned.
      */
     private String findAutoCompleteTerm(String value) {
         // determine if our value is empty
@@ -1025,16 +1030,25 @@ public final class AutoCompleteSupport<E> {
 
         final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
 
+        String partialMatchTerm = null;
+
         // search the list of ALL items for an autocompletion term for the given value
         for (int i = 0, n = items.size(); i < n; i++) {
             final String itemString = convertToString(items.get(i));
 
-            // if the itemString starts with the value we have found an appropriate autocompletion term
-            if (prefixIsEmpty ? "".equals(itemString) : valueMatcher.matches(itemString))
-                return itemString;
+            // if we have an exact match, return the given value immediately
+            if (value.equals(itemString))
+                return value;
+
+            // if we have not yet located a partial match, check the current itemString for a partial match
+            // (to be returned if an exact match cannot be found)
+            if (partialMatchTerm == null) {
+                if (prefixIsEmpty ? "".equals(itemString) : valueMatcher.matches(itemString))
+                    partialMatchTerm = itemString;
+            }
         }
 
-        return null;
+        return partialMatchTerm;
     }
 
     /**
@@ -1187,24 +1201,41 @@ public final class AutoCompleteSupport<E> {
 
             // search the combobox model for a value that starts with our prefix (called an autocompletion term)
             for (int i = 0, n = comboBoxModel.getSize(); i < n; i++) {
-                final String itemString = convertToString(comboBoxModel.getElementAt(i));
+                String itemString = convertToString(comboBoxModel.getElementAt(i));
 
                 // if itemString does not match the prefix, continue searching for an autocompletion term
                 if (prefixIsEmpty ? !"".equals(itemString) : !filterMatcher.matches(itemString))
                     continue;
 
+                // record the index and value that are our "best" autocomplete terms so far
+                int matchIndex = i;
+                String matchString = itemString;
+
+                // search for an *exact* match in the remainder of the ComboBoxModel
+                // before settling for the partial match we have just found
+                for (int j = i; j < n; j++) {
+                    itemString = convertToString(comboBoxModel.getElementAt(j));
+
+                    // if we've located an exact match, use its index and value rather than the partial match
+                    if (prefix.equals(itemString)) {
+                        matchIndex = j;
+                        matchString = itemString;
+                        break;
+                    }
+                }
+
                 // either keep the user's prefix or replace it with the itemString's prefix
                 // depending on whether we correct the case
                 if (getCorrectsCase() || isStrict()) {
-                    filterBypass.replace(0, prefix.length(), itemString, attributeSet);
+                    filterBypass.replace(0, prefix.length(), matchString, attributeSet);
                 } else {
-                    final String itemSuffix = itemString.substring(prefix.length());
+                    final String itemSuffix = matchString.substring(prefix.length());
                     filterBypass.insertString(prefix.length(), itemSuffix, attributeSet);
                 }
 
                 // select the autocompletion term
-                final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, itemString);
-                selectItem(i, silently);
+                final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, matchString);
+                selectItem(matchIndex, silently);
 
                 // select the text after the prefix but before the end of the text (it represents the autocomplete text)
                 comboBoxEditorComponent.select(prefix.length(), document.getLength());
