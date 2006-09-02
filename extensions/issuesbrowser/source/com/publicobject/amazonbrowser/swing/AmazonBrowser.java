@@ -7,10 +7,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TableComparatorChooser;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-import ca.odell.glazedlists.swing.TreeTableSupport;
+import ca.odell.glazedlists.swing.*;
 import com.publicobject.amazonbrowser.*;
 import com.publicobject.misc.Exceptions;
 import com.publicobject.misc.swing.ExceptionHandlerFactory;
@@ -39,6 +36,9 @@ public class AmazonBrowser implements Runnable {
 
     /** the TableModel backing the treetable of items */
     private EventTableModel<TreeList.TreeElement<Item>> itemTableModel;
+
+    /** the ListSelectionModel backing the treetable of items */
+    private EventSelectionModel<TreeList.TreeElement<Item>> itemTableSelectionModel;
 
     /** loads items as requested */
     private ItemLoader itemLoader;
@@ -145,7 +145,11 @@ public class AmazonBrowser implements Runnable {
         // create a JTable to display the items
         final TableFormat<TreeList.TreeElement<Item>> itemTableFormat = new ItemTableFormat();
         itemTableModel = new EventTableModel<TreeList.TreeElement<Item>>(treeList, itemTableFormat);
-        final JTable itemTable = new JTable(itemTableModel);
+
+//        final JTable itemTable = new JTable(itemTableModel);
+
+        itemTableSelectionModel = new EventSelectionModel<TreeList.TreeElement<Item>>(treeList);
+        final JTable itemTable = new JTable(itemTableModel, null, itemTableSelectionModel);
 
         // add sorting to the table
         new TableComparatorChooser<Item>(itemTable, sortedItemsList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);

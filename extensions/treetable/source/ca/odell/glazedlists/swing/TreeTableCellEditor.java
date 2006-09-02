@@ -144,7 +144,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
                 try {
                     // expand/collapse the rowObject if possible
                     if (treeList.isExpandable(row))
-                        treeList.setExpanded(row, !treeList.isExpanded(row));
+                        TreeTableUtilities.toggleExpansionWithoutAdjustingSelection(table, treeList, row);
                 } finally {
                     treeList.getReadWriteLock().writeLock().unlock();
                 }

@@ -348,7 +348,7 @@ public class ListSelection<E> {
      * {@link IllegalArgumentException} is thrown. This list does not support
      * the {@link List#set set} method.
      */
-    public EventList getTogglingDeselected() {
+    public EventList<E> getTogglingDeselected() {
         source.getReadWriteLock().writeLock().lock();
         try {
             if(deselectedToggleList == null) {
@@ -775,17 +775,14 @@ public class ListSelection<E> {
         // only the anchor should be selected
         } else if(selectionMode == SINGLE_SELECTION) {
             setSubRangeOfRange(true, anchorSelectionIndex, anchorSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-            //setSelection(anchorSelectionIndex);
 
         // select the interval between anchor and lead
         } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
             setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-            //setSelection(anchorSelectionIndex, leadSelectionIndex);
 
         // select the interval between anchor and lead without deselecting anything
         } else {
             setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, -1, -1);
-            //select(anchorSelectionIndex, leadSelectionIndex);
         }
     }
 
@@ -811,12 +808,10 @@ public class ListSelection<E> {
         // select only the lead
         } else if(selectionMode == SINGLE_SELECTION) {
             setSubRangeOfRange(true, leadSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-            //setSelection(leadSelectionIndex);
 
         // select the interval between anchor and lead
         } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
             setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
-            //setSelection(anchorSelectionIndex, leadSelectionIndex);
 
         // select the interval between anchor and lead deselecting as necessary
         } else {

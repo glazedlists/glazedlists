@@ -290,6 +290,14 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
+     * A convenience method to expand the row if it is currently collapsed or
+     * vice versa.
+     */
+    public void toggleExpanded(int index) {
+        setExpanded(index, !isExpanded(index));
+    }
+
+    /**
      * Set the visibility of the specified element without firing any events.
      */
     private void setVisible(TreeElement<E> node, boolean visible) {

@@ -9,6 +9,9 @@ import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 /**
  * This class {@link #install}s support for a single hierarchical column within
@@ -54,8 +57,13 @@ public final class TreeTableSupport {
     /** The table to decorate with tree table behaviour */
     private final JTable table;
 
+    /** The TreeList that stores the state of the tree */
+    private final TreeList treeList;
+
     /** The model index of the table column that is the hierarchical column */
     private final int modelColumnIndex;
+
+    private final KeyListener expandAndCollapseKeyListener = new ExpandAndCollapseKeyListener();
 
     /** The renderer installed on the hierarchical TableColumn */
     private final TreeTableCellRenderer treeTableCellRenderer;
@@ -84,6 +92,7 @@ public final class TreeTableSupport {
      */
     private TreeTableSupport(JTable table, TreeList treeList, int modelColumnIndex) {
         this.table = table;
+        this.treeList = treeList;
         this.modelColumnIndex = modelColumnIndex;
 
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
@@ -108,6 +117,8 @@ public final class TreeTableSupport {
         this.originalEditor = viewColumn.getCellEditor();
         this.treeTableCellEditor = new TreeTableCellEditor(originalEditor, treeList);
         viewColumn.setCellEditor(treeTableCellEditor);
+
+        this.table.addKeyListener(expandAndCollapseKeyListener);
     }
 
     /**
@@ -136,6 +147,7 @@ public final class TreeTableSupport {
      *        for the hierachical TableColumn's renderer and editor
      * @param modelColumnIndex the model index of the hierarchical column
      * @return an instance of the support class providing treetable behaviour
+     *
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
@@ -158,6 +170,8 @@ public final class TreeTableSupport {
      */
     public void uninstall() {
         checkAccessThread();
+
+        table.removeKeyListener(expandAndCollapseKeyListener);
 
         // fetch information about the hierarchical column
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
@@ -184,5 +198,57 @@ public final class TreeTableSupport {
     private static void checkAccessThread() {
         if (!SwingUtilities.isEventDispatchThread())
             throw new IllegalStateException("TreeTableSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \"" + Thread.currentThread().getName() + "\"");
+    }
+
+    private class ExpandAndCollapseKeyListener extends KeyAdapter {
+        private boolean eventSelectionModelEnabled;
+        private boolean restoreAutoStartsEdit;
+        private Boolean autoStartsEdit;
+
+        public void keyPressed(KeyEvent e) {
+            // if the table doesn't own the focus, break early
+            if (!table.isFocusOwner())
+                return;
+
+            // if the key pressed is not the space bar, break early
+            if (e.getKeyChar() != KeyEvent.VK_SPACE)
+                return;
+
+            treeList.getReadWriteLock().writeLock().lock();
+            try {
+                final int row = table.getSelectionModel().getLeadSelectionIndex();
+                final int column = table.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+
+                // ensure some valid cell has focus
+                if (row == -1 || column == -1)
+                    return;
+
+                // ensure the column is the hierarchical column
+                final int focusedColumnModelIndex = table.convertColumnIndexToModel(column);
+                if (focusedColumnModelIndex != modelColumnIndex)
+                    return;
+
+                // if the row is expandable, toggle its expanded state
+                if (treeList.isExpandable(row)) {
+                    // turn off the client property that begins a cell edit -
+                    // we don't want the spacebar to invoke two different behaviours
+                    autoStartsEdit = (Boolean) table.getClientProperty("JTable.autoStartsEdit");
+                    table.putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
+                    restoreAutoStartsEdit = true;
+
+                    TreeTableUtilities.toggleExpansionWithoutAdjustingSelection(table, treeList, row);
+                }
+            } finally {
+                treeList.getReadWriteLock().writeLock().unlock();
+            }
+        }
+
+        public void keyReleased(KeyEvent e) {
+            // restore the original value of the client property that normally begins a cell edit on a keystroke
+            if (restoreAutoStartsEdit) {
+                table.putClientProperty("JTable.autoStartsEdit", autoStartsEdit);
+                restoreAutoStartsEdit = false;
+            }
+        }
     }
 }
