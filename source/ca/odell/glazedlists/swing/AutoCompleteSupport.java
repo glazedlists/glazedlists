@@ -1102,7 +1102,7 @@ public final class AutoCompleteSupport<E> {
             if (isReplacingAllText && valueBeforeEdit.equals(string)) return;
 
             super.replace(filterBypass, offset, length, string, attributeSet);
-            postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd);
+            postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd, true);
         }
 
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
@@ -1114,7 +1114,7 @@ public final class AutoCompleteSupport<E> {
             final int selectionEnd = comboBoxEditorComponent.getSelectionEnd();
 
             super.insertString(filterBypass, offset, string, attributeSet);
-            postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd);
+            postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd, true);
         }
 
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
@@ -1126,14 +1126,7 @@ public final class AutoCompleteSupport<E> {
             final int selectionEnd = comboBoxEditorComponent.getSelectionEnd();
 
             super.remove(filterBypass, offset, length);
-
-            // only select an autocomplete term if strict mode is on
-            doNotAutoComplete = !isStrict();
-            try {
-                postProcessDocumentChange(filterBypass, null, valueBeforeEdit, selectionStart, selectionEnd);
-            } finally {
-                doNotAutoComplete = false;
-            }
+            postProcessDocumentChange(filterBypass, null, valueBeforeEdit, selectionStart, selectionEnd, false);
         }
 
         /**
@@ -1148,7 +1141,7 @@ public final class AutoCompleteSupport<E> {
          *   <li> try to show the popup, if possible
          * </ol>
          */
-        private void postProcessDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet, String valueBeforeEdit, int selectionStart, int selectionEnd) throws BadLocationException {
+        private void postProcessDocumentChange(FilterBypass filterBypass, AttributeSet attributeSet, String valueBeforeEdit, int selectionStart, int selectionEnd, boolean allowPartialAutoCompletionTerm) throws BadLocationException {
             // break out early if we're flagged to not post process the Document change
             if (doNotPostProcessDocumentChanges) return;
 
@@ -1180,7 +1173,7 @@ public final class AutoCompleteSupport<E> {
 
             updateFilter();
             applyFilter(prefix);
-            selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit);
+            selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit, allowPartialAutoCompletionTerm);
             togglePopup();
         }
 
@@ -1192,7 +1185,7 @@ public final class AutoCompleteSupport<E> {
          * JComboBox is not a Table Cell Editor, an ActionEvent will be
          * broadcast from the combo box.
          */
-        private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit) throws BadLocationException {
+        private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit, boolean allowPartialAutoCompletionTerm) throws BadLocationException {
             // break out early if we're flagged to ignore attempts to autocomplete
             if (doNotAutoComplete) return;
 
@@ -1223,6 +1216,10 @@ public final class AutoCompleteSupport<E> {
                         break;
                     }
                 }
+
+                // if partial autocompletion terms are not allowed, and we only have a partial term, bail early
+                if (!allowPartialAutoCompletionTerm && !prefix.equals(itemString))
+                    return;
 
                 // either keep the user's prefix or replace it with the itemString's prefix
                 // depending on whether we correct the case
