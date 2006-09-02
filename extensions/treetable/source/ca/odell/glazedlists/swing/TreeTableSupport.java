@@ -201,17 +201,16 @@ public final class TreeTableSupport {
     }
 
     private class ExpandAndCollapseKeyListener extends KeyAdapter {
-        private boolean eventSelectionModelEnabled;
-        private boolean restoreAutoStartsEdit;
-        private Boolean autoStartsEdit;
-
         public void keyPressed(KeyEvent e) {
+//            if (e.getKeyCode() == KeyEvent.VK_UP)
+//                System.out.println("found up arrow!");
+
             // if the table doesn't own the focus, break early
             if (!table.isFocusOwner())
                 return;
 
             // if the key pressed is not the space bar, break early
-            if (e.getKeyChar() != KeyEvent.VK_SPACE)
+            if (e.getKeyChar() != KeyEvent.VK_SPACE || e.getModifiers() != 0)
                 return;
 
             treeList.getReadWriteLock().writeLock().lock();
@@ -229,25 +228,10 @@ public final class TreeTableSupport {
                     return;
 
                 // if the row is expandable, toggle its expanded state
-                if (treeList.isExpandable(row)) {
-                    // turn off the client property that begins a cell edit -
-                    // we don't want the spacebar to invoke two different behaviours
-                    autoStartsEdit = (Boolean) table.getClientProperty("JTable.autoStartsEdit");
-                    table.putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
-                    restoreAutoStartsEdit = true;
-
+                if (treeList.isExpandable(row))
                     TreeTableUtilities.toggleExpansionWithoutAdjustingSelection(table, treeList, row);
-                }
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
-            }
-        }
-
-        public void keyReleased(KeyEvent e) {
-            // restore the original value of the client property that normally begins a cell edit on a keystroke
-            if (restoreAutoStartsEdit) {
-                table.putClientProperty("JTable.autoStartsEdit", autoStartsEdit);
-                restoreAutoStartsEdit = false;
             }
         }
     }
