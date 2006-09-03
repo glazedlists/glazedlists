@@ -21,11 +21,11 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class JXTableTest implements Runnable {
+class JXTableTestApp implements Runnable {
 
     private EventList<Issue> issues;
 
-    public JXTableTest(EventList<Issue> issues) {
+    public JXTableTestApp(EventList<Issue> issues) {
         this.issues = issues;
     }
 
@@ -96,7 +96,7 @@ class JXTableTest implements Runnable {
     public static void main(String[] args) {
         EventList<Issue> issues = new BasicEventList<Issue>();
         new Thread(new IssueLoader(issues, args[0])).start();
-        SwingUtilities.invokeLater(new JXTableTest(issues));
+        SwingUtilities.invokeLater(new JXTableTestApp(issues));
     }
 
 }
