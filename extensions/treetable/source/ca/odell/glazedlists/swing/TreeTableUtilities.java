@@ -26,7 +26,8 @@ class TreeTableUtilities {
      * client property during the toggling to stop any attempts at beginning a
      * cell edit. This behaviour is only relevant when the toggling action is
      * triggered by the keyboard. We do this to avoid invoking two behaviours
-     * with only a single keystroke.
+     * with only a single keystroke: toggling the expand/collapse state AND
+     * starting a cell edit.
      */
     static void toggleExpansionWithoutAdjustingSelection(JTable table, TreeList treeList, int row) {
         final ListSelectionModel selectionModel = table.getSelectionModel();
@@ -44,7 +45,7 @@ class TreeTableUtilities {
         treeList.toggleExpanded(row);
 
         // post a Runnable to the Swing EDT to restore the state of the table and selection model
-        SwingUtilities.invokeLater(new RestoreStatelRunnable(table, autoStartsEdit, eventSelectionModel, isEventSelectionModelEnabled));
+        SwingUtilities.invokeLater(new RestoreStateRunnable(table, autoStartsEdit, eventSelectionModel, isEventSelectionModelEnabled));
     }
 
     /**
@@ -52,14 +53,14 @@ class TreeTableUtilities {
      * in order to restore a captured state of a JTable and EventSelectionModel
      * at some point in the future after the current Runnable is done executing.
      */
-    private static class RestoreStatelRunnable implements Runnable {
+    private static class RestoreStateRunnable implements Runnable {
 
         private final JTable table;
         private final Boolean autoStartsEdit;
         private final EventSelectionModel eventSelectionModel;
         private final boolean eventSelectionModelEnabled;
 
-        public RestoreStatelRunnable(JTable table, Boolean autoStartsEdit, EventSelectionModel eventSelectionModel, boolean eventSelectionModelEnabled) {
+        public RestoreStateRunnable(JTable table, Boolean autoStartsEdit, EventSelectionModel eventSelectionModel, boolean eventSelectionModelEnabled) {
             this.table = table;
             this.autoStartsEdit = autoStartsEdit;
             this.eventSelectionModel = eventSelectionModel;
