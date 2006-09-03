@@ -24,9 +24,9 @@ public class TreeListTest extends TestCase {
         source.add(List.class.getMethod("add", new Class[] {int.class, Object.class}));
         source.add(List.class.getMethod("set", new Class[] {int.class, Object.class}));
         source.add(List.class.getMethod("remove", new Class[] {int.class}));
-        source.add(List.class.getMethod("clear", null));
-        source.add(String.class.getMethod("toString", null));
-        source.add(Date.class.getMethod("getTime", null));
+        source.add(List.class.getMethod("clear", new Class[] {}));
+        source.add(String.class.getMethod("toString", new Class[] {}));
+        source.add(Date.class.getMethod("getTime", new Class[] {}));
         source.add(BasicEventList.class.getMethod("add", new Class[] {Object.class}));
         source.add(BasicEventList.class.getMethod("add", new Class[] {int.class, Object.class}));
 
