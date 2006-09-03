@@ -102,23 +102,18 @@ public class EventComboViewer implements ListEventListener {
      * displayed combo.
      */
     public void listChanged(ListEvent listChanges) {
-        swtSource.getReadWriteLock().readLock().lock();
-        try {
-            // Apply the combo changes
-            while(listChanges.next()) {
-                int changeIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
+        // Apply the combo changes
+        while (listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
-                if(changeType == ListEvent.INSERT) {
-                    addRow(changeIndex, swtSource.get(changeIndex));
-                } else if(changeType == ListEvent.UPDATE) {
-                    updateRow(changeIndex, swtSource.get(changeIndex));
-                } else if(changeType == ListEvent.DELETE) {
-                    deleteRow(changeIndex);
-                }
+            if (changeType == ListEvent.INSERT) {
+                addRow(changeIndex, swtSource.get(changeIndex));
+            } else if (changeType == ListEvent.UPDATE) {
+                updateRow(changeIndex, swtSource.get(changeIndex));
+            } else if (changeType == ListEvent.DELETE) {
+                deleteRow(changeIndex);
             }
-        } finally {
-            swtSource.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -138,5 +133,6 @@ public class EventComboViewer implements ListEventListener {
      */
     public void dispose() {
         swtSource.dispose();
+        swtSource.removeListEventListener(this);
     }
 }

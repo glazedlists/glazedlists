@@ -133,29 +133,24 @@ public class EventListViewer implements ListEventListener {
      */
     public void listChanged(ListEvent listChanges) {
         int firstModified = swtSource.size();
-        swtSource.getReadWriteLock().readLock().lock();
-        try {
-            // Apply the list changes
-            while(listChanges.next()) {
-                int changeIndex = listChanges.getIndex();
-                int changeType = listChanges.getType();
+        // Apply the list changes
+        while (listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int changeType = listChanges.getType();
 
-                if(changeType == ListEvent.INSERT) {
-                    addRow(changeIndex, swtSource.get(changeIndex));
-                    firstModified = Math.min(changeIndex, firstModified);
-                } else if(changeType == ListEvent.UPDATE) {
-                    updateRow(changeIndex, swtSource.get(changeIndex));
-                } else if(changeType == ListEvent.DELETE) {
-                    deleteRow(changeIndex);
-                    firstModified = Math.min(changeIndex, firstModified);
-                }
+            if (changeType == ListEvent.INSERT) {
+                addRow(changeIndex, swtSource.get(changeIndex));
+                firstModified = Math.min(changeIndex, firstModified);
+            } else if (changeType == ListEvent.UPDATE) {
+                updateRow(changeIndex, swtSource.get(changeIndex));
+            } else if (changeType == ListEvent.DELETE) {
+                deleteRow(changeIndex);
+                firstModified = Math.min(changeIndex, firstModified);
             }
-
-            // Reapply selection to the List
-            selection.fireSelectionChanged(firstModified, swtSource.size() - 1);
-        } finally {
-            swtSource.getReadWriteLock().readLock().unlock();
         }
+
+        // Reapply selection to the List
+        selection.fireSelectionChanged(firstModified, swtSource.size() - 1);
     }
 
     /**
@@ -223,5 +218,6 @@ public class EventListViewer implements ListEventListener {
     public void dispose() {
         selection.dispose();
         swtSource.dispose();
+        swtSource.removeListEventListener(this);
     }
 }

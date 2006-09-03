@@ -193,52 +193,47 @@ public class EventTableViewer implements ListEventListener {
      * displayed {@link Table}.
      */
     public void listChanged(ListEvent listChanges) {
-        swtSource.getReadWriteLock().readLock().lock();
         Barcode deletes = new Barcode();
         deletes.addWhite(0, swtSource.size());
         int firstChange = swtSource.size();
-        try {
             // Disable redraws so that the table is updated in bulk
-            table.setRedraw(false);
+        table.setRedraw(false);
 
-            // Apply changes to the list
-            while(listChanges.next()) {
-                int changeIndex = listChanges.getIndex();
-                int adjustedIndex = deletes.getIndex(changeIndex, Barcode.WHITE);
-                int changeType = listChanges.getType();
+        // Apply changes to the list
+        while (listChanges.next()) {
+            int changeIndex = listChanges.getIndex();
+            int adjustedIndex = deletes.getIndex(changeIndex, Barcode.WHITE);
+            int changeType = listChanges.getType();
 
-                // Insert a new element in the Table and the Barcode
-                if(changeType == ListEvent.INSERT) {
-                    deletes.addWhite(adjustedIndex, 1);
-                    tableHandler.addRow(adjustedIndex, swtSource.get(changeIndex));
-                    firstChange = Math.min(changeIndex, firstChange);
+            // Insert a new element in the Table and the Barcode
+            if (changeType == ListEvent.INSERT) {
+                deletes.addWhite(adjustedIndex, 1);
+                tableHandler.addRow(adjustedIndex, swtSource.get(changeIndex));
+                firstChange = Math.min(changeIndex, firstChange);
 
                 // Update the element in the Table
-                } else if(changeType == ListEvent.UPDATE) {
-                    tableHandler.updateRow(adjustedIndex, swtSource.get(changeIndex));
+            } else if (changeType == ListEvent.UPDATE) {
+                tableHandler.updateRow(adjustedIndex, swtSource.get(changeIndex));
 
                 // Just mark the element as deleted in the Barcode
-                } else if(changeType == ListEvent.DELETE) {
-                    deletes.setBlack(adjustedIndex, 1);
-                    firstChange = Math.min(changeIndex, firstChange);
-                }
+            } else if (changeType == ListEvent.DELETE) {
+                deletes.setBlack(adjustedIndex, 1);
+                firstChange = Math.min(changeIndex, firstChange);
             }
-
-            // Process the deletes as a single Table change
-            if(deletes.blackSize() > 0) {
-                int[] deletedIndices = new int[deletes.blackSize()];
-                for(BarcodeIterator i = deletes.iterator(); i.hasNextBlack(); ) {
-                    i.nextBlack();
-                    deletedIndices[i.getBlackIndex()] = i.getIndex();
-                }
-                tableHandler.removeAll(deletedIndices);
-            }
-
-            // Re-enable redraws to update the table
-            table.setRedraw(true);
-        } finally {
-            swtSource.getReadWriteLock().readLock().unlock();
         }
+
+        // Process the deletes as a single Table change
+        if (deletes.blackSize() > 0) {
+            int[] deletedIndices = new int[deletes.blackSize()];
+            for (BarcodeIterator i = deletes.iterator(); i.hasNextBlack();) {
+                i.nextBlack();
+                deletedIndices[i.getBlackIndex()] = i.getIndex();
+            }
+            tableHandler.removeAll(deletedIndices);
+        }
+
+        // Re-enable redraws to update the table
+        table.setRedraw(true);
     }
 
     /**
@@ -266,6 +261,7 @@ public class EventTableViewer implements ListEventListener {
         tableHandler.dispose();
         selection.dispose();
         disposeSource.dispose();
+        swtSource.removeListEventListener(this);
     }
 
     /**
