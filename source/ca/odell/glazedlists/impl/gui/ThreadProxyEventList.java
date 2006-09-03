@@ -169,7 +169,13 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
 
         return result;
     }
-    
+
+    /** {@inheritDoc} */
+    public void dispose() {
+        super.dispose();
+        this.removeListEventListener(updateRunner);
+    }
+
     /**
      * Updates the internal data using the proxy thread.
      *
