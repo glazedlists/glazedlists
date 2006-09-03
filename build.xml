@@ -22,9 +22,15 @@
         <format property="dateAndTime" pattern="yyyy-MM-dd H:mm"/>
     </tstamp>
 
+	<!-- Version number for the next planned release -->
+	<property name="next.release.version" value="1.7.1"/>
+	
 	<!-- Default implementation version for jar file, overridden by release target -->
-	<property name="implementation.version" value="${datestamp.dateAndTime}"/>
-
+	<property name="implementation.version" value="${next.release.version}.alpha${datestamp.DSTAMP}"/>
+	
+	<!-- Default OSGI Bundle version for jar file, overridden by release target -->	
+	<property name="bundle.version" value="${implementation.version}"/>
+	
 	<!-- Default title for javadocs, overridden by release target -->
 	<property name="doctitle" value="Glazed Lists"/>
 
@@ -171,7 +177,7 @@
                 <attribute name="Bundle-ManifestVersion" value="2"/>
                 <attribute name="Bundle-Name" value="Glazed Lists Plug-in"/>
                 <attribute name="Bundle-SymbolicName" value="ca.odell.glazedlists"/>
-                <attribute name="Bundle-Version" value="${version}"/>
+                <attribute name="Bundle-Version" value="${bundle.version}"/>
                 <attribute name="Bundle-ClassPath" value="."/>
                 <attribute name="Bundle-Localization" value="plugin"/>
                 <attribute name="Export-Package" value="${packagelist}"/>
@@ -720,6 +726,7 @@
 		<antcall target="maven-bundle">
 			<param name="doctitle" value="Glazed Lists ${version}"/>
 			<param name="implementation.version" value="${version}"/>
+			<param name="bundle.version" value="${version}"/>
 			<param name="jar.file" value="${release.jar.file}"/>
 			<param name="dist.file" value="${release.dist.file}"/>
 		</antcall>
