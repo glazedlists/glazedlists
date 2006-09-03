@@ -1,5 +1,6 @@
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.TreeList.TreeElement;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
@@ -19,15 +20,15 @@ public class TreeListTest extends TestCase {
      */
     public void testCreate() throws Exception {
         BasicEventList<Method> source = new BasicEventList<Method>();
-        source.add(List.class.getMethod("add", Object.class));
-        source.add(List.class.getMethod("add", int.class, Object.class));
-        source.add(List.class.getMethod("set", int.class, Object.class));
-        source.add(List.class.getMethod("remove", int.class));
-        source.add(List.class.getMethod("clear"));
-        source.add(String.class.getMethod("toString"));
-        source.add(Date.class.getMethod("getTime"));
-        source.add(BasicEventList.class.getMethod("add", Object.class));
-        source.add(BasicEventList.class.getMethod("add", int.class, Object.class));
+        source.add(List.class.getMethod("add", new Class[] {Object.class}));
+        source.add(List.class.getMethod("add", new Class[] {int.class, Object.class}));
+        source.add(List.class.getMethod("set", new Class[] {int.class, Object.class}));
+        source.add(List.class.getMethod("remove", new Class[] {int.class}));
+        source.add(List.class.getMethod("clear", null));
+        source.add(String.class.getMethod("toString", null));
+        source.add(Date.class.getMethod("getTime", null));
+        source.add(BasicEventList.class.getMethod("add", new Class[] {Object.class}));
+        source.add(BasicEventList.class.getMethod("add", new Class[] {int.class, Object.class}));
 
         TreeList treeList = new TreeList(source, new JavaStructureTreeFormat());
     }
@@ -102,12 +103,12 @@ public class TreeListTest extends TestCase {
 
         // make some modifications, they should be handled in place
         source.add("ABF");
-        assertEquals(GlazedListsTests.stringToList("ABF"), treeList.get(8).path());
+        assertEquals(GlazedListsTests.stringToList("ABF"), ((TreeElement)treeList.get(8)).path());
         source.add("ABG");
-        assertEquals(GlazedListsTests.stringToList("ABG"), treeList.get(9).path());
+        assertEquals(GlazedListsTests.stringToList("ABG"), ((TreeElement)treeList.get(9)).path());
         source.add("ACBA");
-        assertEquals(GlazedListsTests.stringToList("ACB"), treeList.get(11).path());
-        assertEquals(GlazedListsTests.stringToList("ACBA"), treeList.get(12).path());
+        assertEquals(GlazedListsTests.stringToList("ACB"), ((TreeElement)treeList.get(11)).path());
+        assertEquals(GlazedListsTests.stringToList("ACBA"), ((TreeElement)treeList.get(12)).path());
 
         // now some removes
         source.remove("ABD");
@@ -501,7 +502,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSourceUpdateEvents() {
+    public void testSourceUpdateEvents_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener.install(treeList);

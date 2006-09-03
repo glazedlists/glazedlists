@@ -54,7 +54,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(currentEditorDocument, originalEditorDocument);
         assertNotSame(originalEditor, combo.getEditor());
         assertNotSame(originalModel, combo.getModel());
-        assertNotSame(originalEditable, combo.isEditable());
+        assertEquals(!originalEditable, combo.isEditable());
         assertNotSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
         assertNotSame(originalSelectPreviousAction, combo.getActionMap().get("selectPrevious"));
         assertNotSame(originalSelectNext2Action, combo.getActionMap().get("selectNext2"));
@@ -91,16 +91,16 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         assertSame(originalUI, combo.getUI());
         assertSame(originalModel, combo.getModel());
-        assertSame(originalEditable, combo.isEditable());
+        assertEquals(originalEditable, combo.isEditable());
         assertSame(originalEditor, combo.getEditor());
         assertSame(originalEditorDocument, currentEditorDocument);
         assertSame(currentEditorDocument.getDocumentFilter(), null);
-        assertSame(originalComboBoxPropertyChangeListenerCount, combo.getPropertyChangeListeners().length);
-        assertSame(originalEditorPropertyChangeListenerCount, currentEditor.getPropertyChangeListeners().length);
-        assertSame(originalEditorKeyListenerCount, currentEditor.getKeyListeners().length);
-        assertSame(originalMaxRowCount, combo.getMaximumRowCount());
-        assertSame(originalComboBoxPopupMenuListenerCount, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
-        assertSame(originalComboBoxPopupMouseListenerCount, ((ComboPopup) combo.getUI().getAccessibleChild(combo, 0)).getList().getMouseListeners().length);
+        assertEquals(originalComboBoxPropertyChangeListenerCount, combo.getPropertyChangeListeners().length);
+        assertEquals(originalEditorPropertyChangeListenerCount, currentEditor.getPropertyChangeListeners().length);
+        assertEquals(originalEditorKeyListenerCount, currentEditor.getKeyListeners().length);
+        assertEquals(originalMaxRowCount, combo.getMaximumRowCount());
+        assertEquals(originalComboBoxPopupMenuListenerCount, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
+        assertEquals(originalComboBoxPopupMouseListenerCount, ((ComboPopup) combo.getUI().getAccessibleChild(combo, 0)).getList().getMouseListeners().length);
         assertSame(originalSelectNextAction, combo.getActionMap().get("selectNext"));
         assertSame(originalSelectPreviousAction, combo.getActionMap().get("selectPrevious"));
         assertSame(originalSelectNext2Action, combo.getActionMap().get("selectNext2"));
@@ -368,7 +368,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(3, listener.getCount());
     }
 
-    public void guiTestDeleteKey() throws BadLocationException {
+    public void guiTestDeleteKey_FixMe() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
         final JComboBox combo = new JComboBox();
         combo.addActionListener(listener);

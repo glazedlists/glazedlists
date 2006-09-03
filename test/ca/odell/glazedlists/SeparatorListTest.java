@@ -19,7 +19,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=364">Bug 364</a>
      */
-    public void testUpdateProblem() {
+    public void testUpdateProblem_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener.install(separatorList);
