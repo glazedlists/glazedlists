@@ -1126,7 +1126,7 @@ public final class AutoCompleteSupport<E> {
             final int selectionEnd = comboBoxEditorComponent.getSelectionEnd();
 
             super.remove(filterBypass, offset, length);
-            postProcessDocumentChange(filterBypass, null, valueBeforeEdit, selectionStart, selectionEnd, false);
+            postProcessDocumentChange(filterBypass, null, valueBeforeEdit, selectionStart, selectionEnd, isStrict());
         }
 
         /**
