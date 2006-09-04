@@ -1667,7 +1667,11 @@ public final class AutoCompleteSupport<E> {
      */
     private class StringFunctionRenderer extends DefaultListCellRenderer {
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            final String string = convertToString(value);
+            String string = convertToString(value);
+
+            // JLabels require some text before they can correctly determine their height, so we convert "" to " "
+            if (string.length() == 0)
+                string = " ";
             return super.getListCellRendererComponent(list, string, index, isSelected, cellHasFocus);
         }
     }
