@@ -399,7 +399,7 @@ public final class CTPConnection implements NIOAttachment {
             parser.consume("HTTP\\/1\\.1( )+");
             String codeString = parser.readUntil("( )+");
             int code = Integer.parseInt(codeString);
-            String description = parser.readUntil("\\r\\n");
+            parser.readUntil("\\r\\n");
             
             // parse the headers
             Map headers = readHeaders();

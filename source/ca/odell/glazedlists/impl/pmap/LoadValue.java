@@ -5,7 +5,6 @@ package ca.odell.glazedlists.impl.pmap;
 
 // NIO is used for CTP
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Loads the value for a chunk from disk.
@@ -14,9 +13,6 @@ import java.util.logging.Logger;
  */
 class LoadValue implements Runnable {
      
-    /** logging */
-    private static Logger logger = Logger.getLogger(LoadValue.class.toString());
-    
     /** the chunk with the data of interest */
     private final Chunk chunk;
     

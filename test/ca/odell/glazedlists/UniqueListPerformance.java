@@ -72,12 +72,12 @@ public class UniqueListPerformance {
         List issues = loadIssues(args[0]);
 
         EventList issuesEventList = new BasicEventList();
-        UniqueList uniqueByEmail    = new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
-        UniqueList uniqueBySeverity = new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity"));
-        UniqueList uniqueByPriority = new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
-        UniqueList uniqueByOs       = new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
-        UniqueList uniqueByResult   = new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
-        UniqueList uniqueByStatus   = new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
+        new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
+        new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity"));
+        new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
+        new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
+        new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
+        new UniqueList(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
         
         // populate
         System.out.print("Populating issues list...");
@@ -100,23 +100,6 @@ public class UniqueListPerformance {
         System.out.println("done. Time: " + tearDownTime + "ms");
     }
     
-    /**
-     * Validates that the UniqueList matches the unique elements in the specified parent.
-     */
-    private static void validateUniqueList(UniqueList unique, Collection parent, Comparator comparator) {
-        TreeSet allUniqueElements = new TreeSet(comparator);
-        allUniqueElements.addAll(parent);
-        
-        Iterator a = unique.iterator();
-        Iterator b = allUniqueElements.iterator();
-        for(; a.hasNext() && b.hasNext(); ) {
-            Object eA = a.next();
-            Object eB = b.next();
-            if(0 != comparator.compare(eA, eB)) throw new IllegalStateException("NO MATCH: " + eA + " != " + eB);
-        }
-        if(a.hasNext() || b.hasNext()) throw new IllegalStateException("DIFFERENT SIZES: " + unique.size() + " != " + allUniqueElements.size());
-    }
-
     /**
      * An entry in the Mozilla bug db
      */

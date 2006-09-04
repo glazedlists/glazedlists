@@ -1109,7 +1109,6 @@ public class SortedListTest extends TestCase {
         unsortedList.clear();
         Random dice = new Random(0);
         List<String> artists = GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        List<String> songs = GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         for(int a = 0; a < 200; a++) {
             String randomArtist = artists.get(dice.nextInt(artists.size()));
             String randomSong = artists.get(dice.nextInt(artists.size()));

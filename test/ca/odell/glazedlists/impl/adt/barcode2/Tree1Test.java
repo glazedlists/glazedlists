@@ -17,7 +17,6 @@ import java.util.Random;
 public class Tree1Test extends TestCase {
 
     /** test values */
-    private static List<String> colors = GlazedListsTests.stringToList("A");
     private static byte allColors = 1;
 
     /** for randomly choosing list indices */
@@ -28,18 +27,18 @@ public class Tree1Test extends TestCase {
      */
     public void testUnsortedElementInSortedTree() {
         SimpleTree<String> tree = new SimpleTree<String>();
-        Element<String> e = tree.addInSortedOrder(Tree1Test.allColors, "E", 1);
-        Element<String> g = tree.addInSortedOrder(Tree1Test.allColors, "G", 1);
-        Element<String> i = tree.addInSortedOrder(Tree1Test.allColors, "I", 1);
+        tree.addInSortedOrder(Tree1Test.allColors, "E", 1);
+        tree.addInSortedOrder(Tree1Test.allColors, "G", 1);
+        tree.addInSortedOrder(Tree1Test.allColors, "I", 1);
         Element<String> k = tree.addInSortedOrder(Tree1Test.allColors, "K", 1);
-        Element<String> m = tree.addInSortedOrder(Tree1Test.allColors, "M", 1);
-        Element<String> o = tree.addInSortedOrder(Tree1Test.allColors, "O", 1);
+        tree.addInSortedOrder(Tree1Test.allColors, "M", 1);
+        tree.addInSortedOrder(Tree1Test.allColors, "O", 1);
 
         k.setSorted(Element.UNSORTED);
         k.set("A");
 
-        Element<String> h = tree.addInSortedOrder(Tree1Test.allColors, "H", 1);
-        Element<String> n = tree.addInSortedOrder(Tree1Test.allColors, "N", 1);
+        tree.addInSortedOrder(Tree1Test.allColors, "H", 1);
+        tree.addInSortedOrder(Tree1Test.allColors, "N", 1);
 
         List<String> asList = new SimpleTreeAsList<String>(tree);
 

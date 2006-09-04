@@ -40,9 +40,6 @@ import java.util.TreeMap;
  */
 public final class FileList extends TransformedList {
 
-    /** the destination file, just for user convenience */
-    private File file = null;
-
     /** how bytes are encoded and decoded */
     private ByteCoder byteCoder;
 
@@ -60,7 +57,6 @@ public final class FileList extends TransformedList {
      */
     public FileList(File file, ByteCoder byteCoder) throws IOException {
         super(new BasicEventList());
-        this.file = file;
         this.byteCoder = byteCoder;
 
         // store the updates in a persistent map

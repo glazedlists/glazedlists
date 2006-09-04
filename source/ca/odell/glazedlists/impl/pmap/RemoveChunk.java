@@ -36,8 +36,6 @@ class RemoveChunk implements Runnable {
      * Removes the chunk by marking it off.
      */
     public void run() {
-        FileChannel fileChannel = persistentMap.getFileChannel();
-        
         try {
             chunk.delete();
             logger.info("Successfully removed value for key \"" + chunk.getKey() + "\"");

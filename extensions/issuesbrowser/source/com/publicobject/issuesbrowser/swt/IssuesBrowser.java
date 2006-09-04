@@ -36,9 +36,6 @@ public class IssuesBrowser {
     private UsersMatcherEditor usersMatcherEditor = null;
     private List usersList = null;
 
-    /** status bar is a temporary throbber */
-    private Text statusText = null;
-
     /** loads issues as requested */
     private IssueLoader issueLoader = new IssueLoader(issuesEventList, new IndeterminateToggler());
 
@@ -474,8 +471,13 @@ public class IssuesBrowser {
         }
 
         public synchronized void run() {
-            //if(on) throbber.setIcon(throbberActive);
-            //else throbber.setIcon(throbberStatic);
+            if(on) {
+                // TODO
+                // throbber.setIcon(throbberActive);
+            } else {
+                // TODO
+                // throbber.setIcon(throbberStatic);
+            }
         }
     }
 }

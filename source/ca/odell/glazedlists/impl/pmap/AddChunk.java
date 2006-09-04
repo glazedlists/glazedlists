@@ -49,8 +49,6 @@ class AddChunk implements Runnable {
      * </ol>
      */
     public void run() {
-        FileChannel fileChannel = persistentMap.getFileChannel();
-        
         try {
             // allocate
             persistentMap.allocate(newValue);

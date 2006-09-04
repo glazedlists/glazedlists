@@ -5,7 +5,6 @@ package ca.odell.glazedlists.impl.pmap;
 
 // NIO is used for CTP
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Closes the file for reading and writing a persistent map.
@@ -13,9 +12,6 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class CloseFile implements Runnable {
-     
-    /** logging */
-    private static Logger logger = Logger.getLogger(CloseFile.class.toString());
     
     /** the host map */
     private PersistentMap persistentMap = null;

@@ -395,14 +395,11 @@ public class SeparatorListTest extends TestCase {
      * See what happens when we filter out separators.
      */
     public void testRemoveInsertSeparators() {
-        Random dice = new Random(0);
-        int expectedEventCount = 0;
-
         BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
-        ListConsistencyListener consistencyTest = ListConsistencyListener.install(separatorList);
+        ListConsistencyListener.install(separatorList);
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
 
         source.removeAll(GlazedListsTests.stringToList("BC"));
@@ -451,7 +448,7 @@ public class SeparatorListTest extends TestCase {
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
 
         final SeparatorList separatorList = new SeparatorList(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
-        ListConsistencyListener consistencyTest = ListConsistencyListener.install(separatorList);
+        ListConsistencyListener.install(separatorList);
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
 
         SeparatorList.Separator separator = (SeparatorList.Separator)separatorList.get(0);
