@@ -144,12 +144,16 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
                 try {
                     // expand/collapse the rowObject if possible
                     if (treeList.isExpandable(row))
-                        TreeTableUtilities.toggleExpansionWithoutAdjustingSelection(table, treeList, row);
+                        TreeTableUtilities.toggleExpansion(table, treeList, row);
                 } finally {
                     treeList.getReadWriteLock().writeLock().unlock();
                 }
                 return false;
             }
+
+            // if the row has children, it is a synthetic row and its node component cannot be edited
+            if (treeList.hasChildren(row))
+                return false;
 
             // if the click occurred over the node name editor
             if (renderedPanel.isPointOverNodeComponent(clickPoint)) {

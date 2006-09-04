@@ -29,7 +29,7 @@ class TreeTableUtilities {
      * with only a single keystroke: toggling the expand/collapse state AND
      * starting a cell edit.
      */
-    static void toggleExpansionWithoutAdjustingSelection(JTable table, TreeList treeList, int row) {
+    static void toggleExpansion(JTable table, TreeList treeList, int row) {
         final ListSelectionModel selectionModel = table.getSelectionModel();
         final EventSelectionModel eventSelectionModel = selectionModel instanceof EventSelectionModel ? (EventSelectionModel) selectionModel : null;
         final boolean isEventSelectionModelEnabled = eventSelectionModel != null && eventSelectionModel.getEnabled();

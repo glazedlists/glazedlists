@@ -230,6 +230,10 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         return data.get(index, VISIBLE_NODES).get();
     }
 
+    public boolean hasChildren(int index) {
+        return true;
+    }
+
     public boolean isExpandable(int index) {
         return true;
 //        throw new UnsupportedOperationException();

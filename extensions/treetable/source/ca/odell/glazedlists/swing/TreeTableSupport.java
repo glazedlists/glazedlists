@@ -229,7 +229,7 @@ public final class TreeTableSupport {
 
                 // if the row is expandable, toggle its expanded state
                 if (treeList.isExpandable(row))
-                    TreeTableUtilities.toggleExpansionWithoutAdjustingSelection(table, treeList, row);
+                    TreeTableUtilities.toggleExpansion(table, treeList, row);
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
             }
