@@ -730,6 +730,8 @@
 			<param name="jar.file" value="${release.jar.file}"/>
 			<param name="dist.file" value="${release.dist.file}"/>
 		</antcall>
+		<echo message="${line.separator}Release build completed. Please upload with: 'ant -Dversion=${version} upload-release'"/>
+		<echo message="Remember to increase the value for build property 'next.release.version'"/>
 	</target>
 
 	<target name="check-release-artifacts">
