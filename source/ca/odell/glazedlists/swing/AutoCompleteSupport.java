@@ -374,7 +374,7 @@ public final class AutoCompleteSupport<E> {
 
         // only build a custom renderer if the user specified their own Format but has not installed a custom renderer of their own
         final boolean defaultRendererInstalled = comboBox.getEditor() instanceof UIResource;
-        this.renderer = format == null && defaultRendererInstalled ? null : new StringFunctionRenderer();
+        this.renderer = format != null && defaultRendererInstalled ? new StringFunctionRenderer() : null;
 
         // is this combo box a TableCellEditor?
         this.isTableCellEditor = Boolean.TRUE.equals(comboBox.getClientProperty("JComboBox.isTableCellEditor"));
