@@ -368,7 +368,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(3, listener.getCount());
     }
 
-    public void guiTestDeleteKey_FixMe() throws BadLocationException {
+    public void guiTestDeleteKey() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
         final JComboBox combo = new JComboBox();
         combo.addActionListener(listener);
