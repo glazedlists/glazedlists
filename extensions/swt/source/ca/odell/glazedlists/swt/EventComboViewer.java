@@ -102,18 +102,17 @@ public class EventComboViewer implements ListEventListener {
      * displayed combo.
      */
     public void listChanged(ListEvent listChanges) {
-        // Apply the combo changes
+        // apply the combo changes
         while (listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
 
-            if (changeType == ListEvent.INSERT) {
+            if (changeType == ListEvent.INSERT)
                 addRow(changeIndex, swtSource.get(changeIndex));
-            } else if (changeType == ListEvent.UPDATE) {
+            else if (changeType == ListEvent.UPDATE)
                 updateRow(changeIndex, swtSource.get(changeIndex));
-            } else if (changeType == ListEvent.DELETE) {
+            else if (changeType == ListEvent.DELETE)
                 deleteRow(changeIndex);
-            }
         }
     }
 
@@ -132,7 +131,7 @@ public class EventComboViewer implements ListEventListener {
      * to call any method on a {@link EventComboViewer} after it has been disposed.
      */
     public void dispose() {
-        swtSource.dispose();
         swtSource.removeListEventListener(this);
+        swtSource.dispose();
     }
 }

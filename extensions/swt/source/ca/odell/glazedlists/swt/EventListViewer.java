@@ -217,7 +217,8 @@ public class EventListViewer implements ListEventListener {
      */
     public void dispose() {
         selection.dispose();
-        swtSource.dispose();
+
         swtSource.removeListEventListener(this);
+        swtSource.dispose();
     }
 }

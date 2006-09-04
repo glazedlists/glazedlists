@@ -261,7 +261,9 @@ public class EventTableViewer implements ListEventListener {
         tableHandler.dispose();
         selection.dispose();
         disposeSource.dispose();
+
         swtSource.removeListEventListener(this);
+        swtSource.dispose();
     }
 
     /**
