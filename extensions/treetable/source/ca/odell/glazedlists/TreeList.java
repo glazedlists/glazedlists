@@ -10,8 +10,6 @@ import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 
 import java.util.*;
 
-import com.publicobject.amazonbrowser.ItemTreeFormat;
-
 /**
  * An experimental attempt at building a TreeList. Not for real-world use!
  *
