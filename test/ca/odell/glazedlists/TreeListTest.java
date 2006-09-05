@@ -30,7 +30,7 @@ public class TreeListTest extends TestCase {
         source.add(BasicEventList.class.getMethod("add", new Class[] {Object.class}));
         source.add(BasicEventList.class.getMethod("add", new Class[] {int.class, Object.class}));
 
-        new TreeList(source, new JavaStructureTreeFormat());
+        TreeList treeList = new TreeList(source, new JavaStructureTreeFormat());
     }
 
     /**

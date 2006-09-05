@@ -32,7 +32,7 @@ public class IndexOrderTest extends TestCase {
     public void testIncreasingOrder() {
         EventList<int[]> unsorted = new BasicEventList<int[]>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
-        new FilterList<int[]>(unsorted, matcherEditor);
+        FilterList<int[]> filteredOnce = new FilterList<int[]>(unsorted, matcherEditor);
 
         // add a block of new elements one hundred times
         for(int a = 0; a < 100; a++) {

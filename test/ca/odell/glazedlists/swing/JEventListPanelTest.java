@@ -25,7 +25,7 @@ public class JEventListPanelTest extends SwingTestCase {
      */
     public void guiTestAddUpdateDelete() {
         EventList<JCheckBox> checkBoxes = new BasicEventList<JCheckBox>();
-        new JEventListPanel<JCheckBox>(checkBoxes, new CheckBoxFormat());
+        JEventListPanel<JCheckBox> checkboxPanel = new JEventListPanel<JCheckBox>(checkBoxes, new CheckBoxFormat());
         checkBoxes.add(new JCheckBox("Saskatchewan"));
         checkBoxes.add(new JCheckBox("Manitoba"));
         checkBoxes.set(0, new JCheckBox("Ontario"));

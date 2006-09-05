@@ -67,9 +67,9 @@ public class Tree4Test extends TestCase {
         assertNotSame(nodeB1, nodeB3);
         assertEquals("AAAAAAAAAABBBBBBBBBBCCCCCBBBCCC", tree.asSequenceOfColors());
 
-        tree.add(4, Tree4Test.allColors, Tree4Test.b, Tree4Test.may, 2);
-        tree.add(7, Tree4Test.allColors, Tree4Test.b, Tree4Test.may, 2);
-        tree.add(10, Tree4Test.allColors, Tree4Test.b, Tree4Test.may, 2);
+        Element<String> nodeB4 = tree.add(4, Tree4Test.allColors, Tree4Test.b, Tree4Test.may, 2);
+        Element<String> nodeB5 = tree.add(7, Tree4Test.allColors, Tree4Test.b, Tree4Test.may, 2);
+        Element<String> nodeB6 = tree.add(10, Tree4Test.allColors, Tree4Test.b, Tree4Test.may, 2);
         assertEquals("AAAABBABBABBAAAABBBBBBBBBBCCCCCBBBCCC", tree.asSequenceOfColors());
 
         //   A INDICES 0123  4  5  6789

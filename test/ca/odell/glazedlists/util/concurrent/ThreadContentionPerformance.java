@@ -185,7 +185,7 @@ public class ThreadContentionPerformance {
 					int size = list.size();
 
 					// Get a random object
-					list.get(random.nextInt(size));
+					Object obj = list.get(random.nextInt(size));
 				}
 				finally {
 					list.getReadWriteLock().readLock().unlock();

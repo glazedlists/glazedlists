@@ -609,28 +609,21 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     updates.addDelete(expandedIndex);
                 }
 
-                // Special case out the shift operation. The Grouper automatically
-                // handles shifts, but SeparatorList needs to manage them independently.
-                // Here we respond to the grouper and the separators barcode getting
-                // out of sync, and resolve that problem.
-                // If this fix poses a problem, we might want to change the way
-                // Grouper works to fire a special flag called 'shift' with the
-                // value true whenever the group joined is a RIGHT_GROUP
-                int shiftGroupIndex = groupIndex + 1;
-                if(groupChangeType == ListEvent.DELETE && elementChangeType != ListEvent.INSERT
-                        && shiftGroupIndex < insertedSeparators.colourSize(SEPARATOR)
-                        && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)) {
-                    int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
-                    int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex , SEPARATOR);
-                    //String was = insertedSeparators.toString();
-                    if(collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
-                        insertedSeparators.remove(separatorsIndex, 1);
-                        updates.addDelete(separatorsIndex);
-                        insertedSeparators.add(collapsedGroupStartIndex + shiftGroupIndex, SEPARATOR, 1);
-                        updates.addInsert(collapsedGroupStartIndex + shiftGroupIndex);
-                        //String now = insertedSeparators.toString();
-                        index++;
-                        //System.out.println("Changed from " + was + " to " + now);
+                // shift around our separators as necessary
+                for(int i = 0; i < 2; i++) {
+                    int groupToTweak = groupIndex + i;
+                    if(groupToTweak < 0) continue;
+
+                    if(groupToTweak < grouper.getBarcode().colourSize(Grouper.UNIQUE)
+                            && groupToTweak < insertedSeparators.colourSize(SEPARATOR)) {
+                        int separatorExpectedIndex = groupToTweak + grouper.getBarcode().getIndex(groupToTweak, Grouper.UNIQUE);
+                        int separatorIndex = insertedSeparators.getIndex(groupToTweak, SEPARATOR);
+                        if(separatorExpectedIndex != separatorIndex) {
+                            insertedSeparators.remove(separatorIndex, 1);
+                            updates.addDelete(separatorIndex);
+                            insertedSeparators.add(separatorExpectedIndex, SEPARATOR, 1);
+                            updates.addInsert(separatorExpectedIndex);
+                        }
                     }
                 }
             }

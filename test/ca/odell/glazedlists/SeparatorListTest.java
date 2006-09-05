@@ -31,7 +31,7 @@ public class SeparatorListTest extends TestCase {
     	source.set(0, "A");
         assertSeparatorEquals(separatorList.get(0), 1, "A");
         assertSeparatorEquals(separatorList.get(2), 2, "B");
-    } 
+    }
 
     public void testSimpleSetup() {
         EventList<String> source = new BasicEventList<String>();
