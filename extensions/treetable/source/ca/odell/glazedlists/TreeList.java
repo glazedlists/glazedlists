@@ -10,6 +10,8 @@ import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 
 import java.util.*;
 
+import com.publicobject.amazonbrowser.ItemTreeFormat;
+
 /**
  * An experimental attempt at building a TreeList. Not for real-world use!
  *
@@ -546,6 +548,10 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             int visibleIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
             updates.addInsert(visibleIndex);
         }
+    }
+
+    public void setTreeFormat(Format<E> treeFormat) {
+        // todo fill this in
     }
 
     /**

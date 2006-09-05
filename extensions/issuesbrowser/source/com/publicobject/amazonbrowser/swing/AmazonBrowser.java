@@ -141,7 +141,12 @@ public class AmazonBrowser implements Runnable {
         final TreeCriteriaEditor treeCriteriaEditor = new TreeCriteriaEditor(TreeCriterion.ALL_CRITERIA);
         treeCriteriaEditor.addPropertyChangeListener("activeCriteria", new ActiveCriteriaPropertyChangeListener());
         treeCriteriaEditor.setOpaque(false);
-        treeCriteriaEditor.setBorder(new RoundedBorder(CLEAR, AMAZON_SEARCH_DARK_BLUE, AMAZON_SEARCH_LIGHT_BLUE, 4, 1));
+        treeCriteriaEditor.setBorder(new RoundedBorder(CLEAR, AMAZON_SEARCH_DARK_BLUE, AMAZON_SEARCH_LIGHT_BLUE, 8, 1));
+
+        final JPanel editorPanel = new JPanel(new GridBagLayout());
+        editorPanel.setBackground(AMAZON_SEARCH_DARK_BLUE);
+        editorPanel.add(treeCriteriaEditor,           new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 5), 0, 0));
+        editorPanel.add(Box.createVerticalStrut(1),   new GridBagConstraints(0, 1, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
 
         final JPanel searchPanel = new GradientPanel(AMAZON_SEARCH_LIGHT_BLUE, AMAZON_SEARCH_DARK_BLUE, true);
         searchPanel.setLayout(new GridBagLayout());
@@ -150,9 +155,8 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(searchButton,                 new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(progressBar,                  new GridBagConstraints(3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(filterFieldLabel,             new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        searchPanel.add(filterField,                  new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        searchPanel.add(treeCriteriaEditor,           new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 10), 0, 0));
-//        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(7, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        searchPanel.add(filterField,                  new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
+        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()));
 
@@ -172,6 +176,7 @@ public class AmazonBrowser implements Runnable {
         // build a panel for the search panel and results table
         final JPanel panel = new JPanel(new BorderLayout());
         panel.add(BorderLayout.NORTH, searchPanel);
+        panel.add(BorderLayout.WEST, editorPanel);
         panel.add(BorderLayout.CENTER, new JScrollPane(itemTable));
         return panel;
     }
@@ -213,16 +218,14 @@ public class AmazonBrowser implements Runnable {
     }
 
     /**
-     * Watch the TreeCriteriaEditor for changes to its active criteria and
-     * respond by updating the TreeFormat used by the AmazonBrowser treetable
-     * to respect the new tree criteria.
+     * Watch the TreeCriteriaEditor for changes to its "activeCriteria"
+     * property and respond by updating the TreeFormat used by the
+     * AmazonBrowser treetable to respect the new tree criteria.
      */
     private class ActiveCriteriaPropertyChangeListener implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent evt) {
             final List<TreeCriterion> treeCriteria = (List<TreeCriterion>) evt.getNewValue();
-
-            // todo allow this call when it is available
-//            treeList.setTreeFormat(new ItemTreeFormat(treeCriteria));
+            treeList.setTreeFormat(new ItemTreeFormat(treeCriteria));
         }
     }
 }
