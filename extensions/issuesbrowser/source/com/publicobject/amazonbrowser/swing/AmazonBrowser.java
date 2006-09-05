@@ -18,7 +18,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
+import java.util.List;
 
 /**
  * An AmazonBrowser is a program for searching and viewing products from amazon.com.
@@ -35,6 +38,9 @@ public class AmazonBrowser implements Runnable {
 
     /** an event list to host the items */
     private EventList<Item> itemEventList = new BasicEventList<Item>();
+
+    /** the TreeList backing the EventTableModel that models the treetable data. */
+    private TreeList<Item> treeList;
 
     /** the TableModel backing the treetable of items */
     private EventTableModel<TreeList.TreeElement<Item>> itemTableModel;
@@ -133,6 +139,7 @@ public class AmazonBrowser implements Runnable {
         progressBar.setBorder(BorderFactory.createLineBorder(AMAZON_SEARCH_DARK_BLUE, 2));
 
         final TreeCriteriaEditor treeCriteriaEditor = new TreeCriteriaEditor(TreeCriterion.ALL_CRITERIA);
+        treeCriteriaEditor.addPropertyChangeListener("activeCriteria", new ActiveCriteriaPropertyChangeListener());
         treeCriteriaEditor.setOpaque(false);
         treeCriteriaEditor.setBorder(new RoundedBorder(CLEAR, AMAZON_SEARCH_DARK_BLUE, AMAZON_SEARCH_LIGHT_BLUE, 4, 1));
 
@@ -147,7 +154,7 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(treeCriteriaEditor,           new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 10), 0, 0));
 //        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(7, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        final TreeList<Item> treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat());
+        treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()));
 
         // create a JTable to display the items
         final TableFormat<TreeList.TreeElement<Item>> itemTableFormat = new ItemTableFormat();
@@ -202,6 +209,20 @@ public class AmazonBrowser implements Runnable {
 
             if (keywords.length() > 0)
                 itemLoader.setKeywords(keywords);
+        }
+    }
+
+    /**
+     * Watch the TreeCriteriaEditor for changes to its active criteria and
+     * respond by updating the TreeFormat used by the AmazonBrowser treetable
+     * to respect the new tree criteria.
+     */
+    private class ActiveCriteriaPropertyChangeListener implements PropertyChangeListener {
+        public void propertyChange(PropertyChangeEvent evt) {
+            final List<TreeCriterion> treeCriteria = (List<TreeCriterion>) evt.getNewValue();
+
+            // todo allow this call when it is available
+//            treeList.setTreeFormat(new ItemTreeFormat(treeCriteria));
         }
     }
 }
