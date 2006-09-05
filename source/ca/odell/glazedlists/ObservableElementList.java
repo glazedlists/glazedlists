@@ -376,7 +376,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
     }
 
     /**
-     * Handle a listener being fired for the specified <code>listElement</code>.
+     * Handle a listener being notified for the specified <code>listElement</code>.
      * This method causes a ListEvent to be fired from this EventList indicating
      * an update occurred at all locations of the given <code>listElement</code>.
      *
