@@ -12,6 +12,7 @@ import com.publicobject.amazonbrowser.*;
 import com.publicobject.misc.Exceptions;
 import com.publicobject.misc.swing.ExceptionHandlerFactory;
 import com.publicobject.misc.swing.GradientPanel;
+import com.publicobject.misc.swing.RoundedBorder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,6 +28,7 @@ import java.net.URL;
 public class AmazonBrowser implements Runnable {
 
     /** application appearance */
+    public static final Color CLEAR = new Color(0, 0, 0, 0);
     public static final Color AMAZON_SEARCH_LIGHT_BLUE = new Color(171, 208, 226);
     public static final Color AMAZON_SEARCH_DARK_BLUE = new Color(54, 127, 168);
     public static final Icon GO = loadIcon("resources/go.gif");
@@ -130,6 +132,10 @@ public class AmazonBrowser implements Runnable {
         progressBar.setStringPainted(true);
         progressBar.setBorder(BorderFactory.createLineBorder(AMAZON_SEARCH_DARK_BLUE, 2));
 
+        final TreeCriteriaEditor treeCriteriaEditor = new TreeCriteriaEditor(TreeCriterion.ALL_CRITERIA);
+        treeCriteriaEditor.setOpaque(false);
+        treeCriteriaEditor.setBorder(new RoundedBorder(CLEAR, AMAZON_SEARCH_DARK_BLUE, AMAZON_SEARCH_LIGHT_BLUE, 4, 1));
+
         final JPanel searchPanel = new GradientPanel(AMAZON_SEARCH_LIGHT_BLUE, AMAZON_SEARCH_DARK_BLUE, true);
         searchPanel.setLayout(new GridBagLayout());
         searchPanel.add(searchFieldLabel,             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 3), 0, 0));
@@ -137,17 +143,15 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(searchButton,                 new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(progressBar,                  new GridBagConstraints(3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(filterFieldLabel,             new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        searchPanel.add(filterField,                  new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
-        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        searchPanel.add(filterField,                  new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        searchPanel.add(treeCriteriaEditor,           new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 2, 10), 0, 0));
+//        searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(7, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         final TreeList<Item> treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat());
 
         // create a JTable to display the items
         final TableFormat<TreeList.TreeElement<Item>> itemTableFormat = new ItemTableFormat();
         itemTableModel = new EventTableModel<TreeList.TreeElement<Item>>(treeList, itemTableFormat);
-
-//        final JTable itemTable = new JTable(itemTableModel);
-
         itemTableSelectionModel = new EventSelectionModel<TreeList.TreeElement<Item>>(treeList);
         final JTable itemTable = new JTable(itemTableModel, null, itemTableSelectionModel);
 
