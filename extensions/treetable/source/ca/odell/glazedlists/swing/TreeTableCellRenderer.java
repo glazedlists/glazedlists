@@ -78,20 +78,22 @@ public class TreeTableCellRenderer implements TableCellRenderer {
 
         final int depth;
         final boolean isExpanded;
-        final boolean isExpandable;
+        final boolean hasChildren;
+        final boolean supportsChildren;
 
         treeList.getReadWriteLock().readLock().lock();
         try {
             // read information about the tree node from the TreeList
             depth = treeList.depth(row);
             isExpanded = treeList.isExpanded(row);
-            isExpandable = treeList.isExpandable(row);
+            hasChildren = treeList.hasChildren(row);
+            supportsChildren = treeList.supportsChildren(row);
         } finally {
             treeList.getReadWriteLock().readLock().unlock();
         }
 
         // ask our special component to configure itself for this tree node
-        component.configure(depth, isExpandable, isExpanded, c);
+        component.configure(depth, hasChildren, supportsChildren, isExpanded, c);
         return component;
     }
 

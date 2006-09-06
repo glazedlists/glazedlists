@@ -40,8 +40,17 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      */
     private FourColorTree<TreeElement<E>> data = new FourColorTree<TreeElement<E>>(BYTE_CODER);
 
+    /**
+     * The format is used to obtain path information from list elements.
+     */
+    private Format<E> format;
+
+    /**
+     * Create a new TreeList that adds hierarchy to the specified source list.
+     */
     public TreeList(EventList<E> source, Format<E> format) {
         super(new SortedList<TreeElement<E>>(new FunctionList<E, TreeElement<E>>(source, new TreeElementFunction<E>(format))));
+        this.format = format;
 
         // insert the new elements like they were adds
         for(int i = 0; i < super.source.size(); i++) {
@@ -114,8 +123,10 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         return true;
     }
 
+    /**
+     * Search the tree for the parent of the specified element.
+     */
     private TreeElement<E> findParentByValue(TreeElement<E> node, boolean createIfNecessary, boolean fireEvents) {
-
         // no parents for root nodes
         if(node.pathLength() == 1) return null;
 
@@ -174,10 +185,14 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         return null;
     }
 
+    /**
+     * @return the number of ancestors of the element at the specified index.
+     *      Root elements have depth 0, other elements depth is one
+     *      greater than the depth of their parent element.
+     */
     public int depth(int index) {
-        return getTreeElement(index).path.size()-1;
+        return getTreeElement(index).path.size() - 1;
     }
-
 
     /**
      * The number of elements including the node itself in its subtree.
@@ -230,20 +245,35 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         return data.get(index, VISIBLE_NODES).get();
     }
 
+    /**
+     * @return <code>true</code> if the element at the specified index has
+     *      children, regardless of whether such children are visible.
+     */
     public boolean hasChildren(int index) {
-        return true;
+        return subtreeSize(index, true) > 1;
     }
 
-    public boolean isExpandable(int index) {
-        return true;
-//        throw new UnsupportedOperationException();
+    /**
+     * @see Format#supportsChildren
+     * @return <code>true<code> if child elements can be added to the
+     *      specified element.
+     */
+    public boolean supportsChildren(int index) {
+        return format.supportsChildren(get(index).sourceValue());
     }
 
+    /**
+     * @return <code>true</code> if the children of the element at the specified
+     *      index are visible. Nodes with no children may be expanded or not,
+     *      this is used to determine whether to show children should any be
+     *      added.
+     */
     public boolean isExpanded(int index) {
         return data.get(index, VISIBLE_NODES).get().expanded;
     }
     /**
-     * @param expanded true to expand the node, false to collapse it.
+     * @param expanded <code>true</code> to expand the node, <code>false</code>
+     *      to collapse it.
      */
     public void setExpanded(int index, boolean expanded) {
         TreeElement<E> toExpand = data.get(index, VISIBLE_NODES).get();
@@ -327,6 +357,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         data.setColor(node.element, newColor);
     }
 
+    /** {@inheritDoc} */
     public void listChanged(ListEvent<TreeElement<E>> listChanges) {
 
         updates.beginEvent(true);
@@ -548,8 +579,13 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         }
     }
 
+    /**
+     * Change how the structure of the tree is derived.
+     *
+     * @param treeFormat
+     */
     public void setTreeFormat(Format<E> treeFormat) {
-        // todo fill this in
+        // todo
     }
 
     /**
@@ -557,7 +593,25 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * element itself to the tree's root.
      */
     public interface Format<E> {
-        public List<E> getPath(E element);
+
+        /**
+         * Populate path with a list describing the path from a root node to
+         * this element. Upon returning, the list must have size >= 1, where
+         * the provided element identical to the list's last element.
+         *
+         * @param path a list that the implementor shall add their path
+         *      elements to via <code>path.add()</code>. This may be a non-empty
+         *      List and it is an error to call any method other than add().
+         */
+        public void getPath(List<E> path, E element);
+
+        /**
+         * Whether an element can have children.
+         *
+         * @return <code>true</code> if this element can have child elements,
+         *      or <code>false</code> if it is always a leaf node.
+         */
+        public boolean supportsChildren(E element);
     }
 
     /**
@@ -565,18 +619,27 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      */
     private static class TreeElementFunction<E> implements FunctionList.AdvancedFunction<E, TreeElement<E>> {
         private final Format<E> format;
+        private final List<E> workingPath = new ArrayList();
         public TreeElementFunction(Format<E> format) {
             this.format = format;
         }
         public TreeElement<E> evaluate(E sourceValue) {
             TreeElement<E> result = new TreeElement<E>();
-            result.path = format.getPath(sourceValue);
             result.virtual = false;
+
+            // populate the path using the working path as a temporary variable
+            format.getPath(workingPath, sourceValue);
+            result.path = new ArrayList<E>(workingPath);
+            workingPath.clear();
+
             return result;
         }
 
         public TreeElement<E> reevaluate(E sourceValue, TreeElement<E> transformedValue) {
-            transformedValue.path = format.getPath(sourceValue);
+            format.getPath(workingPath, sourceValue);
+            transformedValue.path = new ArrayList<E>(workingPath);
+            workingPath.clear();
+
             return transformedValue;
         }
 
@@ -709,8 +772,13 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             siblingBefore = other.siblingBefore;
             parent = other.parent;
         }
+
+        public E sourceValue() {
+            return path.get(path.size() - 1);
+        }
     }
 
+    /** {@inheritDoc} */
     public String toString() {
         final StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < size(); i++) {

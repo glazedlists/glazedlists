@@ -71,26 +71,28 @@ class TreeTableCellPanel extends JPanel {
      * <p>The <strong>nodeComponent</strong> is displayed unmodified.
      *
      * @param depth the depth of the tree node in the hierarchy
-     * @param isExpandable <tt>true</tt> if the tree node can be expanded/collapsed;
-     *      <tt>false</tt> otherwise
+     * @param hasChildren <tt>true</tt> if the tree node has child elements
+     * @param supportsChildren <tt>true</tt> if the node is of the type that can
+     *      have child elements.
      * @param isExpanded <tt>true</tt> if the node is expanded and its children are thus visible;
      *      <tt>false</tt> if it is collapsed and its children are thus hidden. This argument
      *      only has meaning when <code>isExpandable</code> is true; otherwise it is ignored.
      * @param nodeComponent a Component which displays the data of the tree node
      */
-    public void configure(int depth, boolean isExpandable, boolean isExpanded, Component nodeComponent) {
+    public void configure(int depth, boolean hasChildren, boolean supportsChildren, boolean isExpanded, Component nodeComponent) {
         // the expander button is only visible when the node can be expanded/collapsed
-        expanderButton.setVisible(isExpandable);
+        expanderButton.setVisible(supportsChildren);
 
         // if the tree node is expandable, pick an icon for the expander button
-        if (isExpandable)
+        if(supportsChildren) {
             expanderButton.setIcon(UIManager.getIcon(isExpanded ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
+        }
 
         // synchronize the background color of this entire panel with nodeComponent
         setBackground(nodeComponent.getBackground());
 
         // replace any kind of border with an empty one that tabs the node component over from the expander button
-        if (nodeComponent instanceof JComponent) {
+        if(nodeComponent instanceof JComponent) {
             final JComponent jNodeComponent = (JComponent) nodeComponent;
             setToolTipText(jNodeComponent.getToolTipText());
 

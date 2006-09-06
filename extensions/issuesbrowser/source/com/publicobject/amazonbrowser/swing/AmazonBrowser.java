@@ -13,6 +13,7 @@ import com.publicobject.misc.Exceptions;
 import com.publicobject.misc.swing.ExceptionHandlerFactory;
 import com.publicobject.misc.swing.GradientPanel;
 import com.publicobject.misc.swing.RoundedBorder;
+import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -165,6 +166,9 @@ public class AmazonBrowser implements Runnable {
         itemTableModel = new EventTableModel<TreeList.TreeElement<Item>>(treeList, itemTableFormat);
         itemTableSelectionModel = new EventSelectionModel<TreeList.TreeElement<Item>>(treeList);
         final JTable itemTable = new JTable(itemTableModel, null, itemTableSelectionModel);
+        JScrollPane itemScrollPane = new JScrollPane(itemTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        itemScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        MacCornerScrollPaneLayoutManager.install(itemScrollPane);
 
         // add sorting to the table
         new TableComparatorChooser<Item>(itemTable, sortedItemsList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
@@ -177,7 +181,7 @@ public class AmazonBrowser implements Runnable {
         final JPanel panel = new JPanel(new BorderLayout());
         panel.add(BorderLayout.NORTH, searchPanel);
         panel.add(BorderLayout.WEST, editorPanel);
-        panel.add(BorderLayout.CENTER, new JScrollPane(itemTable));
+        panel.add(BorderLayout.CENTER, itemScrollPane);
         return panel;
     }
 

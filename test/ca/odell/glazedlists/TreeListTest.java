@@ -37,11 +37,15 @@ public class TreeListTest extends TestCase {
      * Convert Java methods into paths. For example, {@link Object#toString()}
      * is <code>/java/lang/Object/toString</code>
      */
-    class JavaStructureTreeFormat implements TreeList.Format {
-        public List getPath(Object object) {
-            Method javaMethod = (Method)object;
-            List result = new ArrayList();
-            result.addAll(Arrays.asList(javaMethod.getDeclaringClass().getName().split("\\.")));
+    class JavaStructureTreeFormat implements TreeList.Format<Object> {
+
+        public boolean supportsChildren(Object element) {
+            return (!(element instanceof Method));
+        }
+
+        public void getPath(List<Object> path, Object element) {
+            Method javaMethod = (Method)element;
+            path.addAll(Arrays.asList(javaMethod.getDeclaringClass().getName().split("\\.")));
 
             StringBuffer signature = new StringBuffer();
             signature.append(javaMethod.getName());
@@ -56,8 +60,7 @@ public class TreeListTest extends TestCase {
             }
             signature.append(")");
 
-            result.add(signature.toString());
-            return result;
+            path.add(signature.toString());
         }
     }
 
@@ -65,12 +68,13 @@ public class TreeListTest extends TestCase {
      * Convert Strings into paths. For example, PUPPY is <code>/P/U/P/P/Y</code>
      */
     class CharacterTreeFormat implements TreeList.Format<String> {
-        public List<String> getPath(String element) {
-            List<String> result = new ArrayList<String>(element.length());
+        public boolean supportsChildren(String element) {
+            return true;
+        }
+        public void getPath(List<String> path, String element) {
             for(int c = 0; c < element.length(); c++) {
-                result.add(element.substring(c, c + 1));
+                path.add(element.substring(c, c + 1));
             }
-            return result;
         }
     }
 

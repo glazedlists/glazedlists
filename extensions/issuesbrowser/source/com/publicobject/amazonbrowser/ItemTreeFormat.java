@@ -34,17 +34,21 @@ public class ItemTreeFormat implements TreeList.Format<Item> {
     }
 
     /**
-     * Returns a List of Items produced by consulting the List of TreeCriterion
-     * objects this ItemTreeFormat was constructed with.
+     * Only virtual items have children.
      */
-    public List<Item> getPath(Item item) {
-        final List<Item> path = new ArrayList<Item>();
+    public boolean supportsChildren(Item element) {
+        return element.getASIN() == null;
+    }
 
+    /**
+     * Populates a List of Items produced by consulting the List of
+     * TreeCriterion objects this ItemTreeFormat was constructed with.
+     */
+    public void getPath(List<Item> path, Item item) {
         // add the generated Item from each TreeCriterion
         for (Iterator<TreeCriterion> i = criteria.iterator(); i.hasNext();)
             path.add(i.next().getPathItem(item));
 
         path.add(item);
-        return path;
     }
 }

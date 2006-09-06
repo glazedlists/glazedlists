@@ -6,13 +6,13 @@ package com.publicobject.issuesbrowser.swing;
 import com.publicobject.issuesbrowser.Description;
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.misc.swing.WebStart;
+import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Iterator;
 
@@ -136,24 +136,4 @@ class IssueDescriptionsPanel {
     }
 
 
-    /**
-     * A scrollpane layout that handles the resize box in the bottom right corner.
-     * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
-     */
-    public static class MacCornerScrollPaneLayoutManager extends ScrollPaneLayout {
-        private static final int CORNER_HEIGHT = 14;
-        public static void install(JScrollPane scrollPane) {
-            if(System.getProperty("os.name").startsWith("Mac")) {
-                scrollPane.setLayout(new MacCornerScrollPaneLayoutManager());
-            }
-        }
-        public void layoutContainer(Container container) {
-            super.layoutContainer(container);
-            if(!hsb.isVisible() && vsb != null) {
-                Rectangle bounds = new Rectangle(vsb.getBounds());
-                bounds.height = Math.max(0, bounds.height - CORNER_HEIGHT);
-                vsb.setBounds(bounds);
-            }
-        }
-    }
 }

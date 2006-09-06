@@ -228,7 +228,7 @@ public final class TreeTableSupport {
                     return;
 
                 // if the row is expandable, toggle its expanded state
-                if (treeList.isExpandable(row))
+                if (treeList.supportsChildren(row))
                     TreeTableUtilities.toggleExpansion(table, treeList, row);
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
