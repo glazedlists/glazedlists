@@ -3,9 +3,6 @@ package com.publicobject.misc.swing;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.geom.Rectangle2D;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Draw a clock as a progress bar.
@@ -14,34 +11,37 @@ import java.util.HashMap;
  */
 public class ProgressClock extends JComponent {
 
-    private final Image before;
-    private final Image after;
+    private final Image backgroundImage;
     private final Paint foregroundPaint;
 
     private final int width;
     private final int height;
+    private final Dimension size;
 
     private float progress = 0.0f;
 
-    public ProgressClock(Image before, Image after) {
-        this.before = before;
-        this.after = after;
+    public ProgressClock(Image backgroundImage, Image foregroundImage) {
+        this.backgroundImage = backgroundImage;
 
-        this.width = before.getWidth(null);
-        this.height = before.getHeight(null);
+        this.width = backgroundImage.getWidth(null);
+        this.height = backgroundImage.getHeight(null);
+        this.size = new Dimension(width, height);
 
         Rectangle bounds = new Rectangle(width, height);
 
         BufferedImage afterBuffered = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-        afterBuffered.getGraphics().drawImage(after, 0, 0, null);
+        afterBuffered.getGraphics().drawImage(foregroundImage, 0, 0, null);
         foregroundPaint = new TexturePaint(afterBuffered, bounds);
     }
 
     protected void paintComponent(Graphics g) {
+        // todo - center the clock in the center of the component, for larger
+        // than preferred size components
+
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D)g.create();
 
-        g2d.drawImage(before, 0, 0, null);
+        g2d.drawImage(backgroundImage, 0, 0, null);
         g2d.setClip(0, 0, width, height);
         if(progress > 0f) {
             int arcAngle = (int)(360 * progress);
@@ -51,20 +51,21 @@ public class ProgressClock extends JComponent {
     }
 
     private void setProgress(float progress) {
+        if(progress == this.progress) return;
         this.progress = progress;
         repaint();
     }
 
     public Dimension getPreferredSize() {
-        return new Dimension(width, height);
+        return size;
     }
 
     public Dimension getMaximumSize() {
-        return getPreferredSize();
+        return size;
     }
 
     public Dimension getMinimumSize() {
-        return getPreferredSize();
+        return size;
     }
 
     public static void main(String[] args) throws Exception {
