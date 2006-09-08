@@ -21,7 +21,7 @@ public class SeparatorListTest extends TestCase {
      */
     public void testUpdateProblem_FixMe() {
         EventList<String> source = new BasicEventList<String>();
-        SeparatorList separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener.install(separatorList);
 
         source.addAll(0, GlazedListsTests.stringToList("ABB"));
@@ -31,6 +31,116 @@ public class SeparatorListTest extends TestCase {
     	source.set(0, "A");
         assertSeparatorEquals(separatorList.get(0), 1, "A");
         assertSeparatorEquals(separatorList.get(2), 2, "B");
+    }
+    
+    public void testUpdate1() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("ABB"));
+        source.set(0, "B");
+        assertSeparatorEquals(separatorList.get(0), 3, "B");
+        source.set(2, "C");
+        assertSeparatorEquals(separatorList.get(0), 2, "B");
+        assertSeparatorEquals(separatorList.get(3), 1, "C");
+    }
+
+    /**
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=364">Bug 364</a>
+     */    
+    public void testUpdateProblem2_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("AACCC"));
+        source.set(2, "B");
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 1, "B");
+        assertSeparatorEquals(separatorList.get(5), 2, "C");
+    }
+    
+    public void testUpdate3() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("AAACC"));
+        source.set(2, "B");
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 1, "B");
+        assertSeparatorEquals(separatorList.get(5), 2, "C");
+    }
+    
+    
+    public void testUpdate4() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("ABB"));
+        source.set(0, "B");
+        assertSeparatorEquals(separatorList.get(0), 3, "B");
+        source.set(0, "C");
+        assertSeparatorEquals(separatorList.get(0), 2, "B");
+        assertSeparatorEquals(separatorList.get(3), 1, "C");
+    }
+    
+    /**
+     * Update element in singleton list.
+     */
+    public void testUpdateSingletonList() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("A"));
+        source.set(0, "B");
+        assertSeparatorEquals(separatorList.get(0), 1, "B");        
+        source.set(0, "A");
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+    }
+
+    /**
+     * Updating element leads to group removal.
+     */
+    public void testUpdateElemRemoveGroup() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("ABC"));
+        source.set(1, "C");
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 2, "C");
+    }
+    
+    /**
+     * Removing element leads to group removal.
+     */
+    public void testRemoveElemRemoveGroup() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("ABBC"));
+        source.remove(0);
+        assertSeparatorEquals(separatorList.get(0), 2, "B");
+        assertSeparatorEquals(separatorList.get(3), 1, "C");
+        source.remove(2);
+        assertSeparatorEquals(separatorList.get(0), 2, "B");
+    }
+    
+    /**
+     * Adding element leads to group addition.
+     */
+    public void testAddElemAddGroup() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener.install(separatorList);
+        source.addAll(0, GlazedListsTests.stringToList("BB"));
+        assertSeparatorEquals(separatorList.get(0), 2, "B");
+        source.add(0, "A");
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 2, "B");
+        source.add(3, "C");
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 2, "B");
+        assertSeparatorEquals(separatorList.get(5), 1, "C");
     }
 
     public void testSimpleSetup() {
