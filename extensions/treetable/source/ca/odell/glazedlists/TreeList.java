@@ -717,6 +717,13 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         }
 
         /**
+         * Get the List element at the end of this path.
+         */
+        public E getElement() {
+            return path.get(path.size() - 1);
+        }
+
+        /**
          * @return the path elements for this element, it is an error to modify.
          */
         public List<E> path() {
