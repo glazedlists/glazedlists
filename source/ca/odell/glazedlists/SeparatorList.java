@@ -653,7 +653,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
                     int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex , SEPARATOR);
                     //String was = insertedSeparators.toString();
-          `          if(collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
+                     if(collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
                         insertedSeparators.remove(separatorsIndex, 1);
                         updates.addDelete(separatorsIndex);
                         insertedSeparators.add(collapsedGroupStartIndex + shiftGroupIndex, SEPARATOR, 1);
