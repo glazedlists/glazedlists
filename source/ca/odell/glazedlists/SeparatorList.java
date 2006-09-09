@@ -611,10 +611,10 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                             // separator at groupIndex is not the last one...
                             int nextSeparatorsIndex = insertedSeparators.getIndex(groupIndex + 1, SEPARATOR);
                             if (nextSeparatorsIndex == expandedIndex) {
-                                // separator at groupIndex + 1 is located at the element update position, 
+                                // separator at groupIndex + 1 is located at the element update position,
                                 // so increment update position by one...
-                                expandedIndex++;            
-                                // ...and fix location of separator at groupIndex + 1 
+                                expandedIndex++;
+                                // ...and fix location of separator at groupIndex + 1
                                 fixSeparatorForInsertGroupUpdateElement = true;
                             }
                         }
@@ -628,9 +628,9 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
                 if (fixSeparatorForInsertGroupUpdateElement) {
                     // fix special case:
-                    // the location of separator at groupIndex + 1 must be increased by one 
-                    
-                    int wrongSeparatorIndex = index + groupIndex + 1;    
+                    // the location of separator at groupIndex + 1 must be increased by one
+
+                    int wrongSeparatorIndex = index + groupIndex + 1;
                     assert wrongSeparatorIndex == insertedSeparators.getIndex(groupIndex + 1, SEPARATOR);
 
                     insertedSeparators.remove(wrongSeparatorIndex, 1);
@@ -653,7 +653,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
                     int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex , SEPARATOR);
                     //String was = insertedSeparators.toString();
-                    if(collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
+          `          if(collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
                         insertedSeparators.remove(separatorsIndex, 1);
                         updates.addDelete(separatorsIndex);
                         insertedSeparators.add(collapsedGroupStartIndex + shiftGroupIndex, SEPARATOR, 1);
