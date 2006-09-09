@@ -571,6 +571,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          */
         private class GrouperClient implements Grouper.Client {
             public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType) {
+                boolean fixSeparatorForInsertGroupUpdateElement = false;
                 // handle the group change first
                 if(groupChangeType == ListEvent.INSERT) {
                     int expandedIndex = index + groupIndex;
@@ -602,11 +603,40 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     updates.addInsert(expandedIndex);
                 } else if(elementChangeType == ListEvent.UPDATE) {
                     int expandedIndex = index + groupIndex + 1;
+                    // if we inserted a separator directly before an existing separator,
+                    // we must increase update index for element by one
+                    if (groupChangeType == ListEvent.INSERT) {
+                        int separatorCount = insertedSeparators.colourSize(SEPARATOR);
+                        if (groupIndex + 1 < separatorCount) {
+                            // separator at groupIndex is not the last one...
+                            int nextSeparatorsIndex = insertedSeparators.getIndex(groupIndex + 1, SEPARATOR);
+                            if (nextSeparatorsIndex == expandedIndex) {
+                                // separator at groupIndex + 1 is located at the element update position, 
+                                // so increment update position by one...
+                                expandedIndex++;            
+                                // ...and fix location of separator at groupIndex + 1 
+                                fixSeparatorForInsertGroupUpdateElement = true;
+                            }
+                        }
+                    }
                     updates.addUpdate(expandedIndex);
                 } else if(elementChangeType == ListEvent.DELETE) {
                     int expandedIndex = index + groupIndex + 1;
                     insertedSeparators.remove(expandedIndex, 1);
                     updates.addDelete(expandedIndex);
+                }
+
+                if (fixSeparatorForInsertGroupUpdateElement) {
+                    // fix special case:
+                    // the location of separator at groupIndex + 1 must be increased by one 
+                    
+                    int wrongSeparatorIndex = index + groupIndex + 1;    
+                    assert wrongSeparatorIndex == insertedSeparators.getIndex(groupIndex + 1, SEPARATOR);
+
+                    insertedSeparators.remove(wrongSeparatorIndex, 1);
+                    updates.addDelete(wrongSeparatorIndex);
+                    insertedSeparators.add(wrongSeparatorIndex + 1, SEPARATOR, 1);
+                    updates.addInsert(wrongSeparatorIndex + 1);
                 }
 
                 // Special case out the shift operation. The Grouper automatically
