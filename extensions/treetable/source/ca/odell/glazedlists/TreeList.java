@@ -11,7 +11,11 @@ import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 import java.util.*;
 
 /**
- * An experimental attempt at building a TreeList. Not for real-world use!
+ * A hierarchial EventList that infers its structure from a flat list.
+ *
+ * <p><strong>Developer Preview</strong> this class is still under heavy development
+ * and subject to API changes. It's also really slow at the moment and won't scale
+ * to lists of size larger than a hundred or so efficiently.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -364,6 +368,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         // add the new data, remove the old data, and mark the updated data
         List<TreeElement<E>> parentsToVerify = new ArrayList<TreeElement<E>>();
+        List<TreeElement<E>> parentsToRestore = new ArrayList<TreeElement<E>>();
         while(listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
@@ -374,32 +379,22 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
             } else if(type == ListEvent.UPDATE) {
                 TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
-                int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
-                updates.addUpdate(viewIndex);
 
                 // shift as necessary, so if the parents are immediately after, they're used
-                shiftParentsAsNecessary(treeElement);
+                if(hasLogicallyShifted(treeElement)) {
+                    handleDelete(sourceIndex, parentsToVerify, parentsToRestore);
+                    handleInsert(sourceIndex);
+                } else {
+                    if(treeElement.isVisible()) {
+                        int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+                        updates.addUpdate(viewIndex);
+                    }
+                }
 
-                // add new parents, validate the old ones are still necessary
-                parentsToVerify.add(treeElement.parent);
-                attachParent(treeElement, true, true);
                 // todo: repair siblings
 
-                // todo: handle case where it went from visible to invisible
-                // due to moving from one subtree to another
-
             } else if(type == ListEvent.DELETE) {
-                TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
-                boolean visible = treeElement.isVisible();
-                if(visible) {
-                    int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
-                    updates.addDelete(viewIndex);
-                }
-                data.remove(treeElement.element);
-                treeElement.element = null; // null out the element
-
-                // remove the parent if necessary in the next iteration
-                parentsToVerify.add(treeElement.parent);
+                handleDelete(sourceIndex, parentsToVerify, parentsToRestore);
 
                 // todo: repair siblings
             }
@@ -408,6 +403,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // blow away obsolete parent nodes, and their parents recursively
         deleteObsoleteParents(parentsToVerify);
 
+        // todo: restore parents that got killed
+
+
         // we're currently too lazy to rebuild the sibling links properly, so
         // just brute-force through all of them!
         rebuildAllSiblingLinks();
@@ -415,6 +413,26 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         assert(isValid());
 
         updates.commitEvent();
+    }
+
+    /**
+     * Remove the element at the specified index, firing all the required
+     * notifications.
+     */
+    private void handleDelete(int sourceIndex, List<TreeElement<E>> parentsToVerify, List<TreeElement<E>> parentsToRestore) {
+        TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
+        boolean visible = treeElement.isVisible();
+        if(visible) {
+            int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+            updates.addDelete(viewIndex);
+        }
+        data.remove(treeElement.element);
+        treeElement.element = null; // null out the element
+
+        // remove the parent if necessary in the next iteration
+        parentsToVerify.add(treeElement.parent);
+        // restore this as a parent for its children in the next iteration
+        parentsToRestore.add(treeElement);
     }
 
     /**
@@ -463,54 +481,61 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
-     * Adjust the location of the updated tree element so if it now fits under
-     * it's neighbours parents, those parents are in the correct place.
+     * Decide whether an element needs to be rebuilt due to a change in its
+     * structural meaning. For example, if it is no longer a parent by value for
+     * its children, or if its no longer a child by value of its parent.
      *
-     * <p>This method could benefit highly from the addition of a Glazed Lists
-     * 'move' event.
+     * @return <code>true</code> if the specified element has structurally
+     *      shifted in the tree.
      */
-    private void shiftParentsAsNecessary(TreeElement<E> treeElement) {
-        int index = data.indexOfNode(treeElement.element, ALL_NODES);
+    private boolean hasLogicallyShifted(TreeElement<E> treeElement) {
+        // todo: handle shifts in children
 
-        // swap forward through misplaced followers until we're in the right place
-        boolean shiftedForward = false;
-        while(index - 1 > 0) {
-            TreeElement<E> predecessor = data.get(index - 1, ALL_NODES).get();
-            // the follower's not virtual
-            if(!predecessor.virtual) break;
-            // no swap is necessary, the element is supposed to be before us
-            if(predecessor.compareTo(treeElement) <= 0) break;
+        // is the predecessor a parent or sibling?
+        while(true) {
+            Element<TreeElement<E>> previousElement = treeElement.element.previous();
+            if(previousElement == null) break;
+            TreeElement<E> previousNode = previousElement.get();
 
-            // swap this with its precessor
-            data.remove(predecessor.element);
-            // todo - fire events in the 'visible' index range
-            updates.addDelete(index - 1);
-            Element<TreeElement<E>> element = data.add(index, ALL_NODES, predecessor.element.getColor(), predecessor, 1);
-            predecessor.element = element;
-            updates.addInsert(index);
-            index--;
-            shiftedForward = true;
+            // the predecessor is a sibling
+            if(previousNode.pathLength() == treeElement.pathLength()) {
+                // make sure the sibling is on the right side
+                if(previousNode.virtual && previousNode.compareTo(treeElement) > 0) {
+                    return true;
+                // and that we agree what our parent looks like
+                } else if(!treeElement.isAncestorByValue(previousNode.parent)) {
+                    return true;
+                }
+
+            // the predecessor is a parent
+            } else if(previousNode.pathLength() == treeElement.pathLength() - 1) {
+                // make sure that parent it is an ancestor by value
+                if(!treeElement.isAncestorByValue(previousNode)) {
+                    return true;
+                }
+
+            } else {
+                return true;
+            }
+
+            break;
         }
 
-        // don't shift backwards if we shifted forwards
-        if(shiftedForward) return;
-
-        // shift backwards through virtual followers until we're in the right place
-        while(index + 1 < data.size(ALL_NODES)) {
-            TreeElement<E> possiblePredecessor = data.get(index + 1, ALL_NODES).get();
-            // the predecessor's not virtual
-            if(!possiblePredecessor.virtual) break;
+        // should it be swapped with the follower?
+        while(true) {
+            Element<TreeElement<E>> nextElement = treeElement.element.next();
+            if(nextElement == null) break;
+            TreeElement<E> nextNode = nextElement.get();
+            // the follower is not virtual
+            if(!nextNode.virtual) break;
             // no swap is necessary, the element is supposed to be after us
-            if(possiblePredecessor.compareTo(treeElement) >= 0) break;
+            if(nextNode.compareTo(treeElement) >= 0) break;
 
-            // swap this with its follower
-            data.remove(possiblePredecessor.element);
-            updates.addDelete(index + 1);
-            Element<TreeElement<E>> element = data.add(index, ALL_NODES, possiblePredecessor.element.getColor(), possiblePredecessor, 1);
-            possiblePredecessor.element = element;
-            updates.addInsert(index);
-            index++;
+            // a swap is necessary!
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -535,7 +560,8 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             // in which case we want to update over it. For example, if we
             // simulated a node and then that value gets inserted 'for real',
             // we keep the state of that node
-            if(possibleAncestor.virtual && possibleAncestor.compareTo(treeElement) == 0) {
+            int relativePosition = treeElement.compareTo(possibleAncestor);
+            if(possibleAncestor.virtual && relativePosition == 0) {
 
                 // make the real element copy the state of the virtual
                 treeElement.updateFrom(possibleAncestor);
@@ -555,13 +581,11 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 return;
             }
 
-            // this element is definitely not our parent, it's path is too long
-            if(possibleAncestor.pathLength() > treeElement.pathLength() - 1) break;
+            // if this element follows us by value, we've gone too far
+            if(relativePosition < 0) {
+                break;
+            }
 
-            // make sure the data is consistent with our parent's data
-            if(!treeElement.isAncestorByValue(possibleAncestor)) break;
-
-            // we found an ancestor, skip past it when inserting
             insertIndex++;
         }
 

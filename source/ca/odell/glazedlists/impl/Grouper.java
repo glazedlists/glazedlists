@@ -11,8 +11,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 
 /**
- * This helper class manages the groups created by dividing up a {@link ca.odell.glazedlists.SortedList}
- * using a {@link java.util.Comparator}. This class uses a delegate interface {@link Client}
+ * This helper class manages the groups created by dividing up a {@link SortedList}
+ * using a {@link Comparator}. This class uses a delegate interface {@link Client}
  * to fire the appropriate events as groups are inserted, updated and changed.
  *
  * @author James Lemieux

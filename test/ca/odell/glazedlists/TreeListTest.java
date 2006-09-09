@@ -506,7 +506,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSourceUpdateEvents_FixMe() {
+    public void testSourceUpdateEvents() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener.install(treeList);
@@ -525,6 +525,21 @@ public class TreeListTest extends TestCase {
         source.set(1, "ABE");
         assertTreeStructure(treeList, new String[] {
                 "A",
+        });
+    }
+
+    public void testDeletedRealParentIsReplacedByVirtualParent_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("A");
+        source.add("ABC");
+        source.remove(0);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
         });
     }
 }
