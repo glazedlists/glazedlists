@@ -70,9 +70,32 @@ public class ProgressClock extends JComponent {
 
     public static void main(String[] args) throws Exception {
 
-        final ProgressClock[] progressClock = new ProgressClock[1];
+        final ProgressClock[] progressClocks = new ProgressClock[1];
 
-        SwingUtilities.invokeAndWait(new Runnable() { public void run() {
+        SwingUtilities.invokeAndWait(new StartUIRunnable(progressClocks));
+
+        Object wait = new Object();
+        synchronized(wait) {
+            while(true) {
+                for(int i = 0; i <= 100; i++) {
+                    progressClocks[0].setProgress(i / 100f);
+                    wait.wait(100);
+                }
+                wait.wait(1000);
+                progressClocks[0].setProgress(0f);
+                wait.wait(1000);
+            }
+        }
+    }
+
+    private static class StartUIRunnable implements Runnable {
+        final ProgressClock[] progressClock;
+
+        public StartUIRunnable(ProgressClock[] progressClock) {
+            this.progressClock = progressClock;
+        }
+
+        public void run() {
             JPanel panel = new JPanel(new BorderLayout());
             Image before = new ImageIcon(getClass().getClassLoader().getResource("resources/before.png")).getImage();
             Image after = new ImageIcon(getClass().getClassLoader().getResource("resources/after.png")).getImage();
@@ -87,19 +110,6 @@ public class ProgressClock extends JComponent {
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
-        }});
-
-        Object wait = new Object();
-        synchronized(wait) {
-            while(true) {
-                for(int i = 0; i <= 100; i++) {
-                    progressClock[0].setProgress(i / 100f);
-                    wait.wait(100);
-                }
-                wait.wait(1000);
-                progressClock[0].setProgress(0f);
-                wait.wait(1000);
-            }
         }
     }
 }

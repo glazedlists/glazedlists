@@ -132,8 +132,11 @@ public class XmlBrowser {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new StartUIRunnable());
+    }
 
+    private static class StartUIRunnable implements Runnable {
+        public void run() {
             // get a handle to an XML file for input
             InputStream xmlIn = null;
             try {
@@ -160,7 +163,7 @@ public class XmlBrowser {
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
-        }});
+        }
     }
 
     /**

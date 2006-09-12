@@ -263,7 +263,8 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      *      specified element.
      */
     public boolean supportsChildren(int index) {
-        return format.supportsChildren(get(index).sourceValue());
+        final TreeElement<E> treeElement = (TreeElement<E>) get(index);
+        return format.supportsChildren(treeElement.sourceValue());
     }
 
     /**
