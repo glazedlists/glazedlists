@@ -164,7 +164,7 @@ public class EventSelectionModelTest extends SwingTestCase {
     /**
      * Counts the number of ListSelectionEvents fired.
      */
-    private class ListSelectionChangeCounter implements ListSelectionListener {
+    private static class ListSelectionChangeCounter implements ListSelectionListener {
         private int count = 0;
         public void valueChanged(ListSelectionEvent e) {
             count++;

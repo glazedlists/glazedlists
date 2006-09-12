@@ -415,7 +415,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
     /**
      * Add a listener when executed.
      */
-    private class AddListenerRunnable implements Runnable {
+    private static class AddListenerRunnable implements Runnable {
         private SimpleSubjectListener subject;
         private SimpleSubjectListener listener;
         public AddListenerRunnable(SimpleSubjectListener subject, SimpleSubjectListener listener) {
@@ -430,7 +430,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
     /**
      * Remove a listener when executed.
      */
-    private class RemoveListenerRunnable implements Runnable {
+    private static class RemoveListenerRunnable implements Runnable {
         private SimpleSubjectListener subject;
         private SimpleSubjectListener listener;
         public RemoveListenerRunnable(SimpleSubjectListener subject, SimpleSubjectListener listener) {
@@ -588,7 +588,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         source.add("Hello");
         assertEquals(1, counting.changeCount);
     }
-    public class CountingList<T> extends TransformedList<T,T> {
+    public static class CountingList<T> extends TransformedList<T,T> {
         public int changeCount = 0;
         protected CountingList(EventList<T> source) {
             super(source);

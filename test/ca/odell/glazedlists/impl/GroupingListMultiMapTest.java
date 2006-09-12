@@ -748,7 +748,7 @@ public class GroupingListMultiMapTest extends TestCase {
         names.set(0, key + "****");
     }
 
-    private final class FirstLetterFunction implements FunctionList.Function<String,Comparable<String>> {
+    private static final class FirstLetterFunction implements FunctionList.Function<String,Comparable<String>> {
         public String evaluate(String sourceValue) {
             return String.valueOf(sourceValue.charAt(0));
         }

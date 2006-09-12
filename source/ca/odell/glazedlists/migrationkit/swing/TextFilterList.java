@@ -122,6 +122,7 @@ public class TextFilterList extends TransformedList {
     public TextFilterList(EventList source, TextFilterator filterator, JTextField filterEdit) {
         super(new FilterList(source));
         this.matcherEditor = new TextComponentMatcherEditor(filterEdit, filterator);
+        this.filterEdit = filterEdit;
         ((FilterList)this.source).setMatcherEditor(matcherEditor);
 
         // handle changes

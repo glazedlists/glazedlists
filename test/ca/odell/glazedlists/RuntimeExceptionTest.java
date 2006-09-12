@@ -107,7 +107,7 @@ public class RuntimeExceptionTest extends TestCase {
     /**
      * ListEventListener that throws an exception on demand.
      */
-    class ExceptionThrower implements ListEventListener {
+    static class ExceptionThrower implements ListEventListener {
         private RuntimeException nextException = null;
         public void setNextException(RuntimeException nextException) {
             this.nextException = nextException;

@@ -112,7 +112,7 @@ public class MultipleSourcesTest extends TestCase {
      * Listens to multiple sources, and when one source changes, this iterates all
      * sources.
      */
-    class MultipleSourcesListener implements ListEventListener {
+    static class MultipleSourcesListener implements ListEventListener {
         private List sources;
         private int changeCount = 0;
 

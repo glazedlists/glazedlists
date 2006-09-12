@@ -290,13 +290,13 @@ public final class IndexedTree<V> {
         for(int r = 0; r < repetitions; r++) {
             IndexedTree<Integer> tree = new IndexedTree<Integer>(GlazedLists.comparableComparator());
             for(int i = 0; i < operations; i++) {
-                int operation = (int)(random.nextDouble() * 3.0);
+                int operation = random.nextInt(3);
 
                 if(operation <= 1 || tree.size() == 0) {
                     Integer value = new Integer((int)(random.nextDouble() * (double)Integer.MAX_VALUE));
                     tree.addByNode(value);
                 } else {
-                    int index = (int)(random.nextDouble() * (double)tree.size());
+                    int index = random.nextInt(tree.size());
                     tree.removeByIndex(index);
                 }
 

@@ -261,7 +261,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
     /**
      * Get all listeners of the specified object.
      */
-    public <Listener> List<Listener> getListeners(Object subject) {
+    public synchronized <Listener> List<Listener> getListeners(Object subject) {
         List<Listener> result = new ArrayList<Listener>();
         for(int i = 0, size = subjectAndListeners.size(); i < size; i++) {
             SubjectAndListener<?,Listener,?> subjectAndListener = subjectAndListeners.get(i);

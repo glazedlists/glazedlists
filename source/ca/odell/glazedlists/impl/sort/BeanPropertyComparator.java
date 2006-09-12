@@ -48,15 +48,24 @@ public final class BeanPropertyComparator<T> implements Comparator<T> {
         return propertyComparator.compare(alphaProperty, betaProperty);
     }
 
-    /**
-     * This is equal to another comparator if and only if they both
-     * are BeanPropertyComparators and have equal property comparators.
-     */
-    public boolean equals(Object other) {
-        if(!(other instanceof BeanPropertyComparator)) return false;
-        BeanPropertyComparator otherBeanPropertyComparator = (BeanPropertyComparator)other;
-        if(!beanProperty.equals(otherBeanPropertyComparator.beanProperty)) return false;
-        if(!propertyComparator.equals(otherBeanPropertyComparator.propertyComparator)) return false;
+    /** {@inheritDoc} */
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        final BeanPropertyComparator that = (BeanPropertyComparator) o;
+
+        if(!beanProperty.equals(that.beanProperty)) return false;
+        if(!propertyComparator.equals(that.propertyComparator)) return false;
+
         return true;
+    }
+
+    /** {@inheritDoc} */
+    public int hashCode() {
+        int result;
+        result = propertyComparator.hashCode();
+        result = 29 * result + beanProperty.hashCode();
+        return result;
     }
 }

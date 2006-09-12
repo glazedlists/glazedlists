@@ -317,16 +317,21 @@ public final class ThresholdList<E> extends RangeList<E> {
             else return 0;
         }
 
-        /**
-         * Returns true iff the object passed is a <code>ThresholdComparator</code> with
-         * the same underlying {@link Evaluator}.
-         */
-        public boolean equals(Object object) {
-            if(!(object instanceof ThresholdComparator)) {
-                return false;
-            }
-            ThresholdComparator other = (ThresholdComparator)object;
-            return this.evaluator == other.evaluator;
+        /** {@inheritDoc} */
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+
+            final ThresholdComparator that = (ThresholdComparator) o;
+
+            if(!evaluator.equals(that.evaluator)) return false;
+
+            return true;
+        }
+
+        /** {@inheritDoc} */
+        public int hashCode() {
+            return evaluator.hashCode();
         }
     }
 }

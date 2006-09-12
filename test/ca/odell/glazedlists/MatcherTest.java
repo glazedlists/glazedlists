@@ -130,13 +130,13 @@ public class MatcherTest extends TestCase {
         assertEquals(true, matcher.matches(null));
     }
 
-    private class NumberMatcherEditor extends AbstractMatcherEditor<Number> {
+    private static class NumberMatcherEditor extends AbstractMatcherEditor<Number> {
         public void setNumber(Number number) {
             this.fireChanged(new NumberMatcher(number));
         }
     }
 
-    private class NumberMatcher implements Matcher<Number> {
+    private static class NumberMatcher implements Matcher<Number> {
         private final Number value;
 
         public NumberMatcher(Number value) {

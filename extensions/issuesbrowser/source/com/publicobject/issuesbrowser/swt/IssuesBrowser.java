@@ -363,7 +363,7 @@ public class IssuesBrowser {
      * A listener to selection on the issues table that reflects the change
      * in selection within the description table.
      */
-    class IssueSelectionListener implements ListEventListener {
+    static class IssueSelectionListener implements ListEventListener {
 
         private EventList source = null;
         private Table descriptionsTable = null;
@@ -455,7 +455,7 @@ public class IssuesBrowser {
     /**
      * Toggles the throbber on and off.
      */
-    private class IndeterminateToggler implements Runnable, Throbber {
+    private static class IndeterminateToggler implements Runnable, Throbber {
 
         /** whether the throbber will be turned on and off */
         private boolean on = false;

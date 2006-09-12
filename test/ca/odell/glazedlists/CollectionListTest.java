@@ -375,7 +375,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Model that breaks a String into a list of characters.
      */
-    private class StringDecomposerModel implements CollectionList.Model<String,String> {
+    private static class StringDecomposerModel implements CollectionList.Model<String,String> {
         public List<String> getChildren(String parent) {
             return GlazedListsTests.stringToList(parent);
         }

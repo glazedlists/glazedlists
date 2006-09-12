@@ -20,7 +20,7 @@ public class IntegerArrayMatcherEditor extends AbstractMatcherEditor<int[]> {
     public void setFilter(int index, int threshhold) {
         fireChanged(new IntegerArrayMatcher(index, threshhold));
     }
-    private class IntegerArrayMatcher implements Matcher<int[]> {
+    private static class IntegerArrayMatcher implements Matcher<int[]> {
         private int index;
         private int threshhold;
         public IntegerArrayMatcher(int index, int threshhold) {

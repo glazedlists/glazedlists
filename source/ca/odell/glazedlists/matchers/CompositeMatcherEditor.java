@@ -261,7 +261,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /**
      * Models a Matcher that matches if all child elements match.
      */
-    private class AndMatcher<E> implements Matcher<E> {
+    private static class AndMatcher<E> implements Matcher<E> {
         private List<Matcher<E>> matchers = new ArrayList<Matcher<E>>();
         public AndMatcher(List<Matcher<E>> matchers) {
             this.matchers.addAll(matchers);
@@ -279,7 +279,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /**
      * Models a Matcher that matches if any child elements match.
      */
-    private class OrMatcher<E> implements Matcher<E> {
+    private static class OrMatcher<E> implements Matcher<E> {
         private List<Matcher<E>> matchers = new ArrayList<Matcher<E>>();
         public OrMatcher(List<Matcher<E>> matchers) {
             this.matchers.addAll(matchers);

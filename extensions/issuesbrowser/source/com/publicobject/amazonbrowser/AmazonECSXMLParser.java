@@ -224,7 +224,7 @@ public class AmazonECSXMLParser {
             this.httpConnection = new HTTPConnection(host);
         }
 
-        private class ProgressBarUpdater implements ListEventListener<Item> {
+        private static class ProgressBarUpdater implements ListEventListener<Item> {
             private final JProgressBar progressBar;
 
             public ProgressBarUpdater(JProgressBar progressBar) {

@@ -761,7 +761,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * Match strings that are a substring of the specified String.
      */
-    private class SubstringMatcher implements Matcher<String> {
+    private static class SubstringMatcher implements Matcher<String> {
         private String enclosing;
         public SubstringMatcher(String enclosing) {
             this.enclosing = enclosing;

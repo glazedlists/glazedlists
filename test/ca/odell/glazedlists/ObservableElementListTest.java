@@ -291,7 +291,7 @@ public class ObservableElementListTest extends TestCase {
      * This connector only installs JavaBean listeners on every second element
      * that is added to the associated {@link ObservableElementList}.
      */
-    private class PickyJLabelConnector extends JavaBeanEventListConnector<JLabel> {
+    private static class PickyJLabelConnector extends JavaBeanEventListConnector<JLabel> {
         private int elementCount = 0;
 
         public PickyJLabelConnector() {
@@ -310,7 +310,7 @@ public class ObservableElementListTest extends TestCase {
      * This connector only installs JavaBean listeners on every second element
      * that is added to the associated {@link ObservableElementList}.
      */
-    private class LazyThreadedConnector extends JavaBeanEventListConnector<JLabel> {
+    private static class LazyThreadedConnector extends JavaBeanEventListConnector<JLabel> {
         private Thread lastUpdateThread;
         private boolean exitDueToException = false;
 

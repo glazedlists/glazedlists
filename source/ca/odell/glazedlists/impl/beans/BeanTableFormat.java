@@ -10,6 +10,7 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * TableFormat implementation that uses reflection to be used for any
@@ -34,24 +35,25 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
 
     /** column comparators */
     protected Comparator[] comparators;
-    
+
     /** column classes */
     protected Class[] classes;
-    
+
     /** primitive class to object class conversion map */
-    protected static Map<Class,Class> primitiveToObjectMap;
+    protected static final Map<Class,Class> primitiveToObjectMap;
     static {
-        primitiveToObjectMap = new HashMap<Class,Class>();
-        primitiveToObjectMap.put(boolean.class, Boolean.class);
-        primitiveToObjectMap.put(char.class, Character.class);
-        primitiveToObjectMap.put(byte.class, Byte.class);
-        primitiveToObjectMap.put(short.class, Short.class);
-        primitiveToObjectMap.put(int.class, Integer.class);
-        primitiveToObjectMap.put(long.class, Long.class);
-        primitiveToObjectMap.put(float.class, Float.class);
-        primitiveToObjectMap.put(double.class, Double.class);
+        Map<Class,Class> primitiveToObjectMapWritable = new HashMap<Class,Class>();
+        primitiveToObjectMapWritable.put(boolean.class, Boolean.class);
+        primitiveToObjectMapWritable.put(char.class, Character.class);
+        primitiveToObjectMapWritable.put(byte.class, Byte.class);
+        primitiveToObjectMapWritable.put(short.class, Short.class);
+        primitiveToObjectMapWritable.put(int.class, Integer.class);
+        primitiveToObjectMapWritable.put(long.class, Long.class);
+        primitiveToObjectMapWritable.put(float.class, Float.class);
+        primitiveToObjectMapWritable.put(double.class, Double.class);
+        primitiveToObjectMap = Collections.unmodifiableMap(primitiveToObjectMapWritable);
     }
-    
+
 
     /**
      * Create a BeanTableFormat that uses the specified column names
@@ -61,7 +63,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
         this.propertyNames = propertyNames;
         this.columnLabels = columnLabels;
         this.editable = editable;
-        
+
         // set up the AdvancedTableFormat properties
         comparators = new Comparator[propertyNames.length];
         classes = new Class[propertyNames.length];
@@ -137,7 +139,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
         return beanProperties[column].get(baseObject);
     }
 
-    
+
     // WritableTableFormat // // // // // // // // // // // // // // // // // //
 
     /**
@@ -180,7 +182,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
         return baseObject;
     }
 
-    
+
     // AdvancedTableFormat // // // // // // // // // // // // // // // // // //
 
     /**

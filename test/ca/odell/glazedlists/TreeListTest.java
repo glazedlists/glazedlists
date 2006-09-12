@@ -37,7 +37,7 @@ public class TreeListTest extends TestCase {
      * Convert Java methods into paths. For example, {@link Object#toString()}
      * is <code>/java/lang/Object/toString</code>
      */
-    class JavaStructureTreeFormat implements TreeList.Format<Object> {
+    static class JavaStructureTreeFormat implements TreeList.Format<Object> {
 
         public boolean supportsChildren(Object element) {
             return (!(element instanceof Method));
@@ -67,7 +67,7 @@ public class TreeListTest extends TestCase {
     /**
      * Convert Strings into paths. For example, PUPPY is <code>/P/U/P/P/Y</code>
      */
-    class CharacterTreeFormat implements TreeList.Format<String> {
+    static class CharacterTreeFormat implements TreeList.Format<String> {
         public boolean supportsChildren(String element) {
             return true;
         }

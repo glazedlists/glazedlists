@@ -102,7 +102,7 @@ public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
 	/**
 	 * See {@link #getThreshold()}.
 	 */
-	public E getThreshold() {
+	public synchronized E getThreshold() {
 		return threshold;
 	}
 
@@ -129,7 +129,7 @@ public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
 	/**
 	 * See {@link #setMatchOperation}.
 	 */
-	public MatchOperation getMatchOperation() {
+	public synchronized MatchOperation getMatchOperation() {
 		return operation;
 	}
 
@@ -147,7 +147,7 @@ public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
 	/**
 	 * See {@link #setComparator}.
 	 */
-	public Comparator<E> getComparator() {
+	public synchronized Comparator<E> getComparator() {
 		return comparator;
 	}
 

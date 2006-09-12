@@ -25,7 +25,7 @@ public class TextMatcher<E> implements Matcher<E> {
     /** The single instance of the {@link StringLengthComparator}. */
     private static final Comparator<String> LENGTH_COMPARATOR = new StringLengthComparator();
 
-    /**
+    /** 
      * This Comparator orders {@link String}s in descending order by their lengths.
      */
     private static final class StringLengthComparator implements Comparator<String> {

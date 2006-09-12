@@ -87,14 +87,14 @@ public class MultipleListenersTest extends TestCase {
     /**
      * A simple filter for filtering integers by size.
      */
-    class IntegerSizeMatcherEditor extends AbstractMatcherEditor {
+    static class IntegerSizeMatcherEditor extends AbstractMatcherEditor {
         public IntegerSizeMatcherEditor(int threshhold) {
             setThreshhold(threshhold);
         }
         public void setThreshhold(int threshhold) {
             fireChanged(new IntegerMatcher(threshhold));
         }
-        private class IntegerMatcher implements Matcher {
+        private static class IntegerMatcher implements Matcher {
             int threshhold;
             public IntegerMatcher(int threshhold) {
                 this.threshhold = threshhold;

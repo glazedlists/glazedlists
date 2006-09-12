@@ -1067,7 +1067,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testIncreasingSlidingWindow() {
         // count events
-        ListConsistencyListener counter = ListConsistencyListener.install(thresholdList);
+        ListConsistencyListener.install(thresholdList);
 
         thresholdList.setLowerThreshold(-14938);
         thresholdList.setUpperThreshold(-1938);
@@ -1091,7 +1091,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testDecreasingSlidingWindow() {
         // count events
-        ListConsistencyListener counter = ListConsistencyListener.install(thresholdList);
+        ListConsistencyListener.install(thresholdList);
 
         thresholdList.setUpperThreshold(20063);
         thresholdList.setLowerThreshold(7063);
@@ -1167,7 +1167,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * A JavaBean to test out the Reflection constructor
      */
-    public class SimpleJavaBeanObject {
+    public static class SimpleJavaBeanObject {
 
         private int value = 0;
 
@@ -1183,7 +1183,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Returns an integer value which represents the object.
      */
-    private class IntegerEvaluator implements ThresholdList.Evaluator {
+    private static class IntegerEvaluator implements ThresholdList.Evaluator {
         public int evaluate(Object object) {
             if(object == null) {
                 return Integer.MIN_VALUE;
@@ -1201,7 +1201,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Expects strings like "100" and "50" and returns their integer values.
      */
-    private class IntegerAsStringEvaluator implements ThresholdList.Evaluator {
+    private static class IntegerAsStringEvaluator implements ThresholdList.Evaluator {
         public int evaluate(Object object) {
             return Integer.valueOf((String)object).intValue();
         }
@@ -1216,7 +1216,7 @@ public class ThresholdListTest extends TestCase {
      * testThresholdSettingEvents test.  The code duplication exists only
      * for convienience and for the sake of that one test.
      */
-    private final class ThresholdComparator implements Comparator {
+    private static final class ThresholdComparator implements Comparator {
 
         /** the underlying evaluator **/
         private ThresholdList.Evaluator evaluator = null;
@@ -1251,12 +1251,18 @@ public class ThresholdListTest extends TestCase {
          * Returns true iff the object passed is a <code>ThresholdComparator</code> with
          * the same underlying <code>ThresholdEvaluator</code>.
          */
-        public boolean equals(Object object) {
-            if(object == null || !(object instanceof ThresholdComparator)) {
-            return false;
-            }
-            ThresholdComparator other = (ThresholdComparator)object;
-            return this.evaluator == other.evaluator;
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+
+            final ThresholdComparator that = (ThresholdComparator) o;
+
+            if(!evaluator.equals(that.evaluator)) return false;
+
+            return true;
+        }
+        public int hashCode() {
+            return evaluator.hashCode();
         }
     }
 }

@@ -87,7 +87,7 @@ public class DiffTest extends TestCase {
     /**
      * A list that returns the integer index as the row value.
      */
-    private class ReallyBigList extends AbstractList {
+    private static class ReallyBigList extends AbstractList {
         private int size;
         public ReallyBigList(int size) {
             this.size = size;
@@ -111,7 +111,7 @@ public class DiffTest extends TestCase {
     /**
      * Decorates a list with a small set of changes.
      */
-    private class SparseDifferencesList extends AbstractList {
+    private static class SparseDifferencesList extends AbstractList {
         private Map values = new HashMap();
         private List delegate;
         public SparseDifferencesList(List delegate) {
@@ -240,7 +240,7 @@ public class DiffTest extends TestCase {
     /**
      * Counts how many ListEvents are received.
      */
-    public class ListEventCounter<E> implements ListEventListener<E> {
+    public static class ListEventCounter<E> implements ListEventListener<E> {
 
         /** count the number of changes per event */
         private List<Integer> changeCounts = new ArrayList<Integer>();

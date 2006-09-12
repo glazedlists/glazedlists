@@ -270,12 +270,25 @@ public class BeanProperty<T> {
             throw new UndeclaredThrowableException(e.getCause());
         }
     }
-    
+
     /** {@inheritDoc} */
-    public boolean equals(Object other) {
-        BeanProperty otherProperty = (BeanProperty)other;
-        if(!beanClass.equals(otherProperty.beanClass)) return false; 
-        if(!propertyName.equals(otherProperty.propertyName)) return false;
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        final BeanProperty that = (BeanProperty) o;
+
+        if(!beanClass.equals(that.beanClass)) return false;
+        if(!propertyName.equals(that.propertyName)) return false;
+
         return true;
+    }
+
+    /** {@inheritDoc} */
+    public int hashCode() {
+        int result;
+        result = beanClass.hashCode();
+        result = 29 * result + propertyName.hashCode();
+        return result;
     }
 }

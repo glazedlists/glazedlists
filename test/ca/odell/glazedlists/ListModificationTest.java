@@ -154,7 +154,7 @@ public class ListModificationTest extends TestCase {
     /**
      * A simple filter that filters out anything that is not a vowel.
      */
-    class VowelMatcher implements Matcher<String> {
+    static class VowelMatcher implements Matcher<String> {
         public boolean matches(String letter) {
             if(letter.length() != 1) return false;
             return ("AEIOUaeiou".indexOf(letter) != -1);

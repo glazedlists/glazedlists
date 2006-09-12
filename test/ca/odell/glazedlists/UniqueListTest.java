@@ -964,7 +964,7 @@ public class UniqueListTest extends TestCase {
         }
 
         // listen to changes on the unique list
-        ListConsistencyListener counter = ListConsistencyListener.install(unique);
+        ListConsistencyListener.install(unique);
 
         // replace the values with the replacement set
         GlazedLists.replaceAllSorted(unique, replacementSet, false, null);

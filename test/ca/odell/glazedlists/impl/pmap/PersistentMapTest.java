@@ -203,7 +203,7 @@ public class PersistentMapTest extends TestCase {
     /**
      * Ignores a value callback.
      */
-    class NullValueCallback implements ValueCallback {
+    static class NullValueCallback implements ValueCallback {
         public void valueLoaded(Chunk member, Bufferlo value) {
             // do nothing
         }

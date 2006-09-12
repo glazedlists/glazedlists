@@ -317,7 +317,7 @@ public class IssuesBrowser implements Runnable {
     /**
      * Render the issues separator.
      */
-    public class IssueSeparatorTableCell extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
+    public static class IssueSeparatorTableCell extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
         private final MessageFormat nameFormat = new MessageFormat("{0} ({1})");
 
         /** the separator list to lock */

@@ -251,7 +251,7 @@ public class CachingList extends TransformedList {
    /**
     * A special lock to prevent deadlock in CachingList.
     */
-   private class CacheLock implements ReadWriteLock {
+   private static class CacheLock implements ReadWriteLock {
 
         /** The lock this CacheLock decorates */
         private ReadWriteLock sourceLock;

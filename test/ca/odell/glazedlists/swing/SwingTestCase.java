@@ -59,7 +59,7 @@ public abstract class SwingTestCase extends TestCase {
             else throw new RuntimeException(cause);
         }
     }
-    private class TestOnSwingThread implements Runnable {
+    private static class TestOnSwingThread implements Runnable {
         private Class guiClass;
         public TestOnSwingThread(Class guiClass) {
             this.guiClass = guiClass;

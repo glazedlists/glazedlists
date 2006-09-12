@@ -38,13 +38,20 @@ public final class ReverseComparator<T> implements Comparator<T> {
         return source;
     }
 
-    /**
-     * This is equal to another comparator if and only if they both
-     * are reverse comparators for equal source comparators.
-     */
-    public boolean equals(Object other) {
-        if(!(other instanceof ReverseComparator)) return false;
-        ReverseComparator reverseOther = (ReverseComparator)other;
-        return source.equals(reverseOther.source);
+    /** {@inheritDoc} */
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        final ReverseComparator that = (ReverseComparator) o;
+
+        if(!source.equals(that.source)) return false;
+
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    public int hashCode() {
+        return source.hashCode();
     }
 }

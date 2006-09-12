@@ -71,7 +71,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         this.keyFunction = keyFunction;
 
         // construct a GroupingList which groups together the source elements for common keys
-        this.groupingList = new GroupingList<V>(source, new FunctionComparator(keyFunction));
+        this.groupingList = new GroupingList<V>(source, new FunctionComparator<V,K>(keyFunction));
 
         // wrap each List in the GroupingList in a layer that enforces the keyFunction constraints for writes
         this.valueList = new FunctionList<List<V>, List<V>>(this.groupingList, new ValueListFunction());
@@ -510,7 +510,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * {@link FunctionList.Function} to produce {@link Comparable} objects
      * which are then compared to determine a relative ordering.
      */
-    private final class FunctionComparator implements Comparator<V> {
+    private static final class FunctionComparator<V,K> implements Comparator<V> {
 
         /** A Comparator that orders {@link Comparable} objects. */
         private final Comparator<Comparable> delegate = GlazedLists.comparableComparator();

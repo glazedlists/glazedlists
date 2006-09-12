@@ -48,12 +48,20 @@ public final class ComparatorChain<T> implements Comparator<T> {
         return comparators;
     }
 
-    /**
-     * A list of comparators are equal only if the lists are equal.
-     */
-    public boolean equals(Object other) {
-        if(!(other instanceof ComparatorChain)) return false;
-        final ComparatorChain chainOther = (ComparatorChain) other;
-        return Arrays.equals(comparators, chainOther.comparators);
+    /** {@inheritDoc} */
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        final ComparatorChain that = (ComparatorChain) o;
+
+        if(!Arrays.equals(comparators, that.comparators)) return false;
+
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    public int hashCode() {
+        return 0;
     }
 }

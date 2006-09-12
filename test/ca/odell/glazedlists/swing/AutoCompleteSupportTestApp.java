@@ -433,7 +433,7 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
-    private final class RecordActionHandler implements ActionListener {
+    private static final class RecordActionHandler implements ActionListener {
         private int count = 0;
 
         private final DefaultListModel model;

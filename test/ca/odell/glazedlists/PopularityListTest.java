@@ -242,7 +242,7 @@ public class PopularityListTest extends TestCase {
      * is a Listener, it can detect the exact change that causes the PopularityList
      * to come out of sync.
      */
-    class PopularityListValidator implements ListEventListener {
+    static class PopularityListValidator implements ListEventListener {
 
         private List elementCounts = new ArrayList();
         private PopularityList popularityList;

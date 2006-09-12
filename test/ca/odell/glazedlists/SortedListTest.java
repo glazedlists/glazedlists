@@ -1240,7 +1240,7 @@ public class SortedListTest extends TestCase {
     /**
      * Compares two objects to be equal.
      */
-    class AlwaysEqualComparator implements Comparator<Object> {
+    static class AlwaysEqualComparator implements Comparator<Object> {
         public int compare(Object a, Object b) {
             return 0;
         }
@@ -1249,7 +1249,7 @@ public class SortedListTest extends TestCase {
     /**
      * Compares two objects with the second one always null.
      */
-    class HalfNullComparator implements Comparator {
+    static class HalfNullComparator implements Comparator {
         Comparator target = GlazedLists.comparableComparator();
         public int compare(Object a, Object b) {
             return target.compare(b, null);
@@ -1278,7 +1278,7 @@ public class SortedListTest extends TestCase {
     /**
      * Compares Strings by their length.
      */
-    class StringLengthComparator implements Comparator<String> {
+    static class StringLengthComparator implements Comparator<String> {
         public int compare(String a, String b) {
             return a.length() - b.length();
         }
