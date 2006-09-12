@@ -113,7 +113,6 @@ public class XmlBrowser {
 
             } else {
                 child = new Element(qName);
-
             }
 
             target.add(child);
