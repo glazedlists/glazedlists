@@ -146,7 +146,7 @@ public class XmlBrowser {
 
             // convert the XML into an EventList, then a TreeList
             EventList<Element> eventList = EventListXmlContentHandler.create(xmlIn);
-            TreeList<Element> treeList = new TreeList<Element>(eventList, new ElementTreeFormat());
+            TreeList<Element> treeList = new TreeList<Element>(eventList, new ElementTreeFormat(), true);
 
             // display the XML in a tree table
             EventTableModel<TreeList.TreeElement<Element>> tableModel = new EventTableModel<TreeList.TreeElement<Element>>(treeList, new ElementTableFormat());

@@ -51,9 +51,24 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
     /**
      * Create a new TreeList that adds hierarchy to the specified source list.
+     * This constructor sorts the elements automatically, which is particularly
+     * convenient if you're data is not already in a natural tree ordering,
+     * ie. siblings are not already adjacent.
      */
     public TreeList(EventList<E> source, Format<E> format) {
-        super(new SortedList<TreeElement<E>>(new FunctionList<E, TreeElement<E>>(source, new TreeElementFunction<E>(format))));
+        this(new SortedList<TreeElement<E>>(new FunctionList<E, TreeElement<E>>(source, new TreeElementFunction<E>(format))), format, null);
+    }
+
+    /**
+     * Create a new TreeList that adds hierarchy to the specified source list.
+     * This constructor does not sort the elements.
+     */
+    public TreeList(EventList<E> source, Format<E> format, boolean unused) {
+        this(new FunctionList<E, TreeElement<E>>(source, new TreeElementFunction<E>(format)), format, null);
+    }
+
+    private TreeList(EventList<TreeElement<E>> source, Format<E> format, Void dummy) {
+        super(source);
         this.format = format;
 
         // insert the new elements like they were adds
@@ -66,7 +81,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // populate parent links
         for(int i = 0; i < super.source.size(); i++) {
             TreeElement<E> node = super.source.get(i);
-            attachParent(node, true, false);
+            attachParent(node, false);
         }
 
         // prepare sibling links
@@ -106,14 +121,12 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * visibility is inherited from its parent's 'visible' and 'expanded'
      * flags.
      *
-     * @param createIfNecessary true to recursively create as many parents
-     *      as necessary.
      * @param fireEvents false to suppress event firing, for use only in the
      *      constructor of {@link TreeList}.
      * @return true if the attached element is visible, false otherwise
      */
-    private boolean attachParent(TreeElement<E> node, boolean createIfNecessary, boolean fireEvents) {
-        TreeElement<E> parent = findParentByValue(node, createIfNecessary, fireEvents);
+    private boolean attachParent(TreeElement<E> node, boolean fireEvents) {
+        TreeElement<E> parent = findParentByValue(node, fireEvents);
         node.parent = parent;
 
         // toggle the visibility of the attached node
@@ -130,35 +143,50 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     /**
      * Search the tree for the parent of the specified element.
      */
-    private TreeElement<E> findParentByValue(TreeElement<E> node, boolean createIfNecessary, boolean fireEvents) {
+    private TreeElement<E> findParentByValue(TreeElement<E> node, boolean fireEvents) {
         // no parents for root nodes
         if(node.pathLength() == 1) return null;
 
-        // figure out what our parent would look like and where it would be
+        // search for our parent, starting at our predecessor
         TreeElement<E> parentPrototype = node.describeParent();
-        int expectedParentIndex = data.indexOfValue(parentPrototype, true, true, ALL_NODES);
-        assert(node.element == null || expectedParentIndex <= data.indexOfNode(node.element, ALL_NODES));
-        TreeElement<E> possibleParent = data.get(expectedParentIndex, ALL_NODES).get();
+        Element<TreeElement<E>> previousElement = node.element.previous();
+        TreeElement<E> predecessor = previousElement != null ? previousElement.get() : null;
 
-        // we already have a parent!
-        if(parentPrototype.compareTo(possibleParent) == 0) {
-            return possibleParent;
+        // we don't have a predecessor, we need to fab a parent
+        if(predecessor == null) {
+            // create a parent below
+
+        // our predecessor is too shallow to be our parent
+        } else if(predecessor.pathLength() < parentPrototype.pathLength()) {
+            // create a parent below
+
+        // our predecessor is at our parent's height, it could be our parent
+        } else if(predecessor.pathLength() == parentPrototype.pathLength()) {
+            if(predecessor.compareTo(parentPrototype) == 0) {
+                return predecessor;
+            }
+
+        // our predecessor is deeper than our parent, it could be a descendent of our parent
+        } else {
+            if(predecessor.isAncestorByValue(parentPrototype)) {
+                TreeElement<E> predecessorAncestor = predecessor;
+                while(predecessorAncestor.pathLength() > parentPrototype.pathLength()) {
+                    predecessorAncestor = predecessorAncestor.parent;
+                }
+                return predecessorAncestor;
+            }
+        }
 
         // create a parent
-        } else if(createIfNecessary) {
-            Element<TreeElement<E>> element = data.add(expectedParentIndex, ALL_NODES, VISIBLE_VIRTUAL, parentPrototype, 1);
-            parentPrototype.element = element;
-            boolean visible = attachParent(parentPrototype, true, fireEvents);
-            if(fireEvents && visible) {
-                int visibleIndex = data.indexOfNode(parentPrototype.element, VISIBLE_NODES);
-                updates.addInsert(visibleIndex);
-            }
-            return parentPrototype;
-
-        // no parent exists, and we're not going to make one
-        } else {
-            return null;
+        int index = data.indexOfNode(node.element, ALL_NODES);
+        Element<TreeElement<E>> parentElement = data.add(index, ALL_NODES, VISIBLE_VIRTUAL, parentPrototype, 1);
+        parentPrototype.element = parentElement;
+        boolean visible = attachParent(parentPrototype, fireEvents);
+        if(fireEvents && visible) {
+            int visibleIndex = data.indexOfNode(parentPrototype.element, VISIBLE_NODES);
+            updates.addInsert(visibleIndex);
         }
+        return parentPrototype;
     }
 
     /**
@@ -595,7 +623,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         treeElement.element = element;
 
         // link to the parent to determine visibility
-        boolean visible = attachParent(treeElement, true, true);
+        boolean visible = attachParent(treeElement, true);
 
         // set visibility and fire an event
         if(visible) {
