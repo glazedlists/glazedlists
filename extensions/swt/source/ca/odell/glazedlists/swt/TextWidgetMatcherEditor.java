@@ -28,7 +28,7 @@ import javax.swing.*;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class TextWidgetMatcherEditor extends TextMatcherEditor {
+public final class TextWidgetMatcherEditor<E> extends TextMatcherEditor<E> {
 
     /** the filter edit text field */
     private Text text;
@@ -51,7 +51,7 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
      *
      * @see GlazedLists#textFilterator(String[])
      */
-    public TextWidgetMatcherEditor(Text text, TextFilterator textFilterator) {
+    public TextWidgetMatcherEditor(Text text, TextFilterator<E> textFilterator) {
         this(text, textFilterator, true);
     }
 
@@ -73,7 +73,7 @@ public final class TextWidgetMatcherEditor extends TextMatcherEditor {
      *
      * @see GlazedLists#textFilterator(String[])
      */
-    public TextWidgetMatcherEditor(Text text, TextFilterator textFilterator, boolean live) {
+    public TextWidgetMatcherEditor(Text text, TextFilterator<E> textFilterator, boolean live) {
         super(textFilterator);
         this.text = text;
         this.live = live;

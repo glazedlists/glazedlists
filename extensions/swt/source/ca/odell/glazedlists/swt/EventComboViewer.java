@@ -23,13 +23,13 @@ import org.eclipse.swt.widgets.Combo;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class EventComboViewer implements ListEventListener {
+public class EventComboViewer<E> implements ListEventListener<E> {
 
     /** the SWT Combo component */
     private Combo combo = null;
 
     /** the EventList to respond to */
-    private TransformedList swtSource = null;
+    private TransformedList<E, E> swtSource = null;
 
     /** the label provider to pretty print a String representation of each Object */
     private ILabelProvider labelProvider = null;
@@ -41,7 +41,7 @@ public class EventComboViewer implements ListEventListener {
      * {@link String} values displayed in the {@link Combo} compoment will be
      * the result of calling toString() on the Objects found in source.
      */
-    public EventComboViewer(EventList source, Combo combo) {
+    public EventComboViewer(EventList<E> source, Combo combo) {
         this(source, combo, new LabelProvider());
     }
 
@@ -55,7 +55,7 @@ public class EventComboViewer implements ListEventListener {
      * @see ILabelProvider
      * @see GlazedListsSWT#beanLabelProvider(String)
      */
-    public EventComboViewer(EventList source, Combo combo, ILabelProvider labelProvider) {
+    public EventComboViewer(EventList<E> source, Combo combo, ILabelProvider labelProvider) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, combo.getDisplay());
         this.combo = combo;
         this.labelProvider = labelProvider;

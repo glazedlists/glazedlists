@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Display;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SWTThreadProxyEventList extends ThreadProxyEventList {
+public class SWTThreadProxyEventList<E> extends ThreadProxyEventList<E> {
 
     /** the display which owns the user interface thread */
     private Display display;
@@ -24,7 +24,7 @@ public class SWTThreadProxyEventList extends ThreadProxyEventList {
      * Create a {@link SWTThreadProxyEventList} that mirrors the specified source
      * {@link EventList} for access on the Swing thread.
      */
-    public SWTThreadProxyEventList(EventList source, Display display) {
+    public SWTThreadProxyEventList(EventList<E> source, Display display) {
         super(source);
         this.display = display;
     }

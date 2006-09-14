@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class EventTableViewer implements ListEventListener {
+public class EventTableViewer<E> implements ListEventListener<E> {
 
     /** the heavyweight table */
     private Table table;
@@ -36,19 +36,19 @@ public class EventTableViewer implements ListEventListener {
     private TableHandler tableHandler = null;
 
     /** the first source event list to dispose */
-    private TransformedList disposeSource = null;
+    private TransformedList<E, E> disposeSource = null;
 
     /** the proxy moves events to the SWT user interface thread */
-    private TransformedList swtSource = null;
+    private TransformedList<E, E> swtSource = null;
 
     /** Enables check support */
-    private TableCheckFilterList checkFilter = null;
+    private TableCheckFilterList<E, E> checkFilter = null;
 
     /** Specifies how to render table headers and sort */
-    private TableFormat tableFormat;
+    private TableFormat<E> tableFormat;
 
     /** For selection management */
-    private SelectionManager selection = null;
+    private SelectionManager<E> selection = null;
 
     /**
      * Creates a new viewer for the given {@link Table} that updates the table
@@ -57,8 +57,8 @@ public class EventTableViewer implements ListEventListener {
      * {@link TableFormat}. It uses JavaBeans and Reflection to create a
      * {@link TableFormat} as specified.
      */
-    public EventTableViewer(EventList source, Table table, String[] propertyNames, String[] columnLabels) {
-        this(source, table, GlazedLists.tableFormat(propertyNames, columnLabels));
+    public EventTableViewer(EventList<E> source, Table table, String[] propertyNames, String[] columnLabels) {
+        this(source, table, (TableFormat<E>)GlazedLists.tableFormat(propertyNames, columnLabels));
     }
 
     /**
@@ -66,13 +66,13 @@ public class EventTableViewer implements ListEventListener {
      * contents in response to changes on the specified {@link EventList}.  The
      * {@link Table} is formatted with the specified {@link TableFormat}.
      */
-    public EventTableViewer(EventList source, Table table, TableFormat tableFormat) {
+    public EventTableViewer(EventList<E> source, Table table, TableFormat<E> tableFormat) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
         disposeSource = swtSource;
 
         // insert a checked source if supported by the table
         if((table.getStyle() & SWT.CHECK) == SWT.CHECK) {
-            checkFilter = new TableCheckFilterList(swtSource, table, tableFormat);
+            checkFilter = new TableCheckFilterList<E, E>(swtSource, table, tableFormat);
             swtSource = checkFilter;
         }
 
@@ -81,7 +81,7 @@ public class EventTableViewer implements ListEventListener {
         this.tableFormat = tableFormat;
 
         // enable the selection lists
-        selection = new SelectionManager(swtSource, new SelectableTable());
+        selection = new SelectionManager<E>(swtSource, new SelectableTable());
 
         // configure how the Table will be manipulated
         if((table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL) {
@@ -113,7 +113,7 @@ public class EventTableViewer implements ListEventListener {
     /**
      * Sets all of the column values on a {@link TableItem}.
      */
-    private void setItemText(TableItem item, Object value) {
+    private void setItemText(TableItem item, E value) {
         for(int i = 0; i < tableFormat.getColumnCount(); i++) {
             Object cellValue = tableFormat.getColumnValue(value, i);
             if(cellValue != null) item.setText(i, cellValue.toString());
@@ -124,7 +124,7 @@ public class EventTableViewer implements ListEventListener {
     /**
      * Gets the {@link TableFormat}.
      */
-    public TableFormat getTableFormat() {
+    public TableFormat<E> getTableFormat() {
         return tableFormat;
     }
 
@@ -355,7 +355,7 @@ public class EventTableViewer implements ListEventListener {
          */
         public void addRow(int row, Object value) {
             TableItem item = new TableItem(table, 0, row);
-            setItemText(item, value);
+            setItemText(item, (E)value);
         }
 
         /**
@@ -363,7 +363,7 @@ public class EventTableViewer implements ListEventListener {
          */
         public void updateRow(int row, Object value) {
             TableItem item = table.getItem(row);
-            setItemText(item, value);
+            setItemText(item, (E)value);
         }
 
         /**
@@ -415,7 +415,7 @@ public class EventTableViewer implements ListEventListener {
             if(row <= getLastIndex()) {
                 requested.addBlack(row, 1);
                 TableItem item = new TableItem(table, 0, row);
-                setItemText(item, value);
+                setItemText(item, (E)value);
 
             // Adding in the Virtual values at the end
             } else {
@@ -432,7 +432,7 @@ public class EventTableViewer implements ListEventListener {
             if(!isVirtual(row)) {
                 requested.setBlack(row, 1);
                 TableItem item = table.getItem(row);
-                setItemText(item, value);
+                setItemText(item, (E)value);
             }
         }
 

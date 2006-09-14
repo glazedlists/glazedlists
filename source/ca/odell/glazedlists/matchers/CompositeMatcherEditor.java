@@ -27,13 +27,13 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
     public static final int OR = 24;
 
     /** the delegates */
-    private EventList matcherEditors;
+    private EventList<MatcherEditor<E>> matcherEditors;
 
     /** whether to match with AND or OR */
     private int mode = AND;
 
     /** listeners for each delegate */
-    private List<DelegateMatcherEditorListener<E>> matcherEditorListeners = new ArrayList<DelegateMatcherEditorListener<E>>();
+    private List<DelegateMatcherEditorListener> matcherEditorListeners = new ArrayList<DelegateMatcherEditorListener>();
 
     /**
      * Create a {@link CompositeMatcherEditor} that creates Matchers from the union
@@ -41,13 +41,13 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * must not contain any <code>null</code> values and all elements must
      * implement {@link MatcherEditor}.
      */
-    public CompositeMatcherEditor(EventList matcherEditors) {
+    public CompositeMatcherEditor(EventList<MatcherEditor<E>> matcherEditors) {
         this.matcherEditors = matcherEditors;
 
         // prepare the initial set
-        for(Iterator i = matcherEditors.iterator(); i.hasNext(); ) {
+        for(Iterator<MatcherEditor<E>> i = matcherEditors.iterator(); i.hasNext(); ) {
             MatcherEditor<E> matcherEditor = (MatcherEditor<E>)i.next();
-            matcherEditorListeners.add(new DelegateMatcherEditorListener<E>(matcherEditor));
+            matcherEditorListeners.add(new DelegateMatcherEditorListener(matcherEditor));
         }
 
         // handle changes to the list of matchers
@@ -61,7 +61,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Create a {@link CompositeMatcherEditor}.
      */
     public CompositeMatcherEditor() {
-        this(new BasicEventList());
+        this(new BasicEventList<MatcherEditor<E>>());
     }
 
     /**
@@ -70,7 +70,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * must never contain any <code>null</code> values and all elements must
      * implement {@link MatcherEditor}.
      */
-    public EventList getMatcherEditors() {
+    public EventList<MatcherEditor<E>> getMatcherEditors() {
         return matcherEditors;
     }
 
@@ -79,7 +79,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     private Matcher<E> rebuildMatcher() {
         List<Matcher<E>> matchers = new ArrayList<Matcher<E>>();
-        for(Iterator i = matcherEditors.iterator(); i.hasNext(); ) {
+        for(Iterator<MatcherEditor<E>> i = matcherEditors.iterator(); i.hasNext(); ) {
             MatcherEditor<E> matcherEditor = (MatcherEditor<E>)i.next();
             matchers.add(matcherEditor.getMatcher());
         }
@@ -91,8 +91,8 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /**
      * Handle changes to the MatcherEditors.
      */
-    private class MatcherEditorsListListener implements ListEventListener {
-        public void listChanged(ListEvent listChanges) {
+    private class MatcherEditorsListListener implements ListEventListener<MatcherEditor<E>> {
+        public void listChanged(ListEvent<MatcherEditor<E>> listChanges) {
             // update listeners for the list change
             boolean inserts = false;
             boolean deletes = false;
@@ -104,7 +104,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
                 // when a MatcherEditor is added, listen to it
                 if(type == ListEvent.INSERT) {
                     MatcherEditor<E> inserted = (MatcherEditor<E>)matcherEditors.get(index);
-                    matcherEditorListeners.add(new DelegateMatcherEditorListener<E>(inserted));
+                    matcherEditorListeners.add(new DelegateMatcherEditorListener(inserted));
                     inserts = true;
 
                 // when a MatcherEditor is removed, stop listening to it
@@ -116,7 +116,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
                 // when a MatcherEditor is updated, update the listener
                 } else if(type == ListEvent.UPDATE) {
                     MatcherEditor<E> updated = (MatcherEditor<E>)matcherEditors.get(index);
-                    DelegateMatcherEditorListener<E> listener = matcherEditorListeners.get(index);
+                    DelegateMatcherEditorListener listener = matcherEditorListeners.get(index);
                     listener.setMatcherEditor(updated);
                     inserts = true;
                     deletes = true;
@@ -193,7 +193,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /**
      * Listens to a specific MatcherEditor and fires events as that MatcherEditor changes.
      */
-    private class DelegateMatcherEditorListener<E> implements Listener<E> {
+    private class DelegateMatcherEditorListener implements Listener<E> {
         /** the matcher editor this listens to */
         private MatcherEditor<E> source;
 

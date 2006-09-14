@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class TableComparatorChooser extends AbstractTableComparatorChooser {
+public final class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E> {
 
     private final SortingStrategy sortingStrategy;
 
@@ -55,7 +55,7 @@ public final class TableComparatorChooser extends AbstractTableComparatorChooser
      *      sorting by multiple columns is more powerful, the user interface is
      *      not as simple and this strategy should only be used where necessary.
      */
-    public TableComparatorChooser(EventTableViewer eventTableViewer, SortedList sortedList, boolean multipleColumnSort) {
+    public TableComparatorChooser(EventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
         super(sortedList, eventTableViewer.getTableFormat());
 
         // save the SWT-specific state

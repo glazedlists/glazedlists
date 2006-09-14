@@ -34,10 +34,10 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-final class TableCheckFilterList extends TransformedList implements org.eclipse.swt.events.SelectionListener {
+final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements org.eclipse.swt.events.SelectionListener {
 
     /** filter out unchecked elements */
-    private CheckMatcherEditor checkMatcherEditor = new CheckMatcherEditor();
+    private CheckMatcherEditor<S> checkMatcherEditor = new CheckMatcherEditor<S>();
 
     /** the table that checkboxes are displayed in */
     private Table table;
@@ -53,8 +53,8 @@ final class TableCheckFilterList extends TransformedList implements org.eclipse.
      *      it will be used to store check state. Otherwise check state will be
      *      stored transiently within this class' state.
      */
-    public TableCheckFilterList(EventList source, Table table, TableFormat tableFormat) {
-        super(new FilterList(tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source), Matchers.trueMatcher()));
+    public TableCheckFilterList(EventList<S> source, Table table, TableFormat tableFormat) {
+        super(new FilterList<S>(tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source), Matchers.trueMatcher()));
         this.table = table;
         if(tableFormat instanceof CheckableTableFormat) {
             this.checkableTableFormat = (CheckableTableFormat)tableFormat;
@@ -66,7 +66,7 @@ final class TableCheckFilterList extends TransformedList implements org.eclipse.
         table.addSelectionListener(this);
 
         // prepare the filter
-        FilterList filteredSource = (FilterList)super.source;
+        FilterList<S> filteredSource = (FilterList<S>)super.source;
         filteredSource.setMatcherEditor(checkMatcherEditor);
 
         // handle changes
@@ -111,18 +111,18 @@ final class TableCheckFilterList extends TransformedList implements org.eclipse.
     /**
      * Match checked elements.
      */
-    private class CheckMatcherEditor extends AbstractMatcherEditor {
+    private class CheckMatcherEditor<T> extends AbstractMatcherEditor<T> {
         private boolean checkedOnly = false;
         private void setCheckedOnly(boolean checkedOnly) {
             if(checkedOnly == this.checkedOnly) return;
-            if(checkedOnly) fireConstrained(new CheckMatcher());
+            if(checkedOnly) fireConstrained(new CheckMatcher<T>());
             else fireMatchAll();
         }
         private boolean getCheckedOnly() {
             return checkedOnly;
         }
-        private class CheckMatcher implements Matcher {
-            public boolean matches(Object element) {
+        private class CheckMatcher<V> implements Matcher<V> {
+            public boolean matches(V element) {
                 return getChecked(element);
             }
         }
@@ -162,11 +162,11 @@ final class TableCheckFilterList extends TransformedList implements org.eclipse.
      * Returns the element at the specified position in this list. This unwraps
      * a {@link CheckWrapped} object from the source if necessary.
      */
-    public Object get(int index) {
+    public E get(int index) {
         if(checkableTableFormat != null) {
             return super.get(index);
         } else {
-            CheckWrapped checkWrapped = (CheckWrapped)super.get(index);
+            CheckWrapped<E> checkWrapped = (CheckWrapped)super.get(index);
             return checkWrapped.getWrapped();
         }
     }
@@ -346,16 +346,16 @@ class CheckableWrapperList extends TransformedList {
 /**
  * A simple wrapper that adds a checked property to an Object.
  */
-class CheckWrapped {
+class CheckWrapped<E> {
     private boolean checked = false;
-    private Object wrapped = null;
-    public CheckWrapped(Object wrapped) {
+    private E wrapped = null;
+    public CheckWrapped(E wrapped) {
         this.wrapped = wrapped;
     }
-    public Object getWrapped() {
+    public E getWrapped() {
         return wrapped;
     }
-    public void setWrapped(Object wrapped) {
+    public void setWrapped(E wrapped) {
         this.wrapped = wrapped;
     }
     public boolean getChecked() {

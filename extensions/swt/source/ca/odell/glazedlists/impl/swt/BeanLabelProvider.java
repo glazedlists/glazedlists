@@ -13,13 +13,13 @@ import org.eclipse.jface.viewers.LabelProvider;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public final class BeanLabelProvider extends LabelProvider {
+public final class BeanLabelProvider<E> extends LabelProvider {
 
     /** The name of the JavaBean property to use */
     private String propertyName = null;
 
     /** The easy way to work with JavaBean-like object properties */
-    private BeanProperty beanProperty = null;
+    private BeanProperty<E> beanProperty = null;
 
     /**
      * Creates a new LabelProvider that uses the value of a JavaBean property
@@ -33,8 +33,8 @@ public final class BeanLabelProvider extends LabelProvider {
      * Gets a label for the given Object from the JavaBean property.
      */
     public String getText(Object object) {
-        if(beanProperty == null) loadPropertyDescriptors(object);
-        Object property = beanProperty.get(object);
+        if(beanProperty == null) loadPropertyDescriptors((E)object);
+        Object property = beanProperty.get((E)object);
         return property.toString();
     }
 
@@ -42,8 +42,8 @@ public final class BeanLabelProvider extends LabelProvider {
      * Loads the property descriptors which are used to invoke property
      * access methods using the property names.
      */
-    private void loadPropertyDescriptors(Object beanObject) {
+    private void loadPropertyDescriptors(E beanObject) {
         Class beanClass = beanObject.getClass();
-        beanProperty = new BeanProperty(beanClass, propertyName, true, false);
+        beanProperty = new BeanProperty<E>(beanClass, propertyName, true, false);
     }
 }

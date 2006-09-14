@@ -72,13 +72,13 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class NetworkList extends TransformedList {
+public final class NetworkList<E> extends TransformedList<E, E> {
 
     /** listeners to resource changes */
-    private List resourceListeners = new ArrayList();
+    private List<ResourceListener> resourceListeners = new ArrayList<ResourceListener>();
     
     /** listeners to status changes */
-    private List statusListeners = new ArrayList();
+    private List<NetworkListStatusListener> statusListeners = new ArrayList<NetworkListStatusListener>();
     
     /** how bytes are encoded and decoded */
     private ByteCoder byteCoder;
@@ -95,7 +95,7 @@ public final class NetworkList extends TransformedList {
     /**
      * Create a {@link NetworkList} that brings the specified source online.
      */
-    NetworkList(EventList source, ByteCoder byteCoder) {
+    NetworkList(EventList<E> source, ByteCoder byteCoder) {
         super(source);
         this.byteCoder = byteCoder;
         source.addListEventListener(this);
@@ -129,10 +129,10 @@ public final class NetworkList extends TransformedList {
     }
     
     /** {@inheritDoc} */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         // notify resource listeners
         try {
-            ListEvent listChangesCopy = listChanges.copy();
+            ListEvent<E> listChangesCopy = listChanges.copy();
             Bufferlo listChangesBytes = ListEventToBytes.toBytes(listChangesCopy, byteCoder);
             for(int r = 0; r < resourceListeners.size(); r++) {
                 ResourceListener listener = (ResourceListener)resourceListeners.get(r);

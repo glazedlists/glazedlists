@@ -47,7 +47,7 @@ public abstract class ListEvent<E> extends EventObject {
     /**
      * Create a bitwise copy of this {@link ListEvent}.
      */
-    public abstract ListEvent copy();
+    public abstract ListEvent<E> copy();
 
     /**
      * Resets this event's position to the previously-marked position. This should

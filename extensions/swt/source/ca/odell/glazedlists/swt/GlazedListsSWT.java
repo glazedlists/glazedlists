@@ -35,8 +35,8 @@ public final class GlazedListsSWT {
      * Wraps the source in an {@link EventList} that fires all of its update events
      * from the SWT user interface thread.
      */
-    public static TransformedList swtThreadProxyList(EventList source, Display display) {
-        return new SWTThreadProxyEventList(source, display);
+    public static <E> TransformedList<E, E> swtThreadProxyList(EventList<E> source, Display display) {
+        return new SWTThreadProxyEventList<E>(source, display);
     }
 
     

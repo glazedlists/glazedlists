@@ -17,10 +17,10 @@ import org.eclipse.swt.events.SelectionListener;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-class SelectionManager {
+class SelectionManager<E> {
 
     /** the model to the Selectable widget's selection */
-    private ListSelection selection = null;
+    private ListSelection<E> selection = null;
 
     /** the Selectable SWT Viewer */
     private Selectable selectable = null;
@@ -36,8 +36,8 @@ class SelectionManager {
      * items in an SWT widget.  Deselected items exist in a view accessible
      * via the {@link ListSelection#getDeselected()} method.
      */
-    SelectionManager(EventList source, Selectable selectable) {
-        selection = new ListSelection(source);
+    SelectionManager(EventList<E> source, Selectable selectable) {
+        selection = new ListSelection<E>(source);
         this.selectable = selectable;
         selection.addSelectionListener(new SelectionListListener());
 
@@ -59,7 +59,7 @@ class SelectionManager {
      * of selection on the {@link Selectable} widget and access to
      * selection-driven {@link EventList}s.
      */
-    public ListSelection getSelectionList() {
+    public ListSelection<E> getSelectionList() {
         return selection;
     }
 

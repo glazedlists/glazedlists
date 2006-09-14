@@ -24,26 +24,26 @@ import org.eclipse.swt.widgets.List;
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class EventListViewer implements ListEventListener {
+public class EventListViewer<E> implements ListEventListener<E> {
 
     /** the SWT List */
     private List list = null;
 
     /** the proxy moves events to the SWT user interface thread */
-    private TransformedList swtSource = null;
+    private TransformedList<E, E> swtSource = null;
 
     /** the formatter for list elements */
     private ILabelProvider labelProvider = null;
 
     /** For selection management */
-    private SelectionManager selection = null;
+    private SelectionManager<E> selection = null;
 
     /**
      * Creates a new List that displays and responds to changes in source.
      * List elements will simply be displayed as the result of calling
      * toString() on the contents of the source list.
      */
-    public EventListViewer(EventList source, List list) {
+    public EventListViewer(EventList<E> source, List list) {
         this(source, list, new LabelProvider());
     }
 
@@ -51,13 +51,13 @@ public class EventListViewer implements ListEventListener {
      * Creates a new List that displays and responds to changes in source.
      * List elements are formatted using the provided {@link ILabelProvider}.
      */
-    public EventListViewer(EventList source, List list, ILabelProvider labelProvider) {
+    public EventListViewer(EventList<E> source, List list, ILabelProvider labelProvider) {
         swtSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
         this.list = list;
         this.labelProvider = labelProvider;
 
         // Enable the selection lists
-        selection = new SelectionManager(swtSource, new SelectableList());
+        selection = new SelectionManager<E>(swtSource, new SelectableList());
 
         // setup initial values
         populateList();
@@ -94,7 +94,7 @@ public class EventListViewer implements ListEventListener {
      * Provides access to an {@link EventList} that contains items from the
      * viewed Table that are not currently selected.
      */
-    public EventList getDeselected() {
+    public EventList<E> getDeselected() {
         return selection.getSelectionList().getDeselected();
     }
 
@@ -102,7 +102,7 @@ public class EventListViewer implements ListEventListener {
      * Provides access to an {@link EventList} that contains items from the
      * viewed Table that are currently selected.
      */
-    public EventList getSelected() {
+    public EventList<E> getSelected() {
         return selection.getSelectionList().getSelected();
     }
 
@@ -131,7 +131,7 @@ public class EventListViewer implements ListEventListener {
      * When the source list is changed, this forwards the change to the
      * displayed List.
      */
-    public void listChanged(ListEvent listChanges) {
+    public void listChanged(ListEvent<E> listChanges) {
         int firstModified = swtSource.size();
         // Apply the list changes
         while (listChanges.next()) {
