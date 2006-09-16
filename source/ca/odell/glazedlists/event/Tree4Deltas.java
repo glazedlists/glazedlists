@@ -6,6 +6,7 @@ package ca.odell.glazedlists.event;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTreeIterator;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
 
 import java.util.Arrays;
 
@@ -35,7 +36,8 @@ class Tree4Deltas {
     private static final byte ALL_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+", "_" }));
     private static final byte CHANGE_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
 
-    private FourColorTree<String> tree = new FourColorTree<String>(Tree4Deltas.BYTE_CODER);
+    /** the trees values include removed elements */
+    private FourColorTree<Object> tree = new FourColorTree<Object>(Tree4Deltas.BYTE_CODER);
     private boolean allowContradictingEvents = false;
 
     /**
@@ -95,9 +97,13 @@ class Tree4Deltas {
      *
      * @param startIndex the index of the first element to remove
      * @param endIndex the last index, exclusive
+     * @return the element for the last deleted element. This may be null if the
+     *      deleted value was inserted on this change, or if the delete range
+     *      is empty.
      */
-    public void delete(int startIndex, int endIndex) {
+    public Element<Object> delete(int startIndex, int endIndex) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
+        Element<Object> lastDeleted = null;
         for(int i = startIndex; i < endIndex; i++) {
             int overallIndex = tree.convertIndexColor(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
             // if its an insert, simply remove that insert
@@ -107,9 +113,20 @@ class Tree4Deltas {
 
             // otherwise apply the delete
             } else {
-                tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.DELETE, Tree4Deltas.LIST_CHANGE, 1);
+                lastDeleted = tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.DELETE, Tree4Deltas.LIST_CHANGE, 1);
             }
         }
+
+        return lastDeleted;
+    }
+
+    public void remove(int index, Object removedValue) {
+        Element<Object> element = delete(index, index + 1);
+
+        // todo: make sure the element is at most one node wide
+        // assert(element.size() == 1);
+
+        element.set(removedValue);
     }
 
     public int currentSize() {
@@ -163,7 +180,7 @@ class Tree4Deltas {
     }
 
     public Tree4Deltas.Iterator iterator() {
-        return new Tree4Deltas.Iterator<String>(tree);
+        return new Tree4Deltas.Iterator<Object>(tree);
     }
 
     public String toString() {
@@ -224,6 +241,10 @@ class Tree4Deltas {
         }
         public boolean hasNextNode() {
             return treeIterator.hasNextNode(Tree4Deltas.CHANGE_INDICES);
+        }
+
+        public V getRemovedValue() {
+            return (V)treeIterator.node().get();
         }
     }
 }

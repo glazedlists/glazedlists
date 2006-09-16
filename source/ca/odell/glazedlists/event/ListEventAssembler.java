@@ -186,6 +186,13 @@ public final class ListEventAssembler<E> {
         addChange(ListEvent.DELETE, startIndex, endIndex);
     }
     /**
+     * Add to the current ListEvent the removal of the element at the specified
+     * index, with the specified previous value.
+     */
+    public void elementRemoved(int index, Object removedValue) {
+        delegate.elementRemoved(index, removedValue);
+    }
+    /**
      * Convenience method for appending a range of updates.
      */
     public void addUpdate(int startIndex, int endIndex) {
@@ -364,6 +371,10 @@ public final class ListEventAssembler<E> {
          */
         public abstract void addChange(int type, int startIndex, int endIndex);
 
+        /**
+         * Adds a block describing a deleted element.
+         */
+        public abstract void elementRemoved(int index, Object removedValue);
 
         /**
          * @return <tt>true</tt> if the current atomic change to this list change
@@ -474,6 +485,11 @@ public final class ListEventAssembler<E> {
             }
         }
 
+        /** {@inheritDoc} */
+        public void elementRemoved(int index, Object removedValue) {
+            addChange(ListEvent.DELETE, index, index);
+        }
+
         public BarcodeListDeltas getListDeltas() {
             return listDeltas;
         }
@@ -546,6 +562,15 @@ public final class ListEventAssembler<E> {
             } else if(type == ListEvent.DELETE) {
                 listDeltas.delete(startIndex, endIndex + 1);
             }
+        }
+
+        /** {@inheritDoc} */
+        public void elementRemoved(int index, Object removedValue) {
+            // convert from linear to tree4deltas
+            listDeltas.addAll(blockSequence);
+            useListBlocksLinear = false;
+
+            listDeltas.remove(index, removedValue);
         }
 
         public boolean getUseListBlocksLinear() {
@@ -627,6 +652,11 @@ public final class ListEventAssembler<E> {
             // create a new block for the change
             atomicLatestBlock = new Block(startIndex, endIndex, type);
             atomicChangeBlocks.add(atomicLatestBlock);
+        }
+
+        /** {@inheritDoc} */
+        public void elementRemoved(int index, Object removedValue) {
+            addChange(ListEvent.DELETE, index, index);
         }
 
         /** {@inheritDoc} */

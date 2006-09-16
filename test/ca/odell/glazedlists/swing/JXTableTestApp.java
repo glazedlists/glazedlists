@@ -38,12 +38,15 @@ class JXTableTestApp implements Runnable {
             SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
 
             EventTableModel<Issue> tableModel = new EventTableModel<Issue>(sortedIssues, new IssueTableFormat());
+            EventSelectionModel<Issue> selectionModel = new EventSelectionModel<Issue>(sortedIssues);
 
             JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             filterPanel.add(new JLabel("Filter:"));
             filterPanel.add(filterEdit);
 
             JXTable table = new JXTable(tableModel);
+            table.getSelectionMapper().setEnabled(false);
+            table.setSelectionModel(selectionModel);
             table.setColumnControlVisible(true);
             table.getColumnExt(3).setComparator(new IssueStateComparator());
             EventListJXTableSorting.install(table, sortedIssues);

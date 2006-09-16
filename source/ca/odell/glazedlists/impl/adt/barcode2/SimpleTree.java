@@ -743,10 +743,13 @@ public class SimpleTree<V> {
      * it proves desirable, it may be worthwhile to optimize this implementation
      * with one that performs the remove and insert simultaneously, to save
      * on tree navigation.
+     *
+     * @return the element that was updated. This is non-null unless the size
+     *      parameter is 0, in which case the result is always <code>null</code>.
      */
-    public void set(int index,    V value, int size) {
+    public Element<V> set(int index,    V value, int size) {
         remove(index,    size);
-        add(index,    value, size);
+        return add(index,    value, size);
     }
 
 

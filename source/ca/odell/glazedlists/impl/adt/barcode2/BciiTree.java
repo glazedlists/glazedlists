@@ -47,7 +47,7 @@ public class BciiTree<V> {
 
     /*[ COLORED_START ]*/
     /** the colors in the tree, used for printing purposes only */
-    private final ListToByteCoder<V> coder;
+    private final ListToByteCoder coder;
     /*[ COLORED_END ]*/
 
     /** the tree's root, or <code>null</code> for an empty tree */
@@ -73,7 +73,7 @@ public class BciiTree<V> {
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public BciiTree/**/(/*[ COLORED_START ]*/ ListToByteCoder<V> coder, /*[ COLORED_END ]*/ Comparator<? super V> comparator) {
+    public BciiTree/**/(/*[ COLORED_START ]*/ ListToByteCoder coder, /*[ COLORED_END ]*/ Comparator<? super V> comparator) {
         /*[ COLORED_START ]*/  if(coder == null) throw new NullPointerException("Coder cannot be null."); /*[ COLORED_END ]*/
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
@@ -84,12 +84,12 @@ public class BciiTree<V> {
     /**
      * @param coder specifies the node colors
      */
-    public BciiTree/**/(/*[ COLORED_START ]*/ ListToByteCoder<V> coder /*[ COLORED_END ]*/) {
+    public BciiTree/**/(/*[ COLORED_START ]*/ ListToByteCoder coder /*[ COLORED_END ]*/) {
         this(/*[ COLORED_START ]*/ coder, /*[ COLORED_END ]*/ (Comparator)GlazedLists.comparableComparator());
     }
 
     /*[ COLORED_START ]*/
-    public ListToByteCoder<V> getCoder() {
+    public ListToByteCoder getCoder() {
         return coder;
     }
     /*[ COLORED_END ]*/
@@ -736,10 +736,13 @@ public class BciiTree<V> {
      * it proves desirable, it may be worthwhile to optimize this implementation
      * with one that performs the remove and insert simultaneously, to save
      * on tree navigation.
+     *
+     * @return the element that was updated. This is non-null unless the size
+     *      parameter is 0, in which case the result is always <code>null</code>.
      */
-    public void set(int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ V value, int size) {
+    public Element<V> set(int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ V value, int size) {
         remove(index, /*[ COLORED_START ]*/ indexColors, /*[ COLORED_END ]*/ size);
-        add(index, /*[ COLORED_START ]*/ indexColors, color, /*[ COLORED_END ]*/ value, size);
+        return add(index, /*[ COLORED_START ]*/ indexColors, color, /*[ COLORED_END ]*/ value, size);
     }
 
 

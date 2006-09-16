@@ -89,7 +89,7 @@ public class FourColorTree<V> {
 
      
     /** the colors in the tree, used for printing purposes only */
-    private final ListToByteCoder<V> coder;
+    private final ListToByteCoder coder;
       
 
     /** the tree's root, or <code>null</code> for an empty tree */
@@ -115,7 +115,7 @@ public class FourColorTree<V> {
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public FourColorTree/**/(  ListToByteCoder<V> coder,    Comparator<? super V> comparator) {
+    public FourColorTree/**/(  ListToByteCoder coder,    Comparator<? super V> comparator) {
            if(coder == null) throw new NullPointerException("Coder cannot be null.");   
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
@@ -126,12 +126,12 @@ public class FourColorTree<V> {
     /**
      * @param coder specifies the node colors
      */
-    public FourColorTree/**/(  ListToByteCoder<V> coder   ) {
+    public FourColorTree/**/(  ListToByteCoder coder   ) {
         this(  coder,    (Comparator)GlazedLists.comparableComparator());
     }
 
      
-    public ListToByteCoder<V> getCoder() {
+    public ListToByteCoder getCoder() {
         return coder;
     }
       
@@ -776,10 +776,13 @@ public class FourColorTree<V> {
      * it proves desirable, it may be worthwhile to optimize this implementation
      * with one that performs the remove and insert simultaneously, to save
      * on tree navigation.
+     *
+     * @return the element that was updated. This is non-null unless the size
+     *      parameter is 0, in which case the result is always <code>null</code>.
      */
-    public void set(int index,   byte indexColors, byte color,    V value, int size) {
+    public Element<V> set(int index,   byte indexColors, byte color,    V value, int size) {
         remove(index,   indexColors,    size);
-        add(index,   indexColors, color,    value, size);
+        return add(index,   indexColors, color,    value, size);
     }
 
 

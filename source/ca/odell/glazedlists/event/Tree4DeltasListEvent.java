@@ -97,6 +97,14 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         }
     }
 
+    public E getRemovedValue() {
+        if(linearIterator != null) {
+            return null;
+        } else {
+            return (E)deltasIterator.getRemovedValue();
+        }
+    }
+
     List getBlocks() {
         throw new UnsupportedOperationException();
     }
