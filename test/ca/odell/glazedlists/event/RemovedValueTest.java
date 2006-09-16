@@ -7,6 +7,7 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,9 @@ public class RemovedValueTest extends TestCase {
     public void testGetRemovedValue() {
         // prep recording the deleted elements
         EventList<String> source = new RemovedValueEventList<String>(new BasicEventList<String>());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(source);
+        listConsistencyListener.setRemovedElementTracked(true);
+
         RemovedValuesListener<String> removedValuesListener = new RemovedValuesListener<String>();
         source.addListEventListener(removedValuesListener);
         source.addAll(GlazedListsTests.stringToList("GLAZEDLISTS"));

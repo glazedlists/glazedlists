@@ -99,7 +99,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
 
     public E getRemovedValue() {
         if(linearIterator != null) {
-            return null;
+            return (E)linearIterator.getRemovedValue();
         } else {
             return (E)deltasIterator.getRemovedValue();
         }

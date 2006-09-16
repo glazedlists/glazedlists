@@ -32,6 +32,9 @@ public class ListConsistencyListener<E> {
     /** whether to cough out changes to the console as they happen */
     private boolean verbose = false;
 
+    /** whether to fail when the removed element is incorrectly reported */
+    private boolean removedElementTracked = false;
+
     /** count the number of changes per event */
     private List<Integer> changeCounts = new ArrayList<Integer>();
     private List<Boolean> reorderings = new ArrayList<Boolean>();
@@ -95,6 +98,14 @@ public class ListConsistencyListener<E> {
     }
 
     /**
+     * Configure whether errors shall be thrown if the removed value isn't what's
+     * expected.
+     */
+    public void setRemovedElementTracked(boolean removedElementTracked) {
+        this.removedElementTracked = removedElementTracked;
+    }
+
+    /**
      * When the source {@link EventList} is changed, make sure the event reported
      * describes the differences between before and after.
      */
@@ -150,7 +161,11 @@ public class ListConsistencyListener<E> {
                     if(changeType == ListEvent.INSERT) {
                         expected.add(changeIndex, source.get(changeIndex));
                     } else if(changeType == ListEvent.DELETE) {
-                        expected.remove(changeIndex);
+                        Object removed = expected.remove(changeIndex);
+                        if(removedElementTracked) {
+                            Object reportedRemoved = listChanges.getRemovedValue();
+                            Assert.assertSame(removed, reportedRemoved);
+                        }
                     } else if(changeType == ListEvent.UPDATE) {
                         expected.set(changeIndex, source.get(changeIndex));
                     }

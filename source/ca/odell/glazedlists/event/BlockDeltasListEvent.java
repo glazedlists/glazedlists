@@ -163,6 +163,11 @@ final class BlockDeltasListEvent<E> extends ListEvent<E> {
     }
     
     /** {@inheritDoc} */
+    public E getRemovedValue() {
+        return (E)ListEvent.UNKNOWN_VALUE;
+    }
+
+    /** {@inheritDoc} */
     List<Block> getBlocks() {
         return blocksAssembler.getBlocks();
     }

@@ -189,7 +189,7 @@ public final class ListEventAssembler<E> {
      * Add to the current ListEvent the removal of the element at the specified
      * index, with the specified previous value.
      */
-    public void elementRemoved(int index, Object removedValue) {
+    public void elementRemoved(int index, E removedValue) {
         delegate.elementRemoved(index, removedValue);
     }
     /**
@@ -374,7 +374,7 @@ public final class ListEventAssembler<E> {
         /**
          * Adds a block describing a deleted element.
          */
-        public abstract void elementRemoved(int index, Object removedValue);
+        public abstract void elementRemoved(int index, E removedValue);
 
         /**
          * @return <tt>true</tt> if the current atomic change to this list change
@@ -516,11 +516,11 @@ public final class ListEventAssembler<E> {
     static class Tree4DeltasAssembler<E> extends AssemblerHelper<E> {
 
         /** prefer to use the linear blocks, which are more performant but handle only a subset of all cases */
-        private BlockSequence blockSequence = new BlockSequence();
+        private BlockSequence<E> blockSequence = new BlockSequence<E>();
         private boolean useListBlocksLinear = false;
 
         /** fall back to list deltas 2, which are capable of all list changes */
-        private Tree4Deltas listDeltas = new Tree4Deltas();
+        private Tree4Deltas<E> listDeltas = new Tree4Deltas<E>();
 
         /**
          * Creates a new ListEventAssembler that tracks changes for the specified list.
@@ -543,7 +543,7 @@ public final class ListEventAssembler<E> {
         public void addChange(int type, int startIndex, int endIndex) {
             // try the linear holder first
             if(useListBlocksLinear) {
-                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1);
+                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
                 if(success) {
                     return;
 
@@ -560,17 +560,27 @@ public final class ListEventAssembler<E> {
             } else if(type == ListEvent.UPDATE) {
                 listDeltas.update(startIndex, endIndex + 1);
             } else if(type == ListEvent.DELETE) {
-                listDeltas.delete(startIndex, endIndex + 1);
+                listDeltas.delete(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
             }
         }
 
         /** {@inheritDoc} */
-        public void elementRemoved(int index, Object removedValue) {
-            // convert from linear to tree4deltas
-            listDeltas.addAll(blockSequence);
-            useListBlocksLinear = false;
+        public void elementRemoved(int index, E removedValue) {
+            // try the linear holder first
+            if(useListBlocksLinear) {
+                boolean success = blockSequence.addChange(ListEvent.DELETE, index, index + 1, removedValue);
+                if(success) {
+                    return;
 
-            listDeltas.remove(index, removedValue);
+                // convert from linear to tree4deltas
+                } else {
+                    listDeltas.addAll(blockSequence);
+                    useListBlocksLinear = false;
+                }
+            }
+
+            // try the good old reliable deltas 2
+            listDeltas.delete(index, index + 1, removedValue);
         }
 
         public boolean getUseListBlocksLinear() {

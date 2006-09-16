@@ -30,6 +30,9 @@ public abstract class ListEvent<E> extends EventObject {
     public static final int UPDATE = 1;
     public static final int INSERT = 2;
 
+    /** indicates a removed element whose value is unknown */
+    public static final Object UNKNOWN_VALUE = new Object();
+
     /** the list that has changed */
     protected EventList<E> sourceList;
 
@@ -109,7 +112,17 @@ public abstract class ListEvent<E> extends EventObject {
      * ListEvent.INSERT, UPDATE, or DELETE.
      */
     public abstract int getType();
-    
+
+    /**
+     * Gets the removed value for a deleted element. If that data is not available,
+     * this will return {@link ListEvent.UNKNOWN_VALUE}.
+     *
+     * @deprecated this is a <strong>developer preview</strong> API that is not
+     * yet fit for human consumption. Hopefully the full implementation is
+     * complete for Glazed Lists 2.0.
+     */
+    public abstract E getRemovedValue();
+
     /**
      * Get the List of ListEventBlocks for this change.
      *

@@ -6,7 +6,6 @@ package ca.odell.glazedlists.event;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTreeIterator;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
-import ca.odell.glazedlists.impl.adt.barcode2.Element;
 
 import java.util.Arrays;
 
@@ -22,9 +21,8 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class Tree4Deltas {
+class Tree4Deltas<E> {
 
-    private static final String LIST_CHANGE = "*";
     private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList(new String[] { "+", "U", "X", "_" }));
     private static final byte INSERT = Tree4Deltas.BYTE_CODER.colorToByte("+");
     private static final byte UPDATE = Tree4Deltas.BYTE_CODER.colorToByte("U");
@@ -37,7 +35,7 @@ class Tree4Deltas {
     private static final byte CHANGE_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
 
     /** the trees values include removed elements */
-    private FourColorTree<Object> tree = new FourColorTree<Object>(Tree4Deltas.BYTE_CODER);
+    private FourColorTree<E> tree = new FourColorTree<E>(Tree4Deltas.BYTE_CODER);
     private boolean allowContradictingEvents = false;
 
     /**
@@ -77,7 +75,7 @@ class Tree4Deltas {
             int overallIndex = tree.convertIndexColor(i, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
             // don't bother updating an inserted element
             if(tree.get(overallIndex, Tree4Deltas.ALL_INDICES).getColor() == Tree4Deltas.INSERT) return;
-            tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.UPDATE, Tree4Deltas.LIST_CHANGE, 1);
+            tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.UPDATE, (E)ListEvent.UNKNOWN_VALUE, 1);
         }
     }
 
@@ -87,7 +85,7 @@ class Tree4Deltas {
      */
     public void insert(int startIndex, int endIndex) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
-        tree.add(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.INSERT, Tree4Deltas.LIST_CHANGE, endIndex - startIndex);
+        tree.add(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.INSERT, (E)ListEvent.UNKNOWN_VALUE, endIndex - startIndex);
     }
 
     /**
@@ -97,13 +95,10 @@ class Tree4Deltas {
      *
      * @param startIndex the index of the first element to remove
      * @param endIndex the last index, exclusive
-     * @return the element for the last deleted element. This may be null if the
-     *      deleted value was inserted on this change, or if the delete range
-     *      is empty.
+     * @param value the removed value
      */
-    public Element<Object> delete(int startIndex, int endIndex) {
+    public void delete(int startIndex, int endIndex, E value) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
-        Element<Object> lastDeleted = null;
         for(int i = startIndex; i < endIndex; i++) {
             int overallIndex = tree.convertIndexColor(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
             // if its an insert, simply remove that insert
@@ -113,20 +108,9 @@ class Tree4Deltas {
 
             // otherwise apply the delete
             } else {
-                lastDeleted = tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.DELETE, Tree4Deltas.LIST_CHANGE, 1);
+                tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.DELETE, value, 1);
             }
         }
-
-        return lastDeleted;
-    }
-
-    public void remove(int index, Object removedValue) {
-        Element<Object> element = delete(index, index + 1);
-
-        // todo: make sure the element is at most one node wide
-        // assert(element.size() == 1);
-
-        element.set(removedValue);
     }
 
     public int currentSize() {
@@ -147,25 +131,26 @@ class Tree4Deltas {
         int delta = size - currentSize;
         if(delta > 0) {
             int endOfTree = tree.size(Tree4Deltas.ALL_INDICES);
-            tree.add(endOfTree, Tree4Deltas.ALL_INDICES, Tree4Deltas.NO_CHANGE, Tree4Deltas.LIST_CHANGE, delta);
+            tree.add(endOfTree, Tree4Deltas.ALL_INDICES, Tree4Deltas.NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, delta);
         }
     }
 
     /**
      * Add all the specified changes to this.
      */
-    void addAll(BlockSequence blocks) {
-        for(BlockSequence.Iterator i = blocks.iterator(); i.nextBlock(); ) {
+    void addAll(BlockSequence<E> blocks) {
+        for(BlockSequence<E>.Iterator i = blocks.iterator(); i.nextBlock(); ) {
             int blockStart = i.getBlockStart();
             int blockEnd = i.getBlockEnd();
             int type = i.getType();
+            E value = i.getRemovedValue();
 
             if(type == ListEvent.INSERT) {
                 insert(blockStart, blockEnd);
             } else if(type == ListEvent.UPDATE) {
                 update(blockStart, blockEnd);
             } else if(type == ListEvent.DELETE) {
-                delete(blockStart, blockEnd);
+                delete(blockStart, blockEnd, value);
             } else {
                 throw new IllegalStateException();
             }
@@ -179,8 +164,8 @@ class Tree4Deltas {
         return tree.size(Tree4Deltas.CHANGE_INDICES) == 0;
     }
 
-    public Tree4Deltas.Iterator iterator() {
-        return new Tree4Deltas.Iterator<Object>(tree);
+    public Tree4Deltas.Iterator<E> iterator() {
+        return new Tree4Deltas.Iterator<E>(tree);
     }
 
     public String toString() {
@@ -190,22 +175,22 @@ class Tree4Deltas {
     /**
      * Iterate through the list of changes in this tree.
      */
-    public static class Iterator<V> {
+    public static class Iterator<E> {
 
-        private final FourColorTree<V> tree;
-        private final FourColorTreeIterator<V> treeIterator;
+        private final FourColorTree<E> tree;
+        private final FourColorTreeIterator<E> treeIterator;
 
-        private Iterator(FourColorTree<V> tree) {
+        private Iterator(FourColorTree<E> tree) {
             this.tree = tree;
-            this.treeIterator = new FourColorTreeIterator<V>(tree);
+            this.treeIterator = new FourColorTreeIterator<E>(tree);
         }
 
-        private Iterator(FourColorTree<V> tree, FourColorTreeIterator<V> treeIterator) {
+        private Iterator(FourColorTree<E> tree, FourColorTreeIterator<E> treeIterator) {
             this.tree = tree;
             this.treeIterator = treeIterator;
         }
-        public Tree4Deltas.Iterator<V> copy() {
-            return new Tree4Deltas.Iterator<V>(tree, treeIterator.copy());
+        public Tree4Deltas.Iterator<E> copy() {
+            return new Tree4Deltas.Iterator<E>(tree, treeIterator.copy());
         }
 
         public int getIndex() {
@@ -243,8 +228,8 @@ class Tree4Deltas {
             return treeIterator.hasNextNode(Tree4Deltas.CHANGE_INDICES);
         }
 
-        public V getRemovedValue() {
-            return (V)treeIterator.node().get();
+        public E getRemovedValue() {
+            return treeIterator.node().get();
         }
     }
 }

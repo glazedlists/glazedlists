@@ -36,6 +36,7 @@ public class EventListTest extends TestCase {
 
         // test the BasicEventList list
         List<String> jesseBasicEventList = new BasicEventList<String>();
+        installConsistencyListener(jesseBasicEventList);
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
@@ -65,6 +66,7 @@ public class EventListTest extends TestCase {
 
         // test the BasicEventList list
         List<String> jesseBasicEventList = new BasicEventList<String>();
+        installConsistencyListener(jesseBasicEventList);
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
@@ -209,6 +211,7 @@ public class EventListTest extends TestCase {
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
             List<String> list = i.next();
+            installConsistencyListener(list);
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -531,7 +534,7 @@ public class EventListTest extends TestCase {
 
     public void testSimpleAddAll() {
         EventList<String> source = new BasicEventList<String>();
-        ListConsistencyListener.install(source);
+        installConsistencyListener(source);
         FilterList<String> filterList = new FilterList<String>(source, (Matcher)Matchers.trueMatcher());
 
         filterList.addAll(GlazedListsTests.stringToList("JESSE"));
@@ -652,5 +655,15 @@ public class EventListTest extends TestCase {
         for(int i = 0; i < 2; i++) list.remove(0);
 
         list.commitEvent();
+    }
+
+    /**
+     * Install a consistency listener to the specified list.
+     */
+    private static void installConsistencyListener(List list) {
+        if(list instanceof BasicEventList) {
+            ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install((BasicEventList)list);
+            listConsistencyListener.setRemovedElementTracked(true);
+        }
     }
 }

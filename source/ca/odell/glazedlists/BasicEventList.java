@@ -151,10 +151,10 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     public E remove(int index) {
         // create the change event
         updates.beginEvent();
-        updates.addDelete(index);
         // do the actual remove
         E removed = data.remove(index);
         // fire the event
+        updates.elementRemoved(index, removed);
         updates.commitEvent();
         return removed;
     }
@@ -173,7 +173,9 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         if(isEmpty()) return;
         // create the change event
         updates.beginEvent();
-        updates.addDelete(0, size() - 1);
+        for(int i = 0, size = size(); i < size; i++) {
+            updates.elementRemoved(0, get(i));
+        }
         // do the actual clear
         data.clear();
         // fire the event
@@ -210,8 +212,8 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
             Object value = i.next();
             int index = -1;
             while((index = indexOf(value)) != -1) {
-                updates.addDelete(index);
-                data.remove(index);
+                E removed = data.remove(index);
+                updates.elementRemoved(index, removed);
                 changed = true;
             }
         }
@@ -228,8 +230,8 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
             if(collection.contains(data.get(index))) {
                 index++;
             } else {
-                updates.addDelete(index);
-                data.remove(index);
+                E removed = data.remove(index);
+                updates.elementRemoved(index, removed);
                 changed = true;
             }
         }

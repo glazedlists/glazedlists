@@ -366,11 +366,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     public boolean removeAll(Collection<?> values) {
         boolean changed = false;
-        for(Iterator i = values.iterator(); i.hasNext(); ) {
-            Object value = i.next();
-            int index = -1;
-            while((index = indexOf(value)) != -1) {
-                remove(index);
+        for(Iterator i = iterator(); i.hasNext(); ) {
+            if(values.contains(i.next())) {
+                i.remove();
                 changed = true;
             }
         }

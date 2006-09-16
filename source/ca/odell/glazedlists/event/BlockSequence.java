@@ -5,13 +5,16 @@ package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Manage a very simple list of list event blocks that occur in
  * increasing-only order.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class BlockSequence {
+class BlockSequence<E> {
 
     /** the start indices of the change blocks, inclusive */
     private TIntArrayList starts = new TIntArrayList();
@@ -19,13 +22,15 @@ class BlockSequence {
     private TIntArrayList ends = new TIntArrayList();
     /** the change types */
     private TIntArrayList types = new TIntArrayList();
+    /** the deleted elements */
+    private List<E> elements = new ArrayList<E>();
 
     /**
      * @param startIndex the first updated element, inclusive
      * @param endIndex the last index, exclusive
      */
     public boolean update(int startIndex, int endIndex) {
-        return addChange(ListEvent.UPDATE, startIndex, endIndex);
+        return addChange(ListEvent.UPDATE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE);
     }
 
     /**
@@ -33,7 +38,7 @@ class BlockSequence {
      * @param endIndex the last index, exclusive
      */
     public boolean insert(int startIndex, int endIndex) {
-        return addChange(ListEvent.INSERT, startIndex, endIndex);
+        return addChange(ListEvent.INSERT, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE);
     }
 
     /**
@@ -41,7 +46,7 @@ class BlockSequence {
      * @param endIndex the last index, exclusive
      */
     public boolean delete(int startIndex, int endIndex) {
-        return addChange(ListEvent.DELETE, startIndex, endIndex);
+        return addChange(ListEvent.DELETE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE);
     }
 
     /**
@@ -51,23 +56,26 @@ class BlockSequence {
      * @return true if the change was successfully applied, or <code>false</code>
      *      if no change was made because this change could not be handled.
      */
-    public boolean addChange(int type, int startIndex, int endIndex) {
+    public boolean addChange(int type, int startIndex, int endIndex, E removedValue) {
         // remind ourselves of the most recent change
         int lastType;
         int lastStartIndex;
         int lastEndIndex;
         int lastChangedIndex;
         int size = types.size();
+        Object lastRemovedValue;
         if(size == 0) {
             lastType = -1;
             lastStartIndex = -1;
             lastEndIndex = 0;
             lastChangedIndex = 0;
+            lastRemovedValue = ListEvent.UNKNOWN_VALUE;
         } else {
             lastType = types.get(size - 1);
             lastStartIndex = starts.get(size - 1);
             lastEndIndex = ends.get(size - 1);
             lastChangedIndex = (lastType == ListEvent.DELETE) ? lastStartIndex : lastEndIndex;
+            lastRemovedValue = (lastType == ListEvent.DELETE) ? elements.get(size - 1) : ListEvent.UNKNOWN_VALUE;
         }
 
         // this change breaks the linear-ordering requirement, convert
@@ -76,7 +84,7 @@ class BlockSequence {
             return false;
 
         // concatenate this change on to the previous one
-        } else if(lastChangedIndex == startIndex && lastType == type) {
+        } else if(lastChangedIndex == startIndex && lastType == type && removedValue == lastRemovedValue) {
             int newLength = (lastEndIndex - lastStartIndex) + (endIndex - startIndex);
             ends.set(size - 1, lastStartIndex + newLength);
             return true;
@@ -86,6 +94,7 @@ class BlockSequence {
             starts.add(startIndex);
             ends.add(endIndex);
             types.add(type);
+            elements.add(removedValue);
             return true;
         }
     }
@@ -98,6 +107,7 @@ class BlockSequence {
         starts.clear();
         ends.clear();
         types.clear();
+        elements.clear();
     }
 
     public Iterator iterator() {
@@ -173,6 +183,9 @@ class BlockSequence {
         public int getType() {
             if(type == -1) throw new IllegalStateException("The ListEvent is not currently in a state to return a type");
             return type;
+        }
+        public E getRemovedValue() {
+            return elements.get(blockIndex);
         }
 
         /**

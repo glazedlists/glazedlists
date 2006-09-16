@@ -17,7 +17,7 @@ public class Tree4DeltasTest extends TestCase {
         Tree4Deltas deltas = new Tree4Deltas();
         deltas.reset(10);
         deltas.insert(3, 6);
-        deltas.delete(8, 10);
+        deltas.delete(8, 10, ListEvent.UNKNOWN_VALUE);
 
         Tree4Deltas.Iterator iterator = deltas.iterator();
         assertEquals(true, iterator.hasNextNode());
