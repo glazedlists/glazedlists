@@ -14,18 +14,11 @@ package ca.odell.glazedlists.impl.filter;
 public class SingleCharacterCaseInsensitiveTextSearchStrategy implements TextSearchStrategy {
 
     /** The single character to locate. */
-    private char subtextChar;
+    private char subtextCharLower;
+    private char subtextCharUpper;
 
     /** <tt>true</tt> if subtext has been set; <tt>false</tt> otherwise. */
     private boolean subtextInitialized = false;
-
-    /** caching upper case characters has shown a 5% performance boost over Character.toUpperCase() */
-    private static final char[] UPPER_CASE_CACHE = new char[256];
-    static {
-        for(char c = 0; c < UPPER_CASE_CACHE.length; c++) {
-            UPPER_CASE_CACHE[c] = Character.toUpperCase(c);
-        }
-    }
 
     /**
      * Sets the subtext to locate found when {@link #indexOf(String)} is called.
@@ -41,7 +34,9 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy implements TextSea
         if (subtext == null) throw new IllegalArgumentException("subtext may not be null");
         if (subtext.length() != 1) throw new IllegalArgumentException("subtext (" + subtext + ") must contain a single character");
 
-        this.subtextChar = toUpperCase(subtext.charAt(0));
+        final char c = subtext.charAt(0);
+        this.subtextCharLower = Character.toLowerCase(c);
+        this.subtextCharUpper = Character.toUpperCase(c);
         this.subtextInitialized = true;
     }
 
@@ -50,25 +45,16 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy implements TextSea
         // ensure we are in a state to search the text
         if(!this.subtextInitialized) throw new IllegalStateException("setSubtext must be called with a valid value before this method can operate");
 
+        char firstChar;
         // search for subtextChar in the given text
-        for(int c = 0; c < text.length(); c++) {
-            if(toUpperCase(text.charAt(c)) == this.subtextChar) {
-                return c;
+        for(int i = 0; i < text.length(); i++) {
+            firstChar = text.charAt(i);
+            if(firstChar == this.subtextCharLower || firstChar == this.subtextCharUpper) {
+                return i;
             }
         }
 
         // we didn't find the subtextChar so return -1
         return -1;
-    }
-
-    /**
-     * Our superfast toUpperCase method only works when a character is in the base
-     * 256 characters. Those values are precalculated because Character.toUpperCase()
-     * has proven to be a bottleneck.
-     *
-     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=136">Issue 136</a>
-     */
-    private static char toUpperCase(char anyCase) {
-        return anyCase < UPPER_CASE_CACHE.length ? UPPER_CASE_CACHE[anyCase] : Character.toUpperCase(anyCase);
     }
 }
