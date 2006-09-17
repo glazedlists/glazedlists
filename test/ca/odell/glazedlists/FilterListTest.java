@@ -50,6 +50,41 @@ public class FilterListTest extends TestCase {
         filtered.setMatcherEditor(numberMatcherEditor);
     }
 
+    public void testRemovedValueInListEvent() {
+        // construct a (contrived) list of initial values
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("LIMPBIZKIT"));
+
+        CollectionMatcherEditor<String> collectionMatcherEditor = new CollectionMatcherEditor<String>();
+        FilterList<String> filtered = new FilterList<String>(original, collectionMatcherEditor);
+
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(filtered);
+        listConsistencyListener.setRemovedElementTracked(true);
+
+        original.removeAll(GlazedListsTests.stringToList("MI"));
+        assertEquals(GlazedListsTests.stringToList("LPBZKT"), filtered);
+
+        // constrained
+        collectionMatcherEditor.setCollection(GlazedListsTests.stringToList("LPBZ"));
+        assertEquals(GlazedListsTests.stringToList("LPBZ"), filtered);
+
+        // changed
+        collectionMatcherEditor.setCollection(GlazedListsTests.stringToList("PBZT"));
+        assertEquals(GlazedListsTests.stringToList("PBZT"), filtered);
+
+        // relaxed
+        collectionMatcherEditor.setCollection(GlazedListsTests.stringToList("LPBZT"));
+        assertEquals(GlazedListsTests.stringToList("LPBZT"), filtered);
+
+        // match all
+        collectionMatcherEditor.matchAll();
+        assertEquals(GlazedListsTests.stringToList("LPBZKT"), filtered);
+
+        // match none
+        collectionMatcherEditor.matchNone();
+        assertEquals(GlazedListsTests.stringToList(""), filtered);
+    }
+
     /**
      * This test demonstrates Issue 213.
      */
@@ -62,8 +97,10 @@ public class FilterListTest extends TestCase {
         // prepare a filter to filter our list
         MinimumValueMatcherEditor editor = new MinimumValueMatcherEditor();
         FilterList<Integer> myFilterList = new FilterList<Integer>(original, editor);
-        ListConsistencyListener.install(myFilterList);
-        
+        ListConsistencyListener<Integer> listConsistencyListener = ListConsistencyListener.install(myFilterList);
+        listConsistencyListener.setRemovedElementTracked(true);
+
+
         // relax the list
         editor.setMinimum(11);
         assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
@@ -125,7 +162,8 @@ public class FilterListTest extends TestCase {
 
 		AllOrNothingMatcherEditor matcher = new AllOrNothingMatcherEditor();
 		FilterList<Integer> filterList = new FilterList<Integer>(baseList,matcher);
-		ListConsistencyListener.install(filterList);
+        ListConsistencyListener<Integer> listConsistencyListener = ListConsistencyListener.install(filterList);
+        listConsistencyListener.setRemovedElementTracked(true);
 
 		// Test initial size
 		assertEquals(5, filterList.size());

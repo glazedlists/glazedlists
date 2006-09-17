@@ -31,7 +31,7 @@ public abstract class ListEvent<E> extends EventObject {
     public static final int INSERT = 2;
 
     /** indicates a removed element whose value is unknown */
-    public static final Object UNKNOWN_VALUE = new Object();
+    public static final Object UNKNOWN_VALUE = new String("UNKNOWN VALUE");
 
     /** the list that has changed */
     protected EventList<E> sourceList;

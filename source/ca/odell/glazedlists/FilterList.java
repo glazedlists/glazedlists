@@ -196,7 +196,8 @@ public final class FilterList<E> extends TransformedList<E,E> {
 
                     // if this value was not filtered out, it is now so add a change
                     if(filteredIndex != -1) {
-                        updates.addDelete(filteredIndex);
+                        E removed = listChanges.getRemovedValue();
+                        updates.elementRemoved(filteredIndex, removed);
                     }
 
                     // remove this entry from the flag list
@@ -293,8 +294,10 @@ public final class FilterList<E> extends TransformedList<E,E> {
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
 
-        // filter out all remaining items in this list
-        if(size() > 0) updates.addDelete(0, size() - 1);
+        // fire all the elements in the list as deleted
+        for(int i = 0; i < size(); i++) {
+            updates.elementRemoved(0, get(i));
+        }
 
         // reset the flaglist to all white (which matches nothing)
         flagList.clear();
@@ -366,10 +369,11 @@ public final class FilterList<E> extends TransformedList<E,E> {
         // for all unfiltered items, see what the change is
         for(BarcodeIterator i = flagList.iterator(); i.hasNextBlack();) {
             i.nextBlack();
-            if(!currentMatcher.matches(source.get(i.getIndex()))) {
+            E value = source.get(i.getIndex());
+            if(!currentMatcher.matches(value)) {
                 int blackIndex = i.getBlackIndex();
                 i.setWhite();
-                updates.addDelete(blackIndex);
+                updates.elementRemoved(blackIndex, value);
             }
         }
 
@@ -393,12 +397,13 @@ public final class FilterList<E> extends TransformedList<E,E> {
             int filteredIndex = i.getBlackIndex();
             boolean wasIncluded = filteredIndex != -1;
             // whether we should add this item
-            boolean include = currentMatcher.matches(source.get(i.getIndex()));
+            E value = source.get(i.getIndex());
+            boolean include = currentMatcher.matches(value);
 
             // this element is being removed as a result of the change
             if(wasIncluded && !include) {
                 i.setWhite();
-                updates.addDelete(filteredIndex);
+                updates.elementRemoved(filteredIndex, value);
 
             // this element is being added as a result of the change
             } else if(!wasIncluded && include) {
