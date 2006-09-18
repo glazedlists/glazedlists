@@ -1,6 +1,5 @@
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.TreeList.TreeElement;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
@@ -107,12 +106,12 @@ public class TreeListTest extends TestCase {
 
         // make some modifications, they should be handled in place
         source.add("ABF");
-        assertEquals(GlazedListsTests.stringToList("ABF"), ((TreeElement)treeList.get(8)).path());
+        assertEquals(GlazedListsTests.stringToList("ABF"), treeList.getTreeNode(8).path());
         source.add("ABG");
-        assertEquals(GlazedListsTests.stringToList("ABG"), ((TreeElement)treeList.get(9)).path());
+        assertEquals(GlazedListsTests.stringToList("ABG"), treeList.getTreeNode(9).path());
         source.add("ACBA");
-        assertEquals(GlazedListsTests.stringToList("ACB"), ((TreeElement)treeList.get(11)).path());
-        assertEquals(GlazedListsTests.stringToList("ACBA"), ((TreeElement)treeList.get(12)).path());
+        assertEquals(GlazedListsTests.stringToList("ACB"), treeList.getTreeNode(11).path());
+        assertEquals(GlazedListsTests.stringToList("ACBA"), treeList.getTreeNode(12).path());
 
         // now some removes
         source.remove("ABD");
@@ -372,10 +371,10 @@ public class TreeListTest extends TestCase {
 
         // convert the list of TreeElements into a list of Strings
         List<String> treeAsStrings = new ArrayList<String>();
-        for(Iterator<TreeList.TreeElement<String>> i = treeList.iterator(); i.hasNext(); ) {
-            TreeList.TreeElement<String> treeElement = i.next();
-            StringBuffer asString = new StringBuffer(treeElement.path().size());
-            for(Iterator<String> n = treeElement.path().iterator(); n.hasNext(); ) {
+        for(Iterator<TreeList.Node<String>> i = treeList.getNodesList().iterator(); i.hasNext(); ) {
+            TreeList.Node<String> node = i.next();
+            StringBuffer asString = new StringBuffer(node.path().size());
+            for(Iterator<String> n = node.path().iterator(); n.hasNext(); ) {
                 asString.append(n.next());
             }
             treeAsStrings.add(asString.toString());
@@ -541,5 +540,28 @@ public class TreeListTest extends TestCase {
                 "AB",
                 "ABC",
         });
+    }
+
+    public void testTreeEditing() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener.install(treeList);
+
+        source.add("ABC");
+        source.add("ABD");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+        });
+
+//        treeList.set(0, "ABd");
+//        assertTreeStructure(treeList, new String[] {
+//                "A",
+//                "AB",
+//                "ABC",
+//                "ABd",
+//        });
     }
 }

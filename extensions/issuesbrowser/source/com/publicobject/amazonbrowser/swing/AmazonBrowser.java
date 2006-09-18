@@ -44,10 +44,10 @@ public class AmazonBrowser implements Runnable {
     private TreeList<Item> treeList;
 
     /** the TableModel backing the treetable of items */
-    private EventTableModel<TreeList.TreeElement<Item>> itemTableModel;
+    private EventTableModel<TreeList.Node<Item>> itemTableModel;
 
     /** the ListSelectionModel backing the treetable of items */
-    private EventSelectionModel<TreeList.TreeElement<Item>> itemTableSelectionModel;
+    private EventSelectionModel<TreeList.Node<Item>> itemTableSelectionModel;
 
     /** loads items as requested */
     private ItemLoader itemLoader;
@@ -162,9 +162,9 @@ public class AmazonBrowser implements Runnable {
         treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()));
 
         // create a JTable to display the items
-        final TableFormat<TreeList.TreeElement<Item>> itemTableFormat = new ItemTableFormat();
-        itemTableModel = new EventTableModel<TreeList.TreeElement<Item>>(treeList, itemTableFormat);
-        itemTableSelectionModel = new EventSelectionModel<TreeList.TreeElement<Item>>(treeList);
+        final TableFormat<TreeList.Node<Item>> itemTableFormat = new ItemTableFormat();
+        itemTableModel = new EventTableModel<TreeList.Node<Item>>(treeList.getNodesList(), itemTableFormat);
+        itemTableSelectionModel = new EventSelectionModel<TreeList.Node<Item>>(treeList.getNodesList());
         final JTable itemTable = new JTable(itemTableModel, null, itemTableSelectionModel);
         JScrollPane itemScrollPane = new JScrollPane(itemTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         itemScrollPane.setBorder(BorderFactory.createEmptyBorder());

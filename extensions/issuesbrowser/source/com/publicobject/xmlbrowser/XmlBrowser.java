@@ -149,7 +149,7 @@ public class XmlBrowser {
             TreeList<Element> treeList = new TreeList<Element>(eventList, new ElementTreeFormat());
 
             // display the XML in a tree table
-            EventTableModel<TreeList.TreeElement<Element>> tableModel = new EventTableModel<TreeList.TreeElement<Element>>(treeList, new ElementTableFormat());
+            EventTableModel<TreeList.Node<Element>> tableModel = new EventTableModel<TreeList.Node<Element>>(treeList.getNodesList(), new ElementTableFormat());
             JTable table = new JTable(tableModel);
             TreeTableSupport.install(table, treeList, 0);
 
@@ -166,9 +166,9 @@ public class XmlBrowser {
     }
 
     /**
-     * Adapt {@link TreeList.TreeElement}s for use in a table.
+     * Adapt {@link TreeList.Node}s for use in a table.
      */
-    private static class ElementTableFormat implements WritableTableFormat<TreeList.TreeElement<Element>> {
+    private static class ElementTableFormat implements WritableTableFormat<TreeList.Node<Element>> {
         public int getColumnCount() {
             return 2;
         }
@@ -181,7 +181,7 @@ public class XmlBrowser {
             throw new IndexOutOfBoundsException();
         }
 
-        public Object getColumnValue(TreeList.TreeElement<Element> baseObject, int column) {
+        public Object getColumnValue(TreeList.Node<Element> baseObject, int column) {
             switch(column) {
                 case 0: return baseObject.getElement().getQName();
                 case 1: return baseObject.getElement().getText();
@@ -189,11 +189,11 @@ public class XmlBrowser {
             throw new IndexOutOfBoundsException();
         }
 
-        public boolean isEditable(TreeList.TreeElement<Element> baseObject, int column) {
+        public boolean isEditable(TreeList.Node<Element> baseObject, int column) {
             return true;
         }
 
-        public TreeList.TreeElement<Element> setColumnValue(TreeList.TreeElement<Element> baseObject, Object editedValue, int column) {
+        public TreeList.Node<Element> setColumnValue(TreeList.Node<Element> baseObject, Object editedValue, int column) {
             throw new UnsupportedOperationException();
         }
     }

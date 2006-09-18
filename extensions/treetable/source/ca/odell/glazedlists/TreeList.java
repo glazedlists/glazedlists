@@ -19,7 +19,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeList.TreeElement<E>> {
+public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     private static final Comparator comparableComparator = GlazedLists.comparableComparator();
 
@@ -36,13 +36,16 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     private static final byte HIDDEN_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "r", "v" }));
     private static final byte REAL_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "R", "r" }));
 
+    /** an {@link EventList} of {@link Node}s with the structure of the tree. */
+    private EventList<Node<E>> nodesList = null;
+
     /**
      * All the tree data is stored in this tree.
      *
      * <p>Children of collapsed nodes are {@link #VISIBLE_NODES}, everything
      * else is {@link #HIDDEN_NODES}.
      */
-    private FourColorTree<TreeElement<E>> data = new FourColorTree<TreeElement<E>>(BYTE_CODER);
+    private FourColorTree<Node<E>> data = new FourColorTree<Node<E>>(BYTE_CODER);
 
     /**
      * The format is used to obtain path information from list elements.
@@ -56,7 +59,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * ie. siblings are not already adjacent.
      */
     public TreeList(EventList<E> source, Format<E> format) {
-        this(new SortedList<TreeElement<E>>(new FunctionList<E, TreeElement<E>>(source, new TreeElementFunction<E>(format))), format, null);
+        this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new TreeNodeFunction<E>(format))), format, null);
     }
 
     /**
@@ -64,23 +67,23 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * This constructor does not sort the elements.
      */
     public TreeList(EventList<E> source, Format<E> format, boolean unused) {
-        this(new FunctionList<E, TreeElement<E>>(source, new TreeElementFunction<E>(format)), format, null);
+        this(new FunctionList<E, Node<E>>(source, new TreeNodeFunction<E>(format)), format, null);
     }
 
-    private TreeList(EventList<TreeElement<E>> source, Format<E> format, Void dummy) {
+    private TreeList(EventList<Node<E>> source, Format<E> format, Void dummy) {
         super(source);
         this.format = format;
 
         // insert the new elements like they were adds
         for(int i = 0; i < super.source.size(); i++) {
-            TreeElement<E> treeElement = super.source.get(i);
-            Element<TreeElement<E>> element = data.add(i, ALL_NODES, VISIBLE_REAL, treeElement, 1);
-            treeElement.element = element;
+            Node<E> node = super.source.get(i);
+            Element<Node<E>> element = data.add(i, ALL_NODES, VISIBLE_REAL, node, 1);
+            node.element = element;
         }
 
         // populate parent links
         for(int i = 0; i < super.source.size(); i++) {
-            TreeElement<E> node = super.source.get(i);
+            Node<E> node = super.source.get(i);
             attachParent(node, false);
         }
 
@@ -93,16 +96,27 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
-     * Iterate through all elements in the tree, updating their sibling links.
+     * @return an {@link EventList} of {@link Node}s which can be used
+     *      to access this tree more structurally.
+     */
+    public EventList<Node<E>> getNodesList() {
+        if(nodesList == null) {
+            nodesList = new NodesList();
+        }
+        return nodesList;
+    }
+
+    /**
+     * Iterate through all nodes in the tree, updating their sibling links.
      * This should only be used by the constructor since it takes a long time
      * to execute.
      */
     private void rebuildAllSiblingLinks() {
         for(int i = 0; i < data.size(ALL_NODES); i++) {
-            TreeElement<E> node = data.get(i, ALL_NODES).get();
+            Node<E> node = data.get(i, ALL_NODES).get();
 
             // populate sibling relations
-            TreeElement<E> siblingBefore = findSiblingBeforeByValue(node);
+            Node<E> siblingBefore = findSiblingBeforeByValue(node);
             if(siblingBefore != null) {
                 node.siblingBefore = siblingBefore;
                 siblingBefore.siblingAfter = node;
@@ -123,10 +137,10 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      *
      * @param fireEvents false to suppress event firing, for use only in the
      *      constructor of {@link TreeList}.
-     * @return true if the attached element is visible, false otherwise
+     * @return true if the attached node is visible, false otherwise
      */
-    private boolean attachParent(TreeElement<E> node, boolean fireEvents) {
-        TreeElement<E> parent = findParentByValue(node, fireEvents);
+    private boolean attachParent(Node<E> node, boolean fireEvents) {
+        Node<E> parent = findParentByValue(node, fireEvents);
         node.parent = parent;
 
         // toggle the visibility of the attached node
@@ -136,21 +150,21 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             return visible;
         }
 
-        // parentless elements are always visible
+        // parentless nodes are always visible
         return true;
     }
 
     /**
-     * Search the tree for the parent of the specified element.
+     * Search the tree for the parent of the specified node.
      */
-    private TreeElement<E> findParentByValue(TreeElement<E> node, boolean fireEvents) {
+    private Node<E> findParentByValue(Node<E> node, boolean fireEvents) {
         // no parents for root nodes
         if(node.pathLength() == 1) return null;
 
         // search for our parent, starting at our predecessor
-        TreeElement<E> parentPrototype = node.describeParent();
-        Element<TreeElement<E>> previousElement = node.element.previous();
-        TreeElement<E> predecessor = previousElement != null ? previousElement.get() : null;
+        Node<E> parentPrototype = node.describeParent();
+        Element<Node<E>> previousElement = node.element.previous();
+        Node<E> predecessor = previousElement != null ? previousElement.get() : null;
 
         // we don't have a predecessor, we need to fab a parent
         if(predecessor == null) {
@@ -169,7 +183,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // our predecessor is deeper than our parent, it could be a descendent of our parent
         } else {
             if(predecessor.isAncestorByValue(parentPrototype)) {
-                TreeElement<E> predecessorAncestor = predecessor;
+                Node<E> predecessorAncestor = predecessor;
                 while(predecessorAncestor.pathLength() > parentPrototype.pathLength()) {
                     predecessorAncestor = predecessorAncestor.parent;
                 }
@@ -179,7 +193,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         // create a parent
         int index = data.indexOfNode(node.element, ALL_NODES);
-        Element<TreeElement<E>> parentElement = data.add(index, ALL_NODES, VISIBLE_VIRTUAL, parentPrototype, 1);
+        Element<Node<E>> parentElement = data.add(index, ALL_NODES, VISIBLE_VIRTUAL, parentPrototype, 1);
         parentPrototype.element = parentElement;
         boolean visible = attachParent(parentPrototype, fireEvents);
         if(fireEvents && visible) {
@@ -192,14 +206,14 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     /**
      * Find the latest node with the same parent that's before this node.
      */
-    private TreeElement<E> findSiblingBeforeByValue(TreeElement<E> node) {
+    private Node<E> findSiblingBeforeByValue(Node<E> node) {
 
         // this is crappy, we should figure out something more robust!
         // Currently we do a linear scan backwards looking for a node with the
         // same path length
         int nodeIndex = data.indexOfNode(node.element, ALL_NODES);
         for(int i = nodeIndex - 1; i >= 0; i--) {
-            TreeElement<E> beforeNode = data.get(i, ALL_NODES).get();
+            Node<E> beforeNode = data.get(i, ALL_NODES).get();
 
             // our sibling will have the same path length
             if(beforeNode.pathLength() == node.pathLength()) {
@@ -218,28 +232,28 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
-     * @return the number of ancestors of the element at the specified index.
-     *      Root elements have depth 0, other elements depth is one
-     *      greater than the depth of their parent element.
+     * @return the number of ancestors of the node at the specified index.
+     *      Root nodes have depth 0, other nodes depth is one
+     *      greater than the depth of their parent node.
      */
-    public int depth(int index) {
-        return getTreeElement(index).path.size() - 1;
+    public int depth(int visibleIndex) {
+        return getTreeNode(visibleIndex).path.size() - 1;
     }
 
     /**
-     * The number of elements including the node itself in its subtree.
+     * The number of nodes including the node itself in its subtree.
      */
     public int subtreeSize(int index, boolean includeCollapsed) {
         byte colorsOut = includeCollapsed ? ALL_NODES : VISIBLE_NODES;
 
-        // get the subtree size by finding the next element not in the subtree.
+        // get the subtree size by finding the next node not in the subtree.
         // We could also calculate this by looking at the first child, then
         // traversing across all children until we get to the end of the
         // children.
-        TreeElement<E> treeElement = data.get(index, colorsOut).get();
+        Node<E> node = data.get(index, colorsOut).get();
 
         // find the next node that's not a child to find the delta
-        TreeElement<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOf(treeElement);
+        Node<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOf(node);
 
         // if we don't have a sibling after us, we've hit the end of the tree
         if(nextNodeNotInSubtree == null) {
@@ -248,18 +262,15 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - index;
     }
-    private TreeElement<E> getTreeElement(int visibleIndex) {
-        return data.get(visibleIndex, VISIBLE_NODES).get();
-    }
 
     /**
      * Find the first node after the specified node that's not its child. This
      * is necessary to calculate the size of the node's subtree.
      */
-    private TreeElement<E> nextNodeThatsNotAChildOf(TreeElement<E> element) {
+    private Node<E> nextNodeThatsNotAChildOf(Node<E> node) {
 
-        for(; element != null; element = element.parent) {
-            TreeElement<E> followerNode = element.siblingAfter;
+        for(; node != null; node = node.parent) {
+            Node<E> followerNode = node.siblingAfter;
             if(followerNode != null) {
                 return followerNode;
             }
@@ -273,12 +284,17 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /** {@inheritDoc} */
-    public TreeElement<E> get(int index) {
-        return data.get(index, VISIBLE_NODES).get();
+    public E get(int index) {
+        return getTreeNode(index).getElement();
+    }
+
+    /** {@inheritDoc} */
+    public Node<E> getTreeNode(int visibleIndex) {
+        return data.get(visibleIndex, VISIBLE_NODES).get();
     }
 
     /**
-     * @return <code>true</code> if the element at the specified index has
+     * @return <code>true</code> if the node at the specified index has
      *      children, regardless of whether such children are visible.
      */
     public boolean hasChildren(int index) {
@@ -287,16 +303,15 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
     /**
      * @see Format#supportsChildren
-     * @return <code>true<code> if child elements can be added to the
-     *      specified element.
+     * @return <code>true<code> if child nodes can be added to the
+     *      specified node.
      */
-    public boolean supportsChildren(int index) {
-        final TreeElement<E> treeElement = (TreeElement<E>) get(index);
-        return format.supportsChildren(treeElement.sourceValue());
+    public boolean supportsChildren(int visibleIndex) {
+        return format.supportsChildren(get(visibleIndex));
     }
 
     /**
-     * @return <code>true</code> if the children of the element at the specified
+     * @return <code>true</code> if the children of the node at the specified
      *      index are visible. Nodes with no children may be expanded or not,
      *      this is used to determine whether to show children should any be
      *      added.
@@ -309,7 +324,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      *      to collapse it.
      */
     public void setExpanded(int index, boolean expanded) {
-        TreeElement<E> toExpand = data.get(index, VISIBLE_NODES).get();
+        Node<E> toExpand = data.get(index, VISIBLE_NODES).get();
 
         // if we're already in the desired state, give up!
         if(toExpand.expanded == expanded) return;
@@ -320,19 +335,19 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         updates.beginEvent();
 
-        TreeElement<E> toExpandNextSibling = nextNodeThatsNotAChildOf(toExpand);
+        Node<E> toExpandNextSibling = nextNodeThatsNotAChildOf(toExpand);
 
         // walk through the subtree, looking for all the descendents we need
         // to change. As we encounter them, change them and fire events
-        for(Element<TreeElement<E>> descendentElement = toExpand.element.next(); descendentElement != null; descendentElement = descendentElement.next()) {
-            TreeElement<E> descendent = descendentElement.get();
+        for(Element<Node<E>> descendentElement = toExpand.element.next(); descendentElement != null; descendentElement = descendentElement.next()) {
+            Node<E> descendent = descendentElement.get();
             if(descendent == toExpandNextSibling) break;
 
             // figure out if this node should be visible by walking up the ancestors
             // to the node being expanded, searching for a parent that's not
             // expanded
             boolean shouldBeVisible = expanded;
-            for(TreeElement<E> ancestor = descendent.parent; shouldBeVisible && ancestor != toExpand; ancestor = ancestor.parent) {
+            for(Node<E> ancestor = descendent.parent; shouldBeVisible && ancestor != toExpand; ancestor = ancestor.parent) {
                 if(!ancestor.expanded) {
                     shouldBeVisible = false;
                 }
@@ -365,9 +380,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
-     * Set the visibility of the specified element without firing any events.
+     * Set the visibility of the specified node without firing any events.
      */
-    private void setVisible(TreeElement<E> node, boolean visible) {
+    private void setVisible(Node<E> node, boolean visible) {
         byte newColor;
         if(visible) {
             newColor = node.virtual ? VISIBLE_VIRTUAL : VISIBLE_REAL;
@@ -378,9 +393,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
-     * Set the virtualness of the specified element without firing events.
+     * Set the virtualness of the specified node without firing events.
      */
-    private void setVirtual(TreeElement<E> node, boolean virtual) {
+    private void setVirtual(Node<E> node, boolean virtual) {
         byte newColor;
         if(virtual) {
             newColor = node.isVisible() ? VISIBLE_VIRTUAL : HIDDEN_VIRTUAL;
@@ -391,13 +406,13 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /** {@inheritDoc} */
-    public void listChanged(ListEvent<TreeElement<E>> listChanges) {
+    public void listChanged(ListEvent<Node<E>> listChanges) {
 
         updates.beginEvent(true);
 
         // add the new data, remove the old data, and mark the updated data
-        List<TreeElement<E>> parentsToVerify = new ArrayList<TreeElement<E>>();
-        List<TreeElement<E>> parentsToRestore = new ArrayList<TreeElement<E>>();
+        List<Node<E>> parentsToVerify = new ArrayList<Node<E>>();
+        List<Node<E>> parentsToRestore = new ArrayList<Node<E>>();
         while(listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
@@ -407,15 +422,15 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 // todo: repair siblings
 
             } else if(type == ListEvent.UPDATE) {
-                TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
+                Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
                 // shift as necessary, so if the parents are immediately after, they're used
-                if(hasLogicallyShifted(treeElement)) {
+                if(hasLogicallyShifted(node)) {
                     handleDelete(sourceIndex, parentsToVerify, parentsToRestore);
                     handleInsert(sourceIndex);
                 } else {
-                    if(treeElement.isVisible()) {
-                        int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+                    if(node.isVisible()) {
+                        int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
                         updates.addUpdate(viewIndex);
                     }
                 }
@@ -432,9 +447,6 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // blow away obsolete parent nodes, and their parents recursively
         deleteObsoleteParents(parentsToVerify);
 
-        // todo: restore parents that got killed
-
-
         // we're currently too lazy to rebuild the sibling links properly, so
         // just brute-force through all of them!
         rebuildAllSiblingLinks();
@@ -445,44 +457,44 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
-     * Remove the element at the specified index, firing all the required
+     * Remove the node at the specified index, firing all the required
      * notifications.
      */
-    private void handleDelete(int sourceIndex, List<TreeElement<E>> parentsToVerify, List<TreeElement<E>> parentsToRestore) {
-        TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
+    private void handleDelete(int sourceIndex, List<Node<E>> parentsToVerify, List<Node<E>> parentsToRestore) {
+        Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
         // if it has children, make it virtual and schedule if for verification or deletion later
-        if(treeElement.hasChildren()) {
+        if(node.hasChildren()) {
             // todo: make setVirtual() actually do node.virtual = virtual
-            setVirtual(treeElement, true);
-            treeElement.virtual = true;
-            parentsToVerify.add(treeElement);
+            setVirtual(node, true);
+            node.virtual = true;
+            parentsToVerify.add(node);
             return;
         }
 
         // otherwise delete it
-        boolean visible = treeElement.isVisible();
+        boolean visible = node.isVisible();
         if(visible) {
-            int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+            int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
             updates.addDelete(viewIndex);
         }
-        data.remove(treeElement.element);
-        treeElement.element = null; // null out the element
+        data.remove(node.element);
+        node.element = null; // null out the element
 
         // remove the parent if necessary in the next iteration
-        parentsToVerify.add(treeElement.parent);
+        parentsToVerify.add(node.parent);
         // restore this as a parent for its children in the next iteration
-        parentsToRestore.add(treeElement);
+        parentsToRestore.add(node);
     }
 
     /**
      * Ensure all of the specified parents are still required. If they're not,
      * they'll be removed and the appropriate events fired.
      */
-    private void deleteObsoleteParents(List<TreeElement<E>> parentsToVerify) {
+    private void deleteObsoleteParents(List<Node<E>> parentsToVerify) {
         deleteObsoleteParents:
-        for(Iterator<TreeElement<E>> i = parentsToVerify.iterator(); i.hasNext(); ) {
-            TreeElement<E> parent = i.next();
+        for(Iterator<Node<E>> i = parentsToVerify.iterator(); i.hasNext(); ) {
+            Node<E> parent = i.next();
 
             // walk up the tree, deleting nodes
             while(parent != null) {
@@ -491,13 +503,13 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
                 // we've already deleted this parent, we're done
                 if(parent.element == null) break;
 
-                // if this is a legit parent, then we'll still have a child element.
+                // if this is a legit parent, then we'll still have a child node.
                 // if it turns out that that child is also unnecessary, we'll clean
                 // everything up in the next iteration
                 boolean stillRequired;
                 int index = data.indexOfNode(parent.element, ALL_NODES);
                 if(index + 1 < data.size(ALL_NODES)) {
-                    TreeElement<E> possibleChild = data.get(index + 1, ALL_NODES).get();
+                    Node<E> possibleChild = data.get(index + 1, ALL_NODES).get();
                     stillRequired = possibleChild.parent == parent;
                 } else {
                     stillRequired = false;
@@ -521,36 +533,36 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     }
 
     /**
-     * Decide whether an element needs to be rebuilt due to a change in its
+     * Decide whether an node needs to be rebuilt due to a change in its
      * structural meaning. For example, if it is no longer a parent by value for
      * its children, or if its no longer a child by value of its parent.
      *
-     * @return <code>true</code> if the specified element has structurally
+     * @return <code>true</code> if the specified node has structurally
      *      shifted in the tree.
      */
-    private boolean hasLogicallyShifted(TreeElement<E> treeElement) {
-        // todo: handle shifts in children
+    private boolean hasLogicallyShifted(Node<E> node) {
+        // todo: handle shifts in children?
 
         // is the predecessor a parent or sibling?
         while(true) {
-            Element<TreeElement<E>> previousElement = treeElement.element.previous();
+            Element<Node<E>> previousElement = node.element.previous();
             if(previousElement == null) break;
-            TreeElement<E> previousNode = previousElement.get();
+            Node<E> previousNode = previousElement.get();
 
             // the predecessor is a sibling
-            if(previousNode.pathLength() == treeElement.pathLength()) {
+            if(previousNode.pathLength() == node.pathLength()) {
                 // make sure the sibling is on the right side
-                if(previousNode.virtual && previousNode.compareTo(treeElement) > 0) {
+                if(previousNode.virtual && previousNode.compareTo(node) > 0) {
                     return true;
                 // and that we agree what our parent looks like
-                } else if(!treeElement.isAncestorByValue(previousNode.parent)) {
+                } else if(!node.isAncestorByValue(previousNode.parent)) {
                     return true;
                 }
 
             // the predecessor is a parent
-            } else if(previousNode.pathLength() == treeElement.pathLength() - 1) {
+            } else if(previousNode.pathLength() == node.pathLength() - 1) {
                 // make sure that parent it is an ancestor by value
-                if(!treeElement.isAncestorByValue(previousNode)) {
+                if(!node.isAncestorByValue(previousNode)) {
                     return true;
                 }
 
@@ -563,13 +575,13 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         // should it be swapped with the follower?
         while(true) {
-            Element<TreeElement<E>> nextElement = treeElement.element.next();
+            Element<Node<E>> nextElement = node.element.next();
             if(nextElement == null) break;
-            TreeElement<E> nextNode = nextElement.get();
+            Node<E> nextNode = nextElement.get();
             // the follower is not virtual
             if(!nextNode.virtual) break;
-            // no swap is necessary, the element is supposed to be after us
-            if(nextNode.compareTo(treeElement) >= 0) break;
+            // no swap is necessary, the node is supposed to be after us
+            if(nextNode.compareTo(node) >= 0) break;
 
             // a swap is necessary!
             return true;
@@ -584,44 +596,44 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * skipping.
      */
     private void handleInsert(int sourceIndex) {
-        TreeElement<E> treeElement = super.source.get(sourceIndex);
+        Node<E> node = super.source.get(sourceIndex);
 
-        // figure out where the source element immediately before us lies. All
-        // elements between it and us must me our virtual parents
+        // figure out where the source node immediately before us lies. All
+        // nodes between it and us must me our virtual parents
         int predecessorIndex = sourceIndex > 0 ? data.convertIndexColor(sourceIndex - 1, REAL_NODES, ALL_NODES) : -1;
         int followerIndex = data.size(REAL_NODES) > sourceIndex ? data.convertIndexColor(sourceIndex, REAL_NODES, ALL_NODES) : data.size(ALL_NODES);
 
         // walk through all our parent nodes already in the tree
         int insertIndex = predecessorIndex + 1;
         while(insertIndex < followerIndex) {
-            TreeElement<E> possibleAncestor = data.get(insertIndex, ALL_NODES).get();
+            Node<E> possibleAncestor = data.get(insertIndex, ALL_NODES).get();
 
             // this ancestor is a virtual copy of the node to be inserted,
             // in which case we want to update over it. For example, if we
             // simulated a node and then that value gets inserted 'for real',
             // we keep the state of that node
-            int relativePosition = treeElement.compareTo(possibleAncestor);
+            int relativePosition = node.compareTo(possibleAncestor);
             if(possibleAncestor.virtual && relativePosition == 0) {
 
-                // make the real element copy the state of the virtual
-                treeElement.updateFrom(possibleAncestor);
+                // make the real node copy the state of the virtual
+                node.updateFrom(possibleAncestor);
 
                 // replace the virtual with the real in the tree structure
-                possibleAncestor.element.set(treeElement);
+                possibleAncestor.element.set(node);
                 setVirtual(possibleAncestor, false);
-                for(TreeElement<E> child = firstChildOf(possibleAncestor); child != null; child = child.siblingAfter) {
-                    child.parent = treeElement;
+                for(Node<E> child = firstChildOf(possibleAncestor); child != null; child = child.siblingAfter) {
+                    child.parent = node;
                 }
 
                 // fire an 'update' event so selection is not destroyed
                 if(possibleAncestor.isVisible()) {
-                    int visibleIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+                    int visibleIndex = data.indexOfNode(node.element, VISIBLE_NODES);
                     updates.addUpdate(visibleIndex);
                 }
                 return;
             }
 
-            // if this element follows us by value, we've gone too far
+            // if this node follows us by value, we've gone too far
             if(relativePosition < 0) {
                 break;
             }
@@ -629,16 +641,16 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             insertIndex++;
         }
 
-        // insert a new element
-        Element<TreeElement<E>> element = data.add(insertIndex, ALL_NODES, VISIBLE_REAL, treeElement, 1);
-        treeElement.element = element;
+        // insert a new node
+        Element<Node<E>> element = data.add(insertIndex, ALL_NODES, VISIBLE_REAL, node, 1);
+        node.element = element;
 
         // link to the parent to determine visibility
-        boolean visible = attachParent(treeElement, true);
+        boolean visible = attachParent(node, true);
 
         // set visibility and fire an event
         if(visible) {
-            int visibleIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
+            int visibleIndex = data.indexOfNode(node.element, VISIBLE_NODES);
             updates.addInsert(visibleIndex);
         }
     }
@@ -649,11 +661,11 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * @param treeFormat
      */
     public void setTreeFormat(Format<E> treeFormat) {
-        // todo
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * Define the tree structure of an element by expressing the path from the
+     * Define the tree structure of an node by expressing the path from the
      * element itself to the tree's root.
      */
     public interface Format<E> {
@@ -681,14 +693,14 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     /**
      * A private function used to convert list elements into tree paths.
      */
-    private static class TreeElementFunction<E> implements FunctionList.AdvancedFunction<E, TreeElement<E>> {
+    private static class TreeNodeFunction<E> implements FunctionList.AdvancedFunction<E, Node<E>> {
         private final Format<E> format;
         private final List<E> workingPath = new ArrayList();
-        public TreeElementFunction(Format<E> format) {
+        public TreeNodeFunction(Format<E> format) {
             this.format = format;
         }
-        public TreeElement<E> evaluate(E sourceValue) {
-            TreeElement<E> result = new TreeElement<E>();
+        public Node<E> evaluate(E sourceValue) {
+            Node<E> result = new Node<E>();
             result.virtual = false;
 
             // populate the path using the working path as a temporary variable
@@ -699,7 +711,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             return result;
         }
 
-        public TreeElement<E> reevaluate(E sourceValue, TreeElement<E> transformedValue) {
+        public Node<E> reevaluate(E sourceValue, Node<E> transformedValue) {
             format.getPath(workingPath, sourceValue);
             transformedValue.path = new ArrayList<E>(workingPath);
             workingPath.clear();
@@ -707,7 +719,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             return transformedValue;
         }
 
-        public void dispose(E sourceValue, TreeElement<E> transformedValue) {
+        public void dispose(E sourceValue, Node<E> transformedValue) {
             // do nothing
         }
     }
@@ -717,11 +729,11 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      * such child exists. This is <strong>not</strong> by value, but by the
      * current tree structure.
      */
-    public TreeElement<E> firstChildOf(TreeElement<E> node) {
+    public Node<E> firstChildOf(Node<E> node) {
         // the first child is always the node immediately after
-        Element<TreeElement<E>> possibleChildElement = node.element.next();
+        Element<Node<E>> possibleChildElement = node.element.next();
         if(possibleChildElement == null) return null;
-        TreeElement<E> possibleChild = possibleChildElement.get();
+        Node<E> possibleChild = possibleChildElement.get();
         if(possibleChild.parent != node) return null;
         return possibleChild;
     }
@@ -729,26 +741,26 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
     /**
      * A node in the display tree.
      */
-    public static class TreeElement<E> implements Comparable<TreeElement<E>> {
+    public static class Node<E> implements Comparable<Node<E>> {
 
         private List<E> path;
 
-        /** true if this element isn't in the source list */
+        /** true if this node isn't in the source list */
         private boolean virtual;
 
-        /** true if this element's children should be visible */
+        /** true if this node's children should be visible */
         private boolean expanded = true;
 
-        /** the element object points back at this */
-        private Element<TreeElement<E>> element;
+        /** the element object points back at this, for the tree's structure cache */
+        private Element<Node<E>> element;
 
-        /** the relationship of this element to others */
-        private TreeElement<E> siblingAfter;
-        private TreeElement<E> siblingBefore;
-        private TreeElement<E> parent;
+        /** the relationship of this node to others */
+        private Node<E> siblingAfter;
+        private Node<E> siblingBefore;
+        private Node<E> parent;
 
         /**
-         * The length of the path to this element, in nodes.
+         * The length of the path to this node, in nodes.
          *
          * @return 1 for the root node, 2 for its children, etc.
          */
@@ -773,7 +785,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         /**
          * Compare paths by parts from root deeper.
          */
-        public int compareTo(TreeElement<E> other) {
+        public int compareTo(Node<E> other) {
             int myPathLength = path.size();
             int otherPathLength = other.path.size();
 
@@ -788,10 +800,10 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         }
 
         /**
-         * Create a {@link TreeElement} that resembles the parent of this.
+         * Create a {@link Node} that resembles the parent of this.
          */
-        private TreeElement<E> describeParent() {
-            TreeElement<E> result = new TreeElement<E>();
+        private Node<E> describeParent() {
+            Node<E> result = new Node<E>();
             result.path = path.subList(0, path.size() - 1);
             result.virtual = true;
             return result;
@@ -813,9 +825,9 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         /**
          * @return true if the path of possibleAncestor is a proper prefix of
-         *      the path of this element.
+         *      the path of this node.
          */
-        public boolean isAncestorByValue(TreeElement<E> possibleAncestor) {
+        public boolean isAncestorByValue(Node<E> possibleAncestor) {
             List<E> possibleAncestorPath = possibleAncestor.path;
 
             // this is too long a bath to be an ancestor's
@@ -835,7 +847,7 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
          * when a virtual node is replaced by a real one, and we want the real
          * one to have the attributes of its predecessor.
          */
-        private void updateFrom(TreeElement<E> other) {
+        private void updateFrom(Node<E> other) {
             element = other.element;
             virtual = false;
             expanded = other.expanded;
@@ -844,33 +856,54 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
             parent = other.parent;
         }
 
-        public E sourceValue() {
-            return path.get(path.size() - 1);
-        }
-
         /**
-         * @return <code>true</code> if this node has at least one child element,
+         * @return <code>true</code> if this node has at least one child node,
          *      according to our structure cache.
          */
         public boolean hasChildren() {
-            Element<TreeElement<E>> next = element.next();
+            Element<Node<E>> next = element.next();
             if(next == null) return false;
 
             return next.get().parent == this;
         }
     }
 
+    /**
+     * Convert this {@link TreeList<E>} or {@link Node<E>}s, and expose
+     * it as the raw {@link E elements}s.
+     */
+    private class NodesList extends TransformedList<E,Node<E>> {
+
+        public NodesList() {
+            super(TreeList.this);
+            TreeList.this.addListEventListener(this);
+        }
+
+        protected boolean isWritable() {
+            return true;
+        }
+
+        public Node<E> get(int index) {
+            return getTreeNode(index);
+        }
+
+        public void listChanged(ListEvent<E> listChanges) {
+            updates.forwardEvent(listChanges);
+        }
+    }
+
     /** {@inheritDoc} */
-    public String toString() {
+    public String asTreeString() {
         final StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < size(); i++) {
+        for(int i = 0; i < size(); i++) {
             final int depth = depth(i);
-            final TreeElement<E> treeElement = (TreeElement<E>) get(i);
+            final Node<E> node = getTreeNode(i);
 
-            for (int j = 0; j < depth; j++)
+            for(int j = 0; j < depth; j++) {
                 buffer.append("\t");
+            }
 
-            buffer.append(treeElement).append("\n");
+            buffer.append(node).append("\n");
         }
 
         return buffer.toString();
@@ -887,36 +920,36 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
         // walk through the tree, validating structure and each subtree
         int lastPathLengthSeen = 0;
         for(int i = 0; i < data.size(ALL_NODES); i++) {
-            TreeElement<E> element = data.get(i, ALL_NODES).get();
+            Node<E> node = data.get(i, ALL_NODES).get();
 
             // path lengths should only grow by one from one child to the next
-            assert(element.pathLength() <= lastPathLengthSeen + 1);
-            lastPathLengthSeen = element.pathLength();
+            assert(node.pathLength() <= lastPathLengthSeen + 1);
+            lastPathLengthSeen = node.pathLength();
 
             // the virtual flag should be consistent with the node color
-            if(element.virtual) {
-                assert(element.element.getColor() == HIDDEN_VIRTUAL|| element.element.getColor() == VISIBLE_VIRTUAL);
+            if(node.virtual) {
+                assert(node.element.getColor() == HIDDEN_VIRTUAL|| node.element.getColor() == VISIBLE_VIRTUAL);
             } else {
-                assert(source.get(data.convertIndexColor(i, ALL_NODES, REAL_NODES)) == element);
-                assert(element.element.getColor() == HIDDEN_REAL || element.element.getColor() == VISIBLE_REAL);
+                assert(source.get(data.convertIndexColor(i, ALL_NODES, REAL_NODES)) == node);
+                assert(node.element.getColor() == HIDDEN_REAL || node.element.getColor() == VISIBLE_REAL);
             }
 
             // only validate the roots, they'll validate the rest recursively
-            if(element.pathLength() == 1) {
-                validateSubtree(element);
+            if(node.pathLength() == 1) {
+                validateSubtree(node);
             }
         }
 
         return true;
     }
-    private void validateSubtree(TreeElement<E> node) {
+    private void validateSubtree(Node<E> node) {
         int index = data.indexOfNode(node.element, ALL_NODES);
         int size = subtreeSize(index, true);
 
         // validate all children in the subtree
-        TreeElement<E> lastChildSeen = null;
+        Node<E> lastChildSeen = null;
         for(int i = 1; i < size; i++) {
-            TreeElement<E> descendent = data.get(index + i, ALL_NODES).get();
+            Node<E> descendent = data.get(index + i, ALL_NODES).get();
 
             // if this is a direct child, validate it
             if(descendent.pathLength() == node.pathLength() + 1) {
