@@ -450,6 +450,17 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
      */
     private void handleDelete(int sourceIndex, List<TreeElement<E>> parentsToVerify, List<TreeElement<E>> parentsToRestore) {
         TreeElement<E> treeElement = data.get(sourceIndex, REAL_NODES).get();
+
+        // if it has children, make it virtual and schedule if for verification or deletion later
+        if(treeElement.hasChildren()) {
+            // todo: make setVirtual() actually do node.virtual = virtual
+            setVirtual(treeElement, true);
+            treeElement.virtual = true;
+            parentsToVerify.add(treeElement);
+            return;
+        }
+
+        // otherwise delete it
         boolean visible = treeElement.isVisible();
         if(visible) {
             int viewIndex = data.indexOfNode(treeElement.element, VISIBLE_NODES);
@@ -835,6 +846,17 @@ public class TreeList<E> extends TransformedList<TreeList.TreeElement<E>,TreeLis
 
         public E sourceValue() {
             return path.get(path.size() - 1);
+        }
+
+        /**
+         * @return <code>true</code> if this node has at least one child element,
+         *      according to our structure cache.
+         */
+        public boolean hasChildren() {
+            Element<TreeElement<E>> next = element.next();
+            if(next == null) return false;
+
+            return next.get().parent == this;
         }
     }
 
