@@ -24,7 +24,7 @@ public class CollectionMatcherEditor<E> extends AbstractMatcherEditor<E> {
     }
 
     public void matchNone() {
-        current = Collections.emptyList();
+        current = Collections.EMPTY_LIST;
         fireMatchNone();
     }
 
