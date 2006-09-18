@@ -87,7 +87,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
             depth = treeList.depth(row);
             isExpanded = treeList.isExpanded(row);
             hasChildren = treeList.hasChildren(row);
-            supportsChildren = treeList.supportsChildren(row);
+            supportsChildren = treeList.getAllowsChildren(row);
         } finally {
             treeList.getReadWriteLock().readLock().unlock();
         }

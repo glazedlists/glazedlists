@@ -92,7 +92,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
             depth = treeList.depth(row);
             isExpanded = treeList.isExpanded(row);
             hasChildren = treeList.hasChildren(row);
-            supportsChildren = treeList.supportsChildren(row);
+            supportsChildren = treeList.getAllowsChildren(row);
         } finally {
             treeList.getReadWriteLock().readLock().unlock();
         }
@@ -145,7 +145,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
                 treeList.getReadWriteLock().writeLock().lock();
                 try {
                     // expand/collapse the rowObject if possible
-                    if(treeList.supportsChildren(row))
+                    if(treeList.getAllowsChildren(row))
                         TreeTableUtilities.toggleExpansion(table, treeList, row);
                 } finally {
                     treeList.getReadWriteLock().writeLock().unlock();

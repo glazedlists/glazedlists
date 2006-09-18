@@ -38,7 +38,7 @@ public class TreeListTest extends TestCase {
      */
     static class JavaStructureTreeFormat implements TreeList.Format<Object> {
 
-        public boolean supportsChildren(Object element) {
+        public boolean allowsChildren(Object element) {
             return (!(element instanceof Method));
         }
 
@@ -67,7 +67,7 @@ public class TreeListTest extends TestCase {
      * Convert Strings into paths. For example, PUPPY is <code>/P/U/P/P/Y</code>
      */
     static class CharacterTreeFormat implements TreeList.Format<String> {
-        public boolean supportsChildren(String element) {
+        public boolean allowsChildren(String element) {
             return true;
         }
         public void getPath(List<String> path, String element) {

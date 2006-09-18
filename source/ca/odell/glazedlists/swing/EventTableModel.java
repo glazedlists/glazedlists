@@ -283,8 +283,9 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         swingThreadSource.removeListEventListener(this);
 
         // if we created the swingThreadSource then we must also dispose it
-        if (disposeSwingThreadSource)
+        if(disposeSwingThreadSource) {
             swingThreadSource.dispose();
+        }
 
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         swingThreadSource = null;

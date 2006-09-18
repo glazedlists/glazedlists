@@ -4,7 +4,6 @@
 package com.publicobject.amazonbrowser;
 
 import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.EventList;
 
 import java.util.*;
 
@@ -36,7 +35,7 @@ public class ItemTreeFormat implements TreeList.Format<Item> {
     /**
      * Only virtual items have children.
      */
-    public boolean supportsChildren(Item element) {
+    public boolean allowsChildren(Item element) {
         return element.getASIN() == null;
     }
 

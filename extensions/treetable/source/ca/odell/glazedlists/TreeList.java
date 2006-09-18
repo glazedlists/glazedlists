@@ -243,24 +243,24 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /**
      * The number of nodes including the node itself in its subtree.
      */
-    public int subtreeSize(int index, boolean includeCollapsed) {
+    public int subtreeSize(int visibleIndex, boolean includeCollapsed) {
         byte colorsOut = includeCollapsed ? ALL_NODES : VISIBLE_NODES;
 
         // get the subtree size by finding the next node not in the subtree.
         // We could also calculate this by looking at the first child, then
         // traversing across all children until we get to the end of the
         // children.
-        Node<E> node = data.get(index, colorsOut).get();
+        Node<E> node = data.get(visibleIndex, colorsOut).get();
 
         // find the next node that's not a child to find the delta
         Node<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOf(node);
 
         // if we don't have a sibling after us, we've hit the end of the tree
         if(nextNodeNotInSubtree == null) {
-            return data.size(colorsOut) - index;
+            return data.size(colorsOut) - visibleIndex;
         }
 
-        return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - index;
+        return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - visibleIndex;
     }
 
     /**
@@ -284,8 +284,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /** {@inheritDoc} */
-    public E get(int index) {
-        return getTreeNode(index).getElement();
+    public E get(int visibleIndex) {
+        return getTreeNode(visibleIndex).getElement();
     }
 
     /** {@inheritDoc} */
@@ -297,17 +297,19 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * @return <code>true</code> if the node at the specified index has
      *      children, regardless of whether such children are visible.
      */
-    public boolean hasChildren(int index) {
-        return subtreeSize(index, true) > 1;
+    public boolean hasChildren(int visibleIndex) {
+        return subtreeSize(visibleIndex, true) > 1;
     }
 
     /**
-     * @see Format#supportsChildren
+     * Whether the value at the specified index can have child nodes or not.
+     *
+     * @see Format#allowsChildren
      * @return <code>true<code> if child nodes can be added to the
      *      specified node.
      */
-    public boolean supportsChildren(int visibleIndex) {
-        return format.supportsChildren(get(visibleIndex));
+    public boolean getAllowsChildren(int visibleIndex) {
+        return format.allowsChildren(get(visibleIndex));
     }
 
     /**
@@ -316,15 +318,17 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      *      this is used to determine whether to show children should any be
      *      added.
      */
-    public boolean isExpanded(int index) {
-        return data.get(index, VISIBLE_NODES).get().expanded;
+    public boolean isExpanded(int visibleIndex) {
+        return data.get(visibleIndex, VISIBLE_NODES).get().expanded;
     }
     /**
+     * Control whether the child elements of the specified node are visible.
+     *
      * @param expanded <code>true</code> to expand the node, <code>false</code>
      *      to collapse it.
      */
-    public void setExpanded(int index, boolean expanded) {
-        Node<E> toExpand = data.get(index, VISIBLE_NODES).get();
+    public void setExpanded(int visibleIndex, boolean expanded) {
+        Node<E> toExpand = data.get(visibleIndex, VISIBLE_NODES).get();
 
         // if we're already in the desired state, give up!
         if(toExpand.expanded == expanded) return;
@@ -375,8 +379,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * A convenience method to expand the row if it is currently collapsed or
      * vice versa.
      */
-    public void toggleExpanded(int index) {
-        setExpanded(index, !isExpanded(index));
+    public void toggleExpanded(int visibleIndex) {
+        setExpanded(visibleIndex, !isExpanded(visibleIndex));
     }
 
     /**
@@ -464,7 +468,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
         // if it has children, make it virtual and schedule if for verification or deletion later
-        if(node.hasChildren()) {
+        if(!node.isLeaf()) {
             // todo: make setVirtual() actually do node.virtual = virtual
             setVirtual(node, true);
             node.virtual = true;
@@ -621,7 +625,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 // replace the virtual with the real in the tree structure
                 possibleAncestor.element.set(node);
                 setVirtual(possibleAncestor, false);
-                for(Node<E> child = firstChildOf(possibleAncestor); child != null; child = child.siblingAfter) {
+                for(Node<E> child = possibleAncestor.firstChild(); child != null; child = child.siblingAfter) {
                     child.parent = node;
                 }
 
@@ -665,6 +669,22 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
+     * Get a {@link List} containing all {@link Node}s with no parents in the
+     * tree.
+     */
+    public List<Node<E>> getRoots() {
+        // todo: make this make sense
+        List<Node<E>> result = new ArrayList<Node<E>>();
+        for(int i = 0; i < size(); i++) {
+            Node<E> possibleRoot = getTreeNode(i);
+            if(possibleRoot.pathLength() == 1) {
+                result.add(possibleRoot);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Define the tree structure of an node by expressing the path from the
      * element itself to the tree's root.
      */
@@ -687,7 +707,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * @return <code>true</code> if this element can have child elements,
          *      or <code>false</code> if it is always a leaf node.
          */
-        public boolean supportsChildren(E element);
+        public boolean allowsChildren(E element);
     }
 
     /**
@@ -695,7 +715,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     private static class TreeNodeFunction<E> implements FunctionList.AdvancedFunction<E, Node<E>> {
         private final Format<E> format;
-        private final List<E> workingPath = new ArrayList();
+        private final List<E> workingPath = new ArrayList<E>();
         public TreeNodeFunction(Format<E> format) {
             this.format = format;
         }
@@ -722,20 +742,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         public void dispose(E sourceValue, Node<E> transformedValue) {
             // do nothing
         }
-    }
-
-    /**
-     * Get the first child of the specified node, or <code>null</code> if no
-     * such child exists. This is <strong>not</strong> by value, but by the
-     * current tree structure.
-     */
-    public Node<E> firstChildOf(Node<E> node) {
-        // the first child is always the node immediately after
-        Element<Node<E>> possibleChildElement = node.element.next();
-        if(possibleChildElement == null) return null;
-        Node<E> possibleChild = possibleChildElement.get();
-        if(possibleChild.parent != node) return null;
-        return possibleChild;
     }
 
     /**
@@ -860,11 +866,36 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * @return <code>true</code> if this node has at least one child node,
          *      according to our structure cache.
          */
-        public boolean hasChildren() {
+        public boolean isLeaf() {
             Element<Node<E>> next = element.next();
-            if(next == null) return false;
+            if(next == null) return true;
 
-            return next.get().parent == this;
+            return next.get().parent != this;
+        }
+
+        /**
+         * Get the first child of this node, or <code>null</code> if no
+         * such child exists. This is <strong>not</strong> by value, but by the
+         * current tree structure.
+         */
+        private Node<E> firstChild() {
+            // the first child is always the node immediately after
+            Element<Node<E>> possibleChildElement = element.next();
+            if(possibleChildElement == null) return null;
+            Node<E> possibleChild = possibleChildElement.get();
+            if(possibleChild.parent != this) return null;
+            return possibleChild;
+        }
+
+        /**
+         * List all children of this node.
+         */
+        public List<Node<E>> getChildren() {
+            List<Node<E>> result = new ArrayList<Node<E>>();
+            for(Node<E> child = firstChild(); child != null; child = child.siblingAfter) {
+                result.add(child);
+            }
+            return result;
         }
     }
 
@@ -893,7 +924,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /** {@inheritDoc} */
-    public String asTreeString() {
+    public String toTreeString() {
         final StringBuffer buffer = new StringBuffer();
         for(int i = 0; i < size(); i++) {
             final int depth = depth(i);

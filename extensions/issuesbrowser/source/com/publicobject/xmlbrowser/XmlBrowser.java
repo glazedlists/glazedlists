@@ -11,6 +11,7 @@ import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TreeTableSupport;
+import ca.odell.glazedlists.swing.EventTreeModel;
 
 import javax.swing.*;
 import javax.xml.parsers.SAXParserFactory;
@@ -153,9 +154,15 @@ public class XmlBrowser {
             JTable table = new JTable(tableModel);
             TreeTableSupport.install(table, treeList, 0);
 
+
+            // display the XML in a tree
+            EventTreeModel<Element> treeModel = new EventTreeModel<Element>(treeList);
+            JTree tree = new JTree(treeModel);
+
             // build tha application
             JPanel panel = new JPanel(new BorderLayout());
             panel.add(new JScrollPane(table), BorderLayout.CENTER);
+            panel.add(new JScrollPane(tree), BorderLayout.WEST);
             JFrame frame = new JFrame("XML Browser");
             frame.getContentPane().add(panel);
             frame.pack();
@@ -208,7 +215,7 @@ public class XmlBrowser {
             path.add(element);
         }
 
-        public boolean supportsChildren(Element element) {
+        public boolean allowsChildren(Element element) {
             return true;
         }
     }
