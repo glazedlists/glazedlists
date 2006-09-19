@@ -21,7 +21,8 @@ import java.util.*;
  */
 public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
-    private static final Comparator comparableComparator = GlazedLists.comparableComparator();
+    private static final FunctionList.Function NO_OP_FUNCTION = new NoOpFunction();
+    private static final NodeComparator COMPARABLE_NODE_COMPARATOR = comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator());
 
     /** node colors define where it is in the source and where it is here */
     private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList(new String[] { "R", "V", "r", "v" }));
@@ -35,6 +36,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private static final byte VISIBLE_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "R", "V" }));
     private static final byte HIDDEN_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "r", "v" }));
     private static final byte REAL_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "R", "r" }));
+
+    /** compare nodes */
+    private final NodeComparator<E> nodeComparator;
 
     /** an {@link EventList} of {@link Node}s with the structure of the tree. */
     private EventList<Node<E>> nodesList = null;
@@ -58,21 +62,26 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * convenient if you're data is not already in a natural tree ordering,
      * ie. siblings are not already adjacent.
      */
-    public TreeList(EventList<E> source, Format<E> format) {
-        this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new TreeNodeFunction<E>(format))), format, null);
+    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
+        this(source, format, comparatorToNodeComparator(comparator), null);
+    }
+    /** hack extra Comparator so we can build the nodeComparator only once. */
+    private TreeList(EventList<E> source, Format<E> format, NodeComparator<E> nodeComparator, Void unusedParameterForSortFirst) {
+        this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), nodeComparator), format, nodeComparator);
     }
 
     /**
      * Create a new TreeList that adds hierarchy to the specified source list.
      * This constructor does not sort the elements.
      */
-    public TreeList(EventList<E> source, Format<E> format, boolean unused) {
-        this(new FunctionList<E, Node<E>>(source, new TreeNodeFunction<E>(format)), format, null);
+    public TreeList(EventList<E> source, Format<E> format) {
+        this(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), format, COMPARABLE_NODE_COMPARATOR);
     }
-
-    private TreeList(EventList<Node<E>> source, Format<E> format, Void dummy) {
+    /** master Constructor that takes a FunctionList or a SortedList(FunctionList) */
+    private TreeList(EventList<Node<E>> source, Format<E> format, NodeComparator<E> nodeComparator) {
         super(source);
         this.format = format;
+        this.nodeComparator = nodeComparator;
 
         // insert the new elements like they were adds
         for(int i = 0; i < super.source.size(); i++) {
@@ -176,13 +185,13 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // our predecessor is at our parent's height, it could be our parent
         } else if(predecessor.pathLength() == parentPrototype.pathLength()) {
-            if(predecessor.compareTo(parentPrototype) == 0) {
+            if(compareNodes(predecessor, parentPrototype) == 0) {
                 return predecessor;
             }
 
         // our predecessor is deeper than our parent, it could be a descendent of our parent
         } else {
-            if(predecessor.isAncestorByValue(parentPrototype)) {
+            if(isAncestorByValue(predecessor, parentPrototype)) {
                 Node<E> predecessorAncestor = predecessor;
                 while(predecessorAncestor.pathLength() > parentPrototype.pathLength()) {
                     predecessorAncestor = predecessorAncestor.parent;
@@ -268,7 +277,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * is necessary to calculate the size of the node's subtree.
      */
     private Node<E> nextNodeThatsNotAChildOf(Node<E> node) {
-
         for(; node != null; node = node.parent) {
             Node<E> followerNode = node.siblingAfter;
             if(followerNode != null) {
@@ -281,6 +289,16 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /** {@inheritDoc} */
     public int size() {
         return data.size(VISIBLE_NODES);
+    }
+
+    /** {@inheritDoc} */
+    protected boolean isWritable() {
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    protected int getSourceIndex(int mutationIndex) {
+        return data.convertIndexColor(mutationIndex, VISIBLE_NODES, REAL_NODES);
     }
 
     /** {@inheritDoc} */
@@ -411,7 +429,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     /** {@inheritDoc} */
     public void listChanged(ListEvent<Node<E>> listChanges) {
-
         updates.beginEvent(true);
 
         // add the new data, remove the old data, and mark the updated data
@@ -556,17 +573,17 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // the predecessor is a sibling
             if(previousNode.pathLength() == node.pathLength()) {
                 // make sure the sibling is on the right side
-                if(previousNode.virtual && previousNode.compareTo(node) > 0) {
+                if(previousNode.virtual && compareNodes(previousNode, node) > 0) {
                     return true;
                 // and that we agree what our parent looks like
-                } else if(!node.isAncestorByValue(previousNode.parent)) {
+                } else if(!isAncestorByValue(node, previousNode.parent)) {
                     return true;
                 }
 
             // the predecessor is a parent
             } else if(previousNode.pathLength() == node.pathLength() - 1) {
                 // make sure that parent it is an ancestor by value
-                if(!node.isAncestorByValue(previousNode)) {
+                if(!isAncestorByValue(node, previousNode)) {
                     return true;
                 }
 
@@ -585,7 +602,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // the follower is not virtual
             if(!nextNode.virtual) break;
             // no swap is necessary, the node is supposed to be after us
-            if(nextNode.compareTo(node) >= 0) break;
+            if(compareNodes(nextNode, node) >= 0) break;
 
             // a swap is necessary!
             return true;
@@ -616,7 +633,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // in which case we want to update over it. For example, if we
             // simulated a node and then that value gets inserted 'for real',
             // we keep the state of that node
-            int relativePosition = node.compareTo(possibleAncestor);
+            int relativePosition = compareNodes(node, possibleAncestor);
             if(possibleAncestor.virtual && relativePosition == 0) {
 
                 // make the real node copy the state of the virtual
@@ -659,6 +676,10 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
     }
 
+    private int compareNodes(Node<E> a, Node<E> b) {
+        return nodeComparator.compare(a, b);
+    }
+
     /**
      * Change how the structure of the tree is derived.
      *
@@ -682,6 +703,25 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
         return result;
+    }
+
+    /**
+     * @return true if the path of possibleAncestor is a proper prefix of
+     *      the path of this node.
+     */
+    public boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
+        List<E> possibleAncestorPath = possibleAncestor.path;
+
+        // this is too long a bath to be an ancestor's
+        if(possibleAncestorPath.size() >= child.path.size()) return false;
+
+        // make sure the whole trail of the ancestor is common with our trail
+        for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
+            E possibleAncestorPathElement = possibleAncestorPath.get(d);
+            E pathElement = child.path.get(d);
+            if(nodeComparator.comparator.compare(possibleAncestorPathElement, pathElement) != 0) return false;
+        }
+        return true;
     }
 
     /**
@@ -711,12 +751,44 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
+     * Convert the specified {@link Comparator<E>} into a {@link Comparator} for
+     * nodes of type E.
+     */
+    private static <E> NodeComparator<E> comparatorToNodeComparator(Comparator<E> comparator) {
+        return new NodeComparator<E>(comparator);
+    }
+
+    private static class NodeComparator<E> implements Comparator<Node<E>> {
+        private final Comparator<E> comparator;
+
+        public NodeComparator(Comparator<E> comparator) {
+            if(comparator == null) throw new IllegalArgumentException();
+            this.comparator = comparator;
+        }
+
+        public int compare(Node<E> a, Node<E> b) {
+            int myPathLength = a.path.size();
+            int otherPathLength = b.path.size();
+
+            // compare by value first
+            for(int i = 0; i < myPathLength && i < otherPathLength; i++) {
+                int result = comparator.compare(a.path.get(i), b.path.get(i));
+                if(result != 0) return result;
+            }
+
+            // and path length second
+            return myPathLength - otherPathLength;
+        }
+
+    }
+
+    /**
      * A private function used to convert list elements into tree paths.
      */
-    private static class TreeNodeFunction<E> implements FunctionList.AdvancedFunction<E, Node<E>> {
+    private static class ElementToTreeNodeFunction<E> implements FunctionList.AdvancedFunction<E, Node<E>> {
         private final Format<E> format;
         private final List<E> workingPath = new ArrayList<E>();
-        public TreeNodeFunction(Format<E> format) {
+        public ElementToTreeNodeFunction(Format<E> format) {
             this.format = format;
         }
         public Node<E> evaluate(E sourceValue) {
@@ -743,11 +815,16 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // do nothing
         }
     }
+    private static class NoOpFunction implements FunctionList.Function {
+        public Object evaluate(Object sourceValue) {
+            return sourceValue;
+        }
+    }
 
     /**
      * A node in the display tree.
      */
-    public static class Node<E> implements Comparable<Node<E>> {
+    public static class Node<E> {
 
         private List<E> path;
 
@@ -789,23 +866,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         /**
-         * Compare paths by parts from root deeper.
-         */
-        public int compareTo(Node<E> other) {
-            int myPathLength = path.size();
-            int otherPathLength = other.path.size();
-
-            // compare by value first
-            for(int i = 0; i < myPathLength && i < otherPathLength; i++) {
-                int result = comparableComparator.compare(this.path.get(i), other.path.get(i));
-                if(result != 0) return result;
-            }
-
-            // and path length second
-            return myPathLength - otherPathLength;
-        }
-
-        /**
          * Create a {@link Node} that resembles the parent of this.
          */
         private Node<E> describeParent() {
@@ -827,25 +887,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          */
         public boolean isVisible() {
             return (element.getColor() & VISIBLE_NODES) > 0;
-        }
-
-        /**
-         * @return true if the path of possibleAncestor is a proper prefix of
-         *      the path of this node.
-         */
-        public boolean isAncestorByValue(Node<E> possibleAncestor) {
-            List<E> possibleAncestorPath = possibleAncestor.path;
-
-            // this is too long a bath to be an ancestor's
-            if(possibleAncestorPath.size() >= path.size()) return false;
-
-            // make sure the whole trail of the ancestor is common with our trail
-            for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
-                E possibleAncestorPathElement = possibleAncestorPath.get(d);
-                E pathElement = path.get(d);
-                if(comparableComparator.compare(possibleAncestorPathElement, pathElement) != 0) return false;
-            }
-            return true;
         }
 
         /**
