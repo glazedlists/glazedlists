@@ -192,7 +192,7 @@ public final class AutoCompleteSupport<E> {
     private ComboPopup popup;
 
     /** The arrow button that invokes the popup. */
-    protected JButton arrowButton;
+    private JButton arrowButton;
 
     /** The model backing the comboBox. */
     private final AutoCompleteComboBoxModel comboBoxModel;
