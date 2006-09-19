@@ -24,7 +24,7 @@ import java.util.*;
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="TableHeadingColor"><td colspan="2"><font size="+2"><b>Extension: SwingX</b></font></td></tr>
  * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>SwingX</b>.</td></tr>
- * <tr><td class="TableSubHeadingColor"><b>Tested Version:</b></td><td>CVS Head, September 19, 2006</td></tr>
+ * <tr><td class="TableSubHeadingColor"><b>Tested Version:</b></td><td>CVS Head, September 18, 2006</td></tr>
  * <tr><td class="TableSubHeadingColor"><b>Home page:</b></td><td><a href="https://swingx.dev.java.net/">https://swingx.dev.java.net/</a></td></tr>
  * <tr><td class="TableSubHeadingColor"><b>License:</b></td><td><a href="http://www.gnu.org/copyleft/lesser.html">LGPL</a></td></tr>
  * </td></tr>

@@ -49,7 +49,8 @@ class JXTableTestApp implements Runnable {
             table.setSelectionModel(selectionModel);
             table.setColumnControlVisible(true);
             table.getColumnExt(3).setComparator(new IssueStateComparator());
-            EventListJXTableSorting.install(table, sortedIssues);
+            EventListJXTableSorting eventListJXTableSorting = EventListJXTableSorting.install(table, sortedIssues);
+            eventListJXTableSorting.setMultipleColumnSort(true);
 
             JFrame frame = new JFrame();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
