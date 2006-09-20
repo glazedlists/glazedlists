@@ -1386,17 +1386,26 @@ public final class AutoCompleteSupport<E> {
 
             // if the popup is showing, check if it must be resized
             if (popupMenu.isShowing()) {
-                // if either the previous or new item count is less than the max,
-                // hide and show the popup to recalculate its new height
-                if (newItemCount < maxPopupItemCount || previousItemCount < maxPopupItemCount) {
-                    // don't bother unfiltering the popup since we'll redisplay the popup immediately
-                    doNotClearFilterOnPopupHide = true;
-                    try {
-                        comboBox.setPopupVisible(false);
-                    } finally {
-                        doNotClearFilterOnPopupHide = false;
+                if (comboBox.isShowing()) {
+                    // if either the previous or new item count is less than the max,
+                    // hide and show the popup to recalculate its new height
+                    if (newItemCount < maxPopupItemCount || previousItemCount < maxPopupItemCount) {
+                        // don't bother unfiltering the popup since we'll redisplay the popup immediately
+                        doNotClearFilterOnPopupHide = true;
+                        try {
+                            comboBox.setPopupVisible(false);
+                        } finally {
+                            doNotClearFilterOnPopupHide = false;
+                        }
+                        comboBox.setPopupVisible(true);
                     }
-                    comboBox.setPopupVisible(true);
+                } else {
+                    // if the comboBox is not showing, simply hide the popup to avoid:
+                    // "java.awt.IllegalComponentStateException: component must be showing on the screen to determine its location"
+                    // this case can occur when the comboBox is used as a TableCellEditor
+                    // and is uninstalled (removed from the component hierarchy) before
+                    // receiving this callback
+                    comboBox.setPopupVisible(false);
                 }
             }
 

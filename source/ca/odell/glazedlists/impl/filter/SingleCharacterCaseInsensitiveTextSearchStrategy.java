@@ -11,7 +11,7 @@ package ca.odell.glazedlists.impl.filter;
  *
  * @author James Lemieux
  */
-public class SingleCharacterCaseInsensitiveTextSearchStrategy implements TextSearchStrategy {
+public class SingleCharacterCaseInsensitiveTextSearchStrategy extends AbstractTextSearchStrategy {
 
     /** The single character to locate. */
     private char subtextCharLower;
@@ -49,6 +49,9 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy implements TextSea
         // search for subtextChar in the given text
         for(int i = 0; i < text.length(); i++) {
             firstChar = text.charAt(i);
+            if (characterNormalizer != null)
+                firstChar = characterNormalizer.normalize(firstChar);
+
             if(firstChar == this.subtextCharLower || firstChar == this.subtextCharUpper) {
                 return i;
             }

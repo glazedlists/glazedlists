@@ -10,7 +10,7 @@ package ca.odell.glazedlists.impl.filter;
  *
  * @author James Lemieux
  */
-public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchStrategy {
+public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSearchStrategy {
 
     /** One of two strategies for the indexOf method; one is optimized for single character matching */
     private IndexOfStrategy indexOfStrategy;
@@ -59,7 +59,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchSt
      * This implementation of IndexOfStrategy is optimized for the case when
      * the prefix is precisely one character long.
      */
-    private static class SingleCharacterIndexOfStrategy implements IndexOfStrategy {
+    private class SingleCharacterIndexOfStrategy implements IndexOfStrategy {
         /** The upper and lower case versions of the prefix to match. */
         private final char upperCase;
         private final char lowerCase;
@@ -74,7 +74,10 @@ public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchSt
             if (text.length() < 1)
                 return -1;
 
-            final char c = text.charAt(0);
+            char c = text.charAt(0);
+            if (characterNormalizer != null)
+                c = characterNormalizer.normalize(c);
+
             return (c == this.upperCase || c == this.lowerCase) ? 0 : -1;
         }
     }
@@ -83,7 +86,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchSt
      * This implementation of IndexOfStrategy executes the normal case of
      * prefixes with length > 1.
      */
-    private static class MultiCharacterIndexOfStrategy implements IndexOfStrategy {
+    private class MultiCharacterIndexOfStrategy implements IndexOfStrategy {
         /** The length of the subtext to locate. */
         private final int subtextLength;
 
@@ -106,7 +109,10 @@ public class StartsWithCaseInsensitiveTextSearchStrategy implements TextSearchSt
                 return -1;
 
             for (int i = 0; i < subtextLength; i++) {
-                final char c = text.charAt(i);
+                char c = text.charAt(i);
+                if (characterNormalizer != null)
+                    c = characterNormalizer.normalize(c);
+
                 if (this.subtextCharsLower[i] != c && this.subtextCharsUpper[i] != c)
                     return -1;
             }

@@ -5,6 +5,7 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.util.text.CharacterNormalizer;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 
 /**
@@ -57,6 +58,9 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /** one of {@link #CONTAINS} or {@link #STARTS_WITH} */
     private int mode = CONTAINS;
 
+    /** the optional strategy for normalizing characters to control the "fuzziness" of text matches */
+    private CharacterNormalizer characterNormalizer;
+
     /**
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
      * implement the {@link TextFilterable} interface.
@@ -108,10 +112,10 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         if (mode == STARTS_WITH) {
             // CONTAINS -> STARTS_WITH is a constraining change
-            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode));
+            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, characterNormalizer));
         } else {
             // STARTS_WITH -> CONTAINS is a relaxing change
-            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode));
+            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, characterNormalizer));
         }
     }
     /**
@@ -121,6 +125,32 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public int getMode() {
         return mode;
+    }
+
+    /**
+     * Returns the {@link CharacterNormalizer} being used to normalize (remap)
+     * characters immediately before they are compared. A
+     * {@link CharacterNormalizer} is commonly used to control the "fuzziness"
+     * of text matches since it can decide, for example, that 'é' maps to 'e',
+     * and thus "resume" and "résumé" are a fuzzy match.
+     */
+    public CharacterNormalizer getCharacterNormalizer() {
+        return characterNormalizer;
+    }
+
+    /**
+     * Sets the strategy for normalizing (remapping) characters immediately
+     * before they are compared. A {@link CharacterNormalizer} is commonly
+     * used to control the "fuzziness" of text matches since it can decide,
+     * for example, that 'é' maps to 'e', and thus "resume" and "résumé" are
+     * a fuzzy match.
+     *
+     * <p>Note that {@link CharacterNormalizer} assumes each character is
+     * mapped to EXACTLY one other character. This implies that, for example,
+     * it cannot be used to normalize 'Æ' to "AE".
+     */
+    public void setCharacterNormalizer(CharacterNormalizer characterNormalizer) {
+        this.characterNormalizer = characterNormalizer;
     }
 
     /**
@@ -155,7 +185,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         }
 
         // classify the change in filter and apply the new filter to this list
-        final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode);
+        final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode, characterNormalizer);
 
         if (TextMatcher.isFilterRelaxed(oldFilters, newFilters))
             fireRelaxed(matcher);

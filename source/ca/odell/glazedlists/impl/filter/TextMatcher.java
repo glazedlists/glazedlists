@@ -3,9 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
-// standard collections
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.util.text.CharacterNormalizer;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
@@ -57,15 +57,57 @@ public class TextMatcher<E> implements Matcher<E> {
      *      list elements implement {@link TextFilterable}
      */
     public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode) {
+        this(filters, filterator, mode, null);
+    }
+
+    /**
+     * @param filters an array of {@link #normalizeFilters(String[]) normalized}
+     *      filter Strings
+     * @param filterator the object that will extract filter Strings from each
+     *      object in the <code>source</code>; <code>null</code> indicates the
+     *      list elements implement {@link TextFilterable}
+     */
+    public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode, CharacterNormalizer characterNormalizer) {
         this.filterator = filterator;
-        this.filters = filters;
+        this.filters = normalizeFilters(filters, characterNormalizer);
         this.mode = mode;
 
         // build the parallel list of TextSearchStrategies for the new filters
-        filterStrategies = new TextSearchStrategy[filters.length];
-        for(int i = 0; i < filters.length; i++) {
-            filterStrategies[i] = selectTextSearchStrategy(filters[i], mode);
+        filterStrategies = new TextSearchStrategy[this.filters.length];
+        for(int i = 0; i < this.filters.length; i++) {
+            filterStrategies[i] = selectTextSearchStrategy(this.filters[i], mode, characterNormalizer);
         }
+    }
+
+    /**
+     * This convenience function normalizes each of the <code>filters</code> by
+     * running each of their characters through the
+     * <code>characterNormalizer</code>.
+     *
+     * @param filters the filter Strings to be normalized
+     * @param characterNormalizer the strategy for normalizing a character
+     * @return normalized versions of the filter Strings
+     */
+    private static String[] normalizeFilters(String[] filters, CharacterNormalizer characterNormalizer) {
+        // if no characterNormalizer was given, no normalization is required
+        if (characterNormalizer == null)
+            return filters;
+
+        final StringBuffer buffer = new StringBuffer();
+        final String[] normalized = new String[filters.length];
+
+        // normalize the filter Strings by running each character through the characterNormalizer
+        for (int i = 0; i < filters.length; i++) {
+            final String filter = filters[i];
+            for (int j = 0; j < filter.length(); j++) {
+                char c = filter.charAt(j);
+                buffer.append(characterNormalizer.normalize(c));
+            }
+            normalized[i] = buffer.toString();
+            buffer.setLength(0);
+        }
+
+        return normalized;
     }
 
     /**
@@ -130,7 +172,7 @@ public class TextMatcher<E> implements Matcher<E> {
      * @return a TextSearchStrategy capable of locating the given
      *      <code>filter</code> within arbitrary text
      */
-    private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode) {
+    private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode, CharacterNormalizer characterNormalizer) {
         final TextSearchStrategy result;
 
         if (mode == TextMatcherEditor.CONTAINS) {
@@ -146,6 +188,9 @@ public class TextMatcher<E> implements Matcher<E> {
 
         // apply the subtext
         result.setSubtext(filter);
+
+        // apply the CharacterNormalizer
+        result.setCharacterNormalizer(characterNormalizer);
 
         return result;
     }

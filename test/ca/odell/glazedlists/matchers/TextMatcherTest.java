@@ -3,10 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 import junit.framework.TestCase;
@@ -446,6 +443,56 @@ public class TextMatcherTest extends TestCase {
 
         // verify the lists are equal
         assertEquals(controlList, filteredList);
+    }
+
+    public void testCharacterNormalization() {
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+
+        list.add("résumé");
+        list.add("Björk");
+        list.add("Müller");
+
+        textMatcherEditor.setFilterText(new String[] {"ö"});
+        assertEquals(1, list.size());
+        assertEquals("Björk", list.get(0));
+
+        textMatcherEditor.setFilterText(new String[] {"o"});
+        assertTrue(list.isEmpty());
+
+        textMatcherEditor.setCharacterNormalizer(GlazedLists.latinCharacterNormalizer());
+        textMatcherEditor.setFilterText(new String[] {"ö"});
+        assertEquals(1, list.size());
+        assertEquals("Björk", list.get(0));
+
+        textMatcherEditor.setFilterText(new String[] {"o"});
+        assertEquals(1, list.size());
+        assertEquals("Björk", list.get(0));
+
+        textMatcherEditor.setCharacterNormalizer(null);
+        textMatcherEditor.setFilterText(new String[] {"MÜLL"});
+        assertEquals(1, list.size());
+        assertEquals("Müller", list.get(0));
+
+        textMatcherEditor.setFilterText(new String[] {"MULL"});
+        assertTrue(list.isEmpty());
+
+        textMatcherEditor.setCharacterNormalizer(GlazedLists.latinCharacterNormalizer());
+        textMatcherEditor.setFilterText(new String[] {"MÜLL"});
+        assertEquals(1, list.size());
+        assertEquals("Müller", list.get(0));
+
+        textMatcherEditor.setFilterText(new String[] {"MULL"});
+        assertEquals(1, list.size());
+        assertEquals("Müller", list.get(0));
+
+
+        // the uber test ensures that diacritics and case are unimportant when comparing any of these characters
+        String überString = "ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜİàáâãäåçèéêëìíîïñòóôõöùúûüıÿ";
+        list.add(überString);
+        textMatcherEditor.setFilterText(new String[] {"aaaaaaceeeeiiiinooooouuuuyAAAAAACEEEEIIIINOOOOOUUUUYY"});
+        assertEquals(1, list.size());
+        assertEquals(überString, list.get(0));
     }
 
     /**

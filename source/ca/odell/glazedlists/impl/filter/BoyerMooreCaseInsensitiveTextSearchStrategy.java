@@ -12,7 +12,7 @@ import java.util.Arrays;
  *
  * @author James Lemieux
  */
-public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchStrategy {
+public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSearchStrategy {
 
     /** The number of characters, starting at 0, to cache. */
     private static final int CHARACTER_CACHE_SIZE = 256;
@@ -96,6 +96,8 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
             if(subtextPosition >= 0) {
                 // locate the character in the text to be compared against
                 textChar = text.charAt(textPosition);
+                if (characterNormalizer != null)
+                    textChar = characterNormalizer.normalize(textChar);
 
                 // check for matching character from the end to the beginning of the subtext
                 while(subtextPosition >= 0 &&
@@ -108,6 +110,8 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy implements TextSearchSt
                     // calculate the next character of the text to compare
                     if(textPosition != -1) {
                         textChar = text.charAt(textPosition);
+                        if (characterNormalizer != null)
+                            textChar = characterNormalizer.normalize(textChar);
                     }
                 }
             }
