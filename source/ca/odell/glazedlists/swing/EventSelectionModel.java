@@ -448,5 +448,6 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      */
     public void dispose() {
         listSelection.dispose();
+        swingThreadSource.dispose();
     }
 }
