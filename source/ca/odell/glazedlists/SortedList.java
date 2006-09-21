@@ -241,9 +241,10 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
                 Element<Element> unsortedNode = unsorted.get(unsortedIndex);
+                E deleted = listChanges.getRemovedValue();
                 unsorted.remove(unsortedNode);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
-                updates.addDelete(deleteSortedIndex);
+                updates.elementRemoved(deleteSortedIndex, deleted);
 
             }
         }

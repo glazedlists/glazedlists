@@ -1229,6 +1229,23 @@ public class SortedListTest extends TestCase {
         assertEquals("nirvana", names.get(4));
     }
 
+
+    public void testRemovedValueInListEvent_FixMe() {
+        EventList<String> original = new BasicEventList<String>();
+        original.addAll(GlazedListsTests.stringToList("LIMPBIZKIT"));
+
+        SortedList<String> sorted = new SortedList<String>(original);
+
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(sorted);
+        listConsistencyListener.setRemovedElementTracked(true);
+
+        original.removeAll(GlazedListsTests.stringToList("MI"));
+        assertEquals(GlazedListsTests.stringToList("BKLPTZ"), sorted);
+
+        original.set(4, "M");
+        assertEquals(GlazedListsTests.stringToList("KLMPTZ"), sorted);
+    }
+
     /** test a sorted list for equality */
     public void assertSortedEquals(List<Comparable> unsorted, SortedList sorted) {
         // create a protective copy to muck with
