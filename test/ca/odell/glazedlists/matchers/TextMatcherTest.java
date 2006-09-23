@@ -319,6 +319,40 @@ public class TextMatcherTest extends TestCase {
 		counter.assertCounterState(0, 0, 0, 1, 1);
     }
 
+    public void testChangeStrategyNotifications() {
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        list.addAll(monotonicAlphabet);
+
+        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        textMatcherEditor.addMatcherEditorListener(counter);
+
+        assertEquals(TextMatcherEditor.ASCII_STRATEGY, textMatcherEditor.getStrategy());
+
+        // changing the strategy produces no changes if there is no filter text
+        textMatcherEditor.setStrategy(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY);
+        assertEquals(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY, textMatcherEditor.getStrategy());
+		counter.assertCounterState(0, 0, 0, 0, 0);
+
+        textMatcherEditor.setStrategy(TextMatcherEditor.ASCII_STRATEGY);
+        assertEquals(TextMatcherEditor.ASCII_STRATEGY, textMatcherEditor.getStrategy());
+		counter.assertCounterState(0, 0, 0, 0, 0);
+
+        // set some filter text
+        textMatcherEditor.setFilterText(new String[] {"012"});
+        counter.assertCounterState(0, 0, 0, 1, 0);
+        counter.resetCounterState();
+
+        // changing the strategy with filter text present should cause a change
+        textMatcherEditor.setStrategy(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY);
+        assertEquals(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY, textMatcherEditor.getStrategy());
+		counter.assertCounterState(0, 0, 1, 0, 0);
+
+        textMatcherEditor.setStrategy(TextMatcherEditor.ASCII_STRATEGY);
+        assertEquals(TextMatcherEditor.ASCII_STRATEGY, textMatcherEditor.getStrategy());
+		counter.assertCounterState(0, 0, 2, 0, 0);
+    }
+
     /**
      * Test to verify that the filter is working correctly when values
      * are being added to a list.

@@ -997,7 +997,7 @@ public final class AutoCompleteSupport<E> {
         if (prefix.length() == 0)
             filterMatcher = Matchers.trueMatcher();
         else
-            filterMatcher = new TextMatcher<String>(new String[] {prefix}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
+            filterMatcher = new TextMatcher<String>(new String[] {prefix}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.ASCII_STRATEGY);
     }
 
     /**
@@ -1028,7 +1028,7 @@ public final class AutoCompleteSupport<E> {
         // determine if our value is empty
         final boolean prefixIsEmpty = "".equals(value);
 
-        final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH);
+        final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.ASCII_STRATEGY);
 
         String partialMatchTerm = null;
 

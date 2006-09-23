@@ -49,8 +49,27 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public static final int STARTS_WITH = 1;
 
+    /**
+     * Character comparison strategy that assumes all characters can be
+     * compared directly as though they are ASCII. This implies there is no
+     * fuzzy matching with this strategy - each character must be precisely
+     * matched.
+     */
     public static final int ASCII_STRATEGY = 100;
+
+    /**
+     * Character comparison strategy that assumes all Latin characters should
+     * have their diacritical marks stripped in an effort to normalize words to
+     * their most basic form. This allows a degree of fuzziness within the
+     * matching algorithm, since words like "resume" will match similar words
+     * with diacritics like "résumé". This strategy is particularly useful when
+     * the text to be searched contains text like names in foreign languages,
+     * and your application would like search terms such as "Muller" to match
+     * the actual native spelling: "Müller".
+     */
     public static final int NORMALIZED_LATIN_STRATEGY = 101;
+
+    // todo doc this
     public static final int UNICODE_STRATEGY = 102;
 
     private static final String[] EMPTY_FILTER = new String[0];
@@ -62,7 +81,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     private int mode = CONTAINS;
 
     /** one of {@link #ASCII_STRATEGY}, {@link #NORMALIZED_LATIN_STRATEGY}, or {@link #UNICODE_STRATEGY} */
-    private int strategy;
+    private int strategy = ASCII_STRATEGY;
 
     /**
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
@@ -103,7 +122,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public void setMode(int mode) {
         if(mode != CONTAINS && mode != STARTS_WITH)
-            throw new IllegalArgumentException("Mode must be either TextMatcherEditor.CONTAINS or TextMatcherEditor.STARTS_WITH");
+            throw new IllegalArgumentException("mode must be either TextMatcherEditor.CONTAINS or TextMatcherEditor.STARTS_WITH");
         if(mode == this.mode) return;
 
         // apply the new mode
@@ -130,12 +149,36 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         return mode;
     }
 
+    /**
+     * Modify the character matching strategy of this {@link TextMatcherEditor}
+     * to one of the predefined strategies. See the documentation for each
+     * constant in order contrast the strategies.
+     *
+     * @param strategy either {@link #ASCII_STRATEGY} or {@link #NORMALIZED_LATIN_STRATEGY}
+     *      or {@link #UNICODE_STRATEGY}.
+     */
+    public void setStrategy(int strategy) {
+        if(strategy != ASCII_STRATEGY && strategy != NORMALIZED_LATIN_STRATEGY && strategy != UNICODE_STRATEGY)
+            throw new IllegalArgumentException("strategy must be either TextMatcherEditor.ASCII_STRATEGY, TextMatcherEditor.NORMALIZED_LATIN_STRATEGY or TextMatcherEditor.UNICODE_STRATEGY");
+        if(strategy == this.strategy) return;
+
+        this.strategy = strategy;
+
+        // if no filter text exists, no Matcher change is necessary
+        if (getCurrentFilter().length == 0)
+            return;
+
+        fireChanged(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
+    }
+    /**
+     * Returns the character comparison strategy for this {@link TextMatcherEditor}.
+     * See the documentation for each constant in order contrast the strategies.
+     *
+     * @return one of {@link #ASCII_STRATEGY} or {@link #NORMALIZED_LATIN_STRATEGY}
+     *      or {@link #UNICODE_STRATEGY}
+     */
     public int getStrategy() {
         return strategy;
-    }
-
-    public void setStrategy(int strategy) {
-        this.strategy = strategy;
     }
 
     /**
