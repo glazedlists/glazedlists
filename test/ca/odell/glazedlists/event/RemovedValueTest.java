@@ -28,7 +28,7 @@ public class RemovedValueTest extends TestCase {
         // prep recording the deleted elements
         EventList<String> source = new RemovedValueEventList<String>(new BasicEventList<String>());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(source);
-        listConsistencyListener.setRemovedElementTracked(true);
+        listConsistencyListener.setPreviousElementTracked(true);
 
         RemovedValuesListener<String> removedValuesListener = new RemovedValuesListener<String>();
         source.addListEventListener(removedValuesListener);
@@ -60,7 +60,7 @@ public class RemovedValueTest extends TestCase {
             while(listChanges.next()) {
                 int type = listChanges.getType();
                 if(type == ListEvent.DELETE) {
-                    deleteLog.add(deltasListEvent.getRemovedValue());
+                    deleteLog.add(deltasListEvent.getPreviousValue());
                 }
             }
         }
@@ -94,7 +94,7 @@ public class RemovedValueTest extends TestCase {
                     updates.addUpdate(index);
                 } else if(type == ListEvent.DELETE) {
                     E deleted = sourceValues.remove(index);
-                    updates.elementRemoved(index, deleted);
+                    updates.elementDeleted(index, deleted);
                 }
             }
             updates.commitEvent();

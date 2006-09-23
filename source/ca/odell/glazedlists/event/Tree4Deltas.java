@@ -69,13 +69,13 @@ class Tree4Deltas<E> {
      * @param startIndex the first updated element, inclusive
      * @param endIndex the last index, exclusive
      */
-    public void  update(int startIndex, int endIndex) {
+    public void  update(int startIndex, int endIndex, E value) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
             int overallIndex = tree.convertIndexColor(i, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
             // don't bother updating an inserted element
             if(tree.get(overallIndex, Tree4Deltas.ALL_INDICES).getColor() == Tree4Deltas.INSERT) return;
-            tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.UPDATE, (E)ListEvent.UNKNOWN_VALUE, 1);
+            tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.UPDATE, value, 1);
         }
     }
 
@@ -143,12 +143,12 @@ class Tree4Deltas<E> {
             int blockStart = i.getBlockStart();
             int blockEnd = i.getBlockEnd();
             int type = i.getType();
-            E value = i.getRemovedValue();
+            E value = i.getPreviousValue();
 
             if(type == ListEvent.INSERT) {
                 insert(blockStart, blockEnd);
             } else if(type == ListEvent.UPDATE) {
-                update(blockStart, blockEnd);
+                update(blockStart, blockEnd, value);
             } else if(type == ListEvent.DELETE) {
                 delete(blockStart, blockEnd, value);
             } else {
@@ -228,7 +228,7 @@ class Tree4Deltas<E> {
             return treeIterator.hasNextNode(Tree4Deltas.CHANGE_INDICES);
         }
 
-        public E getRemovedValue() {
+        public E getPreviousValue() {
             return treeIterator.node().get();
         }
     }

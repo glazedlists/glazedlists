@@ -196,8 +196,8 @@ public final class FilterList<E> extends TransformedList<E,E> {
 
                     // if this value was not filtered out, it is now so add a change
                     if(filteredIndex != -1) {
-                        E removed = listChanges.getRemovedValue();
-                        updates.elementRemoved(filteredIndex, removed);
+                        E removed = listChanges.getPreviousValue();
+                        updates.elementDeleted(filteredIndex, removed);
                     }
 
                     // remove this entry from the flag list
@@ -227,12 +227,13 @@ public final class FilterList<E> extends TransformedList<E,E> {
                     int filteredIndex = flagList.getBlackIndex(sourceIndex);
                     boolean wasIncluded = filteredIndex != -1;
                     // whether we should add this item
-                    boolean include = currentMatcher.matches(source.get(sourceIndex));
+                    E updated = source.get(sourceIndex);
+                    boolean include = currentMatcher.matches(updated);
 
                     // if this element is being removed as a result of the change
                     if(wasIncluded && !include) {
                         flagList.setWhite(sourceIndex, 1);
-                        updates.addDelete(filteredIndex);
+                        updates.elementDeleted(filteredIndex, listChanges.getPreviousValue());
 
                     // if this element is being added as a result of the change
                     } else if(!wasIncluded && include) {
@@ -241,7 +242,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
 
                     // this element is still here
                     } else if(wasIncluded && include) {
-                        updates.addUpdate(filteredIndex);
+                        updates.elementUpdated(filteredIndex, listChanges.getPreviousValue());
 
                     }
                 }
@@ -296,7 +297,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
 
         // fire all the elements in the list as deleted
         for(int i = 0; i < size(); i++) {
-            updates.elementRemoved(0, get(i));
+            updates.elementDeleted(0, get(i));
         }
 
         // reset the flaglist to all white (which matches nothing)
@@ -373,7 +374,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
             if(!currentMatcher.matches(value)) {
                 int blackIndex = i.getBlackIndex();
                 i.setWhite();
-                updates.elementRemoved(blackIndex, value);
+                updates.elementDeleted(blackIndex, value);
             }
         }
 
@@ -403,7 +404,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
             // this element is being removed as a result of the change
             if(wasIncluded && !include) {
                 i.setWhite();
-                updates.elementRemoved(filteredIndex, value);
+                updates.elementDeleted(filteredIndex, value);
 
             // this element is being added as a result of the change
             } else if(!wasIncluded && include) {

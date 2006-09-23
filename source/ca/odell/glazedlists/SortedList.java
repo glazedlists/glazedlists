@@ -217,6 +217,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // first update the offset tree for all changes, and keep the changed nodes in a list
         LinkedList<Element> insertNodes = new LinkedList<Element>();
         List<Element<Element>> updateNodes = new ArrayList<Element<Element>>();
+        List<E> previousValues = new ArrayList<E>();
 
         // Update the indexed tree so it matches the source.
         // Save the nodes to be inserted and updated as well
@@ -237,14 +238,15 @@ public final class SortedList<E> extends TransformedList<E,E> {
                 Element sortedNode = unsortedNode.get();
                 sortedNode.setSorted(Element.PENDING);
                 updateNodes.add(sortedNode);
+                previousValues.add(listChanges.getPreviousValue());
 
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
                 Element<Element> unsortedNode = unsorted.get(unsortedIndex);
-                E deleted = listChanges.getRemovedValue();
+                E deleted = listChanges.getPreviousValue();
                 unsorted.remove(unsortedNode);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
-                updates.elementRemoved(deleteSortedIndex, deleted);
+                updates.elementDeleted(deleteSortedIndex, deleted);
 
             }
         }
@@ -252,8 +254,8 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // decide which updated elements need to be shifted. We walk through the
         // tree, marking updated elements as sorted or unsorted depending on their
         // value relative to their neighbours
-        for(Iterator<Element<Element>> i = updateNodes.iterator(); i.hasNext(); ) {
-            Element<Element> sortedNode = i.next();
+        for(int i = 0, size = updateNodes.size(); i < size; i++) {
+            Element<Element> sortedNode = updateNodes.get(i);
             // we may have already handled this via a neighbour 
             if(sortedNode.getSorted() != Element.PENDING) continue;
 
@@ -303,24 +305,25 @@ public final class SortedList<E> extends TransformedList<E,E> {
         }
 
         // fire update events
-        for(Iterator<Element<Element>> i = updateNodes.iterator(); i.hasNext(); ) {
-            Element<Element> sortedNode = i.next();
+        for(int i  = 0, size = updateNodes.size(); i < size; i++) {
+            E previous = previousValues.get(i);
+            Element<Element> sortedNode = updateNodes.get(i);
             assert(sortedNode.getSorted() != Element.PENDING);
             int originalIndex = sorted.indexOfNode(sortedNode, ALL_COLORS);
 
             // the element is still in sorted order, forward the update event
             if(sortedNode.getSorted() == Element.SORTED) {
-                updates.addUpdate(originalIndex);
+                updates.elementUpdated(originalIndex, previous);
 
             // sort order is not enforced so we lose perfect sorting order
             // but we don't need to move elements around
             } else if(mode == AVOID_MOVING_ELEMENTS) {
-                updates.addUpdate(originalIndex);
+                updates.elementUpdated(originalIndex, previous);
 
             // sort order is enforced so move the element to its new location
             } else {
                 sorted.remove(sortedNode);
-                updates.addDelete(originalIndex);
+                updates.elementDeleted(originalIndex, previous);
                 int insertedIndex = insertByUnsortedNode(sortedNode.get());
                 updates.addInsert(insertedIndex);
             }

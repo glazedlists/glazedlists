@@ -56,7 +56,7 @@ class BlockSequence<E> {
      * @return true if the change was successfully applied, or <code>false</code>
      *      if no change was made because this change could not be handled.
      */
-    public boolean addChange(int type, int startIndex, int endIndex, E removedValue) {
+    public boolean addChange(int type, int startIndex, int endIndex, E value) {
         // remind ourselves of the most recent change
         int lastType;
         int lastStartIndex;
@@ -84,7 +84,7 @@ class BlockSequence<E> {
             return false;
 
         // concatenate this change on to the previous one
-        } else if(lastChangedIndex == startIndex && lastType == type && removedValue == lastRemovedValue) {
+        } else if(lastChangedIndex == startIndex && lastType == type && value == lastRemovedValue) {
             int newLength = (lastEndIndex - lastStartIndex) + (endIndex - startIndex);
             ends.set(size - 1, lastStartIndex + newLength);
             return true;
@@ -94,7 +94,7 @@ class BlockSequence<E> {
             starts.add(startIndex);
             ends.add(endIndex);
             types.add(type);
-            elements.add(removedValue);
+            elements.add(value);
             return true;
         }
     }
@@ -184,7 +184,7 @@ class BlockSequence<E> {
             if(type == -1) throw new IllegalStateException("The ListEvent is not currently in a state to return a type");
             return type;
         }
-        public E getRemovedValue() {
+        public E getPreviousValue() {
             return elements.get(blockIndex);
         }
 

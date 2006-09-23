@@ -189,8 +189,15 @@ public final class ListEventAssembler<E> {
      * Add to the current ListEvent the removal of the element at the specified
      * index, with the specified previous value.
      */
-    public void elementRemoved(int index, E removedValue) {
-        delegate.elementRemoved(index, removedValue);
+    public void elementDeleted(int index, E removedValue) {
+        delegate.elementDeleted(index, removedValue);
+    }
+    /**
+     * Add to the current ListEvent the update of the element at the specified
+     * index, with the specified previous value.
+     */
+    public void elementUpdated(int index, E replacedValue) {
+        delegate.elementUpdated(index, replacedValue);
     }
     /**
      * Convenience method for appending a range of updates.
@@ -374,7 +381,12 @@ public final class ListEventAssembler<E> {
         /**
          * Adds a block describing a deleted element.
          */
-        public abstract void elementRemoved(int index, E removedValue);
+        public abstract void elementDeleted(int index, E removedValue);
+
+        /**
+         * Adds a block describing a replaced element.
+         */
+        public abstract void elementUpdated(int index, E replacedValue);
 
         /**
          * @return <tt>true</tt> if the current atomic change to this list change
@@ -486,8 +498,13 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void elementRemoved(int index, Object removedValue) {
+        public void elementDeleted(int index, Object removedValue) {
             addChange(ListEvent.DELETE, index, index);
+        }
+
+        /** {@inheritDoc} */
+        public void elementUpdated(int index, E replacedValue) {
+            addChange(ListEvent.UPDATE, index, index);
         }
 
         public BarcodeListDeltas getListDeltas() {
@@ -558,14 +575,14 @@ public final class ListEventAssembler<E> {
             if(type == ListEvent.INSERT) {
                 listDeltas.insert(startIndex, endIndex + 1);
             } else if(type == ListEvent.UPDATE) {
-                listDeltas.update(startIndex, endIndex + 1);
+                listDeltas.update(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
             } else if(type == ListEvent.DELETE) {
                 listDeltas.delete(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
             }
         }
 
         /** {@inheritDoc} */
-        public void elementRemoved(int index, E removedValue) {
+        public void elementDeleted(int index, E removedValue) {
             // try the linear holder first
             if(useListBlocksLinear) {
                 boolean success = blockSequence.addChange(ListEvent.DELETE, index, index + 1, removedValue);
@@ -581,6 +598,25 @@ public final class ListEventAssembler<E> {
 
             // try the good old reliable deltas 2
             listDeltas.delete(index, index + 1, removedValue);
+        }
+
+        /** {@inheritDoc} */
+        public void elementUpdated(int index, E replacedValue) {
+            // try the linear holder first
+            if(useListBlocksLinear) {
+                boolean success = blockSequence.addChange(ListEvent.UPDATE, index, index + 1, replacedValue);
+                if(success) {
+                    return;
+
+                // convert from linear to tree4deltas
+                } else {
+                    listDeltas.addAll(blockSequence);
+                    useListBlocksLinear = false;
+                }
+            }
+
+            // try the good old reliable deltas 2
+            listDeltas.update(index, index + 1, replacedValue);
         }
 
         public boolean getUseListBlocksLinear() {
@@ -665,8 +701,13 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void elementRemoved(int index, Object removedValue) {
+        public void elementDeleted(int index, Object removedValue) {
             addChange(ListEvent.DELETE, index, index);
+        }
+
+        /** {@inheritDoc} */
+        public void elementUpdated(int index, Object replacedValue) {
+            addChange(ListEvent.UPDATE, index, index);
         }
 
         /** {@inheritDoc} */

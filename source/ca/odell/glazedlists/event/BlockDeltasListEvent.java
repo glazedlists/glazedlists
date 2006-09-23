@@ -163,7 +163,7 @@ final class BlockDeltasListEvent<E> extends ListEvent<E> {
     }
     
     /** {@inheritDoc} */
-    public E getRemovedValue() {
+    public E getPreviousValue() {
         return (E)ListEvent.UNKNOWN_VALUE;
     }
 

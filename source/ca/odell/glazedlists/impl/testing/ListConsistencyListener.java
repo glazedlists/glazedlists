@@ -33,7 +33,7 @@ public class ListConsistencyListener<E> {
     private boolean verbose = false;
 
     /** whether to fail when the removed element is incorrectly reported */
-    private boolean removedElementTracked = false;
+    private boolean previousElementTracked = false;
 
     /** count the number of changes per event */
     private List<Integer> changeCounts = new ArrayList<Integer>();
@@ -98,11 +98,11 @@ public class ListConsistencyListener<E> {
     }
 
     /**
-     * Configure whether errors shall be thrown if the removed value isn't what's
-     * expected.
+     * Configure whether errors shall be thrown if the previous value isn't
+     * what's expected.
      */
-    public void setRemovedElementTracked(boolean removedElementTracked) {
-        this.removedElementTracked = removedElementTracked;
+    public void setPreviousElementTracked(boolean previousElementTracked) {
+        this.previousElementTracked = previousElementTracked;
     }
 
     /**
@@ -162,12 +162,16 @@ public class ListConsistencyListener<E> {
                         expected.add(changeIndex, source.get(changeIndex));
                     } else if(changeType == ListEvent.DELETE) {
                         Object removed = expected.remove(changeIndex);
-                        if(removedElementTracked) {
-                            Object reportedRemoved = listChanges.getRemovedValue();
+                        if(previousElementTracked) {
+                            Object reportedRemoved = listChanges.getPreviousValue();
                             Assert.assertSame(removed, reportedRemoved);
                         }
                     } else if(changeType == ListEvent.UPDATE) {
-                        expected.set(changeIndex, source.get(changeIndex));
+                        Object replaced = expected.set(changeIndex, source.get(changeIndex));
+                        if(previousElementTracked) {
+                            Object reportedReplaced = listChanges.getPreviousValue();
+                            Assert.assertSame(replaced, reportedReplaced);
+                        }
                     }
                 }
 

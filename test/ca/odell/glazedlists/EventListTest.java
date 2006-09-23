@@ -540,8 +540,18 @@ public class EventListTest extends TestCase {
         filterList.addAll(GlazedListsTests.stringToList("JESSE"));
         assertEquals(GlazedListsTests.stringToList("JESSE"), source);
         assertEquals(GlazedListsTests.stringToList("JESSE"), filterList);
+    }
 
-
+    public void testReplace() {
+        EventList<String> source = new BasicEventList<String>();
+        installConsistencyListener(source);
+        source.addAll(GlazedListsTests.stringToList("ROUGHRIDERS"));
+        source.set(2, "G");
+        source.set(0, "T");
+        source.set(4, "R");
+        source.set(1, "I");
+        source.set(3, "E");
+        assertEquals(GlazedListsTests.stringToList("TIGERRIDERS"), source);
     }
 
     /**
@@ -663,7 +673,7 @@ public class EventListTest extends TestCase {
     private static void installConsistencyListener(List list) {
         if(list instanceof BasicEventList) {
             ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install((BasicEventList)list);
-            listConsistencyListener.setRemovedElementTracked(true);
+            listConsistencyListener.setPreviousElementTracked(true);
         }
     }
 }

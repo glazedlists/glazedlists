@@ -1237,13 +1237,26 @@ public class SortedListTest extends TestCase {
         SortedList<String> sorted = new SortedList<String>(original);
 
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(sorted);
-        listConsistencyListener.setRemovedElementTracked(true);
+        listConsistencyListener.setPreviousElementTracked(true);
 
         original.removeAll(GlazedListsTests.stringToList("MI"));
         assertEquals(GlazedListsTests.stringToList("BKLPTZ"), sorted);
 
-        original.set(4, "M");
-        assertEquals(GlazedListsTests.stringToList("KLMPTZ"), sorted);
+        // update in-place
+        original.set(1, "Q");
+        assertEquals(GlazedListsTests.stringToList("LQBZKT"), original);
+        assertEquals(GlazedListsTests.stringToList("BKLQTZ"), sorted);
+
+        // update-causing-move
+        original.set(2, "R");
+        assertEquals(GlazedListsTests.stringToList("LQRZKT"), original);
+        assertEquals(GlazedListsTests.stringToList("KLQRTZ"), sorted);
+
+        // update-without-move
+        sorted.setMode(SortedList.AVOID_MOVING_ELEMENTS);
+        original.set(1, "A");
+        assertEquals(GlazedListsTests.stringToList("LARZKT"), original);
+        assertEquals(GlazedListsTests.stringToList("KLARTZ"), sorted);
     }
 
     /** test a sorted list for equality */

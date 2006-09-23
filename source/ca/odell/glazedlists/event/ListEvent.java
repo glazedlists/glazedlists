@@ -114,14 +114,14 @@ public abstract class ListEvent<E> extends EventObject {
     public abstract int getType();
 
     /**
-     * Gets the removed value for a deleted element. If that data is not available,
-     * this will return {@link ListEvent.UNKNOWN_VALUE}.
+     * Gets the previous value for a deleted or updated element. If that data is
+     * not available, this will return {@link ListEvent.UNKNOWN_VALUE}.
      *
      * @deprecated this is a <strong>developer preview</strong> API that is not
      * yet fit for human consumption. Hopefully the full implementation is
      * complete for Glazed Lists 2.0.
      */
-    public abstract E getRemovedValue();
+    public abstract E getPreviousValue();
 
     /**
      * Get the List of ListEventBlocks for this change.
