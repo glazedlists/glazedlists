@@ -90,7 +90,7 @@ public class TextMatcherTest extends TestCase {
     public void testConstrainingFilter() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
-        
+
         list.addAll(numbers);
         assertEquals(list, numbers);
 
@@ -219,7 +219,7 @@ public class TextMatcherTest extends TestCase {
     public void testClearFilter() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
-        
+
         list.addAll(numbers);
 
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
@@ -362,7 +362,7 @@ public class TextMatcherTest extends TestCase {
         EventList<Object> unfilteredList = new BasicEventList<Object>();
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
-        
+
         // apply a filter
         String filter = "7";
         textMatcherEditor.setFilterText(new String[] { filter });
@@ -401,7 +401,7 @@ public class TextMatcherTest extends TestCase {
         EventList<Object> unfilteredList = new BasicEventList<Object>();
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
-        
+
         // apply a filter
         String filter = "5";
         textMatcherEditor.setFilterText(new String[] { filter });
@@ -445,7 +445,7 @@ public class TextMatcherTest extends TestCase {
         EventList<Object> unfilteredList = new BasicEventList<Object>();
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
-        
+
         // apply a filter
         String filter = "5";
         textMatcherEditor.setFilterText(new String[] { filter });
@@ -483,50 +483,50 @@ public class TextMatcherTest extends TestCase {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
-        list.add("résumé");
-        list.add("Björk");
-        list.add("Müller");
+        list.add("rÃ©sumÃ©");
+        list.add("BjÃ¶rk");
+        list.add("MÃ¼ller");
 
-        textMatcherEditor.setFilterText(new String[] {"ö"});
+        textMatcherEditor.setFilterText(new String[] {"Ã¶"});
         assertEquals(1, list.size());
-        assertEquals("Björk", list.get(0));
+        assertEquals("BjÃ¶rk", list.get(0));
 
         textMatcherEditor.setFilterText(new String[] {"o"});
         assertTrue(list.isEmpty());
 
         textMatcherEditor.setStrategy(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY);
-        textMatcherEditor.setFilterText(new String[] {"ö"});
+        textMatcherEditor.setFilterText(new String[] {"Ã¶"});
         assertEquals(1, list.size());
-        assertEquals("Björk", list.get(0));
+        assertEquals("BjÃ¶rk", list.get(0));
 
         textMatcherEditor.setFilterText(new String[] {"o"});
         assertEquals(1, list.size());
-        assertEquals("Björk", list.get(0));
+        assertEquals("BjÃ¶rk", list.get(0));
 
         textMatcherEditor.setStrategy(TextMatcherEditor.ASCII_STRATEGY);
-        textMatcherEditor.setFilterText(new String[] {"MÜLL"});
+        textMatcherEditor.setFilterText(new String[] {"MÃœLL"});
         assertEquals(1, list.size());
-        assertEquals("Müller", list.get(0));
+        assertEquals("MÃ¼ller", list.get(0));
 
         textMatcherEditor.setFilterText(new String[] {"MULL"});
         assertTrue(list.isEmpty());
 
         textMatcherEditor.setStrategy(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY);
-        textMatcherEditor.setFilterText(new String[] {"MÜLL"});
+        textMatcherEditor.setFilterText(new String[] {"MÃœLL"});
         assertEquals(1, list.size());
-        assertEquals("Müller", list.get(0));
+        assertEquals("MÃ¼ller", list.get(0));
 
         textMatcherEditor.setFilterText(new String[] {"MULL"});
         assertEquals(1, list.size());
-        assertEquals("Müller", list.get(0));
+        assertEquals("MÃ¼ller", list.get(0));
 
 
         // the uber test ensures that diacritics and case are unimportant when comparing any of these characters
-        String überString = "ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜİàáâãäåçèéêëìíîïñòóôõöùúûüıÿ";
-        list.add(überString);
+        String Ã¼berString = "Ã€ÃÃ‚ÃƒÃ„Ã…Ã‡ÃˆÃ‰ÃŠÃ‹ÃŒÃÃÃÃ‘Ã’Ã“Ã”Ã•Ã–Ã™ÃšÃ›ÃœÃÃ Ã¡Ã¢Ã£Ã¤Ã¥Ã§Ã¨Ã©ÃªÃ«Ã¬Ã­Ã®Ã¯Ã±Ã²Ã³Ã´ÃµÃ¶Ã¹ÃºÃ»Ã¼Ã½Ã¿";
+        list.add(Ã¼berString);
         textMatcherEditor.setFilterText(new String[] {"aaaaaaceeeeiiiinooooouuuuyAAAAAACEEEEIIIINOOOOOUUUUYY"});
         assertEquals(1, list.size());
-        assertEquals(überString, list.get(0));
+        assertEquals(Ã¼berString, list.get(0));
     }
 
     /**
