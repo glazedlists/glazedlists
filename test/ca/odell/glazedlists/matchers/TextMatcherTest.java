@@ -540,22 +540,4 @@ public class TextMatcherTest extends TestCase {
             ((List) baseList).add(element);
         }
     }
-
-    public static void main(String[] args) {
-        for(char i = 0; i < args[0].length(); i++) {
-            char c = args[0].charAt(i);
-
-            if(c < 128) {
-                System.out.print(c);
-                continue;
-            }
-
-            String hexString = Integer.toHexString(c);
-            while(hexString.length() < 4) hexString = "0" + hexString;
-
-            System.out.print("\\u" + hexString);
-
-
-        }
-    }
 }
