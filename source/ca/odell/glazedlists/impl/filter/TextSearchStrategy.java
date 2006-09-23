@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
-import ca.odell.glazedlists.util.text.CharacterNormalizer;
-
 /**
  * This interface defines a Strategy for locating a particular subtext within
  * another (typically larger) text. Implementations may make assumptions about
@@ -18,14 +16,14 @@ import ca.odell.glazedlists.util.text.CharacterNormalizer;
 public interface TextSearchStrategy {
 
     /**
-     * Sets the strategy, if any, to normalize the characters being compared
+     * Sets the strategy, if any, to map the characters being compared
      * during a text search. A <code>null</code> normalizer indicates the raw
      * characters should be used during the text search.
      *
-     * @param normalizer the strategy to use when normalizing characters
+     * @param charMap the strategy to use when normalizing characters
      *    immediately before comparing them for equality
      */
-    public void setCharacterNormalizer(CharacterNormalizer normalizer);
+    public void setCharacterMap(char[] charMap);
 
     /**
      * Sets the subtext to locate when {@link #indexOf(String)} is called.

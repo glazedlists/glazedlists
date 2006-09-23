@@ -48,9 +48,7 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy extends AbstractTe
         char firstChar;
         // search for subtextChar in the given text
         for(int i = 0; i < text.length(); i++) {
-            firstChar = text.charAt(i);
-            if (characterNormalizer != null)
-                firstChar = characterNormalizer.normalize(firstChar);
+            firstChar = map(text.charAt(i));
 
             if(firstChar == this.subtextCharLower || firstChar == this.subtextCharUpper) {
                 return i;

@@ -5,7 +5,7 @@ package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.util.text.CharacterNormalizer;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
@@ -50,64 +50,62 @@ public class TextMatcher<E> implements Matcher<E> {
     private final List<String> filterStrings = new ArrayList<String>();
 
     /**
-     * @param filters an array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings
+     * @param filters an array of filter Strings
      * @param filterator the object that will extract filter Strings from each
      *      object in the <code>source</code>; <code>null</code> indicates the
      *      list elements implement {@link TextFilterable}
+     * @param mode one of {@link TextMatcherEditor#CONTAINS} or
+     *      {@link TextMatcherEditor#STARTS_WITH} which indicates where to
+     *      search for the filter text
+     * @param strategy one of {@link TextMatcherEditor#ASCII_STRATEGY},
+     *      {@link TextMatcherEditor#NORMALIZED_LATIN_STRATEGY}, or
+     *      {@link TextMatcherEditor#UNICODE_STRATEGY} which indicates what
+     *      kind of algorithm to use when determining a match
      */
-    public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode) {
-        this(filters, filterator, mode, null);
-    }
-
-    /**
-     * @param filters an array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings
-     * @param filterator the object that will extract filter Strings from each
-     *      object in the <code>source</code>; <code>null</code> indicates the
-     *      list elements implement {@link TextFilterable}
-     */
-    public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode, CharacterNormalizer characterNormalizer) {
+    public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode, int strategy) {
         this.filterator = filterator;
-        this.filters = normalizeFilters(filters, characterNormalizer);
+        this.filters = mapFilters(filters, strategy);
         this.mode = mode;
 
         // build the parallel list of TextSearchStrategies for the new filters
         filterStrategies = new TextSearchStrategy[this.filters.length];
         for(int i = 0; i < this.filters.length; i++) {
-            filterStrategies[i] = selectTextSearchStrategy(this.filters[i], mode, characterNormalizer);
+            filterStrategies[i] = selectTextSearchStrategy(this.filters[i], mode, strategy);
         }
     }
 
     /**
-     * This convenience function normalizes each of the <code>filters</code> by
-     * running each of their characters through the
-     * <code>characterNormalizer</code>.
+     * This convenience function maps each of the <code>filters</code> by
+     * running each of their characters through the <code>characterMap</code>.
      *
-     * @param filters the filter Strings to be normalized
-     * @param characterNormalizer the strategy for normalizing a character
-     * @return normalized versions of the filter Strings
+     * @param filters the filter Strings to be mapped
+     * @param strategy the strategy for mapping a character
+     * @return mapped versions of the filter Strings
      */
-    private static String[] normalizeFilters(String[] filters, CharacterNormalizer characterNormalizer) {
-        // if no characterNormalizer was given, no normalization is required
-        if (characterNormalizer == null)
+    private static String[] mapFilters(String[] filters, int strategy) {
+        // if something other than the "normalized latin strategy" is used, return the filters untouched
+        if (strategy != TextMatcherEditor.NORMALIZED_LATIN_STRATEGY)
             return filters;
 
-        final StringBuffer buffer = new StringBuffer();
-        final String[] normalized = new String[filters.length];
+        final char[] mapper = GlazedListsImpl.getLatinDiacriticsStripper();
+        final String[] mappedFilters = new String[filters.length];
 
-        // normalize the filter Strings by running each character through the characterNormalizer
+        // map the filter Strings by running each character through the characterMap
         for (int i = 0; i < filters.length; i++) {
             final String filter = filters[i];
+            final char[] mappedFilter = new char[filter.length()];
+
+            // map each character in the filter
             for (int j = 0; j < filter.length(); j++) {
                 char c = filter.charAt(j);
-                buffer.append(characterNormalizer.normalize(c));
+                mappedFilter[j] = c < mapper.length ? mapper[c] : c;
             }
-            normalized[i] = buffer.toString();
-            buffer.setLength(0);
+
+            // record the mapped filter
+            mappedFilters[i] = new String(mappedFilter);
         }
 
-        return normalized;
+        return mappedFilters;
     }
 
     /**
@@ -161,18 +159,18 @@ public class TextMatcher<E> implements Matcher<E> {
 
     /**
      * This local factory method allows fine grained control over the choice of
-     * text search strategies for a given <code>filter</code>. Subclasses are
-     * welcome to override this method to return any custom TextSearchStrategy
-     * implementations which may exploit valid assumptions about the text being
-     * searched or the subtext being located.
+     * text search strategies for a given <code>filter</code>.
      *
      * @param filter the filter for which to locate a TextSearchStrategy
      * @param mode the type of search behaviour to use; either
      *      {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH}
+     * @param strategy a hint about the character matching strategy to use; either
+     *      {@link TextMatcherEditor#ASCII_STRATEGY}, {@link TextMatcherEditor#NORMALIZED_LATIN_STRATEGY}
+     *      or {@link TextMatcherEditor#UNICODE_STRATEGY}
      * @return a TextSearchStrategy capable of locating the given
      *      <code>filter</code> within arbitrary text
      */
-    private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode, CharacterNormalizer characterNormalizer) {
+    private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode, int strategy) {
         final TextSearchStrategy result;
 
         if (mode == TextMatcherEditor.CONTAINS) {
@@ -189,8 +187,9 @@ public class TextMatcher<E> implements Matcher<E> {
         // apply the subtext
         result.setSubtext(filter);
 
-        // apply the CharacterNormalizer
-        result.setCharacterNormalizer(characterNormalizer);
+        // apply the character mapper, if necessary
+        if (strategy == TextMatcherEditor.NORMALIZED_LATIN_STRATEGY)
+            result.setCharacterMap(GlazedListsImpl.getLatinDiacriticsStripper());
 
         return result;
     }

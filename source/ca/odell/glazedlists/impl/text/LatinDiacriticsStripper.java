@@ -3,13 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.text;
 
-import ca.odell.glazedlists.util.text.CharacterNormalizer;
-
 /**
- * Latin characters are normalized by stripping the diacritics from each
- * character according to the rules of Unicode. For an introduction to
- * unicode normalization, go
- * <a href="http://www.unicode.org/reports/tr15/">here</a>.
+ * Latin characters are mapped to strip their diacritics from each character
+ * according to the rules of Unicode. For an introduction to unicode
+ * normalization, go <a href="http://www.unicode.org/reports/tr15/">here</a>.
  *
  * <p>The complete set of encoded Latin characters within Unicode looks like so:
  *
@@ -26,40 +23,27 @@ import ca.odell.glazedlists.util.text.CharacterNormalizer;
  * <tr><td class="TableSubHeadingColor">Full-Width Latin Letters</td><td>0xFF00 -> 0xFFEF (65280 -> 65519)</td></tr>
  * </table>
  *
- * This LatinCharacterNormalizer only maps the first 4 sets (0 -> 591), since
+ * This LatinDiacriticsStripper only maps the first 4 sets (0 -> 591), since
  * the rest are quite fringe and extremely rare in practice.
  *
  * <p>For more details see the <a href="http://www.unicode.org/charts/">Unicode Charts</a>.
  *
  * @author James Lemieux
  */
-public class LatinCharacterNormalizer implements CharacterNormalizer {
+public final class LatinDiacriticsStripper {
 
     /** The static map initialized when the class is loaded. */
     private static final char[] MAPPER = new char[592];
 
-    /** The single instance of this LatinCharacterNormalizer that exists. */
-    private static LatinCharacterNormalizer instance;
-
-    /**
-     * Returns the single instance of LatinCharacterNormalizer that exists.
-     */
-    public static LatinCharacterNormalizer getInstance() {
-        if (instance == null)
-            instance = new LatinCharacterNormalizer();
-        return instance;
-    }
-
     /**
      * This method strips diacritics from latin characters, which allows fuzzy
-     * matching between languages. For example, the normalized value of é is e.
+     * matching between languages. For example, the mapped value of é is e.
      * So, the word "résumé" could be matched by simply typing "resume".
      *
-     * @param c the character to be normalized
      * @return the normalized version of <code>c</code>, which can be any character
      */
-    public char normalize(char c) {
-        return MAPPER[c];
+    public static char[] getMapper() {
+        return MAPPER;
     }
 
     /**
@@ -67,8 +51,8 @@ public class LatinCharacterNormalizer implements CharacterNormalizer {
      * MAPPER entries to standard out. They can then be copied and pasted back
      * into this class. Practically speaking, we will never need to execute this
      * main method again as the mappings are formed according to Unicode
-     * standards, but this code serves as documentation to trace how the values
-     * were produced.
+     * standards that will not changed, but this code serves as documentation
+     * to trace how the values were produced.
      */
 /*
     public static void main(String[] args) {

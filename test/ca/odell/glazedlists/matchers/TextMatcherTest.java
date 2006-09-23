@@ -445,7 +445,7 @@ public class TextMatcherTest extends TestCase {
         assertEquals(controlList, filteredList);
     }
 
-    public void testCharacterNormalization() {
+    public void testNormalizedLatinStrategy() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
@@ -460,7 +460,7 @@ public class TextMatcherTest extends TestCase {
         textMatcherEditor.setFilterText(new String[] {"o"});
         assertTrue(list.isEmpty());
 
-        textMatcherEditor.setCharacterNormalizer(GlazedLists.latinCharacterNormalizer());
+        textMatcherEditor.setStrategy(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY);
         textMatcherEditor.setFilterText(new String[] {"ö"});
         assertEquals(1, list.size());
         assertEquals("Björk", list.get(0));
@@ -469,7 +469,7 @@ public class TextMatcherTest extends TestCase {
         assertEquals(1, list.size());
         assertEquals("Björk", list.get(0));
 
-        textMatcherEditor.setCharacterNormalizer(null);
+        textMatcherEditor.setStrategy(TextMatcherEditor.ASCII_STRATEGY);
         textMatcherEditor.setFilterText(new String[] {"MÜLL"});
         assertEquals(1, list.size());
         assertEquals("Müller", list.get(0));
@@ -477,7 +477,7 @@ public class TextMatcherTest extends TestCase {
         textMatcherEditor.setFilterText(new String[] {"MULL"});
         assertTrue(list.isEmpty());
 
-        textMatcherEditor.setCharacterNormalizer(GlazedLists.latinCharacterNormalizer());
+        textMatcherEditor.setStrategy(TextMatcherEditor.NORMALIZED_LATIN_STRATEGY);
         textMatcherEditor.setFilterText(new String[] {"MÜLL"});
         assertEquals(1, list.size());
         assertEquals("Müller", list.get(0));

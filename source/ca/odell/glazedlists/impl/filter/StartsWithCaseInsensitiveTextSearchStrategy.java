@@ -74,9 +74,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
             if (text.length() < 1)
                 return -1;
 
-            char c = text.charAt(0);
-            if (characterNormalizer != null)
-                c = characterNormalizer.normalize(c);
+            char c = map(text.charAt(0));
 
             return (c == this.upperCase || c == this.lowerCase) ? 0 : -1;
         }
@@ -109,9 +107,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
                 return -1;
 
             for (int i = 0; i < subtextLength; i++) {
-                char c = text.charAt(i);
-                if (characterNormalizer != null)
-                    c = characterNormalizer.normalize(c);
+                char c = map(text.charAt(i));
 
                 if (this.subtextCharsLower[i] != c && this.subtextCharsUpper[i] != c)
                     return -1;

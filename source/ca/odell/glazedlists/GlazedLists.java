@@ -8,7 +8,6 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.*;
-import ca.odell.glazedlists.impl.text.LatinCharacterNormalizer;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
 import ca.odell.glazedlists.impl.matchers.FixedMatcherEditor;
@@ -16,7 +15,6 @@ import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
-import ca.odell.glazedlists.util.text.CharacterNormalizer;
 
 import java.util.*;
 
@@ -463,25 +461,6 @@ public final class GlazedLists {
      */
     public static <E,V> FunctionList.Function<E,V> beanFunction(Class<E> beanClass, String propertyName) {
         return new BeanFunction<E,V>(beanClass, propertyName);
-    }
-
-    // CharacterNormalizers // // // // // // // // // // // // // // // // //
-
-    /**
-     * Get a {@link CharacterNormalizer} which strips the diacritics from Latin
-     * characters in order to normalize word spellings between languages. This
-     * allows users from any Latin-based language to search the text of any
-     * other Latin-based language intuitively.
-     *
-     * <p>For example, with the returned {@link CharacterNormalizer}, a French
-     * user searching for the text "résumé" would match the English text
-     * "resume". Similarly, an English user searching for the text "resume"
-     * would match the French text "résumé." In this way, neither user needs to
-     * know the specifics of the foreign language they are searching, and thus
-     * the quality of their search increases.
-     */
-    public static CharacterNormalizer latinCharacterNormalizer() {
-        return LatinCharacterNormalizer.getInstance();
     }
 
     // ListEventListeners // // // // // // // // // // // // // // // // // //

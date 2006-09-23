@@ -95,9 +95,7 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSea
 
             if(subtextPosition >= 0) {
                 // locate the character in the text to be compared against
-                textChar = text.charAt(textPosition);
-                if (characterNormalizer != null)
-                    textChar = characterNormalizer.normalize(textChar);
+                textChar = map(text.charAt(textPosition));
 
                 // check for matching character from the end to the beginning of the subtext
                 while(subtextPosition >= 0 &&
@@ -109,9 +107,7 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSea
 
                     // calculate the next character of the text to compare
                     if(textPosition != -1) {
-                        textChar = text.charAt(textPosition);
-                        if (characterNormalizer != null)
-                            textChar = characterNormalizer.normalize(textChar);
+                        textChar = map(text.charAt(textPosition));
                     }
                 }
             }

@@ -5,7 +5,6 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.util.text.CharacterNormalizer;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 
 /**
@@ -50,6 +49,10 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public static final int STARTS_WITH = 1;
 
+    public static final int ASCII_STRATEGY = 100;
+    public static final int NORMALIZED_LATIN_STRATEGY = 101;
+    public static final int UNICODE_STRATEGY = 102;
+
     private static final String[] EMPTY_FILTER = new String[0];
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
@@ -58,8 +61,8 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /** one of {@link #CONTAINS} or {@link #STARTS_WITH} */
     private int mode = CONTAINS;
 
-    /** the optional strategy for normalizing characters to control the "fuzziness" of text matches */
-    private CharacterNormalizer characterNormalizer;
+    /** one of {@link #ASCII_STRATEGY}, {@link #NORMALIZED_LATIN_STRATEGY}, or {@link #UNICODE_STRATEGY} */
+    private int strategy;
 
     /**
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
@@ -112,10 +115,10 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         if (mode == STARTS_WITH) {
             // CONTAINS -> STARTS_WITH is a constraining change
-            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, characterNormalizer));
+            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
         } else {
             // STARTS_WITH -> CONTAINS is a relaxing change
-            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, characterNormalizer));
+            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
         }
     }
     /**
@@ -127,30 +130,12 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         return mode;
     }
 
-    /**
-     * Returns the {@link CharacterNormalizer} being used to normalize (remap)
-     * characters immediately before they are compared. A
-     * {@link CharacterNormalizer} is commonly used to control the "fuzziness"
-     * of text matches since it can decide, for example, that 'é' maps to 'e',
-     * and thus "resume" and "résumé" are a fuzzy match.
-     */
-    public CharacterNormalizer getCharacterNormalizer() {
-        return characterNormalizer;
+    public int getStrategy() {
+        return strategy;
     }
 
-    /**
-     * Sets the strategy for normalizing (remapping) characters immediately
-     * before they are compared. A {@link CharacterNormalizer} is commonly
-     * used to control the "fuzziness" of text matches since it can decide,
-     * for example, that 'é' maps to 'e', and thus "resume" and "résumé" are
-     * a fuzzy match.
-     *
-     * <p>Note that {@link CharacterNormalizer} assumes each character is
-     * mapped to EXACTLY one other character. This implies that, for example,
-     * it cannot be used to normalize 'Æ' to "AE".
-     */
-    public void setCharacterNormalizer(CharacterNormalizer characterNormalizer) {
-        this.characterNormalizer = characterNormalizer;
+    public void setStrategy(int strategy) {
+        this.strategy = strategy;
     }
 
     /**
@@ -185,7 +170,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         }
 
         // classify the change in filter and apply the new filter to this list
-        final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode, characterNormalizer);
+        final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode, strategy);
 
         if (TextMatcher.isFilterRelaxed(oldFilters, newFilters))
             fireRelaxed(matcher);

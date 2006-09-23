@@ -5,6 +5,7 @@ package ca.odell.glazedlists.impl;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.text.LatinDiacriticsStripper;
 
 import java.util.*;
 
@@ -110,6 +111,23 @@ public final class GlazedListsImpl {
                 sourceObject = NEW_VALUE_NEEDED;
             }
         }
+    }
+
+    /**
+     * Get a character mapper array which strips the diacritics from Latin
+     * characters in order to normalize word spellings between Latin-based
+     * languages. This allows users from any Latin-based language to search
+     * the text of any other Latin-based language intuitively.
+     *
+     * <p>For example, with the returned character mapper array, a French
+     * user searching for the text "résumé" would match the English text
+     * "resume". Similarly, an English user searching for the text "resume"
+     * would match the French text "résumé." In this way, neither user needs to
+     * know the specifics of the foreign language they are searching, and thus
+     * the quality of their search increases.
+     */
+    public static char[] getLatinDiacriticsStripper() {
+        return LatinDiacriticsStripper.getMapper();
     }
 
     // Date Utility Methods // // // // // // // // // // // // // // // // //
