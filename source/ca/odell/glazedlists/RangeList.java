@@ -67,6 +67,7 @@ public class RangeList<E> extends TransformedList<E, E> {
         while(listChanges.next()) {
             int changeType = listChanges.getType();
             int changeIndex = listChanges.getIndex();
+            E previous = listChanges.getPreviousValue();
 
             if(changeType == ListEvent.DELETE) {
                 if(changeIndex < currentStartIndex) {
@@ -74,7 +75,7 @@ public class RangeList<E> extends TransformedList<E, E> {
                     currentEndIndex--;
                 } else if(changeIndex < currentEndIndex) {
                     currentEndIndex--;
-                    updates.addDelete(changeIndex - currentStartIndex);
+                    updates.elementDeleted(changeIndex - currentStartIndex, previous);
                 }
             } else if(changeType == ListEvent.INSERT) {
                 if(changeIndex < currentStartIndex) {
@@ -86,7 +87,7 @@ public class RangeList<E> extends TransformedList<E, E> {
                 }
             } else if(changeType == ListEvent.UPDATE) {
                 if(changeIndex >= currentStartIndex && changeIndex < currentEndIndex) {
-                    updates.addUpdate(changeIndex - currentStartIndex);
+                    updates.elementUpdated(changeIndex - currentStartIndex, previous);
                 }
             }
         }
@@ -124,12 +125,15 @@ public class RangeList<E> extends TransformedList<E, E> {
     }
 
     /**
-     * Set the range to include the specified indices, offset from the end of
-     * the source {@link EventList}. For example, to show the last five values, use:
-     * <code>RangeList.setTailRange(5, 0);</code>
+     * Set the range to include the specified indices, the startIndex offset from the
+     * front of the source {@link EventList} and the endIndex offset from the end
+     * of the source {@link EventList}.
      *
-     * <p>To include the 3rd last and 2nd last values, use:
-     * <code>RangeList.setTailRange(3, 1);</code>.
+     * <p>For example, to include everything but the first element, use
+     * <code>RangeList.setMiddleRange(1, 0);</code>.
+     *
+     * <p>For example, to include everything but the last element, use
+     * <code>RangeList.setMiddleRange(0, 1);</code>.
      */
     public void setMiddleRange(int startIndex, int endIndex) {
         this.desiredStart = startIndex;
@@ -176,14 +180,17 @@ public class RangeList<E> extends TransformedList<E, E> {
         // delete thru to the new beginning
         } else if(currentStartIndex < desiredStartIndex && currentStartIndex < currentEndIndex) {
             int deleteThru = Math.min(desiredStartIndex, currentEndIndex);
-            updates.addDelete(0, deleteThru - currentStartIndex - 1);
+            for(int i = currentStartIndex; i < deleteThru; i++) {
+                updates.elementDeleted(0, source.get(i));
+            }
         }
         currentStartIndex = desiredStartIndex;
 
         // delete past the end
         if(desiredEndIndex < currentEndIndex) {
-            int deleteFrom = Math.max(desiredEndIndex, currentStartIndex);
-            updates.addDelete(deleteFrom - currentStartIndex, currentEndIndex - currentStartIndex - 1);
+            for(int i = desiredEndIndex; i < currentEndIndex; i++) {
+                updates.elementDeleted(desiredEndIndex - currentStartIndex, source.get(i));
+            }
 
         // insert thru to the new end
         } else if(currentEndIndex < desiredEndIndex && desiredStartIndex < desiredEndIndex) {

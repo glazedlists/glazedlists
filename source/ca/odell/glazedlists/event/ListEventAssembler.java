@@ -434,8 +434,17 @@ public final class ListEventAssembler<E> {
             if(isEventEmpty() && listChanges.isReordering()) {
                 reorder(listChanges.getReorderMap());
             } else {
-                while(listChanges.nextBlock()) {
-                    addChange(listChanges.getType(), listChanges.getBlockStartIndex(), listChanges.getBlockEndIndex());
+                while(listChanges.next()) {
+                    int type = listChanges.getType();
+                    int index = listChanges.getIndex();
+                    Object previous = listChanges.getPreviousValue();
+                    if(type == ListEvent.INSERT) {
+                        addChange(ListEvent.INSERT, index, index);
+                    } else if(type == ListEvent.UPDATE) {
+                        elementUpdated(index, (E)previous);
+                    } else if(type == ListEvent.DELETE) {
+                        elementDeleted(index, (E)previous);
+                    }
                 }
                 listChanges.reset();
             }

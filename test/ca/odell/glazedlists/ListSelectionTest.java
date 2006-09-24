@@ -42,10 +42,10 @@ public class ListSelectionTest extends TestCase {
         selectedList = listSelection.getSelected();
         deselectedList = listSelection.getDeselected();
         ListConsistencyListener.install(source);
-        ListConsistencyListener.install(selectedList);
-        ListConsistencyListener.install(deselectedList);
-        ListConsistencyListener.install(listSelection.getTogglingSelected());
-        ListConsistencyListener.install(listSelection.getTogglingDeselected());
+        ListConsistencyListener.install(selectedList).setPreviousElementTracked(false);
+        ListConsistencyListener.install(deselectedList).setPreviousElementTracked(false);
+        ListConsistencyListener.install(listSelection.getTogglingSelected()).setPreviousElementTracked(false);
+        ListConsistencyListener.install(listSelection.getTogglingDeselected()).setPreviousElementTracked(false);
     }
 
     /**

@@ -119,19 +119,24 @@ public final class FreezableList<E> extends TransformedList<E, E> {
     public void thaw() {
         if(!frozen) throw new IllegalStateException("Cannot thaw a list that is not frozen");
 
-        // mark this list as thawed
-        frozen = false;
-        int frozenDataSize = frozenData.size();
-        frozenData.clear();
-
-        // fire events to listeners of the thaw
+        // prep events to listeners of the thaw
         updates.beginEvent();
-        if(frozenDataSize > 0) updates.addDelete(0, frozenDataSize - 1);
-        if(source.size() > 0) updates.addInsert(0, source.size() - 1);
-        updates.commitEvent();
+        for(int i = 0, size = frozenData.size(); i < size; i++) {
+            updates.elementDeleted(0, frozenData.get(i));
+        }
+        if(source.size() > 0) {
+            updates.addInsert(0, source.size() - 1);
+        }
+
+        // we don't need our frozen data anymore
+        frozenData.clear();
+        frozen = false;
 
         // being listening to update events
         source.addListEventListener(this);
+
+        // fire off the thaw event
+        updates.commitEvent();
     }
 
     /** {@inheritDoc} */

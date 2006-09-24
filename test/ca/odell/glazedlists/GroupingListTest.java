@@ -23,7 +23,8 @@ public class GroupingListTest extends TestCase {
     public void testAdd() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
-        ListConsistencyListener.install(groupList);
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         assertEquals(0, groupList.size());
 
@@ -85,7 +86,8 @@ public class GroupingListTest extends TestCase {
     public void testAddAll() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
-        ListConsistencyListener.install(groupList);
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         assertEquals(0, groupList.size());
 
@@ -109,7 +111,8 @@ public class GroupingListTest extends TestCase {
     public void testInsert() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
-        ListConsistencyListener.install(groupList);
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         assertEquals(0, groupList.size());
 
@@ -162,7 +165,8 @@ public class GroupingListTest extends TestCase {
     public void testSourceSet() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
-        ListConsistencyListener.install(groupList);
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         assertEquals(0, groupList.size());
 
@@ -185,7 +189,8 @@ public class GroupingListTest extends TestCase {
     public void testSet() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
-        ListConsistencyListener.install(groupList);
+        ListConsistencyListener<List<String>> groupListConsistencyListener = ListConsistencyListener.install(groupList);
+        groupListConsistencyListener.setPreviousElementTracked(false);
         ListConsistencyListener.install(sourceList);
 
         assertEquals(0, groupList.size());
@@ -208,7 +213,8 @@ public class GroupingListTest extends TestCase {
     public void testRemoveAPair() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
-        ListConsistencyListener.install(groupList);
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         sourceList.addAll(GlazedListsTests.stringToList("AABBBD"));
         assertEquals(GlazedListsTests.stringToLists("AA,BBB,D"), groupList);
@@ -221,7 +227,8 @@ public class GroupingListTest extends TestCase {
     public void testRemove() {
         EventList<String> sourceList = GlazedLists.eventList(new ArrayList<String>());
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
-        ListConsistencyListener.install(groupList);
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         assertEquals(0, groupList.size());
 
@@ -423,7 +430,8 @@ public class GroupingListTest extends TestCase {
     public void testSeparatorListBreaks() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
         GroupingList<String> grouped = new GroupingList<String>(source, (Comparator)GlazedLists.comparableComparator());
-        ListConsistencyListener.install(grouped);
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(grouped);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         // adjust using an event known to put the separator in the wrong place
         source.addAll(0, GlazedListsTests.stringToList("CSC"));

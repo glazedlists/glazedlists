@@ -33,7 +33,7 @@ public class ListConsistencyListener<E> {
     private boolean verbose = false;
 
     /** whether to fail when the removed element is incorrectly reported */
-    private boolean previousElementTracked = false;
+    private boolean previousElementTracked = true;
 
     /** count the number of changes per event */
     private List<Integer> changeCounts = new ArrayList<Integer>();

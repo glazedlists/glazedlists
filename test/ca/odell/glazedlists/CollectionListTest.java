@@ -32,11 +32,13 @@ public class CollectionListTest extends TestCase {
     public void setUp() {
         parentList = new BasicEventList<String>();
         collectionList = new CollectionList<String, String>(parentList, new StringDecomposerModel());
-        ListConsistencyListener.install(collectionList);
         parentList.add(DEV_ROB);
         parentList.add(DEV_JESSE);
         parentList.add(DEV_KEVIN);
         parentList.add(DEV_JAMES);
+
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(collectionList);
+        listConsistencyListener.setPreviousElementTracked(false); // we don't yet support deleted elements here
     }
 
     /**
@@ -222,7 +224,9 @@ public class CollectionListTest extends TestCase {
         // use a list of Lists instead of Strings
         BasicEventList<List<String>> characterLists = new BasicEventList<List<String>>();
         CollectionList<List<String>, String> characters = new CollectionList<List<String>, String>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
-        ListConsistencyListener.install(characters);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(characters);
+        listConsistencyListener.setPreviousElementTracked(false);
+        
         characterLists.add(GlazedListsTests.stringToList(DEV_ROB));
         characterLists.add(GlazedListsTests.stringToList(DEV_JESSE));
         characterLists.add(GlazedListsTests.stringToList(DEV_KEVIN));

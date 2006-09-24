@@ -39,7 +39,18 @@ public class ExternalNestingEventList<E> extends TransformedList<E, E> {
                 updates.reorder(reorderMap);
             } else {
                 while(listChanges.next()) {
-                    updates.addChange(listChanges.getType(), listChanges.getIndex());
+                    int type = listChanges.getType();
+                    int index = listChanges.getIndex();
+                    E previous = listChanges.getPreviousValue();
+                    if(type == ListEvent.INSERT) {
+                        updates.addInsert(index);
+                    } else if(type == ListEvent.UPDATE) {
+                        updates.elementUpdated(index, previous);
+                    } else if(type == ListEvent.DELETE) {
+                        updates.elementDeleted(index, previous);
+                    } else {
+                        throw new IllegalStateException();
+                    }
                 }
             }
         }

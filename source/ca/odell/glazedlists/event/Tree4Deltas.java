@@ -6,6 +6,7 @@ package ca.odell.glazedlists.event;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTreeIterator;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
 
 import java.util.Arrays;
 
@@ -73,8 +74,19 @@ class Tree4Deltas<E> {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
             int overallIndex = tree.convertIndexColor(i, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
+            Element<E> standingChangeToIndex = tree.get(overallIndex, Tree4Deltas.ALL_INDICES);
+
             // don't bother updating an inserted element
-            if(tree.get(overallIndex, Tree4Deltas.ALL_INDICES).getColor() == Tree4Deltas.INSERT) return;
+            if(standingChangeToIndex.getColor() == Tree4Deltas.INSERT) {
+                continue;
+            }
+
+            // if we're updating an update, the original replaced value stands.
+            if(standingChangeToIndex.getColor() == Tree4Deltas.UPDATE) {
+                value = standingChangeToIndex.get();
+            }
+
+            // apply the update to our change description
             tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.UPDATE, value, 1);
         }
     }
@@ -101,16 +113,22 @@ class Tree4Deltas<E> {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
             int overallIndex = tree.convertIndexColor(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
-            // if its an insert, simply remove that insert
-            if(tree.get(overallIndex, Tree4Deltas.ALL_INDICES).getColor() == Tree4Deltas.INSERT) {
+            Element<E> standingChangeToIndex = tree.get(overallIndex, Tree4Deltas.ALL_INDICES);
+
+            // if we're deleting an insert, remove that insert
+            if(standingChangeToIndex.getColor() == Tree4Deltas.INSERT) {
                 if(!allowContradictingEvents) throw new IllegalStateException("Remove " + i + " undoes prior insert at the same index! Consider enabling contradicting events.");
                 tree.remove(overallIndex, Tree4Deltas.ALL_INDICES, 1);
-
-            // otherwise apply the delete
-            } else {
-                tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.DELETE, value, 1);
+                continue;
             }
-        }
+
+            // if we're deleting an update, the original replaced value stands.
+            if(standingChangeToIndex.getColor() == Tree4Deltas.UPDATE) {
+                value = standingChangeToIndex.get();
+            }
+
+            tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.DELETE, value, 1);
+       }
     }
 
     public int currentSize() {

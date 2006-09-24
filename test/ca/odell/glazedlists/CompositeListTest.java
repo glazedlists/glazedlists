@@ -26,7 +26,8 @@ public class CompositeListTest extends TestCase {
      */
     public void testSingleSource() {
         CompositeList<String> fastFood = new CompositeList<String>();
-        ListConsistencyListener.install(fastFood);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(fastFood);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         EventList<String> wendys = fastFood.createMemberList();
         wendys.add("Classic Single");
@@ -55,7 +56,8 @@ public class CompositeListTest extends TestCase {
      */
     public void testMultipleSources() {
         CompositeList<String> fastFood = new CompositeList<String>();
-        ListConsistencyListener.install(fastFood);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(fastFood);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         List<String> fastFoodVerify = new ArrayList<String>();
 
@@ -124,7 +126,8 @@ public class CompositeListTest extends TestCase {
      */
     public void testRemoveByReference() {
         CompositeList<String> fastFood = new CompositeList<String>();
-        ListConsistencyListener.install(fastFood);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(fastFood);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         EventList<String> wendys = fastFood.createMemberList();
         EventList<String> mcDonalds = fastFood.createMemberList();
@@ -189,7 +192,8 @@ public class CompositeListTest extends TestCase {
      */
     public void testSingleElements() {
         CompositeList<String> aToB = new CompositeList<String>();
-        ListConsistencyListener.install(aToB);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(aToB);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         EventList<String> alpha = aToB.createMemberList();
         alpha.add("A");

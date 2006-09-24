@@ -448,7 +448,8 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      */
     public void testMergingListEvents() {
         CompositeList<String> compositeList = new CompositeList<String>();
-        ListConsistencyListener.install(compositeList);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(compositeList);
+        listConsistencyListener.setPreviousElementTracked(false);
         EventList<String> source = compositeList.createMemberList();
         source.add("C");
         source.add("A");

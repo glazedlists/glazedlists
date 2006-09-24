@@ -27,6 +27,7 @@ public class ObservableElementListTest extends TestCase {
     public void setUp() {
         labels = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
         counter = ListConsistencyListener.install(labels);
+        counter.setPreviousElementTracked(false);
         assertEquals(0, counter.getEventCount());
     }
 

@@ -60,6 +60,7 @@ public class MultipleEventsTest extends TestCase {
 
         // listen to changes on the sub list
         ListConsistencyListener<String> counter = ListConsistencyListener.install(subList);
+        counter.setPreviousElementTracked(false);
 
         // clear the sub list
         subList.clear();
@@ -85,6 +86,7 @@ public class MultipleEventsTest extends TestCase {
 
         // listen to changes on the unique list
         ListConsistencyListener<String> counter = ListConsistencyListener.install(uniqueList);
+        counter.setPreviousElementTracked(false);
 
         // clear the unique list
         uniqueList.clear();
