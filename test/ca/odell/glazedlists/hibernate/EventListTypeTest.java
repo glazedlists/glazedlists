@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
-import ca.odell.glazedlists.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
