@@ -8,6 +8,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.util.ArrayList;
 import java.util.List;
