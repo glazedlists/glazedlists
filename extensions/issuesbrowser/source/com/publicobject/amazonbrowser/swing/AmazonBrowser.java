@@ -175,7 +175,8 @@ public class AmazonBrowser implements Runnable {
         new TableComparatorChooser<Item>(itemTable, sortedItemsList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
 
         // add a hierarchical column to the table
-        ListConsistencyListener.install(treeList);
+        ListConsistencyListener<Item> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
         TreeTableSupport.install(itemTable, treeList, 2);
 
         // build a panel for the search panel and results table
