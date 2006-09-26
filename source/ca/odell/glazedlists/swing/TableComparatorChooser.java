@@ -76,33 +76,22 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     private final HeaderClickHandler headerClickHandler;
 
     /**
-     * Creates a new TableComparatorChooser that responds to clicks
-     * on the specified table and uses them to sort the specified list.
+     * Creates and installs a TableComparatorChooser.
      *
-     * @param table the table with headers that can be clicked on
-     * @param sortedList the sorted list to update
-     * @param multipleColumnSort <code>true</code> to sort by multiple columns
-     *      at a time, or <code>false</code> to sort by a single column. Although
-     *      sorting by multiple columns is more powerful, the user interface is
-     *      not as simple and this strategy should only be used where necessary.
+     * @deprecated replaced with {@link #install}, which is functionally
+     * identical but uses a more fitting name to convey the action that is
+     * performed.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
         this(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
     }
 
     /**
-     * Creates a new TableComparatorChooser that responds to clicks
-     * on the specified table and uses them to sort the specified list by
-     * delegating to the given <code>strategy</code>.
+     * Creates and installs a TableComparatorChooser.
      *
-     * @param table the table with headers that can be clicked on
-     * @param sortedList the sorted list to update
-     * @param strategy an implementations of {@link SortingStrategy}, typically one of
-     *      <ul>
-     *          <li> {@link AbstractTableComparatorChooser#SINGLE_COLUMN}
-     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
-     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
-     *      </ul>
+     * @deprecated replaced with {@link #install}, which is functionally
+     * identical but uses a more fitting name to convey the action that is
+     * performed.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
         super(sortedList, ((EventTableModel<E>)table.getModel()).getTableFormat());
@@ -120,6 +109,39 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
         // install the sorting strategy to interpret clicks
         this.headerClickHandler = new HeaderClickHandler(table, (SortingStrategy)strategy);
+    }
+
+    /**
+     * Installs a new TableComparatorChooser that responds to clicks
+     * on the specified table and uses them to sort the specified list.
+     *
+     * @param table the table with headers that can be clicked on
+     * @param sortedList the sorted list to update
+     * @param multipleColumnSort <code>true</code> to sort by multiple columns
+     *      at a time, or <code>false</code> to sort by a single column. Although
+     *      sorting by multiple columns is more powerful, the user interface is
+     *      not as simple and this strategy should only be used where necessary.
+     */
+    public <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
+        return new TableComparatorChooser<E>(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
+    }
+
+    /**
+     * Installs a new TableComparatorChooser that responds to clicks
+     * on the specified table and uses them to sort the specified list by
+     * delegating to the given <code>strategy</code>.
+     *
+     * @param table the table with headers that can be clicked on
+     * @param sortedList the sorted list to update
+     * @param strategy an implementations of {@link SortingStrategy}, typically one of
+     *      <ul>
+     *          <li> {@link AbstractTableComparatorChooser#SINGLE_COLUMN}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
+     *      </ul>
+     */
+    public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, Object strategy) {
+        return new TableComparatorChooser<E>(table, sortedList, strategy);
     }
 
     /**

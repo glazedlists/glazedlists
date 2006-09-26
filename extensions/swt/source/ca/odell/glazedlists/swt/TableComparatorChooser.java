@@ -24,9 +24,6 @@ import java.util.List;
  * on the table's headers. It requires that the ListTable has a SortedList as
  * a source as the sorting on that list is used.
  *
- * <p><strong>Warning:</strong> This class is a a developer preview and subject to
- * many bugs and API changes.
- *
  * @see <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet2.java?rev=HEAD">Snippet 2</a>
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -45,15 +42,11 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
     private ColumnListener columnListener = new ColumnListener();
 
     /**
-     * Creates a new TableComparatorChooser that responds to clicks
-     * on the specified table and uses them to sort the specified list.
+     * Creates and installs a TableComparatorChooser.
      *
-     * @param eventTableViewer the table viewer for the table to be sorted
-     * @param sortedList the sorted list to update.
-     * @param multipleColumnSort <code>true</code> to sort by multiple columns
-     *      at a time, or <code>false</code> to sort by a single column. Although
-     *      sorting by multiple columns is more powerful, the user interface is
-     *      not as simple and this strategy should only be used where necessary.
+     * @deprecated replaced with {@link #install}, which is functionally
+     * identical but uses a more fitting name to convey the action that is
+     * performed.
      */
     public TableComparatorChooser(EventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
         super(sortedList, eventTableViewer.getTableFormat());
@@ -68,6 +61,21 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
 
         // sort using the specified approach
         sortingStrategy = new MouseOnlySortingStrategy(multipleColumnSort);
+    }
+
+    /**
+     * Installs a new TableComparatorChooser that responds to clicks
+     * on the specified table and uses them to sort the specified list.
+     *
+     * @param eventTableViewer the table viewer for the table to be sorted
+     * @param sortedList the sorted list to update.
+     * @param multipleColumnSort <code>true</code> to sort by multiple columns
+     *      at a time, or <code>false</code> to sort by a single column. Although
+     *      sorting by multiple columns is more powerful, the user interface is
+     *      not as simple and this strategy should only be used where necessary.
+     */
+    public <E> TableComparatorChooser<E> install(EventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
+        return new TableComparatorChooser<E>(eventTableViewer, sortedList,  multipleColumnSort);
     }
 
     /**
