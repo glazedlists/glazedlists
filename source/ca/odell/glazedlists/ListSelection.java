@@ -75,7 +75,7 @@ public class ListSelection<E> {
     private DeselectionToggleList<E> deselectedToggleList;
 
     /** observe the source list */
-    private final SourceListener<E> sourceListener = new SourceListener<E>();
+    private final SourceListener sourceListener = new SourceListener();
 
     /** the selection state */
     private Barcode barcode = new Barcode();
@@ -121,7 +121,7 @@ public class ListSelection<E> {
      * Handle changes to the source list by adjusting our selection state and
      * the contents of the selected and deselected lists.
      */
-    private class SourceListener<E> implements ListEventListener<E> {
+    private class SourceListener implements ListEventListener<E> {
 
         /** {@inheritDoc} */
         public void listChanged(ListEvent<E> listChanges) {
@@ -188,12 +188,12 @@ public class ListSelection<E> {
                         // delete selected values
                         if(previouslySelected) {
                             barcode.remove(index, 1);
-                            addSelectedChange(ListEvent.DELETE, previousSelectionIndex, previousSelectionIndex);
+                            addSelectedDelete(previousSelectionIndex, listChanges.getPreviousValue());
 
                         // delete deselected values
                         } else {
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
-                            addDeselectedChange(ListEvent.DELETE, deselectedIndex, deselectedIndex);
+                            addDeselectedDelete(deselectedIndex, listChanges.getPreviousValue());
                             barcode.remove(index, 1);
                         }
 
@@ -208,32 +208,32 @@ public class ListSelection<E> {
                             if(selectionMode == SINGLE_INTERVAL_SELECTION
                             || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
                                 barcode.add(index, selected, 1);
-                                addSelectedChange(ListEvent.INSERT, previousSelectionIndex, previousSelectionIndex);
+                                addSelectedInsert(previousSelectionIndex);
 
                             // do not select the inserted for single selection and defensive selection
                             } else {
                                 barcode.add(index, deselected, 1);
                                 int deselectedIndex = barcode.getColourIndex(index, deselected);
-                                addDeselectedChange(ListEvent.INSERT, deselectedIndex, deselectedIndex);
+                                addDeselectedInsert(deselectedIndex);
                             }
 
                         // add a deselected value
                         } else {
                             barcode.add(index, deselected, 1);
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
-                            addDeselectedChange(ListEvent.INSERT, deselectedIndex, deselectedIndex);
+                            addDeselectedInsert(deselectedIndex);
                         }
 
                     // when an element is changed, assume selection stays the same
                     } else if(changeType == ListEvent.UPDATE) {
                         // update a selected value
                         if(previouslySelected) {
-                            addSelectedChange(ListEvent.UPDATE, previousSelectionIndex, previousSelectionIndex);
+                            addSelectedUpdate(previousSelectionIndex, listChanges.getPreviousValue());
 
                         // update a deselected value
                         } else {
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
-                            addDeselectedChange(ListEvent.UPDATE, deselectedIndex, deselectedIndex);
+                            addDeselectedUpdate(deselectedIndex, listChanges.getPreviousValue());
                         }
                     }
 
@@ -372,27 +372,28 @@ public class ListSelection<E> {
      * Inverts the current selection.
      */
     public void invertSelection() {
-        // Switch what colour is considered to be selected
-        if(selected == Barcode.BLACK) {
-            selected = Barcode.WHITE;
-            deselected = Barcode.BLACK;
-        } else {
-            selected = Barcode.BLACK;
-            deselected = Barcode.WHITE;
-        }
-
         // Clear the anchor and lead
         anchorSelectionIndex = -1;
         leadSelectionIndex = -1;
 
         // Update the selected list to reflect the selection inversion
         beginAll();
-        addSelectedChange(ListEvent.DELETE, 0, barcode.colourSize(deselected) - 1);
-        addSelectedChange(ListEvent.INSERT, 0, barcode.colourSize(selected) - 1);
+        for(BarcodeIterator i = barcode.iterator(); i.hasNext(); ) {
+            Object color = i.next();
+            E value = source.get(i.getIndex());
+            int originalIndex = i.getColourIndex(color);
 
-        // Update the deselected list to reflect the selection inversion
-        addDeselectedChange(ListEvent.DELETE, 0, barcode.colourSize(selected) - 1);
-        addDeselectedChange(ListEvent.INSERT, 0, barcode.colourSize(deselected) - 1);
+            if(color == selected) {
+                i.set(deselected);
+                int newIndex = i.getColourIndex(deselected);
+                addDeselectEvent(originalIndex, newIndex, value);
+
+            } else {
+                i.set(selected);
+                int newIndex = i.getColourIndex(selected);
+                addSelectEvent(newIndex, originalIndex, value);
+            }
+        }
         commitAll();
 
         // notify selection listeners that selection has been inverted
@@ -477,36 +478,48 @@ public class ListSelection<E> {
     }
 
     /**
-     * Deselects all elements.
+     * Deselect all elements.
      */
     public void deselectAll() {
-        // keep track of how many selected elements there were
-        int selectionChangeSize = barcode.colourSize(selected);
+        setAllColor(deselected);
+    }
 
-        // fast fail if there is no change to make
-        if(selectionChangeSize == 0) return;
+    /**
+     * @param color either selected or deselected.
+     */
+    private void setAllColor(Object color) {
+        // if there is nothing selected, we're done
+        Object oppositeColor = (color == selected) ? deselected : selected;
+        if(barcode.colourSize(oppositeColor) == 0) return;
 
         // keep track of the range of values that were affected
         int firstAffectedIndex = -1;
         int lastAffectedIndex = -1;
 
-        // update the deselected list while processing the change
-        beginDeselected();
-        for(BarcodeIterator i = barcode.iterator(); i.hasNextColour(selected);) {
-            i.nextColour(selected);
-            if(firstAffectedIndex == -1) firstAffectedIndex = i.getIndex();
-            lastAffectedIndex = i.getIndex();
-            addDeselectedChange(ListEvent.INSERT, lastAffectedIndex, lastAffectedIndex);
-        }
-        // bulk update the barcode to be entirely deselected
-        barcode.clear();
-        barcode.add(0, deselected, source.size());
-        commitDeselected();
-        beginSelected();
-        addSelectedChange(ListEvent.DELETE, 0, selectionChangeSize - 1);
-        commitSelected();
+        // prepare the change events
+        beginAll();
+        for(BarcodeIterator i = barcode.iterator(); i.hasNextColour(oppositeColor);) {
+            i.nextColour(oppositeColor);
+            int index = i.getIndex();
+            E value = source.get(index);
+            if(color == selected) {
+                addDeselectedDelete(0, value);
+                addSelectedInsert(index);
+            } else {
+                addSelectedDelete(0, value);
+                addDeselectedInsert(index);
+            }
 
-        // notify listeners of selection change
+            if(firstAffectedIndex == -1) firstAffectedIndex = index;
+            lastAffectedIndex = index;
+        }
+
+        // reset barcode state
+        barcode.clear();
+        barcode.add(0, color, source.size());
+
+        // fire events
+        commitAll();
         fireSelectionChanged(firstAffectedIndex, lastAffectedIndex);
     }
 
@@ -583,16 +596,6 @@ public class ListSelection<E> {
         if(firstAffectedIndex > -1) fireSelectionChanged(firstAffectedIndex, lastAffectedIndex);
     }
 
-    private void addSelectEvent(BarcodeIterator i) {
-        int deselectedIndex = i.getColourIndex(deselected);
-        addSelectEvent(i.set(selected), deselectedIndex);
-    }
-
-    private void addSelectEvent(int selectIndex, int deselectIndex){
-        addDeselectedChange(ListEvent.DELETE, deselectIndex, deselectIndex);
-        addSelectedChange(ListEvent.INSERT, selectIndex, selectIndex);
-    }
-
     /**
      * Select the specified element, if it exists.
      *
@@ -645,36 +648,7 @@ public class ListSelection<E> {
      * Selects all elements.
      */
     public void selectAll() {
-        // keep track of how many deselected elements there were
-        int deselectionChangeSize = barcode.colourSize(deselected);
-
-        // fast fail if there is nothing to change
-        if(deselectionChangeSize == 0) return;
-
-        // keep track of the range of values that were affected
-        int firstAffectedIndex = -1;
-        int lastAffectedIndex = -1;
-
-        // update the selected list while processing the change
-        beginSelected();
-        for(BarcodeIterator i = barcode.iterator(); i.hasNextColour(deselected);) {
-            i.nextColour(deselected);
-            if(firstAffectedIndex == -1) firstAffectedIndex = i.getIndex();
-            lastAffectedIndex = i.getIndex();
-            addSelectedChange(ListEvent.INSERT, lastAffectedIndex, lastAffectedIndex);
-        }
-        // bulk update the barcode to be entirely selected
-        barcode.clear();
-        barcode.add(0, selected, source.size());
-        commitSelected();
-
-        // update the deselected list
-        beginDeselected();
-        addDeselectedChange(ListEvent.DELETE, 0, deselectionChangeSize - 1);
-        commitDeselected();
-
-        // notify listeners of selection change
-        fireSelectionChanged(firstAffectedIndex, lastAffectedIndex);
+        setAllColor(selected);
     }
 
     /**
@@ -828,22 +802,52 @@ public class ListSelection<E> {
         if(deselectedToggleList != null) deselectedToggleList.updates().reorder(deselectReorderMap);
     }
 
-    private void addDeselectEvent(BarcodeIterator i) {
-        addDeselectEvent(i.getColourIndex(selected), i.set(deselected));
+    private void addSelectEvent(BarcodeIterator i) {
+        E value = source.get(i.getIndex());
+        int deselectedIndex = i.getColourIndex(deselected);
+        int selectedIndex = i.set(selected);
+        addSelectEvent(selectedIndex, deselectedIndex, value);
     }
-    private void addDeselectEvent(int selectIndex, int deselectIndex) {
-        addSelectedChange(ListEvent.DELETE, selectIndex, selectIndex);
-        addDeselectedChange(ListEvent.INSERT, deselectIndex, deselectIndex);
+    private void addSelectEvent(int selectIndex, int deselectIndex, E oldValue) {
+        addDeselectedDelete(deselectIndex, oldValue);
+        addSelectedInsert(selectIndex);
+    }
+    private void addDeselectEvent(BarcodeIterator i) {
+        E value = source.get(i.getIndex());
+        int selectedIndex = i.getColourIndex(selected);
+        int deselectedIndex = i.set(deselected);
+        addDeselectEvent(selectedIndex, deselectedIndex, value);
+    }
+    private void addDeselectEvent(int selectIndex, int deselectIndex, E value) {
+        addSelectedDelete(selectIndex, value);
+        addDeselectedInsert(deselectIndex);
     }
 
-    private void addSelectedChange(int type, int start, int end){
-        if(selectedList != null) selectedList.updates().addChange(type, start, end);
-        if(selectedToggleList != null) selectedToggleList.updates().addChange(type, start, end);
+    private void addSelectedInsert(int index){
+        if(selectedList != null) selectedList.updates().addInsert(index);
+        if(selectedToggleList != null) selectedToggleList.updates().addInsert(index);
     }
-    private void addDeselectedChange(int type, int start, int end){
-        if(deselectedList != null) deselectedList.updates().addChange(type, start, end);
-        if(deselectedToggleList != null) deselectedToggleList.updates().addChange(type, start, end);
+    private void addSelectedUpdate(int index, E oldValue){
+        if(selectedList != null) selectedList.updates().elementUpdated(index, oldValue);
+        if(selectedToggleList != null) selectedToggleList.updates().elementUpdated(index, oldValue);
     }
+    private void addSelectedDelete(int index, E oldValue){
+        if(selectedList != null) selectedList.updates().elementDeleted(index, oldValue);
+        if(selectedToggleList != null) selectedToggleList.updates().elementDeleted(index, oldValue);
+    }
+    private void addDeselectedInsert(int index){
+        if(deselectedList != null) deselectedList.updates().addInsert(index);
+        if(deselectedToggleList != null) deselectedToggleList.updates().addInsert(index);
+    }
+    private void addDeselectedDelete(int index, E oldValue){
+        if(deselectedList != null) deselectedList.updates().elementDeleted(index, oldValue);
+        if(deselectedToggleList != null) deselectedToggleList.updates().elementDeleted(index, oldValue);
+    }
+    private void addDeselectedUpdate(int index, E oldValue) {
+        if(deselectedList != null) deselectedList.updates().elementUpdated(index, oldValue);
+        if(deselectedToggleList != null) deselectedToggleList.updates().elementUpdated(index, oldValue);
+    }
+
 
     private void beginAll() {
         beginSelected();
@@ -981,6 +985,7 @@ public class ListSelection<E> {
 
             // when there's a change
             if(selectedBefore != selectedAfter) {
+                E value = source.get(i);
 
                 // update change range
                 if(i < minChangedIndex) minChangedIndex = i;
@@ -989,13 +994,13 @@ public class ListSelection<E> {
                 // it is being deselected
                 if(selectedBefore) {
                     barcode.set(i, deselected, 1);
-                    addDeselectEvent(selectionIndex, i - selectionIndex);
+                    addDeselectEvent(selectionIndex, i - selectionIndex, value);
 
                 // it is being selected
                 } else {
                     barcode.set(i, selected, 1);
                     int newSelectionIndex = barcode.getColourIndex(i, selected);
-                    addSelectEvent(newSelectionIndex, i - newSelectionIndex);
+                    addSelectEvent(newSelectionIndex, i - newSelectionIndex, value);
                 }
             }
         }
@@ -1187,7 +1192,7 @@ public class ListSelection<E> {
         /**
          * This allows access to the EventAssembler for this list.
          */
-        public ListEventAssembler updates() {
+        public ListEventAssembler<E> updates() {
             return updates;
         }
 
