@@ -22,7 +22,6 @@ import java.util.*;
 public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     private static final FunctionList.Function NO_OP_FUNCTION = new NoOpFunction();
-    private static final NodeComparator COMPARABLE_NODE_COMPARATOR = comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator());
 
     /** node colors define where it is in the source and where it is here */
     private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList(new String[] { "R", "V", "r", "v" }));
@@ -63,7 +62,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * ie. siblings are not already adjacent.
      */
     public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
-        this(source, format, comparatorToNodeComparator(comparator), null);
+        this(source, format, comparatorToNodeComparator(comparator, format), null);
     }
     /** hack extra Comparator so we can build the nodeComparator only once. */
     private TreeList(EventList<E> source, Format<E> format, NodeComparator<E> nodeComparator, Void unusedParameterForSortFirst) {
@@ -75,7 +74,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * This constructor does not sort the elements.
      */
     public TreeList(EventList<E> source, Format<E> format) {
-        this(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), format, COMPARABLE_NODE_COMPARATOR);
+        this(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), format, comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator(), format));
     }
     /** master Constructor that takes a FunctionList or a SortedList(FunctionList) */
     private TreeList(EventList<Node<E>> source, Format<E> format, NodeComparator<E> nodeComparator) {
@@ -754,30 +753,38 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * Convert the specified {@link Comparator<E>} into a {@link Comparator} for
      * nodes of type E.
      */
-    private static <E> NodeComparator<E> comparatorToNodeComparator(Comparator<E> comparator) {
-        return new NodeComparator<E>(comparator);
+    private static <E> NodeComparator<E> comparatorToNodeComparator(Comparator<E> comparator, Format<E> format) {
+        return new NodeComparator<E>(comparator, format);
     }
 
     private static class NodeComparator<E> implements Comparator<Node<E>> {
         private final Comparator<E> comparator;
+        private final Format<E> format;
 
-        public NodeComparator(Comparator<E> comparator) {
+        public NodeComparator(Comparator<E> comparator, Format<E> format) {
             if(comparator == null) throw new IllegalArgumentException();
             this.comparator = comparator;
+            this.format = format;
         }
 
         public int compare(Node<E> a, Node<E> b) {
-            int myPathLength = a.path.size();
-            int otherPathLength = b.path.size();
+            int aPathLength = a.path.size();
+            int bPathLength = b.path.size();
+
+            // get the effective length, everything but the leaf nodes in the path
+            boolean aAllowsChildren = a.virtual || format.allowsChildren(a.path.get(aPathLength - 1));
+            boolean bAllowsChildren = b.virtual || format.allowsChildren(b.path.get(bPathLength - 1));
+            int aEffectiveLength = aPathLength + (aAllowsChildren ? 0 : -1);
+            int bEffectiveLength = bPathLength + (bAllowsChildren ? 0 : -1);
 
             // compare by value first
-            for(int i = 0; i < myPathLength && i < otherPathLength; i++) {
+            for(int i = 0; i < aEffectiveLength && i < bEffectiveLength; i++) {
                 int result = comparator.compare(a.path.get(i), b.path.get(i));
                 if(result != 0) return result;
             }
 
             // and path length second
-            return myPathLength - otherPathLength;
+            return aEffectiveLength - bEffectiveLength;
         }
 
     }

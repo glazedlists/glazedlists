@@ -17,7 +17,7 @@ import java.util.List;
  *
  * @author James Lemieux
  */
-public class ItemTableFormat implements WritableTableFormat<TreeList.Node<Item>>, AdvancedTableFormat<TreeList.Node<Item>> {
+public class ItemTableFormat implements WritableTableFormat<Item>, AdvancedTableFormat<Item> {
     public int getColumnCount() {
         return 6;
     }
@@ -46,27 +46,21 @@ public class ItemTableFormat implements WritableTableFormat<TreeList.Node<Item>>
         return GlazedLists.comparableComparator();
     }
 
-    public boolean isEditable(TreeList.Node<Item> baseObject, int column) {
+    public boolean isEditable(Item item, int column) {
         return column == 2;
     }
 
-    public TreeList.Node<Item> setColumnValue(TreeList.Node<Item> baseObject, Object editedValue, int column) {
-        final List<Item> treePath = baseObject.path();
-        final Item item = treePath.get(treePath.size()-1);
-
+    public Item setColumnValue(Item item, Object editedValue, int column) {
         switch (column) {
             case 2: item.getItemAttributes().setTitle((String) editedValue); break;
             default: throw new IllegalStateException("column " + column + " is not editable");
         }
 
-        return baseObject;
+        return item;
     }
 
-    public Object getColumnValue(TreeList.Node<Item> baseObject, int column) {
-        if (baseObject == null) return null;
-
-        final List<Item> treePath = baseObject.path();
-        final Item item = treePath.get(treePath.size()-1);
+    public Object getColumnValue(Item item, int column) {
+        if(item == null) return null;
 
         switch (column) {
             case 0: return item.getASIN();

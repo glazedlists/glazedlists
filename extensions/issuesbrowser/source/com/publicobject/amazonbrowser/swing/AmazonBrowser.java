@@ -45,10 +45,10 @@ public class AmazonBrowser implements Runnable {
     private TreeList<Item> treeList;
 
     /** the TableModel backing the treetable of items */
-    private EventTableModel<TreeList.Node<Item>> itemTableModel;
+    private EventTableModel<Item> itemTableModel;
 
     /** the ListSelectionModel backing the treetable of items */
-    private EventSelectionModel<TreeList.Node<Item>> itemTableSelectionModel;
+    private EventSelectionModel<Item> itemTableSelectionModel;
 
     /** loads items as requested */
     private ItemLoader itemLoader;
@@ -118,6 +118,7 @@ public class AmazonBrowser implements Runnable {
         final MatcherEditor<Item> filterFieldMatcherEditor = new TextComponentMatcherEditor<Item>(filterField, new ItemTextFilterator());
 
         // sort the original items list
+        itemEventList = GlazedListsSwing.swingThreadProxyList(itemEventList);
         final SortedList<Item> sortedItemsList = new SortedList<Item>(itemEventList, null);
         final FilterList<Item> filteredItemsList = new FilterList<Item>(sortedItemsList, filterFieldMatcherEditor);
 
@@ -163,9 +164,9 @@ public class AmazonBrowser implements Runnable {
         treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), (Comparator)GlazedLists.comparableComparator());
 
         // create a JTable to display the items
-        final TableFormat<TreeList.Node<Item>> itemTableFormat = new ItemTableFormat();
-        itemTableModel = new EventTableModel<TreeList.Node<Item>>(treeList.getNodesList(), itemTableFormat);
-        itemTableSelectionModel = new EventSelectionModel<TreeList.Node<Item>>(treeList.getNodesList());
+        final TableFormat<Item> itemTableFormat = new ItemTableFormat();
+        itemTableModel = new EventTableModel<Item>(treeList, itemTableFormat);
+        itemTableSelectionModel = new EventSelectionModel<Item>(treeList);
         final JTable itemTable = new JTable(itemTableModel, null, itemTableSelectionModel);
         JScrollPane itemScrollPane = new JScrollPane(itemTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         itemScrollPane.setBorder(BorderFactory.createEmptyBorder());
