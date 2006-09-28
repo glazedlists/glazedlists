@@ -19,6 +19,10 @@ import java.util.List;
  * <p>When this {@link EventList} is <i>thawed</i>, changes to its source
  * {@link EventList} will be reflected.
  *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="TableHeadingColor"><td colspan=2><font size="+2"><b>EventList Overview</b></font></td></tr>
  * <tr><td class="TableSubHeadingColor"><b>Writable:</b></td><td>writable when thawed (default), not writable when frozen</td></tr>

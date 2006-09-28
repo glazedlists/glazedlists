@@ -22,6 +22,10 @@ import java.util.List;
  * because separators are mixed in, which will be a different class than the
  * other list elements.
  *
+ * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
+ * thread ready but not thread safe. See {@link EventList} for an example
+ * of thread safe code.
+ *
  * <p><strong>Developer Preview</strong> this class is still under heavy development
  * and subject to API changes. It's also really slow at the moment and won't scale
  * to lists of size larger than a hundred or so efficiently.
