@@ -65,10 +65,12 @@ public class TreeListTest extends TestCase {
 
     /**
      * Convert Strings into paths. For example, PUPPY is <code>/P/U/P/P/Y</code>
+     *
+     * <p>Lowercase values cannot have children.
      */
     static class CharacterTreeFormat implements TreeList.Format<String> {
         public boolean allowsChildren(String element) {
-            return true;
+            return Character.isUpperCase(element.charAt(0));
         }
         public void getPath(List<String> path, String element) {
             for(int c = 0; c < element.length(); c++) {
@@ -580,6 +582,60 @@ public class TreeListTest extends TestCase {
                 "EFH",
                 "EFI",
                 "EFL",
+        });
+    }
+
+    public void testTreeSortingUnsortedTree() {
+        EventList<String> source = new BasicEventList<String>();
+        SortedList<String> sortedSource = new SortedList<String>(source);
+        TreeList<String> treeList = new TreeList<String>(sortedSource, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("ABD");
+        source.add("ABE");
+        source.add("FGH");
+        source.add("FGI");
+
+        sortedSource.setComparator(GlazedLists.reverseComparator());
+        assertTreeStructure(treeList, new String[] {
+                "F",
+                "FG",
+                "FGI",
+                "FGH",
+                "A",
+                "AB",
+                "ABE",
+                "ABD",
+                "ABC",
+        });
+    }
+
+    public void testTreeSorting() {
+        EventList<String> source = new BasicEventList<String>();
+        SortedList<String> sortedSource = new SortedList<String>(source);
+        TreeList<String> treeList = new TreeList<String>(sortedSource, new CharacterTreeFormat(), (Comparator)GlazedLists.comparableComparator());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABc");
+        source.add("ABd");
+        source.add("ABe");
+        source.add("FGh");
+        source.add("FGi");
+
+        sortedSource.setComparator(GlazedLists.reverseComparator());
+        assertTreeStructure(treeList, new String[] {
+                "F",
+                "FG",
+                "FGi",
+                "FGh",
+                "A",
+                "AB",
+                "ABe",
+                "ABd",
+                "ABc",
         });
     }
 }
