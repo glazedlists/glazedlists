@@ -23,8 +23,7 @@ public class GradientPanel extends JPanel {
     }
 
     public void paintComponent(Graphics g) {
-        if (this.isOpaque())
-            paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, vertical ? this.getHeight() : this.getWidth(), vertical);
+        paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, vertical ? this.getHeight() : this.getWidth(), vertical);
     }
 
     /**
