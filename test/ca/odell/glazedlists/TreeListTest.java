@@ -612,7 +612,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testTreeSorting() {
+    public void testTreeSorting_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedSource = new SortedList<String>(source);
         TreeList<String> treeList = new TreeList<String>(sortedSource, new CharacterTreeFormat(), (Comparator)GlazedLists.comparableComparator());
