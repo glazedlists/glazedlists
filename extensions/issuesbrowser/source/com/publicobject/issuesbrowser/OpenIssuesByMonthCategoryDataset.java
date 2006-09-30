@@ -103,9 +103,8 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
     }
 
     /**
-     * When a new {@link ValueSegment} is inserted we discard it if it
-     * represents a closed Issue (its status is CLOSED or RESOLVED). If it
-     * passes the test, we process the insertion by determining if:
+     * When a new {@link ValueSegment} is inserted we process the insertion by
+     * determining if:
      *
      * <ul>
      *   <li> the segment contains a new status not currently reported by the
@@ -131,9 +130,8 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
     }
 
     /**
-     * When an existing {@link ValueSegment} is removed we discard it if it
-     * represents a closed Issue (its status is CLOSED or RESOLVED). If it
-     * passes the test, we process the deletion by determining if:
+     * When an existing {@link ValueSegment} is removed we process the deletion
+     * by determining if:
      *
      * <ul>
      *   <li> it was the last segment with its status and thus we should remove
