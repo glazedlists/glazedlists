@@ -95,7 +95,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      *      <tt>false</tt> otherwise
      */
     private boolean contains(List l, Object value) {
-        for (int i = 0; i < l.size(); i++)
+        for (int i = 0, n = l.size(); i < n; i++)
             if (value == l.get(i))
                 return true;
 
