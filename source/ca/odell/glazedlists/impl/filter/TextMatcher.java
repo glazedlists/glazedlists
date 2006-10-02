@@ -5,6 +5,7 @@ package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.icu4j.UnicodeTextSearchStrategy;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
@@ -173,15 +174,22 @@ public class TextMatcher<E> implements Matcher<E> {
     private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode, int strategy) {
         final TextSearchStrategy result;
 
-        if (mode == TextMatcherEditor.CONTAINS) {
-            if (filter.length() == 1)
-                result = new SingleCharacterCaseInsensitiveTextSearchStrategy();
-            else
-                result = new BoyerMooreCaseInsensitiveTextSearchStrategy();
-        } else if (mode == TextMatcherEditor.STARTS_WITH) {
-            result = new StartsWithCaseInsensitiveTextSearchStrategy();
+        if (strategy == TextMatcherEditor.UNICODE_STRATEGY) {
+            result = new UnicodeTextSearchStrategy();
+
+        } else if (strategy == TextMatcherEditor.ASCII_STRATEGY || strategy == TextMatcherEditor.NORMALIZED_LATIN_STRATEGY) {
+            if (mode == TextMatcherEditor.CONTAINS) {
+                if (filter.length() == 1)
+                    result = new SingleCharacterCaseInsensitiveTextSearchStrategy();
+                else
+                    result = new BoyerMooreCaseInsensitiveTextSearchStrategy();
+            } else if (mode == TextMatcherEditor.STARTS_WITH) {
+                result = new StartsWithCaseInsensitiveTextSearchStrategy();
+            } else {
+                throw new IllegalArgumentException("unrecognized mode: " + mode);
+            }
         } else {
-            throw new IllegalArgumentException("unrecognized mode: " + mode);
+            throw new IllegalArgumentException("unrecognized strategy: " + strategy);
         }
 
         // apply the subtext

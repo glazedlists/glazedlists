@@ -36,6 +36,7 @@ public class AmazonBrowser implements Runnable {
     public static final Color CLEAR = new Color(0, 0, 0, 0);
     public static final Color AMAZON_SEARCH_LIGHT_BLUE = new Color(171, 208, 226);
     public static final Color AMAZON_SEARCH_DARK_BLUE = new Color(54, 127, 168);
+    public static final Color AMAZON_TAB_LIGHT_BEIGE = new Color(251, 252, 252);
     public static final Icon GO = loadIcon("resources/go.gif");
 
     /** an event list to host the items */
@@ -173,7 +174,7 @@ public class AmazonBrowser implements Runnable {
         MacCornerScrollPaneLayoutManager.install(itemScrollPane);
 
         // add sorting to the table
-        new TableComparatorChooser<Item>(itemTable, sortedItemsList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+        TableComparatorChooser.install(itemTable, sortedItemsList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
 
         // add a hierarchical column to the table
         ListConsistencyListener<Item> listConsistencyListener = ListConsistencyListener.install(treeList);

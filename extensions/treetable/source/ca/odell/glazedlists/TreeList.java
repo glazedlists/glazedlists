@@ -689,7 +689,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * @param treeFormat
      */
     public void setTreeFormat(Format<E> treeFormat) {
-        throw new UnsupportedOperationException();
+        // todo implement this
     }
 
     /**
