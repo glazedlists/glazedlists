@@ -89,7 +89,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     /**
      * Creates and installs a TableComparatorChooser.
      *
-     * @deprecated replaced with {@link #install}, which is functionally
+     * @deprecated 9/25/06 replaced with {@link #install}, which is functionally
      * identical but uses a more fitting name to convey the action that is
      * performed.
      */
