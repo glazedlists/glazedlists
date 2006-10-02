@@ -175,7 +175,8 @@ public class TextMatcher<E> implements Matcher<E> {
         final TextSearchStrategy result;
 
         if (strategy == TextMatcherEditor.UNICODE_STRATEGY) {
-            result = new UnicodeTextSearchStrategy();
+            // todo enable this once the UnicodeTextSearchStrategy is perfected
+//            result = new UnicodeTextSearchStrategy();
 
         } else if (strategy == TextMatcherEditor.ASCII_STRATEGY || strategy == TextMatcherEditor.NORMALIZED_LATIN_STRATEGY) {
             if (mode == TextMatcherEditor.CONTAINS) {
