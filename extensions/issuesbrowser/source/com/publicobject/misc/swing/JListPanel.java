@@ -138,12 +138,12 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
      * by positioning the dragged component according to the mouse position. In
      * this way, the visual effects of drag and drop gestures are recreated.
      */
-    private class DnDMouseListener extends MouseAdapter {
+    private class DnDMouseListener extends MouseAdapter implements MouseMotionListener {
         public void mousePressed(MouseEvent e) {
             // record the particulars of the new DND component
             dndComponent = (C) e.getComponent();
-            dndOrigin = e.getLocationOnScreen();
-            dndCurrent = e.getLocationOnScreen();
+            dndOrigin = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);
+            dndCurrent = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);
         }
 
         public void mouseReleased(MouseEvent e) {
@@ -182,16 +182,12 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
         }
 
         public void mouseDragged(MouseEvent e) {
-            // if the last recorded location produces no change in the display
-            // (i.e. the y-coordinate is the same) then bail early
-            // this can occur when the user moves the mouse directly sideways and only adjusts the x-coordinate
-            if (dndCurrent.y == e.getLocationOnScreen().y)
-                return;
-
-            dndCurrent = e.getLocationOnScreen();
+            dndCurrent = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);
             revalidate();
             repaint();
         }
+
+        public void mouseMoved(MouseEvent e) { }
     }
 
     /**
@@ -201,7 +197,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
      */
     private class ContainerWatcher implements ContainerListener {
         /** The MouseListener installed on each of the model's components to detect drag and drop gestures. */
-        private final MouseAdapter dndMouseListener = new DnDMouseListener();
+        private final DnDMouseListener dndMouseListener = new DnDMouseListener();
 
         public void componentAdded(ContainerEvent e) {
             e.getChild().addMouseListener(dndMouseListener);
