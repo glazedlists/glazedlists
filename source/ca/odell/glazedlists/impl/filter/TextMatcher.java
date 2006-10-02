@@ -5,7 +5,6 @@ package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.icu4j.UnicodeTextSearchStrategy;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
