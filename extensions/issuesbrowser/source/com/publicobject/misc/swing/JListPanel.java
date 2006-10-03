@@ -171,14 +171,19 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             if (p.y > lastComponentBounds.y + lastComponentBounds.height)
                 newIndexOfDnDComponent = model.size()-1;
 
-            // move the component from its old location to its new location
-            model.remove(dndComponent);
-            model.add(newIndexOfDnDComponent, dndComponent);
+            if (newIndexOfDnDComponent != -1) {
+                // move the component from its old location to its new location
+                model.remove(dndComponent);
+                model.add(newIndexOfDnDComponent, dndComponent);
+            }
 
             // remove all traces of the DND component
             dndComponent = null;
             dndOrigin = null;
             dndCurrent = null;
+
+            revalidate();
+            repaint();
         }
 
         public void mouseDragged(MouseEvent e) {
