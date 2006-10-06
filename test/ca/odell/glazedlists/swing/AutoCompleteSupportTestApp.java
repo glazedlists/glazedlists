@@ -169,10 +169,9 @@ public class AutoCompleteSupportTestApp {
         table.setModel(new EventTableModel<Location>(locations, tableFormat));
 
         // install a DefaultCellEditor with autocompleting support in each column
-        for (int i = 0; i < propertyNames.length; i++) {
-            final DefaultCellEditor cellEditor = AutoCompleteSupport.createTableCellEditor(tableFormat, locations, i);
-            table.getColumnModel().getColumn(i).setCellEditor(cellEditor);
-        }
+        final DefaultCellEditor cellEditor = AutoCompleteSupport.createTableCellEditor(tableFormat, locations, 2);
+        table.getColumnModel().getColumn(2).setCellEditor(cellEditor);
+        table.setSurrendersFocusOnKeystroke(true);
 
         autocompleteActionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
         autocompleteActionList.setPreferredSize(new Dimension(autocompleteActionList.getPreferredSize().width, 600));

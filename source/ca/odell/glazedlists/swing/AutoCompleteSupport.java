@@ -11,14 +11,15 @@ import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.ComboPopup;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -1331,11 +1332,11 @@ public final class AutoCompleteSupport<E> {
                 // don't bother unfiltering the popup since we'll redisplay the popup immediately
                 doNotClearFilterOnPopupHide = true;
                 try {
-                    comboBox.setPopupVisible(false);
+                    comboBox.hidePopup();
                 } finally {
                     doNotClearFilterOnPopupHide = false;
                 }
-                comboBox.setPopupVisible(true);
+                comboBox.showPopup();
             }
         } finally {
             doNotPostProcessDocumentChanges = false;
@@ -1363,7 +1364,7 @@ public final class AutoCompleteSupport<E> {
                     selectPossibleValue(comboBox.getSelectedIndex() + offset);
                 } else {
                     applyFilter(prefix);
-                    comboBox.setPopupVisible(true);
+                    comboBox.showPopup();
                 }
             }
         }
@@ -1393,11 +1394,11 @@ public final class AutoCompleteSupport<E> {
                         // don't bother unfiltering the popup since we'll redisplay the popup immediately
                         doNotClearFilterOnPopupHide = true;
                         try {
-                            comboBox.setPopupVisible(false);
+                            comboBox.hidePopup();
                         } finally {
                             doNotClearFilterOnPopupHide = false;
                         }
-                        comboBox.setPopupVisible(true);
+                        comboBox.showPopup();
                     }
                 } else {
                     // if the comboBox is not showing, simply hide the popup to avoid:
@@ -1405,7 +1406,7 @@ public final class AutoCompleteSupport<E> {
                     // this case can occur when the comboBox is used as a TableCellEditor
                     // and is uninstalled (removed from the component hierarchy) before
                     // receiving this callback
-                    comboBox.setPopupVisible(false);
+                    comboBox.hidePopup();
                 }
             }
 
@@ -1788,16 +1789,9 @@ public final class AutoCompleteSupport<E> {
      *
      * <p>Note that this factory method is only appropriate for use when the
      * values in the {@link ComboBoxModel} should be the unique set of values
-     * in a table column. If some other list of values will be used, do not use
-     * this factory method and create the {@link DefaultCellEditor} directly
-     * with code similar to this: <p>
-     *
-     * <pre>
-     * EventList comboBoxModelValues = ...
-     * JComboBox comboBox = new JComboBox();
-     * DefaultCellEditor cellEditor = new DefaultCellEditor(comboBox);
-     * AutoCompleteSupport.install(comboBox, comboBoxModelValues);
-     * </pre>
+     * in a table column. If some other list of values will be used then
+     * {@link #createTableCellEditor(EventList<E>)} is the appropriate factory
+     * method to use.
      *
      * <p>If the appearance or function of the autocompleting {@link JComboBox}
      * is to be customized, it can be retrieved using
@@ -1831,16 +1825,9 @@ public final class AutoCompleteSupport<E> {
      *
      * <p>Note that this factory method is only appropriate for use when the
      * values in the {@link ComboBoxModel} should be the unique set of values
-     * in a table column. If some other list of values will be used, do not use
-     * this factory method and create the {@link DefaultCellEditor} directly
-     * with code similar to this: <p>
-     *
-     * <pre>
-     * EventList comboBoxModelValues = ...
-     * JComboBox comboBox = new JComboBox();
-     * DefaultCellEditor cellEditor = new DefaultCellEditor(comboBox);
-     * AutoCompleteSupport.install(comboBox, comboBoxModelValues);
-     * </pre>
+     * in a table column. If some other list of values will be used then
+     * {@link #createTableCellEditor(EventList<E>)} is the appropriate factory
+     * method to use.
      *
      * <p>If the appearance or function of the autocompleting {@link JComboBox}
      * is to be customized, it can be retrieved using
@@ -1865,14 +1852,141 @@ public final class AutoCompleteSupport<E> {
         // narrow the list to just unique values within the column
         final EventList<Object> uniqueColumnValues = new UniqueList<Object>(allColumnValues, uniqueComparator);
 
-        // create a DefaultCellEditor backed by a JComboBox
-        final DefaultCellEditor cellEditor = new DefaultCellEditor(new JComboBox());
+        return createTableCellEditor(uniqueColumnValues);
+    }
+
+    /**
+     * This factory method creates and returns a {@link DefaultCellEditor}
+     * which adapts an autocompleting {@link JComboBox} for use as a Table
+     * Cell Editor. The values within the <code>source</code> are used as
+     * autocompletion terms within the {@link ComboBoxModel}.
+     *
+     * <p>If the appearance or function of the autocompleting {@link JComboBox}
+     * is to be customized, it can be retrieved using
+     * {@link DefaultCellEditor#getComponent()}.
+     *
+     * @param source the source of data for the JComboBox within the table cell editor
+     * @return a {@link DefaultCellEditor} which contains an autocompleting
+     *      combobox whose model contents are determined by the given <code>source</code>
+     */
+    public static <E> DefaultCellEditor createTableCellEditor(EventList<E> source) {
+        // create a DefaultCellEditor using a slightly customized JComboBox
+        final DefaultCellEditor cellEditor = new DefaultCellEditor(new TableCellComboBox());
         cellEditor.setClickCountToStart(2);
 
         // install autocompletion support on the JComboBox
-        AutoCompleteSupport.install((JComboBox) cellEditor.getComponent(), uniqueColumnValues);
+        AutoCompleteSupport autoCompleteSupport = AutoCompleteSupport.install((JComboBox) cellEditor.getComponent(), source);
+        autoCompleteSupport.setSelectsTextOnFocusGain(false);
 
         return cellEditor;
+    }
+
+    /**
+     * This customized JComboBox is only used when creating an autocompleting
+     * {@link DefaultCellEditor}. It customizes the behaviour of a JComboBox to
+     * make it more appropriate for use as a TableCellEditor. Specifically it
+     * adds the following:
+     *
+     * <ul>
+     *   <li>key presses which start table cell edits are also respected by the
+     *       JTextField
+     *   <li>the next focusable component for the JTextField is set to be the
+     *       JTable when editing begins so that focus returns to the table when
+     *       editing stops
+     * </ul>
+     */
+    private static final class TableCellComboBox extends JComboBox {
+
+        public TableCellComboBox() {
+            // use a customized ComboBoxEditor within this special JComboBox
+            setEditor(new TableCellComboBoxEditor());
+        }
+
+        /**
+         * This method is called by Swing when the JComboBox is installed as a
+         * TableCellEditor. It gives the component a chance to process the
+         * KeyEvent. For example, a JTextField will honour the keystroke and
+         * add the letter to its Document.
+         *
+         * Editable JComboBoxes don't provide that expected behaviour out of
+         * the box, so we override this method with logic that gives the editor
+         * component of the JComboBox a chance to respond to the keystroke that
+         * initiated the cell edit.
+         */
+        protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+            // let the textfield have a crack at processing the KeyEvent
+            ((TableCellTextField) getEditor().getEditorComponent()).processKeyBinding(ks, e, condition, pressed);
+
+            // now let the JComboBox react (important for arrow keys to work as expected)
+            return super.processKeyBinding(ks, e, condition, pressed);
+        }
+
+        /**
+         * This method is called by Swing when installing this JComboBox as a
+         * TableCellEditor. It ensures that focus will return to the JTable
+         * when the cell edit is complete.
+         *
+         * <p>We override this method to ensure that if the JTextField acting
+         * as the editor of the JComboBox has focus when the cell edit is
+         * complete, focus is returned to the JTable in that case as well.
+         */
+        public void setNextFocusableComponent(Component aComponent) {
+            super.setNextFocusableComponent(aComponent);
+
+            // set the next focusable component for the editor as well
+            ((JComponent) getEditor().getEditorComponent()).setNextFocusableComponent(aComponent);
+        }
+
+        /**
+         * A custom BasicComboBoxEditor that builds a custom JTextField with
+         * an extra capability: a public implementation of
+         * {@link TableCellTextField#processKeyBinding}
+         */
+        private static final class TableCellComboBoxEditor extends BasicComboBoxEditor {
+            public TableCellComboBoxEditor() {
+                // replace the super's editor with a JTextField of our own design
+                editor = new TableCellTextField();
+            }
+        }
+
+        /**
+         * This custom JTextField exists solely to make
+         * {@link #processKeyBinding} a public method so that it can be called
+         * from {@link TableCellComboBox#processKeyBinding}.
+         *
+         * This custom JTextField is only used when creating an autocompleting
+         * TableCellEditor via {@link AutoCompleteSupport#createTableCellEditor}.
+         */
+        private static class TableCellTextField extends JTextField {
+            public TableCellTextField() {
+                super("", 9);
+            }
+
+            /**
+             * Implementation copied from BasicComboBoxEditor.BorderlessTextField.
+             */
+            public void setText(String s) {
+                if (!getText().equals(s))
+                    super.setText(s);
+            }
+
+            /**
+             * Implementation copied from BasicComboBoxEditor.BorderlessTextField .
+             */
+            public void setBorder(Border b) {}
+
+            /**
+             * We override this method to make it public so that it can be
+             * called from {@link TableCellComboBox#processKeyBinding}.
+             *
+             * <p>This allows the keystroke which begins a table cell edit to
+             * also contribute a character to this JTextField, thus mimicing
+             * the behaviour of normal editable JTextField table cell editors.
+             */
+            public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+                return super.processKeyBinding(ks, e, condition, pressed);
+            }
+        }
     }
 
     /**
