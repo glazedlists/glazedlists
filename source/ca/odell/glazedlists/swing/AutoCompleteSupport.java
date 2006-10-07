@@ -317,8 +317,13 @@ public final class AutoCompleteSupport<E> {
 
     /** <tt>true</tt> indicates attempts to toggle the state of the popup should be ignored.
      * In general, the only time we should toggle the state of a popup is due to a users keystroke
-     * (and not programmatically setting the selected item, for example). */
-    private boolean doNotTogglePopup = true;
+     * (and not programmatically setting the selected item, for example).
+     *
+     * When the JComboBox is used within a TableCellEditor, this value is ALWAYS false, since
+     * we MUST accept keystrokes, even when they are passed second hand to the JComboBox after
+     * it has been installed as the cell editor (as opposed to typed into the JComboBox directly)
+     */
+    private boolean doNotTogglePopup;
 
     /** <tt>true</tt> indicates attempts to clear the filter when hiding the popup should be ignored.
      * This is because sometimes we hide and reshow a popup in rapid succession and we want to avoid
@@ -379,6 +384,7 @@ public final class AutoCompleteSupport<E> {
 
         // is this combo box a TableCellEditor?
         this.isTableCellEditor = Boolean.TRUE.equals(comboBox.getClientProperty("JComboBox.isTableCellEditor"));
+        this.doNotTogglePopup = !isTableCellEditor;
 
         // build the ComboBoxModel capable of filtering its values
         this.filterMatcherEditor = new TextMatcherEditor<E>(filterator == null ? new DefaultTextFilterator() : filterator);
@@ -1545,7 +1551,8 @@ public final class AutoCompleteSupport<E> {
         private ActionListener[] actionListeners;
 
         public void keyPressed(KeyEvent e) {
-            doNotTogglePopup = false;
+            if (!isTableCellEditor)
+                doNotTogglePopup = false;
 
             // this KeyHandler performs ALL processing of the ENTER key otherwise multiple
             // ActionEvents are fired to ActionListeners by the default JComboBox processing.
@@ -1607,7 +1614,8 @@ public final class AutoCompleteSupport<E> {
                 doNotChangeDocument = false;
             }
 
-            doNotTogglePopup = true;
+            if (!isTableCellEditor)
+                doNotTogglePopup = true;
         }
 
         private boolean isTrigger(KeyEvent e) {
@@ -1871,7 +1879,8 @@ public final class AutoCompleteSupport<E> {
      */
     public static <E> DefaultCellEditor createTableCellEditor(EventList<E> source) {
         // create a DefaultCellEditor using a slightly customized JComboBox
-        final DefaultCellEditor cellEditor = new DefaultCellEditor(new TableCellComboBox());
+        TableCellComboBox comboBox = new TableCellComboBox();
+        final DefaultCellEditor cellEditor = new DefaultCellEditor(comboBox);
         cellEditor.setClickCountToStart(2);
 
         // install autocompletion support on the JComboBox
@@ -1895,11 +1904,79 @@ public final class AutoCompleteSupport<E> {
      *       editing stops
      * </ul>
      */
-    private static final class TableCellComboBox extends JComboBox {
+    private static final class TableCellComboBox extends JComboBox implements FocusListener {
 
         public TableCellComboBox() {
             // use a customized ComboBoxEditor within this special JComboBox
             setEditor(new TableCellComboBoxEditor());
+
+            // replace the UI Delegate's FocusListener with our own in both
+            // the JComboBox and its ComboBoxEditor
+            replaceUIDelegateFocusListener(editor.getEditorComponent(), this);
+            replaceUIDelegateFocusListener(this, this);
+        }
+
+        /**
+         * This method is a complete hack, but is necessary to achieve the
+         * desired behaviour when using an autocompleting JComboBox in a
+         * TableCellEditor.
+         *
+         * The problem is that when cell editing begins due to a keystroke,
+         * ideally the ComboBoxPopup should be displayed in a filtered state.
+         * But, the FocusListener installed by BasicComboBoxUI actually hides
+         * the ComboBoxPopup due to some phantom focusLost event we receive.
+         *
+         * To solve the problem, we rip out the FocusListener installed by
+         * the BasicComboBoxUI and replace it with our own that does NOT hide
+         * the popup when this JComboBox loses focus. That's with us since
+         * losing focus implies we are committing or cancelling the cell edit
+         * anyway, so the entire editor is about to be removed.
+         */
+        private static void replaceUIDelegateFocusListener(Component c, FocusListener replacement) {
+            // remove all FocusListeners that appear to be installed by the UIdelegate
+            final FocusListener[] focusListeners = c.getFocusListeners();
+            for (int i = 0; i < focusListeners.length; i++)
+                if (focusListeners[i].getClass().getName().indexOf("ComboBoxUI") != -1)
+                    c.removeFocusListener(focusListeners[i]);
+
+            c.addFocusListener(replacement);
+        }
+
+        /**
+         * Implementation copied from BasicComboBoxUI.Handler.focusGained.
+         */
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() == getEditor().getEditorComponent())
+                return;
+
+            repaint();
+
+            if (isEditable() && editor != null)
+                getEditor().getEditorComponent().requestFocus();
+        }
+
+        /**
+         * Implementation copied from BasicComboBoxUI.Handler.focusLost and
+         * changed slightly as seen in the comments below.
+         */
+        public void focusLost(FocusEvent e) {
+            if (e.getSource() == getEditor().getEditorComponent()) {
+                final ComboBoxEditor editor = getEditor();
+                final Object item = editor.getItem();
+
+                if (!e.isTemporary() && item != null && !item.equals(getSelectedItem()))
+                    actionPerformed(new ActionEvent(editor, 0, "", EventQueue.getMostRecentEventTime(), 0));
+            }
+
+            // the 2 lines of code below are copied from BasicComboBoxUI.Handler.focusLost
+            // and represent the reason why we must tear out the FocusListener and replace
+            // it with one of our own - it screws up the installation of this JComboBox as
+            // a TableCellEditor by hiding the ComboBoxPopup on the first keystroke.
+            //
+            // if (!e.isTemporary())
+            //    setPopupVisible(false);
+
+            repaint();
         }
 
         /**
@@ -1971,7 +2048,7 @@ public final class AutoCompleteSupport<E> {
             }
 
             /**
-             * Implementation copied from BasicComboBoxEditor.BorderlessTextField .
+             * Implementation copied from BasicComboBoxEditor.BorderlessTextField.
              */
             public void setBorder(Border b) {}
 
