@@ -69,7 +69,34 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public static final int NORMALIZED_LATIN_STRATEGY = 101;
 
-    // todo doc this
+    /**
+     * Character comparison strategy that is implemented using the open source
+     * package for Unicode: <a href="http://icu.sourceforge.net/">ICU4J</a>,
+     * which provides a "Unicode-friendly, locale-sensitive, string-searching
+     * class for Java that obeys the string comparison conventions in different
+     * countries."
+     *
+     * In short, this strategy attempts to provide locale-sensitive
+     * string-searching that correctly handles cases like:
+     *
+     * <ul>
+     *   <li>accented characters (e.g. ≈ and A are equivalent in English but is NOT EQUIVALENT in Danish)
+     *   <li>conjoined letters (e.g. Ê)
+     *   <li>ignorable punctuation (e.g. "blackbird" vs. "black-bird")
+     * </ul>
+     *
+     *
+     * For example, the special character called "ash" from Old English looks
+     * like this '∆' in uppercase and 'Ê' in lowercase. The Unicode Strategy
+     * considers the character sequence of two normal latin characters "a" and "e"
+     * a match with the ash character. So, "Aeon Flux" and "∆on Flux" match.
+     *
+     * Similarly, the "eszett" character in the German alpabet resembles "ﬂ"
+     * but is equivalent to "ss." Thus, "Ruﬂland" and "Russland" match.
+     *
+     * An article of all features found in this character matching strategy can
+     * be found <a href="http://icu.sourceforge.net/userguide/searchString.html">here</a>.
+     */
     public static final int UNICODE_STRATEGY = 102;
 
     private static final String[] EMPTY_FILTER = new String[0];

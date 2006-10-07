@@ -174,9 +174,16 @@ public class TextMatcher<E> implements Matcher<E> {
         final TextSearchStrategy result;
 
         if (strategy == TextMatcherEditor.UNICODE_STRATEGY) {
-            // todo enable this once the UnicodeTextSearchStrategy is perfected
-//            result = new UnicodeTextSearchStrategy();
-            result = null;
+            try {
+                // UnicodeTextSearchStrategy has a runtime dependency on ICU4J. Since there is a
+                // reasonable chance that users will not have icu4j.jar on their classpath the first
+                // time they try this feature, we instantiate the class using reflection so that we can
+                // catch the error and provide better feedback regarding the probable cause.
+                result = (TextSearchStrategy) Class.forName("ca.odell.glazedlists.icu4j.UnicodeTextSearchStrategy").newInstance();
+            } catch (Throwable t) {
+                final String classpath = System.getProperty("java.class.path");
+                throw new RuntimeException("Unable to instantiate ca.odell.glazedlists.icu4j.UnicodeTextSearchStrategy. The most probable cause is that IBM's icu4j jar is not on the classpath: " + classpath, t);
+            }
 
         } else if (strategy == TextMatcherEditor.ASCII_STRATEGY || strategy == TextMatcherEditor.NORMALIZED_LATIN_STRATEGY) {
             if (mode == TextMatcherEditor.CONTAINS) {
