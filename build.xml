@@ -97,7 +97,7 @@
 	   Construct a browsable API.
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="docs" depends=""
+	<target name="docs"
 		description="Scan the source code to generate the Javadoc API.">
 		<!-- document all the source -->
         <mkdir dir="${docs.dir}"/>
@@ -199,17 +199,35 @@
 		description="Compile all components of the source.">
 	</target>
 
-	<target name="core" depends="">
-		<mkdir dir="${classes.dir}"/>
+	<target name="core">
+        <!-- compile the HttpClient we need to download dependency jars -->
+        <mkdir dir="${classes.dir}"/>
+        <javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+            <include name="ca/odell/glazedlists/impl/HttpClient.java"/>
+        </javac>
+
+        <!-- download the icu4j.jar which the core build depends on -->
+        <mkdir dir="lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/41904/icu4j.jar"/>
+            <arg value="lib/icu4j.jar"/>
+        </java>
+
+        <!-- now compile the rest of the core classes -->
 		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
-                <!-- swing -->
-                <exclude name="**/swing/**"/>
-                <!-- io -->
-                <exclude name="**/ctp/**"/>
-                <exclude name="**/io/**"/>
-                <exclude name="**/nio/**"/>
-                <exclude name="**/pmap/**"/>
-                <exclude name="**/rbp/**"/>
+            <classpath>
+                <fileset file="lib/icu4j.jar"/>
+            </classpath>
+
+            <!-- swing -->
+            <exclude name="**/swing/**"/>
+            <!-- io -->
+            <exclude name="**/ctp/**"/>
+            <exclude name="**/io/**"/>
+            <exclude name="**/nio/**"/>
+            <exclude name="**/pmap/**"/>
+            <exclude name="**/rbp/**"/>
 		</javac>
 	</target>
 
