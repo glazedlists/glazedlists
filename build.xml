@@ -505,7 +505,7 @@
         <mkdir dir="${java14_glazedlists.dir}/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="source"/>
-            <arg value="${ant.home}/lib/junit.jar"/>
+            <arg value="${ant.home}/lib/junit.jar${path.separator}lib/icu4j.jar"/>
             <arg value="${java14_glazedlists.dir}/source"/>
         </java>
 
