@@ -213,6 +213,12 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * MultiMap by calculating a key using key function this MultiMap was
      * constructed with.
      *
+     * Interestingly, we don't have to handle the UPDATE events here. The
+     * entries in the delegate map are silenty updated in place since the List
+     * we were given by the GroupingList is simply mutated. INSERTS and
+     * DELETES, however, require actual changes to the delegate map, and thus
+     * are processed here accordingly.
+     *
      * @param listChanges an event describing the changes in the GroupingList
      */
     public void listChanged(ListEvent<List<V>> listChanges) {
