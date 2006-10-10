@@ -1879,8 +1879,7 @@ public final class AutoCompleteSupport<E> {
      */
     public static <E> DefaultCellEditor createTableCellEditor(EventList<E> source) {
         // create a DefaultCellEditor using a slightly customized JComboBox
-        TableCellComboBox comboBox = new TableCellComboBox();
-        final DefaultCellEditor cellEditor = new DefaultCellEditor(comboBox);
+        final DefaultCellEditor cellEditor = new DefaultCellEditor(new TableCellComboBox());
         cellEditor.setClickCountToStart(2);
 
         // install autocompletion support on the JComboBox
