@@ -582,11 +582,70 @@ public final class GlazedLists {
      *      Each change to this {@link EventList} will be applied to the
      *      MultiMap
      * @param keyMaker the {@link FunctionList.Function} which produces a key
-     *      for each value in the <code>source</code>
+     *      for each value in the <code>source</code>. It is imperative that the
+     *      keyMaker produce <strong>immutable</strong> objects.
      * @return a MultiMap which remains in sync with changes that occur to the
      *      underlying <code>source</code> {@link EventList}
      */
     public static <K, V> Map<Comparable<K>, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends Comparable<K>> keyMaker) {
         return new GroupingListMultiMap<K, V>(source, keyMaker);
+    }
+
+    /**
+     * Synchronize the specified {@link EventList} to a Map that is returned
+     * from this method. Each time the {@link EventList} is changed the Map is
+     * updated to reflect the change.
+     *
+     * <p>This can be useful when it is known that an <code>EventList</code>
+     * will experience very few mutations compared to read operation and wants
+     * to provide a data structure that guarantees fast O(1) reads.
+     *
+     * <p>The keys of the Map are determined by evaluating each
+     * <code>source</code> element with the <code>keyMaker</code> function.
+     * The Map implementation assumes that each value has a unique key, and
+     * verifies this invariant at runtime, throwing a RuntimeException if it
+     * is ever violated.
+     *
+     * For example, if two distinct values, say <code>v1</code> and
+     * <code>v2</code> each produce the key <code>k</code> when they are
+     * evaluated by the <code>keyMaker</code> function, an
+     * {@link IllegalStateException} is thrown to proactively indicate the
+     * error.
+     *
+     * <p>As for example of normal usage, assume the <code>keyMaker</code>
+     * function returns the first letter of a name and the <code>source</code>
+     * {@link EventList} contains the names:
+     *
+     * <p><code>{"Kevin", "Jesse", "Holger"}</code>
+     *
+     * <p>The Map returned by this method would thus resemble:
+     *
+     * <p><code>
+     * "K" -> "Kevin"<br>
+     * "J" -> "Jesse"<br>
+     * "H" -> "Holger"<br>
+     * </code>
+     *
+     * <p>It is important to note that all mutating methods on the {@link Map}
+     * interface "write through" to the backing {@link EventList} as expected.
+     * These mutating methods include:
+     *
+     * <ul>
+     *   <li>the mutating methods of {@link Map#keySet()} and its {@link Iterator}
+     *   <li>the mutating methods of {@link Map#values()} and its {@link Iterator}
+     *   <li>the mutating methods of {@link Map#entrySet()} and its {@link Iterator}
+     *   <li>the {@link Map.Entry#setValue} method
+     * </ul>
+     *
+     * @param source the {@link EventList} which provides the values of the map.
+     *      Each change to this {@link EventList} will be applied to the Map.
+     * @param keyMaker the {@link FunctionList.Function} which produces a key
+     *      for each value in the <code>source</code>. It is imperative that the
+     *      keyMaker produce <strong>immutable</strong> objects.
+     * @return a Map which remains in sync with changes that occur to the
+     *      underlying <code>source</code> {@link EventList}
+     */
+    public static <K, V> Map<K, V> syncEventListToMap(EventList<V> source, FunctionList.Function<V, K> keyMaker) {
+        return new FunctionListMap<K, V>(source, keyMaker);
     }
 }

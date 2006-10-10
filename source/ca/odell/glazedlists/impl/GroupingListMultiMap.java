@@ -16,7 +16,7 @@ import java.util.*;
  * The values of the map are the lists of values from the {@link EventList}
  * which all map to a common key.
  *
- * <p>For example, a list containing
+ * <p>For example, an {@link EventList} containing
  *
  * <pre>
  * {Cherry, Plum, Cranberry, Pineapple, Banana, Prune}
@@ -38,7 +38,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     /** The raw values of this Map in an {@link EventList}. */
     private final GroupingList<V> groupingList;
 
-    /** The polished values of this Map in an {@link EventList}. */
+    /** The values of this Map in an {@link EventList}. */
     private final FunctionList<List<V>, List<V>> valueList;
 
     /** The keys of this Map (used to remove entries from the {@link #delegate}) */
@@ -207,11 +207,20 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         return this.entrySet;
     }
 
+    /** @inheritDoc */
+    public boolean equals(Object o) {
+        return delegate.equals(o);
+    }
+
+    /** @inheritDoc */
+    public int hashCode() {
+        return delegate.hashCode();
+    }
+
     /**
      * Updates this MultiMap datastructure to reflect changes in the underlying
      * {@link GroupingList}. Specifically, new entries are added to this
-     * MultiMap by calculating a key using key function this MultiMap was
-     * constructed with.
+     * MultiMap by calculating a key using the key function of this MultiMap.
      *
      * Interestingly, we don't have to handle the UPDATE events here. The
      * entries in the delegate map are silenty updated in place since the List
