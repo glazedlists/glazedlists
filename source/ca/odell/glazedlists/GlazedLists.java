@@ -364,25 +364,25 @@ public final class GlazedLists {
     }
 
     /**
-     * Provides a proxy to another ListEventListener that may go out of
-     * scope without explicitly removing itself from the source list's set of
+     * Provides a proxy to another ListEventListener that may go out of scope
+     * without explicitly removing itself from the source list's set of
      * listeners.
      *
      * <p>This exists to solve a garbage collection problem. Suppose I have an
-     * {@link EventList} <i>L</i> and I request a {@link ListIterator} for <i>L</i>.
+     * {@link EventList} <i>L</i> and I obtain a {@link ListIterator} for <i>L</i>.
      * The {@link ListIterator} must listen for change events to <i>L</i> in order
-     * to be consistent. Therefore such an iterator will register
-     * itself as a listener for <i>L</i>. When the iterator goes out of scope (as
-     * they usually do), it will remain as a listener for <i>L</i>. This prevents
-     * the iterator object from ever being garbage collected! But the iterator is
-     * never used again. Because iterators can be used very frequently, this will
+     * to be consistent. Therefore such an iterator will register itself as a
+     * listener for <i>L</i>. When the iterator goes out of scope (as they usually
+     * do), it will remain as a listener of <i>L</i>. This prevents the iterator
+     * object from ever being garbage collected, though the iterator can never be
+     * never used again! Because iterators can be used very frequently, this will
      * cause an unacceptable memory leak.
      *
      * <p>Instead of adding the iterator directly as a listener for <i>L</i>, add
-     * the proxy instead. The proxy will retain a <code>WeakReference</code> to the
+     * a proxy instead. The proxy will retain a <code>WeakReference</code> to the
      * iterator and forward events to the iterator as long as it is reachable. When
-     * theiterator is no longer reachable, the proxy will remove itself from the list
-     * of listeners for <i>L</i>. All garbage is then available for collection.
+     * the iterator is no longer reachable, the proxy will remove itself from the
+     * list of listeners for <i>L</i>. All garbage is then available for collection.
      *
      * @see java.lang.ref.WeakReference
      */
