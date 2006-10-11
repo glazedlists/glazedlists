@@ -589,16 +589,18 @@ public class TextMatcherTest extends TestCase {
         assertEquals(1, list.size());
         assertEquals("\u00c6nima", list.get(0));
 
-
         textMatcherEditor.setFilterText(new String[0]);
         textMatcherEditor.setFilterText(new String[] {"Ru\u00dfland"}); // Ruﬂland
         assertEquals(1, list.size());
         assertEquals("Ru\u00dfland", list.get(0));
 
-//        textMatcherEditor.setFilterText(new String[0]);
-//        textMatcherEditor.setFilterText(new String[] {"Russland\""});
-//        assertEquals(1, list.size());
-//        assertEquals("Ru\u00dfland", list.get(0));
+        // todo this highlights a bug in ICU4J, not Glazed Lists. We should update our
+        // icu4j.jar on glazedlists.dev.java.net once this bug has been fixed:
+        // http://bugs.icu-project.org/cgi-bin/icu-bugs?findid=5420&go=Go
+        textMatcherEditor.setFilterText(new String[0]);
+        textMatcherEditor.setFilterText(new String[] {"Russland\""});
+        assertEquals(1, list.size());
+        assertEquals("Ru\u00dfland", list.get(0));
     }
 
     /**
