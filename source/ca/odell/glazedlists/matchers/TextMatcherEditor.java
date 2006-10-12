@@ -6,6 +6,7 @@ package ca.odell.glazedlists.matchers;
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
+import ca.odell.glazedlists.impl.filter.TextMatchers;
 
 /**
  * A matcher editor that matches Objects that contain a filter text string.
@@ -28,6 +29,17 @@ import ca.odell.glazedlists.impl.filter.TextMatcher;
  *   <li>{@link #STARTS_WITH} will produce {@link Matcher} objects that test
  *        if at least one searchable string for an Object
  *        <strong>begins with</strong> at least one of the filter strings.
+ * </ul>
+ *
+ * <p>{@link TextMatcherEditor} is able to operate with one of two strategies.
+ * <ul>
+ *   <li>{@link #IDENTICAL_STRATEGY} defines a text match as a precise
+ *        character-for-character match between the filters and the text.
+ *
+ *   <li>{@link #NORMALIZED_STRATEGY} defines a text match more leniently for
+ *        Latin-character based languages. Specifically, diacritics are
+ *        stripped from all Latin characters before comparisons are made.
+ *        Consequently, filters like "resume" match works like "résumé".
  * </ul>
  *
  * @author James Lemieux
@@ -55,7 +67,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * fuzzy matching with this strategy - each character must be precisely
      * matched.
      */
-    public static final int ASCII_STRATEGY = 100;
+    public static final int IDENTICAL_STRATEGY = 100;
 
     /**
      * Character comparison strategy that assumes all Latin characters should
@@ -67,37 +79,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * and your application would like search terms such as "Muller" to match
      * the actual native spelling: "Müller".
      */
-    public static final int NORMALIZED_LATIN_STRATEGY = 101;
-
-    /**
-     * Character comparison strategy that is implemented using the open source
-     * package for Unicode: <a href="http://icu.sourceforge.net/">ICU4J</a>,
-     * which provides a "Unicode-friendly, locale-sensitive, string-searching
-     * class for Java that obeys the string comparison conventions in different
-     * countries."
-     *
-     * In short, this strategy attempts to provide locale-sensitive
-     * string-searching that correctly handles cases like:
-     *
-     * <ul>
-     *   <li>accented characters (e.g. Å and A are equivalent in English but is NOT EQUIVALENT in Danish)
-     *   <li>conjoined letters (e.g. æ)
-     *   <li>ignorable punctuation (e.g. "blackbird" vs. "black-bird")
-     * </ul>
-     *
-     *
-     * For example, the special character called "ash" from Old English looks
-     * like this 'Æ' in uppercase and 'æ' in lowercase. The Unicode Strategy
-     * considers the character sequence of two normal latin characters "a" and "e"
-     * a match with the ash character. So, "Aeon Flux" and "Æon Flux" match.
-     *
-     * Similarly, the "eszett" character in the German alpabet resembles "ß"
-     * but is equivalent to "ss." Thus, "Rußland" and "Russland" match.
-     *
-     * An article of all features found in this character matching strategy can
-     * be found <a href="http://icu.sourceforge.net/userguide/searchString.html">here</a>.
-     */
-    public static final int UNICODE_STRATEGY = 102;
+    public static final int NORMALIZED_STRATEGY = 101;
 
     private static final String[] EMPTY_FILTER = new String[0];
 
@@ -107,8 +89,8 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /** one of {@link #CONTAINS} or {@link #STARTS_WITH} */
     private int mode = CONTAINS;
 
-    /** one of {@link #ASCII_STRATEGY}, {@link #NORMALIZED_LATIN_STRATEGY}, or {@link #UNICODE_STRATEGY} */
-    private int strategy = ASCII_STRATEGY;
+    /** one of {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY} */
+    private int strategy = IDENTICAL_STRATEGY;
 
     /**
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
@@ -181,12 +163,12 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * to one of the predefined strategies. See the documentation for each
      * constant in order contrast the strategies.
      *
-     * @param strategy either {@link #ASCII_STRATEGY} or {@link #NORMALIZED_LATIN_STRATEGY}
-     *      or {@link #UNICODE_STRATEGY}.
+     * @param strategy either {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY}
      */
     public void setStrategy(int strategy) {
-        if(strategy != ASCII_STRATEGY && strategy != NORMALIZED_LATIN_STRATEGY && strategy != UNICODE_STRATEGY)
-            throw new IllegalArgumentException("strategy must be either TextMatcherEditor.ASCII_STRATEGY, TextMatcherEditor.NORMALIZED_LATIN_STRATEGY or TextMatcherEditor.UNICODE_STRATEGY");
+        if(strategy != IDENTICAL_STRATEGY && strategy != NORMALIZED_STRATEGY)
+            throw new IllegalArgumentException("strategy must be either TextMatcherEditor.IDENTICAL_STRATEGY or TextMatcherEditor.NORMALIZED_STRATEGY");
+
         if(strategy == this.strategy) return;
 
         this.strategy = strategy;
@@ -201,8 +183,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Returns the character comparison strategy for this {@link TextMatcherEditor}.
      * See the documentation for each constant in order contrast the strategies.
      *
-     * @return one of {@link #ASCII_STRATEGY} or {@link #NORMALIZED_LATIN_STRATEGY}
-     *      or {@link #UNICODE_STRATEGY}
+     * @return one of {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY}
      */
     public int getStrategy() {
         return strategy;
@@ -227,10 +208,10 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public void setFilterText(String[] newFilters) {
         final String[] oldFilters = getCurrentFilter();
-        newFilters = TextMatcher.normalizeFilters(newFilters);
+        newFilters = TextMatchers.normalizeFilters(newFilters);
 
         // fire the event only as necessary
-        if (TextMatcher.isFilterEqual(oldFilters, newFilters))
+        if (TextMatchers.isFilterEqual(oldFilters, newFilters))
             return;
 
         // classify the change in filter and apply the new filter to this list
@@ -242,9 +223,9 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         // classify the change in filter and apply the new filter to this list
         final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode, strategy);
 
-        if (TextMatcher.isFilterRelaxed(oldFilters, newFilters))
+        if (TextMatchers.isFilterRelaxed(oldFilters, newFilters))
             fireRelaxed(matcher);
-        else if (TextMatcher.isFilterConstrained(oldFilters, newFilters))
+        else if (TextMatchers.isFilterConstrained(oldFilters, newFilters))
             fireConstrained(matcher);
         else
             fireChanged(matcher);

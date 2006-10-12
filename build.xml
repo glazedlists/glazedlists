@@ -191,35 +191,17 @@
 	   COMPILE
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="compile" depends="core,swing"
+	<target name="compile" depends="swing"
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,jfreechart,issuesbrowser,swinglabs,treetable,hibernate"
+	<target name="compileall" depends="core,migrationkit,swing,io,swt,ktable,issuesbrowser,swinglabs,hibernate,icu4j"
 		description="Compile all components of the source.">
 	</target>
 
 	<target name="core">
-        <!-- compile the HttpClient we need to download dependency jars -->
         <mkdir dir="${classes.dir}"/>
-        <javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
-            <include name="ca/odell/glazedlists/impl/HttpClient.java"/>
-        </javac>
-
-        <!-- download the icu4j.jar which the core build depends on -->
-        <mkdir dir="lib"/>
-        <java classname="ca.odell.glazedlists.impl.HttpClient">
-            <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/41904/icu4j.jar"/>
-            <arg value="lib/icu4j.jar"/>
-        </java>
-
-        <!-- now compile the rest of the core classes -->
 		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
-            <classpath>
-                <fileset file="lib/icu4j.jar"/>
-            </classpath>
-
             <!-- swing -->
             <exclude name="**/swing/**"/>
             <!-- io -->
@@ -288,7 +270,7 @@
         </javac>
     </target>
 
-    <target name="jgoodiesforms" depends="core,swing">
+    <target name="jgoodiesforms" depends="swing">
         <mkdir dir="extensions/jgoodiesforms/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
@@ -302,7 +284,7 @@
         </javac>
     </target>
 
-    <target name="swinglabs" depends="core,swing">
+    <target name="swinglabs" depends="swing">
         <!-- the swinglabs .jar is Java 1.5+ only, so we do not bother to run
              this code through our Java 1.5 to Java 1.4 source code translator -->
         <mkdir dir="extensions/swinglabs/lib"/>
@@ -318,7 +300,21 @@
         </javac>
     </target>
 
-    <target name="nachocalendar" depends="core,swing">
+    <target name="icu4j" depends="swing">
+        <mkdir dir="extensions/icu4j/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/41904/icu4j.jar"/>
+            <arg value="extensions/icu4j/lib/icu4j.jar"/>
+        </java>
+        <javac destdir="${classes.dir}" srcdir="extensions/icu4j/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+            <classpath>
+                <fileset dir="extensions/icu4j/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="nachocalendar" depends="swing">
         <mkdir dir="extensions/nachocalendar/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
@@ -332,7 +328,7 @@
         </javac>
     </target>
 
-    <target name="treetable" depends="core,swing">
+    <target name="treetable" depends="swing">
         <javac destdir="${classes.dir}" srcdir="extensions/treetable/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off"/>
     </target>
 
@@ -505,7 +501,7 @@
         <mkdir dir="${java14_glazedlists.dir}/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="source"/>
-            <arg value="${ant.home}/lib/junit.jar${path.separator}lib/icu4j.jar"/>
+            <arg value="${ant.home}/lib/junit.jar"/>
             <arg value="${java14_glazedlists.dir}/source"/>
         </java>
 

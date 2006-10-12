@@ -1,7 +1,6 @@
-/*
- * Copyright(c) 2005, NEXVU Technologies
- * All rights reserved.
- */
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
 import junit.framework.Assert;
@@ -26,7 +25,7 @@ public class CountingMatcherEditorListener implements MatcherEditor.Listener {
 	public CountingMatcherEditorListener(long delay_ms) {
 		this.delay_ms = delay_ms;
 	}
-    
+
     /**
      * Create a {@link CountingMatcherEditorListener} with no delay.
      */

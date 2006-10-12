@@ -3,9 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
-import com.ibm.icu.text.StringSearch;
-import com.ibm.icu.text.RuleBasedCollator;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import com.ibm.icu.text.Collator;
+import com.ibm.icu.text.RuleBasedCollator;
+import com.ibm.icu.text.StringSearch;
 
 import java.text.StringCharacterIterator;
 
@@ -28,10 +29,11 @@ import java.text.StringCharacterIterator;
  *
  * @author James Lemieux
  */
-public class UnicodeTextSearchStrategy implements TextSearchStrategy {
+public class UnicodeCaseInsensitiveTextSearchStrategy implements TextSearchStrategy {
 
-    private static final RuleBasedCollator COLLATOR = (RuleBasedCollator) Collator.getInstance();
+    private static final RuleBasedCollator COLLATOR;
     static {
+        COLLATOR = (RuleBasedCollator) Collator.getInstance();
         // setting the strength property of a Collator determines the minimum
         // level of difference considered significant during comparison
         //
@@ -44,12 +46,25 @@ public class UnicodeTextSearchStrategy implements TextSearchStrategy {
     /** The string to locate within a larger text. */
     private String pattern;
 
+    /** one of {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH} */
+    private final int mode;
+
     /**
-     * @throws UnsupportedOperationException since UnicodeTextSearchStrategy
+     * Construct a UnicodeCaseInsensitiveTextSearchStrategy that matches in one of two ways
+     * depending on the value of <code>mode</code>.
+     *
+     * @param mode one of {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH}
+     */
+    public UnicodeCaseInsensitiveTextSearchStrategy(int mode) {
+        this.mode = mode;
+    }
+
+    /**
+     * @throws UnsupportedOperationException since UnicodeCaseInsensitiveTextSearchStrategy
      *  does not support remapping characters
      */
     public void setCharacterMap(char[] charMap) {
-        throw new UnsupportedOperationException("character maps are not supported by the UnicodeTextSearchStrategy");
+        throw new UnsupportedOperationException("character maps are not supported by the UnicodeCaseInsensitiveTextSearchStrategy");
     }
 
     /**
@@ -75,6 +90,10 @@ public class UnicodeTextSearchStrategy implements TextSearchStrategy {
         if (pattern == null)
             throw new IllegalStateException("setSubtext must be called with a valid value before this method can operate");
 
-        return new StringSearch(pattern, new StringCharacterIterator(text), COLLATOR).first();
+        if (text.length() == 0)
+            return -1;
+
+        final int index = new StringSearch(pattern, new StringCharacterIterator(text), COLLATOR).first();
+        return mode == TextMatcherEditor.STARTS_WITH && index != 0 ? -1 : index;
     }
 }
