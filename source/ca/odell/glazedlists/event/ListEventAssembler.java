@@ -115,7 +115,7 @@ public final class ListEventAssembler<E> {
      * To allow other methods to nest change events within a change event, use
      * beginEvent(true).
      */
-    public void beginEvent() {
+    public synchronized void beginEvent() {
         delegate.beginEvent(false);
     }
 
@@ -329,7 +329,7 @@ public final class ListEventAssembler<E> {
         /**
          * Starts a new atomic change to this list change queue.
          */
-        public final synchronized void beginEvent(boolean allowNestedEvents) {
+        public final void beginEvent(boolean allowNestedEvents) {
             // complain if we cannot nest any further
             if(!this.allowNestedEvents) {
                 throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress by thread, "  + eventThread.getName());
@@ -437,13 +437,13 @@ public final class ListEventAssembler<E> {
                 while(listChanges.next()) {
                     int type = listChanges.getType();
                     int index = listChanges.getIndex();
-                    Object previous = listChanges.getPreviousValue();
+                    E previous = (E) listChanges.getPreviousValue();
                     if(type == ListEvent.INSERT) {
                         addChange(ListEvent.INSERT, index, index);
                     } else if(type == ListEvent.UPDATE) {
-                        elementUpdated(index, (E)previous);
+                        elementUpdated(index, previous);
                     } else if(type == ListEvent.DELETE) {
-                        elementDeleted(index, (E)previous);
+                        elementDeleted(index, previous);
                     }
                 }
                 listChanges.reset();
