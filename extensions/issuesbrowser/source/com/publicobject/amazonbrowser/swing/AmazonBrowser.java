@@ -119,8 +119,8 @@ public class AmazonBrowser implements Runnable {
         final MatcherEditor<Item> filterFieldMatcherEditor = new TextComponentMatcherEditor<Item>(filterField, new ItemTextFilterator());
 
         // sort the original items list
-        itemEventList = GlazedListsSwing.swingThreadProxyList(itemEventList);
-        final SortedList<Item> sortedItemsList = new SortedList<Item>(itemEventList, null);
+        final EventList<Item> swingThreadProxyList = GlazedListsSwing.swingThreadProxyList(itemEventList);
+        final SortedList<Item> sortedItemsList = new SortedList<Item>(swingThreadProxyList, null);
         final FilterList<Item> filteredItemsList = new FilterList<Item>(sortedItemsList, filterFieldMatcherEditor);
 
         final StartNewSearchActionListener startNewSearch = new StartNewSearchActionListener();
