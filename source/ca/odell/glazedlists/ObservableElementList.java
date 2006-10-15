@@ -418,7 +418,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
             // locate all indexes containing the given listElement
             for (int i = 0, n = size(); i < n; i++) {
                 if (listElement == get(i))
-                    this.updates.addUpdate(i);
+                    this.updates.elementUpdated(i, listElement);
             }
 
             this.updates.commitEvent();
