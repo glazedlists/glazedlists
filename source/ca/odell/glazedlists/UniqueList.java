@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.Grouper;
 
@@ -96,8 +95,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
         super(source);
 
         // the grouper handles changes to the SortedList
-        GrouperClient grouperClient = new GrouperClient();
-        this.grouper = new Grouper<E>(source, grouperClient);
+        this.grouper = new Grouper<E>(source, new GrouperClient());
 
         source.addListEventListener(this);
     }
@@ -107,18 +105,14 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      */
     private class GrouperClient implements Grouper.Client {
         public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType) {
-            if(groupChangeType == ListEvent.INSERT) {
-                updates.addInsert(groupIndex);
-            } else if(groupChangeType == ListEvent.DELETE) {
-                updates.addDelete(groupIndex);
-            } else if(groupChangeType == ListEvent.UPDATE) {
-                updates.addUpdate(groupIndex);
-            } else {
-                throw new IllegalStateException();
+            switch (groupChangeType) {
+                case ListEvent.INSERT: updates.addInsert(groupIndex); break;
+                case ListEvent.UPDATE: updates.addUpdate(groupIndex); break;
+                case ListEvent.DELETE: updates.addDelete(groupIndex); break;
+                default: throw new IllegalStateException("Unrecognized groupChangeType: " + groupChangeType);
             }
         }
     }
-
 
     /** {@inheritDoc} */
     public int size() {
@@ -199,7 +193,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      *         is incompatible with this list
      */
     public int indexOf(Object element) {
-        final int index = Collections.binarySearch(this, (E) element, ((SortedList)source).getComparator());
+        final int index = Collections.binarySearch(this, (E) element, ((SortedList<E>)source).getComparator());
 
         // if the element is not found (index is negative) then return -1 to indicate the list does not contain it
         return index < 0 ? -1 : index;
