@@ -49,6 +49,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
      * elements since list removals broadcast ListEvents which do not include
      * the removed element as part of the ListEvent. We use this list to locate
      * removed elements for the purpose of unregistering listeners from them.
+     * todo remove this list when ListEvent can reliably furnish us with a deleted value
      */
     private List<E> observedElements;
 
@@ -158,7 +159,13 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
 
             // unregister a listener on the deleted object
             } else if (changeType == ListEvent.DELETE) {
-                final E deleted = this.observedElements.remove(changeIndex);
+                // try to get the previous value through the ListEvent
+                E deleted = listChanges.getPreviousValue();
+                E deletedElementFromPrivateCopy = this.observedElements.remove(changeIndex);
+
+                // if the ListEvent could give us the previous value, use the value from our private copy of the source
+                if (deleted == ListEvent.UNKNOWN_VALUE)
+                    deleted = deletedElementFromPrivateCopy;
 
                 // remove the listener from the registry
                 final EventListener listener = this.unregisterListener(changeIndex);
@@ -167,7 +174,12 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
 
             // register/unregister listeners if the value at the changeIndex is now a different object
             } else if (changeType == ListEvent.UPDATE) {
-                final E previousValue = this.observedElements.get(changeIndex);
+                E previousValue = listChanges.getPreviousValue();
+
+                // if the ListEvent could give us the previous value, use the value from our private copy of the source
+                if (previousValue == ListEvent.UNKNOWN_VALUE)
+                    previousValue = this.observedElements.get(changeIndex);
+
                 final E newValue = get(changeIndex);
 
                 // if a different object is present at the index
