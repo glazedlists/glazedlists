@@ -309,7 +309,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         }
 
         // fire update events
-        for(int i  = 0, size = updateNodes.size(); i < size; i++) {
+        for(int i = 0, size = updateNodes.size(); i < size; i++) {
             E previous = previousValues.get(i);
             Element<Element> sortedNode = updateNodes.get(i);
             assert(sortedNode.getSorted() != Element.PENDING);
