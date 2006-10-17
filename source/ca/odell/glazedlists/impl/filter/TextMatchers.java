@@ -64,7 +64,7 @@ public final class TextMatchers {
      * @param strategy the strategy for mapping a character
      * @return mapped versions of the filter Strings
      */
-    public static String[] mapFilters(String[] filters, int strategy) {
+    public static String[] mapFilters(String[] filters, TextSearchStrategy.Factory strategy) {
         // if something other than the "normalized latin strategy" is used, return the filters untouched
         if (strategy != TextMatcherEditor.NORMALIZED_STRATEGY)
             return filters;

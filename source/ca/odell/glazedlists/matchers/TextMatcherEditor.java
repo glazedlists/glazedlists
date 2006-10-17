@@ -5,8 +5,8 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.filter.TextMatcher;
-import ca.odell.glazedlists.impl.filter.TextMatchers;
+import ca.odell.glazedlists.impl.filter.*;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 /**
  * A matcher editor that matches Objects that contain a filter text string.
@@ -39,7 +39,7 @@ import ca.odell.glazedlists.impl.filter.TextMatchers;
  *   <li>{@link #NORMALIZED_STRATEGY} defines a text match more leniently for
  *        Latin-character based languages. Specifically, diacritics are
  *        stripped from all Latin characters before comparisons are made.
- *        Consequently, filters like "resume" match works like "résumé".
+ *        Consequently, filters like "resume" match works like "rï¿½sumï¿½".
  * </ul>
  *
  * @author James Lemieux
@@ -67,19 +67,43 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * fuzzy matching with this strategy - each character must be precisely
      * matched.
      */
-    public static final int IDENTICAL_STRATEGY = 100;
+    public static final Object IDENTICAL_STRATEGY = new IdenticalStrategyFactory();
+
+    private static class IdenticalStrategyFactory implements TextSearchStrategy.Factory {
+        public TextSearchStrategy create(int mode, String filter) {
+            if(mode == TextMatcherEditor.CONTAINS) {
+                if (filter.length() == 1) {
+                    return new SingleCharacterCaseInsensitiveTextSearchStrategy();
+                } else {
+                    return new BoyerMooreCaseInsensitiveTextSearchStrategy();
+                }
+            } else if(mode == TextMatcherEditor.STARTS_WITH) {
+                return new StartsWithCaseInsensitiveTextSearchStrategy();
+            } else {
+                throw new IllegalArgumentException("unrecognized mode: " + mode);
+            }
+        }
+    };
 
     /**
      * Character comparison strategy that assumes all Latin characters should
      * have their diacritical marks stripped in an effort to normalize words to
      * their most basic form. This allows a degree of fuzziness within the
      * matching algorithm, since words like "resume" will match similar words
-     * with diacritics like "résumé". This strategy is particularly useful when
+     * with diacritics like "rï¿½sumï¿½". This strategy is particularly useful when
      * the text to be searched contains text like names in foreign languages,
      * and your application would like search terms such as "Muller" to match
-     * the actual native spelling: "Müller".
+     * the actual native spelling: "Mï¿½ller".
      */
-    public static final int NORMALIZED_STRATEGY = 101;
+    public static final Object NORMALIZED_STRATEGY = new NormalizedStrategyFactory();
+    private static class NormalizedStrategyFactory extends IdenticalStrategyFactory {
+        public TextSearchStrategy create(int mode, String filter) {
+            TextSearchStrategy result = super.create(mode, filter);
+            // apply the character mapper
+            result.setCharacterMap(GlazedListsImpl.getLatinDiacriticsStripper());
+            return result;
+        }
+    };
 
     private static final String[] EMPTY_FILTER = new String[0];
 
@@ -90,7 +114,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     private int mode = CONTAINS;
 
     /** one of {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY} */
-    private int strategy = IDENTICAL_STRATEGY;
+    private TextSearchStrategy.Factory strategy = (TextSearchStrategy.Factory)IDENTICAL_STRATEGY;
 
     /**
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
@@ -143,10 +167,10 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         if (mode == STARTS_WITH) {
             // CONTAINS -> STARTS_WITH is a constraining change
-            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
+            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, (TextSearchStrategy.Factory)strategy));
         } else {
             // STARTS_WITH -> CONTAINS is a relaxing change
-            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
+            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, (TextSearchStrategy.Factory)strategy));
         }
     }
     /**
@@ -165,13 +189,11 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      *
      * @param strategy either {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY}
      */
-    public void setStrategy(int strategy) {
-        if(strategy != IDENTICAL_STRATEGY && strategy != NORMALIZED_STRATEGY)
-            throw new IllegalArgumentException("strategy must be either TextMatcherEditor.IDENTICAL_STRATEGY or TextMatcherEditor.NORMALIZED_STRATEGY");
-
+    public void setStrategy(Object strategy) {
         if(strategy == this.strategy) return;
+        if(!(strategy instanceof TextSearchStrategy.Factory)) throw new IllegalArgumentException();
 
-        this.strategy = strategy;
+        this.strategy = (TextSearchStrategy.Factory)strategy;
 
         // if no filter text exists, no Matcher change is necessary
         if (getCurrentFilter().length == 0)
@@ -185,7 +207,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      *
      * @return one of {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY}
      */
-    public int getStrategy() {
+    public Object getStrategy() {
         return strategy;
     }
 

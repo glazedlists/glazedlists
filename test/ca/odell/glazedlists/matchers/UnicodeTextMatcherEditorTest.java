@@ -5,13 +5,15 @@ package ca.odell.glazedlists.matchers;
 
 import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
+import ca.odell.glazedlists.impl.filter.UnicodeCaseInsensitiveTextSearchStrategy;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
 
 public class UnicodeTextMatcherEditorTest extends TestCase {
 
     public void testUnicodeStrategy() {
-        UnicodeTextMatcherEditor<Object> textMatcherEditor = new UnicodeTextMatcherEditor<Object>(new StringTextFilterator());
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        textMatcherEditor.setStrategy(UnicodeCaseInsensitiveTextSearchStrategy.STRATEGY);
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
         list.add(null);
@@ -19,8 +21,8 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
         list.add("r\u00e9sum\u00e9");
         list.add("Bj\u00f6rk");
         list.add("M\u00fcller");
-        list.add("\u00c6nima"); // Ænima
-        list.add("Ru\u00dfland"); // Rußland
+        list.add("\u00c6nima"); // ï¿½nima
+        list.add("Ru\u00dfland"); // Ruï¿½land
 
         textMatcherEditor.setFilterText(new String[0]);
         textMatcherEditor.setFilterText(new String[] {"M\u00fcller"});
@@ -28,7 +30,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
         assertEquals("M\u00fcller", list.get(0));
 
         textMatcherEditor.setFilterText(new String[0]);
-        textMatcherEditor.setFilterText(new String[] {"MÜLLER"});
+        textMatcherEditor.setFilterText(new String[] {"Mï¿½LLER"});
         assertEquals(1, list.size());
         assertEquals("M\u00fcller", list.get(0));
 
@@ -44,12 +46,12 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
 
         textMatcherEditor.setFilterText(new String[0]);
-        textMatcherEditor.setFilterText(new String[] {"\u00c6nima"}); // Ænima
+        textMatcherEditor.setFilterText(new String[] {"\u00c6nima"}); // ï¿½nima
         assertEquals(1, list.size());
         assertEquals("\u00c6nima", list.get(0));
 
         textMatcherEditor.setFilterText(new String[0]);
-        textMatcherEditor.setFilterText(new String[] {"\u00e6nima"}); // ænima
+        textMatcherEditor.setFilterText(new String[] {"\u00e6nima"}); // ï¿½nima
         assertEquals(1, list.size());
         assertEquals("\u00c6nima", list.get(0));
 
@@ -65,11 +67,12 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
     }
 
     public void testUnicodeStrategy_StartsWith() {
-        UnicodeTextMatcherEditor<Object> textMatcherEditor = new UnicodeTextMatcherEditor<Object>(new StringTextFilterator());
+        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        textMatcherEditor.setStrategy(UnicodeCaseInsensitiveTextSearchStrategy.STRATEGY);
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
-        list.add("Ru\u00dfland"); // Rußland
+        list.add("Ru\u00dfland"); // Ruï¿½land
 
         textMatcherEditor.setFilterText(new String[0]);
         textMatcherEditor.setFilterText(new String[] {"Ru\u00df"});

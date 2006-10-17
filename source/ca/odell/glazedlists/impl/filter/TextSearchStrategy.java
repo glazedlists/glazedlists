@@ -47,4 +47,8 @@ public interface TextSearchStrategy {
      * @throws IllegalStateException if no subtext has been set
      */
     public int indexOf(String text);
+
+    public interface Factory {
+        public TextSearchStrategy create(int mode, String filter);
+    }
 }

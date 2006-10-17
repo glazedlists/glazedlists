@@ -7,6 +7,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.util.*;
 
@@ -188,7 +189,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // our predecessor is at our parent's height, it could be our parent
         } else if(predecessor.pathLength() == parentPrototype.pathLength()) {
-            if(compareNodes(predecessor, parentPrototype) == 0) {
+            if(predecessor.equals(parentPrototype)) {
                 return predecessor;
             }
 
@@ -636,6 +637,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // in which case we want to update over it. For example, if we
             // simulated a node and then that value gets inserted 'for real',
             // we keep the state of that node
+            // todo: compareNodes() doesn't make sense anymore for unsorted nodes
             int relativePosition = compareNodes(node, possibleAncestor);
             if(possibleAncestor.virtual && relativePosition == 0) {
 
@@ -948,6 +950,18 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 result.add(child);
             }
             return result;
+        }
+
+        /** {@inheritDoc} */
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            final Node node = (Node) o;
+            return path.equals(node.path);
+        }
+
+        /** {@inheritDoc} */
+        public int hashCode() {
+            return path.hashCode();
         }
     }
 

@@ -18,9 +18,9 @@ import java.text.StringCharacterIterator;
  * complicated text matching scenarios like
  *
  * <ul>
- *   <li>'æ' matches "ae"
- *   <li>'ß' matches "ss"
- *   <li>"resume" matches "résumé"
+ *   <li>'ï¿½' matches "ae"
+ *   <li>'ï¿½' matches "ss"
+ *   <li>"resume" matches "rï¿½sumï¿½"
  * </ul>
  *
  * Since text matching algorithms is not the focus of Glazed Lists, it makes

@@ -47,15 +47,15 @@ public class TextMatcher<E> implements Matcher<E> {
      *      {@link TextMatcherEditor#NORMALIZED_STRATEGY} which
      *      indicates what kind of algorithm to use when determining a match
      */
-    public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode, int strategy) {
+    public TextMatcher(String[] filters, TextFilterator<E> filterator, int mode, Object strategy) {
         this.filterator = filterator;
-        this.filters = TextMatchers.mapFilters(filters, strategy);
+        this.filters = TextMatchers.mapFilters(filters, (TextSearchStrategy.Factory)strategy);
         this.mode = mode;
 
         // build the parallel list of TextSearchStrategies for the new filters
         filterStrategies = new TextSearchStrategy[this.filters.length];
         for(int i = 0; i < this.filters.length; i++) {
-            filterStrategies[i] = selectTextSearchStrategy(this.filters[i], mode, strategy);
+            filterStrategies[i] = selectTextSearchStrategy(this.filters[i], mode, (TextSearchStrategy.Factory)strategy);
         }
     }
 
@@ -93,31 +93,9 @@ public class TextMatcher<E> implements Matcher<E> {
      * @return a TextSearchStrategy capable of locating the given
      *      <code>filter</code> within arbitrary text
      */
-    private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode, int strategy) {
-        final TextSearchStrategy result;
-
-        if (strategy == TextMatcherEditor.IDENTICAL_STRATEGY || strategy == TextMatcherEditor.NORMALIZED_STRATEGY) {
-            if (mode == TextMatcherEditor.CONTAINS) {
-                if (filter.length() == 1)
-                    result = new SingleCharacterCaseInsensitiveTextSearchStrategy();
-                else
-                    result = new BoyerMooreCaseInsensitiveTextSearchStrategy();
-            } else if (mode == TextMatcherEditor.STARTS_WITH) {
-                result = new StartsWithCaseInsensitiveTextSearchStrategy();
-            } else {
-                throw new IllegalArgumentException("unrecognized mode: " + mode);
-            }
-        } else {
-            throw new IllegalArgumentException("unrecognized strategy: " + strategy);
-        }
-
-        // apply the subtext
+    private static TextSearchStrategy selectTextSearchStrategy(String filter, int mode, TextSearchStrategy.Factory strategy) {
+        final TextSearchStrategy result = strategy.create(mode, filter);
         result.setSubtext(filter);
-
-        // apply the character mapper, if necessary
-        if (strategy == TextMatcherEditor.NORMALIZED_STRATEGY)
-            result.setCharacterMap(GlazedListsImpl.getLatinDiacriticsStripper());
-
         return result;
     }
 }
