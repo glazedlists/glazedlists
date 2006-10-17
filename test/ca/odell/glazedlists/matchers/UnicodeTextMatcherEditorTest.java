@@ -13,7 +13,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
     public void testUnicodeStrategy() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        textMatcherEditor.setStrategy(UnicodeCaseInsensitiveTextSearchStrategy.STRATEGY);
+        textMatcherEditor.setStrategy(GlazedListsICU4J.STRATEGY);
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
         list.add(null);
@@ -30,7 +30,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
         assertEquals("M\u00fcller", list.get(0));
 
         textMatcherEditor.setFilterText(new String[0]);
-        textMatcherEditor.setFilterText(new String[] {"M�LLER"});
+        textMatcherEditor.setFilterText(new String[] {"M\u00fcLLER"});
         assertEquals(1, list.size());
         assertEquals("M\u00fcller", list.get(0));
 
@@ -68,7 +68,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
     public void testUnicodeStrategy_StartsWith() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        textMatcherEditor.setStrategy(UnicodeCaseInsensitiveTextSearchStrategy.STRATEGY);
+        textMatcherEditor.setStrategy(GlazedListsICU4J.STRATEGY);
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
