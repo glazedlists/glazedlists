@@ -83,7 +83,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
                 throw new IllegalArgumentException("unrecognized mode: " + mode);
             }
         }
-    };
+    }
 
     /**
      * Character comparison strategy that assumes all Latin characters should
@@ -103,7 +103,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
             result.setCharacterMap(GlazedListsImpl.getLatinDiacriticsStripper());
             return result;
         }
-    };
+    }
 
     private static final String[] EMPTY_FILTER = new String[0];
 
@@ -167,10 +167,10 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         if (mode == STARTS_WITH) {
             // CONTAINS -> STARTS_WITH is a constraining change
-            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, (TextSearchStrategy.Factory)strategy));
+            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
         } else {
             // STARTS_WITH -> CONTAINS is a relaxing change
-            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, (TextSearchStrategy.Factory)strategy));
+            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
         }
     }
     /**
