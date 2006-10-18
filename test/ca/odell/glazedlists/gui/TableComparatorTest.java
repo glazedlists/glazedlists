@@ -6,7 +6,14 @@ package ca.odell.glazedlists.gui;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * Verify that the {@link AbstractTableComparatorChooser} works, especially
@@ -17,8 +24,8 @@ import junit.framework.TestCase;
 public class TableComparatorTest extends TestCase {
 
     /** a table comparator choosers to test with */
-    private SortedList sortedList = new SortedList(new BasicEventList());
-    private AbstractTableComparatorChooser tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
+    private SortedList<String> sortedList = new SortedList<String>(new BasicEventList<String>());
+    private AbstractTableComparatorChooser<String> tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
 
     protected void setUp() throws Exception {
         // add some comparators to column 3
@@ -95,13 +102,91 @@ public class TableComparatorTest extends TestCase {
         }
     }
 
-    private static class TestTableComparatorChooser extends AbstractTableComparatorChooser {
-        protected TestTableComparatorChooser(SortedList sortedList, int columns) {
+    /**
+     * Test that TableComparatorChooser handles the swapping of
+     * EventTableModels behind the JTable.
+     */
+    public void guiTestTableModelStructureChanged() {
+        final EventList<String> source = GlazedLists.eventList(GlazedListsTests.delimitedStringToList("James Jodie Jesse"));
+        final SortedList<String> sorted = new SortedList<String>(source, null);
+
+        final JTable table = new JTable();
+        final EventTableModel<String> firstModel;
+        final EventTableModel<String> secondModel;
+
+        final int initialNumPropertyChangeListenersOnJTable = table.getPropertyChangeListeners().length;
+
+        // 1. set up an EventTableModel to display 3 columns
+        firstModel = new EventTableModel<String>(sorted, new TestTableFormat(3));
+        table.setModel(firstModel);
+
+        assertEquals(1, firstModel.getTableModelListeners().length);
+        assertEquals(3, table.getColumnCount());
+
+
+        // 2. wire up a TableComparatorChooser and make the third column sort
+        TableComparatorChooser chooser = TableComparatorChooser.install(table, sorted, AbstractTableComparatorChooser.SINGLE_COLUMN);
+        chooser.appendComparator(2, 0, false);
+
+        // the TableComparatorChooser should install a PropertyChangeListener on the JTable
+        assertEquals(initialNumPropertyChangeListenersOnJTable+1, table.getPropertyChangeListeners().length);
+        // the TableComparatorChooser should install a TableModelListener on the EventTableModel
+        assertEquals(2, firstModel.getTableModelListeners().length);
+
+        // this assertion proves that the TableComparatorChooser cleared its sorting state
+        assertEquals(1, chooser.getSortingColumns().size());
+
+
+        // 3. changing the TableFormat within the existing EventTableModel should clear the sorting state
+        firstModel.setTableFormat(new TestTableFormat(1));
+
+        // this assertion proves that the JTable has rebuilt the TableColumnModel
+        assertEquals(1, table.getColumnCount());
+        // this assertion proves that the TableComparatorChooser cleared its sorting state
+        assertTrue(chooser.getSortingColumns().isEmpty());
+        assertEquals(2, firstModel.getTableModelListeners().length);
+
+
+        // 4. reapply a sort to the JTable on the first column
+        chooser.appendComparator(0, 0, false);
+        assertEquals(1, chooser.getSortingColumns().size());
+
+
+        // 5. set a new EventTableModel that only uses 2 columns
+        secondModel = new EventTableModel<String>(sorted, new TestTableFormat(2));
+        table.setModel(secondModel);
+
+        // nothing should listen to firstModel, and secondModel is now active
+        assertEquals(0, firstModel.getTableModelListeners().length);
+        assertEquals(2, secondModel.getTableModelListeners().length);
+
+        // this assertion proves that the JTable has rebuilt the TableColumnModel
+        assertEquals(2, table.getColumnCount());
+        // this assertion proves that the TableComparatorChooser cleared its sorting state
+        assertTrue(chooser.getSortingColumns().isEmpty());
+
+
+        // 6. disposing of the TableComparatorChooser should remove all listeners
+        assertEquals(initialNumPropertyChangeListenersOnJTable+1, table.getPropertyChangeListeners().length);
+        chooser.dispose();
+        assertEquals(initialNumPropertyChangeListenersOnJTable, table.getPropertyChangeListeners().length);
+        assertEquals(0, firstModel.getTableModelListeners().length);
+        assertEquals(1, secondModel.getTableModelListeners().length); // the JTable is still listening to the secondModel
+
+        // replacing the JTable's model should remove the remaining listener from secondModel
+        table.setModel(new DefaultTableModel());
+        assertEquals(0, secondModel.getTableModelListeners().length);
+    }
+
+    private static class TestTableComparatorChooser extends AbstractTableComparatorChooser<String> {
+        protected TestTableComparatorChooser(SortedList<String> sortedList, int columns) {
             super(sortedList, new TestTableFormat(columns));
         }
     }
-    private static class TestTableFormat implements TableFormat {
+
+    private static class TestTableFormat implements TableFormat<String> {
         private int columns;
+
         public TestTableFormat(int columns) {
             this.columns = columns;
         }
@@ -111,7 +196,7 @@ public class TableComparatorTest extends TestCase {
         public String getColumnName(int column) {
             return "Column " + column;
         }
-        public Object getColumnValue(Object baseObject, int column) {
+        public Object getColumnValue(String baseObject, int column) {
             return "Row " + baseObject + ", Column " + column;
         }
     }

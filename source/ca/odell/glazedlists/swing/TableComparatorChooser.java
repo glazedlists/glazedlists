@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
@@ -22,6 +21,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking
@@ -64,10 +65,10 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     private final TableModelHandler tableModelHandler = new TableModelHandler();
 
     /** the table being sorted */
-    private JTable table = null;
+    private JTable table;
 
     /** listeners to sort change events */
-    private ActionListener sortListener = null;
+    private ActionListener sortListener;
 
     /** the sort icons to use */
     private static Icon[] icons = SortIconFactory.loadIcons();
@@ -99,6 +100,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
         // save the Swing-specific state
         this.table = table;
+        this.table.addPropertyChangeListener("model", tableModelHandler);
 
         // build and set the table header renderer which decorates the existing renderer with sort arrows
         sortArrowHeaderRenderer = new SortArrowHeaderRenderer(table.getTableHeader().getDefaultRenderer());
@@ -108,7 +110,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         table.getModel().addTableModelListener(tableModelHandler);
 
         // install the sorting strategy to interpret clicks
-        this.headerClickHandler = new HeaderClickHandler(table, (SortingStrategy)strategy);
+        headerClickHandler = new HeaderClickHandler(table, (SortingStrategy)strategy);
     }
 
     /**
@@ -267,15 +269,41 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
         // remove our listeners from the table's header and model
         table.getModel().removeTableModelListener(tableModelHandler);
+        table.removePropertyChangeListener("model", tableModelHandler);
 
         // null out our table reference for safety's sake
         table = null;
     }
 
     /**
-     * Nested Listener class handles table events and mouse events.
+     * Nested Listener class handles TableModelEvents and PropertyChangeEvents.
+     * TableModelEvents tell us when the TableModel's data changes in place.
+     * PropertyChangeEvents tell us when the TableModel has been replaced.
      */
-    private class TableModelHandler implements TableModelListener {
+    private class TableModelHandler implements TableModelListener, PropertyChangeListener {
+
+        /**
+         * This method is only called when the TableModel of the JTable is
+         * changed. It allows us to stop listening to the previous
+         * EventTableModel and start listening to the new one. It also resets
+         * the sorting state of this TableComparatorChooser.
+         */
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (!(evt.getNewValue() instanceof EventTableModel))
+                throw new IllegalStateException("TableComparatorChooser requires the TableModel to be an EventTableModel at all times, but found: " + evt.getNewValue());
+
+            // get the two TableModels
+            final EventTableModel<E> oldModel = (EventTableModel<E>) evt.getOldValue();
+            final EventTableModel<E> newModel = (EventTableModel<E>) evt.getNewValue();
+
+            // stop listening for TableModelEvents in the oldModel and start for the newModel
+            oldModel.removeTableModelListener(this);
+            newModel.addTableModelListener(this);
+
+            // the table structure has probably changed due to the new
+            // EventTableModel so we reset the TableFormat (which clears the sorting state)
+            setTableFormat(newModel.getTableFormat());
+        }
 
         /**
          * When the number of columns changes in the table, we need to
@@ -325,7 +353,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * Returns the delegate renderer that is decorated with sort arrows.
          */
         public TableCellRenderer getDelegateRenderer() {
-            return this.delegateRenderer;
+            return delegateRenderer;
         }
 
         /**
