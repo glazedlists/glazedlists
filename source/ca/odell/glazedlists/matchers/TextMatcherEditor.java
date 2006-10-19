@@ -68,7 +68,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * matched.
      */
     public static final Object IDENTICAL_STRATEGY = new IdenticalStrategyFactory();
-
+    // this would be an inner class if declawer supported it
     private static class IdenticalStrategyFactory implements TextSearchStrategy.Factory {
         public TextSearchStrategy create(int mode, String filter) {
             if(mode == TextMatcherEditor.CONTAINS) {
@@ -96,10 +96,11 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * the actual native spelling: "M�ller".
      */
     public static final Object NORMALIZED_STRATEGY = new NormalizedStrategyFactory();
+    // this would be an inner class if declawer supported it
     private static class NormalizedStrategyFactory extends IdenticalStrategyFactory {
         public TextSearchStrategy create(int mode, String filter) {
             TextSearchStrategy result = super.create(mode, filter);
-            // apply the character mapper
+            // apply our simple character mapper
             result.setCharacterMap(GlazedListsImpl.getLatinDiacriticsStripper());
             return result;
         }

@@ -5,7 +5,6 @@ package ca.odell.glazedlists.matchers;
 
 import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
-import ca.odell.glazedlists.impl.filter.UnicodeCaseInsensitiveTextSearchStrategy;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
 
@@ -13,7 +12,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
     public void testUnicodeStrategy() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        textMatcherEditor.setStrategy(GlazedListsICU4J.STRATEGY);
+        textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 
         list.add(null);
@@ -68,7 +67,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
     public void testUnicodeStrategy_StartsWith() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        textMatcherEditor.setStrategy(GlazedListsICU4J.STRATEGY);
+        textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
 

@@ -48,7 +48,19 @@ public interface TextSearchStrategy {
      */
     public int indexOf(String text);
 
+    /**
+     * The factory for building implementations of {@link TextSearchStrategy}
+     * which is used as an identifier for the strategy itself.
+     */
     public interface Factory {
+
+        /**
+         * Build a new TextSearchStrategy for the specified mode and filter text.
+         *
+         * @param mode either {@code TextMatcherEditor.CONTAINS} or
+         *     {@code TextMatcherEditor.STARTS_WITH}.
+         * @param filter the search string to match against
+         */
         public TextSearchStrategy create(int mode, String filter);
     }
 }
