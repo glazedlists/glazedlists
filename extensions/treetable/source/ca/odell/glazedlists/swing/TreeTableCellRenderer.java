@@ -93,7 +93,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
         }
 
         // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, supportsChildren, isExpanded, c);
+        component.configure(depth, hasChildren, supportsChildren, isExpanded, c, hasFocus);
         return component;
     }
 

@@ -6,6 +6,7 @@ package ca.odell.glazedlists.swing;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ import java.util.List;
 class TreeTableCellPanel extends JPanel {
 
     /** The border that spaces the delegate component over from the expander button. */
-    static final Border NODE_COMPONENT_BORDER = BorderFactory.createEmptyBorder(0, 3, 0, 0);
+    static final Border NODE_COMPONENT_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
 
     /** A cache of appropriate spacer components for each depth in the tree. */
     private final List<Component> spacerComponentsCache = new ArrayList<Component>();
@@ -79,16 +80,12 @@ class TreeTableCellPanel extends JPanel {
      *      only has meaning when <code>isExpandable</code> is true; otherwise it is ignored.
      * @param nodeComponent a Component which displays the data of the tree node
      */
-    public void configure(int depth, boolean hasChildren, boolean supportsChildren, boolean isExpanded, Component nodeComponent) {
-        // the expander button is only visible when the node can be expanded/collapsed
-        expanderButton.setVisible(supportsChildren);
-
+    public void configure(int depth, boolean hasChildren, boolean supportsChildren, boolean isExpanded, Component nodeComponent, boolean hasFocus) {
         // if the tree node is expandable, pick an icon for the expander button
-        if(supportsChildren) {
+        if(supportsChildren)
             expanderButton.setIcon(UIManager.getIcon(isExpanded ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
-        }
 
-        // synchronize the background color of this entire panel with nodeComponent
+        // assign a default background color to this panel to attempt to remain consistent with the nodeComponent
         setBackground(nodeComponent.getBackground());
 
         // replace any kind of border with an empty one that tabs the node component over from the expander button
@@ -96,18 +93,52 @@ class TreeTableCellPanel extends JPanel {
             final JComponent jNodeComponent = (JComponent) nodeComponent;
             setToolTipText(jNodeComponent.getToolTipText());
 
-            setBorder(jNodeComponent.getBorder());
+            // if the nodeComponent has focus, steal its border as the panel's own
+            if (hasFocus)
+                setBorder(jNodeComponent.getBorder());
+
+            // now clear away the nodeComponent's border
             jNodeComponent.setBorder(NODE_COMPONENT_BORDER);
         }
 
         // configure this panel with the updated space/expander button and the supplied nodeComponent
         // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
         removeAll();
-        add(getSpacerComponent(depth), TreeTableCellLayout.SPACER);
-        add(expanderButton, TreeTableCellLayout.EXPANDER_BUTTON);
+        add(getSpacer(depth), TreeTableCellLayout.SPACER);
+        add(supportsChildren ? expanderButton : createSpacer(1), TreeTableCellLayout.EXPANDER);
         add(nodeComponent, TreeTableCellLayout.NODE_COMPONENT);
 
         this.nodeComponent = nodeComponent;
+    }
+
+    /**
+     * Set the background color of the TreeTableCellPanel and node component.
+     */
+    public void setBackground(Color bg) {
+        super.setBackground(bg);
+
+        if (nodeComponent != null)
+            nodeComponent.setBackground(bg);
+    }
+
+    /**
+     * Set the foreground color of the TreeTableCellPanel and node component.
+     */
+    public void setForeground(Color fg) {
+        super.setForeground(fg);
+
+        if (nodeComponent != null)
+            nodeComponent.setForeground(fg);
+    }
+
+    /**
+     * Set the font of the TreeTableCellPanel and its inner node component.
+     */
+    public void setFont(Font font) {
+        super.setFont(font);
+
+        if (nodeComponent != null)
+            nodeComponent.setFont(font);
     }
 
     /**
@@ -136,15 +167,85 @@ class TreeTableCellPanel extends JPanel {
     /**
      * Return a spacer component and update the spacer component cache as needed.
      */
-    private Component getSpacerComponent(int depth) {
+    private Component getSpacer(int depth) {
         if (depth >= spacerComponentsCache.size()) {
             for (int i = spacerComponentsCache.size(); i <= depth; i++) {
-                final Component spacer = Box.createHorizontalStrut(UIManager.getIcon("Tree.expandedIcon").getIconWidth() * i);
+                final Component spacer = createSpacer(UIManager.getIcon("Tree.expandedIcon").getIconWidth() * i);
                 spacerComponentsCache.add(spacer);
             }
         }
 
         return spacerComponentsCache.get(depth);
+    }
+
+    /**
+     * Creates a component which fills the given <code>width</code> of space.
+     */
+    private static Component createSpacer(int width) {
+        return Box.createHorizontalStrut(width);
+    }
+
+    /**
+     * This method is called by Swing when the TreeTableCellPanel is installed
+     * as a TableCellEditor. It gives the component a chance to process the
+     * KeyEvent. For example, a JTextField will honour the keystroke and
+     * add the letter to its Document.
+     *
+     * The TreeTableCellPanel's main job is to pass the KeyEvent on to the
+     * underlying {@link #nodeComponent} so that it may have a chance to react.
+     * This only need occur once for the KeyEvent that caused the cell edit,
+     * after which time the focus will be within the {@link #nodeComponent} and
+     * subsequent keystrokes should be ignored.
+     */
+    protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+        // let the nodeComponent have a crack at processing the KeyEvent
+        // (we'd love to call nodeComponent.processKeyBinding(ks, e, condition, pressed) but it's protected and thus out of scope)
+        if (!nodeComponent.hasFocus())
+            SwingUtilities.invokeLater(new RequestFocusAndDispatchKeyEventRunnable(e, nodeComponent));
+
+        // now let the JComboBox react (important for arrow keys to work as expected)
+        return super.processKeyBinding(ks, e, condition, pressed);
+    }
+
+    /**
+     * This method is called by Swing when installing this TreeTableCellPanel
+     * as a TableCellEditor. It ensures that focus will return to the JTable
+     * when the cell edit is complete.
+     *
+     * <p>We override this method to ensure that if the {@link #nodeComponent}
+     * acting as the child editor of the TreeTableCellPanel has focus when the
+     * cell edit is complete, focus is returned to the JTable in that case as
+     * well.
+     */
+    public void setNextFocusableComponent(Component aComponent) {
+        super.setNextFocusableComponent(aComponent);
+
+        // set the next focusable component for the nodeComponent as well
+        if (nodeComponent instanceof JComponent)
+            ((JComponent) nodeComponent).setNextFocusableComponent(aComponent);
+    }
+
+    /**
+     * This class aids in providing reasonable behaviour when the
+     * TreeTableCellPanel is installed as a TableCellEditor. Specifically, if
+     * it is installed due to a KeyEvent, this Runnable can be dispatched to the
+     * EventQueue and when executed allows the child nodeComponent a chance to
+     * react to the KeyEvent, as is customary with most TableCellEditors.
+     */
+    private static final class RequestFocusAndDispatchKeyEventRunnable implements Runnable {
+
+        private final KeyEvent keyEvent;
+        private final Component component;
+
+        public RequestFocusAndDispatchKeyEventRunnable(KeyEvent keyEvent, Component component) {
+            this.keyEvent = keyEvent;
+            this.component = component;
+        }
+
+        public void run() {
+            component.requestFocus();
+            component.dispatchEvent(keyEvent);
+        }
     }
 
     /**
@@ -156,24 +257,24 @@ class TreeTableCellPanel extends JPanel {
 
         // constraints Objects to be used when adding components to the layout
         public static final Object SPACER = new Object();
-        public static final Object EXPANDER_BUTTON = new Object();
+        public static final Object EXPANDER = new Object();
         public static final Object NODE_COMPONENT = new Object();
 
         // each of the known components layed out by this layout manager
         private Component spacer;
-        private Component expanderButton;
+        private Component expander;
         private Component nodeComponent;
 
         public void addLayoutComponent(Component comp, Object constraints) {
             if (constraints == SPACER) spacer = comp;
-            else if (constraints == EXPANDER_BUTTON) expanderButton = comp;
+            else if (constraints == EXPANDER) expander = comp;
             else if (constraints == NODE_COMPONENT) nodeComponent = comp;
             else throw new IllegalArgumentException("Unexpected constraints object: " + constraints);
         }
 
         public void removeLayoutComponent(Component comp) {
             if (comp == spacer) spacer = null;
-            if (comp == expanderButton) expanderButton = null;
+            if (comp == expander) expander = null;
             if (comp == nodeComponent) nodeComponent = null;
         }
 
@@ -195,20 +296,23 @@ class TreeTableCellPanel extends JPanel {
             }
 
             // 2. layout the expander button (centered vertically)
-            if (availableWidth > 0 && expanderButton != null) {
+            if (availableWidth > 0 && expander != null) {
                 int expanderButtonX = totalWidth - availableWidth;
                 int expanderButtonY = insets.top;
-                int expanderButtonWidth = expanderButton.getPreferredSize().width;
-                int expanderButtonHeight = expanderButton.getPreferredSize().height;
+                int expanderButtonWidth = expander.getPreferredSize().width;
+                int expanderButtonHeight = expander.getPreferredSize().height;
 
                 if (expanderButtonHeight > totalHeight)
                     expanderButtonHeight = totalHeight;
                 else if (expanderButtonHeight < totalHeight)
                     expanderButtonY += (totalHeight - expanderButtonHeight) / 2;
 
-                expanderButton.setBounds(expanderButtonX, expanderButtonY, expanderButtonWidth, expanderButtonHeight);
+                expander.setBounds(expanderButtonX, expanderButtonY, expanderButtonWidth, expanderButtonHeight);
                 availableWidth -= expanderButtonWidth;
             }
+
+            // space the nodeComponent 2 pixels right of the expander button
+            availableWidth -= 2;
 
             // 3. layout the node component (centered vertically and getting all remaining horizontal space)
             if (availableWidth > 0 && nodeComponent != null) {

@@ -16,6 +16,10 @@ import com.publicobject.misc.swing.RoundedBorder;
 import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -168,7 +172,7 @@ public class AmazonBrowser implements Runnable {
         final TableFormat<Item> itemTableFormat = new ItemTableFormat();
         itemTableModel = new EventTableModel<Item>(treeList, itemTableFormat);
         itemTableSelectionModel = new EventSelectionModel<Item>(treeList);
-        final JTable itemTable = new JTable(itemTableModel, null, itemTableSelectionModel);
+        final JTable itemTable = new StripedTable(itemTableModel, null, itemTableSelectionModel);
         JScrollPane itemScrollPane = new JScrollPane(itemTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         itemScrollPane.setBorder(BorderFactory.createEmptyBorder());
         MacCornerScrollPaneLayoutManager.install(itemScrollPane);
@@ -234,6 +238,36 @@ public class AmazonBrowser implements Runnable {
         public void propertyChange(PropertyChangeEvent evt) {
             final List<TreeCriterion> treeCriteria = (List<TreeCriterion>) evt.getNewValue();
             treeList.setTreeFormat(new ItemTreeFormat(treeCriteria));
+        }
+    }
+
+    /**
+     * A custom table that stripes the rows to help ensure our
+     * TreeTableCellPanel handles cosmetic customizations (background,
+     * foreground, font, etc).
+     */
+    private static class StripedTable extends JTable {
+        public StripedTable(TableModel dm, TableColumnModel cm, ListSelectionModel sm) {
+            super(dm, cm, sm);
+            setSurrendersFocusOnKeystroke(true);
+        }
+
+        public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+            return normalize(super.prepareRenderer(renderer, row, column), row);
+        }
+
+        public Component prepareEditor(TableCellEditor editor, int row, int column) {
+            return normalize(super.prepareEditor(editor, row, column), row);
+        }
+
+        /**
+         * This method applies some common formatting to the given Component
+         * which is either a renderer or editor component.
+         */
+        private Component normalize(Component c, int row) {
+            c.setBackground(row % 2 == 0 ? Color.WHITE : AMAZON_SEARCH_LIGHT_BLUE);
+            c.setForeground(Color.BLACK);
+            return c;
         }
     }
 }

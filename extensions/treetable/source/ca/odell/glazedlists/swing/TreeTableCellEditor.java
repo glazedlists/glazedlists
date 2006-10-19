@@ -71,7 +71,9 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
      * each tree node.
      */
     protected TableCellEditor createDelegateEditor() {
-        return new DefaultCellEditor(new JTextField());
+        final JTextField textField = new JTextField();
+        textField.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 0));
+        return new DefaultCellEditor(textField);
     }
 
     /**
@@ -98,7 +100,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
         }
 
         // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, supportsChildren, isExpanded, c);
+        component.configure(depth, hasChildren, supportsChildren, isExpanded, c, false);
         return component;
     }
 
