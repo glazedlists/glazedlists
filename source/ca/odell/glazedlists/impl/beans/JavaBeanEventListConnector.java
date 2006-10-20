@@ -27,7 +27,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     private Method removeListenerMethod = null;
 
     /** The list which contains the elements being observed via this {@link ObservableElementList.Connector}. */
-    private ObservableElementList<E> list = null;
+    private ObservableElementList<? extends E> list = null;
 
     /** The PropertyChangeListener to install on each list element. */
     protected PropertyChangeListener propertyChangeListener = this.createPropertyChangeListener();
@@ -137,7 +137,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     }
 
     /** {@inheritDoc} */
-    public void setObservableElementList(ObservableElementList<E> list) {
+    public void setObservableElementList(ObservableElementList<? extends E> list) {
         this.list = list;
     }
 
@@ -156,7 +156,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      */
     public class PropertyChangeHandler implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
-            list.elementChanged((E) event.getSource());
+            ((ObservableElementList) list).elementChanged(event.getSource());
         }
     }
 }

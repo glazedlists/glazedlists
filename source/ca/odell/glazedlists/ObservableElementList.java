@@ -9,7 +9,6 @@ import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 
 import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -60,7 +59,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
      * listener is responsible for calling {@link #elementChanged(Object)}
      * to notify this list of the changed object.
      */
-    private Connector<E> elementConnector = null;
+    private Connector<? super E> elementConnector = null;
 
     /**
      * <tt>true</tt> indicates a single shared EventListener is used for each
@@ -107,7 +106,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
      *      this list to the given <code>elementConnector</code> by calling
      *      {@link Connector#setObservableElementList(ObservableElementList)}.
      */
-    public ObservableElementList(EventList<E> source, Connector<E> elementConnector) {
+    public ObservableElementList(EventList<E> source, Connector<? super E> elementConnector) {
         super(source);
 
         this.elementConnector = elementConnector;
@@ -125,13 +124,12 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
         this.singleEventListenerRegistry.addWhite(0, source.size());
 
         // add listeners to all source list elements
-        int index = 0;
-        for (Iterator<E> iter = this.iterator(); iter.hasNext(); index++) {
+        for (int i = 0, n = size(); i < n; i++) {
             // connect a listener to the element
-            final EventListener listener = this.connectElement(iter.next());
+            final EventListener listener = this.connectElement(get(i));
 
             // record the listener in the registry
-            this.registerListener(index, listener, false);
+            this.registerListener(i, listener, false);
         }
 
         // begin listening to the source list
@@ -470,6 +468,6 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
          * @param list the ObservableElementList containing the elements to
          *      observe
          */
-        public void setObservableElementList(ObservableElementList<E> list);
+        public void setObservableElementList(ObservableElementList<? extends E> list);
     }
 }

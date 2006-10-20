@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
+import java.util.List;
+import java.awt.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -233,6 +235,11 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(false, connector.isExitDueToException());
     }
 
+    public void testGenerics() {
+        // should be able to use an EventList<JLabel> and a Connector<Component>, for example
+        new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new ComponentConnector());
+    }
+
     /**
      * This connector installs a common JavaBean listener on every element
      * until bloomCount has been reached, when it begins installing unique
@@ -284,6 +291,12 @@ public class ObservableElementListTest extends TestCase {
 
         public void uninstallListener(JLabel element, EventListener listener) {
             element.removePropertyChangeListener((PropertyChangeListener) listener);
+        }
+    }
+
+    private static class ComponentConnector extends JavaBeanEventListConnector<Component> {
+        public ComponentConnector() {
+            super(Component.class);
         }
     }
 
