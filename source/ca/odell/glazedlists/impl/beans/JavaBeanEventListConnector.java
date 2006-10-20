@@ -40,6 +40,11 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     private Object[] reflectionParameters = new Object[] {this.propertyChangeListener};
 
     /**
+     * The types taken by the methods which add and remove PropertyChangeListeners.
+     */
+    private static final Class[] REFLECTION_TYPES = {PropertyChangeListener.class};
+
+    /**
      * Constructs a new Connector which uses reflection to add and remove a
      * PropertyChangeListener from instances of the <code>beanClass</code>. The
      * methods for adding and removing PropertyChangeListener from instances of
@@ -86,8 +91,8 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      */
     public JavaBeanEventListConnector(Class<E> beanClass, String addListenerMethodName, String removeListenerMethodName) {
         try {
-            this.addListenerMethod = beanClass.getMethod(addListenerMethodName, new Class[] { PropertyChangeListener.class });
-            this.removeListenerMethod = beanClass.getMethod(removeListenerMethodName, new Class[] { PropertyChangeListener.class });
+            this.addListenerMethod = beanClass.getMethod(addListenerMethodName, REFLECTION_TYPES);
+            this.removeListenerMethod = beanClass.getMethod(removeListenerMethodName, REFLECTION_TYPES);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Failed to find method " + e.getMessage() + " in " + beanClass);
         }
