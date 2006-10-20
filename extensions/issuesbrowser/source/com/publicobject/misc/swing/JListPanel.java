@@ -3,10 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.swing;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -90,21 +90,34 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
         this.model = model;
 
         // add the components from the new model to the component hiearchy
-        removeAll();
-        for (Iterator<C> i = model.iterator(); i.hasNext();)
-            add(i.next());
+        relayout();
 
         // start listening to the new model
         this.model.addListEventListener(this);
     }
 
-    /** @inheritDoc */
-    protected void paintChildren(Graphics g) {
-        super.paintChildren(g);
+    /**
+     * A convenience method to tear off all components and then re-add them
+     * such that the {@link #dndComponent} is always rendered on top of all
+     * other components (if a dndComponent exists)
+     */
+    private void relayout() {
+        // re-add all components so that their relative z-coordinates are correct
+        removeAll();
 
-        // repaint the component being dragged ON TOP of all other components
-        if (dndComponent != null)
-            dndComponent.repaint();
+        // add the dndComponent first (if there is one) so that it is drawn last (on top)
+        if (model.contains(dndComponent))
+            add(dndComponent);
+
+        // add the remainder of the components in order
+        for (Iterator<C> i = model.iterator(); i.hasNext();) {
+            C c = i.next();
+            if (c != dndComponent)
+                add(c);
+        }
+
+        // have the LayoutManager recalculate positions before the next repaint
+        revalidate();
     }
 
     /**
@@ -113,19 +126,10 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
      * with those changes.
      */
     public void listChanged(ListEvent<C> listChanges) {
-        while (listChanges.next()) {
-            final int type = listChanges.getType();
-            final int index = listChanges.getIndex();
-
-            switch (type) {
-                case ListEvent.INSERT: add(model.get(index), index); break;
-                case ListEvent.UPDATE: remove(index); add(model.get(index), index); break;
-                case ListEvent.DELETE: remove(index); break;
-            }
-        }
+        // incorporate the model changes into the view
+        relayout();
 
         // repaint the panel
-        revalidate();
         repaint();
     }
 
@@ -144,6 +148,9 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             dndComponent = (C) e.getComponent();
             dndOrigin = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);
             dndCurrent = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);
+
+            // adjust the component z-orders so that the DND component is drawn on top
+            relayout();
         }
 
         public void mouseReleased(MouseEvent e) {
@@ -156,7 +163,8 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
                 final Component c = model.get(i);
                 if (c == dndComponent) continue;
 
-                if (c.getBounds().contains(p)) {
+                final Rectangle bounds = c.getBounds();
+                if (bounds.y <= p.y && (bounds.y + bounds.height) >= p.y) {
                     newIndexOfDnDComponent = i;
                     break;
                 }
@@ -187,7 +195,9 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
         }
 
         public void mouseDragged(MouseEvent e) {
+            // reposition the DND component relative to the mouse cursor
             dndCurrent = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);
+
             revalidate();
             repaint();
         }
