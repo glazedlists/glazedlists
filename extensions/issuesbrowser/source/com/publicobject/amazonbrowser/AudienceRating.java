@@ -21,21 +21,24 @@ package com.publicobject.amazonbrowser;
  */
 public final class AudienceRating implements Comparable {
 
-	public static final AudienceRating G = new AudienceRating(1, "G");
-	public static final AudienceRating PG = new AudienceRating(2, "PG");
-	public static final AudienceRating PG_13 = new AudienceRating(3, "PG-13");
-	public static final AudienceRating R = new AudienceRating(4, "R");
-	public static final AudienceRating NC_17 = new AudienceRating(5, "NC-17");
-	public static final AudienceRating X = new AudienceRating(6, "X");
-	public static final AudienceRating NR = new AudienceRating(7, "NR");
+	public static final AudienceRating G = new AudienceRating(1, "G", "General Audiences");
+	public static final AudienceRating PG = new AudienceRating(2, "PG", "Parental Guidance Suggested");
+	public static final AudienceRating PG_13 = new AudienceRating(3, "PG-13", "Parents Strongly Cautioned");
+	public static final AudienceRating R = new AudienceRating(4, "R", "Restricted");
+	public static final AudienceRating NC_17 = new AudienceRating(5, "NC-17", "No One Under 17");
+	public static final AudienceRating X = new AudienceRating(6, "X", "No One Under 18");
+	public static final AudienceRating NR = new AudienceRating(7, "NR", "Not Rated");
 
 	private final int rating;
 
     private final String name;
 
-    private AudienceRating(int value, String name) {
+    private final String description;
+
+    private AudienceRating(int value, String name, String description) {
         this.rating = value;
         this.name = name;
+        this.description = description;
     }
 
 	/**
@@ -63,7 +66,11 @@ public final class AudienceRating implements Comparable {
 		return rating;
 	}
 
-	public String toString() {
+    public String getDescription() {
+        return description;
+    }
+
+    public String toString() {
 		return name;
 	}
 

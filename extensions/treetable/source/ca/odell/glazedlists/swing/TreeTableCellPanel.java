@@ -35,7 +35,7 @@ import java.util.List;
 class TreeTableCellPanel extends JPanel {
 
     /** The border that spaces the delegate component over from the expander button. */
-    static final Border NODE_COMPONENT_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
+    static final Border NO_FOCUS_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
 
     /** A cache of appropriate spacer components for each depth in the tree. */
     private final List<Component> spacerComponentsCache = new ArrayList<Component>();
@@ -94,11 +94,10 @@ class TreeTableCellPanel extends JPanel {
             setToolTipText(jNodeComponent.getToolTipText());
 
             // if the nodeComponent has focus, steal its border as the panel's own
-            if (hasFocus)
-                setBorder(jNodeComponent.getBorder());
+            setBorder(hasFocus ? jNodeComponent.getBorder() : NO_FOCUS_BORDER);
 
             // now clear away the nodeComponent's border
-            jNodeComponent.setBorder(NODE_COMPONENT_BORDER);
+            jNodeComponent.setBorder(NO_FOCUS_BORDER);
         }
 
         // configure this panel with the updated space/expander button and the supplied nodeComponent

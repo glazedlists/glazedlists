@@ -163,7 +163,7 @@ public abstract class TreeCriterion {
          */
         public Item getPathItem(Item item) {
             final AudienceRating rating = item.getItemAttributes().getAudienceRating();
-            return getOrCreateItem(rating == null ? "Unknown" : rating.toString());
+            return getOrCreateItem(rating == null ? "Unknown" : rating.getDescription());
         }
     }
 
