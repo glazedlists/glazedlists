@@ -12,6 +12,7 @@ import ca.odell.glazedlists.matchers.Matchers;
 import com.publicobject.amazonbrowser.TreeCriterion;
 import com.publicobject.misc.swing.JListPanel;
 import com.publicobject.misc.swing.RoundedBorder;
+import com.publicobject.misc.swing.Gripper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -109,6 +110,7 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
 
         private final JButton activeButton = new JButton();
         private final JLabel nameLabel = new JLabel();
+        private final JLabel gripLabel = new JLabel();
         private final TreeCriterion treeCriterion;
 
         public TreeCriterionEditorPanel(TreeCriterion tc) {
@@ -124,12 +126,15 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
             activeButton.setFocusable(false);
             activeButton.setFont(nameLabel.getFont().deriveFont(8));
 
-            nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 0));
+            nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
             nameLabel.setForeground(AmazonBrowser.AMAZON_TAB_LIGHT_BEIGE);
             nameLabel.setFont(nameLabel.getFont().deriveFont(8));
 
+            gripLabel.setIcon(new Gripper(10, 19, AmazonBrowser.AMAZON_TAB_LIGHT_BEIGE, Color.BLACK, AmazonBrowser.AMAZON_SEARCH_DARK_BLUE));
+
             add(activeButton, BorderLayout.WEST);
             add(nameLabel, BorderLayout.CENTER);
+            add(gripLabel, BorderLayout.EAST);
 
             update();
         }
