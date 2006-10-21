@@ -55,7 +55,6 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
      */
     public TreeCriteriaEditor(EventList<TreeCriterion> source) {
         super(new FunctionList<TreeCriterion,TreeCriterionEditorPanel>(source, new ForwardFunction(), new ReverseFunction()));
-        setBackground(AmazonBrowser.AMAZON_SEARCH_LIGHT_BLUE);
 
         // build a filtered view of allCriteria that only contains active TreeCriterion objects
         this.activeCriteria = new FilterList<TreeCriterion>(source, Matchers.beanPropertyMatcher(TreeCriterion.class, "active", Boolean.TRUE));
