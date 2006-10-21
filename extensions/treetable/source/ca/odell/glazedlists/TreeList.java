@@ -229,7 +229,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
             E possibleAncestorPathElement = possibleAncestorPath.get(d);
             E pathElement = child.path.get(d);
-            if(nodeComparator.comparator.compare(possibleAncestorPathElement, pathElement) != 0) return false;
+            if(!valuesEqual(d, possibleAncestorPathElement, pathElement)) return false;
         }
         return true;
     }
@@ -480,6 +480,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     }
                 }
 
+                // todo: handle shifts in children? perhaps we can look at the first child
+                // only, and if it has become detached then we can figure out what to do
+
                 // todo: repair siblings
 
             } else if(type == ListEvent.DELETE) {
@@ -586,8 +589,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      *      shifted in the tree.
      */
     private boolean hasStructurallyChanged(Node<E> node) {
-        // todo: handle shifts in children?
-
         // our parent should have a length one less than our length
         int parentPathLength = node.parent == null ? 0 : node.parent.pathLength();
         if(parentPathLength != node.pathLength() - 1) {
@@ -611,24 +612,34 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private void handleInsert(int sourceIndex) {
         Node<E> node = super.source.get(sourceIndex);
 
-        // figure out where the source node immediately before us lies. All
-        // nodes between it and us must me our virtual parents
+        //  bound the range of indices where this node can be inserted. This is
+        // all the virtual nodes between our predecessor and follower in the
+        // source list
         int predecessorIndex = sourceIndex > 0 ? data.convertIndexColor(sourceIndex - 1, REAL_NODES, ALL_NODES) : -1;
         int followerIndex = data.size(REAL_NODES) > sourceIndex ? data.convertIndexColor(sourceIndex, REAL_NODES, ALL_NODES) : data.size(ALL_NODES);
 
-        // walk through all our parent nodes already in the tree
-        int insertIndex = predecessorIndex + 1;
-        while(insertIndex < followerIndex) {
-            Node<E> possibleAncestor = data.get(insertIndex, ALL_NODES).get();
+        // prepare to search through the virtual nodes, looking for the node with
+        // the longest common path with the inserted node
+        int indexOfLongestAncestorByValue = predecessorIndex;
+        int lengthOfLongestAncestorCommonPath;
+        if(predecessorIndex >= 0) {
+            Node<E> predecessor = data.get(predecessorIndex, ALL_NODES).get();
+            lengthOfLongestAncestorCommonPath = commonPathLength(node, predecessor);
+        } else {
+            lengthOfLongestAncestorCommonPath = 0;
+        }
 
-            // this ancestor is a virtual copy of the node to be inserted,
-            // in which case we want to update over it. For example, if we
-            // simulated a node and then that value gets inserted 'for real',
-            // we keep the state of that node
-            // todo: compareNodes() doesn't make sense anymore for unsorted nodes
-            int relativePosition = compareNodes(node, possibleAncestor);
-            if(possibleAncestor.virtual && relativePosition == 0) {
+        // do the search
+        for(int i = predecessorIndex + 1; i < followerIndex; i++) {
+            Node<E> possibleAncestor = data.get(i, ALL_NODES).get();
+            assert(possibleAncestor.virtual);
 
+            // what's the longest ancestor that we share
+            int commonPathLength = commonPathLength(node, possibleAncestor);
+
+            // if the common path is the complete path, then we have a virtual
+            // node that has become real. Do the replace in place and we're done
+            if(commonPathLength == node.pathLength()) {
                 // make the real node copy the state of the virtual
                 node.updateFrom(possibleAncestor);
 
@@ -645,18 +656,16 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     updates.addUpdate(visibleIndex);
                 }
                 return;
-            }
 
-            // if this node follows us by value, we've gone too far
-            if(relativePosition < 0) {
-                break;
+            // have we found a new longest common path?
+            } else if(commonPathLength > lengthOfLongestAncestorCommonPath) {
+                lengthOfLongestAncestorCommonPath = commonPathLength;
+                indexOfLongestAncestorByValue = i;
             }
-
-            insertIndex++;
         }
 
         // insert a new node
-        Element<Node<E>> element = data.add(insertIndex, ALL_NODES, VISIBLE_REAL, node, 1);
+        Element<Node<E>> element = data.add(indexOfLongestAncestorByValue + 1, ALL_NODES, VISIBLE_REAL, node, 1);
         node.element = element;
 
         // link to the parent to determine visibility
@@ -669,8 +678,37 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
     }
 
-    private int compareNodes(Node<E> a, Node<E> b) {
-        return nodeComparator.compare(a, b);
+    /**
+     * @return the length of the common prefix path between the specified nodes
+     */
+    private int commonPathLength(Node<E> a, Node<E> b) {
+        List<E> aPath = a.path;
+        List<E> bPath = b.path;
+        int maxCommonPathLength = Math.min(aPath.size(), bPath.size());
+
+        // walk through the paths, looking for the first difference
+        for(int i = 0; i < maxCommonPathLength; i++) {
+            if(!valuesEqual(i, aPath.get(i), bPath.get(i))) {
+                return i;
+            }
+        }
+        return maxCommonPathLength;
+    }
+
+    /**
+     * Compare two path elements for equality. The path elements will always
+     * have the same depth.
+     *
+     * @param depth the index of the value in the element's path. For example
+     *     if the path is <code>/Users/jessewilson/Desktop/yarbo.mp4</code>,
+     *     then depth 3 corresponds to the element <code>yarmo.mp4</code>.
+     */
+    private boolean valuesEqual(int depth, E a, E b) {
+        return nodeComparator.comparator.compare(a, b) == 0;
+    }
+
+    private boolean nodesEqualByValue(Node<E> a, Node<E> b) {
+        return nodeComparator.compare(a, b) == 0;
     }
 
     /**

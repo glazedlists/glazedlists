@@ -638,4 +638,14 @@ public class TreeListTest extends TestCase {
                 "ABc",
         });
     }
+
+    public void testInsertInReverseOrder() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), (Comparator)GlazedLists.comparableComparator());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("LBAA");
+        source.add("LAAA");
+    }
 }
