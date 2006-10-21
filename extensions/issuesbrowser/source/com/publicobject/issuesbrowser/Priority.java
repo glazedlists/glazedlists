@@ -8,7 +8,7 @@ package com.publicobject.issuesbrowser;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public final class Priority implements Comparable {
+public final class Priority implements Comparable<Priority> {
 
 	public static final Priority P1 = new Priority(1);
 	public static final Priority P2 = new Priority(2);
@@ -54,8 +54,8 @@ public final class Priority implements Comparable {
 		return name;
 	}
 
-	public int compareTo(Object o) {
+	public int compareTo(Priority p) {
 		// Note: toggle the sign because P1 is a "higher" priority than P5, etc.
-		return value - ((Priority) o).value;
+		return value - p.value;
 	}
 }

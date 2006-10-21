@@ -19,7 +19,7 @@ package com.publicobject.amazonbrowser;
  *
  * @author James Lemieux
  */
-public final class AudienceRating implements Comparable {
+public final class AudienceRating implements Comparable<AudienceRating> {
 
 	public static final AudienceRating G = new AudienceRating(1, "G", "General Audiences");
 	public static final AudienceRating PG = new AudienceRating(2, "PG", "Parental Guidance Suggested");
@@ -74,7 +74,7 @@ public final class AudienceRating implements Comparable {
 		return name;
 	}
 
-	public int compareTo(Object o) {
-		return rating - ((AudienceRating) o).rating;
+	public int compareTo(AudienceRating ar) {
+		return rating - ar.rating;
 	}
 }
