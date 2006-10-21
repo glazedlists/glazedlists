@@ -7,7 +7,6 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.util.*;
 
@@ -217,6 +216,25 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
+     * @return true if the path of possibleAncestor is a proper prefix of
+     *      the path of this node.
+     */
+    public boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
+        List<E> possibleAncestorPath = possibleAncestor.path;
+
+        // this is too long a bath to be an ancestor's
+        if(possibleAncestorPath.size() >= child.path.size()) return false;
+
+        // make sure the whole trail of the ancestor is common with our trail
+        for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
+            E possibleAncestorPathElement = possibleAncestorPath.get(d);
+            E pathElement = child.path.get(d);
+            if(nodeComparator.comparator.compare(possibleAncestorPathElement, pathElement) != 0) return false;
+        }
+        return true;
+    }
+
+    /**
      * Find the latest node with the same parent that's before this node.
      */
     private Node<E> findSiblingBeforeByValue(Node<E> node) {
@@ -244,6 +262,21 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         return null;
     }
 
+
+    /**
+     * Find the first node after the specified node that's not its child. This
+     * is necessary to calculate the size of the node's subtree.
+     */
+    private Node<E> nextNodeThatsNotAChildOfByStructure(Node<E> node) {
+        for(; node != null; node = node.parent) {
+            Node<E> followerNode = node.siblingAfter;
+            if(followerNode != null) {
+                return followerNode;
+            }
+        }
+        return null;
+    }
+
     /**
      * @return the number of ancestors of the node at the specified index.
      *      Root nodes have depth 0, other nodes depth is one
@@ -266,7 +299,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         Node<E> node = data.get(visibleIndex, colorsOut).get();
 
         // find the next node that's not a child to find the delta
-        Node<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOf(node);
+        Node<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOfByStructure(node);
 
         // if we don't have a sibling after us, we've hit the end of the tree
         if(nextNodeNotInSubtree == null) {
@@ -274,20 +307,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - visibleIndex;
-    }
-
-    /**
-     * Find the first node after the specified node that's not its child. This
-     * is necessary to calculate the size of the node's subtree.
-     */
-    private Node<E> nextNodeThatsNotAChildOf(Node<E> node) {
-        for(; node != null; node = node.parent) {
-            Node<E> followerNode = node.siblingAfter;
-            if(followerNode != null) {
-                return followerNode;
-            }
-        }
-        return null;
     }
 
     /** {@inheritDoc} */
@@ -361,7 +380,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         updates.beginEvent();
 
-        Node<E> toExpandNextSibling = nextNodeThatsNotAChildOf(toExpand);
+        Node<E> toExpandNextSibling = nextNodeThatsNotAChildOfByStructure(toExpand);
 
         // walk through the subtree, looking for all the descendents we need
         // to change. As we encounter them, change them and fire events
@@ -437,6 +456,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // add the new data, remove the old data, and mark the updated data
         List<Node<E>> parentsToVerify = new ArrayList<Node<E>>();
+        // todo: we don't need this?
         List<Node<E>> parentsToRestore = new ArrayList<Node<E>>();
         while(listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
@@ -450,7 +470,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
                 // shift as necessary, so if the parents are immediately after, they're used
-                if(hasLogicallyShifted(node)) {
+                if(hasStructurallyChanged(node)) {
                     handleDelete(sourceIndex, parentsToVerify, parentsToRestore);
                     handleInsert(sourceIndex);
                 } else {
@@ -565,54 +585,22 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * @return <code>true</code> if the specified node has structurally
      *      shifted in the tree.
      */
-    private boolean hasLogicallyShifted(Node<E> node) {
+    private boolean hasStructurallyChanged(Node<E> node) {
         // todo: handle shifts in children?
 
-        // is the predecessor a parent or sibling?
-        while(true) {
-            Element<Node<E>> previousElement = node.element.previous();
-            if(previousElement == null) break;
-            Node<E> previousNode = previousElement.get();
-
-            // the predecessor is a sibling
-            if(previousNode.pathLength() == node.pathLength()) {
-                // make sure the sibling is on the right side
-                if(previousNode.virtual && compareNodes(previousNode, node) > 0) {
-                    return true;
-                // and that we agree what our parent looks like
-                } else if(!isAncestorByValue(node, previousNode.parent)) {
-                    return true;
-                }
-
-            // the predecessor is a parent
-            } else if(previousNode.pathLength() == node.pathLength() - 1) {
-                // make sure that parent it is an ancestor by value
-                if(!isAncestorByValue(node, previousNode)) {
-                    return true;
-                }
-
-            } else {
-                return true;
-            }
-
-            break;
-        }
-
-        // should it be swapped with the follower?
-        while(true) {
-            Element<Node<E>> nextElement = node.element.next();
-            if(nextElement == null) break;
-            Node<E> nextNode = nextElement.get();
-            // the follower is not virtual
-            if(!nextNode.virtual) break;
-            // no swap is necessary, the node is supposed to be after us
-            if(compareNodes(nextNode, node) >= 0) break;
-
-            // a swap is necessary!
+        // our parent should have a length one less than our length
+        int parentPathLength = node.parent == null ? 0 : node.parent.pathLength();
+        if(parentPathLength != node.pathLength() - 1) {
             return true;
         }
 
-        return false;
+        // our previous parent is still our parent, so nothing has changed structurally
+        if(node.parent == null || isAncestorByValue(node, node.parent)) {
+            return false;
+        }
+
+        // something about our parentage has changed
+        return true;
     }
 
     /**
@@ -708,25 +696,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
         return result;
-    }
-
-    /**
-     * @return true if the path of possibleAncestor is a proper prefix of
-     *      the path of this node.
-     */
-    public boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
-        List<E> possibleAncestorPath = possibleAncestor.path;
-
-        // this is too long a bath to be an ancestor's
-        if(possibleAncestorPath.size() >= child.path.size()) return false;
-
-        // make sure the whole trail of the ancestor is common with our trail
-        for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
-            E possibleAncestorPathElement = possibleAncestorPath.get(d);
-            E pathElement = child.path.get(d);
-            if(nodeComparator.comparator.compare(possibleAncestorPathElement, pathElement) != 0) return false;
-        }
-        return true;
     }
 
     /**
