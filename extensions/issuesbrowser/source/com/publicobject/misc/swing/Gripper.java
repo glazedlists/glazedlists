@@ -49,7 +49,7 @@ public class Gripper implements Icon {
     }
 
     public void paintIcon(Component c, Graphics g, int x, int y) {
-        GraphicsConfiguration gc = g instanceof Graphics2D ? (GraphicsConfiguration) ((Graphics2D) g).getDeviceConfiguration() : null;
+        GraphicsConfiguration gc = g instanceof Graphics2D ? ((Graphics2D) g).getDeviceConfiguration() : null;
 
         buffer = getBuffer(gc, topColor, shadowColor, backColor);
 
