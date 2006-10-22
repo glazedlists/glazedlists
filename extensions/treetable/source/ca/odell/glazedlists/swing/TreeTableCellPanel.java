@@ -86,7 +86,7 @@ class TreeTableCellPanel extends JPanel {
             expanderButton.setIcon(UIManager.getIcon(isExpanded ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
 
         // assign a default background color to this panel to attempt to remain consistent with the nodeComponent
-        setBackground(nodeComponent.getBackground());
+        super.setBackground(nodeComponent.getBackground());
 
         // replace any kind of border with an empty one that tabs the node component over from the expander button
         if(nodeComponent instanceof JComponent) {
