@@ -131,15 +131,26 @@ public class XmlBrowser {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new StartUIRunnable());
+        if(args.length != 1) {
+            System.out.println("Usage: XmlBrowser <xmlfile>");
+            return;
+        }
+
+        SwingUtilities.invokeLater(new StartUIRunnable(args[0]));
     }
 
     private static class StartUIRunnable implements Runnable {
+        private String xmlFile;
+
+        public StartUIRunnable(String xmlFile) {
+            this.xmlFile = xmlFile;
+        }
+
         public void run() {
             // get a handle to an XML file for input
             InputStream xmlIn = null;
             try {
-                xmlIn = new FileInputStream("pom.xml");
+                xmlIn = new FileInputStream(xmlFile);
             } catch(FileNotFoundException e) {
                 throw new RuntimeException(e);
             }

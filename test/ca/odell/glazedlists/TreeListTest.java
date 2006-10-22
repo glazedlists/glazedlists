@@ -739,4 +739,35 @@ public class TreeListTest extends TestCase {
                 "ABD",
         });
     }
+
+    /**
+     * This test validates that when multiple sets of parents are restored, all
+     * the appropriate virtual nodes are assigned the appropriate new parents.
+     */
+    public void testInsertMultipleParents_FixMe() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.beginEvent(false);
+            source.add("ABC");
+            source.add("ABD");
+            source.add("ABE");
+        source.commitEvent();
+
+        source.beginEvent(true);
+            source.addAll(0, Arrays.asList(new String[] { "A", "AB" }));
+            source.addAll(3, Arrays.asList(new String[] { "A", "AB" }));
+        source.commitEvent();
+
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "A",
+                "AB",
+                "ABD",
+        });
+    }
 }
