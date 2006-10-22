@@ -265,8 +265,10 @@ public class AmazonBrowser implements Runnable {
          * which is either a renderer or editor component.
          */
         private Component normalize(Component c, int row) {
-            c.setBackground(row % 2 == 0 ? Color.WHITE : AMAZON_SEARCH_LIGHT_BLUE);
-            c.setForeground(Color.BLACK);
+            if (!isRowSelected(row)) {
+                c.setBackground(row % 2 == 0 ? Color.WHITE : AMAZON_SEARCH_LIGHT_BLUE);
+                c.setForeground(Color.BLACK);
+            }
             return c;
         }
     }
