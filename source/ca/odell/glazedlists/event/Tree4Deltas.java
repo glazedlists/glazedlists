@@ -112,6 +112,9 @@ class Tree4Deltas<E> {
     public void delete(int startIndex, int endIndex, E value) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
+            if(startIndex > 0 && startIndex > tree.size(Tree4Deltas.CURRENT_INDICES)) {
+                throw new IllegalArgumentException();
+            }
             int overallIndex = tree.convertIndexColor(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
             Element<E> standingChangeToIndex = tree.get(overallIndex, Tree4Deltas.ALL_INDICES);
 

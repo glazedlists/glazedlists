@@ -4,14 +4,13 @@
 package com.publicobject.xmlbrowser;
 
 import java.util.List;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TreeTableSupport;
 import ca.odell.glazedlists.swing.EventTreeModel;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import javax.swing.*;
 import javax.xml.parsers.SAXParserFactory;
@@ -145,9 +144,18 @@ public class XmlBrowser {
                 throw new RuntimeException(e);
             }
 
+            // prepare the table filters
+            JTextField filterEdit = new JTextField(15);
+            TextFilterator<Element> filterator = GlazedLists.textFilterator(new String[]{"qName", "text"});
+            TextComponentMatcherEditor<Element> matcherEditor = new TextComponentMatcherEditor<Element>(filterEdit, filterator);
+            JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            filterPanel.add(new JLabel("Filter:"));
+            filterPanel.add(filterEdit);
+
             // convert the XML into an EventList, then a TreeList
             EventList<Element> eventList = EventListXmlContentHandler.create(xmlIn);
-            TreeList<Element> treeList = new TreeList<Element>(eventList, new ElementTreeFormat());
+            FilterList<Element> filteredList = new FilterList<Element>(eventList, matcherEditor);
+            TreeList<Element> treeList = new TreeList<Element>(filteredList, new ElementTreeFormat());
 
             // display the XML in a tree table
             EventTableModel<TreeList.Node<Element>> tableModel = new EventTableModel<TreeList.Node<Element>>(treeList.getNodesList(), new ElementTableFormat());
@@ -161,6 +169,7 @@ public class XmlBrowser {
 
             // build tha application
             JPanel panel = new JPanel(new BorderLayout());
+            panel.add(filterPanel, BorderLayout.NORTH);
             panel.add(new JScrollPane(table), BorderLayout.CENTER);
             panel.add(new JScrollPane(tree), BorderLayout.WEST);
             JFrame frame = new JFrame("XML Browser");

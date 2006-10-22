@@ -2,6 +2,7 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
@@ -647,5 +648,95 @@ public class TreeListTest extends TestCase {
 
         source.add("LBAA");
         source.add("LAAA");
+    }
+
+    public void testNonSiblingsBecomeSiblings_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("EFG");
+        source.add("ABD");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "E",
+                "EF",
+                "EFG",
+                "A",
+                "AB",
+                "ABD",
+        });
+
+        source.remove("EFG");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+        });
+    }
+
+    public void testSiblingsBecomeNonSiblings() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("ABD");
+        source.add(1, "EFG");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "E",
+                "EF",
+                "EFG",
+                "A",
+                "AB",
+                "ABD",
+        });
+    }
+
+    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("ABD");
+        treeList.setExpanded(1, false); // collapse 'B'
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+        });
+
+        source.add(1, "EFG");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "E",
+                "EF",
+                "EFG",
+                "A",
+                "AB",
+        });
+
+        treeList.setExpanded(6, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "E",
+                "EF",
+                "EFG",
+                "A",
+                "AB",
+                "ABD",
+        });
     }
 }
