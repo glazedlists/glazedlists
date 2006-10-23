@@ -434,7 +434,7 @@
     </target>
 
     <!-- check if the user already has BCEL in their ANT \lib directory (which is required to execute the "demojar" target -->
-    <available file="${ant.home}/lib/bcel.jar" property="bcel.present"/>
+    <available classname="org.apache.bcel.Constants" property="bcel.present"/>
 
     <target name="downloadBCEL" unless="bcel.present">
         <!-- explain the BCEL requirement -->
@@ -451,7 +451,7 @@
         </java>
 
         <!-- recheck if bcel.jar is now in the ANT \lib directory -->
-        <available file="${ant.home}/lib/bcel.jar" property="bcel.present"/>
+        <available classname="org.apache.bcel.Constants" property="bcel.present"/>
 
         <!-- check if bcel.jar was downloaded successfully and display the instructions to rerun the ANT command. -->
         <fail message="BCEL has been successfully downloaded. Please re-execute the ANT task and it will now proceed normally.">
