@@ -433,7 +433,38 @@
         </javac>
     </target>
 
-    <target name="demojar" depends="clean,issuesbrowser"
+    <!-- check if the user already has BCEL in their ANT \lib directory (which is required to execute the "demojar" target -->
+    <available file="${ant.home}/lib/bcel.jar" property="bcel.present"/>
+
+    <target name="downloadBCEL" unless="bcel.present">
+        <!-- explain the BCEL requirement -->
+        <echo>To build the demojar, Glazed Lists requires the Byte Code Engineering Library (BCEL) to be available in the \lib directory of your ANT installation. The Glazed Lists build system will now automatically attempt to download the BCEL into ${ant.home}\lib on your behalf.</echo>
+
+        <!-- wait for the user to read the message before continuing -->
+        <input>Press Return to begin the download...</input>
+
+        <!-- download bcel.jar to the ant \lib directory -->
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/42723/bcel.jar"/>
+            <arg value="${ant.home}/lib/bcel.jar"/>
+        </java>
+
+        <!-- recheck if bcel.jar is now in the ANT \lib directory -->
+        <available file="${ant.home}/lib/bcel.jar" property="bcel.present"/>
+
+        <!-- check if bcel.jar was downloaded successfully and display the instructions to rerun the ANT command. -->
+        <fail message="BCEL has been successfully downloaded. Please re-execute the ANT task and it will now proceed normally.">
+            <condition>
+                <available file="${ant.home}/lib/bcel.jar"/>
+            </condition>
+        </fail>
+
+        <!-- otherwise bcel.jar could not be downloaded so fail with instructions on how to resolve the problem manually -->
+        <fail message="The BCEL could not be downloaded. You must manually download it from here: http://jakarta.apache.org/site/downloads/downloads_bcel.cgi and place it in your ANT installation here: ${ant.home}\lib"/>
+    </target>
+
+    <target name="demojar" depends="clean,issuesbrowser,downloadBCEL"
         description="Create a .jar file with the Issues Browser demo application.">
 
         <!-- make a temporary folder for assembling the demojar -->
