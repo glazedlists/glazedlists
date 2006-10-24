@@ -261,8 +261,24 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches the given JavaBean
      * properties.
      */
+    public static <E> TextFilterator<E> textFilterator(Class<E> beanClass, String[] propertyNames) {
+        return new BeanTextFilterator<Object,E>(beanClass, propertyNames);
+    }
+
+    /**
+     * Creates a {@link TextFilterator} that searches the given JavaBean
+     * properties.
+     */
     public static <D,E> Filterator<D,E> filterator(String[] propertyNames) {
         return new BeanTextFilterator<D,E>(propertyNames);
+    }
+
+    /**
+     * Creates a {@link TextFilterator} that searches the given JavaBean
+     * properties of the specified class.
+     */
+    public static <D,E> Filterator<D,E> filterator(Class<E> beanClass, String[] propertyNames) {
+        return new BeanTextFilterator<D,E>(beanClass, propertyNames);
     }
 
     /**

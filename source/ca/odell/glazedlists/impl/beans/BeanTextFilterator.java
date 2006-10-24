@@ -30,12 +30,20 @@ public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,
         this.propertyNames = propertyNames;
     }
 
+    /**
+     * Create a BeanTextFilterator that uses the specified property names.
+     */
+    public BeanTextFilterator(Class<E> beanClass, String[] propertyNames) {
+        this.propertyNames = propertyNames;
+        loadPropertyDescriptors(beanClass);
+    }
+
     /** {@inheritDoc} */
     public void getFilterStrings(List<String> baseList, E element) {
         if(element == null) return;
 
         // load the property descriptors on first request
-        if(beanProperties == null) loadPropertyDescriptors(element);
+        if(beanProperties == null) loadPropertyDescriptors(element.getClass());
 
         // get the filter strings
         for(int p = 0; p < beanProperties.length; p++) {
@@ -50,7 +58,7 @@ public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,
         if(element == null) return;
 
         // load the property descriptors on first request
-        if(beanProperties == null) loadPropertyDescriptors(element);
+        if(beanProperties == null) loadPropertyDescriptors(element.getClass());
 
         // get the filter strings
         for(int p = 0; p < beanProperties.length; p++) {
@@ -64,8 +72,7 @@ public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,
      * Loads the property descriptors which are used to invoke property
      * access methods using the property names.
      */
-    private void loadPropertyDescriptors(E beanObject) {
-        Class<E> beanClass = (Class<E>) beanObject.getClass();
+    private void loadPropertyDescriptors(Class beanClass) {
         beanProperties = new BeanProperty[propertyNames.length];
         for(int p = 0; p < propertyNames.length; p++) {
             beanProperties[p] = new BeanProperty<E>(beanClass, propertyNames[p], true, false);
