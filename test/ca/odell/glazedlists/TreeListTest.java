@@ -680,7 +680,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSiblingsBecomeNonSiblings() {
+    public void testSiblingsBecomeNonSiblings_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -702,7 +702,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes() {
+    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -768,6 +768,24 @@ public class TreeListTest extends TestCase {
                 "A",
                 "AB",
                 "ABD",
+        });
+    }
+
+    public void testAttachSiblings() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("A");
+        source.add("BCD");
+        source.add("BCF");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "B",
+                "BC",
+                "BCD",
+                "BCF",
         });
     }
 }
