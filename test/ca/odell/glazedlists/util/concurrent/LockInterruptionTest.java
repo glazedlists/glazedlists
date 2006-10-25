@@ -39,7 +39,7 @@ public class LockInterruptionTest extends TestCase {
         JobQueue.Job result = jobQueue.invokeLater(new LockALockRunnable(lock.writeLock()));
 
         // make sure there's contention on the lock
-        sleep();
+        sleep(1000);
 
         // release the lock, this will cause our other job to finish
         lock.writeLock().unlock();
@@ -57,10 +57,10 @@ public class LockInterruptionTest extends TestCase {
     /**
      * Wait a bit to give a chance for thread contention.
      */
-    private void sleep() {
+    private void sleep(long duration) {
         synchronized(this) {
             try {
-                wait(1000);
+                wait(duration);
             } catch(InterruptedException e) {
                 throw new RuntimeException(e);
             }
