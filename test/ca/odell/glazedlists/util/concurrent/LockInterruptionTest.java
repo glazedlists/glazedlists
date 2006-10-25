@@ -36,15 +36,12 @@ public class LockInterruptionTest extends TestCase {
         jobQueue.interrupt();
 
         // create a thread that will block waiting on Lock.lock()
-        JobQueue.Job result = jobQueue.invokeLater(new Runnable() {
-            public void run() {
-                lock.writeLock().lock();
-            }
-        });
+        JobQueue.Job result = jobQueue.invokeLater(new LockALockRunnable(lock.writeLock()));
 
         // make sure there's contention on the lock
         sleep();
 
+        // release the lock, this will cause our other job to finish
         lock.writeLock().unlock();
 
         // flush the queue
@@ -54,21 +51,44 @@ public class LockInterruptionTest extends TestCase {
         assertNull(result.getThrown());
 
         // validate that the thread is still interrupted
-        jobQueue.invokeAndWait(new Runnable() {
-            public void run() {
-                if(!Thread.interrupted()) {
-                    fail();
-                }
-            }
-        });
+        jobQueue.invokeAndWait(new FailIfNotInterruptedRunnable());
     }
 
+    /**
+     * Wait a bit to give a chance for thread contention.
+     */
     private void sleep() {
         synchronized(this) {
             try {
                 wait(1000);
             } catch(InterruptedException e) {
                 throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * We'd prefer anonymous inner classes here, but alas for Java 1.4 generics
+     * we can't do anonymous inner classes.
+     */
+    private static class LockALockRunnable implements Runnable {
+        private Lock lock;
+        public LockALockRunnable(Lock lock) {
+            this.lock = lock;
+        }
+        public void run() {
+            lock.lock();
+        }
+    }
+
+    /**
+     * We'd prefer anonymous inner classes here, but alas for Java 1.4 generics
+     * we can't do anonymous inner classes.
+     */
+    private static class FailIfNotInterruptedRunnable implements Runnable {
+        public void run() {
+            if(!Thread.interrupted()) {
+                fail();
             }
         }
     }
