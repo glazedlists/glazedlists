@@ -20,7 +20,7 @@ public class LockInterruptionTest extends TestCase {
     }
 
     public void testJava14LockInterrupt() {
-        testLockInterrupt(new J2SE12LockFactory().createReadWriteLock());
+        testLockInterrupt(new J2SE14LockFactory().createReadWriteLock());
     }
 
     /**

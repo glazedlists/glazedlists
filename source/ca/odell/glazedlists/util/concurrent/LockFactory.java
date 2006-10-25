@@ -47,7 +47,7 @@ class DelegateLockFactory implements LockFactory {
 
         } catch (Exception e) {
             // otherwise fall back to a J2SE 1.2 LockFactory
-            this.delegate = new J2SE12LockFactory();
+            this.delegate = new J2SE14LockFactory();
         }
     }
 

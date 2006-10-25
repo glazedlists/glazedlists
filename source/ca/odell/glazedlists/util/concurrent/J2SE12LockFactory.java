@@ -6,62 +6,6 @@ package ca.odell.glazedlists.util.concurrent;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * An implementation of {@link LockFactory} that has been derived from Doug Lea's
- * <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
- */
-final class J2SE12LockFactory implements LockFactory {
-
-    /**
-     * Create a {@link ReadWriteLock}.
-     *
-     * <p>The default implementation returns an implementation that has been
-     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
-     */
-    public ReadWriteLock createReadWriteLock() {
-        return new J2SE12ReadWriteLock();
-    }
-
-    /**
-     * Create a {@link Lock}.
-     *
-     * <p>The default implementation returns an implementation that has been
-     * derived from Doug Lea's <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">util.concurrent</a>.
-     */
-    public Lock createLock() {
-        return new J2SE12ReadWriteLock().writeLock();
-    }
-}
-
-/**
- * A ReadWriteLock implementation that is compatible with Java 1.2 and better. This
- * is <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">Doug Lea's</a>
- * implementation, slightly modified to fit within the Glazed Lists codebase.
- *
- * @see <a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html">Introduction to util.concurrent</a>
- *
- * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
- */
-final class J2SE12ReadWriteLock implements ReadWriteLock {
-
-    /** delegate locking to the professionals! */
-    ReentrantWriterPreferenceReadWriteLock j2se12ReadWriteLock = new ReentrantWriterPreferenceReadWriteLock();
-
-    /**
-     * Return the lock used for reading.
-     */
-    public Lock readLock() {
-        return j2se12ReadWriteLock.readLock();
-    }
-
-    /**
-     * Return the lock used for writing.
-     */
-    public Lock writeLock() {
-        return j2se12ReadWriteLock.writeLock();
-    }
-}
-
 
 /*
   File: ReentrantWriterPreferenceReadWriteLock.java
