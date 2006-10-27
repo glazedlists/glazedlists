@@ -118,29 +118,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Iterate through all nodes in the tree, updating their sibling links.
-     * This should only be used by the constructor since it takes a long time
-     * to execute.
-     */
-    private void rebuildAllSiblingLinks() {
-        for(int i = 0; i < data.size(ALL_NODES); i++) {
-            Node<E> node = data.get(i, ALL_NODES).get();
-
-            // populate sibling relations
-            Node<E> siblingBefore = findSiblingBeforeByValue(node);
-            if(siblingBefore != null) {
-                node.siblingBefore = siblingBefore;
-                siblingBefore.siblingAfter = node;
-            } else {
-                node.siblingBefore = null;
-            }
-
-            // sibling after may be set in a future iteration of this loop
-            node.siblingAfter = null;
-        }
-    }
-
-    /**
      * Find the parent for the specified node, creating it if necessary. When
      * a parent is found, this node is attached to that parent and its
      * visibility is inherited from its parent's 'visible' and 'expanded'
@@ -206,68 +183,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * @return true if the path of possibleAncestor is a proper prefix of
-     *      the path of this node.
-     */
-    public boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
-        List<E> possibleAncestorPath = possibleAncestor.path;
-
-        // this is too long a path to be an ancestor's
-        if(possibleAncestorPath.size() >= child.path.size()) return false;
-
-        // make sure the whole trail of the ancestor is common with our trail
-        for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
-            E possibleAncestorPathElement = possibleAncestorPath.get(d);
-            E pathElement = child.path.get(d);
-            if(!valuesEqual(d, possibleAncestorPathElement, pathElement)) return false;
-        }
-        return true;
-    }
-
-    /**
-     * Find the latest node with the same parent that's before this node.
-     */
-    private Node<E> findSiblingBeforeByValue(Node<E> node) {
-
-        // this is crappy, we should figure out something more robust!
-        // Currently we do a linear scan backwards looking for a node with the
-        // same path length
-        int nodeIndex = data.indexOfNode(node.element, ALL_NODES);
-        for(int i = nodeIndex - 1; i >= 0; i--) {
-            Node<E> beforeNode = data.get(i, ALL_NODES).get();
-
-            // our sibling will have the same path length
-            if(beforeNode.pathLength() == node.pathLength()) {
-                return beforeNode;
-
-            // we've stumbled on our parent, don't bother going further
-            } else if(beforeNode.pathLength() < node.pathLength()) {
-                return null;
-            }
-        }
-
-        // we've run out of data, this must be the first root
-        assert(node.pathLength() == 1);
-        assert(nodeIndex == 0);
-        return null;
-    }
-
-
-    /**
-     * Find the first node after the specified node that's not its child. This
-     * is necessary to calculate the size of the node's subtree.
-     */
-    private Node<E> nextNodeThatsNotAChildOfByStructure(Node<E> node) {
-        for(; node != null; node = node.parent) {
-            Node<E> followerNode = node.siblingAfter;
-            if(followerNode != null) {
-                return followerNode;
-            }
-        }
-        return null;
-    }
-
-    /**
      * @return the number of ancestors of the node at the specified index.
      *      Root nodes have depth 0, other nodes depth is one
      *      greater than the depth of their parent node.
@@ -297,6 +212,20 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - visibleIndex;
+    }
+
+    /**
+     * Find the first node after the specified node that's not its child. This
+     * is necessary to calculate the size of the node's subtree.
+     */
+    private Node<E> nextNodeThatsNotAChildOfByStructure(Node<E> node) {
+        for(; node != null; node = node.parent) {
+            Node<E> followerNode = node.siblingAfter;
+            if(followerNode != null) {
+                return followerNode;
+            }
+        }
+        return null;
     }
 
     /** {@inheritDoc} */
@@ -330,6 +259,32 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     public boolean hasChildren(int visibleIndex) {
         return subtreeSize(visibleIndex, true) > 1;
+    }
+
+
+    /**
+     * Change how the structure of the tree is derived.
+     *
+     * @param treeFormat
+     */
+    public void setTreeFormat(Format<E> treeFormat) {
+        // todo implement this
+    }
+
+    /**
+     * Get a {@link List} containing all {@link Node}s with no parents in the
+     * tree.
+     */
+    public List<Node<E>> getRoots() {
+        // todo: make this make sense
+        List<Node<E>> result = new ArrayList<Node<E>>();
+        for(int i = 0; i < size(); i++) {
+            Node<E> possibleRoot = getTreeNode(i);
+            if(possibleRoot.pathLength() == 1) {
+                result.add(possibleRoot);
+            }
+        }
+        return result;
     }
 
     /**
@@ -920,6 +875,25 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
+     * @return true if the path of possibleAncestor is a proper prefix of
+     *      the path of this node.
+     */
+    public boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
+        List<E> possibleAncestorPath = possibleAncestor.path;
+
+        // this is too long a path to be an ancestor's
+        if(possibleAncestorPath.size() >= child.path.size()) return false;
+
+        // make sure the whole trail of the ancestor is common with our trail
+        for(int d = possibleAncestorPath.size() - 1; d >= 0; d--) {
+            E possibleAncestorPathElement = possibleAncestorPath.get(d);
+            E pathElement = child.path.get(d);
+            if(!valuesEqual(d, possibleAncestorPathElement, pathElement)) return false;
+        }
+        return true;
+    }
+
+    /**
      * Compare two path elements for equality. The path elements will always
      * have the same depth.
      *
@@ -933,31 +907,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     private boolean nodesEqualByValue(Node<E> a, Node<E> b) {
         return nodeComparator.compare(a, b) == 0;
-    }
-
-    /**
-     * Change how the structure of the tree is derived.
-     *
-     * @param treeFormat
-     */
-    public void setTreeFormat(Format<E> treeFormat) {
-        // todo implement this
-    }
-
-    /**
-     * Get a {@link List} containing all {@link Node}s with no parents in the
-     * tree.
-     */
-    public List<Node<E>> getRoots() {
-        // todo: make this make sense
-        List<Node<E>> result = new ArrayList<Node<E>>();
-        for(int i = 0; i < size(); i++) {
-            Node<E> possibleRoot = getTreeNode(i);
-            if(possibleRoot.pathLength() == 1) {
-                result.add(possibleRoot);
-            }
-        }
-        return result;
     }
 
     /**

@@ -650,7 +650,7 @@ public class TreeListTest extends TestCase {
         source.add("LAAA");
     }
 
-    public void testNonSiblingsBecomeSiblings_FixMe() {
+    public void testNonSiblingsBecomeSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -680,7 +680,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSiblingsBecomeNonSiblings_FixMe() {
+    public void testSiblingsBecomeNonSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -702,7 +702,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes_FixMe() {
+    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -744,7 +744,7 @@ public class TreeListTest extends TestCase {
      * This test validates that when multiple sets of parents are restored, all
      * the appropriate virtual nodes are assigned the appropriate new parents.
      */
-    public void testInsertMultipleParents_FixMe() {
+    public void testInsertMultipleParents() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -787,6 +787,28 @@ public class TreeListTest extends TestCase {
                 "BC",
                 "BCD",
                 "BCF",
+        });
+    }
+
+    public void testDeleteParentAndOneChild() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("P");
+        source.add("PD");
+        source.add("PU");
+        source.add("PI");
+        source.add("PIS");
+        source.add("PIU");
+        source.add("PY");
+        source.removeAll(Arrays.asList(new String[] { "PI", "PIS" }));
+        assertTreeStructure(treeList, new String[] {
+                "P",
+                "PD",
+                "PU",
+                "PY",
         });
     }
 }
