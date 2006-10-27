@@ -768,6 +768,7 @@ public class TreeListTest extends TestCase {
                 "A",
                 "AB",
                 "ABD",
+                "ABE",
         });
     }
 
