@@ -132,7 +132,7 @@ public final class Matchers {
      * that don't match the specified matcher.
      *
      * @return <code>true</code> if any elements were removed from the specified
-     *      {@link Collection}.
+     *      {@link Collection}
      */
     public static <E> boolean filter(Collection<E> collection, Matcher<? super E> matcher) {
         boolean changed = false;
@@ -142,6 +142,28 @@ public final class Matchers {
                 i.remove();
                 changed = true;
             }
+        }
+        return changed;
+    }
+
+    /**
+     * Add all elements from the given <code>collection</code> that satisfy the
+     * <code>matcher</code> to the given <code>results</code> Collection.
+     * <code>results</code> can be any Collection that supports the
+     * {@link Collection#add} operation.
+     *
+     * @param collection the Collection to search
+     * @param matcher the criteria for considering an element a match
+     * @param results the Collection into which matching elements are added
+     * @return <code>true</code> if any elements were added to the
+     *      <code>results</code> {@link Collection}
+     */
+    public static <E> boolean find(Collection<E> collection, Matcher<? super E> matcher, Collection<? super E> results) {
+        boolean changed = false;
+        for (Iterator<E> i = collection.iterator(); i.hasNext();) {
+            E element = i.next();
+            if (matcher.matches(element))
+                changed = results.add(element);
         }
         return changed;
     }

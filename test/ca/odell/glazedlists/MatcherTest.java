@@ -68,35 +68,68 @@ public class MatcherTest extends TestCase {
 
         boolean result;
 
-        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(22)));
+        result = Matchers.filter(elements, new NumberMatcher(new Integer(22)));
         assertEquals(true, result);
         assertEquals(4, elements.size());
 
-        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(22)));
+        result = Matchers.filter(elements, new NumberMatcher(new Integer(22)));
         assertEquals(false, result);
         assertEquals(4, elements.size());
 
-        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(33)));
+        result = Matchers.filter(elements, new NumberMatcher(new Integer(33)));
         assertEquals(true, result);
         assertEquals(0, elements.size());
 
-        result = Matchers.filter(elements, (Matcher)new NumberMatcher(new Integer(35)));
+        result = Matchers.filter(elements, new NumberMatcher(new Integer(35)));
         assertEquals(false, result);
         assertEquals(0, elements.size());
     }
 
+    public void testFind() {
+        List<Integer> elements = new ArrayList<Integer>();
+        elements.add(new Integer(45));
+        elements.add(new Integer(22));
+        elements.add(new Integer(15));
+        elements.add(new Integer(22));
+        elements.add(new Integer(13));
+        elements.add(new Integer(53));
+        elements.add(new Integer(22));
+        elements.add(new Integer(23));
+        elements.add(new Integer(22));
+
+        List<Comparable> results = new ArrayList<Comparable>();
+
+        boolean result;
+
+        result = Matchers.find(elements, new NumberMatcher(new Integer(22)), results);
+        assertEquals(true, result);
+        assertEquals(4, results.size());
+
+        result = Matchers.find(elements, new NumberMatcher(new Integer(22)), results);
+        assertEquals(true, result);
+        assertEquals(8, results.size());
+
+        result = Matchers.find(elements, new NumberMatcher(new Integer(45)), results);
+        assertEquals(true, result);
+        assertEquals(9, results.size());
+
+        result = Matchers.find(elements, new NumberMatcher(new Integer(99)), results);
+        assertEquals(false, result);
+        assertEquals(9, results.size());
+    }
+
     public void testPropertyMatcher() {
-        Matcher matcher = Matchers.beanPropertyMatcher(Collection.class, "empty", Boolean.TRUE);
+        Matcher<Collection> matcher = Matchers.beanPropertyMatcher(Collection.class, "empty", Boolean.TRUE);
         assertEquals(true, matcher.matches(Collections.EMPTY_LIST));
         assertEquals(false, matcher.matches(Collections.singletonList("A")));
-        assertEquals(true, matcher.matches(Arrays.asList(new Object[] { })));
+        assertEquals(true, matcher.matches(Arrays.asList(new Object[0])));
         assertEquals(false, matcher.matches(Arrays.asList(new Object[] { "B" })));
         assertEquals(true, matcher.matches(Collections.EMPTY_SET));
         assertEquals(false, matcher.matches(null));
     }
 
     public void testDateRangeMatcher() {
-        Matcher matcher = Matchers.rangeMatcher(new Date(10000), new Date(20000));
+        Matcher<Date> matcher = Matchers.rangeMatcher(new Date(10000), new Date(20000));
         assertEquals(false, matcher.matches(new Date(9999)));
         assertEquals(true, matcher.matches(new Date(10000)));
         assertEquals(true, matcher.matches(new Date(15000)));
