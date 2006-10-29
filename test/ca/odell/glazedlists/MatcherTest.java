@@ -85,7 +85,7 @@ public class MatcherTest extends TestCase {
         assertEquals(0, elements.size());
     }
 
-    public void testFind() {
+    public void testSelect() {
         List<Integer> elements = new ArrayList<Integer>();
         elements.add(new Integer(45));
         elements.add(new Integer(22));
@@ -97,24 +97,16 @@ public class MatcherTest extends TestCase {
         elements.add(new Integer(23));
         elements.add(new Integer(22));
 
-        List<Comparable> results = new ArrayList<Comparable>();
-
-        boolean result;
-
-        result = Matchers.find(elements, new NumberMatcher(new Integer(22)), results);
-        assertEquals(true, result);
+        Collection<? super Integer> results = Matchers.select(elements, new NumberMatcher(new Integer(22)));
         assertEquals(4, results.size());
 
-        result = Matchers.find(elements, new NumberMatcher(new Integer(22)), results);
-        assertEquals(true, result);
+        results = Matchers.select(elements, new NumberMatcher(new Integer(22)), results);
         assertEquals(8, results.size());
 
-        result = Matchers.find(elements, new NumberMatcher(new Integer(45)), results);
-        assertEquals(true, result);
+        results = Matchers.select(elements, new NumberMatcher(new Integer(45)), results);
         assertEquals(9, results.size());
 
-        result = Matchers.find(elements, new NumberMatcher(new Integer(99)), results);
-        assertEquals(false, result);
+        results = Matchers.select(elements, new NumberMatcher(new Integer(99)), results);
         assertEquals(9, results.size());
     }
 

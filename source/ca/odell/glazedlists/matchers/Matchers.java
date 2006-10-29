@@ -8,6 +8,7 @@ import ca.odell.glazedlists.impl.matchers.*;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * A factory for creating Matchers.
@@ -148,6 +149,19 @@ public final class Matchers {
 
     /**
      * Add all elements from the given <code>collection</code> that satisfy the
+     * <code>matcher</code> to a new <code>ArrayList</code>.
+     *
+     * @param collection the Collection to search
+     * @param matcher the criteria for considering an element a match
+     * @return a new {@link ArrayList} containing the elements which satisfy
+     *      the <code>matcher</code>
+     */
+    public static <E> Collection<? super E> select(Collection<E> collection, Matcher<? super E> matcher) {
+        return select(collection, matcher, new ArrayList<E>());
+    }
+
+    /**
+     * Add all elements from the given <code>collection</code> that satisfy the
      * <code>matcher</code> to the given <code>results</code> Collection.
      * <code>results</code> can be any Collection that supports the
      * {@link Collection#add} operation.
@@ -155,16 +169,16 @@ public final class Matchers {
      * @param collection the Collection to search
      * @param matcher the criteria for considering an element a match
      * @param results the Collection into which matching elements are added
-     * @return <code>true</code> if any elements were added to the
-     *      <code>results</code> {@link Collection}
+     * @return the <code>results</code> {@link Collection} containing the
+     *      elements which satisfy the <code>matcher</code>
      */
-    public static <E> boolean find(Collection<E> collection, Matcher<? super E> matcher, Collection<? super E> results) {
-        boolean changed = false;
+    public static <E> Collection<? super E> select(Collection<E> collection, Matcher<? super E> matcher, Collection<? super E> results) {
         for (Iterator<E> i = collection.iterator(); i.hasNext();) {
             E element = i.next();
             if (matcher.matches(element))
-                changed = results.add(element);
+                results.add(element);
         }
-        return changed;
+
+        return results;
     }
 }
