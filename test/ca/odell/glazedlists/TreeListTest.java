@@ -702,7 +702,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes() {
+    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -790,7 +790,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testDeleteParentAndOneChild() {
+    public void testDeleteParentAndOneChild_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);

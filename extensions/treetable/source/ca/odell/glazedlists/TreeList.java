@@ -98,7 +98,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // insert the new elements like they were adds
         for(int i = 0; i < super.source.size(); i++) {
             Node<E> node = super.source.get(i);
-            wireUpNewNode(false, data.size(ALL_NODES), node, DEFAULT_NEW_NODE_STATE_PROVIDER);
+            node.element = data.add(i, REAL_NODES, VISIBLE_REAL, node, 1);
+            attachParentsAndSiblings(node, false);
         }
 
         assert(isValid());
@@ -115,71 +116,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             nodesList = new NodesList();
         }
         return nodesList;
-    }
-
-    /**
-     * Find the parent for the specified node, creating it if necessary. When
-     * a parent is found, this node is attached to that parent and its
-     * visibility is inherited from its parent's 'visible' and 'expanded'
-     * flags.
-     *
-     * @param fireEvents false to suppress event firing, for use only in the
-     *      constructor of {@link TreeList}.
-     * @return true if the attached node is visible, false otherwise
-     */
-    private boolean attachParent(Node<E> node, boolean fireEvents, NewNodeStateProvider newNodeStateProvider) {
-        Node<E> parent = findParentByValue(node, fireEvents, newNodeStateProvider);
-        node.parent = parent;
-
-        // toggle the visibility of the attached node
-        if(parent != null) {
-            boolean visible = parent.expanded && parent.isVisible();
-            setVisible(node, visible);
-            return visible;
-        }
-
-        // parentless nodes are always visible
-        return true;
-    }
-
-    /**
-     * Search the tree for the parent of the specified node.
-     */
-    private Node<E> findParentByValue(Node<E> node, boolean fireEvents, NewNodeStateProvider<E> newNodeStateProvider) {
-        // no parents for root nodes
-        if(node.pathLength() == 1) return null;
-
-        // search for our parent, starting at our predecessor
-        Node<E> parentPrototype = node.describeParent();
-        Element<Node<E>> previousElement = node.element.previous();
-        Node<E> predecessor = previousElement != null ? previousElement.get() : null;
-
-        // we don't have a predecessor, we need to fab a parent
-        if(predecessor == null) {
-            // create a parent below
-
-        // our predecessor is too shallow to be our parent
-        } else if(predecessor.pathLength() < parentPrototype.pathLength()) {
-            // create a parent below
-
-        // our predecessor is at our parent's height, it could be our parent
-        } else if(predecessor.pathLength() == parentPrototype.pathLength()) {
-            if(nodesEqualByValue(predecessor, parentPrototype)) {
-                return predecessor;
-            }
-
-        // our predecessor is deeper than our parent, it could be a descendent of our parent
-        } else {
-            if(isAncestorByValue(predecessor, parentPrototype)) {
-                return predecessor.ancestorWithPathLength(parentPrototype.pathLength());
-            }
-        }
-
-        // create a parent
-        int index = data.indexOfNode(node.element, ALL_NODES);
-        wireUpNewNode(fireEvents, index, parentPrototype, newNodeStateProvider);
-
-        return parentPrototype;
     }
 
     /**
@@ -399,41 +335,52 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     public void listChanged(ListEvent<Node<E>> listChanges) {
         updates.beginEvent(true);
 
-        // add the new data, remove the old data, and mark the updated data
+        // first pass: apply changes to the trees structure, marking all new
+        // nodes as hidden. In the next pass we'll figure out parents, siblings
+        // and fire events for nodes that shouldn't be hidden
         List<Node<E>> parentsToVerify = new ArrayList<Node<E>>();
-        // todo: we don't need this?
-        List<Node<E>> parentsToRestore = new ArrayList<Node<E>>();
+        List<Node<E>> changeNodes = new ArrayList<Node<E>>();
         while(listChanges.next()) {
+
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
 
             if(type == ListEvent.INSERT) {
-                handleInsert(sourceIndex);
+                changeNodes.add(findOrInsertNode(sourceIndex));
 
             } else if(type == ListEvent.UPDATE) {
                 Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
                 // shift as necessary, so if the parents are immediately after, they're used
                 if(hasStructurallyChanged(node)) {
-                    handleDelete(sourceIndex, parentsToVerify, parentsToRestore);
-                    handleInsert(sourceIndex);
+                    deleteNode(sourceIndex, parentsToVerify);
+                    changeNodes.add(findOrInsertNode(sourceIndex));
+
                 } else {
-                    if(node.isVisible()) {
-                        int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
-                        updates.addUpdate(viewIndex);
-                    }
+                    changeNodes.add(node);
                 }
 
-                // todo: handle shifts in children? perhaps we can look at the first child
-                // only, and if it has become detached then we can figure out what to do
-
             } else if(type == ListEvent.DELETE) {
-                handleDelete(sourceIndex, parentsToVerify, parentsToRestore);
+                deleteNode(sourceIndex, parentsToVerify);
+            }
+        }
+
+        // now walk through all the changed nodes and attach parents and siblings
+        for(Iterator<Node<E>> i = changeNodes.iterator(); i.hasNext(); ) {
+            Node<E> changed = i.next();
+
+            attachParentsAndSiblings(changed, true);
+            Node<E> next = changed.next();
+            if(next != null) {
+                attachParentsAndSiblings(next, true);
             }
         }
 
         // blow away obsolete parent nodes, and their parents recursively
         deleteObsoleteVirtualAncestry(parentsToVerify);
+
+        // still todo:
+        // delete nodes that have been collapsed
 
         assert(isValid());
 
@@ -441,12 +388,218 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
+     * Walk up the tree, fixing parents and siblings of the specified changed
+     * node. Performing this fix may require:
+     * <li>attaching parents
+     * <li>attaching siblings
+     * <li>firing an 'insert' event for such parents and siblings
+     *
+     *
+     * @param changed
+     */
+    private void attachParentsAndSiblings(Node<E> changed, boolean fireEvents) {
+        int index = data.indexOfNode(changed.element, ALL_NODES);
+        List<Node<E>> pathToRoot = new ArrayList<Node<E>>(changed.pathLength());
+
+        // create a path from the changed node to the root, attaching parents as we go
+        {
+            Node<E> current = changed;
+            Node<E> predecessor = changed.previous(); // at height of current.parent
+            Node<E> predecessorAtOurHeight = null; // at height of current
+            boolean preexistingParentFound = false;
+            while(current != null) {
+                int currentPathLength = current.pathLength();
+                int predecessorPathLength = predecessor == null ? 0 : predecessor.pathLength();
+
+                // we've already found a connection, keep accumulating the path to root
+                if(preexistingParentFound) {
+                    pathToRoot.add(current);
+                    current = current.parent;
+
+                // the predecessor is too short to be our parent, so create a new parent
+                // and hope that the predecessor is our grandparent
+                } else if(currentPathLength > predecessorPathLength + 1) {
+                    pathToRoot.add(current);
+                    Node<E> parent = current.describeParent();
+                    if(parent != null) {
+                        parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
+                        attachParent(current, parent, null);
+                    }
+                    current = parent;
+
+                // the predecessor is too tall to be our parent, maybe its parent is our parent?
+                } else if(predecessorPathLength >= currentPathLength) {
+                    // the predecessor loses siblings since we split them apart
+                    if(predecessor.siblingAfter != null) {
+                        predecessor.siblingAfter.siblingBefore = null;
+                        predecessor.siblingAfter = null;
+                    }
+                    predecessorAtOurHeight = predecessor;
+                    predecessor = predecessor.parent;
+
+                // sweet! the predecessor node is our parent!
+                } else if(isAncestorByValue(current, predecessor)) {
+                    pathToRoot.add(current);
+                    assert(currentPathLength == predecessorPathLength + 1);
+                    attachParent(current, predecessor, predecessorAtOurHeight);
+                    // we're mostly done, just fill in the path to root
+                    current = current.parent;
+                    preexistingParentFound = true;
+
+                // the predecessor node is not our parent, so create a new parent
+                // and hope we have common grandparents
+                } else {
+                    pathToRoot.add(current);
+                    assert(currentPathLength == predecessorPathLength + 1);
+                    assert(predecessor != null);
+                    Node<E> parent = current.describeParent();
+                    parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
+                    attachParent(current, parent, null);
+                    current = current.parent;
+                    predecessorAtOurHeight = predecessor;
+                    predecessor = predecessor.parent;
+
+                }
+            }
+        }
+
+        // phase two: fix visibility and fire events, going from root down
+        boolean visible = true;
+        for(int i = pathToRoot.size() - 1; i >= 0; i--) {
+            Node<E> current = pathToRoot.get(i);
+
+            // only fire events for visible nodes
+            if(visible) {
+                // an inserted node
+                if(!current.isVisible()) {
+                    setVisible(current, true);
+                    int visibleIndex = data.indexOfNode(current.element, VISIBLE_NODES);
+                    if(fireEvents) {
+                        updates.addInsert(visibleIndex);
+                    }
+
+                // an updated node
+                } else {
+                    int visibleIndex = data.indexOfNode(current.element, VISIBLE_NODES);
+                    if(fireEvents) {
+                        updates.addUpdate(visibleIndex);
+                    }
+                }
+            }
+
+            // collapsed state restricts visibility on child elements
+            visible = visible && current.expanded;
+        }
+    }
+
+    /**
+     * Attach the specified parent to the specified node.
+     *
+     * @param node the node to be attached as parent
+     * @param parent the parent node, may be <code>null</code>
+     * @param siblingBeforeNode the node immediately before the node of interest
+     *      who is a child of the same parent. This will be linked in as the
+     *      new node's sibling
+     */
+    private void attachParent(Node<E> node, Node<E> parent, Node<E> siblingBeforeNode) {
+        assert(node != null);
+        assert((node.pathLength() == 1 && parent == null) || (node.pathLength() == parent.pathLength() + 1));
+        Node<E> originalParent = node.parent;
+        node.parent = parent;
+
+        // the nearest child of our parent will become our sibling
+        if(siblingBeforeNode != null) {
+            assert(siblingBeforeNode.pathLength() == node.pathLength());
+            assert(siblingBeforeNode.parent == parent);
+
+            // attach the sibling before
+            node.siblingBefore = siblingBeforeNode;
+            siblingBeforeNode.siblingAfter = node;
+        }
+
+        // todo: resolve the EXPANDED state of these nodes, which may now become
+        // visible!
+
+        // attach all siblings after to this new parent
+        for(Node<E> siblingAfter = node.siblingAfter; siblingAfter != null; siblingAfter = siblingAfter.siblingAfter) {
+            assert(siblingAfter.parent == originalParent);
+            siblingAfter.parent = parent;
+        }
+    }
+
+    /**
+     * Handle a source insert at the specified index by adding the corresponding
+     * real node, or converting a virtual node to a real node. The real node
+     * is inserted, marked as real and hidden, and returned.
+     *
+     * @param sourceIndex the index of the element in the source list that has
+     *      been inserted
+     * @return the new node, prior to any events fired
+     */
+    private Node<E> findOrInsertNode(int sourceIndex) {
+        Node<E> inserted = source.get(sourceIndex);
+
+        //  bound the range of indices where this node can be inserted. This is
+        // all the virtual nodes between our predecessor and follower in the
+        // source list
+        int predecessorIndex = sourceIndex > 0 ? data.convertIndexColor(sourceIndex - 1, REAL_NODES, ALL_NODES) : -1;
+        int followerIndex = data.size(REAL_NODES) > sourceIndex ? data.convertIndexColor(sourceIndex, REAL_NODES, ALL_NODES) : data.size(ALL_NODES);
+
+        // prepare to search through the virtual nodes, looking for the node with
+        // the longest common path with the inserted node
+        int indexOfNearestAncestorByValue = predecessorIndex;
+        int lengthOfLongestAncestorCommonPath;
+        if(predecessorIndex >= 0) {
+            Node<E> predecessor = data.get(predecessorIndex, ALL_NODES).get();
+            lengthOfLongestAncestorCommonPath = commonPathLength(inserted, predecessor);
+        } else {
+            lengthOfLongestAncestorCommonPath = 0;
+        }
+
+        // search through the virtual nodes, looking for the node with
+        // the longest common path with the inserted node
+        for(int i = predecessorIndex + 1; i < followerIndex; i++) {
+            Node<E> possibleAncestor = data.get(i, ALL_NODES).get();
+            assert(possibleAncestor.virtual);
+
+            // what's the longest ancestor that we share
+            int commonPathLength = commonPathLength(inserted, possibleAncestor);
+
+            // if the common path is the complete path, then we have a virtual
+            // node that has become real.
+            if(commonPathLength == inserted.pathLength()) {
+                // make the real node copy the state of the virtual
+                inserted.updateFrom(possibleAncestor);
+
+                // replace the virtual with the real in the tree structure
+                possibleAncestor.element.set(inserted);
+                setVirtual(possibleAncestor, false);
+                for(Node<E> child = possibleAncestor.firstChild(); child != null; child = child.siblingAfter) {
+                    child.parent = inserted;
+                }
+
+                return possibleAncestor;
+
+            // have we found a new longest common path?
+            } else if(commonPathLength > lengthOfLongestAncestorCommonPath) {
+                lengthOfLongestAncestorCommonPath = commonPathLength;
+                indexOfNearestAncestorByValue = i;
+            }
+        }
+
+        // insert the node as hidden by default - if we need to show this node,
+        // we'll change its state later and fire an 'insert' event then
+        Element<Node<E>> element = data.add(indexOfNearestAncestorByValue + 1, ALL_NODES, HIDDEN_REAL, inserted, 1);
+        inserted.element = element;
+        return inserted;
+    }
+
+    /**
      * Remove the node at the specified index, firing all the required
      * notifications.
      */
-    private void handleDelete(int sourceIndex, List<Node<E>> parentsToVerify, List<Node<E>> parentsToRestore) {
+    private void deleteNode(int sourceIndex, List<Node<E>> parentsToVerify) {
         Node<E> node = data.get(sourceIndex, REAL_NODES).get();
-        Node<E> predecessor = node.previous();
 
         // remove links to this node from siblings
         node.detachSiblings();
@@ -457,25 +610,20 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             setVirtual(node, true);
             node.virtual = true;
             parentsToVerify.add(node);
-            return;
+
+        // otherwise delete it directly
+        } else {
+            boolean visible = node.isVisible();
+            if(visible) {
+                int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
+                updates.elementDeleted(viewIndex, node.getElement());
+            }
+            data.remove(node.element);
+            node.element = null; // null out the element
+
+            // remove the parent if necessary in the next iteration
+            parentsToVerify.add(node.parent);
         }
-
-        // otherwise delete it
-        boolean visible = node.isVisible();
-        if(visible) {
-            int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
-            updates.elementDeleted(viewIndex, node.getElement());
-        }
-        data.remove(node.element);
-        node.element = null; // null out the element
-
-        // handle the merging of the nodes surrounding the deleted node
-        deleteRedundantVirtualAncestryAfter(predecessor);
-
-        // remove the parent if necessary in the next iteration
-        parentsToVerify.add(node.parent);
-        // restore this as a parent for its children in the next iteration
-        parentsToRestore.add(node);
     }
 
     /**
@@ -500,159 +648,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // something about our parentage has changed
         return true;
-    }
-
-    /**
-     * Figure out where to insert the specified value in the data list,
-     * accounting for virtual parents that may already exist and require
-     * skipping.
-     */
-    private void handleInsert(int sourceIndex) {
-        Node<E> node = super.source.get(sourceIndex);
-
-        //  bound the range of indices where this node can be inserted. This is
-        // all the virtual nodes between our predecessor and follower in the
-        // source list
-        int predecessorIndex = sourceIndex > 0 ? data.convertIndexColor(sourceIndex - 1, REAL_NODES, ALL_NODES) : -1;
-        int followerIndex = data.size(REAL_NODES) > sourceIndex ? data.convertIndexColor(sourceIndex, REAL_NODES, ALL_NODES) : data.size(ALL_NODES);
-
-        // prepare to search through the virtual nodes, looking for the node with
-        // the longest common path with the inserted node
-        int indexOfNearestAncestorByValue = predecessorIndex;
-        int lengthOfLongestAncestorCommonPath;
-        if(predecessorIndex >= 0) {
-            Node<E> predecessor = data.get(predecessorIndex, ALL_NODES).get();
-            lengthOfLongestAncestorCommonPath = commonPathLength(node, predecessor);
-        } else {
-            lengthOfLongestAncestorCommonPath = 0;
-        }
-
-        // do the search
-        for(int i = predecessorIndex + 1; i < followerIndex; i++) {
-            Node<E> possibleAncestor = data.get(i, ALL_NODES).get();
-            assert(possibleAncestor.virtual);
-
-            // what's the longest ancestor that we share
-            int commonPathLength = commonPathLength(node, possibleAncestor);
-
-            // if the common path is the complete path, then we have a virtual
-            // node that has become real. Do the replace in place and we're done
-            if(commonPathLength == node.pathLength()) {
-                // make the real node copy the state of the virtual
-                node.updateFrom(possibleAncestor);
-
-                // replace the virtual with the real in the tree structure
-                possibleAncestor.element.set(node);
-                setVirtual(possibleAncestor, false);
-                for(Node<E> child = possibleAncestor.firstChild(); child != null; child = child.siblingAfter) {
-                    child.parent = node;
-                }
-
-                // fire an 'update' event so selection is not destroyed
-                if(possibleAncestor.isVisible()) {
-                    int visibleIndex = data.indexOfNode(node.element, VISIBLE_NODES);
-                    updates.addUpdate(visibleIndex);
-                }
-                return;
-
-            // have we found a new longest common path?
-            } else if(commonPathLength > lengthOfLongestAncestorCommonPath) {
-                lengthOfLongestAncestorCommonPath = commonPathLength;
-                indexOfNearestAncestorByValue = i;
-            }
-        }
-
-        wireUpNewNode(true, indexOfNearestAncestorByValue + 1, node, DEFAULT_NEW_NODE_STATE_PROVIDER);
-
-        // add additional virtual nodes as necessary by splitting trees, which is
-        // necessary whenever an unrelated node is inserted between siblings
-        createParentsDueToSplits(node.next());
-    }
-
-    /**
-     * Wire up the specified node to the tree.
-     */
-    private void wireUpNewNode(boolean fireEvents, int index, Node<E> node, NewNodeStateProvider<E> newNodeStateProvider) {
-        byte color = node.virtual ? VISIBLE_VIRTUAL : VISIBLE_REAL;
-        Element<Node<E>> element = data.add(index, ALL_NODES, color, node, 1);
-        node.element = element;
-        newNodeStateProvider.initialize(node);
-
-        // link to the parent to determine visibility
-        boolean visible = attachParent(node, true, newNodeStateProvider);
-
-        // set visibility and fire an event
-        if(visible && fireEvents) {
-            int visibleIndex = data.indexOfNode(node.element, VISIBLE_NODES);
-            updates.addInsert(visibleIndex);
-        }
-
-        // attach siblings only after parent has been attached
-        attachSiblings(node);
-    }
-
-    /**
-     * Attach siblings to the specified node immediately after it has been inserted
-     * and its parent node has been attached. This method assumes all structure
-     * of the tree except the one node of interest has its siblings and parents
-     * correctly set, and that the node of interest has its parent correctly set.
-     */
-    public void attachSiblings(Node<E> node) {
-        int nodePathLength = node.pathLength();
-
-        // search for a sibling on the left
-        node.siblingBefore = null;
-        for(Node<E> previous = node.previous(); previous != null; ) {
-            // this is a child of our sibling, clear its sibling after and walk up
-            if(previous.pathLength() > nodePathLength) {
-                if(previous.siblingAfter != null) {
-                    previous.siblingAfter.siblingBefore = null;
-                    previous.siblingAfter = null;
-                }
-                previous = previous.parent;
-
-            // we have no sibling on the left, we'll have to look for a sibling on the right
-            } else if(previous.pathLength() < nodePathLength) {
-                break;
-
-            // the node must be our sibling, otherwise we would have seen our ancestor first
-            } else {
-                assert(previous.parent == node.parent);
-                // attach to the sibling after node
-                node.siblingAfter = previous.siblingAfter;
-                if(node.siblingAfter != null) node.siblingAfter.siblingBefore = node;
-                // attach to the sibling before node
-                previous.siblingAfter = node;
-                node.siblingBefore = previous;
-                return;
-            }
-        }
-
-        // search for a sibling on the right
-        node.siblingAfter = null;
-        for(Node<E> next = node.next(); next != null; ) {
-            // this is a child of ours, keep going
-            if(next.pathLength() > nodePathLength) {
-                next = next.next();
-
-            // we're the last of our siblings
-            } else if(next.pathLength() < nodePathLength) {
-                break;
-
-            // we've gotten between this node and its sibling or parent
-            } else if(next.parent != node.parent) {
-                next.siblingBefore = null;
-                createParentsDueToSplits(next);
-                break;
-
-            // the node must be our sibling, otherwise we would have seen its ancestor first
-            } else {
-                assert(next.siblingBefore == null);
-                node.siblingAfter = next;
-                next.siblingBefore = node;
-                break;
-            }
-        }
     }
 
     /**
@@ -809,55 +804,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Create parent elements wherever necessary due to pair of siblings being
-     * split by another element being inserted (or modified). This is the reciprocal
-     * case of {@link #deleteRedundantVirtualAncestryAfter}. For example, consider
-     * the initial tree where lowercase values are virtual:
-     * <code>
-     * /a
-     * /a/b
-     * /a/b/C
-     * /a/b/D
-     * </code>
-     *
-     * <p>If the node <code>/j/K</code> was inserted between <code>/a/b/C</code>
-     * and <code>/a/b/D</code>, then we would otherwise be left with this tree:
-     * <code>
-     * /a
-     * /a/b
-     * /a/b/C
-     * /j
-     * /j/K
-     * /a/b/D
-     * </code>
-     *
-     * <p>This method repairs the nodes after inserts and updates to ensure their
-     * parents aren't lost due to sibling splits. In this case, this will provide
-     * the expected result:
-     * <code>
-     * /a
-     * /a/b
-     * /a/b/C
-     * /j
-     * /j/K
-     * /a
-     * /a/b
-     * /a/b/D
-     * </code>
-     *
-     * <p>When splitting siblings, the expanded state of the sibling is respected
-     * for both the output nodes.
-     *
-     * @param nodeThatMightNeedParents the node following a newly inserted node
-     */
-    private void createParentsDueToSplits(Node<E> nodeThatMightNeedParents) {
-        if(nodeThatMightNeedParents == null) return;
-
-        cloneStateNewNodeStateProvider.setNodeToPrototype(nodeThatMightNeedParents);
-        attachParent(nodeThatMightNeedParents, true, cloneStateNewNodeStateProvider);
-    }
-
-    /**
      * @return the length of the common prefix path between the specified nodes
      */
     private int commonPathLength(Node<E> a, Node<E> b) {
@@ -879,6 +825,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      *      the path of this node.
      */
     public boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
+        if(possibleAncestor == null) return true;
         List<E> possibleAncestorPath = possibleAncestor.path;
 
         // this is too long a path to be an ancestor's
@@ -932,8 +879,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     /**
      * A node state provider that clones the state from another subtree. This
-     * is useful when a node tree gets split, as in
-     * {@link TreeList#createParentsDueToSplits}.
+     * is useful when a node tree gets split.
      */
     private static class CloneStateNewNodeStateProvider<E> implements NewNodeStateProvider<E> {
         private boolean[] expandedStateByDepth;
@@ -1110,8 +1056,12 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * Create a {@link Node} that resembles the parent of this.
          */
         private Node<E> describeParent() {
+            int pathLength = pathLength();
+            // this is a root node, it has no parent
+            if(pathLength == 1) return null;
+            // return a node describing the parent path
             Node<E> result = new Node<E>();
-            result.path = path.subList(0, path.size() - 1);
+            result.path = path.subList(0, pathLength - 1);
             result.virtual = true;
             return result;
         }
