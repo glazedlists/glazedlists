@@ -628,15 +628,15 @@ public class TreeListTest extends TestCase {
 
         sortedSource.setComparator(GlazedLists.reverseComparator());
         assertTreeStructure(treeList, new String[] {
-                "F",
-                "FG",
-                "FGi",
-                "FGh",
                 "A",
                 "AB",
                 "ABe",
                 "ABd",
                 "ABc",
+                "F",
+                "FG",
+                "FGi",
+                "FGh",
         });
     }
 
@@ -790,7 +790,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testDeleteParentAndOneChild_FixMe() {
+    public void testDeleteParentAndOneChild() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -808,7 +808,32 @@ public class TreeListTest extends TestCase {
                 "P",
                 "PD",
                 "PU",
+                "PI",
+                "PIU",
                 "PY",
+        });
+    }
+
+    public void testReplaceVirtualWithRealWithSiblings() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("DEF");
+        source.add("GHI");
+        source.addAll(1, Arrays.asList(new String[] { "D", "DE" }));
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "D",
+                "DE",
+                "DEF",
+                "G",
+                "GH",
+                "GHI",
         });
     }
 }

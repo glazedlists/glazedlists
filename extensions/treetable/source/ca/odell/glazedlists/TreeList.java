@@ -255,11 +255,12 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // if we're already in the desired state, give up!
         if(toExpand.expanded == expanded) return;
 
+        updates.beginEvent();
+
         // first toggle the active node. Note that it's visibility does not
         // change, only that of its children
         toExpand.expanded = expanded;
-
-        updates.beginEvent();
+        updates.addUpdate(visibleIndex);
 
         Node<E> toExpandNextSibling = nextNodeThatsNotAChildOfByStructure(toExpand);
 
@@ -601,9 +602,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private void deleteNode(int sourceIndex, List<Node<E>> parentsToVerify) {
         Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
-        // remove links to this node from siblings
-        node.detachSiblings();
-
         // if it has children, make it virtual and schedule if for verification or deletion later
         if(!node.isLeaf()) {
             // todo: make setVirtual() actually do node.virtual = virtual
@@ -613,6 +611,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // otherwise delete it directly
         } else {
+            // remove links to this node from siblings
+            node.detachSiblings();
+
             boolean visible = node.isVisible();
             if(visible) {
                 int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
@@ -1089,8 +1090,17 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             element = other.element;
             virtual = false;
             expanded = other.expanded;
-            siblingAfter = other.siblingAfter;
+
+            // weave in the siblings
             siblingBefore = other.siblingBefore;
+            if(siblingBefore != null) {
+                siblingBefore.siblingAfter = this;
+            }
+            siblingAfter = other.siblingAfter;
+            if(siblingAfter != null) {
+                siblingAfter.siblingBefore = this;
+            }
+
             parent = other.parent;
         }
 
@@ -1280,10 +1290,14 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     throw new IllegalStateException();
                 }
                 assert(descendent.parent == node);
-                if(!(lastChildSeen == descendent.siblingBefore)) {
+                if(lastChildSeen != descendent.siblingBefore) {
                     throw new IllegalStateException();
                 }
-                if(lastChildSeen != null) assert(lastChildSeen.siblingAfter == descendent);
+                if(lastChildSeen != null) {
+                    if(lastChildSeen.siblingAfter != descendent) {
+                        throw new IllegalStateException();
+                    }
+                }
                 lastChildSeen = descendent;
                 validateSubtree(descendent);
 
