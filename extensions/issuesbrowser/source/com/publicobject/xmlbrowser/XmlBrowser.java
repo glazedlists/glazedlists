@@ -162,7 +162,7 @@ public class XmlBrowser {
 
             // convert the XML into an EventList, then a TreeList
             EventList<Element> eventList = EventListXmlContentHandler.create(xmlIn);
-            SortedList<Element> sortedList = new SortedList<Element>(eventList);
+            SortedList<Element> sortedList = new SortedList<Element>(eventList, null);
             FilterList<Element> filteredList = new FilterList<Element>(sortedList, matcherEditor);
             TreeList<Element> treeList = new TreeList<Element>(filteredList, new ElementTreeFormat());
 
