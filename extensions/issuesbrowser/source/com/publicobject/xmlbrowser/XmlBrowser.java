@@ -7,10 +7,7 @@ import java.util.List;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TreeTableSupport;
-import ca.odell.glazedlists.swing.EventTreeModel;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import ca.odell.glazedlists.swing.*;
 
 import javax.swing.*;
 import javax.xml.parsers.SAXParserFactory;
@@ -165,14 +162,15 @@ public class XmlBrowser {
 
             // convert the XML into an EventList, then a TreeList
             EventList<Element> eventList = EventListXmlContentHandler.create(xmlIn);
-            FilterList<Element> filteredList = new FilterList<Element>(eventList, matcherEditor);
+            SortedList<Element> sortedList = new SortedList<Element>(eventList);
+            FilterList<Element> filteredList = new FilterList<Element>(sortedList, matcherEditor);
             TreeList<Element> treeList = new TreeList<Element>(filteredList, new ElementTreeFormat());
 
             // display the XML in a tree table
-            EventTableModel<TreeList.Node<Element>> tableModel = new EventTableModel<TreeList.Node<Element>>(treeList.getNodesList(), new ElementTableFormat());
+            EventTableModel<Element> tableModel = new EventTableModel<Element>(treeList, new ElementTableFormat());
             JTable table = new JTable(tableModel);
             TreeTableSupport.install(table, treeList, 0);
-
+            TableComparatorChooser.install(table, sortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
 
             // display the XML in a tree
             EventTreeModel<Element> treeModel = new EventTreeModel<Element>(treeList);
@@ -195,7 +193,7 @@ public class XmlBrowser {
     /**
      * Adapt {@link TreeList.Node}s for use in a table.
      */
-    private static class ElementTableFormat implements WritableTableFormat<TreeList.Node<Element>> {
+    private static class ElementTableFormat implements WritableTableFormat<Element> {
         public int getColumnCount() {
             return 2;
         }
@@ -208,19 +206,19 @@ public class XmlBrowser {
             throw new IndexOutOfBoundsException();
         }
 
-        public Object getColumnValue(TreeList.Node<Element> baseObject, int column) {
+        public Object getColumnValue(Element baseObject, int column) {
             switch(column) {
-                case 0: return baseObject.getElement().getQName();
-                case 1: return baseObject.getElement().getText();
+                case 0: return baseObject.getQName();
+                case 1: return baseObject.getText();
             }
             throw new IndexOutOfBoundsException();
         }
 
-        public boolean isEditable(TreeList.Node<Element> baseObject, int column) {
+        public boolean isEditable(Element baseObject, int column) {
             return true;
         }
 
-        public TreeList.Node<Element> setColumnValue(TreeList.Node<Element> baseObject, Object editedValue, int column) {
+        public Element setColumnValue(Element baseObject, Object editedValue, int column) {
             throw new UnsupportedOperationException();
         }
     }

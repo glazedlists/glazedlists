@@ -339,10 +339,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // first pass: apply changes to the trees structure, marking all new
         // nodes as hidden. In the next pass we'll figure out parents, siblings
         // and fire events for nodes that shouldn't be hidden
-        List<Node<E>> parentsToVerify = new ArrayList<Node<E>>();
+        List<Node<E>> nodesToVerify = new ArrayList<Node<E>>();
         List<Node<E>> changeNodes = new ArrayList<Node<E>>();
         while(listChanges.next()) {
-
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
 
@@ -354,7 +353,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
                 // shift as necessary, so if the parents are immediately after, they're used
                 if(hasStructurallyChanged(node)) {
-                    deleteNode(sourceIndex, parentsToVerify);
+                    deleteAndDetachNode(sourceIndex, nodesToVerify);
                     changeNodes.add(findOrInsertNode(sourceIndex));
 
                 } else {
@@ -362,11 +361,12 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 }
 
             } else if(type == ListEvent.DELETE) {
-                deleteNode(sourceIndex, parentsToVerify);
+                deleteAndDetachNode(sourceIndex, nodesToVerify);
             }
         }
 
-        // now walk through all the changed nodes and attach parents and siblings
+        // second pass: walk through all the changed nodes and attach parents
+        // and siblings, plus fire events for all the inserted or updated nodes
         for(Iterator<Node<E>> i = changeNodes.iterator(); i.hasNext(); ) {
             Node<E> changed = i.next();
 
@@ -377,11 +377,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
 
-        // blow away obsolete parent nodes, and their parents recursively
-        deleteObsoleteVirtualAncestry(parentsToVerify);
-
-        // still todo:
-        // delete nodes that have been collapsed
+        // blow away obsolete virtual nodes
+        deleteObsoleteVirtualNodes(nodesToVerify);
 
         assert(isValid());
 
@@ -402,6 +399,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         int index = data.indexOfNode(changed.element, ALL_NODES);
         List<Node<E>> pathToRoot = new ArrayList<Node<E>>(changed.pathLength());
 
+        // record the expanded/collapsed state of this node's path
+        cloneStateNewNodeStateProvider.setNodeToPrototype(changed);
+
         // create a path from the changed node to the root, attaching parents as we go
         {
             Node<E> current = changed;
@@ -421,12 +421,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 // and hope that the predecessor is our grandparent
                 } else if(currentPathLength > predecessorPathLength + 1) {
                     pathToRoot.add(current);
-                    Node<E> parent = current.describeParent();
-                    if(parent != null) {
-                        parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
-                        attachParent(current, parent, null);
-                    }
-                    current = parent;
+                    current = createAndAttachParent(index, current);
 
                 // the predecessor is too tall to be our parent, maybe its parent is our parent?
                 } else if(predecessorPathLength >= currentPathLength) {
@@ -453,10 +448,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     pathToRoot.add(current);
                     assert(currentPathLength == predecessorPathLength + 1);
                     assert(predecessor != null);
-                    Node<E> parent = current.describeParent();
-                    parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
-                    attachParent(current, parent, null);
-                    current = current.parent;
+                    current = createAndAttachParent(index, current);
                     predecessorAtOurHeight = predecessor;
                     predecessor = predecessor.parent;
 
@@ -491,6 +483,20 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // collapsed state restricts visibility on child elements
             visible = visible && current.expanded;
         }
+    }
+
+    /**
+     * Attach the default parent for the specified node, using the node's
+     * ability to describe a prototype for its parent object.
+     */
+    private Node<E> createAndAttachParent(int index, Node<E> current) {
+        Node<E> parent = current.describeParent();
+        if(parent != null) {
+            cloneStateNewNodeStateProvider.initialize(parent);
+            parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
+            attachParent(current, parent, null);
+        }
+        return parent;
     }
 
     /**
@@ -590,8 +596,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // insert the node as hidden by default - if we need to show this node,
         // we'll change its state later and fire an 'insert' event then
-        Element<Node<E>> element = data.add(indexOfNearestAncestorByValue + 1, ALL_NODES, HIDDEN_REAL, inserted, 1);
-        inserted.element = element;
+        inserted.element = data.add(indexOfNearestAncestorByValue + 1, ALL_NODES, HIDDEN_REAL, inserted, 1);
         return inserted;
     }
 
@@ -599,7 +604,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * Remove the node at the specified index, firing all the required
      * notifications.
      */
-    private void deleteNode(int sourceIndex, List<Node<E>> parentsToVerify) {
+    private void deleteAndDetachNode(int sourceIndex, List<Node<E>> nodesToVerify) {
         Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
         // if it has children, make it virtual and schedule if for verification or deletion later
@@ -607,23 +612,19 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // todo: make setVirtual() actually do node.virtual = virtual
             setVirtual(node, true);
             node.virtual = true;
-            parentsToVerify.add(node);
+            nodesToVerify.add(node);
 
         // otherwise delete it directly
         } else {
-            // remove links to this node from siblings
-            node.detachSiblings();
+            Node<E> follower = node.next();
 
-            boolean visible = node.isVisible();
-            if(visible) {
-                int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
-                updates.elementDeleted(viewIndex, node.getElement());
-            }
-            data.remove(node.element);
-            node.element = null; // null out the element
+            deleteNode(node);
 
             // remove the parent if necessary in the next iteration
-            parentsToVerify.add(node.parent);
+            nodesToVerify.add(node.parent);
+
+            // also remove the follower - it may have become redundant as well
+            if(follower != null && follower.virtual) nodesToVerify.add(follower);
         }
     }
 
@@ -652,158 +653,102 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Ensure all of the specified parents are still required. If they're not,
+     * Ensure all of the specified virtual nodes are still required. If they're not,
      * they'll be removed and the appropriate events fired.
      */
-    private void deleteObsoleteVirtualAncestry(List<Node<E>> parentsToVerify) {
+    private void deleteObsoleteVirtualNodes(List<Node<E>> nodesToVerify) {
         deleteObsoleteParents:
-        for(Iterator<Node<E>> i = parentsToVerify.iterator(); i.hasNext(); ) {
-            Node<E> parent = i.next();
+        for(Iterator<Node<E>> i = nodesToVerify.iterator(); i.hasNext(); ) {
+            Node<E> node = i.next();
 
             // walk up the tree, deleting nodes
-            while(parent != null) {
+            while(node != null) {
                 // we've reached a real parent, don't delete it!
-                if(!parent.virtual) continue deleteObsoleteParents;
+                if(!node.virtual) continue deleteObsoleteParents;
                 // we've already deleted this parent, we're done
-                if(parent.element == null) continue deleteObsoleteParents;
+                if(node.element == null) continue deleteObsoleteParents;
 
-                // if this is a legit parent, then we'll still have a child node.
-                // if it turns out that that child is also unnecessary, we'll clean
-                // everything up in the next iteration
-                boolean stillRequired;
-                int index = data.indexOfNode(parent.element, ALL_NODES);
-                if(index + 1 < data.size(ALL_NODES)) {
-                    Node<E> possibleChild = data.get(index + 1, ALL_NODES).get();
-                    stillRequired = possibleChild.parent == parent;
-                } else {
-                    stillRequired = false;
+                // if this virtual parent is redundant, then we can delete it
+                // todo: come up with a test case where previous pathlength == parent pathlength, which will cause this to fail (slightly)
+                Node<E> previous = node.previous();
+                if(previous != null && isAncestorByValue(previous, node)) {
+                    node = deleteVirtualAncestryRootDown(previous, node);
+                    continue;
                 }
 
-                // this is a legit parent, nothing to see here
-                if(stillRequired) {
-                    continue deleteObsoleteParents;
+                // if this virtual node has no children, then it's obsolete and
+                // we can delete it right away. Afterwards, we might need to
+                // delete that node's parent
+                if(node.isLeaf()) {
+                    deleteNode(node);
+                    node = node.parent;
+                    continue;
                 }
 
-                // we need to destroy this parent
-                Node<E> predecessor = parent.previous();
-                parent.detachSiblings();
-                int viewIndex = data.indexOfNode(parent.element, VISIBLE_NODES);
-                data.remove(parent.element);
-                parent.element = null; // null out the element
-                updates.elementDeleted(viewIndex, parent.getElement());
-
-                // handle the merging of the nodes surrounding the deleted node
-                deleteRedundantVirtualAncestryAfter(predecessor);
-
-                // now we might need to delete the parent's parent
-                parent = parent.parent;
+                // nothing obsolete here, look at the next element in the queue
+                break;
             }
         }
     }
 
     /**
-     * Clean up parents of deleted followers. When two siblings with independent
-     * ancestry are joined, we want to delete the redundant virtual parent nodes.
-     * For example, consider the initial tree where lowercase values are virtual:
+     * Remove obsolete virtual parents where there's another equal parent
+     * earlier in the tree. This can happen when sibling nodes are united by
+     * the deletion of an intervening node. For example, consider the following
+     * tree, where lowercase values are virtual:
      * <code>
      * /a
      * /a/b
      * /a/b/C
-     * /j
-     * /j/K
+     * /Z
      * /a
      * /a/b
      * /a/b/D
      * </code>
      *
-     * <p>If the node <code>/j/K</code> is deleted, then we would otherwise
-     * be left with this tree:
-     * <code>
-     * /a
-     * /a/b
-     * /a/b/C
-     * /a
-     * /a/b
-     * /a/b/D
-     * </code>
-     *
-     * <p>In this case, there are redundant virtual parents left around. This
-     * method removes such parents, leaving the tree in the correct state:
-     * <code>
-     * /a
-     * /a/b
-     * /a/b/C
-     * /a/b/D
-     * </code>
-     *
-     * <p>This process is only necessary for unsorted trees, but it has no
-     * negative side-effects for sorted trees.
-     *
-     * <p>When merging redundant nodes, sometimes we'll have a conflict
-     * between whether the nodes were collapsed or expaneded. The current
-     * policy is to have the result expanded if either of the two nodes are
-     * expanded.
-     *
-     * @param beforePossiblyRedundant the node to validate that ancestry after it is
-     *     necessary. This is the node immediately before the recently deleted
-     *     element.
+     * <p>If the node <code>/Z</code> is deleted, then the second set of
+     * <code>/a</code> and <code>/a/b</code> nodes are now redundant. In this
+     * case, we must delete those as well.
      */
-    private void deleteRedundantVirtualAncestryAfter(Node<E> beforePossiblyRedundant) {
-        if(beforePossiblyRedundant == null) return;
+    private Node<E> deleteVirtualAncestryRootDown(Node<E> previous, Node<E> parent) {
+        Node<E> replacementLastSibling = previous.ancestorWithPathLength(parent.pathLength() + 1);
+        assert(replacementLastSibling.siblingAfter == null);
+        Node<E> replacement = replacementLastSibling.parent;
 
-        // delete all the redundant nodes after the changed node
-        while(true) {
-            Node<E> possiblyRedundant = beforePossiblyRedundant.next();
+        // link the children of the two parents as siblings
+        Node<E> parentFirstChild = parent.firstChild();
+        assert(parentFirstChild == null || parentFirstChild.siblingBefore == null);
+        replacementLastSibling.siblingAfter = parentFirstChild;
+        if(parentFirstChild != null) parentFirstChild.siblingBefore = replacementLastSibling;
 
-            // if we can't clean this node up, we're done
-            if(possiblyRedundant == null
-                || !possiblyRedundant.virtual
-                || !isAncestorByValue(beforePossiblyRedundant, possiblyRedundant)) {
-                return;
-            }
-
-            // find the node to merge into
-            Node<E> mergeInto = beforePossiblyRedundant.ancestorWithPathLength(possiblyRedundant.pathLength());
-
-            // find the last child of the node to merge into
-            Node<E> lastChildBeforeMerge;
-            if(beforePossiblyRedundant.pathLength() >= possiblyRedundant.pathLength() + 1) {
-                lastChildBeforeMerge = beforePossiblyRedundant.ancestorWithPathLength(possiblyRedundant.pathLength() + 1);
-            } else {
-                lastChildBeforeMerge = null;
-            }
-
-            // merge nodes: expand/collapse
-            if(mergeInto.expanded != possiblyRedundant.expanded) {
-                // we don't yet know how to merge expanded with unexpanded nodes, but we'll figure out how to soon
-                throw new UnsupportedOperationException("TODO!");
-            }
-
-            // merge nodes: fix siblings
-            mergeInto.siblingAfter = possiblyRedundant.siblingAfter;
-            if(possiblyRedundant.siblingAfter != null) {
-                possiblyRedundant.siblingAfter.siblingBefore = mergeInto;
-            }
-
-            // merge nodes: attach children as siblings
-            Node<E> firstChildAfterMerge = possiblyRedundant.firstChild();
-            if(firstChildAfterMerge != null) firstChildAfterMerge.siblingBefore = lastChildBeforeMerge;
-            if(lastChildBeforeMerge != null) lastChildBeforeMerge.siblingAfter = firstChildAfterMerge;
-
-            // merge nodes: set node.parent on all children
-            for(Node<E> child = firstChildAfterMerge; child != null; child = child.siblingAfter) {
-                child.parent = mergeInto;
-            }
-
-            // merge nodes: delete the redundant node
-            if(possiblyRedundant.isVisible()) {
-                int deleteIndex = data.indexOfNode(possiblyRedundant.element, VISIBLE_NODES);
-                updates.elementDeleted(deleteIndex, possiblyRedundant.getElement());
-            }
-            data.remove(possiblyRedundant.element);
-            possiblyRedundant.element = null; // null out the element
+        // point all children at the new parent
+        for(Node<E> child = parentFirstChild; child != null; child = child.siblingAfter) {
+            child.parent = replacement;
         }
+
+        // remove the parent itself
+        deleteNode(parent);
+        parent = parentFirstChild;
+        return parent;
     }
+
+    /**
+     * Delete the actual node, without unlinking children or unlinking siblings,
+     * which must be handled externally.
+     */
+    private void deleteNode(Node<E> node) {
+        // remove links to this node from siblings
+        node.detachSiblings();
+
+        boolean visible = node.isVisible();
+        if(visible) {
+            int viewIndex = data.indexOfNode(node.element, VISIBLE_NODES);
+            updates.elementDeleted(viewIndex, node.getElement());
+        }
+        data.remove(node.element);
+        node.element = null; // null out the element
+    }
+
 
     /**
      * @return the length of the common prefix path between the specified nodes
@@ -854,10 +799,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         return nodeComparator.comparator.compare(a, b) == 0;
     }
 
-    private boolean nodesEqualByValue(Node<E> a, Node<E> b) {
-        return nodeComparator.compare(a, b) == 0;
-    }
-
     /**
      * Prepare the state of node as it is created.
      */
@@ -895,8 +836,12 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // walk up the tree to the root, saving ancestor's expanded state
             Node<E> nodeWithDepthD = nodeToPrototype;
             for(int d = expandedStateByDepth.length - 1; d >= 0; d--) {
-                expandedStateByDepth[d] = nodeWithDepthD.expanded;
-                nodeWithDepthD = nodeWithDepthD.parent;
+                if(nodeWithDepthD != null) {
+                    expandedStateByDepth[d] = nodeWithDepthD.expanded;
+                    nodeWithDepthD = nodeWithDepthD.parent;
+                } else {
+                    expandedStateByDepth[d] = true;
+                }
             }
         }
         /** {@inheritDoc} */
