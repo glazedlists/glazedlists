@@ -579,7 +579,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     child.parent = inserted;
                 }
 
-                return possibleAncestor;
+                return inserted;
 
             // have we found a new longest common path?
             } else if(commonPathLength > lengthOfLongestAncestorCommonPath) {
@@ -689,8 +689,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 parent.detachSiblings();
                 int viewIndex = data.indexOfNode(parent.element, VISIBLE_NODES);
                 data.remove(parent.element);
-                updates.elementDeleted(viewIndex, parent.getElement());
                 parent.element = null; // null out the element
+                updates.elementDeleted(viewIndex, parent.getElement());
 
                 // handle the merging of the nodes surrounding the deleted node
                 deleteRedundantVirtualAncestryAfter(predecessor);
@@ -801,6 +801,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 updates.elementDeleted(deleteIndex, possiblyRedundant.getElement());
             }
             data.remove(possiblyRedundant.element);
+            possiblyRedundant.element = null; // null out the element
         }
     }
 

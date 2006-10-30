@@ -836,4 +836,25 @@ public class TreeListTest extends TestCase {
                 "GHI",
         });
     }
+
+
+    public void testAddSubtreeForPlusSiblings() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("AWX");
+        source.addAll(1, Arrays.asList(new String[] { "AE", "AEF", "AW" }));
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "AE",
+                "AEF",
+                "AW",
+                "AWX",
+        });
+    }
 }
