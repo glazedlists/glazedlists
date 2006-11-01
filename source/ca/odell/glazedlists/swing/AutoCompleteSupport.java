@@ -929,6 +929,41 @@ public final class AutoCompleteSupport<E> {
             doNotChangeDocument = false;
         }
     }
+    
+    /**
+     * Sets the manner in which the contents of the {@link ComboBoxModel} are
+     * filtered and autocompletion terms are matched. The given <code>strategy</code> must be one of
+     * {@link TextMatcherEditor#IDENTICAL_STRATEGY} or {@link TextMatcherEditor#NORMALIZED_STRATEGY}
+     * or the Unicode strategy of the ICU4J extension.
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     *
+     * @see #getTextMatchingStrategy()
+     */
+    public void setTextMatchingStrategy(Object strategy) {
+        checkAccessThread();
+
+        // adjust the MatcherEditor that filters the AutoCompleteComboBoxModel to respect the given strategy
+        // but ONLY adjust the contents of the model, avoid changing the text in the JComboBox's textfield
+        doNotChangeDocument = true;
+        try {
+            filterMatcherEditor.setStrategy(strategy);
+            // do we need to update the filterMatcher here?
+        } finally {
+            doNotChangeDocument = false;
+        }
+    }
+    
+    /**
+     * Returns the manner in which the contents of the {@link ComboBoxModel} are
+     * filtered and autocompletion terms are matched. The returned <code>strategy</code> is one of
+     * {@link TextMatcherEditor#IDENTICAL_STRATEGY} or {@link TextMatcherEditor#NORMALIZED_STRATEGY}
+     * or the Unicode strategy of the ICU4J extension.
+     */    
+    public Object getTextMatchingStrategy() {
+        return filterMatcherEditor.getStrategy();
+    }
 
     /**
      * This method removes autocompletion support from the {@link JComboBox}
@@ -1004,7 +1039,7 @@ public final class AutoCompleteSupport<E> {
         if (prefix.length() == 0)
             filterMatcher = Matchers.trueMatcher();
         else
-            filterMatcher = new TextMatcher<String>(new String[] {prefix}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.IDENTICAL_STRATEGY);
+            filterMatcher = new TextMatcher<String>(new String[] {prefix}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
     }
 
     /**
@@ -1035,7 +1070,7 @@ public final class AutoCompleteSupport<E> {
         // determine if our value is empty
         final boolean prefixIsEmpty = "".equals(value);
 
-        final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.IDENTICAL_STRATEGY);
+        final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
 
         String partialMatchTerm = null;
 

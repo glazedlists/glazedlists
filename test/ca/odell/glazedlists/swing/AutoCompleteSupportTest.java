@@ -7,6 +7,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.io.IntegerTableFormat;
+import ca.odell.glazedlists.matchers.GlazedListsICU4J;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 import javax.swing.*;
@@ -449,6 +450,129 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("New Brunswick", model.getElementAt(0));
         assertEquals("Nova Scotia", model.getElementAt(1));
         assertEquals("Newfoundland", model.getElementAt(2));
+    }
+    
+    public void guiTestTextMatchingStrategy() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("Muller");
+        items.add("New Brunswick");
+        items.add("Aenima");
+        items.add("M\u00fcller");
+        items.add("\u00c6nima"); // ÔøΩnima
+        items.add("Ru\u00dfland"); // RuÔøΩland        
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Ècole");
+        items.add("weiﬂe Wasserwelle");
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final ComboBoxModel model = combo.getModel();
+        assertEquals(TextMatcherEditor.IDENTICAL_STRATEGY, support.getTextMatchingStrategy());
+        doc.replace(0, doc.getLength(), "New", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", model.getElementAt(0));
+        assertEquals("Newfoundland", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "Mull", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Muller", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "M\u00fcll", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("M\u00fcller", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Aenima", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Aenima", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "\u00c6nima", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("\u00c6nima", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "ecole", null);
+        assertEquals(0, combo.getItemCount());
+        doc.replace(0, doc.getLength(), "Ècole", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Ècole", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Ru\u00df", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Ru\u00dfland", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Russland", null);
+        assertEquals(0, combo.getItemCount());
+        doc.replace(0, doc.getLength(), "weiﬂe Wasser", null);
+        assertEquals(0, combo.getItemCount());
+        
+        support.setTextMatchingStrategy(TextMatcherEditor.NORMALIZED_STRATEGY);
+        doc.replace(0, doc.getLength(), "New", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", model.getElementAt(0));
+        assertEquals("Newfoundland", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "Mull", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("Muller", model.getElementAt(0));
+        assertEquals("M\u00fcller", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "M\u00fcll", null);
+        assertEquals(2, combo.getItemCount());        
+        assertEquals("Muller", model.getElementAt(0));
+        assertEquals("M\u00fcller", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "Aenima", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Aenima", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "\u00c6nima", null);
+        assertEquals(1, combo.getItemCount());                
+        assertEquals("\u00c6nima", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "ecole", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Ècole", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Ècole", null);
+        assertEquals(1, combo.getItemCount());        
+        assertEquals("Ècole", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Ru\u00df", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Ru\u00dfland", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Russland", null);
+        assertEquals(0, combo.getItemCount());
+        doc.replace(0, doc.getLength(), "weiﬂe Wasser", null);
+        assertEquals(0, combo.getItemCount());
+        
+        support.setTextMatchingStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
+        doc.replace(0, doc.getLength(), "New", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("New Brunswick", model.getElementAt(0));
+        assertEquals("Newfoundland", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "Mull", null);
+        assertEquals(2, combo.getItemCount());
+        assertEquals("Muller", model.getElementAt(0));
+        assertEquals("M\u00fcller", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "M\u00fcll", null);
+        assertEquals(2, combo.getItemCount());        
+        assertEquals("Muller", model.getElementAt(0));
+        assertEquals("M\u00fcller", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "Aenima", null);
+        assertEquals(2, combo.getItemCount());        
+        assertEquals("Aenima", model.getElementAt(0));
+        assertEquals("\u00c6nima", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "\u00c6nima", null);
+        assertEquals(2, combo.getItemCount());                
+        assertEquals("Aenima", model.getElementAt(0));
+        assertEquals("\u00c6nima", model.getElementAt(1));
+        doc.replace(0, doc.getLength(), "ecole", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Ècole", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Ècole", null);
+        assertEquals(1, combo.getItemCount());        
+        assertEquals("Ècole", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Ru\u00df", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("Ru\u00dfland", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "weiﬂe Wasser", null);
+        assertEquals(1, combo.getItemCount());
+        assertEquals("weiﬂe Wasserwelle", model.getElementAt(0));
+        
+        // @todo activate when ICU4J bug 5420 is fixed!
+//        doc.replace(0, doc.getLength(), "Russland", null);
+//        assertEquals(1, combo.getItemCount());
+//        assertEquals("Ru\u00dfland", model.getElementAt(0));        
     }
 
     public void guiTestFilterator() {
