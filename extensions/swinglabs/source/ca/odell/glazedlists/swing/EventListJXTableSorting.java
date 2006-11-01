@@ -234,7 +234,8 @@ public class EventListJXTableSorting {
 
         /** {@inheritDoc} */
         public SortOrder getSortOrder(int columnIndex) {
-            for(SortKey s : sortKeys) {
+            for(int k = 0; k < this.sortKeys.size(); k++) {
+                SortKey s = (SortKey)this.sortKeys.get(k);
                 if(s.getColumn() == columnIndex) return s.getSortOrder();
             }
             return SortOrder.UNSORTED;

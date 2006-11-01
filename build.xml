@@ -592,6 +592,22 @@
             <arg value="${java14_glazedlists.dir}/extensions/hibernate/source"/>
         </java>
 
+    	<!-- Declaw icu4j/ -->
+        <mkdir dir="${java14_glazedlists.dir}/extensions/icu4j/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/icu4j/source"/>
+            <arg value="${classes.dir}${path.separator}extensions/icu4j/lib/icu4j.jar"/>
+            <arg value="${java14_glazedlists.dir}/extensions/icu4j/source"/>
+        </java>
+    	
+        <!-- Declaw swinglabs/ -->
+        <mkdir dir="${java14_glazedlists.dir}/extensions/swinglabs/source"/>
+        <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
+            <arg value="extensions/swinglabs/source"/>
+            <arg value="${classes.dir}${path.separator}extensions/swinglabs/lib/swingx.jar"/>
+            <arg value="${java14_glazedlists.dir}/extensions/swinglabs/source"/>
+        </java>
+
         <!-- Declaw issuesbrowser/ -->
         <mkdir dir="${java14_glazedlists.dir}/extensions/issuesbrowser/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
