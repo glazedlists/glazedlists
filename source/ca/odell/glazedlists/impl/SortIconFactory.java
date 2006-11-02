@@ -73,8 +73,9 @@ public final class SortIconFactory {
         ClassLoader jarLoader = SortIconFactory.class.getClassLoader();
 
         // load each icon as a resource from the source .jar file
+        // (we intentionally start at index 1 for now because unsorted.png, the 0th iconFileName, is not yet used)
         Icon[] pathIcons = new Icon[iconFileNames.length];
-        for(int i = 0; i < pathIcons.length; i++) {
+        for(int i = 1; i < pathIcons.length; i++) {
             URL iconLocation = jarLoader.getResource(path + "/" + iconFileNames[i]);
             if(iconLocation != null)
                 pathIcons[i] = new ImageIcon(iconLocation);
