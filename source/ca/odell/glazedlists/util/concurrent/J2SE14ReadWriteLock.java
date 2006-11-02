@@ -281,7 +281,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
             Thread t = Thread.currentThread();
             Object c = readers_.get(t);
             if (c == null)
-                throw new IllegalThreadStateException();
+                throw new IllegalMonitorStateException();
             --activeReaders_;
             if (c != IONE) { // more than one hold; decrement count
                 int h = ( (Integer) (c)).intValue() - 1;
