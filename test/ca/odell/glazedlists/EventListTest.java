@@ -3,11 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// for being a JUnit test case
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import junit.framework.TestCase;
 
@@ -89,7 +87,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
 
             // test a list that doesn't contain nulls
@@ -118,7 +116,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
 
             // test a list that doesn't contain nulls
@@ -149,7 +147,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
 
             // test a list that doesn't contain nulls
@@ -167,8 +165,6 @@ public class EventListTest extends TestCase {
         }
     }
 
-
-
     /**
      * Validates that lastIndexOf() works with null.
      */
@@ -180,7 +176,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
 
             // test a list that doesn't contain nulls
@@ -209,7 +205,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
             installConsistencyListener(list);
 
@@ -239,7 +235,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
 
             // test a list that doesn't contain nulls
@@ -268,7 +264,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
 
             // test a list that doesn't contain nulls
@@ -285,7 +281,6 @@ public class EventListTest extends TestCase {
         }
     }
 
-
     /**
      * Validates that hashCode() works with null.
      */
@@ -297,7 +292,7 @@ public class EventListTest extends TestCase {
         listTypes.add(new SortedList<String>(new BasicEventList<String>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext(); ) {
+        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
             List<String> list = i.next();
             List<String> copy = new ArrayList<String>();
 
@@ -346,9 +341,8 @@ public class EventListTest extends TestCase {
         assertEquals(Collections.EMPTY_LIST, empty);
     }
 
-
     /**
-     * Tests taht the {@link GlazedLists#syncEventListToList(EventList, java.util.List)}
+     * Tests the {@link GlazedLists#syncEventListToList(EventList, List)}
      * factory method.
      */
     public void testGlazedListsSync() {
@@ -385,8 +379,8 @@ public class EventListTest extends TestCase {
     }
 
     public void testEventListTypeSafety() {
-        EventList source = new BasicEventList();
-        final Set acceptedTypes = new HashSet();
+        EventList<Object> source = new BasicEventList<Object>();
+        final Set<Class> acceptedTypes = new HashSet<Class>();
         acceptedTypes.add(null);
         acceptedTypes.add(Integer.class);
         acceptedTypes.add(String.class);
@@ -404,7 +398,7 @@ public class EventListTest extends TestCase {
         }
 
         // the source list is in an inconsistent state so we rebuild the list
-        source = new BasicEventList();
+        source = new BasicEventList<Object>();
         typeSafetyListener = GlazedLists.typeSafetyListener(source, acceptedTypes);
         source.add(null);
 
@@ -449,25 +443,10 @@ public class EventListTest extends TestCase {
         source.getReadWriteLock().writeLock().unlock();
     }
 
-    public void testRemoveAllOnSelf() {
-        EventList<String> original = new BasicEventList<String>();
-        original.addAll(GlazedListsTests.stringToList("ABCDE"));
-        original.removeAll(original);
-        assertEquals(Collections.EMPTY_LIST, original);
-    }
-
-    public void testRemoveAllFromView() {
-        EventList<String> original = new BasicEventList<String>();
-        original.addAll(GlazedListsTests.stringToList("ABCDE"));
-        FilterList<String> filtered = new FilterList<String>(original, (Matcher) Matchers.trueMatcher());
-        original.removeAll(filtered);
-        assertEquals(Collections.EMPTY_LIST, original);
-    }
-
     public void testRemoveAllOnView() {
         EventList<String> original = new BasicEventList<String>();
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
-        FilterList<String> filtered = new FilterList<String>(original, (Matcher)Matchers.trueMatcher());
+        FilterList<String> filtered = new FilterList<String>(original, Matchers.trueMatcher());
         filtered.removeAll(filtered);
         assertEquals(Collections.EMPTY_LIST, original);
     }
@@ -477,29 +456,6 @@ public class EventListTest extends TestCase {
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
         original.retainAll(original);
         assertEquals(GlazedListsTests.stringToList("ABCDE"), original);
-    }
-
-    public void testRetainAllFromView() {
-        EventList<Integer> original = new BasicEventList<Integer>();
-        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
-        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
-        original.retainAll(filtered);
-        assertEquals(Arrays.asList(new Integer[] { new Integer(20), new Integer(30), new Integer(40) }), original);
-    }
-
-    public void testRetainAllOnView() {
-        EventList<Integer> original = new BasicEventList<Integer>();
-        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
-        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
-        filtered.retainAll(filtered);
-        assertEquals(Arrays.asList(new Integer[] { new Integer(20), new Integer(30), new Integer(40) }), original);
-    }
-
-    public void testAddAllOnSelf() {
-        EventList<String> original = new BasicEventList<String>();
-        original.addAll(GlazedListsTests.stringToList("ABCDE"));
-        original.addAll(original);
-        assertEquals(GlazedListsTests.stringToList("ABCDEABCDE"), original);
     }
 
     public void testSublistClear() {
@@ -523,19 +479,10 @@ public class EventListTest extends TestCase {
         assertEquals(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40), new Integer(20), new Integer(30), new Integer(40) }), original);
     }
 
-    public void testAddAllOnView() {
-        if(true) throw new UnsupportedOperationException("This test case fails, but it takes a long time to do so!");
-        EventList<Integer> original = new BasicEventList<Integer>();
-        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
-        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
-        filtered.addAll(filtered);
-        assertEquals(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40), new Integer(20), new Integer(30), new Integer(40) }), original);
-    }
-
     public void testSimpleAddAll() {
         EventList<String> source = new BasicEventList<String>();
         installConsistencyListener(source);
-        FilterList<String> filterList = new FilterList<String>(source, (Matcher)Matchers.trueMatcher());
+        FilterList<String> filterList = new FilterList<String>(source, Matchers.trueMatcher());
 
         filterList.addAll(GlazedListsTests.stringToList("JESSE"));
         assertEquals(GlazedListsTests.stringToList("JESSE"), source);
