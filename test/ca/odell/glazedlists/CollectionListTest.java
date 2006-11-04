@@ -5,6 +5,10 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -24,7 +28,6 @@ public class CollectionListTest extends TestCase {
 
     private CollectionList<String, String> collectionList;
     private BasicEventList<String> parentList;
-
 
     /**
      * Do basic setup for the tests.
@@ -317,17 +320,85 @@ public class CollectionListTest extends TestCase {
     }
 
     /**
-     * Tests disposing of CollectionList, where the model produces EventLists containing the
-     * children.  
+     * Ensure all child EventLists are validated to ensure they share the same
+     * locks and publisher as the CollectionList they are members of. This
+     * involves checking in two areas:
+     *
+     * 1) The CollectionList's constructor needs to validate the invariant
+     * 2) adding further EventLists to the CollectionList after construction
+     *    also needs to validate the invariant
+     */
+    public void testEventListChildrenMustUseSameLocksAsCollectionList() {
+        EventList<List> source;
+
+        source = new BasicEventList<List>();
+        new CollectionList<List, String>(source, (CollectionList.Model) GlazedLists.listCollectionListModel());
+        // this works because the BasicEventList we are adding shares a publisher and locks with the CollectionList
+        source.add(new BasicEventList(source.getPublisher(), source.getReadWriteLock()));
+
+        source = new BasicEventList<List>();
+        new CollectionList<List, String>(source, (CollectionList.Model) GlazedLists.listCollectionListModel());
+        try {
+            // try to add a new BasicEventList that uses its own publisher - it should fail
+            source.add(new BasicEventList(ListEventAssembler.createListEventPublisher(), source.getReadWriteLock()));
+            fail("failed to receive an IllegalArgumentException when child EventList did not share the same publisher");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        source = new BasicEventList<List>();
+        new CollectionList<List, String>(source, (CollectionList.Model) GlazedLists.listCollectionListModel());
+        try {
+            // try to add a new BasicEventList that uses its own locks - it should fail
+            source.add(new BasicEventList(source.getPublisher(), LockFactory.DEFAULT.createReadWriteLock()));
+            fail("failed to receive an IllegalArgumentException when child EventList did not share the same locks");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        source = new BasicEventList<List>();
+        source.add(new BasicEventList(ListEventAssembler.createListEventPublisher(), source.getReadWriteLock()));
+        try {
+            // try to create a CollectionList where one of the child EventLists uses a bad publisher - it should fail
+            new CollectionList<List, String>(source, (CollectionList.Model) GlazedLists.listCollectionListModel());
+            fail("failed to receive an IllegalArgumentException when child EventList did not share the same publisher");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        source = new BasicEventList<List>();
+        source.add(new BasicEventList(source.getPublisher(), LockFactory.DEFAULT.createReadWriteLock()));
+        try {
+            // try to create a CollectionList where one of the child EventLists uses a bad set of locks - it should fail
+            new CollectionList<List, String>(source, (CollectionList.Model) GlazedLists.listCollectionListModel());
+            fail("failed to receive an IllegalArgumentException when child EventList did not share the same publisher");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Tests disposing of CollectionList, where the model produces EventLists
+     * containing the children.
      */
     public void testDisposeWithEventListChildren() {
-        final List<String> abcList = GlazedListsTests.stringToList("ABC");
-        final EventList<String> abcEventList = GlazedLists.eventList(abcList);
-        final List<String> defList = GlazedListsTests.stringToList("DEF");
-        final EventList<String> defEventList = GlazedLists.eventList(defList);
-        final List<String> ghiList = GlazedListsTests.stringToList("GHI");
-        final EventList<String> ghiEventList = GlazedLists.eventList(ghiList);
         final EventList<List<String>> parentEventList = new BasicEventList<List<String>>();
+        final ListEventPublisher sharedpublisher = parentEventList.getPublisher();
+        final ReadWriteLock sharedLocks = parentEventList.getReadWriteLock();
+
+        // make sure all of the child lists are built using the shared ListEventPublisher and ReadWriteLocks
+        final List<String> abcList = GlazedListsTests.stringToList("ABC");
+        final EventList<String> abcEventList = new BasicEventList<String>(sharedpublisher, sharedLocks);
+        abcEventList.addAll(abcList);
+
+        final List<String> defList = GlazedListsTests.stringToList("DEF");
+        final EventList<String> defEventList = new BasicEventList<String>(sharedpublisher, sharedLocks);
+        defEventList.addAll(defList);
+
+        final List<String> ghiList = GlazedListsTests.stringToList("GHI");
+        final EventList<String> ghiEventList = new BasicEventList<String>(sharedpublisher, sharedLocks);
+        ghiEventList.addAll(ghiList);
+
         parentEventList.add(abcEventList);
         parentEventList.add(defEventList);
         parentEventList.add(ghiEventList);

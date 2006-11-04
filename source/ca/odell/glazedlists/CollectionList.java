@@ -13,15 +13,22 @@ import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
- * A list that acts like a tree in that it contains child elements to nodes contained in
- * another list. An example usage would be to wrap a parent list containing record albums
- * and use the CollectionList to display the songs on the album.
+ * A list that acts like a tree in that it contains child elements to nodes
+ * contained in another list. An example usage would be to wrap a parent list
+ * containing albums and use the CollectionList to display the songs on the
+ * album.
  * 
- * <p>The actual mapping from the parent list to the child list (record to songs in the
- * above example) is done by a {@link CollectionList.Model} that is provided to the
- * constructor.
+ * <p>The actual mapping from the parent list to the child list (album to
+ * songs in the above example) is done by a {@link CollectionList.Model} that
+ * is provided to the constructor.
+ *
+ * <p>Note that any {@link EventList}s returned by the {@link CollectionList.Model}
+ * must use the same {@link ca.odell.glazedlists.event.ListEventPublisher} and
+ * {@link ca.odell.glazedlists.util.concurrent.ReadWriteLock} as this
+ * {@link CollectionList}. This is necessary in order for CollectionList to
+ * operate correctly under mult-threaded conditions. An
+ * {@link IllegalArgumentException} will be raised if this invariant is violated.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
@@ -53,7 +60,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     private final ChildElement<E> EMPTY_CHILD_ELEMENT = new SimpleChildElement(Collections.EMPTY_LIST, null);
 
     /** used to extract children */
-    private final Model<S,E> model;
+    private final Model<S, E> model;
 
     /**
      * Barcode containing the node mappings. There is a black node for each parent
@@ -67,15 +74,20 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     /**
      * Create a {@link CollectionList} with its contents being the children of
      * the elements in the specified source {@link EventList}.
+     *
+     * @param source an EventList of Objects from each of which the
+     *      <code>model</code> can extract child elements
+     * @param model the logic for extracting children from each
+     *      <code>source</code> element
      */
-    public CollectionList(EventList<S> source, Model<S,E> model) {
+    public CollectionList(EventList<S> source, Model<S, E> model) {
         super(source);
-        if(model == null) throw new IllegalArgumentException("Collection map cannot be null");
+        if(model == null) throw new IllegalArgumentException("model cannot be null");
 
         this.model = model;
 
-        // Sync the current size and indexes
-        for(int i = 0; i < source.size(); i++) {
+        // sync the current size and indexes
+        for(int i = 0, n = source.size(); i < n; i++) {
             List<E> children = model.getChildren(source.get(i));
 
             // update the list of child lists
@@ -87,45 +99,44 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             if(!children.isEmpty()) barcode.addWhite(barcode.size(), children.size());
         }
 
-        // Listen for events
+        // listen for changes
         source.addListEventListener(this);
     }
 
     /** {@inheritDoc} */
     public int size() {
-        // Size of the child nodes only
+        // size of the child nodes only
         return barcode.whiteSize();
     }
 
     /** {@inheritDoc} */
     public E get(int index) {
         // get the child
-        ChildElement<E> childElement = getChildElement(index);
-        int childIndexInParent = barcode.getWhiteSequenceIndex(index);
+        final ChildElement<E> childElement = getChildElement(index);
+        final int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.get(childIndexInParent);
     }
-
 
     /** {@inheritDoc} */
     public E set(int index, E value) {
         // set on the child
-        ChildElement<E> childElement = getChildElement(index);
-        int childIndexInParent = barcode.getWhiteSequenceIndex(index);
+        final ChildElement<E> childElement = getChildElement(index);
+        final int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.set(childIndexInParent, value);
     }
 
     /** {@inheritDoc} */
     public E remove(int index) {
         // remove from the child
-        ChildElement<E> childElement = getChildElement(index);
-        int childIndexInParent = barcode.getWhiteSequenceIndex(index);
+        final ChildElement<E> childElement = getChildElement(index);
+        final int childIndexInParent = barcode.getWhiteSequenceIndex(index);
         return childElement.remove(childIndexInParent);
     }
 
     /**
-     * Return the index of the first child in the CollectionList for the given parent
-     * index. This can be very useful for things like selecting the children in a
-     * CollectionList when the parent is selected in another list.
+     * Return the index of the first child in the CollectionList for the given
+     * parent index. This can be very useful for things like selecting the
+     * children in a CollectionList when the parent is selected in another list.
      *
      * @see #childEndingIndex
      */
@@ -133,25 +144,25 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         if(parentIndex < 0) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
         if(parentIndex >= source.size()) throw new IndexOutOfBoundsException("Invalid index: " + parentIndex);
 
-        // Get the index of the next node
-        // Find the index of the black node with that index
-        int parentFullIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
-        int childFullIndex = parentFullIndex + 1;
+        // get the index of the next node
+        // find the index of the black node with that index
+        final int parentFullIndex = barcode.getIndex(parentIndex, Barcode.BLACK);
+        final int childFullIndex = parentFullIndex + 1;
 
-        // If this node has no children, the next node index will be past the size or black
+        // ff this node has no children, the next node index will be past the size or black
         if(childFullIndex >= barcode.size()) return -1;
         if(barcode.get(childFullIndex) != Barcode.WHITE) return -1;
 
         // return the child index
-        int childIndex = childFullIndex - (parentIndex+1);
+        final int childIndex = childFullIndex - (parentIndex+1);
         assert(barcode.getWhiteIndex(childFullIndex) == childIndex);
         return childIndex;
     }
 
     /**
-     * Return the index of the last child in the CollectionList for the given parent
-     * index. This can be very useful for things like selecting the children in a
-     * CollectionList when the parent is selected in another list.
+     * Return the index of the last child in the CollectionList for the given
+     * parent index. This can be very useful for things like selecting the
+     * children in a CollectionList when the parent is selected in another list.
      *
      * @see #childStartingIndex
      */
@@ -161,36 +172,37 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
 
         // Get the index of the next node
         // Find the index of the black node with that index
-        int nextParentFullIndex = (parentIndex == barcode.blackSize() - 1) ? barcode.size() : barcode.getIndex(parentIndex + 1, Barcode.BLACK);
-        int lastWhiteBeforeNextParent = nextParentFullIndex - 1;
+        final int nextParentFullIndex = (parentIndex == barcode.blackSize() - 1) ? barcode.size() : barcode.getIndex(parentIndex + 1, Barcode.BLACK);
+        final int lastWhiteBeforeNextParent = nextParentFullIndex - 1;
 
         // If this node has no children, the next node index will be past the size or black
         if(barcode.get(lastWhiteBeforeNextParent) == Barcode.BLACK) return -1;
 
         // return the child index
-        int childIndex = lastWhiteBeforeNextParent - (parentIndex+1);
+        final int childIndex = lastWhiteBeforeNextParent - (parentIndex+1);
         assert(barcode.getWhiteIndex(lastWhiteBeforeNextParent) == childIndex);
         return childIndex;
     }
 
     /**
-     * Handle changes in the parent list. We'll need to update our node list sizes.
+     * Handle changes in the parent list. We'll need to update our node list
+     * sizes.
      */
     public void listChanged(ListEvent<S> listChanges) {
-        // Need to process the changes so that our size caches are up to date.
+        // need to process the changes so that our size caches are up to date.
         updates.beginEvent();
         while(listChanges.next()) {
             int index = listChanges.getIndex();
             int type = listChanges.getType();
 
-            // Insert means we'll need to insert a new node in the array
+            // insert means we'll need to insert a new node in the array
             if(type == ListEvent.INSERT) {
                 handleInsert(index);
 
             } else if(type == ListEvent.DELETE) {
                 handleDelete(index);
 
-            // Treat like a delete and then an add:
+            // treat like a delete and then an add:
             } else if(type == ListEvent.UPDATE) {
                 handleDelete(index);
                 handleInsert(index);
@@ -204,8 +216,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         super.dispose();
         
         // iterate over all child elements and dispose them
-        final SimpleTreeIterator<ChildElement<E>> treeIterator = 
-            new SimpleTreeIterator<ChildElement<E>>(childElements);
+        final SimpleTreeIterator<ChildElement<E>> treeIterator = new SimpleTreeIterator<ChildElement<E>>(childElements);
         
         while(treeIterator.hasNext()) {
             treeIterator.next();
@@ -217,10 +228,10 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      * Helper for {@link #listChanged(ListEvent)} when inserting.
      */
     private void handleInsert(int parentIndex) {
-        // Find the index of the black node with that index
+        // find the index of the black node with that index
         int absoluteIndex = getAbsoluteIndex(parentIndex);
 
-        // Find the size of the new node and add it to the total
+        // find the size of the new node and add it to the total
         S parent = source.get(parentIndex);
         List<E> children = model.getChildren(parent);
 
@@ -243,7 +254,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      * Helper for {@link #listChanged(ListEvent)} when deleting.
      */
     private void handleDelete(int sourceIndex) {
-        // Find the index of the black node with that index
+        // find the index of the black node with that index
         int parentIndex = getAbsoluteIndex(sourceIndex);
         int nextParentIndex = getAbsoluteIndex(sourceIndex + 1);
 
@@ -280,23 +291,26 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      * Create a {@link ChildElement} for the specified List.
      */
     private ChildElement<E> createChildElementForList(List<E> children, Element<ChildElement<E>> node) {
-        if(children instanceof EventList) return new EventChildElement((EventList<E>)children, node);
-        else return new SimpleChildElement(children, node);
+        if(children instanceof EventList)
+            return new EventChildElement((EventList<E>) children, node);
+        else
+            return new SimpleChildElement(children, node);
     }
 
     /**
-     * Get the absolute index for the specified parent index. This may be virtual
-     * if the parent index is one greater than the last element. This is useful
-     * for calculating the size of a range by using the location of its follower.
+     * Get the absolute index for the specified parent index. This may be
+     * virtual if the parent index is one greater than the last element. This
+     * is useful for calculating the size of a range by using the location of
+     * its follower.
      */
     private int getAbsoluteIndex(int parentIndex) {
-        if(parentIndex < barcode.blackSize()) {
+        if(parentIndex < barcode.blackSize())
             return barcode.getIndex(parentIndex, Barcode.BLACK);
-        } else if(parentIndex == barcode.blackSize()) {
+
+        if(parentIndex == barcode.blackSize())
             return barcode.size();
-        } else {
-            throw new IndexOutOfBoundsException();
-        }
+
+        throw new IndexOutOfBoundsException();
     }
 
     /**
@@ -309,12 +323,10 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         public void dispose();
     }
 
-
-
     /**
-     * Provides the logic to map a parent record (e.g., a records album) to its children
-     * (e.g., the songs on the record). Serves basically the same purpose as
-     * {@link javax.swing.tree.TreeModel} does to a JTree in Swing.
+     * Provides the logic to map a parent object (e.g. an album) to its
+     * children (e.g. the songs on the album). Serves basically the same
+     * purpose as {@link javax.swing.tree.TreeModel} does to a JTree in Swing.
      *
      * @see CollectionList
      * @see GlazedLists#listCollectionListModel()
@@ -324,27 +336,28 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         /**
          * Return a list of the child nodes for a parent node.
          *
-         * @param parent The parent node.
-         * @return A List containing the child nodes.
+         * @param parent the parent node.
+         * @return a List containing the child nodes.
          */
         public List<S> getChildren(E parent);
     }
-
-
 
     /**
      * Manages a standard List that does not implement {@link EventList}.
      */
     private class SimpleChildElement implements ChildElement<E> {
-        private List<E> children;
-        private Element node;
-        public SimpleChildElement(List<E> children, Element node) {
+        private final List<E> children;
+        private final Element<ChildElement<E>> node;
+
+        public SimpleChildElement(List<E> children, Element<ChildElement<E>> node) {
             this.children = children;
             this.node = node;
         }
+
         public E get(int index) {
             return children.get(index);
         }
+
         public E remove(int index) {
             E removed = children.remove(index);
 
@@ -363,6 +376,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             // all done
             return removed;
         }
+
         public E set(int index, E element) {
             E replaced = children.set(index, element);
 
@@ -377,35 +391,50 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             // all done
             return replaced;
         }
+
         public void dispose() {
             // do nothing
         }
     }
 
     /**
-     * Monitors changes to a member EventList and forwards changes to all listeners
-     * of the CollectionList.
+     * Monitors changes to a member EventList and forwards changes to all
+     * listeners of the CollectionList.
      */
     private class EventChildElement implements ChildElement<E>, ListEventListener<E> {
-        private EventList<E> children;
-        private Element<ChildElement<E>> node;
+        private final EventList<E> children;
+        private final Element<ChildElement<E>> node;
+
         public EventChildElement(EventList<E> children, Element<ChildElement<E>> node) {
             this.children = children;
             this.node = node;
+
+            // ensure the EventList of children uses the same publisher as the CollectionList
+            if(!getPublisher().equals(children.getPublisher()))
+                throw new IllegalArgumentException("If a CollectionList.Model returns EventLists, those EventLists must use the same ListEventPublisher as the CollectionList");
+
+            // ensure the EventList of children uses the same locks as the CollectionList
+            if(!getReadWriteLock().equals(children.getReadWriteLock()))
+                throw new IllegalArgumentException("If a CollectionList.Model returns EventLists, those EventLists must use the same ReadWriteLock as the CollectionList");
+
             children.getPublisher().setRelatedSubject(this, CollectionList.this);
             children.addListEventListener(this);
         }
+
         public E get(int index) {
             return children.get(index);
         }
+
         public E remove(int index) {
             // events will be fired from this call
             return children.remove(index);
         }
+
         public E set(int index, E element) {
             // events will be fired from this call
             return children.set(index, element);
         }
+
         public void listChanged(ListEvent<E> listChanges) {
             int parentIndex = childElements.indexOfNode(node, (byte)1);
             int absoluteIndex = getAbsoluteIndex(parentIndex);
@@ -429,10 +458,12 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             }
             updates.commitEvent();
         }
+
         public void dispose() {
             children.removeListEventListener(this);
             children.getPublisher().clearRelatedSubject(this);
         }
+
         public String toString() {
             return "[" + childElements.indexOfNode(node, (byte)0) + ":" + children + "]";
         }
