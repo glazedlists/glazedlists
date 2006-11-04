@@ -5,6 +5,7 @@ package com.publicobject.xmlbrowser;
 
 import java.util.List;
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.swing.*;
@@ -165,6 +166,8 @@ public class XmlBrowser {
             SortedList<Element> sortedList = new SortedList<Element>(eventList, null);
             FilterList<Element> filteredList = new FilterList<Element>(sortedList, matcherEditor);
             TreeList<Element> treeList = new TreeList<Element>(filteredList, new ElementTreeFormat());
+            ListConsistencyListener consistencyListener = ListConsistencyListener.install(treeList);
+            consistencyListener.setPreviousElementTracked(false);
 
             // display the XML in a tree table
             EventTableModel<Element> tableModel = new EventTableModel<Element>(treeList, new ElementTableFormat());

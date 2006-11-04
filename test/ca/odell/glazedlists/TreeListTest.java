@@ -702,7 +702,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes_FixMe() {
+    public void testSiblingsBecomeNonSiblingsWithCollapsedNodes() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -855,6 +855,93 @@ public class TreeListTest extends TestCase {
                 "AEF",
                 "AW",
                 "AWX",
+        });
+    }
+
+    public void testInsertUpdateDeleteOnCollapsed() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("ABD");
+        source.add("ABEF");
+        treeList.setExpanded(1, false);
+        source.add("ABEG");
+        source.add(3, "ABH"); // to split siblings ABEF, ABEG
+        source.remove(1);
+        source.set(0, "ABI");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+        });
+
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABI",
+                "ABE",
+                "ABEF",
+                "ABH",
+                "ABE",
+                "ABEG",
+        });
+
+        treeList.setExpanded(1, false);
+        source.remove(2); // to join siblings ABEF, ABEG
+
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABI",
+                "ABE",
+                "ABEF",
+                "ABEG",
+        });
+    }
+
+    public void testInsertVirtualParentsOnCollapsed() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABE");
+        treeList.setExpanded(1, false);
+        source.add("ABEFGH");
+
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABE",
+                "ABEF",
+                "ABEFG",
+                "ABEFGH",
+        });
+    }
+
+    public void testReplaceHiddenVirtualParentWithReal() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        treeList.setExpanded(0, false);
+        source.addAll(0, Arrays.asList(new String[] {
+                "A",
+                "AB",
+        }));
+
+        treeList.setExpanded(0, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
         });
     }
 }

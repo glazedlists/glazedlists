@@ -327,7 +327,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         if(virtual) {
             newColor = node.isVisible() ? VISIBLE_VIRTUAL : HIDDEN_VIRTUAL;
         } else {
-            newColor = node.virtual ? VISIBLE_REAL : HIDDEN_REAL;
+            newColor = node.isVisible() ? VISIBLE_REAL : HIDDEN_REAL;
         }
         data.setColor(node.element, newColor);
     }
@@ -1034,7 +1034,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          */
         private void updateFrom(Node<E> other) {
             element = other.element;
-            virtual = false;
             expanded = other.expanded;
 
             // weave in the siblings
