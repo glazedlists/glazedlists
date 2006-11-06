@@ -944,4 +944,27 @@ public class TreeListTest extends TestCase {
                 "ABC",
         });
     }
+
+    public void testSortingSource_FixMe() {
+
+        EventList<String> source = new BasicEventList<String>();
+        SortedList<String> sortedList = new SortedList<String>(source, null);
+        TreeList<String> treeList = new TreeList<String>(sortedList, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("A");
+        source.add("DEF");
+        source.add("ABC");
+        sortedList.setComparator(GlazedLists.comparableComparator());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "D",
+                "DE",
+                "DEF",
+        });
+
+    }
 }
