@@ -18,16 +18,8 @@
     <inceptionYear>2003</inceptionYear>
     <mailingLists>
         <mailingList>
-            <name>user@glazedlists.dev.java.net</name>
-            <post>user@glazedlists.dev.java.net</post>
-            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
-            <unsubscribe>
-                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
-            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
-        </mailingList>
-        <mailingList>
-            <name>announce@glazedlists.dev.java.net</name>
-            <post>announce@glazedlists.dev.java.net</post>
+            <name>users@glazedlists.dev.java.net</name>
+            <post>users@glazedlists.dev.java.net</post>
             <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
             <unsubscribe>
                 https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
@@ -69,7 +61,6 @@
             <timezone>PDT</timezone>
         </developer>
         <developer>
-            <!-- TODO verify and complete -->
             <id>jplemieux</id>
             <name>James Lemieux</name>
             <email/>
@@ -79,7 +70,6 @@
             <timezone>PDT</timezone>
         </developer>
         <developer>
-            <!-- TODO verify and complete -->
             <id>kevinmaltby</id>
             <name>Kevin Maltby</name>
             <email/>
@@ -89,8 +79,7 @@
             <timezone>EST</timezone>
         </developer>
         <developer>
-            <!-- TODO verify and complete -->
-            <id>???</id>
+            <id>reden</id>
             <name>Rob Eden</name>
             <email/>
             <roles>
@@ -99,7 +88,6 @@
             <timezone/>
         </developer>
         <developer>
-            <!-- TODO verify and complete -->
             <id>brands</id>
             <name>Holger Brands</name>
             <email/>

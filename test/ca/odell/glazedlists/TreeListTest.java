@@ -945,8 +945,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSortingSource_FixMe() {
-
+    public void testSortingSource() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
         TreeList<String> treeList = new TreeList<String>(sortedList, new CharacterTreeFormat());

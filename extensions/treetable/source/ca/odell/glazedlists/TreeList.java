@@ -584,6 +584,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 for(Node<E> child = possibleAncestor.firstChild(); child != null; child = child.siblingAfter) {
                     child.parent = inserted;
                 }
+                // mark the ancestor as obsolete
+                possibleAncestor.element = null;
 
                 return inserted;
 
