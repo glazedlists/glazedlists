@@ -966,7 +966,7 @@ public class TreeListTest extends TestCase {
 
     }
 
-    public void testSortingSourceWithVirtualParentsBetween_FixMe() {
+    public void testSortingSourceWithVirtualParentsBetween() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
         TreeList<String> treeList = new TreeList<String>(sortedList, new CharacterTreeFormat());
@@ -981,6 +981,23 @@ public class TreeListTest extends TestCase {
                 "pdeb"
         }));
         sortedList.setComparator(new LastCharComparator());
+    }
+
+    // todo(jessewilson): give this a more fitting name
+    public void testWeirdNullPointerOnReorder() {
+        EventList<String> source = new BasicEventList<String>();
+        SortedList<String> sortedList = new SortedList<String>(source, null);
+        TreeList<String> treeList = new TreeList<String>(sortedList, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "ad",
+                "adce",
+                "adca"
+        }));
+        sortedList.setComparator(new LastCharComparator());
+        sortedList.setComparator(null);
     }
 
     private class LastCharComparator implements Comparator<String> {
