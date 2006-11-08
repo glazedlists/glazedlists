@@ -365,6 +365,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
 
+        // blow away obsolete virtual nodes before we rewire siblings
+        deleteObsoleteVirtualNodes(nodesToVerify);
+
         // second pass: walk through all the changed nodes and attach parents
         // and siblings, plus fire events for all the inserted or updated nodes
         for(Iterator<Node<E>> i = changeNodes.iterator(); i.hasNext(); ) {
@@ -376,9 +379,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 attachParentsAndSiblings(next, true);
             }
         }
-
-        // blow away obsolete virtual nodes
-        deleteObsoleteVirtualNodes(nodesToVerify);
 
         assert(isValid());
 
