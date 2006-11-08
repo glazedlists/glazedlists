@@ -2,7 +2,6 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
@@ -965,5 +964,31 @@ public class TreeListTest extends TestCase {
                 "DEF",
         });
 
+    }
+
+    public void testSortingSourceWithVirtualParentsBetween_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        SortedList<String> sortedList = new SortedList<String>(source, null);
+        TreeList<String> treeList = new TreeList<String>(sortedList, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "pb",
+                "pnma",
+                "pnm",
+                "pnma",
+                "pdeb"
+        }));
+        sortedList.setComparator(new LastCharComparator());
+    }
+
+    private class LastCharComparator implements Comparator<String> {
+        public int compare(String a, String b) {
+            return lastCharOf(a).compareTo(lastCharOf(b));
+        }
+        private Character lastCharOf(String s) {
+            return s.charAt(s.length() - 1);
+        }
     }
 }
