@@ -27,6 +27,95 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     }
 
     /**
+     * Tests a lazy loaded value collection.
+     */
+    public void testLazyValueCollection() {
+        doTestValueCollection(true);        
+    }
+
+    /**
+     * Tests an eager loaded value collection.
+     */
+    public void testEagerValueCollection() {
+        doTestValueCollection(false);        
+    }
+    
+    /**
+     * Runs tests for a value collection of Strings.
+     * 
+     * @param lazy indicates lazy or eager loading of nick name collection
+     */
+    private void doTestValueCollection(boolean lazy) {
+        // create user with email addresses and persist
+        User u = createAndPersistUserWithNickNames();
+
+        // load user in new session
+        Session s = openSession();
+        Transaction t = s.beginTransaction();
+
+        // load saved user again
+        u = loadUser(s, lazy);
+        assertTrue(u != null);
+
+        final GlazedListsTests.ListEventCounter<String> listener = new GlazedListsTests.ListEventCounter<String>();
+
+        if (lazy) {
+            // lazy collection still uninitialized
+            assertFalse(Hibernate.isInitialized(u.getNickNames()));
+            // call EventList methods            
+            u.getNickNames().addListEventListener(listener);
+            u.getNickNames().removeListEventListener(listener);
+            u.getNickNames().addListEventListener(listener);
+            u.getNickNames().getReadWriteLock();
+            u.getNickNames().getPublisher();
+
+            // lazy collection should still be uninitialized
+            assertFalse(Hibernate.isInitialized(u.getNickNames()));
+            assertEquals(0, listener.getCountAndReset());
+
+            // trigger initialization        
+            assertEquals(2, u.getNickNames().size());
+            assertTrue(Hibernate.isInitialized(u.getNickNames()));
+            // ATTENTION: Hibernate calls add and set for each list element
+            assertEquals(4, listener.getCountAndReset());
+        } else {
+            // collection should be initialized
+            assertTrue(Hibernate.isInitialized(u.getNickNames()));
+            u.getNickNames().addListEventListener(listener);
+        }
+
+        // test manipulating list
+        u.getNickNames().remove(1);
+        u.getNickNames().add(1, "Headbanger");
+        u.getNickNames().remove(0);
+
+        t.commit();
+        s.close();
+        assertEquals(3, listener.getCountAndReset());
+
+        s = openSession();
+        t = s.beginTransaction();
+        u = loadUser(s, lazy);
+
+        assertEquals(1, u.getNickNames().size());
+        assertEquals("Headbanger", u.getNickNames().get(0));
+        assertTrue(Hibernate.isInitialized(u.getNickNames()));
+
+        // delete user
+        s.delete(u);
+        t.commit();
+        s.close();
+
+        // no user should be found
+        s = openSession();
+        t = s.beginTransaction();
+        u = loadUser(s, lazy);
+        assertEquals(u, null);
+        t.commit();
+        s.close();        
+    }
+    
+    /**
      * Tests a lazy loaded, one-to-many, unidirectional association with entity collection. 
      */
     public void testLazyOneToManyUniDirectionalAssociation() {
@@ -54,7 +143,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
      */
     private void doTestOneToManyUniDirectionalAssociation(boolean lazy) {
         // create user with email addresses and persist
-        User u = createAndPersistUser();
+        User u = createAndPersistUserWithEmail();
 
         // load user and emails in new session
         Session s = openSession();
@@ -137,13 +226,29 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Creates and persists an example user with emial addresses.
      */
-    private User createAndPersistUser() {
+    private User createAndPersistUserWithEmail() {
         // create user with email adresses and persist
         Session s = openSession();
         Transaction t = s.beginTransaction();
         User u = new User("admin");
         u.getEmailAddresses().add(new Email("admin@hibernate.org"));
         u.getEmailAddresses().add(new Email("admin@gmail.com"));
+        s.persist(u);
+        t.commit();
+        s.close();
+        return u;
+    }
+    
+    /**
+     * Creates and persists an example user with nicknames.
+     */
+    private User createAndPersistUserWithNickNames() {
+        // create user with nicknames and persist
+        Session s = openSession();
+        Transaction t = s.beginTransaction();
+        User u = new User("admin");
+        u.addNickName("Hacker");
+        u.addNickName("Maestro");
         s.persist(u);
         t.commit();
         s.close();
@@ -161,6 +266,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         } else {
             return (User) s.createCriteria(User.class)
             	.setFetchMode("emailAddresses", FetchMode.JOIN)
+                .setFetchMode("nickNames", FetchMode.JOIN)
             	.uniqueResult();
         }
     }

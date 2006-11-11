@@ -9,18 +9,27 @@
 
 <hibernate-mapping package="ca.odell.glazedlists.hibernate">
 
-    <class name="User" table="`Users`">
-        <id name="userName"/>
-        <list name="emailAddresses" cascade="all, delete-orphan"
+    <class name="User" table="`USERS`">
+        <id name="userName" column="USERNAME"/>
+        <!-- mapping a value collection -->
+        <list name="nickNames" table="USER_NICKNAMES"
             collection-type="ca.odell.glazedlists.hibernate.EventListType">
-            <key column="userName"/>
-            <list-index column="displayOrder" base="1"/>
+            <key column="USER_ID"/>
+            <list-index column="DISPLAY_ORDER"/>
+            <element column="NAME" type="string" length="50"/>
+        </list>
+        
+        <!-- mapping a one-to-many entity association -->
+        <list name="emailAddresses" table="USER_EMAIL" cascade="all, delete-orphan"
+            collection-type="ca.odell.glazedlists.hibernate.EventListType">
+            <key column="USER_ID"/>
+            <list-index column="DISPLAY_ORDER" base="1"/>
             <one-to-many class="Email"/>
         </list>
     </class>
 
-    <class name="Email">
-        <id name="id">
+    <class name="Email" table="EMAIL">
+        <id name="id" column="ID">
             <generator class="native"/>
         </id>
         <property name="address"/>

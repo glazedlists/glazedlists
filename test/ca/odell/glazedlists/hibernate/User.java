@@ -16,6 +16,9 @@ public class User {
     /** Username is Id. */
     private String userName;
 
+    /** List of nicknames. */
+    private EventList<String> nickNames = new BasicEventList<String>();
+
     /** List of email addresses. */
     private EventList<Email> emailAddresses = new BasicEventList<Email>();
 
@@ -59,4 +62,27 @@ public class User {
     public void setEmailAddresses(EventList<Email> emailAddresses) {
         this.emailAddresses = emailAddresses;
     }
+    
+    /**
+     * Gets the nicknames.
+     */
+    public EventList<String> getNickNames() {
+        return nickNames;
+    }
+
+    /**
+     * Sets the nicknames.
+     */
+    private void setNickNames(EventList<String> nickNames) {
+        this.nickNames = nickNames;
+    }
+    
+    public void addNickName(String nickName) {
+        nickNames.add(nickName);
+    }
+
+    public void removedNickName(String nickName) {
+        nickNames.remove(nickName);
+    }
+    
 }
