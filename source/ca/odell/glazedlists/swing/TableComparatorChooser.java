@@ -124,7 +124,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *      sorting by multiple columns is more powerful, the user interface is
      *      not as simple and this strategy should only be used where necessary.
      */
-    public <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
+    public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
         return new TableComparatorChooser<E>(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
     }
 
