@@ -1002,9 +1002,9 @@ public class TreeListTest extends TestCase {
 
     private class LastCharComparator implements Comparator<String> {
         public int compare(String a, String b) {
-            return lastCharOf(a).compareTo(lastCharOf(b));
+            return lastCharOf(a) - lastCharOf(b);
         }
-        private Character lastCharOf(String s) {
+        private char lastCharOf(String s) {
             return s.charAt(s.length() - 1);
         }
     }
