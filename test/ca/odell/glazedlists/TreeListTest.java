@@ -983,8 +983,7 @@ public class TreeListTest extends TestCase {
         sortedList.setComparator(new LastCharComparator());
     }
 
-    // todo(jessewilson): give this a more fitting name
-    public void testWeirdNullPointerOnReorder() {
+    public void testObsoleteVirtualParentsWithinMovedNodes() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
         TreeList<String> treeList = new TreeList<String>(sortedList, new CharacterTreeFormat());
@@ -1007,5 +1006,45 @@ public class TreeListTest extends TestCase {
         private char lastCharOf(String s) {
             return s.charAt(s.length() - 1);
         }
+    }
+
+    public void testVisibilityOnParentMergeFollowerCollapsed_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("DEF");
+        source.add("ABD");
+        treeList.setExpanded(7, false);
+        source.remove(1);
+
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABE",
+        });
+    }
+
+    public void testVisibilityOnParentMergeLeaderCollapsed_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("DEF");
+        source.add("ABD");
+        treeList.setExpanded(1, false);
+        source.remove(1);
+
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABE",
+        });
     }
 }

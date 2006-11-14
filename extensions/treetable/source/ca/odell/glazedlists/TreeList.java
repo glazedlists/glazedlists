@@ -365,8 +365,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
 
-        // blow away obsolete virtual nodes before we rewire siblings
-        deleteObsoleteVirtualNodes(nodesToVerify);
+        // blow away obsolete virtual leaf nodes now that we can know for sure
+        // if they're obsolete this doesn't depend on the siblings & parents to be attached
+        deleteObsoleteVirtualLeaves(nodesToVerify);
 
         // second pass: walk through all the changed nodes and attach parents
         // and siblings, plus fire events for all the inserted or updated nodes
@@ -379,6 +380,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 attachParentsAndSiblings(next, true);
             }
         }
+
+        // blow away obsolete parent nodes now that we can know for sure if they're obsolete
+        deleteObsoleteVirtualParents(nodesToVerify);
 
         assert(isValid());
 
@@ -531,6 +535,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         for(Node<E> siblingAfter = node.siblingAfter; siblingAfter != null; siblingAfter = siblingAfter.siblingAfter) {
             assert(siblingAfter.parent == originalParent);
             siblingAfter.parent = parent;
+            assert(isVisibilityValid(siblingAfter));
         }
     }
 
@@ -655,40 +660,31 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Ensure all of the specified virtual nodes are still required. If they're not,
-     * they'll be removed and the appropriate events fired.
+     * Delete all virtual parents that no longer have child nodes attached.
+     * This method does not depend upon child nodes being properly configured.
      */
-    private void deleteObsoleteVirtualNodes(List<Node<E>> nodesToVerify) {
-        deleteObsoleteParents:
+    private void deleteObsoleteVirtualLeaves(List<Node<E>> nodesToVerify) {
+        deleteObsoleteLeaves:
         for(Iterator<Node<E>> i = nodesToVerify.iterator(); i.hasNext(); ) {
             Node<E> node = i.next();
 
             // walk up the tree, deleting nodes
             while(node != null) {
                 // we've reached a real parent, don't delete it!
-                if(!node.virtual) continue deleteObsoleteParents;
+                if(!node.virtual) continue deleteObsoleteLeaves;
                 // we've already deleted this parent, we're done
-                if(node.element == null) continue deleteObsoleteParents;
-
-                // if this virtual parent is redundant, then we can delete it
-                // todo: come up with a test case where previous pathlength == parent pathlength, which will cause this to fail (slightly)
-                Node<E> previous = node.previous();
-                if(previous != null && isAncestorByValue(previous, node)) {
-                    node = deleteVirtualAncestryRootDown(previous, node);
-                    continue;
-                }
+                if(node.element == null) continue deleteObsoleteLeaves;
+                // this node now has children, don't delete it
+                // todo: create a test case where isLeaf fails, instead we want hasChildByValue() or something
+                // todo: that might still pass, because the parent will be recreated. In that case we should
+                // todo: cleverly make sure the parent node's expand/collapse state is unchanged
+                if(!node.isLeaf()) continue deleteObsoleteLeaves;
 
                 // if this virtual node has no children, then it's obsolete and
                 // we can delete it right away. Afterwards, we might need to
                 // delete that node's parent
-                if(node.isLeaf()) {
-                    deleteNode(node);
-                    node = node.parent;
-                    continue;
-                }
-
-                // nothing obsolete here, look at the next element in the queue
-                break;
+                deleteNode(node);
+                node = node.parent;
             }
         }
     }
@@ -711,7 +707,32 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * <p>If the node <code>/Z</code> is deleted, then the second set of
      * <code>/a</code> and <code>/a/b</code> nodes are now redundant. In this
      * case, we must delete those as well.
+     *
+     * <p>Because it depends upon ancestry being properly configured, this method may
+     * only be executed after the tree's parent and sibling nodes have been attached.
      */
+    private void deleteObsoleteVirtualParents(List<Node<E>> nodesToVerify) {
+        deleteObsoleteParents:
+        for(Iterator<Node<E>> i = nodesToVerify.iterator(); i.hasNext(); ) {
+            Node<E> node = i.next();
+
+            // walk up the tree, deleting nodes
+            while(node != null) {
+                // we've reached a real parent, don't delete it!
+                if(!node.virtual) continue deleteObsoleteParents;
+                // we've already deleted this parent, we're done
+                if(node.element == null) continue deleteObsoleteParents;
+
+                // todo: come up with a test case where previous pathlength == parent pathlength, which will cause this to fail (slightly)
+                Node<E> previous = node.previous();
+                if(previous == null) continue deleteObsoleteParents;
+                if(!isAncestorByValue(previous, node)) continue deleteObsoleteParents;
+
+                // if this virtual parent is redundant, then we can delete it
+                node = deleteVirtualAncestryRootDown(previous, node);
+            }
+        }
+    }
     private Node<E> deleteVirtualAncestryRootDown(Node<E> previous, Node<E> parent) {
         Node<E> replacementLastSibling = previous.ancestorWithPathLength(parent.pathLength() + 1);
         assert(replacementLastSibling.siblingAfter == null);
@@ -1117,6 +1138,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             Node<E> ancestor = this;
             while(ancestor.pathLength() > ancestorPathLength) {
                 ancestor = ancestor.parent;
+                if(ancestor == null) {
+                    throw new IllegalStateException();
+                }
             }
             return ancestor;
         }
@@ -1189,6 +1213,20 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         return buffer.toString();
     }
 
+    /**
+     * @return true if the visibility of this node is what it's parents prescribe.
+     */
+    private boolean isVisibilityValid(Node<E> node) {
+        boolean expectedVisible = true;
+        for(Node<E> ancestor = node.parent; ancestor != null; ancestor = ancestor.parent) {
+            if(!ancestor.expanded) {
+                expectedVisible = false;
+                break;
+            }
+        }
+
+        return node.isVisible() == expectedVisible;
+    }
 
     /**
      * Sanity check the entire datastructure.
@@ -1205,6 +1243,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // path lengths should only grow by one from one child to the next
             assert(node.pathLength() <= lastPathLengthSeen + 1);
             lastPathLengthSeen = node.pathLength();
+
+            // the node's visibility should be consistent with its parent nodes expanded state
+            assert(isVisibilityValid(node));
 
             // the virtual flag should be consistent with the node color
             if(node.virtual) {
