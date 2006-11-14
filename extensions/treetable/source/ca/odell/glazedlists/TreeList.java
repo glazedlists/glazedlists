@@ -380,6 +380,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         for(Iterator<Node<E>> i = changeNodes.iterator(); i.hasNext(); ) {
             Node<E> changed = i.next();
 
+            // todo: this isn't attaching sibling before
             attachParentsAndSiblings(changed, true);
             Node<E> next = changed.next();
             if(next != null) {
@@ -401,7 +402,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * <li>attaching parents
      * <li>attaching siblings
      * <li>firing an 'insert' event for such parents and siblings
-     *
      *
      * @param changed
      */
@@ -521,13 +521,19 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private void attachParent(Node<E> node, Node<E> parent, Node<E> siblingBeforeNode) {
         assert(node != null);
         assert((node.pathLength() == 1 && parent == null) || (node.pathLength() == parent.pathLength() + 1));
-        Node<E> originalParent = node.parent;
         node.parent = parent;
 
         // the nearest child of our parent will become our sibling
         if(siblingBeforeNode != null) {
             assert(siblingBeforeNode.pathLength() == node.pathLength());
             assert(siblingBeforeNode.parent == parent);
+
+            // attach the sibling after
+            if(siblingBeforeNode.siblingAfter != null) {
+                assert(node.siblingAfter == null);
+                node.siblingAfter = siblingBeforeNode.siblingAfter;
+                siblingBeforeNode.siblingAfter.siblingBefore = node;
+            }
 
             // attach the sibling before
             node.siblingBefore = siblingBeforeNode;
@@ -539,7 +545,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // attach all siblings after to this new parent
         for(Node<E> siblingAfter = node.siblingAfter; siblingAfter != null; siblingAfter = siblingAfter.siblingAfter) {
-            assert(siblingAfter.parent == originalParent);
             siblingAfter.parent = parent;
             assert(isVisibilityValid(siblingAfter));
         }
