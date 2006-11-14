@@ -1008,7 +1008,7 @@ public class TreeListTest extends TestCase {
         }
     }
 
-    public void testVisibilityOnParentMergeFollowerCollapsed_FixMe() {
+    public void testVisibilityOnParentMergeFollowerCollapsed() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1024,11 +1024,11 @@ public class TreeListTest extends TestCase {
                 "A",
                 "AB",
                 "ABC",
-                "ABE",
+                "ABD",
         });
     }
 
-    public void testVisibilityOnParentMergeLeaderCollapsed_FixMe() {
+    public void testVisibilityOnParentMergeLeaderCollapsed() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1044,7 +1044,7 @@ public class TreeListTest extends TestCase {
                 "A",
                 "AB",
                 "ABC",
-                "ABE",
+                "ABD",
         });
     }
 }

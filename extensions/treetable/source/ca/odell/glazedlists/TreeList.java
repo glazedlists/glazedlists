@@ -243,6 +243,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     public boolean isExpanded(int visibleIndex) {
         return data.get(visibleIndex, VISIBLE_NODES).get().expanded;
     }
+
     /**
      * Control whether the child elements of the specified node are visible.
      *
@@ -251,25 +252,30 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     public void setExpanded(int visibleIndex, boolean expanded) {
         Node<E> toExpand = data.get(visibleIndex, VISIBLE_NODES).get();
+        setExpanded(toExpand, expanded);
+    }
+
+    public void setExpanded(Node<E> toExpand, boolean expanded) {
 
         // if we're already in the desired state, give up!
         if(toExpand.expanded == expanded) return;
 
         updates.beginEvent();
 
-        // first toggle the active node. Note that it's visibility does not
-        // change, only that of its children
+        // toggle the active node.
         toExpand.expanded = expanded;
-        updates.addUpdate(visibleIndex);
+
+        // This node's visibility does not change, only that of its children
+        if(toExpand.isVisible()) {
+            int visibleIndex = data.indexOfNode(toExpand.element, VISIBLE_NODES);
+            updates.addUpdate(visibleIndex);
+        }
 
         Node<E> toExpandNextSibling = nextNodeThatsNotAChildOfByStructure(toExpand);
 
         // walk through the subtree, looking for all the descendents we need
         // to change. As we encounter them, change them and fire events
-        for(Element<Node<E>> descendentElement = toExpand.element.next(); descendentElement != null; descendentElement = descendentElement.next()) {
-            Node<E> descendent = descendentElement.get();
-            if(descendent == toExpandNextSibling) break;
-
+        for(Node<E> descendent= toExpand.next(); descendent != null && descendent != toExpandNextSibling; descendent = descendent.next()) {
             // figure out if this node should be visible by walking up the ancestors
             // to the node being expanded, searching for a parent that's not
             // expanded
@@ -738,6 +744,13 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         assert(replacementLastSibling.siblingAfter == null);
         Node<E> replacement = replacementLastSibling.parent;
 
+        // merge expand/collapse state first
+        if(replacement.expanded && !parent.expanded) {
+            setExpanded(parent, true);
+        } else if(parent.expanded && !replacement.expanded) {
+            setExpanded(replacement, true);
+        }
+
         // link the children of the two parents as siblings
         Node<E> parentFirstChild = parent.firstChild();
         assert(parentFirstChild == null || parentFirstChild.siblingBefore == null);
@@ -751,8 +764,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // remove the parent itself
         deleteNode(parent);
-        parent = parentFirstChild;
-        return parent;
+
+        // next up for potential deletion is the child of this parent
+        return parentFirstChild;
     }
 
     /**
