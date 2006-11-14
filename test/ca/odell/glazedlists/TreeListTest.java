@@ -1047,4 +1047,35 @@ public class TreeListTest extends TestCase {
                 "ABD",
         });
     }
+
+    public void testSplitChildrenHoldsSiblings_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "pmmp",
+                "pmmp",
+                "psu"
+        }));
+
+        source.add(1, "pdds");
+
+        assertTreeStructure(treeList, new String[] {
+                "p",
+                "pm",
+                "pmm",
+                "pmmp",
+                "pd",
+                "pdd",
+                "pdds",
+                "pm",
+                "pmm",
+                "pmmp",
+                "ps",
+                "psu",
+        });
+
+    }
 }

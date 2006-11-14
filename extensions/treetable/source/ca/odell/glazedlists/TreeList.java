@@ -212,7 +212,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * tree.
      */
     public List<Node<E>> getRoots() {
-        // todo: make this make sense
+        // todo: make this fast
         List<Node<E>> result = new ArrayList<Node<E>>();
         for(int i = 0; i < size(); i++) {
             Node<E> possibleRoot = getTreeNode(i);
@@ -729,7 +729,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 // we've already deleted this parent, we're done
                 if(node.element == null) continue deleteObsoleteParents;
 
-                // todo: come up with a test case where previous pathlength == parent pathlength, which will cause this to fail (slightly)
+                // todo: come up with a test case where previous pathlength == parent pathlength,
+                // which will cause this to fail (slightly) because the expanded state will be destroyed
                 Node<E> previous = node.previous();
                 if(previous == null) continue deleteObsoleteParents;
                 if(!isAncestorByValue(previous, node)) continue deleteObsoleteParents;
