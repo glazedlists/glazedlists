@@ -1079,7 +1079,7 @@ public class TreeListTest extends TestCase {
 
     }
 
-    public void testXXX_FixMe() {
+    public void testAttachSiblingsToStrippedSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1106,5 +1106,35 @@ public class TreeListTest extends TestCase {
                 "psu",
         });
 
+    }
+
+    public void testInsertAncestorAfterChild() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "psu",
+                "pmma",
+        }));
+
+        source.addAll(1, Arrays.asList(new String[] {
+                "pdds",
+                "p",
+        }));
+
+        assertTreeStructure(treeList, new String[] {
+                "p",
+                "ps",
+                "psu",
+                "pd",
+                "pdd",
+                "pdds",
+                "p",
+                "pm",
+                "pmm",
+                "pmma",
+        });
     }
 }

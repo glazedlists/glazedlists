@@ -554,6 +554,11 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      *      new node's sibling
      */
     private void attachParent(Node<E> node, Node<E> parent, Node<E> siblingBeforeNode) {
+        // todo: kill this assertion
+        assert(siblingBeforeNode == null || siblingBeforeNode.siblingAfter == null || siblingBeforeNode.siblingAfter.pathLength() == siblingBeforeNode.pathLength());
+        assert(siblingBeforeNode == null || siblingBeforeNode.siblingBefore == null || siblingBeforeNode.siblingBefore.pathLength() == siblingBeforeNode.pathLength());
+        
+
         assert(node != null);
         assert((node.pathLength() == 1 && parent == null) || (node.pathLength() == parent.pathLength() + 1));
         node.parent = parent;
@@ -586,6 +591,10 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             siblingAfter.parent = parent;
             assert(isVisibilityValid(siblingAfter));
         }
+
+        // todo: kill this assertion
+        assert(node.siblingAfter == null || node.siblingAfter.pathLength() == node.pathLength());
+        assert(node.siblingBefore == null || node.siblingBefore.pathLength() == node.pathLength());
     }
 
     /**
@@ -630,6 +639,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // node that has become real.
             if(commonPathLength == inserted.pathLength()) {
                 // make the real node copy the state of the virtual
+                assert(inserted.pathLength() == possibleAncestor.pathLength());
                 inserted.updateFrom(possibleAncestor);
 
                 // replace the virtual with the real in the tree structure
@@ -1341,6 +1351,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 }
                 if(lastChildSeen != null) {
                     if(lastChildSeen.siblingAfter != descendent) {
+                        throw new IllegalStateException();
+                    }
+                    if(lastChildSeen.pathLength() != descendent.pathLength()) {
                         throw new IllegalStateException();
                     }
                 }
