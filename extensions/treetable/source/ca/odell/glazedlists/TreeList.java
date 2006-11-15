@@ -408,15 +408,16 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private void attachParentsAndSiblings(Node<E> changed, boolean fireEvents) {
         int index = data.indexOfNode(changed.element, ALL_NODES);
         List<Node<E>> pathToRoot = new ArrayList<Node<E>>(changed.pathLength());
+        final Node<E> nodeImmediatelyBeforeChanges = changed.previous();
 
         // record the expanded/collapsed state of this node's path
         cloneStateNewNodeStateProvider.setNodeToPrototype(changed);
 
-        // create a path from the changed node to the root, attaching parents as we go
+        // phase one: create a path from the changed node to the root, attaching parents as we go
         {
             Node<E> current = changed;
-            Node<E> predecessor = changed.previous(); // at height of current.parent
-            Node<E> predecessorAtOurHeight = null; // at height of current
+            Node<E> predecessor = nodeImmediatelyBeforeChanges; // for success, this is the same depth as current.parent
+            Node<E> predecessorAtOurHeight = null; // for success, this is the same depth as current
             boolean preexistingParentFound = false;
             while(current != null) {
                 int currentPathLength = current.pathLength();
@@ -435,11 +436,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
                 // the predecessor is too tall to be our parent, maybe its parent is our parent?
                 } else if(predecessorPathLength >= currentPathLength) {
-                    // the predecessor loses siblings since we split them apart
-                    if(predecessor.siblingAfter != null) {
-                        predecessor.siblingAfter.siblingBefore = null;
-                        predecessor.siblingAfter = null;
-                    }
                     predecessorAtOurHeight = predecessor;
                     predecessor = predecessor.parent;
 
@@ -466,7 +462,46 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
 
-        // phase two: fix visibility and fire events, going from root down
+        // phase two: detach siblings that were split apart by adding this node
+        {
+            for(Node<E> predecessor = nodeImmediatelyBeforeChanges, current = changed; predecessor != null; ) {
+                int currentPathLength = current.pathLength();
+                int predecessorPathLength = predecessor.pathLength();
+
+                // the predecessor is deeper than current, sever its sibling after
+                if(predecessorPathLength > currentPathLength) {
+                    if(predecessor.siblingAfter != null) {
+                        predecessor.siblingAfter.siblingBefore = null;
+                        predecessor.siblingAfter = null;
+                    }
+                    predecessor = predecessor.parent;
+
+                // current is too tall, predecessor sibling is unchanged
+                } else if(currentPathLength > predecessorPathLength) {
+                    current = current.parent;
+
+                // we've found a parent, there's nothing to detach
+                } else if(predecessor == current) {
+                    break;
+
+                // they're siblings, there's nothing to detach
+                } else if(predecessor.parent == current.parent) {
+                    assert(current.siblingBefore == predecessor && predecessor.siblingAfter == current);
+                    break;
+
+                // they're at the same height but not siblings, detach predecessor's siblings and keep searching
+                } else {
+                    if(predecessor.siblingAfter != null) {
+                        predecessor.siblingAfter.siblingBefore = null;
+                        predecessor.siblingAfter = null;
+                    }
+                    predecessor = predecessor.parent;
+                    current = current.parent;
+                }
+            }
+        }
+
+        // phase three: fix visibility and fire events, going from root down
         boolean visible = true;
         for(int i = pathToRoot.size() - 1; i >= 0; i--) {
             Node<E> current = pathToRoot.get(i);
@@ -523,8 +558,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         assert((node.pathLength() == 1 && parent == null) || (node.pathLength() == parent.pathLength() + 1));
         node.parent = parent;
 
-        // the nearest child of our parent will become our sibling
-        if(siblingBeforeNode != null) {
+        // the nearest child of our parent will become our sibling if it isn't already
+        if(siblingBeforeNode != null && siblingBeforeNode.siblingAfter != node) {
             assert(siblingBeforeNode.pathLength() == node.pathLength());
             assert(siblingBeforeNode.parent == parent);
 
@@ -538,6 +573,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // attach the sibling before
             node.siblingBefore = siblingBeforeNode;
             siblingBeforeNode.siblingAfter = node;
+
+            assert(node.siblingBefore != node);
+            assert(node.siblingAfter != node);
         }
 
         // todo: resolve the EXPANDED state of these nodes, which may now become

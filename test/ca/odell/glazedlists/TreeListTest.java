@@ -1048,7 +1048,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testSplitChildrenHoldsSiblings_FixMe() {
+    public void testSplitChildrenHoldsSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1070,6 +1070,35 @@ public class TreeListTest extends TestCase {
                 "pd",
                 "pdd",
                 "pdds",
+                "pm",
+                "pmm",
+                "pmmp",
+                "ps",
+                "psu",
+        });
+
+    }
+
+    public void testXXX_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "pmmp",
+                "pmmp",
+                "psu"
+        }));
+
+        source.add(1, "pp");
+
+        assertTreeStructure(treeList, new String[] {
+                "p",
+                "pm",
+                "pmm",
+                "pmmp",
+                "pp",
                 "pm",
                 "pmm",
                 "pmmp",
