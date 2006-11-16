@@ -9,9 +9,8 @@ import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
+import java.awt.*;
 
 /**
  * This class {@link #install}s support for a single hierarchical column within
@@ -63,6 +62,10 @@ public final class TreeTableSupport {
     /** The model index of the table column that is the hierarchical column */
     private final int modelColumnIndex;
 
+    /** Expands and collapses the tree structure based on mouse clicks. */
+    private final MouseListener expandAndCollapseMouseListener = new ExpandAndCollapseMouseListener();
+
+    /** Expands and collapses the tree structure based on key strokes (the entry key). */
     private final KeyListener expandAndCollapseKeyListener = new ExpandAndCollapseKeyListener();
 
     /** The renderer installed on the hierarchical TableColumn */
@@ -119,6 +122,7 @@ public final class TreeTableSupport {
         viewColumn.setCellEditor(treeTableCellEditor);
 
         this.table.addKeyListener(expandAndCollapseKeyListener);
+        this.table.addMouseListener(expandAndCollapseMouseListener);
     }
 
     /**
@@ -171,7 +175,9 @@ public final class TreeTableSupport {
     public void uninstall() {
         checkAccessThread();
 
+        // stop trying to toggle tree nodes due to keystrokes and mouse clicks
         table.removeKeyListener(expandAndCollapseKeyListener);
+        table.removeMouseListener(expandAndCollapseMouseListener);
 
         // fetch information about the hierarchical column
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
@@ -200,10 +206,61 @@ public final class TreeTableSupport {
             throw new IllegalStateException("TreeTableSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \"" + Thread.currentThread().getName() + "\"");
     }
 
+    /**
+     * This listener watches for mouse clicks overtop of the expander button
+     * within a renderer in a hierarchical column and toggles the expansion
+     * of the tree node, if possible.
+     */
+    private class ExpandAndCollapseMouseListener extends MouseAdapter {
+        public void mouseClicked(MouseEvent me) {
+            // if the table isn't enabled, break early
+            if (!table.isEnabled())
+                return;
+
+            // we're going to check if the single click was overtop of the
+            // expander button and toggle the expansion of the row if it was
+
+            final TreeTableCellPanel renderedPanel = TreeTableUtilities.prepareRenderer(me);
+
+            // translate the click to be relative to the cellRect (and thus its rendered component)
+            // extract information about the location of the click
+            final JTable table = (JTable) me.getSource();
+            final Point clickPoint = me.getPoint();
+            final int row = table.rowAtPoint(clickPoint);
+            final int column = table.columnAtPoint(clickPoint);
+
+            // ensure a valid cell has clicked
+            if (row == -1 || column == -1)
+                return;
+
+            // translate the clickPoint to be relative to the rendered component
+            final Rectangle cellRect = table.getCellRect(row, column, true);
+            clickPoint.translate(-cellRect.x, -cellRect.y);
+
+            // if a left-click occurred over the expand/collapse button
+            if (SwingUtilities.isLeftMouseButton(me) && renderedPanel != null && renderedPanel.isPointOverExpanderButton(clickPoint)) {
+                treeList.getReadWriteLock().writeLock().lock();
+                try {
+                    // expand/collapse the rowObject if possible
+                    if (treeList.getAllowsChildren(row))
+                        TreeTableUtilities.toggleExpansion(table, treeList, row);
+                } finally {
+                    treeList.getReadWriteLock().writeLock().unlock();
+                }
+            }
+        }
+    }
+
+    /**
+     * This listener watches for ENTER key presses when cell focus is within
+     * a hierarchical column and toggles the expansion of the tree node, if
+     * possible.
+     */
     private class ExpandAndCollapseKeyListener extends KeyAdapter {
         public void keyPressed(KeyEvent e) {
-//            if (e.getKeyCode() == KeyEvent.VK_UP)
-//                System.out.println("found up arrow!");
+            // if the table isn't enabled, break early
+            if (!table.isEnabled())
+                return;
 
             // if the table doesn't own the focus, break early
             if (!table.isFocusOwner())
@@ -213,20 +270,20 @@ public final class TreeTableSupport {
             if (e.getKeyChar() != KeyEvent.VK_SPACE || e.getModifiers() != 0)
                 return;
 
+            final int row = table.getSelectionModel().getLeadSelectionIndex();
+            final int column = table.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+
+            // ensure a valid cell has focus
+            if (row == -1 || column == -1)
+                return;
+
+            // ensure the column is the hierarchical column
+            final int focusedColumnModelIndex = table.convertColumnIndexToModel(column);
+            if (focusedColumnModelIndex != modelColumnIndex)
+                return;
+
             treeList.getReadWriteLock().writeLock().lock();
             try {
-                final int row = table.getSelectionModel().getLeadSelectionIndex();
-                final int column = table.getColumnModel().getSelectionModel().getLeadSelectionIndex();
-
-                // ensure some valid cell has focus
-                if (row == -1 || column == -1)
-                    return;
-
-                // ensure the column is the hierarchical column
-                final int focusedColumnModelIndex = table.convertColumnIndexToModel(column);
-                if (focusedColumnModelIndex != modelColumnIndex)
-                    return;
-
                 // if the row is expandable, toggle its expanded state
                 if (treeList.getAllowsChildren(row))
                     TreeTableUtilities.toggleExpansion(table, treeList, row);

@@ -105,65 +105,34 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     }
 
    /**
-    * Returns true if <code>anEvent</code> is a <code>MouseEvent</code> with a
-    * click count >= 2. This method's implementation is actually used for
-    * another purpose besides determining if <code>anEvent</code> should
-    * trigger a cell edit. If <code>anEvent</code> is a single mouse click
-    * which is positioned over the expand/collapse label of the underlying
-    * <code>DefaultTreeTableCellPanel</code> then this method actually toggles
-    * the expanded/collapsed state of the rowObject and then returns
-    * <tt>false</tt> from this method to indicate that we should not enter
-    * edit mode.
+    * This method checks if the <code>event</code> is a <code>MouseEvent</code>
+    * and determines if it occurred overtop of the component created by the
+    * delegate TableCellEditor. If so, it translates the coordinates of the
+    * <code>event</code> so they are relative to that component and then asks
+    * the delegate TableCellEditor if it believes supports cell editing.
     *
-    * @param anEvent the event attempting to begin a cell edit
+    * Effectively, this implies that clicks overtop of other areas of the
+    * editor component are ignored. In truth, they are handled elsewhere (a
+    * MouseListener on the JTable installed within TreeTableSupport).
+    *
+    * @param event the event attempting to begin a cell edit
     * @return true if cell is ready for editing, false otherwise
     */
-    public boolean isCellEditable(EventObject anEvent) {
-        if (anEvent instanceof MouseEvent) {
-            final MouseEvent me = (MouseEvent) anEvent;
+    public boolean isCellEditable(EventObject event) {
+        if (event instanceof MouseEvent) {
+            final MouseEvent me = (MouseEvent) event;
 
             // we're going to check if the single click was overtop of the
-            // expand button, and toggle the expansion state of the row if
-            // it was but return false so we don't begin the cell edit
+            // node component and give a translated version of the
+            // MouseEvent to the delegate TableCellEditor if it was
 
-            // extract information about the location of the click
-            final JTable table = (JTable) anEvent.getSource();
-            final Point clickPoint = me.getPoint();
-            final int row = table.rowAtPoint(clickPoint);
-            final int column = table.columnAtPoint(clickPoint);
+            final TreeTableCellPanel renderedPanel = TreeTableUtilities.prepareRenderer(me);
 
-            // translate the click to be relative to the cellRect (and thus its rendered component)
-            final Rectangle cellRect = table.getCellRect(row, column, true);
-            clickPoint.translate(-cellRect.x, -cellRect.y);
-
-            // get the component rendered at the clickPoint
-            final Component renderedComponent = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
-            final TreeTableCellPanel renderedPanel = (TreeTableCellPanel) renderedComponent;
-            renderedPanel.setBounds(cellRect);
-            renderedPanel.doLayout();
-
-            // if a left-click occurred over the expand/collapse button
-            if (SwingUtilities.isLeftMouseButton(me) && renderedPanel.isPointOverExpanderButton(clickPoint)) {
-                treeList.getReadWriteLock().writeLock().lock();
-                try {
-                    // expand/collapse the rowObject if possible
-                    if(treeList.getAllowsChildren(row))
-                        TreeTableUtilities.toggleExpansion(table, treeList, row);
-                } finally {
-                    treeList.getReadWriteLock().writeLock().unlock();
-                }
-                return false;
-            }
-
-            // if the row has children, it is a synthetic row and its node component cannot be edited
-            if (treeList.hasChildren(row))
-                return false;
-
-            // if the click occurred over the node name editor
-            if (renderedPanel.isPointOverNodeComponent(clickPoint)) {
+            // if the click occurred over the node component
+            if (renderedPanel != null && renderedPanel.isPointOverNodeComponent(me.getPoint())) {
                 // shift the click over by the expand icon and space
-                Rectangle delegateRendererBounds = renderedPanel.getNodeComponent().getBounds();
-                MouseEvent translatedMouseEvent = new MouseEvent(me.getComponent(), me.getID(), me.getWhen(), me.getModifiers(), me.getX() - delegateRendererBounds.x, me.getY() - delegateRendererBounds.y , me.getClickCount(), me.isPopupTrigger(), me.getButton());
+                final Rectangle delegateRendererBounds = renderedPanel.getNodeComponent().getBounds();
+                final MouseEvent translatedMouseEvent = new MouseEvent(me.getComponent(), me.getID(), me.getWhen(), me.getModifiers(), me.getX() - delegateRendererBounds.x, me.getY() - delegateRendererBounds.y , me.getClickCount(), me.isPopupTrigger(), me.getButton());
 
                 // allow the actual editor to decide
                 return delegate.isCellEditable(translatedMouseEvent);
@@ -173,7 +142,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
         }
 
         // otherwise, we're here because of an unrecognized EventObject
-        return super.isCellEditable(anEvent);
+        return super.isCellEditable(event);
     }
 
     public boolean shouldSelectCell(EventObject anEvent) {
