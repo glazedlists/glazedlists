@@ -1119,6 +1119,9 @@ public class TreeListTest extends TestCase {
                 "pmma",
         }));
 
+        // when we're inserting the 'p' node, we need to be careful about the
+        // virtual ancestry of the existing 'pmma' node that precedes it, making
+        // sure not to attach p as a child of a deeper node
         source.addAll(1, Arrays.asList(new String[] {
                 "pdds",
                 "p",
@@ -1135,6 +1138,41 @@ public class TreeListTest extends TestCase {
                 "pm",
                 "pmm",
                 "pmma",
+        });
+    }
+
+    public void testSiblingsAttachedToNewParentsFromSplitNodes() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "pmmu",
+                "pmmp",
+                "pn",
+        }));
+
+        // this insert causes ancestry to be added for the existing node 'pmmp',
+        // which needs to be attached as a sibling to the parent node 'pm'.
+        source.addAll(1, Arrays.asList(new String[] {
+                "pdds",
+                "p",
+        }));
+
+        assertTreeStructure(treeList, new String[] {
+                "p",
+                "pm",
+                "pmm",
+                "pmmu",
+                "pd",
+                "pdd",
+                "pdds",
+                "p",
+                "pm",
+                "pmm",
+                "pmmp",
+                "pn",
         });
     }
 }
