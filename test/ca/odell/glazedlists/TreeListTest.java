@@ -1175,4 +1175,37 @@ public class TreeListTest extends TestCase {
                 "pn",
         });
     }
+
+    public void testAddExtraRoot_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "pmmu",
+                "pmmp",
+                "pmmp",
+                "pn",
+        }));
+
+        source.addAll(1, Arrays.asList(new String[] {
+                "p",
+        }));
+
+        assertTreeStructure(treeList, new String[] {
+                "p",
+                "pm",
+                "pmm",
+                "pmmu",
+                "pd",
+                "pdd",
+                "pdds",
+                "p",
+                "pm",
+                "pmm",
+                "pmmp",
+                "pn",
+        });
+    }
 }

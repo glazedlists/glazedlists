@@ -376,11 +376,13 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         deleteObsoleteVirtualLeaves(nodesToVerify);
 
         // second pass: walk through all the changed nodes and attach parents
-        // and siblings, plus fire events for all the inserted or updated nodes
+        // and siblings, plus fire events for all the inserted or updated nodes.
         for(Iterator<Node<E>> i = changeNodes.iterator(); i.hasNext(); ) {
+            // the inner loop makes sure we attach replacement ancestry to nodes
+            // that were split from their parents.
             for(Node<E> current = i.next(); current != null; current = current.next()) {
-                boolean valuesChanged = attachParentsAndSiblings(current, true);
-                if(!valuesChanged) break;
+                boolean treeChanged = attachParentsAndSiblings(current, true);
+                if(!treeChanged) break;
             }
         }
 
