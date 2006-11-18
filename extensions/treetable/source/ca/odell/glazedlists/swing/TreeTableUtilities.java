@@ -87,14 +87,12 @@ class TreeTableUtilities {
      * starting a cell edit.
      */
     static void toggleExpansion(JTable table, TreeList treeList, int row) {
-        final ListSelectionModel selectionModel = table.getSelectionModel();
-        final EventSelectionModel eventSelectionModel = selectionModel instanceof EventSelectionModel ? (EventSelectionModel) selectionModel : null;
-        final boolean isEventSelectionModelEnabled = eventSelectionModel != null && eventSelectionModel.getEnabled();
-        final Boolean autoStartsEdit = (Boolean) table.getClientProperty("JTable.autoStartsEdit");
+        final RestoreStateRunnable restoreStateRunnable = new RestoreStateRunnable(table);
+        final EventSelectionModel selectionModel = restoreStateRunnable.getEventSelectionModel();
 
         // disable the EventSelectionModel so it does not respect our attempted change to row selection (due to treeList.toggleExpanded(row);)
-        if (eventSelectionModel != null)
-            eventSelectionModel.setEnabled(false);
+        if (selectionModel != null)
+            selectionModel.setEnabled(false);
 
         // disable attempts to start an edit because of a keystroke
         table.putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
@@ -102,7 +100,7 @@ class TreeTableUtilities {
         treeList.toggleExpanded(row);
 
         // post a Runnable to the Swing EDT to restore the state of the table and selection model
-        SwingUtilities.invokeLater(new RestoreStateRunnable(table, autoStartsEdit, eventSelectionModel, isEventSelectionModelEnabled));
+        SwingUtilities.invokeLater(restoreStateRunnable);
     }
 
     /**
@@ -117,11 +115,17 @@ class TreeTableUtilities {
         private final EventSelectionModel eventSelectionModel;
         private final boolean eventSelectionModelEnabled;
 
-        public RestoreStateRunnable(JTable table, Boolean autoStartsEdit, EventSelectionModel eventSelectionModel, boolean eventSelectionModelEnabled) {
+        public RestoreStateRunnable(JTable table) {
             this.table = table;
-            this.autoStartsEdit = autoStartsEdit;
-            this.eventSelectionModel = eventSelectionModel;
-            this.eventSelectionModelEnabled = eventSelectionModelEnabled;
+
+            final ListSelectionModel selectionModel = table.getSelectionModel();
+            eventSelectionModel = selectionModel instanceof EventSelectionModel ? (EventSelectionModel) selectionModel : null;
+            eventSelectionModelEnabled = eventSelectionModel != null && eventSelectionModel.getEnabled();
+            autoStartsEdit = (Boolean) table.getClientProperty("JTable.autoStartsEdit");
+        }
+
+        public EventSelectionModel getEventSelectionModel() {
+            return eventSelectionModel;
         }
 
         public void run() {

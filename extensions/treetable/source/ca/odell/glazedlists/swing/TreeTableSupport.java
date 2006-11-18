@@ -62,11 +62,11 @@ public final class TreeTableSupport {
     /** The model index of the table column that is the hierarchical column */
     private final int modelColumnIndex;
 
-    /** Expands and collapses the tree structure based on mouse clicks. */
-    private final MouseListener expandAndCollapseMouseListener = new ExpandAndCollapseMouseListener();
-
-    /** Expands and collapses the tree structure based on key strokes (the entry key). */
+    /** Expands and collapses the tree structure based on key strokes (the space bar). */
     private final KeyListener expandAndCollapseKeyListener = new ExpandAndCollapseKeyListener();
+
+    /** Expands and collapses the tree structure based on left and right arrow key strokes. */
+    private final KeyListener arrowKeyListener = new ArrowKeyListener();
 
     /** The renderer installed on the hierarchical TableColumn */
     private final TreeTableCellRenderer treeTableCellRenderer;
@@ -121,8 +121,52 @@ public final class TreeTableSupport {
         this.treeTableCellEditor = new TreeTableCellEditor(originalEditor, treeList);
         viewColumn.setCellEditor(treeTableCellEditor);
 
+        this.table.addKeyListener(arrowKeyListener);
         this.table.addKeyListener(expandAndCollapseKeyListener);
-        this.table.addMouseListener(expandAndCollapseMouseListener);
+        decorateUIDelegateMouseListener(this.table);
+    }
+
+    /**
+     * This method is a complete hack, but is necessary to achieve the
+     * desired behaviour when adding collapse/expand capabilities to a
+     * treetable.
+     *
+     * The problem is that when a mouse button is pressed, the MouseListener
+     * installed by the UI Delegate is executed <strong>first</strong> and
+     * changes the selected row to the row that was just clicked. This is
+     * undesirable from the standpoint of treetables. One should be able to
+     * expand or collapse tree nodes without adjusting the selection.
+     *
+     * To solve the problem, we rip out the MouseListener installed by
+     * the BasicTableUI and decorate it before reinstalling it. The decorated
+     * version of the MouseListener detects mouse clicks that actually toggle
+     * the collapsed/expanded state and ensures that we do not change the
+     * selected row in that case.
+     */
+    private void decorateUIDelegateMouseListener(Component c) {
+        // replace the first MouseListener that appears to be installed by the UI Delegate
+        final MouseListener[] mouseListeners = c.getMouseListeners();
+        for (int i = mouseListeners.length-1; i >= 0; i--) {
+            if (mouseListeners[i].getClass().getName().indexOf("TableUI") != -1) {
+                c.removeMouseListener(mouseListeners[i]);
+                c.addMouseListener(new ExpandAndCollapseMouseListener(mouseListeners[i]));
+                break;
+            }
+        }
+    }
+
+    /**
+     * This method will undo the work performed by {@link #decorateUIDelegateMouseListener(Component)}.
+     */
+    private void undecorateUIDelegateMouseListener(Component c) {
+        // replace all decorated MouseListeners with original UI Delegate MouseListener
+        final MouseListener[] mouseListeners = c.getMouseListeners();
+        for (int i = 0; i < mouseListeners.length; i++) {
+            if (mouseListeners[i] instanceof ExpandAndCollapseMouseListener) {
+                c.removeMouseListener(mouseListeners[i]);
+                c.addMouseListener(((ExpandAndCollapseMouseListener) mouseListeners[i]).getDelegate());
+            }
+        }
     }
 
     /**
@@ -176,8 +220,9 @@ public final class TreeTableSupport {
         checkAccessThread();
 
         // stop trying to toggle tree nodes due to keystrokes and mouse clicks
+        table.removeKeyListener(arrowKeyListener);
         table.removeKeyListener(expandAndCollapseKeyListener);
-        table.removeMouseListener(expandAndCollapseMouseListener);
+        undecorateUIDelegateMouseListener(table);
 
         // fetch information about the hierarchical column
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
@@ -212,7 +257,25 @@ public final class TreeTableSupport {
      * of the tree node, if possible.
      */
     private class ExpandAndCollapseMouseListener extends MouseAdapter {
-        public void mouseClicked(MouseEvent me) {
+
+        /** An optional MouseListener to which we delegate after performing our own processing. */
+        private final MouseListener delegate;
+
+        /**
+         * Decorate the given <code>delegate</code> with extra functionality.
+         */
+        public ExpandAndCollapseMouseListener(MouseListener delegate) {
+            this.delegate = delegate;
+        }
+
+        /**
+         * Return the {@link MouseListener} being decorated.
+         */
+        public MouseListener getDelegate() {
+            return delegate;
+        }
+
+        public void mousePressed(MouseEvent me) {
             // if the table isn't enabled, break early
             if (!table.isEnabled())
                 return;
@@ -248,11 +311,14 @@ public final class TreeTableSupport {
                     treeList.getReadWriteLock().writeLock().unlock();
                 }
             }
+
+            if (delegate != null)
+                delegate.mousePressed(me);
         }
     }
 
     /**
-     * This listener watches for ENTER key presses when cell focus is within
+     * This listener watches for space bar presses when cell focus is within
      * a hierarchical column and toggles the expansion of the tree node, if
      * possible.
      */
@@ -267,7 +333,7 @@ public final class TreeTableSupport {
                 return;
 
             // if the key pressed is not the space bar, break early
-            if (e.getKeyChar() != KeyEvent.VK_SPACE || e.getModifiers() != 0)
+            if (e.getKeyCode() != KeyEvent.VK_SPACE || e.getModifiers() != 0)
                 return;
 
             final int row = table.getSelectionModel().getLeadSelectionIndex();
@@ -287,6 +353,49 @@ public final class TreeTableSupport {
                 // if the row is expandable, toggle its expanded state
                 if (treeList.getAllowsChildren(row))
                     TreeTableUtilities.toggleExpansion(table, treeList, row);
+            } finally {
+                treeList.getReadWriteLock().writeLock().unlock();
+            }
+        }
+    }
+
+    /**
+     * This listener watches for ENTER key presses when cell focus is within
+     * a hierarchical column and toggles the expansion of the tree node, if
+     * possible.
+     */
+    private class ArrowKeyListener extends KeyAdapter {
+        public void keyPressed(KeyEvent e) {
+            // if the table isn't enabled, break early
+            if (!table.isEnabled())
+                return;
+
+            // if column selection is allowed, we want normal table handling of
+            // the arrow key, not this special tree node toggling logic
+            if (table.getColumnSelectionAllowed())
+                return;
+
+            // if the key pressed is not the space bar, break early
+            final int c = e.getKeyCode();
+            final boolean isLeftArrowKey = c == KeyEvent.VK_LEFT;
+            final boolean isRightArrowKey = c == KeyEvent.VK_RIGHT;
+            if (!(isLeftArrowKey || isRightArrowKey) || e.getModifiers() != 0)
+                return;
+
+            final int row = table.getSelectionModel().getLeadSelectionIndex();
+
+            // ensure a valid cell has focus
+            if (row == -1)
+                return;
+
+            treeList.getReadWriteLock().writeLock().lock();
+            try {
+                // if the row is expandable, toggle its expanded state
+                if (treeList.getAllowsChildren(row)) {
+                    final boolean expanded = treeList.isExpanded(row);
+                    if ((expanded && isLeftArrowKey) || (!expanded && isRightArrowKey))
+                        TreeTableUtilities.toggleExpansion(table, treeList, row);
+                }
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
             }
