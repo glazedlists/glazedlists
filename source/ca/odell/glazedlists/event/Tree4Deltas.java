@@ -11,32 +11,31 @@ import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import java.util.Arrays;
 
 /**
- * Working copy of a class to eventually become a proper replacement for
- * {@link ca.odell.glazedlists.event.Block}s.
+ * Manage and describe the differences between two revisions of the
+ * same List, assuming either one can change at any time.
  *
- * <li>Test cases fail due to no copy constructor in {@link ca.odell.glazedlists.event.ListEvent}
- * <li>Logic to find appropriate index doing an extra layer of mapping isn't nice
- * <li>Clarify tree's rules regarding combining of nodes
- * <li>Provide special-case support for increasing event indices, such as
- *     those from FilterList.matcherChanged
+ * <p>Initially, the source and target lists are equal. Over time, the
+ * target list changes. It's also possible that the source list can change,
+ * which is necessary for long-lived buffered changes.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class Tree4Deltas<E> {
 
+    /** all the names of the index sets are with respect to the target */
     private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList(new String[] { "+", "U", "X", "_" }));
-    private static final byte INSERT = Tree4Deltas.BYTE_CODER.colorToByte("+");
-    private static final byte UPDATE = Tree4Deltas.BYTE_CODER.colorToByte("U");
-    private static final byte DELETE = Tree4Deltas.BYTE_CODER.colorToByte("X");
-    private static final byte NO_CHANGE = Tree4Deltas.BYTE_CODER.colorToByte("_");
+    private static final byte INSERT = BYTE_CODER.colorToByte("+");
+    private static final byte UPDATE = BYTE_CODER.colorToByte("U");
+    private static final byte DELETE = BYTE_CODER.colorToByte("X");
+    private static final byte NO_CHANGE = BYTE_CODER.colorToByte("_");
 
-    private static final byte SNAPSHOT_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "_" }));
-    private static final byte CURRENT_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "+", "_" }));
-    private static final byte ALL_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+", "_" }));
-    private static final byte CHANGE_INDICES = Tree4Deltas.BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
+    private static final byte SOURCE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "_" }));
+    private static final byte TARGET_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "+", "_" }));
+    private static final byte ALL_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+", "_" }));
+    private static final byte CHANGE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
 
     /** the trees values include removed elements */
-    private FourColorTree<E> tree = new FourColorTree<E>(Tree4Deltas.BYTE_CODER);
+    private FourColorTree<E> tree = new FourColorTree<E>(BYTE_CODER);
     private boolean allowContradictingEvents = false;
 
     /**
@@ -54,40 +53,41 @@ class Tree4Deltas<E> {
         this.allowContradictingEvents = allowContradictingEvents;
     }
 
-    public int currentToSnapshot(int currentIndex) {
+    public int targetToSource(int currentIndex) {
         if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
-        return tree.convertIndexColor(currentIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.SNAPSHOT_INDICES);
+        return tree.convertIndexColor(currentIndex, TARGET_INDICES, SOURCE_INDICES);
     }
 
-    public int snapshotToCurrent(int snapshotIndex) {
+    public int sourceToTarget(int snapshotIndex) {
         if(!initialCapacityKnown) ensureCapacity(snapshotIndex + 1);
-        return tree.convertIndexColor(snapshotIndex, Tree4Deltas.SNAPSHOT_INDICES, Tree4Deltas.CURRENT_INDICES);
+        return tree.convertIndexColor(snapshotIndex, SOURCE_INDICES, TARGET_INDICES);
     }
 
     /**
      * <p>We should consider removing the loop by only setting on removed elements.
      *
+     * @param value the previous value being replaced
      * @param startIndex the first updated element, inclusive
      * @param endIndex the last index, exclusive
      */
-    public void  update(int startIndex, int endIndex, E value) {
+    public void targetUpdate(int startIndex, int endIndex, E value) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
-            int overallIndex = tree.convertIndexColor(i, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
-            Element<E> standingChangeToIndex = tree.get(overallIndex, Tree4Deltas.ALL_INDICES);
+            int overallIndex = tree.convertIndexColor(i, TARGET_INDICES, ALL_INDICES);
+            Element<E> standingChangeToIndex = tree.get(overallIndex, ALL_INDICES);
 
             // don't bother updating an inserted element
-            if(standingChangeToIndex.getColor() == Tree4Deltas.INSERT) {
+            if(standingChangeToIndex.getColor() == INSERT) {
                 continue;
             }
 
             // if we're updating an update, the original replaced value stands.
-            if(standingChangeToIndex.getColor() == Tree4Deltas.UPDATE) {
+            if(standingChangeToIndex.getColor() == UPDATE) {
                 value = standingChangeToIndex.get();
             }
 
             // apply the update to our change description
-            tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.UPDATE, value, 1);
+            tree.set(overallIndex, ALL_INDICES, UPDATE, value, 1);
         }
     }
 
@@ -95,9 +95,9 @@ class Tree4Deltas<E> {
      * @param startIndex the first inserted element, inclusive
      * @param endIndex the last index, exclusive
      */
-    public void insert(int startIndex, int endIndex) {
+    public void targetInsert(int startIndex, int endIndex) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
-        tree.add(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.INSERT, (E)ListEvent.UNKNOWN_VALUE, endIndex - startIndex);
+        tree.add(startIndex, TARGET_INDICES, INSERT, (E)ListEvent.UNKNOWN_VALUE, endIndex - startIndex);
     }
 
     /**
@@ -109,37 +109,45 @@ class Tree4Deltas<E> {
      * @param endIndex the last index, exclusive
      * @param value the removed value
      */
-    public void delete(int startIndex, int endIndex, E value) {
+    public void targetDelete(int startIndex, int endIndex, E value) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
-            if(startIndex > 0 && startIndex > tree.size(Tree4Deltas.CURRENT_INDICES)) {
+            if(startIndex > 0 && startIndex > tree.size(TARGET_INDICES)) {
                 throw new IllegalArgumentException();
             }
-            int overallIndex = tree.convertIndexColor(startIndex, Tree4Deltas.CURRENT_INDICES, Tree4Deltas.ALL_INDICES);
-            Element<E> standingChangeToIndex = tree.get(overallIndex, Tree4Deltas.ALL_INDICES);
+            int overallIndex = tree.convertIndexColor(startIndex, TARGET_INDICES, ALL_INDICES);
+            Element<E> standingChangeToIndex = tree.get(overallIndex, ALL_INDICES);
 
             // if we're deleting an insert, remove that insert
-            if(standingChangeToIndex.getColor() == Tree4Deltas.INSERT) {
+            if(standingChangeToIndex.getColor() == INSERT) {
                 if(!allowContradictingEvents) throw new IllegalStateException("Remove " + i + " undoes prior insert at the same index! Consider enabling contradicting events.");
-                tree.remove(overallIndex, Tree4Deltas.ALL_INDICES, 1);
+                tree.remove(overallIndex, ALL_INDICES, 1);
                 continue;
             }
 
             // if we're deleting an update, the original replaced value stands.
-            if(standingChangeToIndex.getColor() == Tree4Deltas.UPDATE) {
+            if(standingChangeToIndex.getColor() == UPDATE) {
                 value = standingChangeToIndex.get();
             }
 
-            tree.set(overallIndex, Tree4Deltas.ALL_INDICES, Tree4Deltas.DELETE, value, 1);
+            tree.set(overallIndex, ALL_INDICES, DELETE, value, 1);
        }
     }
 
+    public void sourceInsert(int sourceIndex) {
+        tree.add(sourceIndex, SOURCE_INDICES, NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, 1);
+    }
+
+    public void sourceDelete(int sourceIndex) {
+        tree.remove(sourceIndex, SOURCE_INDICES, 1);
+    }
+
     public int currentSize() {
-        return tree.size(Tree4Deltas.CURRENT_INDICES);
+        return tree.size(TARGET_INDICES);
     }
 
     public int snapshotSize() {
-        return tree.size(Tree4Deltas.SNAPSHOT_INDICES);
+        return tree.size(SOURCE_INDICES);
     }
 
     public void reset(int size) {
@@ -148,11 +156,11 @@ class Tree4Deltas<E> {
         ensureCapacity(size);
     }
     private void ensureCapacity(int size) {
-        int currentSize = tree.size(Tree4Deltas.CURRENT_INDICES);
+        int currentSize = tree.size(TARGET_INDICES);
         int delta = size - currentSize;
         if(delta > 0) {
-            int endOfTree = tree.size(Tree4Deltas.ALL_INDICES);
-            tree.add(endOfTree, Tree4Deltas.ALL_INDICES, Tree4Deltas.NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, delta);
+            int endOfTree = tree.size(ALL_INDICES);
+            tree.add(endOfTree, ALL_INDICES, NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, delta);
         }
     }
 
@@ -167,11 +175,11 @@ class Tree4Deltas<E> {
             E value = i.getPreviousValue();
 
             if(type == ListEvent.INSERT) {
-                insert(blockStart, blockEnd);
+                targetInsert(blockStart, blockEnd);
             } else if(type == ListEvent.UPDATE) {
-                update(blockStart, blockEnd, value);
+                targetUpdate(blockStart, blockEnd, value);
             } else if(type == ListEvent.DELETE) {
-                delete(blockStart, blockEnd, value);
+                targetDelete(blockStart, blockEnd, value);
             } else {
                 throw new IllegalStateException();
             }
@@ -182,11 +190,11 @@ class Tree4Deltas<E> {
      * @return <code>true</code> if this event contains no changes.
      */
     public boolean isEmpty() {
-        return tree.size(Tree4Deltas.CHANGE_INDICES) == 0;
+        return tree.size(CHANGE_INDICES) == 0;
     }
 
-    public Tree4Deltas.Iterator<E> iterator() {
-        return new Tree4Deltas.Iterator<E>(tree);
+    public Iterator<E> iterator() {
+        return new Iterator<E>(tree);
     }
 
     public String toString() {
@@ -210,43 +218,43 @@ class Tree4Deltas<E> {
             this.tree = tree;
             this.treeIterator = treeIterator;
         }
-        public Tree4Deltas.Iterator<E> copy() {
-            return new Tree4Deltas.Iterator<E>(tree, treeIterator.copy());
+        public Iterator<E> copy() {
+            return new Iterator<E>(tree, treeIterator.copy());
         }
 
         public int getIndex() {
-            return treeIterator.index(Tree4Deltas.CURRENT_INDICES);
+            return treeIterator.index(TARGET_INDICES);
         }
         public int getEndIndex() {
             // this is peculiar. We add mixed types - an index of current indices
             // plus the size of "all indices". . . this is because we describe the
             // range of deleted indices from its start to finish, although it's
             // finish will ultimately go to zero once the change is applied. 
-            return treeIterator.nodeStartIndex(Tree4Deltas.CURRENT_INDICES) + treeIterator.nodeSize(Tree4Deltas.ALL_INDICES);
+            return treeIterator.nodeStartIndex(TARGET_INDICES) + treeIterator.nodeSize(ALL_INDICES);
         }
 
         public int getType() {
             byte color = treeIterator.color();
-            if(color == Tree4Deltas.INSERT) return ListEvent.INSERT;
-            else if(color == Tree4Deltas.UPDATE) return ListEvent.UPDATE;
-            else if(color == Tree4Deltas.DELETE) return ListEvent.DELETE;
+            if(color == INSERT) return ListEvent.INSERT;
+            else if(color == UPDATE) return ListEvent.UPDATE;
+            else if(color == DELETE) return ListEvent.DELETE;
             else throw new IllegalStateException();
         }
         public boolean next() {
             if(!hasNext()) return false;
-            treeIterator.next(Tree4Deltas.CHANGE_INDICES);
+            treeIterator.next(CHANGE_INDICES);
             return true;
         }
         public boolean nextNode() {
             if(!hasNextNode()) return false;
-            treeIterator.nextNode(Tree4Deltas.CHANGE_INDICES);
+            treeIterator.nextNode(CHANGE_INDICES);
             return true;
         }
         public boolean hasNext() {
-            return treeIterator.hasNext(Tree4Deltas.CHANGE_INDICES);
+            return treeIterator.hasNext(CHANGE_INDICES);
         }
         public boolean hasNextNode() {
-            return treeIterator.hasNextNode(Tree4Deltas.CHANGE_INDICES);
+            return treeIterator.hasNextNode(CHANGE_INDICES);
         }
 
         public E getPreviousValue() {

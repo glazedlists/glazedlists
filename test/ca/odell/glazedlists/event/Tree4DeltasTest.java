@@ -16,8 +16,8 @@ public class Tree4DeltasTest extends TestCase {
     public void testIterateByBlocks() {
         Tree4Deltas deltas = new Tree4Deltas();
         deltas.reset(10);
-        deltas.insert(3, 6);
-        deltas.delete(8, 10, ListEvent.UNKNOWN_VALUE);
+        deltas.targetInsert(3, 6);
+        deltas.targetDelete(8, 10, ListEvent.UNKNOWN_VALUE);
 
         Tree4Deltas.Iterator iterator = deltas.iterator();
         assertEquals(true, iterator.hasNextNode());
@@ -33,5 +33,35 @@ public class Tree4DeltasTest extends TestCase {
         assertEquals(ListEvent.DELETE, iterator.getType());
 
         assertEquals(false, iterator.hasNextNode());
+    }
+    
+    public void testTargetChanges() {
+        Tree4Deltas deltas = new Tree4Deltas();
+        deltas.reset(10);
+        assertEquals("__________", deltas.toString());
+
+        deltas.targetDelete(5, 6, null);
+        deltas.targetInsert(2, 3);
+        deltas.targetUpdate(8, 9, null);
+
+        assertEquals("__+___X__U_", deltas.toString());
+
+        deltas.sourceInsert(0);
+        assertEquals("___+___X__U_", deltas.toString());
+
+        deltas.sourceDelete(0);
+        assertEquals("__+___X__U_", deltas.toString());
+
+        deltas.sourceDelete(8);
+        assertEquals("__+___X___", deltas.toString());
+
+        deltas.sourceDelete(5);
+        assertEquals("__+______", deltas.toString());
+
+        deltas.targetInsert(2, 6);
+        assertEquals("__+++++______", deltas.toString());
+
+        deltas.sourceInsert(8);
+        assertEquals("__+++++_______", deltas.toString());
     }
 }

@@ -32,7 +32,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
     }
 
     public void commit() {
-        if (txThread == Thread.currentThread())
+        if (txThread != Thread.currentThread())
             throw new IllegalStateException("Cannot commit() a transaction that does not exist on Thread:" + Thread.currentThread());
 
         txThread = null;

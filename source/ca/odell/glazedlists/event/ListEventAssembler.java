@@ -582,11 +582,11 @@ public final class ListEventAssembler<E> {
 
             // try the good old reliable deltas 2
             if(type == ListEvent.INSERT) {
-                listDeltas.insert(startIndex, endIndex + 1);
+                listDeltas.targetInsert(startIndex, endIndex + 1);
             } else if(type == ListEvent.UPDATE) {
-                listDeltas.update(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
+                listDeltas.targetUpdate(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
             } else if(type == ListEvent.DELETE) {
-                listDeltas.delete(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
+                listDeltas.targetDelete(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
             }
         }
 
@@ -606,7 +606,7 @@ public final class ListEventAssembler<E> {
             }
 
             // try the good old reliable deltas 2
-            listDeltas.delete(index, index + 1, removedValue);
+            listDeltas.targetDelete(index, index + 1, removedValue);
         }
 
         /** {@inheritDoc} */
@@ -625,7 +625,7 @@ public final class ListEventAssembler<E> {
             }
 
             // try the good old reliable deltas 2
-            listDeltas.update(index, index + 1, replacedValue);
+            listDeltas.targetUpdate(index, index + 1, replacedValue);
         }
 
         public boolean getUseListBlocksLinear() {

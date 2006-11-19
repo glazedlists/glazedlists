@@ -20,27 +20,27 @@ import ca.odell.glazedlists.impl.adt.Barcode;
  * calculation on those elements (such as creating a sorted view of it). In the
  * initial case, the {@link IndexSnapshot} provides a natural function to convert
  * between indices:
- * <code>currentToSnapshot(0) -> 0</code>,
- * <code>currentToSnapshot(5) -> 5</code>.
+ * <code>targetToSource(0) -> 0</code>,
+ * <code>targetToSource(5) -> 5</code>.
  *
  * <p>When you change that sequence by removing the 'I' and 'E', the
  * {@link IndexSnapshot} we have the sequence <code>F, L, T, R</code>.
  * The {@link IndexSnapshot} provides more value in this case:
- * <code>currentToSnapshot(0) -> 0</code>,
- * <code>currentToSnapshot(3) -> 5</code>,
- * <code>snapshotToCurrent(0) -> 0</code>,
- * <code>snapshotToCurrent(1) -> -1</code>,
- * <code>snapshotToCurrent(5) -> 3</code>.
+ * <code>targetToSource(0) -> 0</code>,
+ * <code>targetToSource(3) -> 5</code>,
+ * <code>sourceToTarget(0) -> 0</code>,
+ * <code>sourceToTarget(1) -> -1</code>,
+ * <code>sourceToTarget(5) -> 3</code>.
  *
  * <p>Similarly you can change the sequence again by adding elements
  * <code>O, A</code> to create the sequence <code>F, L, O, A, T, R</code>.
  * The {@link IndexSnapshot} provides these results:
- * <code>currentToSnapshot(1) -> 2</code>,
- * <code>currentToSnapshot(2) -> 7</code>,
- * <code>currentToSnapshot(3) -> 8</code>,
- * <code>currentToSnapshot(4) -> 3</code>,
- * <code>snapshotToCurrent(1) -> -1</code>,
- * <code>snapshotToCurrent(3) -> 4</code>.
+ * <code>targetToSource(1) -> 2</code>,
+ * <code>targetToSource(2) -> 7</code>,
+ * <code>targetToSource(3) -> 8</code>,
+ * <code>targetToSource(4) -> 3</code>,
+ * <code>sourceToTarget(1) -> -1</code>,
+ * <code>sourceToTarget(3) -> 4</code>.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
