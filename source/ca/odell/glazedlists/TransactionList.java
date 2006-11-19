@@ -47,7 +47,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
     }
 
     public void rollback() {
-        if (txThread == Thread.currentThread())
+        if (txThread != Thread.currentThread())
             throw new IllegalStateException("Cannot rollback() a transaction that does not exist on Thread:" + Thread.currentThread());
 
         try {
