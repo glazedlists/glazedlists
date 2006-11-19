@@ -64,4 +64,17 @@ public class Tree4DeltasTest extends TestCase {
         deltas.sourceInsert(8);
         assertEquals("__+++++_______", deltas.toString());
     }
+
+    public void testTargetValues() {
+        Tree4Deltas<String> deltas = new Tree4Deltas<String>();
+        deltas.reset(10);
+        assertEquals("__________", deltas.toString());
+
+        deltas.targetDelete(5, 6, null);
+        deltas.targetInsert(2, 3, "i");
+        deltas.targetUpdate(8, 9, "u");
+        assertEquals("i", deltas.getTargetValue(2));
+        assertEquals("u", deltas.getTargetValue(8));
+        assertEquals(ListEvent.UNKNOWN_VALUE, deltas.getTargetValue(0));
+    }
 }

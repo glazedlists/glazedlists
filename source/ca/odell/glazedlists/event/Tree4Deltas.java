@@ -53,14 +53,14 @@ class Tree4Deltas<E> {
         this.allowContradictingEvents = allowContradictingEvents;
     }
 
-    public int targetToSource(int currentIndex) {
-        if(!initialCapacityKnown) ensureCapacity(currentIndex + 1);
-        return tree.convertIndexColor(currentIndex, TARGET_INDICES, SOURCE_INDICES);
+    public int targetToSource(int targetIndex) {
+        if(!initialCapacityKnown) ensureCapacity(targetIndex + 1);
+        return tree.convertIndexColor(targetIndex, TARGET_INDICES, SOURCE_INDICES);
     }
 
-    public int sourceToTarget(int snapshotIndex) {
-        if(!initialCapacityKnown) ensureCapacity(snapshotIndex + 1);
-        return tree.convertIndexColor(snapshotIndex, SOURCE_INDICES, TARGET_INDICES);
+    public int sourceToTarget(int sourceIndex) {
+        if(!initialCapacityKnown) ensureCapacity(sourceIndex + 1);
+        return tree.convertIndexColor(sourceIndex, SOURCE_INDICES, TARGET_INDICES);
     }
 
     /**
@@ -98,6 +98,20 @@ class Tree4Deltas<E> {
     public void targetInsert(int startIndex, int endIndex) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         tree.add(startIndex, TARGET_INDICES, INSERT, (E)ListEvent.UNKNOWN_VALUE, endIndex - startIndex);
+    }
+
+    /**
+     * Add a value to the target only.
+     *
+     * <p>Since this method takes a value parameter, is is only needed
+     * when the target doesn't store its value, for example with buffered
+     * changes.
+     *
+     * @param value the inserted value
+     */
+    public void targetInsert(int startIndex, int endIndex, E value) {
+        if(!initialCapacityKnown) ensureCapacity(endIndex);
+        tree.add(startIndex, TARGET_INDICES, INSERT, value, endIndex - startIndex);
     }
 
     /**
@@ -148,6 +162,17 @@ class Tree4Deltas<E> {
 
     public int snapshotSize() {
         return tree.size(SOURCE_INDICES);
+    }
+
+    /**
+     * Get the value at the specified target index.
+     *
+     * @return the value, or {@link ListEvent#UNKNOWN_VALUE} if this index
+     *     holds a value that hasn't been buffered. In this case, the value
+     *     can be obtained from the source list. 
+     */
+    public E getTargetValue(int targetIndex) {
+        return tree.get(targetIndex, TARGET_INDICES).get();
     }
 
     public void reset(int size) {
