@@ -1,9 +1,12 @@
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.Collections;
 
 public class TransactionListTest extends TestCase {
 
@@ -24,7 +27,7 @@ public class TransactionListTest extends TestCase {
         // the txList changes should not yet propagate to the source (we must commit())
         assertEquals("Jesse", source.get(0));
         assertEquals("Holger", txList.get(0));
-        assertEquals("Jesse", readValueFromEDT(txList, 0));
+        assertEquals("Holger", readValueFromEDT(txList, 0));
 
         // commit the tx and verify that the changes are now visible in the source
         txList.commit();
@@ -50,7 +53,7 @@ public class TransactionListTest extends TestCase {
         // the txList changes should not yet propagate to the source (we must commit())
         assertEquals("Jesse", source.get(0));
         assertEquals("Holger", txList.get(0));
-        assertEquals("Jesse", readValueFromEDT(txList, 0));
+        assertEquals("Holger", readValueFromEDT(txList, 0));
 
         // rollback the tx and verify that the changes are now gone in the txList
         txList.rollback();
@@ -131,6 +134,146 @@ public class TransactionListTest extends TestCase {
         assertEquals("Holger", txList.get(2));
     }
 
+    public void testSourceUpdateConflictsWithTargetUpdate() {
+        final EventList<String> source = new BasicEventList<String>();
+        TransactionList<String> txList = new TransactionList<String>(source, TransactionList.PREFER_TARGET_CHANGES);
+        ListConsistencyListener<String> consistencyListener = ListConsistencyListener.install(txList);
+
+        txList.add("Jesse");
+        assertEquals(1, consistencyListener.getEventCount());
+
+        txList.begin();
+        txList.set(0, "James");
+        assertEquals("Jesse", source.get(0));
+        assertEquals("James", txList.get(0));
+        assertEquals(2, consistencyListener.getEventCount());
+
+        source.set(0, "Holger");
+        assertEquals("Holger", source.get(0));
+        assertEquals("James", txList.get(0));
+        assertEquals(2, consistencyListener.getEventCount());
+
+        txList.commit();
+        assertEquals("James", source.get(0));
+        assertEquals("James", txList.get(0));
+        assertEquals(3, consistencyListener.getEventCount());
+
+        // try the same test over again but use a policy that prefers the source values over the target
+        txList.dispose();
+        txList = new TransactionList<String>(source, TransactionList.PREFER_SOURCE_CHANGES);
+        consistencyListener = ListConsistencyListener.install(txList);
+
+        txList.begin();
+        txList.set(0, "Jesse");
+        assertEquals("James", source.get(0));
+        assertEquals("Jesse", txList.get(0));
+        assertEquals(1, consistencyListener.getEventCount());
+
+        source.set(0, "Holger");
+        assertEquals("Holger", source.get(0));
+        assertEquals("Holger", txList.get(0));
+        assertEquals(2, consistencyListener.getEventCount());
+
+        txList.commit();
+        assertEquals("Holger", source.get(0));
+        assertEquals("Holger", txList.get(0));
+        assertEquals(2, consistencyListener.getEventCount());
+    }
+
+    public void testSourceDeleteConflictsWithTargetUpdate() {
+        final EventList<String> source = new BasicEventList<String>();
+        TransactionList<String> txList = new TransactionList<String>(source, TransactionList.PREFER_TARGET_CHANGES);
+        ListConsistencyListener<String> consistencyListener = ListConsistencyListener.install(txList);
+
+        txList.add("Jesse");
+        assertEquals(1, consistencyListener.getEventCount());
+
+        txList.begin();
+        txList.set(0, "James");
+        assertEquals("Jesse", source.get(0));
+        assertEquals("James", txList.get(0));
+        assertEquals(2, consistencyListener.getEventCount());
+
+        source.remove(0);
+        assertTrue(source.isEmpty());
+        assertEquals("James", txList.get(0));
+        assertEquals(2, consistencyListener.getEventCount());
+
+        txList.commit();
+        assertEquals("James", source.get(0));
+        assertEquals("James", txList.get(0));
+        assertEquals(3, consistencyListener.getEventCount());
+
+        // try the same test over again but use a policy that prefers the source values over the target
+        txList.dispose();
+        txList = new TransactionList<String>(source, TransactionList.PREFER_SOURCE_CHANGES);
+        consistencyListener = ListConsistencyListener.install(txList);
+
+        txList.begin();
+        txList.set(0, "Jesse");
+        assertEquals("James", source.get(0));
+        assertEquals("Jesse", txList.get(0));
+        assertEquals(1, consistencyListener.getEventCount());
+
+        source.remove(0);
+        assertTrue(source.isEmpty());
+        assertTrue(txList.isEmpty());
+        assertEquals(2, consistencyListener.getEventCount());
+
+        txList.commit();
+        assertTrue(source.isEmpty());
+        assertTrue(txList.isEmpty());
+        assertEquals(2, consistencyListener.getEventCount());
+    }
+
+    public void testSourceUpdateConflictsWithTargetDelete() {
+        final EventList<String> source = new BasicEventList<String>();
+        TransactionList<String> txList = new TransactionList<String>(source, TransactionList.PREFER_TARGET_CHANGES);
+        ListConsistencyListener<String> consistencyListener = ListConsistencyListener.install(txList);
+
+        txList.add("Jesse");
+        assertEquals(1, consistencyListener.getEventCount());
+
+        txList.begin();
+        txList.remove(0);
+        assertEquals("Jesse", source.get(0));
+        assertTrue(txList.isEmpty());
+        assertEquals(2, consistencyListener.getEventCount());
+
+        source.set(0, "James");
+        assertEquals("James", source.get(0));
+        assertTrue(txList.isEmpty());
+        assertEquals(2, consistencyListener.getEventCount());
+
+        txList.commit();
+        assertTrue(source.isEmpty());
+        assertTrue(txList.isEmpty());
+        assertEquals(3, consistencyListener.getEventCount());
+
+        // try the same test over again but use a policy that prefers the source values over the target
+        txList.dispose();
+        txList = new TransactionList<String>(source, TransactionList.PREFER_SOURCE_CHANGES);
+        consistencyListener = ListConsistencyListener.install(txList);
+        txList.add("James");
+        assertEquals(1, consistencyListener.getEventCount());
+
+        txList.begin();
+        txList.remove(0);
+        assertEquals("James", source.get(0));
+        assertTrue(txList.isEmpty());
+        assertEquals(2, consistencyListener.getEventCount());
+
+        source.set(0, "Jesse");
+        assertEquals("Jesse", source.get(0));
+        assertEquals("Jesse", txList.get(0));
+        assertEquals(3, consistencyListener.getEventCount());
+
+        txList.commit();
+        assertEquals("Jesse", source.get(0));
+        assertEquals("Jesse", txList.get(0));
+        assertEquals(3, consistencyListener.getEventCount());
+    }
+
     public void testBeginTwoTransactions() {
         final EventList<String> source = new BasicEventList<String>();
         final TransactionList<String> txList = new TransactionList<String>(source);
@@ -154,6 +297,26 @@ public class TransactionListTest extends TestCase {
         } catch (IllegalStateException e) {
             // expected
         }
+    }
+
+    public void testCommitCausesChange() {
+        final EventList<String> source = new BasicEventList<String>();
+        final CollectionMatcherEditor matcherEditor = new CollectionMatcherEditor();
+        final FilterList<String> filtered = new FilterList<String>(source, matcherEditor);
+        final TransactionList<String> txList = new TransactionList<String>(filtered);
+        ListConsistencyListener<String> consistencyListener = ListConsistencyListener.install(txList);
+        consistencyListener.setPreviousElementTracked(false);
+
+        matcherEditor.setCollection(GlazedListsTests.stringToList("ABC"));
+        txList.begin();
+        txList.add(0, "D");
+        assertEquals(GlazedListsTests.stringToList("D"), txList);
+
+        txList.commit();
+        assertEquals(Collections.EMPTY_LIST, txList);
+
+        txList.add("A");
+        assertEquals(GlazedListsTests.stringToList("A"), txList);
     }
 
     public void testRollbackNonExistentTransactions() {

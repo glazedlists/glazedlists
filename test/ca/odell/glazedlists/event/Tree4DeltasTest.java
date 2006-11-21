@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.event;
 
 import junit.framework.TestCase;
+import ca.odell.glazedlists.impl.event.Tree4Deltas;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

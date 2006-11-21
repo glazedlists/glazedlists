@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.event;
 
 import junit.framework.TestCase;
+import ca.odell.glazedlists.impl.event.BlockSequence;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>

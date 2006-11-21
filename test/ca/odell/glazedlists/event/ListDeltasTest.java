@@ -8,6 +8,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ExternalNestingEventList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.impl.event.Tree4Deltas;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;

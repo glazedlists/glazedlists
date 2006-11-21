@@ -1,12 +1,13 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.event;
+package ca.odell.glazedlists.impl.event;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTreeIterator;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
-import ca.odell.glazedlists.impl.adt.barcode2.Element;
 
 import java.util.Arrays;
 
@@ -20,14 +21,14 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class Tree4Deltas<E> {
+public class Tree4Deltas<E> {
 
     /** all the names of the index sets are with respect to the target */
     private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList(new String[] { "+", "U", "X", "_" }));
-    private static final byte INSERT = BYTE_CODER.colorToByte("+");
-    private static final byte UPDATE = BYTE_CODER.colorToByte("U");
-    private static final byte DELETE = BYTE_CODER.colorToByte("X");
-    private static final byte NO_CHANGE = BYTE_CODER.colorToByte("_");
+    public static final byte INSERT = BYTE_CODER.colorToByte("+");
+    public static final byte UPDATE = BYTE_CODER.colorToByte("U");
+    public static final byte DELETE = BYTE_CODER.colorToByte("X");
+    public static final byte NO_CHANGE = BYTE_CODER.colorToByte("_");
 
     private static final byte SOURCE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "_" }));
     private static final byte TARGET_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "+", "_" }));
@@ -45,6 +46,7 @@ class Tree4Deltas<E> {
      */
     private boolean initialCapacityKnown = false;
 
+    public boolean horribleHackPreferMostRecentValue = false;
 
     public boolean getAllowContradictingEvents() {
         return allowContradictingEvents;
@@ -76,6 +78,12 @@ class Tree4Deltas<E> {
             int overallIndex = tree.convertIndexColor(i, TARGET_INDICES, ALL_INDICES);
             Element<E> standingChangeToIndex = tree.get(overallIndex, ALL_INDICES);
 
+            if(horribleHackPreferMostRecentValue) {
+                byte newColor = standingChangeToIndex.getColor() == INSERT ? INSERT : UPDATE;
+                tree.set(overallIndex, ALL_INDICES, newColor, value, 1);
+                continue;
+            }
+
             // don't bother updating an inserted element
             if(standingChangeToIndex.getColor() == INSERT) {
                 continue;
@@ -97,7 +105,7 @@ class Tree4Deltas<E> {
      */
     public void targetInsert(int startIndex, int endIndex) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
-        tree.add(startIndex, TARGET_INDICES, INSERT, (E)ListEvent.UNKNOWN_VALUE, endIndex - startIndex);
+        tree.add(startIndex, TARGET_INDICES, INSERT, (E) ListEvent.UNKNOWN_VALUE, endIndex - startIndex);
     }
 
     /**
@@ -156,12 +164,20 @@ class Tree4Deltas<E> {
         tree.remove(sourceIndex, SOURCE_INDICES, 1);
     }
 
-    public int currentSize() {
+    public void sourceRevert(int sourceIndex) {
+        tree.set(sourceIndex, SOURCE_INDICES, NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, 1);
+    }
+
+    public int targetSize() {
         return tree.size(TARGET_INDICES);
     }
 
-    public int snapshotSize() {
+    public int sourceSize() {
         return tree.size(SOURCE_INDICES);
+    }
+
+    public byte getChangeType(int sourceIndex) {
+        return tree.get(sourceIndex, SOURCE_INDICES).getColor();
     }
 
     /**
@@ -173,6 +189,10 @@ class Tree4Deltas<E> {
      */
     public E getTargetValue(int targetIndex) {
         return tree.get(targetIndex, TARGET_INDICES).get();
+    }
+
+    public E getSourceValue(int sourceIndex) {
+        return tree.get(sourceIndex, SOURCE_INDICES).get();
     }
 
     public void reset(int size) {
@@ -192,7 +212,7 @@ class Tree4Deltas<E> {
     /**
      * Add all the specified changes to this.
      */
-    void addAll(BlockSequence<E> blocks) {
+    public void addAll(BlockSequence<E> blocks) {
         for(BlockSequence<E>.Iterator i = blocks.iterator(); i.nextBlock(); ) {
             int blockStart = i.getBlockStart();
             int blockEnd = i.getBlockEnd();

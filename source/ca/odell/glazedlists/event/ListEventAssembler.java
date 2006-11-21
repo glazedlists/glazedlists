@@ -6,6 +6,8 @@ package ca.odell.glazedlists.event;
 // the core Glazed Lists package
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
+import ca.odell.glazedlists.impl.event.Tree4Deltas;
+import ca.odell.glazedlists.impl.event.BlockSequence;
 
 import java.util.*;
 

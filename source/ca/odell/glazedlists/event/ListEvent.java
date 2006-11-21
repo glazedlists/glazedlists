@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-// the core Glazed Lists package
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 
@@ -115,7 +114,7 @@ public abstract class ListEvent<E> extends EventObject {
 
     /**
      * Gets the previous value for a deleted or updated element. If that data is
-     * not available, this will return {@link ListEvent.UNKNOWN_VALUE}.
+     * not available, this will return {@link ListEvent#UNKNOWN_VALUE}.
      *
      * @deprecated this is a <strong>developer preview</strong> API that is not
      * yet fit for human consumption. Hopefully the full implementation is

@@ -1,9 +1,10 @@
 /* Glazed Lists                                                 (c) 2003-2005 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.event;
+package ca.odell.glazedlists.impl.event;
 
 import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
+import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class BlockSequence<E> {
+public class BlockSequence<E> {
 
     /** the start indices of the change blocks, inclusive */
     private TIntArrayList starts = new TIntArrayList();
@@ -144,7 +145,7 @@ class BlockSequence<E> {
     /**
      * Iterate through the list of changes in this sequence.
      */
-    class Iterator {
+    public class Iterator {
 
         private int blockIndex = -1;
         private int offset = 0;

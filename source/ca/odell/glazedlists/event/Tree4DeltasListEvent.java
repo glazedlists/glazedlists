@@ -4,6 +4,8 @@
 package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.event.Tree4Deltas;
+import ca.odell.glazedlists.impl.event.BlockSequence;
 
 import java.util.List;
 
