@@ -235,91 +235,118 @@ public class TransactionList<S> extends TransformedList<S,S> {
         return true;
     }
 
+    /**
+     * This method is called when the source EventList is updated. If a
+     * transaction is currently in progress then any conflicts (changes in
+     * the source EventList to elements which have already been modified
+     * within the transaction) are resolved by consulting the {@link Policy}
+     * object this TransactionList was constructed with.
+     *
+     * @param listChanges the changes which have occurred in the source
+     */
     public void listChanged(ListEvent<S> listChanges) {
         updates.beginEvent(true);
 
         while (listChanges.next()) {
-            int sourceType = listChanges.getType();
-            int sourceIndex = listChanges.getIndex();
+            final int sourceChangeType = listChanges.getType();
+            final int sourceIndex = listChanges.getIndex();
 
-            if (sourceType == ListEvent.INSERT) {
+            if (sourceChangeType == ListEvent.INSERT) {
+                // inserts in the source can never be conflicts
                 deltas.sourceInsert(sourceIndex);
                 updates.addInsert(deltas.sourceToTarget(sourceIndex));
                 
-            } else if (sourceType == ListEvent.UPDATE) {
-                final byte targetType = deltas.getChangeType(sourceIndex);
+            } else if (sourceChangeType == ListEvent.UPDATE) {
+                // updates in the source may conflict with updates or deletes in the TransactionList
+                final byte targetChangeType = deltas.getChangeType(sourceIndex);
 
-                if (targetType == Tree4Deltas.INSERT) {
+                if (targetChangeType == Tree4Deltas.INSERT) {
+                    // this is an impossible case which we document with an exception
                     throw new IllegalStateException("Unexpected target type: insert over top of update");
 
-                } else if (targetType == Tree4Deltas.UPDATE) {
+                } else if (targetChangeType == Tree4Deltas.UPDATE) {
+                    // fetch the transaction's value and the source's value for the index in question
                     final int targetIndex = deltas.sourceToTarget(sourceIndex);
                     final S targetValue = deltas.getTargetValue(targetIndex);
                     final S sourceValue = source.get(sourceIndex);
 
+                    // ask the policy to arbitrate the conflicting updates
                     final S resolvedValue = policy.sourceUpdatedTargetUpdated(sourceValue, targetValue);
+
+                    // if the policy says to keep the source value, remove the modification from the transaction
                     if (resolvedValue == sourceValue) {
                         deltas.sourceRevert(sourceIndex);
                         updates.elementUpdated(targetIndex, targetValue);
+
+                    // if the policy says to keep the transaction's value, no work exists
                     } else if (resolvedValue == targetValue) {
                         // no-op the target change has already been broadcasted
+
+                    // otherwise an entirely different value has been returned and we must record it as the new transaction value
                     } else {
                         deltas.targetUpdate(targetIndex, targetIndex+1, resolvedValue);
                         updates.elementUpdated(targetIndex, targetValue);
                     }
 
-
-                } else if (targetType == Tree4Deltas.DELETE) {
-                    final S deletedFromTarget = deltas.getSourceValue(sourceIndex);// deltas.getTargetValue(targetIndex);
+                } else if (targetChangeType == Tree4Deltas.DELETE) {
+                    // fetch the transaction's value and the source's value for the index in question
+                    final S deletedFromTarget = deltas.getSourceValue(sourceIndex);
                     final S updatedFromSource = source.get(sourceIndex);
+
+                    // ask the policy to arbitrate the conflicting update and delete
                     final Policy.Result policyResult = policy.sourceUpdatedTargetDeleted(updatedFromSource, deletedFromTarget);
 
+                    // if the policy says to keep the source value, then add the updated source value back into the transaction
                     if (policyResult == Policy.KEEP_SOURCE) {
                         deltas.sourceRevert(sourceIndex);
                         updates.addInsert(deltas.sourceToTarget(sourceIndex));
 
+                    // if the policy says to keep the transaction value, then update the record we have of the value that was deleted
                     } else if (policyResult == Policy.KEEP_TARGET) {
                         // change the value we recorded as the deleted value
                         deltas.sourceRevert(sourceIndex);
                         final int targetIndex = deltas.sourceToTarget(sourceIndex);
                         deltas.targetDelete(targetIndex, targetIndex+1, updatedFromSource);
-
-                    } else {
-                        throw new IllegalStateException("Unexpected policy result: " + policyResult);
                     }
 
-                } else if (targetType == Tree4Deltas.NO_CHANGE) {
+                } else if (targetChangeType == Tree4Deltas.NO_CHANGE) {
+                    // update the record we have of the value at that index
                     updates.elementUpdated(deltas.sourceToTarget(sourceIndex), listChanges.getPreviousValue());
                 }
 
-            } else if (sourceType == ListEvent.DELETE) {
-                final byte targetType = deltas.getChangeType(sourceIndex);
+            } else if (sourceChangeType == ListEvent.DELETE) {
+                final byte targetChangeType = deltas.getChangeType(sourceIndex);
 
-                if (targetType == Tree4Deltas.INSERT) {
+                if (targetChangeType == Tree4Deltas.INSERT) {
+                    // this is an impossible case which we document with an exception
                     throw new IllegalStateException("Unexpected target type: insert over top of delete");
 
-                } else if (targetType == Tree4Deltas.UPDATE) {
+                } else if (targetChangeType == Tree4Deltas.UPDATE) {
+                    // fetch the transaction's value and the source's value for the index in question
                     final int targetIndex = deltas.sourceToTarget(sourceIndex);
                     final S targetValue = deltas.getTargetValue(targetIndex);
                     final S sourceValue = listChanges.getPreviousValue();
+
+                    // ask the policy to arbitrate the conflicting delete and update
                     final Policy.Result policyResult = policy.sourceDeletedTargetUpdated(sourceValue, targetValue);
 
+                    // if the policy says to keep the source value, then remove the value from the transaction
                     if (policyResult == Policy.KEEP_SOURCE) {
                         deltas.sourceDelete(sourceIndex);
                         updates.elementDeleted(targetIndex, targetValue);
 
+                    // if the policy says to keep the transaction value, then change the update to look like an insert
                     } else if (policyResult == Policy.KEEP_TARGET) {
                         deltas.sourceDelete(sourceIndex);
                         deltas.targetInsert(targetIndex, targetIndex+1, targetValue);
-
-                    } else {
-                        throw new IllegalStateException("Unexpected policy result: " + policyResult);
                     }
 
-                } else if (targetType == Tree4Deltas.DELETE) {
+                } else if (targetChangeType == Tree4Deltas.DELETE) {
+                    // two deletes simply result in no change (the delete in the transaction has already been broadcasted to listeners)
                     deltas.sourceDelete(sourceIndex);
 
-                } else if (targetType == Tree4Deltas.NO_CHANGE) {
+                } else if (targetChangeType == Tree4Deltas.NO_CHANGE) {
+                    // delete the value from the transaction and broadcast the change
                     updates.elementDeleted(deltas.sourceToTarget(sourceIndex), listChanges.getPreviousValue());
                     deltas.sourceDelete(sourceIndex);
                 }
