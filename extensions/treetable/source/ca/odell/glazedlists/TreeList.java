@@ -99,7 +99,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         for(int i = 0; i < super.source.size(); i++) {
             Node<E> node = super.source.get(i);
             node.element = data.add(i, REAL_NODES, VISIBLE_REAL, node, 1);
-            attachParentsAndSiblings(node, false);
+            attachParentsAndSiblings(node, false, new ArrayList<Node<E>>());
         }
 
         assert(isValid());
@@ -377,13 +377,12 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // second pass: walk through all the changed nodes and attach parents
         // and siblings, plus fire events for all the inserted or updated nodes.
-        for(Iterator<Node<E>> i = changeNodes.iterator(); i.hasNext(); ) {
-            // the inner loop makes sure we attach replacement ancestry to nodes
-            // that were split from their parents.
-            for(Node<E> current = i.next(); current != null; current = current.next()) {
-                boolean treeChanged = attachParentsAndSiblings(current, true);
-                if(!treeChanged) break;
-            }
+        List<Node<E>> brokenSiblings = new ArrayList<Node<E>>();
+        while(!changeNodes.isEmpty()) {
+            attachParentsAndSiblings(changeNodes.remove(0), true, changeNodes);
+        }
+        while(!brokenSiblings.isEmpty()) {
+            attachParentsAndSiblings(brokenSiblings.remove(0), true, new ArrayList<Node<E>>());
         }
 
         // blow away obsolete parent nodes now that we can know for sure if they're obsolete
@@ -402,13 +401,15 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * <li>firing an 'insert' event for such parents and siblings
      *
      * @param changed
+     * @param toBeRepaired the list of nodes in need of repair, to be processed
+     *      in increasing order by the order in the tree
      * @return <code>true</code> if changes were made to the tree
      */
-    private boolean attachParentsAndSiblings(Node<E> changed, boolean fireEvents) {
+    private void attachParentsAndSiblings(Node<E> changed, boolean fireEvents, List<Node<E>> toBeRepaired) {
         int index = data.indexOfNode(changed.element, ALL_NODES);
         List<Node<E>> pathToRoot = new ArrayList<Node<E>>(changed.pathLength());
+
         final Node<E> nodeImmediatelyBeforeChanges = changed.previous();
-        boolean treeHasChanged = false;
 
         // record the expanded/collapsed state of this node's path
         cloneStateNewNodeStateProvider.setNodeToPrototype(changed);
@@ -419,6 +420,14 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             Node<E> predecessor = nodeImmediatelyBeforeChanges; // for success, this is the same depth as current.parent
             Node<E> predecessorAtOurHeight = null; // for success, this is the same depth as current
             boolean preexistingParentFound = false;
+
+            // make sure the following node is repaired if necessary
+            // TODO: constrain this, it's majorly slow
+            Node<E> follower = changed.next();
+            if(follower != null) {
+                toBeRepaired.add(follower);
+            }
+
             while(current != null) {
                 int currentPathLength = current.pathLength();
                 int predecessorPathLength = predecessor == null ? 0 : predecessor.pathLength();
@@ -433,10 +442,15 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 } else if(currentPathLength > predecessorPathLength + 1) {
                     pathToRoot.add(current);
                     current = createAndAttachParent(index, current);
-                    treeHasChanged |= (current != null);
 
                 // the predecessor is too tall to be our parent, maybe its parent is our parent?
                 } else if(predecessorPathLength >= currentPathLength) {
+                    // make sure our predecessor's sibling has parents reattached if necessary
+                    if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
+                        toBeRepaired.add(predecessor.siblingAfter);
+                        predecessor.siblingAfter.siblingBefore = null;
+                        predecessor.siblingAfter = null;
+                    }
                     predecessorAtOurHeight = predecessor;
                     predecessor = predecessor.parent;
 
@@ -444,7 +458,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 } else if(isAncestorByValue(current, predecessor)) {
                     pathToRoot.add(current);
                     assert(currentPathLength == predecessorPathLength + 1);
-                    treeHasChanged |= attachParent(current, predecessor, predecessorAtOurHeight);
+                    attachParent(current, predecessor, predecessorAtOurHeight);
                     // we're mostly done, just fill in the path to root
                     current = current.parent;
                     preexistingParentFound = true;
@@ -456,56 +470,20 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     assert(currentPathLength == predecessorPathLength + 1);
                     assert(predecessor != null);
                     current = createAndAttachParent(index, current);
+                    // make sure our predecessor's sibling has parents reattached if necessary
+                    if(predecessor.siblingAfter != null) {
+                        toBeRepaired.add(predecessor.siblingAfter);
+                        predecessor.siblingAfter.siblingBefore = null;
+                        predecessor.siblingAfter = null;
+                    }
                     predecessorAtOurHeight = predecessor;
                     predecessor = predecessor.parent;
-                    treeHasChanged |= (current != null);
 
                 }
             }
         }
 
-        // phase two: detach siblings that were split apart by adding this node
-        {
-            for(Node<E> predecessor = nodeImmediatelyBeforeChanges, current = changed; predecessor != null; ) {
-                int currentPathLength = current.pathLength();
-                int predecessorPathLength = predecessor.pathLength();
-
-                // the predecessor is deeper than current, sever its sibling after
-                if(predecessorPathLength > currentPathLength) {
-                    if(predecessor.siblingAfter != null) {
-                        predecessor.siblingAfter.siblingBefore = null;
-                        predecessor.siblingAfter = null;
-                        treeHasChanged = true;
-                    }
-                    predecessor = predecessor.parent;
-
-                // current is too tall, predecessor sibling is unchanged
-                } else if(currentPathLength > predecessorPathLength) {
-                    current = current.parent;
-
-                // we've found a parent, there's nothing to detach
-                } else if(predecessor == current) {
-                    break;
-
-                // they're siblings, there's nothing to detach
-                } else if(predecessor.parent == current.parent) {
-                    assert(current.siblingBefore == predecessor && predecessor.siblingAfter == current);
-                    break;
-
-                // they're at the same height but not siblings, detach predecessor's siblings and keep searching
-                } else {
-                    if(predecessor.siblingAfter != null) {
-                        predecessor.siblingAfter.siblingBefore = null;
-                        predecessor.siblingAfter = null;
-                        treeHasChanged = true;
-                    }
-                    predecessor = predecessor.parent;
-                    current = current.parent;
-                }
-            }
-        }
-
-        // phase three: fix visibility and fire events, going from root down
+        // phase two: fix visibility and fire events, going from root down
         {
             boolean visible = true;
             for(int i = pathToRoot.size() - 1; i >= 0; i--) {
@@ -534,8 +512,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 visible = visible && current.expanded;
             }
         }
-
-        return treeHasChanged;
     }
 
     /**
@@ -571,7 +547,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // attach the siblings, the nearest child of our parent will become our sibling
         // if it isn't already
         if(siblingBeforeNode != null && siblingBeforeNode.siblingAfter != node) {
-            assert(siblingBeforeNode.pathLength() == node.pathLength());
+            if(siblingBeforeNode.pathLength() != node.pathLength()) {
+                throw new IllegalStateException();
+            }
             assert(siblingBeforeNode.parent == parent);
 
             if(siblingBeforeNode.siblingAfter != null) {

@@ -837,7 +837,7 @@ public class TreeListTest extends TestCase {
     }
 
 
-    public void testAddSubtreeForPlusSiblings() {
+    public void testAddSubtreePlusSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1176,7 +1176,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void testAddExtraRoot_FixMe() {
+    public void testAddExtraRoot() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1198,14 +1198,36 @@ public class TreeListTest extends TestCase {
                 "pm",
                 "pmm",
                 "pmmu",
-                "pd",
-                "pdd",
-                "pdds",
                 "p",
                 "pm",
                 "pmm",
                 "pmmp",
+                "pmmp",
                 "pn",
+        });
+    }
+
+    public void testAddParentAndSibling() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "ac",
+                "a",
+        }));
+
+        source.addAll(0, Arrays.asList(new String[] {
+                "a",
+                "ab",
+        }));
+
+        assertTreeStructure(treeList, new String[] {
+                "a",
+                "ab",
+                "ac",
+                "a",
         });
     }
 }
