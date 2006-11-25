@@ -255,7 +255,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         setExpanded(toExpand, expanded);
     }
 
-    public void setExpanded(Node<E> toExpand, boolean expanded) {
+    private void setExpanded(Node<E> toExpand, boolean expanded) {
 
         // if we're already in the desired state, give up!
         if(toExpand.expanded == expanded) return;
@@ -381,6 +381,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         while(!changeNodes.isEmpty()) {
             attachParentsAndSiblings(changeNodes.remove(0), true, changeNodes);
         }
+        // todo: this is horrible, why do we loop twice?
         while(!brokenSiblings.isEmpty()) {
             attachParentsAndSiblings(brokenSiblings.remove(0), true, new ArrayList<Node<E>>());
         }
@@ -471,7 +472,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     assert(predecessor != null);
                     current = createAndAttachParent(index, current);
                     // make sure our predecessor's sibling has parents reattached if necessary
-                    if(predecessor.siblingAfter != null) {
+                    if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
                         toBeRepaired.add(predecessor.siblingAfter);
                         predecessor.siblingAfter.siblingBefore = null;
                         predecessor.siblingAfter = null;
@@ -537,12 +538,10 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      *      who is a child of the same parent. This will be linked in as the
      *      new node's sibling. If <code>null</code>, no linking/unlinking will
      *      be performed.
-     * @return <code>true</code> if the tree was changed.
      */
-    private boolean attachParent(Node<E> node, Node<E> parent, Node<E> siblingBeforeNode) {
+    private void attachParent(Node<E> node, Node<E> parent, Node<E> siblingBeforeNode) {
         assert(node != null);
         assert((node.pathLength() == 1 && parent == null) || (node.pathLength() == parent.pathLength() + 1));
-        boolean changed = false;
 
         // attach the siblings, the nearest child of our parent will become our sibling
         // if it isn't already
@@ -559,7 +558,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
             node.siblingBefore = siblingBeforeNode;
             siblingBeforeNode.siblingAfter = node;
-            changed = true;
 
             assert(node.siblingBefore != node);
             assert(node.siblingAfter != node);
@@ -570,12 +568,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         for(Node<E> currentSibling = node; currentSibling != null; currentSibling = currentSibling.siblingAfter) {
             if(currentSibling.parent != parent) {
                 currentSibling.parent = parent;
-                changed = true;
             }
-//            assert(isVisibilityValid(currentSibling));
         }
-
-        return changed;
     }
 
     /**
@@ -1337,6 +1331,10 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                         throw new IllegalStateException();
                     }
                     if(lastChildSeen.pathLength() != descendent.pathLength()) {
+                        throw new IllegalStateException();
+                    }
+                } else {
+                    if(descendent.siblingBefore != null) {
                         throw new IllegalStateException();
                     }
                 }
