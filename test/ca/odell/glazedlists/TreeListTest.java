@@ -1290,4 +1290,42 @@ public class TreeListTest extends TestCase {
             return 0;
         }
     }
+
+    public void testCollapseHiddenSubtrees() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "L",
+                "LL",
+                "LLG",
+                "LL",
+                "LLM",
+        }));
+
+        treeList.setExpanded(1, false);
+        treeList.setExpanded(0, false);
+
+        source.remove(3);
+
+        assertTreeStructure(treeList, new String[] {
+                "L",
+        });
+
+        treeList.setExpanded(0, true);
+        assertTreeStructure(treeList, new String[] {
+                "L",
+                "LL",
+        });
+
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "L",
+                "LL",
+                "LLG",
+                "LLM",
+        });
+    }
 }
