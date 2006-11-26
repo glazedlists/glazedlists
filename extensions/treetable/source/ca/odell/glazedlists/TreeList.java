@@ -673,6 +673,10 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          */
         private final class NodeIndexComparator implements Comparator<Node<E>> {
             public int compare(Node<E> a, Node<E> b) {
+                if(a.element == null || b.element == null) {
+                    throw new IllegalStateException();
+                }
+
                 return data.indexOfNode(a.element, ALL_NODES) - data.indexOfNode(b.element, ALL_NODES);
             }
         }
@@ -722,19 +726,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // if the common path is the complete path, then we have a virtual
             // node that has become real.
             if(commonPathLength == inserted.pathLength()) {
-                // make the real node copy the state of the virtual
-                assert(inserted.pathLength() == possibleAncestor.pathLength());
-                inserted.updateFrom(possibleAncestor);
-
-                // replace the virtual with the real in the tree structure
-                possibleAncestor.element.set(inserted);
-                setVirtual(possibleAncestor, false);
-                for(Node<E> child = possibleAncestor.firstChild(); child != null; child = child.siblingAfter) {
-                    child.parent = inserted;
-                }
-                // mark the ancestor as obsolete
-                possibleAncestor.element = null;
-
+                replaceNode(possibleAncestor, inserted, false);
                 return inserted;
 
             // have we found a new longest common path?
@@ -750,6 +742,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         return inserted;
     }
 
+
     /**
      * Remove the node at the specified index, firing all the required
      * notifications.
@@ -757,12 +750,12 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private void deleteAndDetachNode(int sourceIndex, List<Node<E>> nodesToVerify) {
         Node<E> node = data.get(sourceIndex, REAL_NODES).get();
 
-        // if it has children, make it virtual and schedule if for verification or deletion later
+        // if it has children, replace it with a virtual copy and schedule that for verification
         if(!node.isLeaf()) {
-            // todo: make setVirtual() actually do node.virtual = virtual
-            setVirtual(node, true);
-            node.virtual = true;
-            nodesToVerify.add(node);
+            Node<E> replacement = new Node<E>(node.virtual, new ArrayList<E>(node.path()));
+            replaceNode(node, replacement, true);
+
+            nodesToVerify.add(replacement);
 
         // otherwise delete it directly
         } else {
@@ -776,6 +769,39 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // also remove the follower - it may have become redundant as well
             if(follower != null && follower.virtual) nodesToVerify.add(follower);
         }
+    }
+
+    /**
+     * Replace the before node with the replacement node, updating the tree
+     * structure completely. This is used to replace a virtual node with a real
+     * one or vice versa.
+     */
+    private void replaceNode(Node<E> before, Node<E> after, boolean virtual) {
+        assert(before.pathLength() == after.pathLength());
+        after.expanded = before.expanded;
+        // change parent and children
+        after.parent = before.parent;
+        for(Node<E> child = before.firstChild(); child != null; child = child.siblingAfter) {
+            assert(child.parent == before);
+            child.parent = after;
+        }
+        // change siblings
+        if(before.siblingAfter != null) {
+            after.siblingAfter = before.siblingAfter;
+            after.siblingAfter.siblingBefore = after;
+        }
+        if(before.siblingBefore != null) {
+            after.siblingBefore = before.siblingBefore;
+            after.siblingBefore.siblingAfter = after;
+        }
+        // change element
+        after.element = before.element;
+        after.element.set(after);
+        // change virtual
+        setVirtual(after, virtual);
+        after.virtual = virtual;
+        // mark the original as obsolete
+        before.element = null;
     }
 
     /**
@@ -1151,6 +1177,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          *      is an error to mutate this path once it has been provided to a node.
          */
         private Node(boolean virtual, List<E> path) {
+            reset();
             this.virtual = virtual;
             this.path = path;
         }
@@ -1200,7 +1227,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // this is a root node, it has no parent
             if(pathLength == 1) return null;
             // return a node describing the parent path
-            return new Node<E>(true, path.subList(0, pathLength - 1));
+            return new Node<E>(true, new ArrayList<E>(path.subList(0, pathLength - 1)));
         }
 
         /** {@inheritDoc} */
@@ -1215,28 +1242,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          */
         public boolean isVisible() {
             return (element.getColor() & VISIBLE_NODES) > 0;
-        }
-
-        /**
-         * Copy the values from that object into this object. This is useful
-         * when a virtual node is replaced by a real one, and we want the real
-         * one to have the attributes of its predecessor.
-         */
-        private void updateFrom(Node<E> other) {
-            element = other.element;
-            expanded = other.expanded;
-
-            // weave in the siblings
-            siblingBefore = other.siblingBefore;
-            if(siblingBefore != null) {
-                siblingBefore.siblingAfter = this;
-            }
-            siblingAfter = other.siblingAfter;
-            if(siblingAfter != null) {
-                siblingAfter.siblingBefore = this;
-            }
-
-            parent = other.parent;
         }
 
         /**
