@@ -14,6 +14,9 @@ import java.awt.*;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
+import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
+import com.publicobject.misc.swing.NoSelectionListSelectionModel;
+
 /**
  * Display an XML file in a table, to show off our tree code.
  *
@@ -66,6 +69,7 @@ public class XmlBrowser {
             JTable table = new JTable(tableModel);
             TreeTableSupport.install(table, treeList, 0);
             TableComparatorChooser.install(table, sortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+            table.getColumnModel().setSelectionModel(new NoSelectionListSelectionModel());
 
             // display the XML in a tree
             EventTreeModel<Tag> treeModel = new EventTreeModel<Tag>(treeList);
@@ -74,7 +78,13 @@ public class XmlBrowser {
             tree.setCellRenderer(new TreeListNodeRenderer());
 
             // build tha application
-            JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(tree), new JScrollPane(table));
+            JScrollPane treeScrollPane = new JScrollPane(tree, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            Color borderColor = new Color(153, 153, 204);
+            treeScrollPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 1, borderColor));
+            JScrollPane tableScrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            tableScrollPane.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor));
+            MacCornerScrollPaneLayoutManager.install(tableScrollPane);
+            JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, tableScrollPane);
             splitPane.setBorder(BorderFactory.createEmptyBorder());
             splitPane.setDividerLocation(200); 
             JPanel panel = new JPanel(new BorderLayout());
