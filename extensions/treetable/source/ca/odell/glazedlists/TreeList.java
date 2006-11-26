@@ -63,12 +63,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private Format<E> format;
 
     /**
-     * reuse the CloneStateNewNodeStateProvider to save expensive <code>new</code> calls.
-     * Note that this cannot be static because it is stateful.
-     */
-    private CloneStateNewNodeStateProvider<E> cloneStateNewNodeStateProvider = new CloneStateNewNodeStateProvider<E>();
-
-    /**
      * Create a new TreeList that adds hierarchy to the specified source list.
      * This constructor sorts the elements automatically, which is particularly
      * convenient if you're data is not already in a natural tree ordering,
@@ -96,10 +90,11 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         this.nodeComparator = nodeComparator;
 
         // insert the new elements like they were adds
+        NodeAttacher nodeAttacher = new NodeAttacher(false);
         for(int i = 0; i < super.source.size(); i++) {
             Node<E> node = super.source.get(i);
             node.element = data.add(i, REAL_NODES, VISIBLE_REAL, node, 1);
-            attachParentsAndSiblings(node, false, new NodesToAttach());
+            nodeAttacher.attach(node);
         }
 
         assert(isValid());
@@ -346,14 +341,14 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // nodes as hidden. In the next pass we'll figure out parents, siblings
         // and fire events for nodes that shouldn't be hidden
         List<Node<E>> nodesToVerify = new ArrayList<Node<E>>();
-        NodesToAttach nodesToAttach = new NodesToAttach();
+        NodeAttacher nodeAttacher = new NodeAttacher(true);
         while(listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
 
             if(type == ListEvent.INSERT) {
                 Node<E> inserted = findOrInsertNode(sourceIndex);
-                nodesToAttach.appendNewlyInserted(inserted);
+                nodeAttacher.nodesToAttach.appendNewlyInserted(inserted);
 
             } else if(type == ListEvent.UPDATE) {
                 Node<E> node = data.get(sourceIndex, REAL_NODES).get();
@@ -362,10 +357,10 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 if(hasStructurallyChanged(node)) {
                     deleteAndDetachNode(sourceIndex, nodesToVerify);
                     Node<E> updated = findOrInsertNode(sourceIndex);
-                    nodesToAttach.appendNewlyInserted(updated);
+                    nodeAttacher.nodesToAttach.appendNewlyInserted(updated);
 
                 } else {
-                    nodesToAttach.appendNewlyInserted(node);
+                    nodeAttacher.nodesToAttach.appendNewlyInserted(node);
                 }
 
             } else if(type == ListEvent.DELETE) {
@@ -379,9 +374,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // second pass: walk through all the changed nodes and attach parents
         // and siblings, plus fire events for all the inserted or updated nodes.
-        while(!nodesToAttach.isEmpty()) {
-            attachParentsAndSiblings(nodesToAttach.removeFirst(), true, nodesToAttach);
-        }
+        nodeAttacher.attachAll();
 
         // blow away obsolete parent nodes now that we can know for sure if they're obsolete
         deleteObsoleteVirtualParents(nodesToVerify);
@@ -392,101 +385,207 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Walk up the tree, fixing parents and siblings of the specified changed
-     * node. Performing this fix may require:
-     * <li>attaching parents
-     * <li>attaching siblings
-     * <li>firing an 'insert' event for such parents and siblings
+     * A transient  helper object to attach nodes to sibling and parent nodes.
      *
-     * @param changed
-     * @param nodesToAttach the queue of nodes needing parents and siblings attached
-     * @return <code>true</code> if changes were made to the tree
+     * <p>Because this class is stateful, it shouldn't be referenced across changes
+     * as that risks a memory leak.
      */
-    private void attachParentsAndSiblings(Node<E> changed, boolean fireEvents, NodesToAttach nodesToAttach) {
-        int index = data.indexOfNode(changed.element, ALL_NODES);
-        List<Node<E>> pathToRoot = new ArrayList<Node<E>>(changed.pathLength());
+    private class NodeAttacher {
 
-        final Node<E> nodeImmediatelyBeforeChanges = changed.previous();
+        private final boolean fireEvents;
 
-        // record the expanded/collapsed state of this node's path
-        cloneStateNewNodeStateProvider.setNodeToPrototype(changed);
+        /** the queue of nodes needing parents and siblings attached */
+        private final NodesToAttach nodesToAttach = new NodesToAttach();
 
-        // phase one: create a path from the changed node to the root, attaching parents as we go
-        {
-            Node<E> current = changed;
-            Node<E> predecessor = nodeImmediatelyBeforeChanges; // for success, this is the same depth as current.parent
-            Node<E> predecessorAtOurHeight = null; // for success, this is the same depth as current
-            boolean preexistingParentFound = false;
+        /** the node having its parents and siblings attached */
+        private Node<E> current;
 
-            // make sure the following node is repaired if this node might
-            // have separated it from its predecessor or parent node
-            if(nodesToAttach.isNewlyInserted(changed)) {
-                Node<E> follower = changed.next();
+        /** the active node before current which we're hoping is current's parent */
+        private Node<E> predecessor;
+
+        /** the active node before current which we're hoping is current's sibling */
+        private Node<E> predecessorAtOurHeight;
+
+        /** the path from the changed node to the root, used to fire events in the second phase */
+        private List<Node<E>> pathToRoot = new ArrayList<Node<E>>();
+
+        /** the index of the changed node, which is where parent nodes shall be inserted */
+        private int index;
+
+        /**
+         * reuse the CloneStateNewNodeStateProvider to save expensive <code>new</code> calls.
+         * Note that this cannot be static because it is stateful.
+         */
+        private CloneStateNewNodeStateProvider<E> cloneStateNewNodeStateProvider = new CloneStateNewNodeStateProvider<E>();
+
+        public NodeAttacher(boolean fireEvents) {
+            this.fireEvents = fireEvents;
+        }
+
+        public void attachAll() {
+            while(!nodesToAttach.isEmpty()) {
+                attach(nodesToAttach.removeFirst());
+            }
+        }
+
+        /**
+         * Walk up the tree, fixing parents and siblings of the specified changed
+         * node. Performing this fix may require:
+         * <li>attaching parents
+         * <li>attaching siblings
+         * <li>firing an 'insert' event for such parents and siblings
+         *
+         * @param changed the node to attach parents and siblings to
+         * @return <code>true</code> if changes were made to the tree
+         */
+        private void attach(Node<E> changed) {
+            current = changed;
+
+            // record the expanded/collapsed state of this node's path
+            cloneStateNewNodeStateProvider.setNodeToPrototype(current);
+
+            // prepare state for attaching the node
+            index = data.indexOfNode(current.element, ALL_NODES);
+            predecessor = current.previous();
+            predecessorAtOurHeight = null;
+
+            // make sure the following node is repaired, as it might have become
+            // separated from its siblings or parent by the insertion of this node
+            if(nodesToAttach.isNewlyInserted(current)) {
+                Node<E> follower = current.next();
                 if(follower != null) {
-                    nodesToAttach.addAtFront(follower);
+                    nodesToAttach.prependPotentiallySplit(follower);
                 }
             }
 
+            attachParentsAndSiblings();
+            fixVisibilityAndFireEvents();
+
+            // cleanup
+            pathToRoot.clear();
+        }
+
+        private void attachParentsAndSiblings() {
+            boolean preexistingParentFound = false;
             while(current != null) {
                 int currentPathLength = current.pathLength();
                 int predecessorPathLength = predecessor == null ? 0 : predecessor.pathLength();
 
                 // we've already found a connection, keep accumulating the path to root
                 if(preexistingParentFound) {
-                    pathToRoot.add(current);
-                    current = current.parent;
+                    incrementCurrent();
 
                 // the predecessor is too short to be our parent, so create a new parent
                 // and hope that the predecessor is our grandparent
                 } else if(currentPathLength > predecessorPathLength + 1) {
-                    pathToRoot.add(current);
-                    current = createAndAttachParent(index, current);
+                    createAndAttachParent();
 
                 // the predecessor is too tall to be our parent, maybe its parent is our parent?
                 } else if(predecessorPathLength >= currentPathLength) {
                     // make sure our predecessor's sibling has parents reattached if necessary
-                    if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
-                        nodesToAttach.addInOrder(predecessor.siblingAfter);
-                        predecessor.siblingAfter.siblingBefore = null;
-                        predecessor.siblingAfter = null;
-                    }
-                    predecessorAtOurHeight = predecessor;
-                    predecessor = predecessor.parent;
+                    incrementPredecessor();
 
                 // sweet! the predecessor node is our parent!
                 } else if(isAncestorByValue(current, predecessor)) {
-                    pathToRoot.add(current);
                     assert(currentPathLength == predecessorPathLength + 1);
-                    attachParent(current, predecessor, predecessorAtOurHeight);
+                    attachParent(predecessor, predecessorAtOurHeight);
                     // we're mostly done, just fill in the path to root
-                    current = current.parent;
                     preexistingParentFound = true;
 
                 // the predecessor node is not our parent, so create a new parent
                 // and hope we have common grandparents
                 } else {
-                    pathToRoot.add(current);
                     assert(currentPathLength == predecessorPathLength + 1);
                     assert(predecessor != null);
-                    current = createAndAttachParent(index, current);
+                    createAndAttachParent();
                     // make sure our predecessor's sibling has parents reattached if necessary
-                    if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
-                        nodesToAttach.addInOrder(predecessor.siblingAfter);
-                        predecessor.siblingAfter.siblingBefore = null;
-                        predecessor.siblingAfter = null;
-                    }
-                    predecessorAtOurHeight = predecessor;
-                    predecessor = predecessor.parent;
+                    incrementPredecessor();
 
                 }
             }
         }
 
-        // phase two: fix visibility and fire events, going from root down
-        {
+        private void incrementCurrent() {
+            pathToRoot.add(current);
+            current = current.parent;
+        }
+
+        private void incrementPredecessor() {
+            if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
+                nodesToAttach.addInOrder(predecessor.siblingAfter);
+                predecessor.siblingAfter.siblingBefore = null;
+                predecessor.siblingAfter = null;
+            }
+            predecessorAtOurHeight = predecessor;
+            predecessor = predecessor.parent;
+        }
+
+
+        /**
+         * Attach the default parent for the specified node, using the node's
+         * ability to describe a prototype for its parent object.
+         */
+        private void createAndAttachParent() {
+            Node<E> parent = current.describeParent();
+            if(parent != null) {
+                cloneStateNewNodeStateProvider.initialize(parent);
+                parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
+            }
+            attachParent(parent, null);
+        }
+
+        /**
+         * Attach the specified parent to the specified node.
+         *
+         * @param parent the parent node, may be <code>null</code>
+         * @param siblingBeforeNode the node immediately before the node of interest
+         *      who is a child of the same parent. This will be linked in as the
+         *      new node's sibling. If <code>null</code>, no linking/unlinking will
+         *      be performed.
+         */
+        private void attachParent(Node<E> parent, Node<E> siblingBeforeNode) {
+            assert(current != null);
+            assert((current.pathLength() == 1 && parent == null) || (current.pathLength() == parent.pathLength() + 1));
+
+            // attach the siblings, the nearest child of our parent will become our sibling
+            // if it isn't already
+            if(siblingBeforeNode != null && siblingBeforeNode.siblingAfter != current) {
+                if(siblingBeforeNode.pathLength() != current.pathLength()) {
+                    throw new IllegalStateException();
+                }
+                assert(siblingBeforeNode.parent == parent);
+
+                if(siblingBeforeNode.siblingAfter != null) {
+                    assert(current.siblingAfter == null);
+                    current.siblingAfter = siblingBeforeNode.siblingAfter;
+                    siblingBeforeNode.siblingAfter.siblingBefore = current;
+                }
+                current.siblingBefore = siblingBeforeNode;
+                siblingBeforeNode.siblingAfter = current;
+
+                assert(current.siblingBefore != current);
+                assert(current.siblingAfter != current);
+            }
+
+            // attach the new parent to this and siblings after. This is necessary when
+            // siblings have been split from their previous parent
+            for(Node<E> currentSibling = current; currentSibling != null; currentSibling = currentSibling.siblingAfter) {
+                if(currentSibling.parent != parent) {
+                    currentSibling.parent = parent;
+                }
+            }
+
+            // now the current node has shifted up to the parent node
+            incrementCurrent();
+        }
+
+        /**
+         * Fire events for the recently changed node, going from root down
+         */
+        private void fixVisibilityAndFireEvents() {
             boolean visible = true;
             for(int i = pathToRoot.size() - 1; i >= 0; i--) {
-                Node<E> current = pathToRoot.get(i);
+                current = pathToRoot.get(i);
 
                 // only fire events for visible nodes
                 if(visible) {
@@ -498,7 +597,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                             updates.addInsert(visibleIndex);
                         }
 
-                    // an updated node
+                        // an updated node
                     } else {
                         int visibleIndex = data.indexOfNode(current.element, VISIBLE_NODES);
                         if(fireEvents) {
@@ -532,7 +631,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             assert(isValid());
         }
 
-        private void addAtFront(Node<E> node) {
+        private void prependPotentiallySplit(Node<E> node) {
             if(!nodes.isEmpty()) {
                 if(nodes.get(0) == node) {
                     return;
@@ -577,64 +676,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private final class NodeIndexComparator implements Comparator<Node<E>> {
             public int compare(Node<E> a, Node<E> b) {
                 return data.indexOfNode(a.element, ALL_NODES) - data.indexOfNode(b.element, ALL_NODES);
-            }
-        }
-    }
-
-
-    /**
-     * Attach the default parent for the specified node, using the node's
-     * ability to describe a prototype for its parent object.
-     */
-    private Node<E> createAndAttachParent(int index, Node<E> current) {
-        Node<E> parent = current.describeParent();
-        if(parent != null) {
-            cloneStateNewNodeStateProvider.initialize(parent);
-            parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
-            attachParent(current, parent, null);
-        }
-        return parent;
-    }
-
-    /**
-     * Attach the specified parent to the specified node.
-     *
-     * @param node the node to be attached as parent
-     * @param parent the parent node, may be <code>null</code>
-     * @param siblingBeforeNode the node immediately before the node of interest
-     *      who is a child of the same parent. This will be linked in as the
-     *      new node's sibling. If <code>null</code>, no linking/unlinking will
-     *      be performed.
-     */
-    private void attachParent(Node<E> node, Node<E> parent, Node<E> siblingBeforeNode) {
-        assert(node != null);
-        assert((node.pathLength() == 1 && parent == null) || (node.pathLength() == parent.pathLength() + 1));
-
-        // attach the siblings, the nearest child of our parent will become our sibling
-        // if it isn't already
-        if(siblingBeforeNode != null && siblingBeforeNode.siblingAfter != node) {
-            if(siblingBeforeNode.pathLength() != node.pathLength()) {
-                throw new IllegalStateException();
-            }
-            assert(siblingBeforeNode.parent == parent);
-
-            if(siblingBeforeNode.siblingAfter != null) {
-                assert(node.siblingAfter == null);
-                node.siblingAfter = siblingBeforeNode.siblingAfter;
-                siblingBeforeNode.siblingAfter.siblingBefore = node;
-            }
-            node.siblingBefore = siblingBeforeNode;
-            siblingBeforeNode.siblingAfter = node;
-
-            assert(node.siblingBefore != node);
-            assert(node.siblingAfter != node);
-        }
-
-        // attach the new parent to this and siblings after. This is necessary when
-        // siblings have been split from their previous parent
-        for(Node<E> currentSibling = node; currentSibling != null; currentSibling = currentSibling.siblingAfter) {
-            if(currentSibling.parent != parent) {
-                currentSibling.parent = parent;
             }
         }
     }
