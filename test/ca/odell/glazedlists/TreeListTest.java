@@ -974,11 +974,11 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "pb",
-                "pnma",
-                "pnm",
-                "pnma",
-                "pdeb"
+                "PB",
+                "PNMA",
+                "PNM",
+                "PNMA",
+                "PDEB"
         }));
         sortedList.setComparator(new LastCharComparator());
     }
@@ -991,9 +991,9 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "ad",
-                "adce",
-                "adca"
+                "AD",
+                "ADCE",
+                "ADCA"
         }));
         sortedList.setComparator(new LastCharComparator());
         sortedList.setComparator(null);
@@ -1055,26 +1055,26 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "pmmp",
-                "pmmp",
-                "psu"
+                "PMMP",
+                "PMMP",
+                "PSU"
         }));
 
-        source.add(1, "pdds");
+        source.add(1, "PDDS");
 
         assertTreeStructure(treeList, new String[] {
-                "p",
-                "pm",
-                "pmm",
-                "pmmp",
-                "pd",
-                "pdd",
-                "pdds",
-                "pm",
-                "pmm",
-                "pmmp",
-                "ps",
-                "psu",
+                "P",
+                "PM",
+                "PMM",
+                "PMMP",
+                "PD",
+                "PDD",
+                "PDDS",
+                "PM",
+                "PMM",
+                "PMMP",
+                "PS",
+                "PSU",
         });
 
     }
@@ -1086,24 +1086,24 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "pmmp",
-                "pmmp",
-                "psu"
+                "PMMP",
+                "PMMP",
+                "PSU"
         }));
 
-        source.add(1, "pp");
+        source.add(1, "PP");
 
         assertTreeStructure(treeList, new String[] {
-                "p",
-                "pm",
-                "pmm",
-                "pmmp",
-                "pp",
-                "pm",
-                "pmm",
-                "pmmp",
-                "ps",
-                "psu",
+                "P",
+                "PM",
+                "PMM",
+                "PMMP",
+                "PP",
+                "PM",
+                "PMM",
+                "PMMP",
+                "PS",
+                "PSU",
         });
 
     }
@@ -1115,29 +1115,29 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "psu",
-                "pmma",
+                "PSU",
+                "PMMA",
         }));
 
         // when we're inserting the 'p' node, we need to be careful about the
         // virtual ancestry of the existing 'pmma' node that precedes it, making
         // sure not to attach p as a child of a deeper node
         source.addAll(1, Arrays.asList(new String[] {
-                "pdds",
-                "p",
+                "PDDS",
+                "P",
         }));
 
         assertTreeStructure(treeList, new String[] {
-                "p",
-                "ps",
-                "psu",
-                "pd",
-                "pdd",
-                "pdds",
-                "p",
-                "pm",
-                "pmm",
-                "pmma",
+                "P",
+                "PS",
+                "PSU",
+                "PD",
+                "PDD",
+                "PDDS",
+                "P",
+                "PM",
+                "PMM",
+                "PMMA",
         });
     }
 
@@ -1148,31 +1148,31 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "pmmu",
-                "pmmp",
-                "pn",
+                "PMMU",
+                "PMMP",
+                "PN",
         }));
 
         // this insert causes ancestry to be added for the existing node 'pmmp',
         // which needs to be attached as a sibling to the parent node 'pm'.
         source.addAll(1, Arrays.asList(new String[] {
-                "pdds",
-                "p",
+                "PDDS",
+                "P",
         }));
 
         assertTreeStructure(treeList, new String[] {
-                "p",
-                "pm",
-                "pmm",
-                "pmmu",
-                "pd",
-                "pdd",
-                "pdds",
-                "p",
-                "pm",
-                "pmm",
-                "pmmp",
-                "pn",
+                "P",
+                "PM",
+                "PMM",
+                "PMMU",
+                "PD",
+                "PDD",
+                "PDDS",
+                "P",
+                "PM",
+                "PMM",
+                "PMMP",
+                "PN",
         });
     }
 
@@ -1183,27 +1183,27 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "pmmu",
-                "pmmp",
-                "pmmp",
-                "pn",
+                "PMMU",
+                "PMMP",
+                "PMMP",
+                "PN",
         }));
 
         source.addAll(1, Arrays.asList(new String[] {
-                "p",
+                "P",
         }));
 
         assertTreeStructure(treeList, new String[] {
-                "p",
-                "pm",
-                "pmm",
-                "pmmu",
-                "p",
-                "pm",
-                "pmm",
-                "pmmp",
-                "pmmp",
-                "pn",
+                "P",
+                "PM",
+                "PMM",
+                "PMMU",
+                "P",
+                "PM",
+                "PMM",
+                "PMMP",
+                "PMMP",
+                "PN",
         });
     }
 
@@ -1214,20 +1214,20 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.addAll(Arrays.asList(new String[] {
-                "ac",
-                "a",
+                "AC",
+                "A",
         }));
 
         source.addAll(0, Arrays.asList(new String[] {
-                "a",
-                "ab",
+                "A",
+                "AB",
         }));
 
         assertTreeStructure(treeList, new String[] {
-                "a",
-                "ab",
-                "ac",
-                "a",
+                "A",
+                "AB",
+                "AC",
+                "A",
         });
     }
 
@@ -1239,28 +1239,55 @@ public class TreeListTest extends TestCase {
 
         source.beginEvent(true);
         source.addAll(Arrays.asList(new String[] {
-                "pmmp",
-                "pmms",
+                "PMMP",
+                "PMMS",
         }));
         source.commitEvent();
 
         source.beginEvent(true);
-        source.add(1, "p");
-        source.add(3, "pddv");
+        source.add(1, "P");
+        source.add(3, "PDDV");
         source.commitEvent();
 
         assertTreeStructure(treeList, new String[] {
-                "p",
-                "pm",
-                "pmm",
-                "pmmp",
-                "p",
-                "pm",
-                "pmm",
-                "pmms",
-                "pd",
-                "pdd",
-                "pddv",
+                "P",
+                "PM",
+                "PMM",
+                "PMMP",
+                "P",
+                "PM",
+                "PMM",
+                "PMMS",
+                "PD",
+                "PDD",
+                "PDDV",
         });
+    }
+
+    public void testReorderIntoInfiniteLoop() {
+        EventList<String> source = new BasicEventList<String>();
+        SortedList<String> sortedSource = new SortedList<String>(source, null);
+        TreeList<String> treeList = new TreeList<String>(sortedSource, new CharacterTreeFormat(), new NullCompartor<String>());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("AC");
+        source.add("AB");
+        source.add("AD");
+
+        sortedSource.setComparator(GlazedLists.comparableComparator());
+
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "AC",
+                "AD",
+        });
+    }
+
+    private static final class NullCompartor<E> implements Comparator<E> {
+        public int compare(E o1, E o2) {
+            return 0;
+        }
     }
 }

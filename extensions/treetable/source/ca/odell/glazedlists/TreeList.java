@@ -570,9 +570,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // attach the new parent to this and siblings after. This is necessary when
             // siblings have been split from their previous parent
             for(Node<E> currentSibling = current; currentSibling != null; currentSibling = currentSibling.siblingAfter) {
-                if(currentSibling.parent != parent) {
-                    currentSibling.parent = parent;
-                }
+                currentSibling.parent = parent;
             }
 
             // now the current node has shifted up to the parent node
@@ -691,6 +689,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     private Node<E> findOrInsertNode(int sourceIndex) {
         Node<E> inserted = source.get(sourceIndex);
+        inserted.reset();
 
         //  bound the range of indices where this node can be inserted. This is
         // all the virtual nodes between our predecessor and follower in the
@@ -1097,27 +1096,19 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     private static class ElementToTreeNodeFunction<E> implements FunctionList.AdvancedFunction<E, Node<E>> {
         private final Format<E> format;
-        private final List<E> workingPath = new ArrayList<E>();
         public ElementToTreeNodeFunction(Format<E> format) {
             this.format = format;
         }
         public Node<E> evaluate(E sourceValue) {
-            Node<E> result = new Node<E>();
-            result.virtual = false;
-
             // populate the path using the working path as a temporary variable
-            format.getPath(workingPath, sourceValue);
-            result.path = new ArrayList<E>(workingPath);
-            workingPath.clear();
-
-            return result;
+            List<E> path = new ArrayList<E>();
+            format.getPath(path, sourceValue);
+            return new Node<E>(false, path);
         }
 
         public Node<E> reevaluate(E sourceValue, Node<E> transformedValue) {
-            format.getPath(workingPath, sourceValue);
-            transformedValue.path = new ArrayList<E>(workingPath);
-            workingPath.clear();
-
+            transformedValue.path.clear();
+            format.getPath(transformedValue.path, sourceValue);
             return transformedValue;
         }
 
@@ -1136,13 +1127,13 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     public static class Node<E> {
 
-        private List<E> path;
+        private final List<E> path;
 
         /** true if this node isn't in the source list */
         private boolean virtual;
 
         /** true if this node's children should be visible */
-        private boolean expanded = true;
+        private boolean expanded;
 
         /** the element object points back at this, for the tree's structure cache */
         private Element<Node<E>> element;
@@ -1151,6 +1142,32 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private Node<E> siblingAfter;
         private Node<E> siblingBefore;
         private Node<E> parent;
+
+        /**
+         * Construct a new node.
+         *
+         * @param virtual <code>true</code> if this node is initially virtual
+         * @param path the tree path from root to value that this node represents. It
+         *      is an error to mutate this path once it has been provided to a node.
+         */
+        private Node(boolean virtual, List<E> path) {
+            this.virtual = virtual;
+            this.path = path;
+        }
+
+        /**
+         * Clean up this node for insertion into the tree. It might have some
+         * residual state due to a previous location in the tree, in the event
+         * that the node was subject to a reordering event.
+         */
+        private void reset() {
+            virtual = false;
+            expanded = true;
+            element = null;
+            siblingAfter = null;
+            siblingBefore = null;
+            parent = null;
+        }
 
         /**
          * The length of the path to this node, in nodes.
@@ -1183,10 +1200,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // this is a root node, it has no parent
             if(pathLength == 1) return null;
             // return a node describing the parent path
-            Node<E> result = new Node<E>();
-            result.path = path.subList(0, pathLength - 1);
-            result.virtual = true;
-            return result;
+            return new Node<E>(true, path.subList(0, pathLength - 1));
         }
 
         /** {@inheritDoc} */
@@ -1239,7 +1253,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * @return the node that follows this one, or <code>null</code> if there
          * is no such node.
          */
-        public Node<E> next() {
+        private Node<E> next() {
             Element<Node<E>> next = element.next();
             return (next == null) ? null : next.get();
         }
@@ -1248,7 +1262,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * @return the node that precedes this one, or <code>null</code> if there
          * is no such node.
          */
-        public Node<E> previous() {
+        private Node<E> previous() {
             Element<Node<E>> previous = element.previous();
             return (previous == null) ? null : previous.get();
         }
@@ -1286,7 +1300,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * <p>If the ancestor path length is the same as this node's path length,
          * then this node will be returned.
          */
-        public Node<E> ancestorWithPathLength(int ancestorPathLength) {
+        private Node<E> ancestorWithPathLength(int ancestorPathLength) {
             assert(pathLength() >= ancestorPathLength);
             Node<E> ancestor = this;
             while(ancestor.pathLength() > ancestorPathLength) {
@@ -1404,7 +1418,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             if(node.virtual) {
                 assert(node.element.getColor() == HIDDEN_VIRTUAL|| node.element.getColor() == VISIBLE_VIRTUAL);
             } else {
-                assert(source.get(data.convertIndexColor(i, ALL_NODES, REAL_NODES)) == node);
+                if(source.get(data.convertIndexColor(i, ALL_NODES, REAL_NODES)) != node) {
+                    throw new IllegalStateException();
+                }
                 assert(node.element.getColor() == HIDDEN_REAL || node.element.getColor() == VISIBLE_REAL);
             }
 
