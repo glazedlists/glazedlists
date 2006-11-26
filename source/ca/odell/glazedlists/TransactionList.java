@@ -119,6 +119,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
      * arbitrate the result.
      * 
      * @param source the {@link EventList} to transform
+     * @param policy the logic consulted to arbitrate conflicting changes
      */
     public TransactionList(EventList<S> source, Policy<S> policy) {
         super(source);

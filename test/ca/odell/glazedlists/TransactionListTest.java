@@ -273,6 +273,57 @@ public class TransactionListTest extends TestCase {
         assertEquals("Jesse", txList.get(0));
         assertEquals(3, consistencyListener.getEventCount());
     }
+    
+    public void testEmptyTransaction() {
+        final EventList<String> source = new BasicEventList<String>();
+        final TransactionList<String> txList = new TransactionList<String>(source);
+
+        source.add("James");
+        assertEquals("James", txList.get(0));
+        assertEquals("James", source.get(0));
+
+        txList.begin();
+        txList.commit();
+        assertEquals("James", txList.get(0));
+        assertEquals("James", source.get(0));
+
+        txList.begin();
+        txList.rollback();
+        assertEquals("James", txList.get(0));
+        assertEquals("James", source.get(0));
+    }
+
+    public void testWriteThroughTransactionList() {
+        final EventList<String> source = new BasicEventList<String>();
+        final TransactionList<String> txList = new TransactionList<String>(source);
+
+        assertEquals(0, txList.size());
+
+        txList.add("James");
+        assertEquals(1, txList.size());
+        assertEquals("James", txList.get(0));
+
+        txList.set(0, "Jesse");
+        assertEquals(1, txList.size());
+        assertEquals("Jesse", txList.get(0));
+
+        txList.remove(0);
+        assertEquals(0, txList.size());
+    }
+
+    public void testCustomMergePolicy() {
+        final EventList<String> source = new BasicEventList<String>();
+        final TransactionList<String> txList = new TransactionList<String>(source, new MergeConflictingUpdatesPolicy());
+
+        txList.add("James");
+        txList.begin();
+
+        txList.set(0, "Jackson");
+        source.set(0, "Jesse");
+
+        assertEquals("JesseJackson", txList.get(0));
+        assertEquals("Jesse", source.get(0));
+    }
 
     public void testBeginTwoTransactions() {
         final EventList<String> source = new BasicEventList<String>();
@@ -341,6 +392,9 @@ public class TransactionListTest extends TestCase {
         }
     }
 
+    /**
+     * Read from the given List at the given index when the Runnable is executed.
+     */
     private static class GetAtIndexRunnable implements Runnable {
 
         private final List list;
@@ -358,6 +412,23 @@ public class TransactionListTest extends TestCase {
 
         public Object getValue() {
             return value;
+        }
+    }
+
+    /**
+     * This Policy simply combines the updates from the source EventList and transaction.
+     */
+    private static class MergeConflictingUpdatesPolicy implements TransactionList.Policy<String> {
+        public Result sourceDeletedTargetUpdated(String deletedFromSource, String updatedFromTarget) {
+            return TransactionList.Policy.KEEP_SOURCE;
+        }
+
+        public Result sourceUpdatedTargetDeleted(String updatedFromSource, String deletedFromTarget) {
+            return TransactionList.Policy.KEEP_SOURCE;
+        }
+
+        public String sourceUpdatedTargetUpdated(String updatedFromSource, String updatedFromTarget) {
+            return updatedFromSource + updatedFromTarget;
         }
     }
 }
