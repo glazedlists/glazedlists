@@ -62,7 +62,8 @@
 	<property name="docs.dir" value="${target.dir}/docs"/>
 
 	<!-- output directory for demo jar contents -->
-	<property name="demojar.dir" value="${target.dir}/demojar"/>
+	<property name="issuesbrowserjar.dir" value="${target.dir}/issuesbrowserjar"/>
+	<property name="xmlbrowser.dir" value="${target.dir}/xmlbrowserjar"/>
 
 	<!-- output directory for java 1.4 build -->
 	<property name="java14_glazedlists.dir" value="${target.dir}/java14_glazedlists"/>
@@ -464,31 +465,31 @@
         <fail message="The BCEL could not be downloaded. You must manually download it from here: http://jakarta.apache.org/site/downloads/downloads_bcel.cgi and place it in your ANT installation here: ${ant.home}\lib"/>
     </target>
 
-    <target name="demojar" depends="clean,issuesbrowser,downloadBCEL"
+    <target name="issuesbrowserjar" depends="clean,issuesbrowser,downloadBCEL"
         description="Create a .jar file with the Issues Browser demo application.">
 
         <!-- make a temporary folder for assembling the demojar -->
-        <mkdir dir="${demojar.dir}"/>
+        <mkdir dir="${issuesbrowserjar.dir}"/>
 
         <!-- copy the classes into the demojar folder -->
-        <copy todir="${demojar.dir}">
+        <copy todir="${issuesbrowserjar.dir}">
             <fileset dir="${classes.dir}"/>
         </copy>
 
         <!-- unjar the third-party classes into the demojar folder -->
-        <unjar src="extensions/jfreechart/lib/jcommon.jar" dest="${demojar.dir}"/>
-        <unjar src="extensions/jfreechart/lib/jfreechart.jar" dest="${demojar.dir}"/>
-        <unjar src="extensions/jgoodiesforms/lib/forms.jar" dest="${demojar.dir}"/>
-        <unjar src="extensions/nachocalendar/lib/nachocalendar.jar" dest="${demojar.dir}"/>
-        <unjar src="extensions/issuesbrowser/lib/http.jar" dest="${demojar.dir}"/>
+        <unjar src="extensions/jfreechart/lib/jcommon.jar" dest="${issuesbrowserjar.dir}"/>
+        <unjar src="extensions/jfreechart/lib/jfreechart.jar" dest="${issuesbrowserjar.dir}"/>
+        <unjar src="extensions/jgoodiesforms/lib/forms.jar" dest="${issuesbrowserjar.dir}"/>
+        <unjar src="extensions/nachocalendar/lib/nachocalendar.jar" dest="${issuesbrowserjar.dir}"/>
+        <unjar src="extensions/issuesbrowser/lib/http.jar" dest="${issuesbrowserjar.dir}"/>
 
         <!-- create a *minimal* set of classes required to execute the swing demo -->
-        <classfileset id="demoClasses" dir="${demojar.dir}" rootclass="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
+        <classfileset id="issuesBrowserClasses" dir="${issuesbrowserjar.dir}" rootclass="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
 
         <!-- create the actual demo jar -->
         <jar destfile="${target.dir}/glazedlists-demo.jar" update="true" index="true">
-            <fileset refid="demoClasses"/>
-            <fileset dir="${demojar.dir}">
+            <fileset refid="issuesBrowserClasses"/>
+            <fileset dir="${issuesbrowserjar.dir}">
                 <include name="**/LocalizationBundle*.properties"/>
                 <include name="org/jfree/chart/resources/JFreeChartResources.class"/>
                 <include name="org/jfree/resources/JCommonResources.class"/>
@@ -504,9 +505,33 @@
                 <attribute name="Main-Class" value="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
             </manifest>
         </jar>
+	</target>
 
-        <!-- clean up the demojar folder -->
-        <!--<delete dir="${demojar.dir}"/>-->
+    <target name="xmlbrowserjar" depends="clean,issuesbrowser,downloadBCEL"
+        description="Create a .jar file with the Xml Browser demo application.">
+
+        <!-- make a temporary folder for assembling the demojar -->
+        <mkdir dir="${xmlbrowser.dir}"/>
+
+        <!-- copy the classes into the xmlbrowser folder -->
+        <copy todir="${xmlbrowser.dir}">
+            <fileset dir="${classes.dir}"/>
+        </copy>
+
+        <!-- xmlToEventList a *minimal* set of classes required to execute the swing demo -->
+        <classfileset id="xmlBrowserClasses" dir="${xmlbrowser.dir}" rootclass="com.publicobject.xmlbrowser.XmlBrowser"/>
+
+        <!-- xmlToEventList the actual demo jar -->
+        <jar destfile="${target.dir}/xmlbrowser.jar" update="true" index="true">
+            <fileset refid="xmlBrowserClasses"/>
+            <fileset dir=".">
+                <include name="resources/**"/>
+                <include name="pom.xml"/>
+            </fileset>
+            <manifest>
+                <attribute name="Main-Class" value="com.publicobject.xmlbrowser.XmlBrowser"/>
+            </manifest>
+        </jar>
 	</target>
 
 

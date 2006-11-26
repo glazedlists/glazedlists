@@ -5,20 +5,18 @@ package com.publicobject.xmlbrowser;
 
 import java.util.List;
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.swing.*;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.lang.reflect.InvocationTargetException;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -81,15 +79,19 @@ public class XmlBrowser {
      */
     private static class EventListXmlContentHandler extends DefaultHandler {
 
-        private final EventList<Element> target = GlazedLists.threadSafeList(new BasicEventList<Element>());
+        private final EventList<Element> target;
         private final List<Element> stack = new ArrayList<Element>();
 
-        public static EventList<Element> create(InputStream inputStream) {
+        public EventListXmlContentHandler(EventList<Element> target) {
+            this.target = GlazedLists.threadSafeList(target);
+        }
+
+        public EventList<Element> parse(InputStream inputStream) {
             try {
                 XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
                 SaxParserSidekick.install(xmlReader);
 
-                EventListXmlContentHandler handler = new EventListXmlContentHandler();
+                EventListXmlContentHandler handler = new EventListXmlContentHandler(target);
                 xmlReader.setContentHandler(handler);
                 xmlReader.parse(new InputSource(inputStream));
 
@@ -128,31 +130,27 @@ public class XmlBrowser {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InvocationTargetException, InterruptedException {
         if(args.length != 1) {
-            System.out.println("Usage: XmlBrowser <xmlfile>");
-            return;
+            args = new String[] { "pom.xml" };
         }
 
-        SwingUtilities.invokeLater(new StartUIRunnable(args[0]));
+        EventList<Element> eventList = new BasicEventList<Element>();
+        SwingUtilities.invokeAndWait(new StartUIRunnable(eventList));
+
+        // get a handle to an XML file for input
+        InputStream xmlIn = XmlBrowser.class.getClassLoader().getResourceAsStream(args[0]);
+        new EventListXmlContentHandler(eventList).parse(xmlIn);
     }
 
     private static class StartUIRunnable implements Runnable {
-        private String xmlFile;
+        private final EventList<Element> eventList;
 
-        public StartUIRunnable(String xmlFile) {
-            this.xmlFile = xmlFile;
+        public StartUIRunnable(EventList<Element> eventList) {
+            this.eventList = eventList;
         }
 
         public void run() {
-            // get a handle to an XML file for input
-            InputStream xmlIn = null;
-            try {
-                xmlIn = new FileInputStream(xmlFile);
-            } catch(FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-
             // prepare the table filters
             JTextField filterEdit = new JTextField(15);
             TextFilterator<Element> filterator = GlazedLists.textFilterator(new String[]{"qName", "text"});
@@ -162,12 +160,9 @@ public class XmlBrowser {
             filterPanel.add(filterEdit);
 
             // convert the XML into an EventList, then a TreeList
-            EventList<Element> eventList = EventListXmlContentHandler.create(xmlIn);
             SortedList<Element> sortedList = new SortedList<Element>(eventList, null);
             FilterList<Element> filteredList = new FilterList<Element>(sortedList, matcherEditor);
             TreeList<Element> treeList = new TreeList<Element>(filteredList, new ElementTreeFormat());
-            ListConsistencyListener consistencyListener = ListConsistencyListener.install(treeList);
-            consistencyListener.setPreviousElementTracked(false);
 
             // display the XML in a tree table
             EventTableModel<Element> tableModel = new EventTableModel<Element>(treeList, new ElementTableFormat());
@@ -178,18 +173,41 @@ public class XmlBrowser {
             // display the XML in a tree
             EventTreeModel<Element> treeModel = new EventTreeModel<Element>(treeList);
             JTree tree = new JTree(treeModel);
+            tree.setRootVisible(false);
+            tree.setCellRenderer(new TreeListNodeRenderer());
 
             // build tha application
+            JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(tree), new JScrollPane(table));
+            splitPane.setBorder(BorderFactory.createEmptyBorder());
+            splitPane.setDividerLocation(200); 
             JPanel panel = new JPanel(new BorderLayout());
             panel.add(filterPanel, BorderLayout.NORTH);
-            panel.add(new JScrollPane(table), BorderLayout.CENTER);
-            panel.add(new JScrollPane(tree), BorderLayout.WEST);
+            panel.add(splitPane, BorderLayout.CENTER);
             JFrame frame = new JFrame("XML Browser");
             frame.getContentPane().add(panel);
-            frame.pack();
+            frame.setSize(640, 480);
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
+        }
+    }
+
+    /**
+     * Render a TreeList node in a JTree.
+     *
+     * TODO: make this available as an API via a factory method?
+     */
+    private static class TreeListNodeRenderer extends DefaultTreeCellRenderer {
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            Object renderValue;
+            if(value instanceof TreeList.Node) {
+                TreeList.Node<Element> node = (TreeList.Node<Element>)value;
+                renderValue = node.getElement();
+            } else {
+                // sometimes JTree inexplicably wants to render the root
+                renderValue = null;
+            }
+            return super.getTreeCellRendererComponent(tree, renderValue, selected, expanded, leaf, row, hasFocus);
         }
     }
 
