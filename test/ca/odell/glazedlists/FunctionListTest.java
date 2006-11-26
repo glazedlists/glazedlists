@@ -5,6 +5,8 @@ import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 public class FunctionListTest extends TestCase {
 
     public void testConstructor() {
@@ -182,5 +184,19 @@ public class FunctionListTest extends TestCase {
         public int getDisposeCount() {
             return this.disposeCount;
         }
+    }
+
+    public void testReorder() {
+        // establish a control for this test case with the normal Function
+        SortedList<Integer> source = new SortedList<Integer>(new BasicEventList(), null);
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new AdvancedIntegerToString(), new StringToInteger());
+        ListConsistencyListener consistencyListener = ListConsistencyListener.install(intsToStrings);
+        consistencyListener.setPreviousElementTracked(false);
+        
+        source.add(new Integer(1));
+        source.add(new Integer(0));
+        source.setComparator(GlazedLists.comparableComparator());
+
+        assertEquals(3, consistencyListener.getEventCount());
     }
 }

@@ -198,26 +198,33 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
 
     /** {@inheritDoc} */
     public void listChanged(ListEvent<S> listChanges) {
-        while (listChanges.next()) {
-            final int changeIndex = listChanges.getIndex();
-            final int changeType = listChanges.getType();
+        if(listChanges.isReordering()) {
+            int[] reorderMap = listChanges.getReorderMap();
+            List<E> originalMappedElements = new ArrayList(mappedElements);
+            for(int i = 0; i < reorderMap.length; i++) {
+                mappedElements.set(i, originalMappedElements.get(reorderMap[i]));
+            }
 
-            if (changeType == ListEvent.INSERT) {
-                final S inserted = source.get(changeIndex);
-                this.sourceElements.add(changeIndex, inserted);
-                this.mappedElements.add(changeIndex, this.forward(inserted));
+        } else {
+            while (listChanges.next()) {
+                final int changeIndex = listChanges.getIndex();
+                final int changeType = listChanges.getType();
 
-            } else if (changeType == ListEvent.UPDATE) {
-                final S updated = source.get(changeIndex);
+                if (changeType == ListEvent.INSERT) {
+                    final S inserted = source.get(changeIndex);
+                    this.sourceElements.add(changeIndex, inserted);
+                    this.mappedElements.add(changeIndex, this.forward(inserted));
 
-                this.sourceElements.set(changeIndex, updated);
-                this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), updated));
+                } else if (changeType == ListEvent.UPDATE) {
+                    final S updated = source.get(changeIndex);
+                    this.sourceElements.set(changeIndex, updated);
+                    this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), updated));
 
-            } else if (changeType == ListEvent.DELETE) {
-                final S deletedSource = this.sourceElements.remove(changeIndex);
-                final E deletedTransform = this.mappedElements.remove(changeIndex);
-
-                this.forward.dispose(deletedSource, deletedTransform);
+                } else if (changeType == ListEvent.DELETE) {
+                    final S deletedSource = this.sourceElements.remove(changeIndex);
+                    final E deletedTransform = this.mappedElements.remove(changeIndex);
+                    this.forward.dispose(deletedSource, deletedTransform);
+                }
             }
         }
 

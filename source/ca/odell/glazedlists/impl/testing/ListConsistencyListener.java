@@ -180,7 +180,10 @@ public class ListConsistencyListener<E> {
             }
 
             // verify the source is consistent with what we expect
-            Assert.assertEquals(expected, source);
+            Assert.assertEquals(expected.size(), source.size());
+            for(int i = 0; i < expected.size(); i++) {
+                Assert.assertSame("Different elements at " + i, expected.get(i), source.get(i));
+            }
         }
 
         public String toString() {
