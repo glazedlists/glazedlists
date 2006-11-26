@@ -43,7 +43,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private static final byte HIDDEN_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "r", "v" }));
     private static final byte REAL_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "R", "r" }));
 
-    /** compare nodes */
+    /** compare nodes by value */
     private final NodeComparator<E> nodeComparator;
 
     /** an {@link EventList} of {@link Node}s with the structure of the tree. */
@@ -99,7 +99,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         for(int i = 0; i < super.source.size(); i++) {
             Node<E> node = super.source.get(i);
             node.element = data.add(i, REAL_NODES, VISIBLE_REAL, node, 1);
-            attachParentsAndSiblings(node, false, new ArrayList<Node<E>>());
+            attachParentsAndSiblings(node, false, new NodesToAttach());
         }
 
         assert(isValid());
@@ -346,13 +346,14 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // nodes as hidden. In the next pass we'll figure out parents, siblings
         // and fire events for nodes that shouldn't be hidden
         List<Node<E>> nodesToVerify = new ArrayList<Node<E>>();
-        List<Node<E>> changeNodes = new ArrayList<Node<E>>();
+        NodesToAttach nodesToAttach = new NodesToAttach();
         while(listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
 
             if(type == ListEvent.INSERT) {
-                changeNodes.add(findOrInsertNode(sourceIndex));
+                Node<E> inserted = findOrInsertNode(sourceIndex);
+                nodesToAttach.appendNewlyInserted(inserted);
 
             } else if(type == ListEvent.UPDATE) {
                 Node<E> node = data.get(sourceIndex, REAL_NODES).get();
@@ -360,10 +361,11 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 // shift as necessary, so if the parents are immediately after, they're used
                 if(hasStructurallyChanged(node)) {
                     deleteAndDetachNode(sourceIndex, nodesToVerify);
-                    changeNodes.add(findOrInsertNode(sourceIndex));
+                    Node<E> updated = findOrInsertNode(sourceIndex);
+                    nodesToAttach.appendNewlyInserted(updated);
 
                 } else {
-                    changeNodes.add(node);
+                    nodesToAttach.appendNewlyInserted(node);
                 }
 
             } else if(type == ListEvent.DELETE) {
@@ -377,13 +379,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // second pass: walk through all the changed nodes and attach parents
         // and siblings, plus fire events for all the inserted or updated nodes.
-        List<Node<E>> brokenSiblings = new ArrayList<Node<E>>();
-        while(!changeNodes.isEmpty()) {
-            attachParentsAndSiblings(changeNodes.remove(0), true, changeNodes);
-        }
-        // todo: this is horrible, why do we loop twice?
-        while(!brokenSiblings.isEmpty()) {
-            attachParentsAndSiblings(brokenSiblings.remove(0), true, new ArrayList<Node<E>>());
+        while(!nodesToAttach.isEmpty()) {
+            attachParentsAndSiblings(nodesToAttach.removeFirst(), true, nodesToAttach);
         }
 
         // blow away obsolete parent nodes now that we can know for sure if they're obsolete
@@ -402,11 +399,10 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * <li>firing an 'insert' event for such parents and siblings
      *
      * @param changed
-     * @param toBeRepaired the list of nodes in need of repair, to be processed
-     *      in increasing order by the order in the tree
+     * @param nodesToAttach the queue of nodes needing parents and siblings attached
      * @return <code>true</code> if changes were made to the tree
      */
-    private void attachParentsAndSiblings(Node<E> changed, boolean fireEvents, List<Node<E>> toBeRepaired) {
+    private void attachParentsAndSiblings(Node<E> changed, boolean fireEvents, NodesToAttach nodesToAttach) {
         int index = data.indexOfNode(changed.element, ALL_NODES);
         List<Node<E>> pathToRoot = new ArrayList<Node<E>>(changed.pathLength());
 
@@ -422,11 +418,13 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             Node<E> predecessorAtOurHeight = null; // for success, this is the same depth as current
             boolean preexistingParentFound = false;
 
-            // make sure the following node is repaired if necessary
-            // TODO: constrain this, it's majorly slow
-            Node<E> follower = changed.next();
-            if(follower != null) {
-                toBeRepaired.add(follower);
+            // make sure the following node is repaired if this node might
+            // have separated it from its predecessor or parent node
+            if(nodesToAttach.isNewlyInserted(changed)) {
+                Node<E> follower = changed.next();
+                if(follower != null) {
+                    nodesToAttach.addAtFront(follower);
+                }
             }
 
             while(current != null) {
@@ -448,7 +446,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 } else if(predecessorPathLength >= currentPathLength) {
                     // make sure our predecessor's sibling has parents reattached if necessary
                     if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
-                        toBeRepaired.add(predecessor.siblingAfter);
+                        nodesToAttach.addInOrder(predecessor.siblingAfter);
                         predecessor.siblingAfter.siblingBefore = null;
                         predecessor.siblingAfter = null;
                     }
@@ -473,7 +471,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                     current = createAndAttachParent(index, current);
                     // make sure our predecessor's sibling has parents reattached if necessary
                     if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
-                        toBeRepaired.add(predecessor.siblingAfter);
+                        nodesToAttach.addInOrder(predecessor.siblingAfter);
                         predecessor.siblingAfter.siblingBefore = null;
                         predecessor.siblingAfter = null;
                     }
@@ -514,6 +512,75 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
     }
+
+    /**
+     * A list of nodes to be attached to their parent nodes and siblings, provided
+     * in increasing order by index.
+     *
+     * <p>This queue is necessary because our algorith encounters nodes in random
+     * order but most process them in increasing order.
+     */
+    private final class NodesToAttach {
+        private final List<Node<E>> nodes = new ArrayList<Node<E>>();
+        private final NodeIndexComparator nodeIndexComparator = new NodeIndexComparator();
+        private final Map<Node<E>,Boolean> newlyInsertedNodes = new IdentityHashMap<Node<E>,Boolean>();
+
+        private void addInOrder(Node<E> node) {
+            int position = Collections.binarySearch(nodes, node, nodeIndexComparator);
+            if(position >= 0) return;
+            nodes.add(-position - 1, node);
+            assert(isValid());
+        }
+
+        private void addAtFront(Node<E> node) {
+            if(!nodes.isEmpty()) {
+                if(nodes.get(0) == node) {
+                    return;
+                }
+                assert(nodeIndexComparator.compare(nodes.get(0), node) >= 0);
+            }
+            nodes.add(0, node);
+            assert(isValid());
+        }
+
+        private void appendNewlyInserted(Node<E> node) {
+            assert(nodes.isEmpty() || nodeIndexComparator.compare(nodes.get(nodes.size() - 1), node) < 0);
+            nodes.add(node);
+            newlyInsertedNodes.put(node, Boolean.TRUE);
+            assert(isValid());
+        }
+
+        private boolean isEmpty() {
+            return nodes.isEmpty();
+        }
+
+        private Node<E> removeFirst() {
+            return nodes.remove(0);
+        }
+
+        private boolean isNewlyInserted(Node<E> node) {
+            return newlyInsertedNodes.containsKey(node);
+        }
+
+        private boolean isValid() {
+            for(int i = 0; i < nodes.size() - 1; i++) {
+                Node<E> a = nodes.get(i);
+                Node<E> b = nodes.get(i + 1);
+                assert(nodeIndexComparator.compare(a, b) <= 0);
+            }
+            return true;
+        }
+
+        /**
+         * Compare two nodes by their position in the tree.
+         */
+        private final class NodeIndexComparator implements Comparator<Node<E>> {
+            public int compare(Node<E> a, Node<E> b) {
+                return data.indexOfNode(a.element, ALL_NODES) - data.indexOfNode(b.element, ALL_NODES);
+            }
+        }
+    }
+
 
     /**
      * Attach the default parent for the specified node, using the node's

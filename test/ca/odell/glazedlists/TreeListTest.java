@@ -1230,4 +1230,37 @@ public class TreeListTest extends TestCase {
                 "a",
         });
     }
+
+    public void testRebuildSiblingsInUnnaturalOrder() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>(), false);
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.beginEvent(true);
+        source.addAll(Arrays.asList(new String[] {
+                "pmmp",
+                "pmms",
+        }));
+        source.commitEvent();
+
+        source.beginEvent(true);
+        source.add(1, "p");
+        source.add(3, "pddv");
+        source.commitEvent();
+
+        assertTreeStructure(treeList, new String[] {
+                "p",
+                "pm",
+                "pmm",
+                "pmmp",
+                "p",
+                "pm",
+                "pmm",
+                "pmms",
+                "pd",
+                "pdd",
+                "pddv",
+        });
+    }
 }
