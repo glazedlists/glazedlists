@@ -7,7 +7,6 @@ package ca.odell.glazedlists.impl.testing;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +93,20 @@ public class ListConsistencyListener<E> {
      * Validate that this list is as expected.
      */
     public void assertConsistent() {
-        Assert.assertEquals(expected, source);
+        assertTrue(expected.size() == source.size());
+        for(int i = 0; i < expected.size(); i++) {
+            assertTrue("Different elements at " + i, expected.get(i) == source.get(i));
+        }
+    }
+
+    public void assertTrue(boolean condition) {
+        assertTrue("Assertion failed", condition);
+    }
+
+    public void assertTrue(String message, boolean condition) {
+        if(!condition) {
+            throw new IllegalStateException(message);
+        }
     }
 
     /**
@@ -112,7 +124,7 @@ public class ListConsistencyListener<E> {
     private class ListChangeHandler implements ListEventListener<E> {
 
         public void listChanged(ListEvent<E> listChanges) {
-            Assert.assertEquals(source, listChanges.getSource());
+            assertTrue(source == listChanges.getSource());
             assertEventsInIncreasingOrder(listChanges);
 
             // print the changes if necessary
@@ -127,7 +139,7 @@ public class ListConsistencyListener<E> {
             // handle sorting events
             if(listChanges.isReordering()) {
                 int[] reorderMap = listChanges.getReorderMap();
-                Assert.assertEquals(expected.size(), reorderMap.length);
+                assertTrue(expected.size() == reorderMap.length);
                 List<E> newExpectedValues = new ArrayList<E>(expected.size());
                 for(int i = 0; i < reorderMap.length; i++) {
                     newExpectedValues.add(i, expected.get(reorderMap[i]));
@@ -153,8 +165,8 @@ public class ListConsistencyListener<E> {
                     changedIndices.add(new Integer(changeIndex));
 
                     // make sure the change indices are positive and not descreasing
-                    Assert.assertTrue(changeIndex >= 0);
-                    Assert.assertTrue(changeIndex >= highestChangeIndex);
+                    assertTrue(changeIndex >= 0);
+                    assertTrue(changeIndex >= highestChangeIndex);
                     highestChangeIndex = changeIndex;
 
                     // verify the index is small enough, and adjust the size
@@ -164,13 +176,13 @@ public class ListConsistencyListener<E> {
                         Object removed = expected.remove(changeIndex);
                         if(previousElementTracked) {
                             Object reportedRemoved = listChanges.getPreviousValue();
-                            Assert.assertSame(removed, reportedRemoved);
+                            assertTrue(removed == reportedRemoved);
                         }
                     } else if(changeType == ListEvent.UPDATE) {
                         Object replaced = expected.set(changeIndex, source.get(changeIndex));
                         if(previousElementTracked) {
                             Object reportedReplaced = listChanges.getPreviousValue();
-                            Assert.assertSame(replaced, reportedReplaced);
+                            assertTrue(replaced == reportedReplaced);
                         }
                     }
                 }
@@ -180,10 +192,7 @@ public class ListConsistencyListener<E> {
             }
 
             // verify the source is consistent with what we expect
-            Assert.assertEquals(expected.size(), source.size());
-            for(int i = 0; i < expected.size(); i++) {
-                Assert.assertSame("Different elements at " + i, expected.get(i), source.get(i));
-            }
+            assertConsistent();
         }
 
         public String toString() {
