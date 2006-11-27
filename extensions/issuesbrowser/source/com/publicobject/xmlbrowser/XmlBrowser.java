@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 import com.publicobject.misc.swing.NoSelectionListSelectionModel;
+import com.publicobject.misc.swing.LookAndFeelTweaks;
 
 /**
  * Display an XML file in a table, to show off our tree code.
@@ -48,6 +49,12 @@ public class XmlBrowser {
         }
 
         public void run() {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                // do nothing - fall back to default look and feel
+            }
+
             // prepare the table filters
             JTextField filterEdit = new JTextField(15);
             TextFilterator<Tag> filterator = GlazedLists.textFilterator(new String[]{"qName", "text"});
@@ -69,7 +76,10 @@ public class XmlBrowser {
             JTable table = new JTable(tableModel);
             TreeTableSupport.install(table, treeList, 0);
             TableComparatorChooser.install(table, sortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+            LookAndFeelTweaks.tweakTable(table);
             table.getColumnModel().setSelectionModel(new NoSelectionListSelectionModel());
+            JScrollPane tableScrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            tableScrollPane.getViewport().setBackground(UIManager.getColor("EditorPane.background"));
 
             // display the XML in a tree
             EventTreeModel<Tag> treeModel = new EventTreeModel<Tag>(treeList);
@@ -81,7 +91,6 @@ public class XmlBrowser {
             JScrollPane treeScrollPane = new JScrollPane(tree, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             Color borderColor = new Color(153, 153, 204);
             treeScrollPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 1, borderColor));
-            JScrollPane tableScrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             tableScrollPane.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor));
             MacCornerScrollPaneLayoutManager.install(tableScrollPane);
             JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, tableScrollPane);
