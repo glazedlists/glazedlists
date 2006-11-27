@@ -158,44 +158,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
         if (!txStarted)
             throw new IllegalStateException("Cannot commit() a transaction that does not exist. Please call begin() to start a transaction first.");
 
-        new EventListTransactionHack().runAsTransaction(new Runnable() {
-            public void run() {
-                // 1. undo the transaction's changes on self
-                updates.beginEvent(true);
-                for(Tree4Deltas.Iterator<S> i = deltas.iterator(); i.hasNext(); ) {
-                    i.next();
-                    int index = i.getIndex();
-                    int type = i.getType();
-                    if(type == ListEvent.INSERT) {
-                        updates.elementDeleted(index, deltas.getTargetValue(index));
-                    } else if(type == ListEvent.UPDATE) {
-                        updates.elementUpdated(index, deltas.getTargetValue(index));
-                    } else if(type == ListEvent.DELETE) {
-                        updates.addInsert(index);
-                    }
-                }
-                updates.commitEvent();
-
-                final int sourceSizeBeforeChanges = source.size();
-
-                // 2. redo the ListEvent's changes on source
-                for(Tree4Deltas.Iterator<S> i = deltas.iterator(); i.hasNext(); ) {
-                    i.next();
-                    int index = i.getIndex();
-                    int type = i.getType();
-                    if(type == ListEvent.INSERT) {
-                        source.add(index, i.getPreviousValue());
-                    } else if(type == ListEvent.UPDATE) {
-                        source.set(index, i.getPreviousValue());
-                    } else if(type == ListEvent.DELETE) {
-                        source.remove(index);
-                    }
-                }
-
-                txStarted = false;
-                deltas.reset(sourceSizeBeforeChanges);
-            }
-        }, source);
+        new EventListTransactionHack().runAsTransaction(new HackRunnable(), source);
     }
 
     /**
@@ -211,6 +174,49 @@ public class TransactionList<S> extends TransformedList<S,S> {
 
         txStarted = false;
         deltas.reset(source.size());
+    }
+
+    /**
+     * The mother of all hacks.
+     * todo remove this hack
+     */
+    private final class HackRunnable implements Runnable {
+        public void run() {
+            // 1. undo the transaction's changes on self
+            updates.beginEvent(true);
+            for(Tree4Deltas.Iterator<S> i = deltas.iterator(); i.hasNext(); ) {
+                i.next();
+                int index = i.getIndex();
+                int type = i.getType();
+                if(type == ListEvent.INSERT) {
+                    updates.elementDeleted(index, deltas.getTargetValue(index));
+                } else if(type == ListEvent.UPDATE) {
+                    updates.elementUpdated(index, deltas.getTargetValue(index));
+                } else if(type == ListEvent.DELETE) {
+                    updates.addInsert(index);
+                }
+            }
+            updates.commitEvent();
+
+            final int sourceSizeBeforeChanges = source.size();
+
+            // 2. redo the ListEvent's changes on source
+            for(Tree4Deltas.Iterator<S> i = deltas.iterator(); i.hasNext(); ) {
+                i.next();
+                int index = i.getIndex();
+                int type = i.getType();
+                if(type == ListEvent.INSERT) {
+                    source.add(index, i.getPreviousValue());
+                } else if(type == ListEvent.UPDATE) {
+                    source.set(index, i.getPreviousValue());
+                } else if(type == ListEvent.DELETE) {
+                    source.remove(index);
+                }
+            }
+
+            txStarted = false;
+            deltas.reset(sourceSizeBeforeChanges);
+        }
     }
 
     /**
