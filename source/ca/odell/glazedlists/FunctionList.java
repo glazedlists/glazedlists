@@ -66,7 +66,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
 
     private final List<S> sourceElements;
 
-    /** A list of the Objects produced by running the source elements through the {@link forward} Function. */
+    /** A list of the Objects produced by running the source elements through the {@link #forward} Function. */
     private final List<E> mappedElements;
 
     /** The Function that maps source elements to FunctionList elements. */
@@ -200,7 +200,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     public void listChanged(ListEvent<S> listChanges) {
         if(listChanges.isReordering()) {
             int[] reorderMap = listChanges.getReorderMap();
-            List<E> originalMappedElements = new ArrayList(mappedElements);
+            List<E> originalMappedElements = new ArrayList<E>(mappedElements);
             for(int i = 0; i < reorderMap.length; i++) {
                 mappedElements.set(i, originalMappedElements.get(reorderMap[i]));
             }
