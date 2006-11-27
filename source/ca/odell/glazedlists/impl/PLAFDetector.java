@@ -21,8 +21,7 @@ public final class PLAFDetector {
     /**
      * Workaround method to get the metal theme, either "Steel" or "Ocean". This is because the
      * Metal look and feel's getName() property does not distinguish between versions correctly.
-     * A bug has been submitted to the Sun Java bug database and will be reviewed. If fixed, we
-     * can get rid of this ugly hack method.
+     * A bug has been submitted to the Sun Java bug database and will be reviewed.
      */
     public static String getMetalTheme() {
         try {
@@ -41,8 +40,10 @@ public final class PLAFDetector {
     }
 
     /**
-     * Workaround method to get the Windows theme, either "Windows Classic" or
-     * "Windows XP". The test for Windows XP is also an ugly hack because Swing's
+     * Workaround method to get the Windows theme, either "Windows Classic",
+     * "Windows XP" or "Windows Vista".
+     *
+     * <p>The test for the Windows style is also an ugly hack because Swing's
      * pluggable look-and-feel provides no alternative means for determining if
      * the current theme is XP. For compatibility, the algorithm to determine if
      * the style is XP is derived from similar code in the XPStyle class.
@@ -50,6 +51,7 @@ public final class PLAFDetector {
     public static String getWindowsTheme() {
         String classic = "Classic Windows";
         String xp = "Windows XP";
+        String vista = "Windows Vista";
 
         // theme active property must be "Boolean.TRUE";
         String themeActiveKey = "win.xpstyle.themeActive";
@@ -71,7 +73,22 @@ public final class PLAFDetector {
         String classicLnF = "com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel";
         if(UIManager.getLookAndFeel().getClass().getName().equals(classicLnF)) return "Classic Windows";
 
-        // must be XP
-        return xp;
+        // breakdown by major engineering version
+        // Windows 2000 os.version is 5.0
+        // Windows XP os.version is 5.1
+        // Windows Vista os.version is 6
+        try {
+            double osVersion = Double.parseDouble(System.getProperty("os.version"));
+            if(osVersion >= 6.0) return vista;
+            if(osVersion >= 5.1) return xp;
+            return classic;
+
+        } catch (AccessControlException e) {
+            // return a reasonable default if we're not allowed access to the OS version
+            return xp;
+        } catch (NumberFormatException e) {
+            // return a reasonable default if the version wasn't in the expected format
+            return xp;
+        }
     }
 }

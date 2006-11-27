@@ -27,6 +27,7 @@ public final class SortIconFactory {
         lookAndFeelResourcePathMap.put("Metal/Ocean", "ocean");
         lookAndFeelResourcePathMap.put("Classic Windows", "windows");
         lookAndFeelResourcePathMap.put("Windows XP", "windowsxp");
+        lookAndFeelResourcePathMap.put("Windows Vista", "windowsxp"); // TODO(jessewilson) make Vista-specific icons
         lookAndFeelResourcePathMap.put("WinLAF", "windowsxp");
     }
 
