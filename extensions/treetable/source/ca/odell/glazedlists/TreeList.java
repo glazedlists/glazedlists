@@ -385,7 +385,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * A transient  helper object to attach nodes to sibling and parent nodes.
+     * A transient helper object to attach nodes to sibling and parent nodes.
      *
      * <p>Because this class is stateful, it shouldn't be referenced across changes
      * as that risks a memory leak.
@@ -614,8 +614,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * A list of nodes to be attached to their parent nodes and siblings, provided
      * in increasing order by index.
      *
-     * <p>This queue is necessary because our algorith encounters nodes in random
-     * order but most process them in increasing order.
+     * <p>This queue is necessary because our algorithm encounters nodes in random
+     * order but must process them in increasing order.
      */
     private final class NodesToAttach {
         private final List<Node<E>> nodes = new ArrayList<Node<E>>();
