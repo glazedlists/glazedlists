@@ -1291,7 +1291,7 @@ public class TreeListTest extends TestCase {
         }
     }
 
-    public void testCollapseHiddenSubtrees() {
+    public void testRemoveHiddenCollapsedSubtrees() {
         BasicEventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1315,12 +1315,6 @@ public class TreeListTest extends TestCase {
         });
 
         treeList.setExpanded(0, true);
-        assertTreeStructure(treeList, new String[] {
-                "L",
-                "LL",
-        });
-
-        treeList.setExpanded(1, true);
         assertTreeStructure(treeList, new String[] {
                 "L",
                 "LL",

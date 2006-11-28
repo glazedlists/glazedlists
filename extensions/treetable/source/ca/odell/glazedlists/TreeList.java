@@ -255,48 +255,55 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // if we're already in the desired state, give up!
         if(toExpand.expanded == expanded) return;
 
-        updates.beginEvent();
-
         // toggle the active node.
         toExpand.expanded = expanded;
 
-        // This node's visibility does not change, only that of its children
-        if(toExpand.isVisible()) {
-            int visibleIndex = data.indexOfNode(toExpand.element, VISIBLE_NODES);
-            updates.addUpdate(visibleIndex);
-        }
+        // whether the entire subtree, including the specified node, is visible
+        boolean subtreeIsVisible = (toExpand.element.getColor() & VISIBLE_NODES) != 0;
 
-        Node<E> toExpandNextSibling = nextNodeThatsNotAChildOfByStructure(toExpand);
+        // only fire events and change deeper elements if the subtree is showing
+        if(subtreeIsVisible) {
+            updates.beginEvent();
 
-        // walk through the subtree, looking for all the descendents we need
-        // to change. As we encounter them, change them and fire events
-        for(Node<E> descendent= toExpand.next(); descendent != null && descendent != toExpandNextSibling; descendent = descendent.next()) {
-            // figure out if this node should be visible by walking up the ancestors
-            // to the node being expanded, searching for a parent that's not
-            // expanded
-            boolean shouldBeVisible = expanded;
-            for(Node<E> ancestor = descendent.parent; shouldBeVisible && ancestor != toExpand; ancestor = ancestor.parent) {
-                if(!ancestor.expanded) {
-                    shouldBeVisible = false;
+            // This node's visibility does not change, only that of its children
+            if(toExpand.isVisible()) {
+                int visibleIndex = data.indexOfNode(toExpand.element, VISIBLE_NODES);
+                updates.addUpdate(visibleIndex);
+            }
+
+            Node<E> toExpandNextSibling = nextNodeThatsNotAChildOfByStructure(toExpand);
+
+            // walk through the subtree, looking for all the descendents we need
+            // to change. As we encounter them, change them and fire events
+            for(Node<E> descendent = toExpand.next(); descendent != null && descendent != toExpandNextSibling; descendent = descendent.next()) {
+                // figure out if this node should be visible by walking up the ancestors
+                // to the node being expanded, searching for a parent that's not
+                // expanded
+                boolean shouldBeVisible = expanded;
+                for(Node<E> ancestor = descendent.parent; shouldBeVisible && ancestor != toExpand; ancestor = ancestor.parent) {
+                    if(!ancestor.expanded) {
+                        shouldBeVisible = false;
+                    }
+                }
+                if(shouldBeVisible == descendent.isVisible()) continue;
+
+                // show a non-visible node
+                if(shouldBeVisible) {
+                    setVisible(descendent, true);
+                    int insertIndex = data.indexOfNode(descendent.element, VISIBLE_NODES);
+                    updates.addInsert(insertIndex);
+
+                // hide a visible node
+                } else {
+                    int deleteIndex = data.indexOfNode(descendent.element, VISIBLE_NODES);
+                    updates.elementDeleted(deleteIndex, descendent.getElement());
+                    setVisible(descendent, false);
                 }
             }
-            if(shouldBeVisible == descendent.isVisible()) continue;
-
-            // show a non-visible node
-            if(shouldBeVisible) {
-                setVisible(descendent, true);
-                int insertIndex = data.indexOfNode(descendent.element, VISIBLE_NODES);
-                updates.addInsert(insertIndex);
-
-            // hide a visible node
-            } else {
-                int deleteIndex = data.indexOfNode(descendent.element, VISIBLE_NODES);
-                updates.elementDeleted(deleteIndex, descendent.getElement());
-                setVisible(descendent, false);
-            }
+            updates.commitEvent();
         }
+
         assert(isValid());
-        updates.commitEvent();
     }
 
     /**
