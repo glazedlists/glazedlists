@@ -204,9 +204,9 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
             final List<E> originalMappedElements = new ArrayList<E>(mappedElements);
             for (int i = 0; i < reorderMap.length; i++) {
                 final int sourceIndex = reorderMap[i];
-                final E replaced = mappedElements.set(i, originalMappedElements.get(sourceIndex));
-                updates.elementUpdated(i, replaced);
+                mappedElements.set(i, originalMappedElements.get(sourceIndex));
             }
+            updates.reorder(reorderMap);
 
         } else {
             while (listChanges.next()) {
