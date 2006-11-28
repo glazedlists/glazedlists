@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.List;
 /**
  * This List is meant to simplify the task of transforming each element of a
  * source list to an element stored at the same index in this FunctionList.
- * The logic of precisely how to tranform the source elements is contained
+ * The logic of precisely how to transform the source elements is contained
  * within a {@link Function} that must be supplied at the time of construction
  * and can never be changed. This {@link Function} is called the forward
  * function because it creates elements in this {@link FunctionList} from
@@ -23,7 +22,7 @@ import java.util.List;
  *
  * <p>An optional reverse {@link Function} which is capable of mapping the
  * elements of this FunctionList back to the corresponding source element may
- * be supplied in order to use the following methods:
+ * be supplied in order to use the following mutating methods:
  *
  * <ul>
  *   <li> {@link #add(Object)}
@@ -94,9 +93,9 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * each source element using the given forward {@link Function}. If the
      * reverse {@link Function} is not null, {@link #add(Object)},
      * {@link #add(int, Object)} and {@link #set(int, Object)} will execute
-     * correctly.
+     * as expected.
      *
-     * <p> Note: a {@link AdvancedFunction} can be specified for the forward
+     * <p> Note: an {@link AdvancedFunction} can be specified for the forward
      * {@link Function} which allows the implementor a chance to examine the
      * prior value that was mapped to a source element when it must be remapped
      * due to a modification (from a call to {@link List#set}).
@@ -125,7 +124,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
         // map all of the elements within source
         this.mappedElements = new ArrayList<E>(source.size());
         for (Iterator<S> iter = source.iterator(); iter.hasNext();) {
-            this.mappedElements.add(this.forward(iter.next()));
+            this.mappedElements.add(forward(iter.next()));
         }
 
         source.addListEventListener(this);
@@ -139,7 +138,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * @return the result of transforming the source element
      */
     private E forward(S s) {
-        return this.forward.evaluate(s);
+        return forward.evaluate(s);
     }
 
     /**
@@ -151,7 +150,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * @return the result of transforming the source element
      */
     private E forward(E e, S s) {
-        return this.forward.reevaluate(s, e);
+        return forward.reevaluate(s, e);
     }
 
     /**
@@ -162,10 +161,10 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * @return the result of transforming the {@link FunctionList} element
      */
     private S reverse(E e) {
-        if (this.reverse == null)
+        if (reverse == null)
             throw new IllegalStateException("A reverse mapping function must be specified to support this List operation");
 
-        return this.reverse.evaluate(e);
+        return reverse.evaluate(e);
     }
 
     /**
@@ -175,10 +174,10 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      */
     public Function<S,E> getForwardFunction() {
         // unwrap the forward function from an AdvancedFunctionAdapter if necessary
-        if (this.forward instanceof AdvancedFunctionAdapter)
-            return ((AdvancedFunctionAdapter) this.forward).getDelegate();
+        if (forward instanceof AdvancedFunctionAdapter)
+            return ((AdvancedFunctionAdapter) forward).getDelegate();
         else
-            return this.forward;
+            return forward;
     }
 
     /**
@@ -188,7 +187,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      * construction.
      */
     public Function<E,S> getReverseFunction() {
-        return this.reverse;
+        return reverse;
     }
 
     /** {@inheritDoc} */
@@ -198,11 +197,15 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
 
     /** {@inheritDoc} */
     public void listChanged(ListEvent<S> listChanges) {
-        if(listChanges.isReordering()) {
-            int[] reorderMap = listChanges.getReorderMap();
-            List<E> originalMappedElements = new ArrayList<E>(mappedElements);
-            for(int i = 0; i < reorderMap.length; i++) {
-                mappedElements.set(i, originalMappedElements.get(reorderMap[i]));
+        updates.beginEvent(true);
+
+        if (listChanges.isReordering()) {
+            final int[] reorderMap = listChanges.getReorderMap();
+            final List<E> originalMappedElements = new ArrayList<E>(mappedElements);
+            for (int i = 0; i < reorderMap.length; i++) {
+                final int sourceIndex = reorderMap[i];
+                final E replaced = mappedElements.set(i, originalMappedElements.get(sourceIndex));
+                updates.elementUpdated(i, replaced);
             }
 
         } else {
@@ -212,48 +215,50 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
 
                 if (changeType == ListEvent.INSERT) {
                     final S inserted = source.get(changeIndex);
-                    this.sourceElements.add(changeIndex, inserted);
-                    this.mappedElements.add(changeIndex, this.forward(inserted));
+                    sourceElements.add(changeIndex, inserted);
+                    mappedElements.add(changeIndex, forward(inserted));
+                    updates.addInsert(changeIndex);
 
                 } else if (changeType == ListEvent.UPDATE) {
+                    final E replaced = get(changeIndex);
                     final S updated = source.get(changeIndex);
-                    this.sourceElements.set(changeIndex, updated);
-                    this.mappedElements.set(changeIndex, this.forward(this.get(changeIndex), updated));
+                    sourceElements.set(changeIndex, updated);
+                    mappedElements.set(changeIndex, forward(replaced, updated));
+                    updates.elementUpdated(changeIndex, replaced);
 
                 } else if (changeType == ListEvent.DELETE) {
-                    final S deletedSource = this.sourceElements.remove(changeIndex);
-                    final E deletedTransform = this.mappedElements.remove(changeIndex);
-                    this.forward.dispose(deletedSource, deletedTransform);
+                    final S deletedSource = sourceElements.remove(changeIndex);
+                    final E deletedTransform = mappedElements.remove(changeIndex);
+                    forward.dispose(deletedSource, deletedTransform);
+                    updates.elementDeleted(changeIndex, deletedTransform);
                 }
             }
         }
-
-        listChanges.reset();
-        updates.forwardEvent(listChanges);
+        updates.commitEvent();
     }
 
     /** {@inheritDoc} */
     public E get(int index) {
-        return this.mappedElements.get(index);
+        return mappedElements.get(index);
     }
 
     /** {@inheritDoc} */
     public E remove(int index) {
-        final E removed = this.get(index);
+        final E removed = get(index);
         source.remove(index);
         return removed;
     }
 
     /** {@inheritDoc} */
     public E set(int index, E value) {
-        final E updated = this.get(index);
-        source.set(index, this.reverse(value));
+        final E updated = get(index);
+        source.set(index, reverse(value));
         return updated;
     }
 
     /** {@inheritDoc} */
     public void add(int index, E value) {
-        source.add(index, this.reverse(value));
+        source.add(index, reverse(value));
     }
 
     /**
@@ -286,7 +291,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
      *
      *   <li> {@link #dispose} which is called when an element is removed from
      *        the FunctionList and is meant to be location that cleans up any
-     *        resource the Function may have allocated. (like Listeners for
+     *        resources the Function may have allocated. (like Listeners for
      *        example)
      * </ul>
      *
@@ -313,8 +318,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
         /**
          * Perform any necessary resource cleanup on the given
          * <code>sourceValue</code> and <code>transformedValue</code> as they
-         * are removed from the FunctionList. For example, an installed
-         * listeners
+         * are removed from the FunctionList such as installed listeners.
          *
          * @param sourceValue the Object that was transformed
          * @param transformedValue the Object that resulted from the last
@@ -344,14 +348,14 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
          * Defers to the delegate.
          */
         public B evaluate(A sourceValue) {
-            return this.delegate.evaluate(sourceValue);
+            return delegate.evaluate(sourceValue);
         }
 
         /**
          * Defers to the delegate's {@link Function#evaluate} method.
          */
         public B reevaluate(A sourceValue, B transformedValue) {
-            return this.evaluate(sourceValue);
+            return evaluate(sourceValue);
         }
 
         public void dispose(A sourceValue, B transformedValue) {
@@ -359,7 +363,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
         }
 
         public Function getDelegate() {
-            return this.delegate;
+            return delegate;
         }
     }
 }
