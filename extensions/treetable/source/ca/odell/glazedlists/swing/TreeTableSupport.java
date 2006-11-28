@@ -254,7 +254,9 @@ public final class TreeTableSupport {
     /**
      * This listener watches for mouse clicks overtop of the expander button
      * within a renderer in a hierarchical column and toggles the expansion
-     * of the tree node, if possible.
+     * of the tree node, if possible, without calling the delegate. In all
+     * other cases (where the mouse click does not toggle expansion), the
+     * delegate is allowed to handle the mouse click as normal.
      */
     private class ExpandAndCollapseMouseListener extends MouseAdapter {
 
@@ -306,10 +308,13 @@ public final class TreeTableSupport {
                 try {
                     // expand/collapse the rowObject if possible
                     if (treeList.getAllowsChildren(row))
-                        TreeTableUtilities.toggleExpansion(table, treeList, row);
+                        TreeTableUtilities.toggleExpansion(table, treeList, row).run();
                 } finally {
                     treeList.getReadWriteLock().writeLock().unlock();
                 }
+
+                // return early and don't allow the delegate a chance to react to the mouse click
+                return;
             }
 
             if (delegate != null)
@@ -323,6 +328,15 @@ public final class TreeTableSupport {
      * possible.
      */
     private class ExpandAndCollapseKeyListener extends KeyAdapter {
+        /**
+         * A Runnable which restores the state of the selection model and the
+         * client property "JTable.autoStartsEdit". We save the Runnable when
+         * the backspace key is pressed and the focus is within the hierarchy
+         * column. We execute it when the key is released to resume normal
+         * handling of future keystrokes.
+         */
+        private Runnable restoreStateRunnable;
+
         public void keyPressed(KeyEvent e) {
             // if the table isn't enabled, break early
             if (!table.isEnabled())
@@ -352,10 +366,19 @@ public final class TreeTableSupport {
             try {
                 // if the row is expandable, toggle its expanded state
                 if (treeList.getAllowsChildren(row))
-                    TreeTableUtilities.toggleExpansion(table, treeList, row);
+                    restoreStateRunnable = TreeTableUtilities.toggleExpansion(table, treeList, row);
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
             }
+        }
+
+        /**
+         * When the key is released, execute the Runnable which restores the
+         * state of the selection model and "JTable.autoStartsEdit" client property.
+         */
+        public void keyReleased(KeyEvent e) {
+            if (restoreStateRunnable != null)
+                restoreStateRunnable.run();
         }
     }
 
@@ -394,7 +417,7 @@ public final class TreeTableSupport {
                 if (treeList.getAllowsChildren(row)) {
                     final boolean expanded = treeList.isExpanded(row);
                     if ((expanded && isLeftArrowKey) || (!expanded && isRightArrowKey))
-                        TreeTableUtilities.toggleExpansion(table, treeList, row);
+                        TreeTableUtilities.toggleExpansion(table, treeList, row).run();
                 }
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();

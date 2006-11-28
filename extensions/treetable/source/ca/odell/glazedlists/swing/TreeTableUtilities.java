@@ -85,8 +85,13 @@ class TreeTableUtilities {
      * triggered by the keyboard. We do this to avoid invoking two behaviours
      * with only a single keystroke: toggling the expand/collapse state AND
      * starting a cell edit.
+     *
+     * A Runnable is returned which, when executed, restores the settings in
+     * the EventSelectionModel and the JTable's client property. It is up to
+     * the caller to decide when the appropriate time to re-enable those
+     * settings may be and execute the Runnable.
      */
-    static void toggleExpansion(JTable table, TreeList treeList, int row) {
+    static Runnable toggleExpansion(JTable table, TreeList treeList, int row) {
         final RestoreStateRunnable restoreStateRunnable = new RestoreStateRunnable(table);
         final EventSelectionModel selectionModel = restoreStateRunnable.getEventSelectionModel();
 
@@ -99,14 +104,13 @@ class TreeTableUtilities {
 
         treeList.toggleExpanded(row);
 
-        // post a Runnable to the Swing EDT to restore the state of the table and selection model
-        SwingUtilities.invokeLater(restoreStateRunnable);
+        // return a Runnable that restores the state of the table and selection model
+        return restoreStateRunnable;
     }
 
     /**
-     * Instances of this Runnable can be created and posted to the Swing EDT
-     * in order to restore a captured state of a JTable and EventSelectionModel
-     * at some point in the future after the current Runnable is done executing.
+     * Instances of this Runnable restore a captured state of a JTable and its
+     * EventSelectionModel at some point in the future (when it is executed)
      */
     private static class RestoreStateRunnable implements Runnable {
 
