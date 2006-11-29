@@ -2,7 +2,7 @@
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 /*                                                          StarLight Systems */
-package ca.odell.glazedlists;
+package com.publicobject.misc.util.concurrent;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class JobQueue extends Thread {
+public class JobQueue implements Runnable {
 
     /** the tasks to invoke, in order of invocation */
     private List<Job> jobs = new ArrayList<Job>();

@@ -5,7 +5,7 @@
 package ca.odell.glazedlists.util.concurrent;
 
 import junit.framework.TestCase;
-import ca.odell.glazedlists.JobQueue;
+import com.publicobject.misc.util.concurrent.JobQueue;
 
 
 /**
@@ -28,12 +28,13 @@ public class LockInterruptionTest extends TestCase {
      */
     private void testLockInterrupt(final ReadWriteLock lock) {
         JobQueue jobQueue = new JobQueue();
-        jobQueue.start();
+        Thread jobQueueThread = new Thread(jobQueue);
+        jobQueueThread.start();
 
         lock.writeLock().lock();
 
         // interrupt that thread
-        jobQueue.interrupt();
+        jobQueueThread.interrupt();
 
         // create a thread that will block waiting on Lock.lock()
         JobQueue.Job result = jobQueue.invokeLater(new LockALockRunnable(lock.writeLock()));

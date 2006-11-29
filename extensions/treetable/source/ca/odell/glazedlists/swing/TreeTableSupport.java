@@ -178,10 +178,6 @@ public final class TreeTableSupport {
         if (viewColumnIndex == -1)
             throw new IllegalArgumentException("Unable to locate a view index for the given model index: " + modelColumnIndex);
 
-        // if we have data, check that the hierarchical column is editable
-        if (!treeList.isEmpty() && !table.isCellEditable(0, viewColumnIndex))
-            throw new IllegalStateException("The hierarchy view column at index " + viewColumnIndex + " must be editable to support expanding and collapsing tree nodes");
-
         // look up the hierarchical TableColumn
         final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
 
