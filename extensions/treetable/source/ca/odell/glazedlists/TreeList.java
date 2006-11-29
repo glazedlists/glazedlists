@@ -124,24 +124,24 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /**
      * The number of nodes including the node itself in its subtree.
      */
-    public int subtreeSize(int visibleIndex, boolean includeCollapsed) {
+    public int subtreeSize(int index, boolean includeCollapsed) {
         byte colorsOut = includeCollapsed ? ALL_NODES : VISIBLE_NODES;
 
         // get the subtree size by finding the next node not in the subtree.
         // We could also calculate this by looking at the first child, then
         // traversing across all children until we get to the end of the
         // children.
-        Node<E> node = data.get(visibleIndex, VISIBLE_NODES).get();
+        Node<E> node = data.get(index, colorsOut).get();
 
         // find the next node that's not a child to find the delta
         Node<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOfByStructure(node);
 
         // if we don't have a sibling after us, we've hit the end of the tree
         if(nextNodeNotInSubtree == null) {
-            return data.size(colorsOut) - visibleIndex;
+            return data.size(colorsOut) - index;
         }
 
-        return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - visibleIndex;
+        return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - index;
     }
 
     /**
@@ -188,7 +188,12 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      *      children, regardless of whether such children are visible.
      */
     public boolean hasChildren(int visibleIndex) {
-        return subtreeSize(visibleIndex, true) > 1;
+        boolean hasChildren = subtreeSize(visibleIndex, true) > 1;
+        boolean isLeaf = getTreeNode(visibleIndex).isLeaf();
+        if(isLeaf == hasChildren) {
+            subtreeSize(visibleIndex, true);
+        }
+        return hasChildren;
     }
 
 
