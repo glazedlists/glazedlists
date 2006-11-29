@@ -22,7 +22,7 @@ import java.awt.*;
  *
  * <p>Typical usage of {@link TreeTableSupport} resembles this:
  * <br><br>
- * <pre>
+ * <pre><code>
  * // create an EventList of data
  * EventList myEventList = ...
  *
@@ -35,7 +35,7 @@ import java.awt.*;
  *
  * // make the 3rd table column a hierarchical column to create a TreeTable
  * TreeTableSupport.install(myTable, treeList, 2);
- * </pre>
+ * </code></pre>
  *
  * In order to achieve all of the treetable behaviours, the following occurs
  * when {@link #install} is called:
@@ -44,19 +44,19 @@ import java.awt.*;
  *   <li>a {@link TreeTableCellRenderer} will be installed on the hierarchical
  *       {@link TableColumn}. It wraps any {@link TableCellRenderer} previously
  *       installed on the {@link TableColumn}, or if none was present, a
- *       DefaultTableCellRenderer.
+ *       DefaultTableCellRenderer.</li>
  *
  *   <li>a {@link TreeTableCellEditor} will be installed on the hierarchical
  *       {@link TableColumn}. It wraps any {@link TableCellEditor} previously
  *       installed on the {@link TableColumn}, or if none was present, a
- *       DefaultCellEditor.
+ *       DefaultCellEditor.</li>
  *
  *   <li>the UI Delegate's MouseListener will be decorated with extra
  *       functionality that detects clicks overtop of the expand/collapse icon
  *       and reacts accordingly by expanding/collapsing the hierarchy. In these
  *       cases the normal mechanism for handling clicks over the table is
  *       circumvented and thus cell edits and/or row selection changes are not
- *       honoured.
+ *       honoured.</li>
  * </ul>
  *
  * <font size="+1"><u>Customizing TreeTableSupport</u></font>
@@ -86,20 +86,20 @@ import java.awt.*;
  * <ul>
  *   <li>Does node N currently have children? If it does, the expander button
  *       <code>must</code> be displayed.
- *       <p>e.g.: A directory in a file system that contains files and/or subdirectories.<p>
+ *       <p>e.g.: A directory in a file system that contains files and/or subdirectories.</li>
  *
  *   <li>If node N does not currently have children, is it capable of having
  *       children in the future? If it is not, then it is a true leaf node and
  *       the expander button <code>must not</code> be displayed.
- *       <p>e.g.: A file in a file system.<p>
+ *       <p>e.g.: A file in a file system.</li>
  *
  *   <li>If node N currently has no children but is capable of having children
  *       in the future, should it be rendered with an expander now? Both yes
  *       and no are valid choices and thus the decision is left to the API
  *       user. The preference for this situation can be controlled using
  *       {@link #setShowExpanderForEmptyParent(boolean)}.
- *       <p>e.g.: Empty directories in Mac OS X Finder are displayed with
- *       visible expanders while Windows Explorer does not display them.<p>
+ *       <br>e.g.: Empty directories in Mac OS X Finder are displayed with
+ *       visible expanders while Windows Explorer does not display them.</li>
  * </ul>
  *
  * @author James Lemieux
@@ -218,13 +218,13 @@ public final class TreeTableSupport {
      * the collapsed/expanded state and ensures that we do not change the
      * selected row in that case.
      */
-    private void decorateUIDelegateMouseListener(Component c) {
+    private void decorateUIDelegateMouseListener(Component component) {
         // replace the first MouseListener that appears to be installed by the UI Delegate
-        final MouseListener[] mouseListeners = c.getMouseListeners();
+        final MouseListener[] mouseListeners = component.getMouseListeners();
         for (int i = mouseListeners.length-1; i >= 0; i--) {
             if (mouseListeners[i].getClass().getName().indexOf("TableUI") != -1) {
-                c.removeMouseListener(mouseListeners[i]);
-                c.addMouseListener(new ExpandAndCollapseMouseListener(mouseListeners[i]));
+                component.removeMouseListener(mouseListeners[i]);
+                component.addMouseListener(new ExpandAndCollapseMouseListener(mouseListeners[i]));
                 break;
             }
         }
@@ -233,13 +233,13 @@ public final class TreeTableSupport {
     /**
      * This method will undo the work performed by {@link #decorateUIDelegateMouseListener(Component)}.
      */
-    private void undecorateUIDelegateMouseListener(Component c) {
+    private void undecorateUIDelegateMouseListener(Component component) {
         // replace all decorated MouseListeners with original UI Delegate MouseListener
-        final MouseListener[] mouseListeners = c.getMouseListeners();
+        final MouseListener[] mouseListeners = component.getMouseListeners();
         for (int i = 0; i < mouseListeners.length; i++) {
             if (mouseListeners[i] instanceof ExpandAndCollapseMouseListener) {
-                c.removeMouseListener(mouseListeners[i]);
-                c.addMouseListener(((ExpandAndCollapseMouseListener) mouseListeners[i]).getDelegate());
+                component.removeMouseListener(mouseListeners[i]);
+                component.addMouseListener(((ExpandAndCollapseMouseListener) mouseListeners[i]).getDelegate());
             }
         }
     }
@@ -259,10 +259,10 @@ public final class TreeTableSupport {
      *
      * <ul>
      *   <li>the <code>hierarchyColumnModelIndex</code> must correspond to a valid
-     *       view column index
+     *       view column index</li>
      *   <li>the table column at the given <code>hierarchyColumnModelIndex</code> must
      *       be editable so that tree node collapsing and expanding is possible
-     *       (collapsing/expanding is accomplished via the TreeTableCellEditor)
+     *       (collapsing/expanding is accomplished via the TreeTableCellEditor)</li>
      * </ul>
      *
      * @param table the table to convert into a tree table
@@ -281,7 +281,7 @@ public final class TreeTableSupport {
     }
 
     /**
-     * This method removes treetable support from the {@link JTable} it was
+     * Removes treetable support from the {@link JTable} it was
      * installed on. This method is useful when the {@link TreeList} of items
      * that backs the JTable must outlive the JTable itself. Calling this method
      * will return the hierarchical column to its original state before
@@ -321,24 +321,24 @@ public final class TreeTableSupport {
     }
 
     /**
-     * Sets a boolean that decides whether the expander is displayed for nodes
-     * that do not contain children but are allowed to contain children, and
+     * Sets whether the expander is displayed for nodes that do not
+     * contain children but are allowed to contain children, and
      * thus may accumulate children in the future. If this property is
      * <tt>true</tt> then empty nodes that may contain children in the future
      * are displayed with a visible expander; otherwise they are displayed
      * without the expander.
      */
-    public void setShowExpanderForEmptyParent(boolean b) {
+    public void setShowExpanderForEmptyParent(boolean showExpanderForEmptyParent) {
         checkAccessThread();
 
-        if (showExpanderForEmptyParent == b)
+        if (this.showExpanderForEmptyParent == showExpanderForEmptyParent)
             return;
 
-        showExpanderForEmptyParent = b;
+        this.showExpanderForEmptyParent = showExpanderForEmptyParent;
 
         // indicate the new property value to the renderer and editor
-        treeTableCellRenderer.setShowExpanderForEmptyParent(b);
-        treeTableCellEditor.setShowExpanderForEmptyParent(b);
+        treeTableCellRenderer.setShowExpanderForEmptyParent(showExpanderForEmptyParent);
+        treeTableCellEditor.setShowExpanderForEmptyParent(showExpanderForEmptyParent);
 
         // repaint the table so the display is updated
         table.repaint();
@@ -354,34 +354,34 @@ public final class TreeTableSupport {
     }
 
     /**
-     * Sets a boolean that controls two behaviours in tandem. If <code>b</code>
+     * Sets two behaviours in tandem. If <code>arrowKeyExpansionEnabled</code>
      * is <tt>true</tt> then two things are changed:
      *
      * <ul>
      *   <li> The left and right arrow keys will toggle the expansion state of
      *        hierarchy nodes in the tree rather than adjust cell focus in the
-     *        table.
+     *        table.</li>
      * 
      *   <li> The table's column model is replaced with a no-op implementation
      *        so that column selection and column lead/anchor indexes are NOT
      *        tracked. Thus, column selection is disabled and there is no cell
-     *        focus adjusted when the left and right arrow keys are used.
+     *        focus adjusted when the left and right arrow keys are used.</li>
      * </ul>
      *
-     * If <code>b</code> is <tt>false</tt> then the behaviour is reverted to
-     * default. That is, left and right arrow keys adjust cell focus in the
-     * table and not expansion, and the original column selection model is
+     * <p>If <code>arrowKeyExpansionEnabled</code> is <tt>false</tt> then the behaviour
+     * is reverted to default. That is, left and right arrow keys adjust cell focus
+     * in the table and not expansion, and the original column selection model is
      * reinstalled.
      */
-    public void setArrowKeyExpansionEnabled(boolean b) {
+    public void setArrowKeyExpansionEnabled(boolean arrowKeyExpansionEnabled) {
         checkAccessThread();
 
         // make sure we're actually changing the value
-        if (arrowKeyExpansionEnabled == b)
+        if (this.arrowKeyExpansionEnabled == arrowKeyExpansionEnabled)
             return;
 
         final TableColumnModel tableColumnModel = table.getColumnModel();
-        if (b) {
+        if (arrowKeyExpansionEnabled) {
             // if arrow key expansion is turned on, install the noop column selection model
             originalColumnSelectionModel = tableColumnModel.getSelectionModel();
             tableColumnModel.setSelectionModel(NOOP_SELECTION_MODEL);
@@ -392,7 +392,7 @@ public final class TreeTableSupport {
             originalColumnSelectionModel = null;
         }
 
-        arrowKeyExpansionEnabled = b;
+        this.arrowKeyExpansionEnabled = arrowKeyExpansionEnabled;
     }
 
     /**
