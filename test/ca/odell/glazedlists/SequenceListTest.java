@@ -63,8 +63,7 @@ public class SequenceListTest extends TestCase {
     public void testAdd() {
         final EventList<Date> source = new BasicEventList<Date>();
         final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
-        ListConsistencyListener<Date> listConsistencyListener = ListConsistencyListener.install(sequence);
-        listConsistencyListener.setPreviousElementTracked(false);
+        ListConsistencyListener.install(sequence);
 
         source.add(jun);
         assertEquals(2, sequence.size());
@@ -101,8 +100,7 @@ public class SequenceListTest extends TestCase {
     public void testRemove() {
         final EventList<Date> source = new BasicEventList<Date>();
         final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
-        ListConsistencyListener<Date> listConsistencyListener = ListConsistencyListener.install(sequence);
-        listConsistencyListener.setPreviousElementTracked(false);
+        ListConsistencyListener.install(sequence);
 
         source.add(apr);
         source.add(jun);
@@ -150,8 +148,7 @@ public class SequenceListTest extends TestCase {
     public void testSet() {
         final EventList<Date> source = new BasicEventList<Date>();
         final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
-        ListConsistencyListener<Date> listConsistencyListener = ListConsistencyListener.install(sequence);
-        listConsistencyListener.setPreviousElementTracked(false);
+        ListConsistencyListener.install(sequence);
 
         source.add(apr);
         source.add(jun);

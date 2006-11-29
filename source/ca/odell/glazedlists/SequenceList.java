@@ -202,9 +202,8 @@ public final class SequenceList<E> extends TransformedList<E,E> {
 
         // check for the special case when the underlying list has been completely cleared
         if (source.isEmpty()) {
-            if (!this.isEmpty()) {
-                updates.addDelete(0, size()-1);
-                sequence.clear();
+            while (!sequence.isEmpty()) {
+                updates.elementDeleted(0, sequence.remove(0));
             }
 
         } else {
@@ -229,8 +228,7 @@ public final class SequenceList<E> extends TransformedList<E,E> {
 
             // remove the unnecessary leading sequence values
             while (comparator.compare(get(1), firstSourceValue) == -1) {
-                updates.addDelete(0);
-                sequence.remove(0);
+                updates.elementDeleted(0, sequence.remove(0));
             }
 
             // add the necessary trailing sequence values
@@ -242,8 +240,8 @@ public final class SequenceList<E> extends TransformedList<E,E> {
 
             // remove the unnecessary trailing sequence values
             while (comparator.compare(get(size()-2), lastSourceValue) == 1) {
-                updates.addDelete(size()-1);
-                sequence.remove(size()-1);
+                final int lastIndex = size()-1;
+                updates.elementDeleted(lastIndex, sequence.remove(lastIndex));
             }
         }
 
