@@ -1358,7 +1358,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private class NodesList extends TransformedList<E,Node<E>> {
 
         public NodesList() {
-            super(TreeList.this);
+            super((EventList) TreeList.this);
             TreeList.this.addListEventListener(this);
         }
 
