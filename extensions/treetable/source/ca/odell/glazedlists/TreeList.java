@@ -16,10 +16,9 @@ import java.util.*;
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
  * of thread safe code.
- * 
- * <p><strong>Developer Preview</strong> this class is still under heavy development
- * and subject to API changes. It's also really slow at the moment and won't scale
- * to lists of size larger than a hundred or so efficiently.
+ *
+ * <p><strong>Developer Preview</strong> this class is still under development
+ * and subject to API changes.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -132,7 +131,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // We could also calculate this by looking at the first child, then
         // traversing across all children until we get to the end of the
         // children.
-        Node<E> node = data.get(visibleIndex, colorsOut).get();
+        Node<E> node = data.get(visibleIndex, VISIBLE_NODES).get();
 
         // find the next node that's not a child to find the delta
         Node<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOfByStructure(node);
@@ -1121,7 +1120,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // and path length second
             return aEffectiveLength - bEffectiveLength;
         }
-
     }
 
     /**
@@ -1158,7 +1156,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /**
      * A node in the display tree.
      */
-    public static class Node<E> {
+    public static final class Node<E> {
 
         private final List<E> path;
 
@@ -1373,23 +1371,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         public void listChanged(ListEvent<E> listChanges) {
             updates.forwardEvent(listChanges);
         }
-    }
-
-    /** {@inheritDoc} */
-    public String toTreeString() {
-        final StringBuffer buffer = new StringBuffer();
-        for(int i = 0; i < size(); i++) {
-            final int depth = depth(i);
-            final Node<E> node = getTreeNode(i);
-
-            for(int j = 0; j < depth; j++) {
-                buffer.append("\t");
-            }
-
-            buffer.append(node).append("\n");
-        }
-
-        return buffer.toString();
     }
 
     /**
