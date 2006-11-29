@@ -70,8 +70,8 @@ public class XmlBrowser {
             // display the XML in a tree table
             String[] columnFields = new String[] { "qName", "text" };
             String[] columnNames = new String[] { "Element", "Content" };
-            TableFormat tableFormat = GlazedLists.tableFormat(Tag.class, columnFields, columnNames);
-            EventTableModel<Tag> tableModel = new EventTableModel<Tag>(treeList, tableFormat);
+            //TableFormat tableFormat = GlazedLists.tableFormat(Tag.class, columnFields, columnNames);
+            EventTableModel<TreeList.Node<Tag>> tableModel = new EventTableModel<TreeList.Node<Tag>>(treeList.getNodesList(), new TagElementTableFormat());
             JTable table = new JTable(tableModel);
             TreeTableSupport treeSupport = TreeTableSupport.install(table, treeList, 0);
             treeSupport.setArrowKeyExpansionEnabled(true);
@@ -105,6 +105,33 @@ public class XmlBrowser {
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
+        }
+    }
+
+    public static class TagElementTableFormat implements TableFormat<TreeList.Node<Tag>> {
+
+        public int getColumnCount() {
+            return 4;
+        }
+
+        public String getColumnName(int column) {
+            switch(column) {
+                case 0 : return "Element";
+                case 1 : return "Content";
+                case 2 : return "Has Children";
+                case 3 : return "Supports Children";
+            }
+            throw new IllegalStateException();
+        }
+
+        public Object getColumnValue(TreeList.Node<Tag> baseObject, int column) {
+            switch(column) {
+                case 0 : return baseObject.getElement().getQName();
+                case 1 : return baseObject.getElement().getText();
+                case 2 : return !baseObject.isLeaf();
+                case 3 : return true;
+            }
+            throw new IllegalStateException();
         }
     }
 
