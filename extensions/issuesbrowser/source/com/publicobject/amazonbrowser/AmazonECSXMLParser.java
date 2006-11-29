@@ -300,7 +300,8 @@ public class AmazonECSXMLParser {
             // responseQueue has been shutdown, so to accomodate this case we
             // join on the responseQueue's Thread to ensure the queue's are
             // fully shutdown before returning
-            thread.join();
+            if (thread != null)
+                thread.join();
         }
 
         /**
