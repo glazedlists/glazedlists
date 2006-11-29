@@ -43,6 +43,9 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     /** The data structure that answers questions about the tree node. */
     private TreeList treeList;
 
+    /** <tt>true</tt> indicates the expander button should be visible even if the parent has no children. */
+    private boolean showExpanderForEmptyParent;
+
     /** The panel capable of laying out a spacer component, expander button, and data Component to produce the entire tree node display. */
     private final TreeTableCellPanel component = new TreeTableCellPanel();
 
@@ -93,8 +96,19 @@ public class TreeTableCellRenderer implements TableCellRenderer {
         }
 
         // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, supportsChildren, isExpanded, c, hasFocus);
+        component.configure(depth, hasChildren, showExpanderForEmptyParent, supportsChildren, isExpanded, c, hasFocus);
         return component;
+    }
+
+    /**
+     * If <code>b</code> is <tt>true</tt> then the expand/collapse button must
+     * be displayed for nodes which allow children but do not currently have
+     * children. This implies that empty tree nodes with the
+     * <strong>potential</strong> for children may be displayed differently
+     * than pure leaf nodes which are guaranteed to never have children.
+     */
+    void setShowExpanderForEmptyParent(boolean b) {
+        showExpanderForEmptyParent = b;
     }
 
     /**

@@ -46,6 +46,9 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     /** The user-supplied editor that produces the look of the tree node's data. */
     private TableCellEditor delegate;
 
+    /** <tt>true</tt> indicates the expander button should be visible even if the parent has no children. */
+    private boolean showExpanderForEmptyParent;
+
     /** Respond to editing changes in the delegate TableCellEditor. */
     private final CellEditorListener delegateListener = new DelegateTableCellEditorListener();
 
@@ -100,7 +103,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
         }
 
         // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, supportsChildren, isExpanded, c, false);
+        component.configure(depth, hasChildren, showExpanderForEmptyParent, supportsChildren, isExpanded, c, false);
         return component;
     }
 
@@ -145,12 +148,25 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
         return super.isCellEditable(event);
     }
 
+    /** @inheritDoc */
     public boolean shouldSelectCell(EventObject anEvent) {
         return delegate.shouldSelectCell(anEvent);
     }
 
+    /** @inheritDoc */
     public Object getCellEditorValue() {
         return delegate.getCellEditorValue();
+    }
+
+    /**
+     * If <code>b</code> is <tt>true</tt> then the expand/collapse button must
+     * be displayed for nodes which allow children but do not currently have
+     * children. This implies that empty tree nodes with the
+     * <strong>potential</strong> for children may be displayed differently
+     * than pure leaf nodes which are guaranteed to never have children.
+     */
+    void setShowExpanderForEmptyParent(boolean b) {
+        showExpanderForEmptyParent = b;
     }
 
     /**

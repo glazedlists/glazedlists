@@ -80,9 +80,10 @@ class TreeTableCellPanel extends JPanel {
      *      only has meaning when <code>isExpandable</code> is true; otherwise it is ignored.
      * @param nodeComponent a Component which displays the data of the tree node
      */
-    public void configure(int depth, boolean hasChildren, boolean supportsChildren, boolean isExpanded, Component nodeComponent, boolean hasFocus) {
+    public void configure(int depth, boolean hasChildren, boolean showExpanderForEmptyParent, boolean supportsChildren, boolean isExpanded, Component nodeComponent, boolean hasFocus) {
         // if the tree node is expandable, pick an icon for the expander button
-        if(supportsChildren)
+        final boolean showExpanderButton = hasChildren || (supportsChildren && showExpanderForEmptyParent);
+        if(showExpanderButton)
             expanderButton.setIcon(UIManager.getIcon(isExpanded ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
 
         // assign a default background color to this panel to attempt to remain consistent with the nodeComponent
@@ -104,7 +105,7 @@ class TreeTableCellPanel extends JPanel {
         // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
         removeAll();
         add(getSpacer(depth), TreeTableCellLayout.SPACER);
-        add(supportsChildren ? expanderButton : createSpacer(1), TreeTableCellLayout.EXPANDER);
+        add(showExpanderButton ? expanderButton : createSpacer(1), TreeTableCellLayout.EXPANDER);
         add(nodeComponent, TreeTableCellLayout.NODE_COMPONENT);
 
         this.nodeComponent = nodeComponent;
