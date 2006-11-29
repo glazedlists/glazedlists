@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
-import com.publicobject.misc.swing.NoSelectionListSelectionModel;
 import com.publicobject.misc.swing.LookAndFeelTweaks;
 
 /**
@@ -74,10 +73,11 @@ public class XmlBrowser {
             TableFormat tableFormat = GlazedLists.tableFormat(Tag.class, columnFields, columnNames);
             EventTableModel<Tag> tableModel = new EventTableModel<Tag>(treeList, tableFormat);
             JTable table = new JTable(tableModel);
-            TreeTableSupport.install(table, treeList, 0);
+            TreeTableSupport treeSupport = TreeTableSupport.install(table, treeList, 0);
+            treeSupport.setArrowKeyExpansionEnabled(true);
+            treeSupport.setShowExpanderForEmptyParent(false);
             TableComparatorChooser.install(table, sortedList, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
             LookAndFeelTweaks.tweakTable(table);
-            table.getColumnModel().setSelectionModel(new NoSelectionListSelectionModel());
             JScrollPane tableScrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             tableScrollPane.getViewport().setBackground(UIManager.getColor("EditorPane.background"));
 
