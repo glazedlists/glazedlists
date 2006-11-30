@@ -3,20 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.Comparator;
 
 /**
- * An {@link EventList} that shows the unique elements from its source {@link EventList}
- * ordered by the frequency of their appearance.
+ * An {@link EventList} that shows the unique elements from its source
+ * {@link EventList} ordered by the frequency of their appearance.
  *
  * <p>This {@link EventList} supports all write operations.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class
- * breaks the contract required by {@link java.util.List}. See {@link EventList}
- * for an example.
+ * breaks the contract required by {@link java.util.List}. See
+ * {@link EventList} for an example.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
@@ -42,18 +41,18 @@ public final class PopularityList<E> extends TransformedList<E, E> {
     private UniqueList<E> uniqueList;
 
     /**
-     * Creates a new {@link PopularityList} that provides frequency-ranking for the
-     * specified {@link EventList}.
+     * Creates a new {@link PopularityList} that provides frequency-ranking
+     * for the specified {@link EventList}.
      *
-     * @param uniqueComparator The {@link Comparator} used to determine equality.
+     * @param uniqueComparator {@link Comparator} used to determine equality
      */
     public PopularityList(EventList<E> source, Comparator<E> uniqueComparator) {
         this(new UniqueList<E>(source, uniqueComparator));
     }
 
     /**
-     * Creates a new {@link PopularityList} that provides frequency-ranking for the
-     * specified {@link EventList}.
+     * Creates a new {@link PopularityList} that provides frequency-ranking
+     * for the specified {@link EventList}.
      */
     public PopularityList(EventList<E> source) {
         this(new UniqueList<E>(source));
@@ -66,10 +65,9 @@ public final class PopularityList<E> extends TransformedList<E, E> {
     private PopularityList(UniqueList<E> uniqueList) {
         super(new SortedList<E>(uniqueList, new PopularityComparator<E>(uniqueList)));
         this.uniqueList = uniqueList;
-//        uniqueList.setFireCountChangeEvents(true);
 
         // listen for changes to the source list
-        ((SortedList<E>)super.source).addListEventListener(this);
+        source.addListEventListener(this);
     }
 
     /** {@inheritDoc} */

@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// for being a JUnit test case
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -22,8 +21,8 @@ public class PopularityListTest extends TestCase {
      * Test that the Popularity List works with simple data.
      */
     public void testSimpleData() {
-        EventList source = new BasicEventList();
-        PopularityList popularityList = new PopularityList(source);
+        EventList<String> source = new BasicEventList<String>();
+        PopularityList popularityList = new PopularityList<String>(source);
         
         source.add("Mike");
         source.add("Kevin");
@@ -64,9 +63,9 @@ public class PopularityListTest extends TestCase {
     public void testRandom() {
         Random dice = new Random(0);
         
-        EventList source = new BasicEventList();
-        SortedList sortedSource = new SortedList(source);
-        PopularityList popularityList = new PopularityList(source);
+        EventList<Integer> source = new BasicEventList<Integer>();
+        SortedList<Integer> sortedSource = new SortedList<Integer>(source);
+        PopularityList<Integer> popularityList = new PopularityList<Integer>(source);
         new PopularityListValidator(popularityList, sortedSource);
         
         // add 1000
@@ -92,7 +91,7 @@ public class PopularityListTest extends TestCase {
      * Tests that the PopularityList can handle multiple simultaneous events.
      */
     public void testMultipleEvents() {
-        EventList source = new BasicEventList();
+        EventList<int[]> source = new BasicEventList<int[]>();
         source.add(new int[] { 86, 1, 1, 1, 1, 0, 0 });
         source.add(new int[] { 86, 1, 0, 1, 1, 1, 0 });
         source.add(new int[] { 86, 1, 0, 0, 0, 0, 0 });
@@ -104,9 +103,9 @@ public class PopularityListTest extends TestCase {
         source.add(new int[] { 98, 1, 0, 0, 1, 1, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        SortedList sortedList = new SortedList(source, GlazedListsTests.intArrayComparator(0));
-        PopularityList popularityList = new PopularityList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(source, matcherEditor);
+        SortedList<int[]> sortedList = new SortedList<int[]>(source, GlazedListsTests.intArrayComparator(0));
+        PopularityList<int[]> popularityList = new PopularityList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
         new PopularityListValidator(popularityList, sortedList);
 
         matcherEditor.setFilter(1, 1);
@@ -121,7 +120,7 @@ public class PopularityListTest extends TestCase {
      * Tests that the PopularityList can handle edge case sets.
      */
     public void testEdgeSets() {
-        EventList source = new BasicEventList();
+        EventList<String> source = new BasicEventList<String>();
         source.add("Audi");      // A
         source.add("Audi");      // A A
         source.add("Audi");      // A A A
@@ -131,8 +130,8 @@ public class PopularityListTest extends TestCase {
         source.add("Chevy");     // A A A B C C C
         source.add("Datsun");    // A A A B C C C D
 
-        SortedList sortedList = new SortedList(source);
-        PopularityList popularityList = new PopularityList(source);
+        SortedList<String> sortedList = new SortedList<String>(source);
+        PopularityList<String> popularityList = new PopularityList<String>(source);
         new PopularityListValidator(popularityList, sortedList);
         
         // in sorted order changes
@@ -163,9 +162,9 @@ public class PopularityListTest extends TestCase {
      * Tests that the PopularityList can handle edge case sets.
      */
     public void testLeftEdgeSet() {
-        EventList source = new BasicEventList();
-        SortedList sortedList = new SortedList(source);
-        PopularityList popularityList = new PopularityList(source);
+        EventList<String> source = new BasicEventList<String>();
+        SortedList<String> sortedList = new SortedList<String>(source);
+        PopularityList<String> popularityList = new PopularityList<String>(source);
         new PopularityListValidator(popularityList, sortedList);
         
         // in sorted order changes
@@ -181,8 +180,8 @@ public class PopularityListTest extends TestCase {
      * order.
      */
     public void testEqualPopularityOrdering() {
-        EventList source = new BasicEventList();
-        PopularityList popularityList = new PopularityList(source);
+        EventList<String> source = new BasicEventList<String>();
+        PopularityList<String> popularityList = new PopularityList<String>(source);
         
         // in sorted order changes
         source.add(0, "chaos"); // c
@@ -193,7 +192,7 @@ public class PopularityListTest extends TestCase {
         source.add(5, "hippo"); // b c d f g h
         source.add(0, "album"); // a b c d f g h
         source.add(4, "eerie"); // a b c d e f g h
-        List sortedSingleCopy = new ArrayList();
+        List<String> sortedSingleCopy = new ArrayList<String>();
         sortedSingleCopy.addAll(source);
         Collections.sort(sortedSingleCopy);
         assertEquals(sortedSingleCopy, popularityList);
@@ -225,7 +224,7 @@ public class PopularityListTest extends TestCase {
         source.set(2, "hippo"); // g b h d e f g h a b c d e f g h c f g b d h a e
         source.set(4, "dingo"); // g b h d d f g h a b c d e f g h c f g b d h a e
         source.set(5, "banjo"); // g b h d d b g h a b c d e f g h c f g b d h a e
-        List expectedTwoClasses = new ArrayList();
+        List<String> expectedTwoClasses = new ArrayList<String>();
         expectedTwoClasses.add("banjo");
         expectedTwoClasses.add("dingo");
         expectedTwoClasses.add("gecko");
@@ -269,7 +268,7 @@ public class PopularityListTest extends TestCase {
          * Handle the source PopularityList changing by validating that list.
          */
         public void listChanged(ListEvent listEvent) {
-            List changedIndices = new ArrayList();
+            List<Integer> changedIndices = new ArrayList<Integer>();
             
             // apply the changes
             while(listEvent.next()) {
@@ -288,8 +287,8 @@ public class PopularityListTest extends TestCase {
             
             // validate the changes
             assertEquals(popularityList.size(), elementCounts.size());
-            for(Iterator c = changedIndices.iterator(); c.hasNext(); ) {
-                int changeIndex = ((Integer)c.next()).intValue();
+            for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {
+                int changeIndex = c.next().intValue();
                 for(int i = Math.max(changeIndex - 1, 0); i < Math.min(changeIndex+2, popularityList.size()); i++) {
                     assertEquals("Test index " + i + ", value: " + popularityList.get(i), elementCounts.get(i), new Integer(count(popularityList.get(i))));
                 }
