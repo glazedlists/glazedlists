@@ -104,7 +104,7 @@ class TreeTableCellPanel extends JPanel {
         // configure this panel with the updated space/expander button and the supplied nodeComponent
         // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
         removeAll();
-        add(getSpacer(depth), TreeTableCellLayout.SPACER);
+        add(getSpacer(showExpanderButton ? depth : depth + 1), TreeTableCellLayout.SPACER);
         add(showExpanderButton ? expanderButton : createSpacer(1), TreeTableCellLayout.EXPANDER);
         add(nodeComponent, TreeTableCellLayout.NODE_COMPONENT);
 
