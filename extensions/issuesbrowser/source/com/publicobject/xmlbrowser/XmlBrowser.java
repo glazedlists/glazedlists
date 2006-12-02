@@ -44,7 +44,7 @@ public class XmlBrowser {
         private final EventList<Tag> eventList;
 
         public StartUIRunnable(EventList<Tag> eventList) {
-            this.eventList = eventList;
+            this.eventList = GlazedListsSwing.swingThreadProxyList(eventList);
         }
 
         public void run() {
@@ -70,8 +70,8 @@ public class XmlBrowser {
             // display the XML in a tree table
             String[] columnFields = new String[] { "qName", "text" };
             String[] columnNames = new String[] { "Element", "Content" };
-            //TableFormat tableFormat = GlazedLists.tableFormat(Tag.class, columnFields, columnNames);
-            EventTableModel<TreeList.Node<Tag>> tableModel = new EventTableModel<TreeList.Node<Tag>>(treeList.getNodesList(), new TagElementTableFormat());
+            TableFormat<Tag> tableFormat = GlazedLists.tableFormat(Tag.class, columnFields, columnNames);
+            EventTableModel<Tag> tableModel = new EventTableModel<Tag>(treeList, tableFormat);
             JTable table = new JTable(tableModel);
             TreeTableSupport treeSupport = TreeTableSupport.install(table, treeList, 0);
             treeSupport.setArrowKeyExpansionEnabled(true);
@@ -111,7 +111,7 @@ public class XmlBrowser {
     public static class TagElementTableFormat implements TableFormat<TreeList.Node<Tag>> {
 
         public int getColumnCount() {
-            return 4;
+            return 2;
         }
 
         public String getColumnName(int column) {

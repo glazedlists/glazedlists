@@ -122,26 +122,50 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * The number of nodes including the node itself in its subtree.
+     * Get the size of the subtree at the specified index, counting nodes
+     * of the specified types only.
+     *
+     * @param index either a visible or invisible index of the node in the tree
+     *      whose subtree size is to be measured
+     * @param indexIsVisibleIndex <code>true</code> if index is a visible index,
+     *      false if it's an overall index
+     * @param includeCollapsedNodes <code>true</code> if the result should include
+     *      nodes not visible in the fully-expanded tree, <code>false</code> if the
+     *      result should be restricted to only those nodes that are visible.
      */
-    public int subtreeSize(int index, boolean includeCollapsed) {
-        byte colorsOut = includeCollapsed ? ALL_NODES : VISIBLE_NODES;
+    private int subtreeSize(int index, boolean indexIsVisibleIndex, boolean includeCollapsedNodes) {
+        byte coloursIn = indexIsVisibleIndex ? VISIBLE_NODES : ALL_NODES;
+        byte coloursOut = includeCollapsedNodes ? ALL_NODES : VISIBLE_NODES;
 
-        // get the subtree size by finding the next node not in the subtree.
-        // We could also calculate this by looking at the first child, then
-        // traversing across all children until we get to the end of the
-        // children.
-        Node<E> node = data.get(index, colorsOut).get();
+        // the node whose subtree is being measured
+        Node<E> node = data.get(index, coloursIn).get();
+
+        // get the index in terms of collapsed nodes
+        int indexOut;
+        if(coloursIn == coloursOut) {
+            indexOut = index;
+        } else {
+            // we can't get the collapsed subtree size of a collapsed node
+            assert((node.element.getColor() & coloursOut) != 0);
+            indexOut = data.convertIndexColor(index, coloursIn, coloursOut);
+        }
 
         // find the next node that's not a child to find the delta
         Node<E> nextNodeNotInSubtree = nextNodeThatsNotAChildOfByStructure(node);
 
         // if we don't have a sibling after us, we've hit the end of the tree
         if(nextNodeNotInSubtree == null) {
-            return data.size(colorsOut) - index;
+            return data.size(coloursOut) - indexOut;
         }
 
-        return data.indexOfNode(nextNodeNotInSubtree.element, colorsOut) - index;
+        return data.indexOfNode(nextNodeNotInSubtree.element, coloursOut) - indexOut;
+    }
+
+    /**
+     * The number of nodes including the node itself in its subtree.
+     */
+    public int subtreeSize(int visibleIndex, boolean includeCollapsed) {
+        return subtreeSize(visibleIndex, true, includeCollapsed);
     }
 
     /**
@@ -191,7 +215,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         boolean hasChildren = subtreeSize(visibleIndex, true) > 1;
         boolean isLeaf = getTreeNode(visibleIndex).isLeaf();
         if(isLeaf == hasChildren) {
-            subtreeSize(visibleIndex, true);
+            subtreeSize(visibleIndex, true, true);
         }
         return hasChildren;
     }
@@ -1432,7 +1456,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
     private void validateSubtree(Node<E> node) {
         int index = data.indexOfNode(node.element, ALL_NODES);
-        int size = subtreeSize(index, true);
+        int size = subtreeSize(index, false, true);
 
         // validate all children in the subtree
         Node<E> lastChildSeen = null;
