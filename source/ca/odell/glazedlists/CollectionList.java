@@ -255,8 +255,19 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      */
     private void handleDelete(int sourceIndex) {
         // find the index of the black node with that index
-        int parentIndex = getAbsoluteIndex(sourceIndex);
-        int nextParentIndex = getAbsoluteIndex(sourceIndex + 1);
+        final int parentIndex = getAbsoluteIndex(sourceIndex);
+        final int nextParentIndex = getAbsoluteIndex(sourceIndex + 1);
+        final int childCount = nextParentIndex - parentIndex - 1; // subtract one for the parent
+
+        // record the delete events first while the deleted values still exist
+        if(childCount > 0) {
+            int firstDeletedChildIndex = parentIndex - sourceIndex;
+            int firstNotDeletedChildIndex = firstDeletedChildIndex + childCount;
+
+            for (int i = firstDeletedChildIndex; i < firstNotDeletedChildIndex; i++) {
+                updates.elementDeleted(firstDeletedChildIndex, get(i));
+            }
+        }
 
         // update the list of child lists
         Element<ChildElement<E>> removedChildElement = childElements.get(sourceIndex);
@@ -264,15 +275,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         removedChildElement.get().dispose();
 
         // update the barcode
-        int childCount = nextParentIndex - parentIndex - 1; // subtract one for the parent
         barcode.remove(parentIndex, 1 + childCount); // delete the parent and all children
-
-        // fire events
-        if(childCount > 0) {
-            int firstDeletedChildIndex = parentIndex - sourceIndex;
-            int firstNotDeletedChildIndex = firstDeletedChildIndex + childCount;
-            updates.addDelete(firstDeletedChildIndex, firstNotDeletedChildIndex - 1); // inclusive ranges
-        }
     }
 
     /**
@@ -370,7 +373,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             // forward the offset event
             int childOffset = absoluteIndex - parentIndex;
             updates.beginEvent();
-            updates.addDelete(index + childOffset);
+            updates.elementDeleted(index + childOffset, removed);
             updates.commitEvent();
 
             // all done
@@ -385,7 +388,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             int absoluteIndex = getAbsoluteIndex(parentIndex);
             int childOffset = absoluteIndex - parentIndex;
             updates.beginEvent();
-            updates.addUpdate(index + childOffset);
+            updates.elementUpdated(index + childOffset, replaced);
             updates.commitEvent();
 
             // all done
@@ -454,7 +457,13 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             while(listChanges.next()) {
                 int index = listChanges.getIndex();
                 int type = listChanges.getType();
-                updates.addChange(type, index + childOffset);
+
+                int overallIndex = index + childOffset;
+                switch (type) {
+                    case ListEvent.INSERT: updates.addInsert(overallIndex); break;
+                    case ListEvent.UPDATE: updates.elementUpdated(overallIndex, listChanges.getPreviousValue()); break;
+                    case ListEvent.DELETE: updates.elementDeleted(overallIndex, listChanges.getPreviousValue()); break;
+                }
             }
             updates.commitEvent();
         }

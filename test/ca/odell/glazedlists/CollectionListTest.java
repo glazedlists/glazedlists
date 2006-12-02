@@ -3,14 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.event.ListEventPublisher;
-import ca.odell.glazedlists.event.ListEventAssembler;
-import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,8 +41,7 @@ public class CollectionListTest extends TestCase {
         parentList.add(DEV_KEVIN);
         parentList.add(DEV_JAMES);
 
-        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(collectionList);
-        listConsistencyListener.setPreviousElementTracked(false); // we don't yet support deleted elements here
+        ListConsistencyListener.install(collectionList);
     }
 
     /**
@@ -75,6 +75,37 @@ public class CollectionListTest extends TestCase {
         assertEquals(collectionList.get(8), "J");
     }
 
+    public void testMutateThroughCollectionList() {
+        final EventList<List<String>> source = new BasicEventList<List<String>>();
+        final CollectionList<List<String>, String> collectionList = new CollectionList<List<String>, String>(source, new SimpleListModel());
+        ListConsistencyListener.install(collectionList);
+
+        // test with a simple List
+        final List<String> list1 = new ArrayList<String>();
+        list1.add("Jesse");
+        
+        source.add(list1);
+        assertEquals("Jesse", collectionList.get(0));
+
+        collectionList.set(0, "James");
+        assertEquals("James", collectionList.get(0));
+
+        collectionList.remove(0);
+        assertTrue(collectionList.isEmpty());
+
+        // test with a simple EventList
+        final List<String> list2 = new BasicEventList<String>(collectionList.getPublisher(), collectionList.getReadWriteLock());
+        list2.add("Jesse");
+
+        source.set(0, list2);
+        assertEquals("Jesse", collectionList.get(0));
+
+        collectionList.set(0, "James");
+        assertEquals("James", collectionList.get(0));
+
+        collectionList.remove(0);
+        assertTrue(collectionList.isEmpty());
+    }
 
     /**
      * Make sure all the data is there in the order we expect.
@@ -226,10 +257,9 @@ public class CollectionListTest extends TestCase {
     public void testChildModification() {
         // use a list of Lists instead of Strings
         BasicEventList<List<String>> characterLists = new BasicEventList<List<String>>();
-        CollectionList<List<String>, String> characters = new CollectionList<List<String>, String>(characterLists, (CollectionList.Model)GlazedLists.listCollectionListModel());
-        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(characters);
-        listConsistencyListener.setPreviousElementTracked(false);
-        
+        CollectionList<List<String>, String> characters = new CollectionList<List<String>, String>(characterLists, (CollectionList.Model) GlazedLists.listCollectionListModel());
+        ListConsistencyListener.install(characters);
+
         characterLists.add(GlazedListsTests.stringToList(DEV_ROB));
         characterLists.add(GlazedListsTests.stringToList(DEV_JESSE));
         characterLists.add(GlazedListsTests.stringToList(DEV_KEVIN));
@@ -453,6 +483,15 @@ public class CollectionListTest extends TestCase {
     private static class StringDecomposerModel implements CollectionList.Model<String,String> {
         public List<String> getChildren(String parent) {
             return GlazedListsTests.stringToList(parent);
+        }
+    }
+
+    /**
+     * Model that returns the given List unchanged.
+     */
+    private static class SimpleListModel implements CollectionList.Model<List<String>,String> {
+        public List<String> getChildren(List<String> parent) {
+            return parent;
         }
     }
 }

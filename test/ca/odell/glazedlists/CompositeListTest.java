@@ -26,8 +26,7 @@ public class CompositeListTest extends TestCase {
      */
     public void testSingleSource() {
         CompositeList<String> fastFood = new CompositeList<String>();
-        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(fastFood);
-        listConsistencyListener.setPreviousElementTracked(false);
+        ListConsistencyListener.install(fastFood);
 
         EventList<String> wendys = fastFood.createMemberList();
         wendys.add("Classic Single");
@@ -56,8 +55,7 @@ public class CompositeListTest extends TestCase {
      */
     public void testMultipleSources() {
         CompositeList<String> fastFood = new CompositeList<String>();
-        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(fastFood);
-        listConsistencyListener.setPreviousElementTracked(false);
+        ListConsistencyListener.install(fastFood);
 
         List<String> fastFoodVerify = new ArrayList<String>();
 
@@ -126,8 +124,7 @@ public class CompositeListTest extends TestCase {
      */
     public void testRemoveByReference() {
         CompositeList<String> fastFood = new CompositeList<String>();
-        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(fastFood);
-        listConsistencyListener.setPreviousElementTracked(false);
+        ListConsistencyListener.install(fastFood);
 
         EventList<String> wendys = fastFood.createMemberList();
         EventList<String> mcDonalds = fastFood.createMemberList();
@@ -192,8 +189,7 @@ public class CompositeListTest extends TestCase {
      */
     public void testSingleElements() {
         CompositeList<String> aToB = new CompositeList<String>();
-        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(aToB);
-        listConsistencyListener.setPreviousElementTracked(false);
+        ListConsistencyListener.install(aToB);
 
         EventList<String> alpha = aToB.createMemberList();
         alpha.add("A");
@@ -231,7 +227,6 @@ public class CompositeListTest extends TestCase {
         assertSame(sharedPublisher, beta.getPublisher());
         assertSame(sharedPublisher, gamma.getPublisher());
         assertSame(sharedPublisher, uber.getPublisher());
-
     }
 
     /**
@@ -278,8 +273,7 @@ public class CompositeListTest extends TestCase {
         memberListTwo.addAll(GlazedListsTests.stringToList("DEF"));
         composite.addMemberList(memberListOne);
         composite.addMemberList(memberListTwo);
-        final GlazedListsTests.ListEventCounter<String> eventCounter =
-                new GlazedListsTests.ListEventCounter<String>();
+        final GlazedListsTests.ListEventCounter<String> eventCounter = new GlazedListsTests.ListEventCounter<String>();
         composite.addListEventListener(eventCounter);
 
         // modify member lists
