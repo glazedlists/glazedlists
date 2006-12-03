@@ -139,6 +139,10 @@ public final class Processors {
         return new AddToCollectionProcessor(new BeanProperty(clazz, propertyName, true, false), converter, matcher);
     }
 
+    public static Processor compound(Processor[] processors) {
+        return new CompoundProcessor(processors);
+    }
+
     /**
      * Find the object to operate at from the specified tag path. This is
      * naturally the object for the parent tag in the stack, but sometimes
@@ -257,6 +261,20 @@ public final class Processors {
 
             // add the value to the Collection
             c.add(newValue);
+        }
+    }
+
+    private static class CompoundProcessor implements Processor {
+        private final Processor[] processors;
+
+        public CompoundProcessor(Processor[] delegates) {
+            this.processors = delegates;
+        }
+
+        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
+            for(int p = 0; p < processors.length; p++) {
+                processors[p].process(path, context);
+            }
         }
     }
 }
