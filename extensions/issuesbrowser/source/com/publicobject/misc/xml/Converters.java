@@ -25,6 +25,14 @@ public final class Converters {
     }
 
     /**
+     * Returns a {@link Converter} capable of converting date Strings into
+     * {@link java.util.Date} objects using the given <code>formats</code>.
+     */
+    public static Converter date(DateFormat format) {
+        return date(new DateFormat[] { format });
+    }
+
+    /**
      * Returns a {@link Converter} capable of converting integer Strings into
      * {@link Integer} objects.
      */
