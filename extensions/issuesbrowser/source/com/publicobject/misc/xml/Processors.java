@@ -211,7 +211,7 @@ public final class Processors {
 
         public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
             // locate the value that was just collected
-            Object newValue = context.get(path.end());
+            Object newValue = context.get(path.textKey());
 
             // if a converter has been specified, run the value through the converter
             if (converter != null)
@@ -239,7 +239,7 @@ public final class Processors {
 
         public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
             // locate the value that was just collected
-            Object newValue = context.get(path.end());
+            Object newValue = context.get(path.textKey());
 
             // if a converter has been specified, run the value through the converter
             if (converter != null)

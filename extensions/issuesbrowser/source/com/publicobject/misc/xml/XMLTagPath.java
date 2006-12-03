@@ -60,7 +60,7 @@ public final class XMLTagPath {
     private final String attribute;
 
     /**
-     * One of either {@link START_TAG} or {@link END_TAG} which indicates whether
+     * One of either {@link #START_TAG} or {@link #END_TAG} which indicates whether
      * the last entry in {@link #parts} refers to the opening or closing tag.
      */
     private final Object location;
@@ -80,7 +80,7 @@ public final class XMLTagPath {
      *
      * @param parts a List of individual XML tag names in order of occurrence
      *      from the root Document tag
-     * @param location one of either {@link START_TAG} or {@link END_TAG} which
+     * @param location one of either {@link #START_TAG} or {@link #END_TAG} which
      *      indicates whether the last entry in <code>parts</code> refers to
      *      the opening or closing tag.
      */
@@ -94,7 +94,7 @@ public final class XMLTagPath {
      *
      * @param parts a List of individual XML tag names in order of occurrence
      *      from the root Document tag
-     * @param location one of either {@link START_TAG} or {@link END_TAG} which
+     * @param location one of either {@link #START_TAG} or {@link #END_TAG} which
      *      indicates whether the last entry in <code>parts</code> refers to
      *      the opening or closing tag.
      * @param attribute the name of the attribute within the specified tag
@@ -166,7 +166,7 @@ public final class XMLTagPath {
 
     /**
      * Produces a new XMLTagPath by changing the location field of this
-     * XMLTagPath to be {@link START_TAG}.
+     * XMLTagPath to be {@link #START_TAG}.
      */
     public XMLTagPath start() {
         return location == START_TAG ? this : new XMLTagPath(parts, START_TAG);
@@ -174,7 +174,7 @@ public final class XMLTagPath {
 
     /**
      * Produces a new XMLTagPath by changing the location field of this
-     * XMLTagPath to be {@link END_TAG}.
+     * XMLTagPath to be {@link #END_TAG}.
      */
     public XMLTagPath end() {
         return location == END_TAG ? this : new XMLTagPath(parts, END_TAG);
