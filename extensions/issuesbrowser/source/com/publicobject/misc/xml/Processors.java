@@ -139,6 +139,21 @@ public final class Processors {
         return new AddToCollectionProcessor(new BeanProperty(clazz, propertyName, true, false), converter, matcher);
     }
 
+    /**
+     * Find the object to operate at from the specified tag path. This is
+     * naturally the object for the parent tag in the stack, but sometimes
+     * it can be a higher level parent.
+     */
+    private static Object getSetterOwner(Map<XMLTagPath, Object> context, XMLTagPath path) {
+        for(XMLTagPath key = path.parent(); key != null; key = key.parent()) {
+            Object setterOwner = context.get(key.end());
+            if(setterOwner != null) {
+                return setterOwner;
+            }
+        }
+        throw new IllegalStateException("No target object for path, " + path);
+    }
+
     private static class CreateNewObjectProcessor implements Processor {
         private final Constructor constructor;
         private final Object[] args;
@@ -184,6 +199,7 @@ public final class Processors {
         }
     }
 
+
     private static class CallSetterMethodProcessor implements Processor {
         private final BeanProperty beanProperty;
         private final Converter converter;
@@ -202,11 +218,12 @@ public final class Processors {
                 newValue = converter.convert(newValue.toString());
 
             // look up the object we will call setXXX(...) on
-            final Object setterOwner = context.get(path.parent().end());
+            final Object setterOwner = getSetterOwner(context, path);
 
             // call setXXX(...) on the setterOwner
             beanProperty.set(setterOwner, newValue);
         }
+
     }
 
     private static class AddToCollectionProcessor implements Processor {
@@ -233,7 +250,7 @@ public final class Processors {
                 return;
 
             // look up the object from which we will get the List
-            final Object setterOwner = context.get(path.parent().end());
+            final Object setterOwner = getSetterOwner(context, path);
 
             // get the Collection
             final Collection c = (Collection) beanProperty.get(setterOwner);
