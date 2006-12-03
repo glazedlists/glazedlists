@@ -198,7 +198,7 @@ public class Parser {
             // update the XMLTagPath by pushing on the latest start tag
             currentTagPath = currentTagPath.child(qName).start();
 
-            // add entries in the parser context Map for each of the attributes
+            // populate the context Map with each of the attributes
             for (int i = 0; i < attributes.getLength(); i++) {
                 final XMLTagPath attributeTagPath = currentTagPath.attribute(attributes.getQName(i));
                 final String attributeValue = attributes.getValue(i);
@@ -210,6 +210,12 @@ public class Parser {
 
             // execute any Processor associated with the current start XMLTagPath
             executeProcessor(currentTagPath, context);
+
+            // execute Processors associated to each attribute
+            for (int i = 0; i < attributes.getLength(); i++) {
+                final XMLTagPath attributeTagPath = currentTagPath.attribute(attributes.getQName(i));
+                executeProcessor(attributeTagPath, context);
+            }
         }
 
         /** @inheritDoc */

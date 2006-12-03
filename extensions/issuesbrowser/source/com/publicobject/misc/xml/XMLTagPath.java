@@ -100,8 +100,12 @@ public final class XMLTagPath {
      * @param attribute the name of the attribute within the specified tag
      */
     private XMLTagPath(List<String> parts, Object location, String attribute) {
-        if (parts == null)
+        if (parts == null) {
             throw new IllegalArgumentException("parts may not be null");
+        }
+        if (location != START_TAG && attribute != null) {
+            throw new IllegalArgumentException("only start tags may have attributes");
+        }
 
         this.parts = Collections.unmodifiableList(parts);
         this.location = location;
