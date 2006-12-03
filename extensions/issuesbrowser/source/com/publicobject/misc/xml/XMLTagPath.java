@@ -218,4 +218,16 @@ public final class XMLTagPath {
 
         return formattedPath.toString();
     }
+
+    /**
+     * @return the context map key used to retrieve the text value
+     *      of this element or attribute.
+     */
+    public XMLTagPath textKey() {
+        if(attribute != null) {
+            return this;
+        } else {
+            return end();
+        }
+    }
 }
