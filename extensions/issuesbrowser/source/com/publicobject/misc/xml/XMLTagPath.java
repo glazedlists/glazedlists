@@ -155,13 +155,19 @@ public final class XMLTagPath {
     }
 
     /**
-     * Produces a new XMLTagPath by removing the last <code>part</code> from
-     * this XMLTagPath.
+     * Produces a new XMLTagPath that's the logical container of this path.
+     *
+     * <p>If this path is an attribute, the parent is the containing tag, otherwise
+     * the parent is obtained by removing the last <code>part</code> from this XMLTagPath.
      */
     public XMLTagPath parent() {
-        final LinkedList<String> newParts = new LinkedList<String>(parts);
-        newParts.removeLast();
-        return new XMLTagPath(newParts, location);
+        if(attribute != null) {
+            return new XMLTagPath(parts, location);
+        } else {
+            final LinkedList<String> newParts = new LinkedList<String>(parts);
+            newParts.removeLast();
+            return new XMLTagPath(newParts, location);
+        }
     }
 
     /**
