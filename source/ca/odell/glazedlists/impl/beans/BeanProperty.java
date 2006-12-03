@@ -267,7 +267,9 @@ public class BeanProperty<T> {
             se.initCause(e);
             throw se;
         } catch(InvocationTargetException e) {
-            throw new UndeclaredThrowableException(e.getCause(), "Failed to set property \"" + propertyName + "\" of " + beanClass + " to " + (newValue == null ? "null" : "instance of " + newValue.getClass()));
+            throw new UndeclaredThrowableException(e.getCause());
+        } catch(RuntimeException e) {
+            throw new RuntimeException("Failed to set property \"" + propertyName + "\" of " + beanClass + " to " + (newValue == null ? "null" : "instance of " + newValue.getClass()), e);
         }
     }
 
