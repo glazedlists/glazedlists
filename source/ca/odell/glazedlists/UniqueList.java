@@ -70,7 +70,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * @param comparator the {@link Comparator} used to determine equality
      */
     public UniqueList(EventList<E> source, Comparator<E> comparator) {
-        this(new SortedList<E>(source, comparator), comparator, null);
+        this(new SortedList<E>(source, comparator), (Void) null);
     }
 
     /**
@@ -87,11 +87,10 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      *
      * @param source a private {@link SortedList} whose {@link Comparator} never
      *      changes, this is used to keep track of uniqueness.
-     * @param comparator the {@link Comparator} used to determine equality.
      * @param dummyParameter dummy parameter to differentiate between the different
      *      {@link GroupingList} constructors.
      */
-    private UniqueList(SortedList<E> source, Comparator<E> comparator, Void dummyParameter) {
+    private UniqueList(SortedList<E> source, Void dummyParameter) {
         super(source);
 
         // the grouper handles changes to the SortedList
