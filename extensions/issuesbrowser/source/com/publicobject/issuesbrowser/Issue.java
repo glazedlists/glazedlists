@@ -32,6 +32,7 @@ public class Issue implements Comparable {
 
     // mandatory issue fields
     private Integer id;
+    private String statusCode;
     private String status;
     private Priority priority;
     private String resolution;
@@ -185,6 +186,12 @@ public class Issue implements Comparable {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * HTTP-like status code of this issue, such as "200".
+     */
+    public String getStatusCode() { return statusCode; }
+    public void setStatusCode(String statusCode) { this.statusCode = statusCode; }
 
     /**
      * Current status of this issue.

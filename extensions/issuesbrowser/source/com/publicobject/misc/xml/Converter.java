@@ -13,10 +13,10 @@ package com.publicobject.misc.xml;
  *
  * @author James Lemieux
  */
-public interface Converter {
+public interface Converter<S,T> {
     /**
      * Convert the given <code>value</code> to a more appropriate, type-safe
      * value for use in the Objects being created from the XML Document.
      */
-    public Object convert(String value);
+    public T convert(S value);
 }

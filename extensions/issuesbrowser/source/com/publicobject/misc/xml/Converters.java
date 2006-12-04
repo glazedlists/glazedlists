@@ -5,6 +5,7 @@ package com.publicobject.misc.xml;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.Date;
 
 /**
  * This factory class produces common implementations of the
@@ -17,10 +18,18 @@ public final class Converters {
     private Converters() {}
 
     /**
+     * Returns a {@link Converter} that returns the input object. This is
+     * allows us to use the "Null Object Pattern" with converters.
+     */
+    public static <T> Converter<T,T> identityConverter() {
+        return new IdentityConverter<T>();
+    }
+
+    /**
      * Returns a {@link Converter} capable of converting date Strings into
      * {@link java.util.Date} objects using any of the given <code>formats</code>.
      */
-    public static Converter date(DateFormat[] formats) {
+    public static Converter<String,Date> date(DateFormat[] formats) {
         return new DateConverter(formats);
     }
 
@@ -28,7 +37,7 @@ public final class Converters {
      * Returns a {@link Converter} capable of converting date Strings into
      * {@link java.util.Date} objects using the given <code>formats</code>.
      */
-    public static Converter date(DateFormat format) {
+    public static Converter<String,Date> date(DateFormat format) {
         return date(new DateFormat[] { format });
     }
 
@@ -36,7 +45,7 @@ public final class Converters {
      * Returns a {@link Converter} capable of converting integer Strings into
      * {@link Integer} objects.
      */
-    public static Converter integer() {
+    public static Converter<String,Integer> integer() {
         return new IntegerConverter();
     }
 
@@ -44,7 +53,7 @@ public final class Converters {
      * Returns a {@link Converter} capable of trimming whitespace from the
      * beginning and end of String objects.
      */
-    public static Converter trim() {
+    public static Converter<String,String> trim() {
         return new TrimConverter();
     }
 
@@ -53,18 +62,18 @@ public final class Converters {
      * beginning and end of String objects and then
      * {@link String#intern interning} the resulting String.
      */
-    public static Converter trimAndIntern() {
+    public static Converter<String,String> trimAndIntern() {
         return new TrimAndInternConverter();
     }
 
-    private static class DateConverter implements Converter {
+    private static class DateConverter implements Converter<String, Date> {
         private final DateFormat[] format;
 
         public DateConverter(DateFormat[] format) {
             this.format = format;
         }
 
-        public Object convert(String value) {
+        public Date convert(String value) {
             value = value.trim();
 
             // Format is most likely a SimpleDateFormat. From the SimpleDateFormat class doc:
@@ -88,21 +97,27 @@ public final class Converters {
         }
     }
 
-    private static class IntegerConverter implements Converter {
-        public Object convert(String value) {
+    private static class IntegerConverter implements Converter<String,Integer> {
+        public Integer convert(String value) {
             return Integer.valueOf(value.trim());
         }
     }
 
-    private static class TrimConverter implements Converter {
-        public Object convert(String value) {
+    private static class TrimConverter implements Converter<String,String> {
+        public String convert(String value) {
             return value.trim();
         }
     }
 
-    private static class TrimAndInternConverter implements Converter {
-        public Object convert(String value) {
+    private static class TrimAndInternConverter implements Converter<String,String> {
+        public String convert(String value) {
             return value.trim().intern();
+        }
+    }
+
+    private static class IdentityConverter<T> implements Converter<T,T> {
+        public T convert(T value) {
+            return value;
         }
     }
 }

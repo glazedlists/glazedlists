@@ -45,105 +45,98 @@ public class IssuezillaXMLParser {
         // configure the Parser for Issues
 
         // Parsing instructions for Issue
-        final XMLTagPath startIssueTag = XMLTagPath.startTagPath("issuezilla issue");
-        final XMLTagPath endIssueTag = startIssueTag.end();
-        issueParser.addProcessor(startIssueTag,                                 Processors.createNewObject(Issue.class, new Class[] {Project.class}, new Object[] {project}));
-        issueParser.addProcessor(endIssueTag.child("issue_id"),                 Processors.setterMethod(Issue.class, "id", Converters.integer()));
-        issueParser.addProcessor(endIssueTag.child("issue_status"),             Processors.setterMethod(Issue.class, "status", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("priority"),                 Processors.setterMethod(Issue.class, "priority", new PriorityConverter()));
-        issueParser.addProcessor(endIssueTag.child("resolution"),               Processors.setterMethod(Issue.class, "resolution", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("component"),                Processors.setterMethod(Issue.class, "component", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("version"),                  Processors.setterMethod(Issue.class, "version", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("rep_platform"),             Processors.setterMethod(Issue.class, "repPlatform", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("assigned_to"),              Processors.setterMethod(Issue.class, "assignedTo", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("delta_ts"),                 Processors.setterMethod(Issue.class, "deltaTimestamp", Converters.date(dateFormats)));
-        issueParser.addProcessor(endIssueTag.child("subcomponent"),             Processors.setterMethod(Issue.class, "subcomponent", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("reporter"),                 Processors.setterMethod(Issue.class, "reporter", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("target_milestone"),         Processors.setterMethod(Issue.class, "targetMilestone", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("issue_type"),               Processors.setterMethod(Issue.class, "issueType", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("creation_ts"),              Processors.setterMethod(Issue.class, "creationTimestamp", Converters.date(dateFormats)));
-        issueParser.addProcessor(endIssueTag.child("qa_contact"),               Processors.setterMethod(Issue.class, "qAContact", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("status_whiteboard"),        Processors.setterMethod(Issue.class, "statusWhiteboard", Converters.trim()));
-        issueParser.addProcessor(endIssueTag.child("issue_file_loc"),           Processors.setterMethod(Issue.class, "fileLocation", Converters.trim()));
-        issueParser.addProcessor(endIssueTag.child("votes"),                    Processors.setterMethod(Issue.class, "votes", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("op_sys"),                   Processors.setterMethod(Issue.class, "operatingSystem", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("short_desc"),               Processors.setterMethod(Issue.class, "shortDescription", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIssueTag.child("keywords"),                 Processors.addToCollection(Issue.class, "keywords", Converters.trimAndIntern(), Matchers.nonNullAndNonEmptyString()));
-        issueParser.addProcessor(endIssueTag.child("cc"),                       Processors.addToCollection(Issue.class, "cC", Converters.trimAndIntern(), Matchers.nonNullAndNonEmptyString()));
-        issueParser.addProcessor(endIssueTag,                                   new AddIssueToTargetListProcessor());
+        final XMLTagPath issueTag = new XMLTagPath("issuezilla").child("issue");
+        issueParser.addProcessor(issueTag.start(),                           Processors.createNewObject(Issue.class, new Class[] {Project.class}, new Object[] {project}));
+        issueParser.addProcessor(issueTag.attribute("status_code"),          Processors.setterMethod(Issue.class, "statusCode", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("issue_id"),                 Processors.setterMethod(Issue.class, "id", Converters.integer()));
+        issueParser.addProcessor(issueTag.child("issue_status"),             Processors.setterMethod(Issue.class, "status", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("priority"),                 Processors.setterMethod(Issue.class, "priority", new PriorityConverter()));
+        issueParser.addProcessor(issueTag.child("resolution"),               Processors.setterMethod(Issue.class, "resolution", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("component"),                Processors.setterMethod(Issue.class, "component", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("version"),                  Processors.setterMethod(Issue.class, "version", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("rep_platform"),             Processors.setterMethod(Issue.class, "repPlatform", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("assigned_to"),              Processors.setterMethod(Issue.class, "assignedTo", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("delta_ts"),                 Processors.setterMethod(Issue.class, "deltaTimestamp", Converters.date(dateFormats)));
+        issueParser.addProcessor(issueTag.child("subcomponent"),             Processors.setterMethod(Issue.class, "subcomponent", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("reporter"),                 Processors.setterMethod(Issue.class, "reporter", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("target_milestone"),         Processors.setterMethod(Issue.class, "targetMilestone", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("issue_type"),               Processors.setterMethod(Issue.class, "issueType", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("creation_ts"),              Processors.setterMethod(Issue.class, "creationTimestamp", Converters.date(dateFormats)));
+        issueParser.addProcessor(issueTag.child("qa_contact"),               Processors.setterMethod(Issue.class, "qAContact", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("status_whiteboard"),        Processors.setterMethod(Issue.class, "statusWhiteboard", Converters.trim()));
+        issueParser.addProcessor(issueTag.child("issue_file_loc"),           Processors.setterMethod(Issue.class, "fileLocation", Converters.trim()));
+        issueParser.addProcessor(issueTag.child("votes"),                    Processors.setterMethod(Issue.class, "votes", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("op_sys"),                   Processors.setterMethod(Issue.class, "operatingSystem", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("short_desc"),               Processors.setterMethod(Issue.class, "shortDescription", Converters.trimAndIntern()));
+        issueParser.addProcessor(issueTag.child("keywords"),                 Processors.addToCollection(Issue.class, "keywords", Converters.trimAndIntern(), Matchers.nonNullAndNonEmptyString()));
+        issueParser.addProcessor(issueTag.child("cc"),                       Processors.addToCollection(Issue.class, "cC", Converters.trimAndIntern(), Matchers.nonNullAndNonEmptyString()));
+        issueParser.addProcessor(issueTag.end(),                             new AddIssueToTargetListProcessor());
 
         // Parsing instructions for Description
-        final XMLTagPath startDescriptionTag = XMLTagPath.startTagPath("issuezilla issue long_desc");
-        final XMLTagPath endDescriptionTag = startDescriptionTag.end();
-        issueParser.addProcessor(startDescriptionTag,                           Processors.createNewObject(Description.class));
-        issueParser.addProcessor(endDescriptionTag.child("who"),                Processors.setterMethod(Description.class, "who", Converters.trimAndIntern()));
-        issueParser.addProcessor(endDescriptionTag.child("issue_when"),         Processors.setterMethod(Description.class, "when", Converters.date(dateFormats)));
-        issueParser.addProcessor(endDescriptionTag.child("thetext"),            Processors.setterMethod(Description.class, "text", Converters.trim()));
-        issueParser.addProcessor(endDescriptionTag,                             Processors.addToCollection(Issue.class, "descriptions"));
+        final XMLTagPath descriptionTag = issueTag.child("long_desc");
+        issueParser.addProcessor(descriptionTag.start(),                     Processors.createNewObject(Description.class));
+        issueParser.addProcessor(descriptionTag.child("who"),                Processors.setterMethod(Description.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(descriptionTag.child("issue_when"),         Processors.setterMethod(Description.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(descriptionTag.child("thetext"),            Processors.setterMethod(Description.class, "text", Converters.trim()));
+        issueParser.addProcessor(descriptionTag.end(),                       Processors.addToCollection(Issue.class, "descriptions"));
 
         // Parsing instructions for Activity
-        final XMLTagPath startActivityTag = XMLTagPath.startTagPath("issuezilla issue activity");
-        final XMLTagPath endActivityTag = startActivityTag.end();
-        issueParser.addProcessor(startActivityTag,                              Processors.createNewObject(Activity.class));
-        issueParser.addProcessor(endActivityTag.child("user"),                  Processors.setterMethod(Activity.class, "user", Converters.trimAndIntern()));
-        issueParser.addProcessor(endActivityTag.child("when"),                  Processors.setterMethod(Activity.class, "when", Converters.date(dateFormats)));
-        issueParser.addProcessor(endActivityTag.child("field_name"),            Processors.setterMethod(Activity.class, "field", Converters.trimAndIntern()));
-        issueParser.addProcessor(endActivityTag.child("field_desc"),            Processors.setterMethod(Activity.class, "fieldDescription", Converters.trimAndIntern()));
-        issueParser.addProcessor(endActivityTag.child("oldvalue"),              Processors.setterMethod(Activity.class, "oldValue", Converters.trimAndIntern()));
-        issueParser.addProcessor(endActivityTag.child("newvalue"),              Processors.setterMethod(Activity.class, "newValue", Converters.trimAndIntern()));
-        issueParser.addProcessor(endActivityTag,                                Processors.addToCollection(Issue.class, "activities"));
+        final XMLTagPath activityTag = issueTag.child("activity");
+        issueParser.addProcessor(activityTag.start(),                        Processors.createNewObject(Activity.class));
+        issueParser.addProcessor(activityTag.child("user"),                  Processors.setterMethod(Activity.class, "user", Converters.trimAndIntern()));
+        issueParser.addProcessor(activityTag.child("when"),                  Processors.setterMethod(Activity.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(activityTag.child("field_name"),            Processors.setterMethod(Activity.class, "field", Converters.trimAndIntern()));
+        issueParser.addProcessor(activityTag.child("field_desc"),            Processors.setterMethod(Activity.class, "fieldDescription", Converters.trimAndIntern()));
+        issueParser.addProcessor(activityTag.child("oldvalue"),              Processors.setterMethod(Activity.class, "oldValue", Converters.trimAndIntern()));
+        issueParser.addProcessor(activityTag.child("newvalue"),              Processors.setterMethod(Activity.class, "newValue", Converters.trimAndIntern()));
+        issueParser.addProcessor(activityTag.end(),                          Processors.addToCollection(Issue.class, "activities"));
 
         // Parsing instructions for Attachment
-        final XMLTagPath startAttachmentTag = XMLTagPath.startTagPath("issuezilla issue attachment");
-        final XMLTagPath endAttachmentTag = startAttachmentTag.end();
-        issueParser.addProcessor(startAttachmentTag,                            Processors.createNewObject(Attachment.class));
-        issueParser.addProcessor(endAttachmentTag.child("mimetype"),            Processors.setterMethod(Attachment.class, "mimeType", Converters.trimAndIntern()));
-        issueParser.addProcessor(endAttachmentTag.child("attachid"),            Processors.setterMethod(Attachment.class, "attachId", Converters.trimAndIntern()));
-        issueParser.addProcessor(endAttachmentTag.child("date"),                Processors.setterMethod(Attachment.class, "date", Converters.date(dateFormats)));
-        issueParser.addProcessor(endAttachmentTag.child("desc"),                Processors.setterMethod(Attachment.class, "description", Converters.trim()));
-        issueParser.addProcessor(endAttachmentTag.child("ispatch"),             Processors.setterMethod(Attachment.class, "isPatch", Converters.trim()));
-        issueParser.addProcessor(endAttachmentTag.child("filename"),            Processors.setterMethod(Attachment.class, "filename", Converters.trim()));
-        issueParser.addProcessor(endAttachmentTag.child("submitter_id"),        Processors.setterMethod(Attachment.class, "submitterId", Converters.trimAndIntern()));
-        issueParser.addProcessor(endAttachmentTag.child("submitting_username"), Processors.setterMethod(Attachment.class, "submitterUsername", Converters.trimAndIntern()));
-        issueParser.addProcessor(endAttachmentTag.child("data"),                Processors.setterMethod(Attachment.class, "data", Converters.trim()));
-        issueParser.addProcessor(endAttachmentTag.child("attachment_iz_url"),   Processors.setterMethod(Attachment.class, "attachmentIzUrl", Converters.trim()));
-        issueParser.addProcessor(endAttachmentTag,                              Processors.addToCollection(Issue.class, "attachments"));
+        final XMLTagPath attachmentTag = issueTag.child("attachment");
+        issueParser.addProcessor(attachmentTag.start(),                      Processors.createNewObject(Attachment.class));
+        issueParser.addProcessor(attachmentTag.child("mimetype"),            Processors.setterMethod(Attachment.class, "mimeType", Converters.trimAndIntern()));
+        issueParser.addProcessor(attachmentTag.child("attachid"),            Processors.setterMethod(Attachment.class, "attachId", Converters.trimAndIntern()));
+        issueParser.addProcessor(attachmentTag.child("date"),                Processors.setterMethod(Attachment.class, "date", Converters.date(dateFormats)));
+        issueParser.addProcessor(attachmentTag.child("desc"),                Processors.setterMethod(Attachment.class, "description", Converters.trim()));
+        issueParser.addProcessor(attachmentTag.child("ispatch"),             Processors.setterMethod(Attachment.class, "isPatch", Converters.trim()));
+        issueParser.addProcessor(attachmentTag.child("filename"),            Processors.setterMethod(Attachment.class, "filename", Converters.trim()));
+        issueParser.addProcessor(attachmentTag.child("submitter_id"),        Processors.setterMethod(Attachment.class, "submitterId", Converters.trimAndIntern()));
+        issueParser.addProcessor(attachmentTag.child("submitting_username"), Processors.setterMethod(Attachment.class, "submitterUsername", Converters.trimAndIntern()));
+        issueParser.addProcessor(attachmentTag.child("data"),                Processors.setterMethod(Attachment.class, "data", Converters.trim()));
+        issueParser.addProcessor(attachmentTag.child("attachment_iz_url"),   Processors.setterMethod(Attachment.class, "attachmentIzUrl", Converters.trim()));
+        issueParser.addProcessor(attachmentTag.end(),                        Processors.addToCollection(Issue.class, "attachments"));
 
-        // Parsing instructions for duplicate PeerIssues
-        final XMLTagPath startHasDuplicatesTag = XMLTagPath.startTagPath("issuezilla issue has_duplicates");
-        final XMLTagPath endHasDuplicatesTag = startHasDuplicatesTag.end();
-        issueParser.addProcessor(startHasDuplicatesTag,                         Processors.createNewObject(PeerIssue.class));
-        issueParser.addProcessor(endHasDuplicatesTag.child("issue_id"),         Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
-        issueParser.addProcessor(endHasDuplicatesTag.child("who"),              Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
-        issueParser.addProcessor(endHasDuplicatesTag.child("when"),             Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
-        issueParser.addProcessor(endHasDuplicatesTag,                           Processors.addToCollection(Issue.class, "duplicates"));
+        // Parsing instructions for duplicante PeerIssues
+        final XMLTagPath hasDuplicatesTag = issueTag.child("has_duplicates");
+        issueParser.addProcessor(hasDuplicatesTag.start(),                   Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(hasDuplicatesTag.child("issue_id"),         Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(hasDuplicatesTag.child("who"),              Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(hasDuplicatesTag.child("when"),             Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(hasDuplicatesTag.end(),                     Processors.addToCollection(Issue.class, "duplicates"));
 
         // Parsing instructions for a duplicate PeerIssue
-        final XMLTagPath startIsDuplicateTag = XMLTagPath.startTagPath("issuezilla issue is_duplicate");
-        final XMLTagPath endIsDuplicateTag = startIsDuplicateTag.end();
-        issueParser.addProcessor(startIsDuplicateTag,                           Processors.createNewObject(PeerIssue.class));
-        issueParser.addProcessor(endIsDuplicateTag.child("issue_id"),           Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIsDuplicateTag.child("who"),                Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
-        issueParser.addProcessor(endIsDuplicateTag.child("when"),               Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
-        issueParser.addProcessor(endIsDuplicateTag,                             Processors.setterMethod(Issue.class, "duplicate"));
+        final XMLTagPath isDuplicateTag = issueTag.child("is_duplicate");
+        issueParser.addProcessor(isDuplicateTag.start(),                     Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(isDuplicateTag.child("issue_id"),           Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(isDuplicateTag.child("who"),                Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(isDuplicateTag.child("when"),               Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(isDuplicateTag.end(),                       Processors.setterMethod(Issue.class, "duplicate"));
 
         // Parsing instructions for a dependent PeerIssue
-        final XMLTagPath startDependsOnTag = XMLTagPath.startTagPath("issuezilla issue dependson");
-        final XMLTagPath endDependsOnTag = startDependsOnTag.end();
-        issueParser.addProcessor(startDependsOnTag,                             Processors.createNewObject(PeerIssue.class));
-        issueParser.addProcessor(endDependsOnTag.child("issue_id"),             Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
-        issueParser.addProcessor(endDependsOnTag.child("who"),                  Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
-        issueParser.addProcessor(endDependsOnTag.child("when"),                 Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
-        issueParser.addProcessor(endDependsOnTag,                               Processors.addToCollection(Issue.class, "dependsOn"));
+        final XMLTagPath dependsOnTag = issueTag.child("dependson");
+        issueParser.addProcessor(dependsOnTag.start(),                       Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(dependsOnTag.child("issue_id"),             Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(dependsOnTag.child("who"),                  Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(dependsOnTag.child("when"),                 Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(dependsOnTag.end(),                         Processors.addToCollection(Issue.class, "dependsOn"));
 
         // Parsing instructions for a blocking PeerIssue
-        final XMLTagPath startBlocksTag = XMLTagPath.startTagPath("issuezilla issue blocks");
-        final XMLTagPath endBlocksTag = startBlocksTag.end();
-        issueParser.addProcessor(startBlocksTag,                                Processors.createNewObject(PeerIssue.class));
-        issueParser.addProcessor(endBlocksTag.child("issue_id"),                Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
-        issueParser.addProcessor(endBlocksTag.child("who"),                     Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
-        issueParser.addProcessor(endBlocksTag.child("when"),                    Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
-        issueParser.addProcessor(endBlocksTag,                                  Processors.addToCollection(Issue.class, "blocks"));
+        final XMLTagPath blocksTag = issueTag.child("blocks");
+        issueParser.addProcessor(blocksTag.start(),                          Processors.createNewObject(PeerIssue.class));
+        issueParser.addProcessor(blocksTag.child("issue_id"),                Processors.setterMethod(PeerIssue.class, "issueId", Converters.trimAndIntern()));
+        issueParser.addProcessor(blocksTag.child("who"),                     Processors.setterMethod(PeerIssue.class, "who", Converters.trimAndIntern()));
+        issueParser.addProcessor(blocksTag.child("when"),                    Processors.setterMethod(PeerIssue.class, "when", Converters.date(dateFormats)));
+        issueParser.addProcessor(blocksTag.end(),                            Processors.addToCollection(Issue.class, "blocks"));
 
         return issueParser;
     }
@@ -196,14 +189,14 @@ public class IssuezillaXMLParser {
      * to load the issues as code rather than XML.
      */
     public static void loadIssues(EventList<Issue> target, InputStream source, Project owner) throws IOException {
-        createParser(owner).parse(target, source);
+        createParser(owner).parse(source, target);
     }
 
     /**
      * This Converter can lookup Priority objects using Strings.
      */
-    private static class PriorityConverter implements Converter {
-        public Object convert(String value) {
+    private static class PriorityConverter implements Converter<String,Priority> {
+        public Priority convert(String value) {
             return Priority.lookup(value.trim());
         }
     }
@@ -215,25 +208,19 @@ public class IssuezillaXMLParser {
      * target EventList if the status code is 200, indicating that the Issue
      * was loaded successfully.
      */
-    private static class AddIssueToTargetListProcessor implements Processor {
-        private static final Processor delegate = Processors.addObjectToTargetList();
-        private static final XMLTagPath status_code_attribute = XMLTagPath.startTagPath("issuezilla issue").attribute("status_code");
-
+    private static class AddIssueToTargetListProcessor implements PopProcessor<EventList<Issue>,Issue> {
         private final Date loadingStarted = new Date();
 
-        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
-            final String status_code = (String) context.get(status_code_attribute);
+        public void process(EventList<Issue> issues, Issue issue) {
+            final String statusCode = issue.getStatusCode();
 
             // add the issue to the list if it was found okay
-            if ("200".equals(status_code)) {
-                // locate the newly built object keyed by the starting tag of the current XMLTagPath
-                final Issue currentIssue = (Issue) context.get(path.end());
-
+            if ("200".equals(statusCode)) {
                 // compute the timeline of state changes now that we have loaded the entire Issue
-                currentIssue.getStateChanges().addAll(Issue.computeStateChanges(currentIssue, loadingStarted));
+                issue.getStateChanges().addAll(Issue.computeStateChanges(issue, loadingStarted));
 
                 // add the Issue to the list of Issues
-                delegate.process(path, context);
+                issues.add(issue);
             }
         }
     }

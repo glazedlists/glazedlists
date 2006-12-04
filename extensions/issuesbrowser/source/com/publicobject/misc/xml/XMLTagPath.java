@@ -34,116 +34,80 @@ import java.util.*;
  *   &lt;/customer&gt;
  * </pre>
  *
- * An XMLTagPath can also be used to represent the path to an attribute
- * within an opening XML tag. Attribute based XMLTagPath objects are only
- * created using {@link #attribute(String)}.
+ * <p>An <code>XMLTagPath</code> represents either the start, end, body text
+ * or attribute of an XML tag.
  *
- * <p>This class is intentionally immutable. All methods produce new XMLTagPath objects.
+ * <p>This class is intentionally immutable. All methods produce new
+ * <code>XMLTagPath</code> objects.
  *
  * @author James Lemieux
+ * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class XMLTagPath {
 
-    /** A special XMLTagPath representing the Document before even the first tag is processed. */
-    private static final XMLTagPath NEW_PATH = new XMLTagPath(new String[0], null);
+    /** A virtual attribute representing the tag opening */
+    private static final String START = "_START";
 
-    /** Indicates the path represents the opening tag, like &lt;customer&gt; and not &lt;/customer&gt;. */
-    public static final Object START_TAG = "Start ";
+    /** A virtual attribute representing the tag closing */
+    private static final String END = "_END";
 
-    /** Indicates the path represents the closing tag, like &lt;/customer&gt; and not &lt;customer&gt;. */
-    public static final Object END_TAG = "End ";
+    /** A virtual attribute representing the tag body text */
+    private static final String BODY = "_BODY";
 
     /** The list of tag names specifying the location of this XMLTagPath relative to the Document root. */
-    private final List<String> parts;
+    private final List<String> path;
 
-    /** The optional name of an attribute within the tag. (Only applicable for start tags) */
+    /**
+     * The name of an attribute within the tag, or the type of tag such
+     * as {@link #START}, {@link #END} or {@link #BODY} if this is not
+     * an attribute tag.
+     */
     private final String attribute;
 
     /**
-     * One of either {@link #START_TAG} or {@link #END_TAG} which indicates whether
-     * the last entry in {@link #parts} refers to the opening or closing tag.
+     * Constructs a new {@link XMLTagPath} representing the body text of
+     * the specified root tag.
      */
-    private final Object location;
-
-    /**
-     * A convenience constructor to work with parts as Arrays, internally.
-     */
-    private XMLTagPath(String[] parts, Object location) {
-        this(parts == null ? null : Arrays.asList(parts), location);
+    public XMLTagPath(String root) {
+        this(Collections.singletonList(root), BODY);
     }
 
     /**
-     * Constructs a new XMLTagPath where the given <code>parts</code> represent
-     * a list of XML tag names starting with the root Document tag. The
-     * <code>location</code> value describes whether the last part in the list
-     * of <code>parts</code> refers to the open or close tag.
+     * General constructor for an arbitrary tag path.
      *
-     * @param parts a List of individual XML tag names in order of occurrence
-     *      from the root Document tag
-     * @param location one of either {@link #START_TAG} or {@link #END_TAG} which
-     *      indicates whether the last entry in <code>parts</code> refers to
-     *      the opening or closing tag.
+     * @param path the sequence of nested tags defining this path.
+     * @param attribute the XML attribute named by this path, or a virtual
+     *      attribute such as {@link #START}, {@link #END} or {@link #BODY}.
      */
-    public XMLTagPath(List<String> parts, Object location) {
-        this(parts, location, null);
-    }
-
-    /**
-     * Constructs a new XMLTagPath representing an attribute within a start
-     * tag.
-     *
-     * @param parts a List of individual XML tag names in order of occurrence
-     *      from the root Document tag
-     * @param location one of either {@link #START_TAG} or {@link #END_TAG} which
-     *      indicates whether the last entry in <code>parts</code> refers to
-     *      the opening or closing tag.
-     * @param attribute the name of the attribute within the specified tag
-     */
-    private XMLTagPath(List<String> parts, Object location, String attribute) {
-        if (parts == null) {
-            throw new IllegalArgumentException("parts may not be null");
+    private XMLTagPath(List<String> path, String attribute) {
+        if (path == null) {
+            throw new IllegalArgumentException("path must not be null");
         }
-        if (location != START_TAG && attribute != null) {
-            throw new IllegalArgumentException("only start tags may have attributes");
+        if (attribute == null) {
+            throw new IllegalArgumentException("attribute must not be null");
         }
 
-        this.parts = Collections.unmodifiableList(parts);
-        this.location = location;
+        this.path = Collections.unmodifiableList(path);
         this.attribute = attribute;
     }
 
     /**
-     * A factory method that allows the start tag path to be specified as a
-     * single space delimited String.
-     */
-    public static XMLTagPath startTagPath(String spaceDelimitedPath) {
-        return new XMLTagPath(spaceDelimitedPath.split(" "), START_TAG);
-    }
-
-    /**
-     * A factory method that allows the end tag path to be specified as a
-     * single space delimited String.
-     */
-    public static XMLTagPath endTagPath(String spaceDelimitedPath) {
-        return new XMLTagPath(spaceDelimitedPath.split(" "), END_TAG);
-    }
-
-    /**
-     * Returns A special XMLTagPath that does not contain any parts. It can be
+     * Returns A special {@link XMLTagPath} that does not contain any path. It can be
      * thought of as representing the entire Document.
      */
-    public static XMLTagPath newPath() {
-        return NEW_PATH;
+    static XMLTagPath emptyPath() {
+        return new XMLTagPath(Collections.<String>emptyList(), BODY);
     }
 
     /**
-     * Produces a new XMLTagPath by appending the given <code>part</code> to
-     * this XMLTagPath.
+     * Produces a new XMLTagPath by appending the given <code>tag</code> to
+     * this XMLTagPath. The attribute is kept the same.
      */
-    public XMLTagPath child(String part) {
-        final LinkedList<String> newParts = new LinkedList<String>(parts);
-        newParts.add(part);
-        return new XMLTagPath(newParts, location);
+    public XMLTagPath child(String tag) {
+        final List<String> newParts = new ArrayList<String>(path.size() + 1);
+        newParts.addAll(path);
+        newParts.add(tag);
+        return new XMLTagPath(newParts, attribute);
     }
 
     /**
@@ -151,89 +115,80 @@ public final class XMLTagPath {
      * within the current tag.
      */
     public XMLTagPath attribute(String attribute) {
-        return new XMLTagPath(new LinkedList<String>(parts), location, attribute);
+        if(this.attribute == attribute) return this;
+        return new XMLTagPath(path, attribute);
     }
-
-    /**
-     * Produces a new XMLTagPath that's the logical container of this path.
-     *
-     * <p>If this path is an attribute, the parent is the containing tag, otherwise
-     * the parent is obtained by removing the last <code>part</code> from this XMLTagPath.
-     */
-    public XMLTagPath parent() {
-        if(attribute != null) {
-            return new XMLTagPath(parts, location);
-        } else {
-            final LinkedList<String> newParts = new LinkedList<String>(parts);
-            newParts.removeLast();
-            return new XMLTagPath(newParts, location);
-        }
-    }
-
+    
     /**
      * Produces a new XMLTagPath by changing the location field of this
-     * XMLTagPath to be {@link #START_TAG}.
+     * XMLTagPath to be {@link #START}.
      */
     public XMLTagPath start() {
-        return location == START_TAG ? this : new XMLTagPath(parts, START_TAG);
+        return attribute(START);
     }
 
     /**
      * Produces a new XMLTagPath by changing the location field of this
-     * XMLTagPath to be {@link #END_TAG}.
+     * XMLTagPath to be {@link #END}.
      */
     public XMLTagPath end() {
-        return location == END_TAG ? this : new XMLTagPath(parts, END_TAG);
+        return attribute(END);
     }
 
-    /** @inheritDoc */
+    /**
+     * Produces a new XMLTagPath representing the body text for this tag.
+     */
+    public XMLTagPath body() {
+        return attribute(BODY);
+    }
+
+    /**
+     * The containing tag with the same attribute.
+     */
+    public XMLTagPath parent() {
+        return new XMLTagPath(path.subList(0, path.size() - 1), attribute);
+    }
+
+    /** {@inheritDoc} */
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
 
-        final XMLTagPath xmlTagPath = (XMLTagPath) o;
+        XMLTagPath that = (XMLTagPath) o;
 
-        if (location != null ? !location.equals(xmlTagPath.location) : xmlTagPath.location != null) return false;
-        if (attribute != null ? !attribute.equals(xmlTagPath.attribute) : xmlTagPath.attribute != null) return false;
-        if (!parts.equals(xmlTagPath.parts)) return false;
+        if(!attribute.equals(that.attribute)) return false;
+        if(!path.equals(that.path)) return false;
 
         return true;
     }
 
-    /** @inheritDoc */
+    /** {@inheritDoc} */
     public int hashCode() {
         int result;
-        result = parts.hashCode();
-        result = 29 * result + (location != null ? location.hashCode() : 0);
-        result = 29 * result + (attribute != null ? attribute.hashCode() : 0);
+        result = path.hashCode();
+        result = 31 * result + attribute.hashCode();
         return result;
     }
 
     /** @inheritDoc */
     public String toString() {
-        final StringBuffer formattedPath = new StringBuffer(location.toString());
+        final StringBuffer formattedPath = new StringBuffer();
 
-        for (Iterator i = parts.iterator(); i.hasNext();) {
+        for (Iterator i = path.iterator(); i.hasNext();) {
             formattedPath.append(i.next());
-            if (i.hasNext()) formattedPath.append(" / ");
+            if (i.hasNext()) formattedPath.append("/");
         }
 
-        // "$" delimits an attribute from the XML tags within an XMLTagPath
-        if (attribute != null)
-            formattedPath.append(" $ ").append(attribute);
+        if(attribute == START) {
+            formattedPath.append("[start]");
+        } else if(attribute == BODY) {
+            formattedPath.append("[body]");
+        } else if(attribute == END) {
+            formattedPath.append("[end]");
+        } else {
+            formattedPath.append("#").append(attribute);
+        }
 
         return formattedPath.toString();
-    }
-
-    /**
-     * @return the context map key used to retrieve the text value
-     *      of this element or attribute.
-     */
-    public XMLTagPath textKey() {
-        if(attribute != null) {
-            return this;
-        } else {
-            return end();
-        }
     }
 }
