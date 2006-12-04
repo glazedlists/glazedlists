@@ -6,15 +6,15 @@ package com.publicobject.misc.xml;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.Map;
 
 /**
- * This factory class produces common implementations of the {@link Processor}
- * interface.
+ * This factory class produces common implementations of the {@link PushProcessor}
+ * and {@link PopProcessor} interfaces.
  *
  * @author James Lemieux
  */
@@ -23,7 +23,7 @@ public final class Processors {
     private Processors() {}
 
     /**
-     * Returns a {@link Processor} that uses reflection to instantiate a new
+     * Returns a {@link PushProcessor} that uses reflection to instantiate a new
      * Object via a no-arg constructor in the given <code>clazz</code>. It then
      * associates the new Object in the XML context with the XMLTagPath for the
      * end of the current path.
@@ -33,12 +33,12 @@ public final class Processors {
      * objects would then be placed in the parse context Map using the
      * {@link XMLTagPath} of &lt;/customer&gt;.
      */
-    public static Processor createNewObject(Class clazz) {
+    public static <B> PushProcessor<B> createNewObject(Class<B> clazz) {
         return createNewObject(clazz, null, null);
     }
 
     /**
-     * Returns a {@link Processor} that uses reflection to instantiate a new
+     * Returns a {@link PushProcessor} that uses reflection to instantiate a new
      * Object for the given <code>clazz</code> with arguments that match the
      * given <code>params</code> using the given <code>args</code>. It then
      * associates the new Object in the XML context with the XMLTagPath for the
@@ -49,27 +49,25 @@ public final class Processors {
      * objects would then be placed in the parse context Map using the
      * {@link XMLTagPath} of &lt;/customer&gt;.
      */
-    public static Processor createNewObject(Class clazz, Class[] params, Object[] args) {
-        return new CreateNewObjectProcessor(clazz, params, args);
+    public static <B> PushProcessor<B> createNewObject(Class<B> clazz, Class[] params, Object[] args) {
+        return new CreateNewObjectProcessor<B>(clazz, params, args);
     }
 
     /**
-     * Returns a {@link Processor} that retrieves an Object from the parse
-     * context Map using the end Tag of the current XMLTagPath and then adds
-     * that Object to the target {@link EventList} that is also located in the
-     * parse context Map using the well known key {@link XMLTagPath#newPath()}.
+     * Returns a {@link PopProcessor} that takes the active object and adds it
+     * to a collection from the current context object.
      *
      * <p>Typical usage of this Processor would be to insert a newly built
      * Customer object into the target EventList each time &lt;/customer&gt;
      * is seen. The Customer object to insert would be associated with the path
      * to &lt;/customer&gt; in the parse context map.
      */
-    public static Processor addObjectToTargetList() {
-        return new AddObjectToTargetListProcessor();
+    public static <B> PopProcessor<EventList<B>, B> addObjectToTargetList() {
+        return new AddObjectToTargetListProcessor<B>();
     }
 
     /**
-     * Returns a {@link Processor} that retrieves an object from the parse
+     * Returns a {@link PopProcessor} that retrieves an object from the parse
      * context Map using the end tag of the parent XMLTagPath, which is
      * assumed to be an instance of the given <code>clazz</code>. It then uses
      * reflection to call a setter method for the given
@@ -83,8 +81,8 @@ public final class Processors {
      * would then have setName(...) called on it with the String value associated
      * to the current XMLTagPath, &lt;/name&gt;.
      */
-    public static Processor setterMethod(Class clazz, String propertyName) {
-        return setterMethod(clazz, propertyName, null);
+    public static <B,V> PopProcessor<B,V> setterMethod(Class<B> clazz, String propertyName) {
+        return setterMethod(clazz, propertyName, Converters.<V>identityConverter());
     }
 
     /**
@@ -93,12 +91,12 @@ public final class Processors {
      * {@link Converter} first to produce a more appropriate argument to the
      * setter.
      */
-    public static Processor setterMethod(Class clazz, String propertyName, Converter converter) {
-        return new CallSetterMethodProcessor(new BeanProperty(clazz, propertyName, false, true), converter);
+    public static <B,O,C> PopProcessor<B,O> setterMethod(Class<B> clazz, String propertyName, Converter<O,C> converter) {
+        return new CallSetterMethodProcessor<B,O,C>(new BeanProperty<B>(clazz, propertyName, false, true), converter);
     }
 
     /**
-     * Returns a {@link Processor} that retrieves an object from the parse
+     * Returns a {@link PopProcessor} that retrieves an object from the parse
      * context Map using the end tag of the parent XMLTagPath, which is
      * assumed to be an instance of the given <code>clazz</code>. It then uses
      * reflection to call a getter method for the given
@@ -117,8 +115,8 @@ public final class Processors {
      * <p>called on it to retrieve the Collection of Item objects, and then
      * the latest Item object would be added to that Collection.
      */
-    public static Processor addToCollection(Class clazz, String propertyName) {
-        return addToCollection(clazz, propertyName, null, null);
+    public static <B,V> PopProcessor<B,V> addToCollection(Class<B> clazz, String propertyName) {
+        return addToCollection(clazz, propertyName, Converters.<V>identityConverter(), Matchers.<V>trueMatcher());
     }
 
     /**
@@ -126,8 +124,8 @@ public final class Processors {
      * with the exception that the value is run through a {@link Converter}
      * first to produce a more appropriate object to add to the {@link Collection}.
      */
-    public static Processor addToCollection(Class clazz, String propertyName, Converter converter) {
-        return addToCollection(clazz, propertyName, converter, null);
+    public static <B,V> PopProcessor<B,V> addToCollection(Class<B> clazz, String propertyName, Converter<V,V> converter) {
+        return addToCollection(clazz, propertyName, converter, Matchers.<V>trueMatcher());
     }
 
     /**
@@ -135,34 +133,15 @@ public final class Processors {
      * with the exception that the value is only added if it is matched by the
      * given <code>matcher</code>.
      */
-    public static Processor addToCollection(Class clazz, String propertyName, Converter converter, Matcher matcher) {
-        return new AddToCollectionProcessor(new BeanProperty(clazz, propertyName, true, false), converter, matcher);
+    public static <B,V> PopProcessor<B,V> addToCollection(Class<B> clazz, String propertyName, Converter<V,V> converter, Matcher<V> matcher) {
+        return new AddToCollectionProcessor<B,V>(new BeanProperty<B>(clazz, propertyName, true, false), converter, matcher);
     }
 
-    public static Processor compound(Processor[] processors) {
-        return new CompoundProcessor(processors);
-    }
-
-    /**
-     * Find the object to operate at from the specified tag path. This is
-     * naturally the object for the parent tag in the stack, but sometimes
-     * it can be a higher level parent.
-     */
-    private static Object getSetterOwner(Map<XMLTagPath, Object> context, XMLTagPath path) {
-        for(XMLTagPath key = path.parent(); key != null; key = key.parent()) {
-            Object setterOwner = context.get(key.end());
-            if(setterOwner != null) {
-                return setterOwner;
-            }
-        }
-        throw new IllegalStateException("No target object for path, " + path);
-    }
-
-    private static class CreateNewObjectProcessor implements Processor {
-        private final Constructor constructor;
+    private static class CreateNewObjectProcessor<T> implements PushProcessor<T> {
+        private final Constructor<T> constructor;
         private final Object[] args;
 
-        public CreateNewObjectProcessor(Class clazz, Class[] params, Object[] args) {
+        public CreateNewObjectProcessor(Class<T> clazz, Class[] params, Object[] args) {
             try {
                 this.args = args;
                 this.constructor = clazz.getConstructor(params);
@@ -171,10 +150,9 @@ public final class Processors {
             }
         }
 
-        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
+        public T evaluate() {
             try {
-                // use reflection to create a new Object and place it into the parse context Map
-                context.put(path.end(), constructor.newInstance(args));
+                return constructor.newInstance(args);
             } catch (InstantiationException e) {
                 throw new RuntimeException(e);
             } catch (InvocationTargetException e) {
@@ -185,96 +163,65 @@ public final class Processors {
         }
     }
 
-    private static class AddObjectToTargetListProcessor implements Processor {
-        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
-            // locate the target EventList within the parse context Map using the well known special key
-            final EventList targetList = (EventList) context.get(XMLTagPath.newPath());
-
-            // locate the newly built object keyed by the starting tag of the current XMLTagPath
-            final Object o = context.get(path.end());
-
+    private static class AddObjectToTargetListProcessor<T> implements PopProcessor<EventList<T>,T> {
+        public void process(EventList<T> baseObject, T value) {
             // add the object to the targetList in a thread-safe manner
-            targetList.getReadWriteLock().writeLock().lock();
+            baseObject.getReadWriteLock().writeLock().lock();
             try {
-                targetList.add(o);
+                baseObject.add(value);
             } finally {
-                targetList.getReadWriteLock().writeLock().unlock();
+                baseObject.getReadWriteLock().writeLock().unlock();
             }
         }
     }
 
+    private static class CallSetterMethodProcessor<T,O,C> implements PopProcessor<T,O> {
+        private final BeanProperty<T> beanProperty;
+        private final Converter<O,C> converter;
 
-    private static class CallSetterMethodProcessor implements Processor {
-        private final BeanProperty beanProperty;
-        private final Converter converter;
-
-        public CallSetterMethodProcessor(BeanProperty beanProperty, Converter converter) {
+        public CallSetterMethodProcessor(BeanProperty<T> beanProperty, Converter<O,C> converter) {
+            if(beanProperty == null) throw new IllegalArgumentException();
+            if(converter == null) throw new IllegalArgumentException();
             this.beanProperty = beanProperty;
             this.converter = converter;
         }
 
-        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
-            // locate the value that was just collected
-            Object newValue = context.get(path.textKey());
-
+        public void process(T baseObject, O value) {
             // if a converter has been specified, run the value through the converter
-            if (converter != null)
-                newValue = converter.convert(newValue.toString());
-
-            // look up the object we will call setXXX(...) on
-            final Object setterOwner = getSetterOwner(context, path);
+            C convertedValue = converter.convert(value);
 
             // call setXXX(...) on the setterOwner
-            beanProperty.set(setterOwner, newValue);
+            beanProperty.set(baseObject, convertedValue);
         }
-
     }
 
-    private static class AddToCollectionProcessor implements Processor {
-        private final BeanProperty beanProperty;
-        private final Converter converter;
-        private final Matcher matcher;
+    private static class AddToCollectionProcessor<T,V> implements PopProcessor<T,V> {
+        private final BeanProperty<T> beanProperty;
+        private final Converter<V,V> converter;
+        private final Matcher<V> matcher;
 
-        public AddToCollectionProcessor(BeanProperty beanProperty, Converter converter, Matcher matcher) {
+        public AddToCollectionProcessor(BeanProperty<T> beanProperty, Converter<V,V> converter, Matcher<V> matcher) {
+            if(beanProperty == null) throw new IllegalArgumentException();
+            if(converter == null) throw new IllegalArgumentException();
+            if(matcher == null) throw new IllegalArgumentException();
             this.beanProperty = beanProperty;
             this.converter = converter;
             this.matcher = matcher;
         }
 
-        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
-            // locate the value that was just collected
-            Object newValue = context.get(path.textKey());
 
+        public void process(T baseObject, V value) {
             // if a converter has been specified, run the value through the converter
-            if (converter != null)
-                newValue = converter.convert(newValue.toString());
+            value = converter.convert(value);
 
-            // if newValue doesn't pass the matcher, return early
-            if (matcher != null && !matcher.matches(newValue))
-                return;
-
-            // look up the object from which we will get the List
-            final Object setterOwner = getSetterOwner(context, path);
+            // if element doesn't pass the matcher, return early
+            if (!matcher.matches(value)) return;
 
             // get the Collection
-            final Collection c = (Collection) beanProperty.get(setterOwner);
+            final Collection<V> c = (Collection<V>) beanProperty.get(baseObject);
 
             // add the value to the Collection
-            c.add(newValue);
-        }
-    }
-
-    private static class CompoundProcessor implements Processor {
-        private final Processor[] processors;
-
-        public CompoundProcessor(Processor[] delegates) {
-            this.processors = delegates;
-        }
-
-        public void process(XMLTagPath path, Map<XMLTagPath, Object> context) {
-            for(int p = 0; p < processors.length; p++) {
-                processors[p].process(path, context);
-            }
+            c.add(value);
         }
     }
 }
