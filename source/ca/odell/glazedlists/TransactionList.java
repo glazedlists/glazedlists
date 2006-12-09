@@ -226,15 +226,25 @@ public class TransactionList<S> extends TransformedList<S,S> {
     private static final class EventListTransactionHack {
         public void runAsTransaction(final Runnable task, EventList eventList) {
             BasicEventList list = new BasicEventList(eventList.getPublisher(), eventList.getReadWriteLock());
-            ListEventListener listener = new ListEventListener() {
-                public void listChanged(ListEvent listChanges) {
-                    task.run();
-                }
-            };
+            final ListEventListener listener = new ListEventListenerHack(task);
+
             list.addListEventListener(listener);
             list.add("A");
             list.removeListEventListener(listener);
         }
+
+        private static final class ListEventListenerHack implements ListEventListener {
+
+            private final Runnable task;
+
+            public ListEventListenerHack(Runnable task) {
+                this.task = task;
+            }
+
+            public void listChanged(ListEvent listChanges) {
+                task.run();
+            }
+        };
     }
 
     /** @inheritDoc */

@@ -82,7 +82,7 @@ public final class Processors {
      * to the current XMLTagPath, &lt;/name&gt;.
      */
     public static <B,V> PopProcessor<B,V> setterMethod(Class<B> clazz, String propertyName) {
-        return setterMethod(clazz, propertyName, Converters.<V>identityConverter());
+        return setterMethod(clazz, propertyName, (Converter) Converters.identityConverter());
     }
 
     /**
