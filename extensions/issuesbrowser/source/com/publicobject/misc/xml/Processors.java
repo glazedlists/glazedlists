@@ -125,7 +125,7 @@ public final class Processors {
      * first to produce a more appropriate object to add to the {@link Collection}.
      */
     public static <B,V> PopProcessor<B,V> addToCollection(Class<B> clazz, String propertyName, Converter<V,V> converter) {
-        return addToCollection(clazz, propertyName, converter, Matchers.<V>trueMatcher());
+        return addToCollection(clazz, propertyName, converter, (Matcher) Matchers.trueMatcher());
     }
 
     /**

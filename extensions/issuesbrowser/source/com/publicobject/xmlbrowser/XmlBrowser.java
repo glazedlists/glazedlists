@@ -128,8 +128,8 @@ public class XmlBrowser {
             switch(column) {
                 case 0 : return baseObject.getElement().getQName();
                 case 1 : return baseObject.getElement().getText();
-                case 2 : return !baseObject.isLeaf();
-                case 3 : return true;
+                case 2 : return Boolean.valueOf(!baseObject.isLeaf());
+                case 3 : return Boolean.TRUE;
             }
             throw new IllegalStateException();
         }
