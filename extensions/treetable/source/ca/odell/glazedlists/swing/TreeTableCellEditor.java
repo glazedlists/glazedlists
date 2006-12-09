@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
@@ -167,6 +168,14 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
      */
     void setShowExpanderForEmptyParent(boolean b) {
         showExpanderForEmptyParent = b;
+    }
+
+    /**
+     * Use the given <code>delegate</code> to edit the data associated with
+     * each tree node.
+     */
+    void setDelegate(TableCellEditor delegate) {
+        this.delegate = delegate;
     }
 
     /**

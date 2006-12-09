@@ -112,6 +112,14 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     }
 
     /**
+     * Use the given <code>delegate</code> to render the data associated with
+     * each tree node.
+     */
+    void setDelegate(TableCellRenderer delegate) {
+        this.delegate = delegate;
+    }
+
+    /**
      * Returns the delegate TableCellRenderer being decorated.
      */
     public TableCellRenderer getDelegate() {

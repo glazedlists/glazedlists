@@ -44,12 +44,14 @@ import java.awt.*;
  *   <li>a {@link TreeTableCellRenderer} will be installed on the hierarchical
  *       {@link TableColumn}. It wraps any {@link TableCellRenderer} previously
  *       installed on the {@link TableColumn}, or if none was present, a
- *       DefaultTableCellRenderer.</li>
+ *       DefaultTableCellRenderer. The delegate renderer can be changed at any
+ *       time using {@link #setDelegateRenderer}.</li>
  *
  *   <li>a {@link TreeTableCellEditor} will be installed on the hierarchical
  *       {@link TableColumn}. It wraps any {@link TableCellEditor} previously
  *       installed on the {@link TableColumn}, or if none was present, a
- *       DefaultCellEditor.</li>
+ *       DefaultCellEditor. The delegate editor can be changed at any
+ *       time using {@link #setDelegateEditor}.</li>
  *
  *   <li>the UI Delegate's MouseListener will be decorated with extra
  *       functionality that detects clicks overtop of the expand/collapse icon
@@ -256,9 +258,6 @@ public final class TreeTableSupport {
      * <ul>
      *   <li>the <code>hierarchyColumnModelIndex</code> must correspond to a valid
      *       view column index</li>
-     *   <li>the table column at the given <code>hierarchyColumnModelIndex</code> must
-     *       be editable so that tree node collapsing and expanding is possible
-     *       (collapsing/expanding is accomplished via the TreeTableCellEditor)</li>
      * </ul>
      *
      * @param table the table to convert into a tree table
@@ -350,8 +349,8 @@ public final class TreeTableSupport {
     }
 
     /**
-     * Sets two behaviours in tandem. If <code>arrowKeyExpansionEnabled</code>
-     * is <tt>true</tt> then two things are changed:
+     * If <code>arrowKeyExpansionEnabled</code> is <tt>true</tt> then two
+     * things are changed in tandem:
      *
      * <ul>
      *   <li> The left and right arrow keys will toggle the expansion state of
@@ -364,10 +363,10 @@ public final class TreeTableSupport {
      *        focus adjusted when the left and right arrow keys are used.</li>
      * </ul>
      *
-     * <p>If <code>arrowKeyExpansionEnabled</code> is <tt>false</tt> then the behaviour
-     * is reverted to default. That is, left and right arrow keys adjust cell focus
-     * in the table and not expansion, and the original column selection model is
-     * reinstalled.
+     * <p>If <code>arrowKeyExpansionEnabled</code> is <tt>false</tt> then the
+     * behaviour is reverted to default. That is, left and right arrow keys
+     * adjust cell focus in the table and not expansion, and the original
+     * column selection model is reinstalled.
      */
     public void setArrowKeyExpansionEnabled(boolean arrowKeyExpansionEnabled) {
         checkAccessThread();
@@ -398,6 +397,28 @@ public final class TreeTableSupport {
      */
     public boolean getArrowKeyExpansionEnabled() {
         return arrowKeyExpansionEnabled;
+    }
+
+    /**
+     * Use the given <code>renderer</code> as the new delegate renderer of the
+     * {@link TreeTableCellRenderer} which is responsible for rendering the
+     * data associated with each tree node in the hierarchy column.
+     */
+    public void setDelegateRenderer(TableCellRenderer renderer) {
+        checkAccessThread();
+
+        treeTableCellRenderer.setDelegate(renderer);
+    }
+
+    /**
+     * Use the given <code>editor</code> as the new delegate editor of the
+     * {@link TreeTableCellEditor} which is responsible for editing the data
+     * associated with each tree node in the hierarchy column.
+     */
+    public void setDelegateEditor(TableCellEditor editor) {
+        checkAccessThread();
+
+        treeTableCellEditor.setDelegate(editor);
     }
 
     /**
