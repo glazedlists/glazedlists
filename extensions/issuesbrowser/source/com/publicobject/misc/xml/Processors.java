@@ -116,7 +116,7 @@ public final class Processors {
      * the latest Item object would be added to that Collection.
      */
     public static <B,V> PopProcessor<B,V> addToCollection(Class<B> clazz, String propertyName) {
-        return addToCollection(clazz, propertyName, Converters.<V>identityConverter(), Matchers.<V>trueMatcher());
+        return addToCollection(clazz, propertyName, (Converter) Converters.identityConverter(), Matchers.trueMatcher());
     }
 
     /**

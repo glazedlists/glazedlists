@@ -96,7 +96,7 @@ public final class XMLTagPath {
      * thought of as representing the entire Document.
      */
     static XMLTagPath emptyPath() {
-        return new XMLTagPath(Collections.<String>emptyList(), BODY);
+        return new XMLTagPath(Collections.EMPTY_LIST, BODY);
     }
 
     /**
