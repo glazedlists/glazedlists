@@ -87,21 +87,9 @@ public class GlazedListsTests {
     }
 
     /**
-     * Manually apply the specified filter to the specified list.
-     */
-    public static <E> List<E> filter(List<E> input, Matcher<E> matcher) {
-        List<E> result = new ArrayList<E>();
-        for(Iterator<E> i = input.iterator(); i.hasNext(); ) {
-            E element = i.next();
-            if(matcher.matches(element)) result.add(element);
-        }
-        return result;
-    }
-
-    /**
      * This matcher matches everything greater than its minimum.
      */
-    public static Matcher<Integer> matchAtLeast(int minimum) {
+    public static Matcher<Number> matchAtLeast(int minimum) {
         return new AtLeastMatcher(minimum);
     }
 
@@ -137,12 +125,12 @@ public class GlazedListsTests {
         return result.toString();
     }
 
-    private static class AtLeastMatcher implements Matcher<Integer> {
+    private static class AtLeastMatcher implements Matcher<Number> {
         private final int minimum;
         public AtLeastMatcher(int minimum) {
             this.minimum = minimum;
         }
-        public boolean matches(Integer value) {
+        public boolean matches(Number value) {
             return value.intValue() >= minimum;
         }
     }

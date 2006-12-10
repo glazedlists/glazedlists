@@ -173,10 +173,11 @@ public final class Matchers {
      *      elements which satisfy the <code>matcher</code>
      */
     public static <E> Collection<? super E> select(Collection<E> collection, Matcher<? super E> matcher, Collection<? super E> results) {
-        for (Iterator<E> i = collection.iterator(); i.hasNext();) {
+        for(Iterator<E> i = collection.iterator(); i.hasNext();) {
             E element = i.next();
-            if (matcher.matches(element))
+            if(matcher.matches(element)) {
                 results.add(element);
+            }
         }
 
         return results;

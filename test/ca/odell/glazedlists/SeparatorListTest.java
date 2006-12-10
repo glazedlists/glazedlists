@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.impl.filter.StringLengthComparator;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import junit.framework.TestCase;
@@ -444,7 +445,7 @@ public class SeparatorListTest extends TestCase {
 
     public void testSortedSource() {
         Comparator<String> alphabetical = (Comparator)GlazedLists.comparableComparator();
-        Comparator<String> length = new StringLengthComparator();
+        Comparator<String> length = GlazedLists.reverseComparator(new StringLengthComparator());
 
         BasicEventList<String> unsortedSource = new BasicEventList<String>();
         SortedList<String> source = new SortedList<String>(unsortedSource, null);
@@ -689,11 +690,6 @@ public class SeparatorListTest extends TestCase {
         }
     }
 
-    private static class StringLengthComparator implements Comparator<String> {
-        public int compare(String a, String b) {
-            return a.length() - b.length();
-        }
-    }
     private static class CaseComparator implements Comparator<String> {
         public int compare(String a, String b) {
             boolean aIsUpperCase = Character.isUpperCase(a.charAt(0));

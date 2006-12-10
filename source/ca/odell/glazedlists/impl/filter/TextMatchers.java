@@ -291,12 +291,4 @@ public final class TextMatchers {
         return isFilterRelaxed(newFilter, oldFilter);
     }
 
-    /**
-     * This Comparator orders {@link String}s in descending order by their lengths.
-     */
-    public static final class StringLengthComparator implements Comparator<String> {
-        public int compare(String s1, String s2) {
-            return s2.length() - s1.length();
-        }
-    }
 }

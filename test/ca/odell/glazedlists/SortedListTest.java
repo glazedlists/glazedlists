@@ -6,6 +6,7 @@ package ca.odell.glazedlists;
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.impl.filter.StringLengthComparator;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -837,7 +838,7 @@ public class SortedListTest extends TestCase {
      */
     public void testEqualValuesOrderedByIndex() {
         // create a sorted list that cannot distinguish between the data items
-        Comparator<String> intCompareAt0 = new StringLengthComparator();
+        Comparator<String> intCompareAt0 = GlazedLists.reverseComparator(new StringLengthComparator());
         sortedList.dispose();
         sortedList = new SortedList(unsortedList, intCompareAt0);
 
@@ -1130,7 +1131,7 @@ public class SortedListTest extends TestCase {
 
     public void testSortedSource() {
         Comparator<Comparable> alphabetical = GlazedLists.comparableComparator();
-        Comparator<String> length = new StringLengthComparator();
+        Comparator<String> length = GlazedLists.reverseComparator(new StringLengthComparator());
 
         sortedList.setComparator(null);
         unsortedList.addAll(Arrays.asList(new String[] { "dddd", "aaa", "c", "bb" }));
@@ -1302,15 +1303,6 @@ public class SortedListTest extends TestCase {
         }
         public int compareTo(Object o) {
             return position - ((Position)o).position;
-        }
-    }
-
-    /**
-     * Compares Strings by their length.
-     */
-    static class StringLengthComparator implements Comparator<String> {
-        public int compare(String a, String b) {
-            return a.length() - b.length();
         }
     }
 

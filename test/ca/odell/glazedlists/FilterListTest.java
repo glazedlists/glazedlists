@@ -27,7 +27,7 @@ public class FilterListTest extends TestCase {
      * a MatcherEditor<Integer>.
      */
     public void testGenericsCompile() {
-        final Matcher<Number> numberMatcher = new MinimumNumberMatcher(0);
+        final Matcher<Number> numberMatcher = GlazedListsTests.matchAtLeast(0);
         final MatcherEditor<Number> numberMatcherEditor = new MinimumNumberMatcherEditor();
 
         // constructor should accept Matcher<Object>
@@ -130,17 +130,17 @@ public class FilterListTest extends TestCase {
 
         // relax the list
         editor.setMinimum(11);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(10);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(0);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(10);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(11);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(0);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         
         // now try constrain
         values = GlazedListsTests.intArrayToIntegerCollection(new int[] { 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11 });
@@ -149,13 +149,13 @@ public class FilterListTest extends TestCase {
         
         // constrain the list
         editor.setMinimum(10);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(11);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(12);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(10);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
 
         // now try more changes
         values = GlazedListsTests.intArrayToIntegerCollection(new int[] { 8, 6, 7, 5, 3, 0, 9 });
@@ -164,15 +164,15 @@ public class FilterListTest extends TestCase {
 
         // constrain the list
         editor.setMinimum(5);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(10);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(1);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(0);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(1);
-        assertEquals(myFilterList, GlazedListsTests.filter(original, editor.getMatcher()));
+        assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
 
     }
 
@@ -237,37 +237,23 @@ public class FilterListTest extends TestCase {
     }
 }
 
-
-/**
- * A Matcher for minimum Number values.
- */
-class MinimumNumberMatcher implements Matcher<Number> {
-    private final int number;
-    public MinimumNumberMatcher(int number) {
-        this.number = number;
-    }
-    public boolean matches(Number item) {
-        return item != null && item.intValue() >= number;
-    }
-}
-
 /**
  * A MatcherEditor for minimum Number values.
  */
 class MinimumNumberMatcherEditor extends AbstractMatcherEditor<Number> {
     private int minimum = 0;
     public MinimumNumberMatcherEditor() {
-        currentMatcher = new MinimumNumberMatcher(0);
+        currentMatcher = GlazedListsTests.matchAtLeast(0);
     }
     public void setMinimum(int value) {
         if(value < minimum) {
             this.minimum = value;
-            fireRelaxed(new MinimumNumberMatcher(minimum));
+            fireRelaxed(GlazedListsTests.matchAtLeast(minimum));
         } else if(value == minimum) {
             // do nothing
         } else {
             this.minimum = value;
-            fireConstrained(new MinimumNumberMatcher(minimum));
+            fireConstrained(GlazedListsTests.matchAtLeast(minimum));
         }
     }
 }
@@ -275,7 +261,7 @@ class MinimumNumberMatcherEditor extends AbstractMatcherEditor<Number> {
 /**
  * A MatcherEditor for minimum values.
  */
-class MinimumValueMatcherEditor extends AbstractMatcherEditor<Integer> {
+class MinimumValueMatcherEditor extends AbstractMatcherEditor<Number> {
     private int minimum = 0;
     public MinimumValueMatcherEditor() {
         currentMatcher = GlazedListsTests.matchAtLeast(0);
