@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.sort.ReverseComparator;
+import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import junit.framework.TestCase;
@@ -28,8 +29,8 @@ public class MultipleListenersTest extends TestCase {
      * receive notification.
      */
     public void testMultipleListeners() {
-        BasicEventList root = new BasicEventList();
-        List control = new ArrayList();
+        BasicEventList<Number> root = new BasicEventList<Number>();
+        List<Number> control = new ArrayList<Number>();
 
         // add 1000 elements to start
         for(int i = 0; i < 1000; i++) {
@@ -39,10 +40,10 @@ public class MultipleListenersTest extends TestCase {
         }
 
         // create sorted and filtered derivatives
-        Comparator comparator = GlazedLists.comparableComparator();
-        SortedList sorted = new SortedList(root, comparator);
-        IntegerSizeMatcherEditor matcherEditor = new IntegerSizeMatcherEditor(50);
-        FilterList filtered = new FilterList(root, matcherEditor);
+        Comparator<Number> comparator = (Comparator)GlazedLists.comparableComparator();
+        SortedList<Number> sorted = new SortedList<Number>(root, comparator);
+        AtLeastMatcherEditor matcherEditor = new AtLeastMatcherEditor(50);
+        FilterList<Number> filtered = new FilterList<Number>(root, matcherEditor);
 
         // repeatedly make updates and verify the derivates keep up
         for(int i = 0; i < 30; i++) {
@@ -57,13 +58,13 @@ public class MultipleListenersTest extends TestCase {
             assertEquals(root, control);
 
             // verify that the sorted list is correct
-            List sortedControl = new ArrayList();
+            List<Number> sortedControl = new ArrayList<Number>();
             sortedControl.addAll(control);
             Collections.sort(sortedControl, sorted.getComparator());
             assertEquals(sortedControl, sorted);
 
             // verify that the filtered list is correct
-            List filteredControl = new ArrayList();
+            List<Number> filteredControl = new ArrayList<Number>();
             for(int j = 0; j < control.size(); j++) {
                 if(matcherEditor.getMatcher().matches(control.get(j))) {
                     filteredControl.add(control.get(j));
@@ -73,36 +74,14 @@ public class MultipleListenersTest extends TestCase {
 
             // adjust the sorter
             if(comparator instanceof ReverseComparator) {
-                comparator = GlazedLists.comparableComparator();
+                comparator = (Comparator)GlazedLists.comparableComparator();
             } else {
                 comparator = GlazedLists.reverseComparator(comparator);
             }
             sorted.setComparator(comparator);
 
             // adjust the filter
-            matcherEditor.setThreshhold(random.nextInt(100));
-        }
-    }
-
-    /**
-     * A simple filter for filtering integers by size.
-     */
-    static class IntegerSizeMatcherEditor extends AbstractMatcherEditor {
-        public IntegerSizeMatcherEditor(int threshhold) {
-            setThreshhold(threshhold);
-        }
-        public void setThreshhold(int threshhold) {
-            fireChanged(new IntegerMatcher(threshhold));
-        }
-        private static class IntegerMatcher implements Matcher {
-            int threshhold;
-            public IntegerMatcher(int threshhold) {
-                this.threshhold = threshhold;
-            }
-            public boolean matches(Object element) {
-                Integer integer = (Integer)element;
-                return (integer.intValue() >= threshhold);
-            }
+            matcherEditor.setMinimum(random.nextInt(100));
         }
     }
 

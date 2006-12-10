@@ -406,7 +406,7 @@
         <property name="config" value="extensions/japex/ListEventPublisher-JapexConfig.xml"/>
         <property name="config" value="extensions/japex/SortedList-JapexConfig.xml"/>
         -->
-        <property name="config" value="extensions/japex/SortedList-JapexConfig.xml"/>
+        <property name="config" value="extensions/japex/ThreadProxy-JapexConfig.xml"/>
         <java dir="." fork="true" classname="com.sun.japex.Japex">
             <classpath>
                 <fileset dir="extensions/japex/lib/" includes="*.jar"/>

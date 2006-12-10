@@ -65,7 +65,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
         assertEquals("\u00c6nima", list.get(0));
     }
 
-    public void testUnicodeStrategy_StartsWith() {
+    public void testUnicodeStrategy_StartsWith_FixMe() {
         TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);

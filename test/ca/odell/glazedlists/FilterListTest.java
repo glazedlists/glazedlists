@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
 import ca.odell.glazedlists.matchers.*;
 import junit.framework.TestCase;
 
@@ -28,7 +29,7 @@ public class FilterListTest extends TestCase {
      */
     public void testGenericsCompile() {
         final Matcher<Number> numberMatcher = GlazedListsTests.matchAtLeast(0);
-        final MatcherEditor<Number> numberMatcherEditor = new MinimumNumberMatcherEditor();
+        final MatcherEditor<Number> numberMatcherEditor = new AtLeastMatcherEditor();
 
         // constructor should accept Matcher<Object>
         new FilterList<Number>(new BasicEventList<Number>(), Matchers.falseMatcher());
@@ -122,7 +123,7 @@ public class FilterListTest extends TestCase {
         original.addAll(values);
         
         // prepare a filter to filter our list
-        MinimumValueMatcherEditor editor = new MinimumValueMatcherEditor();
+        AtLeastMatcherEditor editor = new AtLeastMatcherEditor();
         FilterList<Integer> myFilterList = new FilterList<Integer>(original, editor);
         ListConsistencyListener<Integer> listConsistencyListener = ListConsistencyListener.install(myFilterList);
         listConsistencyListener.setPreviousElementTracked(true);
@@ -234,48 +235,6 @@ public class FilterListTest extends TestCase {
         // the editor should have been disconnected during dispose(), so this should produce no ListEvent
         editor.setFilterText(new String[] {"C"});
         assertEquals(0, counter.getCountAndReset());
-    }
-}
-
-/**
- * A MatcherEditor for minimum Number values.
- */
-class MinimumNumberMatcherEditor extends AbstractMatcherEditor<Number> {
-    private int minimum = 0;
-    public MinimumNumberMatcherEditor() {
-        currentMatcher = GlazedListsTests.matchAtLeast(0);
-    }
-    public void setMinimum(int value) {
-        if(value < minimum) {
-            this.minimum = value;
-            fireRelaxed(GlazedListsTests.matchAtLeast(minimum));
-        } else if(value == minimum) {
-            // do nothing
-        } else {
-            this.minimum = value;
-            fireConstrained(GlazedListsTests.matchAtLeast(minimum));
-        }
-    }
-}
-
-/**
- * A MatcherEditor for minimum values.
- */
-class MinimumValueMatcherEditor extends AbstractMatcherEditor<Number> {
-    private int minimum = 0;
-    public MinimumValueMatcherEditor() {
-        currentMatcher = GlazedListsTests.matchAtLeast(0);
-    }
-    public void setMinimum(int value) {
-        if(value < minimum) {
-            this.minimum = value;
-            fireRelaxed(GlazedListsTests.matchAtLeast(minimum));
-        } else if(value == minimum) {
-            // do nothing
-        } else {
-            this.minimum = value;
-            fireConstrained(GlazedListsTests.matchAtLeast(minimum));
-        }
     }
 }
 

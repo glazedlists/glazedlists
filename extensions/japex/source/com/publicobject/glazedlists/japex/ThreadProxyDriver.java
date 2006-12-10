@@ -13,8 +13,7 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.gui.ThreadProxyEventList;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
 
 /**
  * This Japex driver simulates a thread proxy. This thread proxy itself isn't
@@ -24,7 +23,7 @@ import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
  */
 public class ThreadProxyDriver extends JapexDriverBase {
 
-    private GreaterThanMatcherEditor<Integer> matcherEditor;
+    private AtLeastMatcherEditor matcherEditor;
     private Random dice = new Random(0);
 
     public void initializeDriver() {
@@ -37,9 +36,7 @@ public class ThreadProxyDriver extends JapexDriverBase {
         String updateStrategy = getParam("GlazedLists.ThreadProxyUpdateStrategy");
 
         // prepare a matcher, we change this every iteration
-        String distinctValuesCSV = testCase.getParam("distinctValues");
-        matcherEditor = new GreaterThanMatcherEditor<Integer>();
-        matcherEditor.setValue(new Integer(0));
+        matcherEditor = new AtLeastMatcherEditor();
 
         // create a short pipeline, ending in a thread proxied list
         EventList<Integer> base = new BasicEventList<Integer>();
@@ -64,14 +61,14 @@ public class ThreadProxyDriver extends JapexDriverBase {
      * Warmup is exactly the same as the run method.
      */
     public void warmup(TestCase testCase) {
-        matcherEditor.setValue(new Integer(dice.nextInt(1000)));
+        matcherEditor.setMinimum(dice.nextInt(1000));
     }
 
     /**
      * Execute the specified testcase one time.
      */
     public void run(TestCase testCase) {
-        matcherEditor.setValue(new Integer(dice.nextInt(1000)));
+        matcherEditor.setMinimum(dice.nextInt(1000));
     }
 
     public void finish(TestCase testCase) {
@@ -80,24 +77,6 @@ public class ThreadProxyDriver extends JapexDriverBase {
 
     public void terminateDriver() {
         // do nothing
-    }
-
-    /**
-     * Match a single value.
-     */
-    private static class GreaterThanMatcherEditor<T extends Comparable> extends AbstractMatcherEditor<T> {
-        public void setValue(T value) {
-            fireChanged(new GreaterThanMatcher<T>(value));
-        }
-        private static class GreaterThanMatcher<T extends Comparable> implements Matcher<T> {
-            private T value;
-            public GreaterThanMatcher(T value) {
-                this.value = value;
-            }
-            public boolean matches(T item) {
-                return item.compareTo(value) > 0;
-            }
-        }
     }
 
     /**
@@ -112,7 +91,7 @@ public class ThreadProxyDriver extends JapexDriverBase {
             runnable.run();
         }
         protected List applyChangeToCache(List<T> source, ListEvent<T> listChanges, List<T> localCache) {
-            return new ArrayList(source);
+            return new ArrayList<T>(source);
         }
     }
 
