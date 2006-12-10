@@ -904,8 +904,8 @@ public class ThresholdListTest extends TestCase {
         }
 
         // Wrap the lists in SortedLists whose internal data representation will break if the events are in error
-        SortedList sortedIncreasing = new SortedList(lowerThresholdList, new ThresholdComparator(new IntegerEvaluator()));
-        SortedList sortedDecreasing = new SortedList(upperThresholdList, new ThresholdComparator(new IntegerEvaluator()));
+        SortedList sortedIncreasing = new SortedList(lowerThresholdList, new ThresholdList.ThresholdComparator(new IntegerEvaluator()));
+        SortedList sortedDecreasing = new SortedList(upperThresholdList, new ThresholdList.ThresholdComparator(new IntegerEvaluator()));
 
         // validate that the lists are equal to start with
         validateListsEquals(lowerThresholdList, sortedIncreasing);
@@ -945,7 +945,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testInitialization() {
         // Prime a sorted source list with data
-        SortedList sortedBase = new SortedList(source, new ThresholdComparator(new IntegerEvaluator()));
+        SortedList sortedBase = new SortedList(source, new ThresholdList.ThresholdComparator(new IntegerEvaluator()));
         for(int i = 0; i < 500; i++) {
             sortedBase.add(i, new Integer(i));
         }
@@ -954,7 +954,7 @@ public class ThresholdListTest extends TestCase {
         thresholdList = new ThresholdList(sortedBase, new IntegerEvaluator());
 
         // Wrap the threshold list in another sorted list and see if it is all the same
-        SortedList sortedCover = new SortedList(thresholdList, new ThresholdComparator(new IntegerEvaluator()));
+        SortedList sortedCover = new SortedList(thresholdList, new ThresholdList.ThresholdComparator(new IntegerEvaluator()));
         validateListsEquals(sortedBase, sortedCover);
     }
 
@@ -964,9 +964,9 @@ public class ThresholdListTest extends TestCase {
      */
     public void testEventsOnNewThresholdList() {
         // Layer a new threshold list between two sorted lists and do not change defaults
-        SortedList sortedBase = new SortedList(source, new ThresholdComparator(new IntegerEvaluator()));
+        SortedList sortedBase = new SortedList(source, new ThresholdList.ThresholdComparator(new IntegerEvaluator()));
         thresholdList = new ThresholdList(sortedBase, new IntegerEvaluator());
-        SortedList sortedCover = new SortedList(thresholdList, new ThresholdComparator(new IntegerEvaluator()));
+        SortedList sortedCover = new SortedList(thresholdList, new ThresholdList.ThresholdComparator(new IntegerEvaluator()));
 
         // Now add values before a threshold is set and validate sortedBase equals sortedCover
         for(int i = 0; i < 500; i++) {
@@ -1204,65 +1204,6 @@ public class ThresholdListTest extends TestCase {
     private static class IntegerAsStringEvaluator implements ThresholdList.Evaluator {
         public int evaluate(Object object) {
             return Integer.valueOf((String)object).intValue();
-        }
-    }
-
-    /**
-     * A ThresholdComparator is a simple helper class that wraps
-     * a <code>ThresholdEvaluator</code> with a <code>Comparator</code> to
-     * be used for sorting of the <code>ThresholdList</code>.
-     *
-     * <p>This class is duplicated within this testcase for the
-     * testThresholdSettingEvents test.  The code duplication exists only
-     * for convienience and for the sake of that one test.
-     */
-    private static final class ThresholdComparator implements Comparator {
-
-        /** the underlying evaluator **/
-        private ThresholdList.Evaluator evaluator = null;
-
-        /**
-         * Creates a new ThresholdComparator
-         */
-        ThresholdComparator(ThresholdList.Evaluator evaluator) {
-            this.evaluator = evaluator;
-        }
-
-        /**
-         * Compares two <code>Object</code>s, and compares them using the result
-         * given when each <code>Object</code> is evaluated using the underlying
-         * <code>ThresholdEvaluator</code>.
-         */
-        public int compare(Object alpha, Object beta) {
-            int alphaValue = 0;
-            if(alpha instanceof Integer) alphaValue = ((Integer)alpha).intValue();
-            else alphaValue = evaluator.evaluate(alpha);
-
-            int betaValue = 0;
-            if(beta instanceof Integer) betaValue = ((Integer)beta).intValue();
-            else betaValue = evaluator.evaluate(beta);
-
-            if(alphaValue > betaValue) return 1;
-            else if(alphaValue < betaValue) return -1;
-            else return 0;
-        }
-
-        /**
-         * Returns true iff the object passed is a <code>ThresholdComparator</code> with
-         * the same underlying <code>ThresholdEvaluator</code>.
-         */
-        public boolean equals(Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-
-            final ThresholdComparator that = (ThresholdComparator) o;
-
-            if(!evaluator.equals(that.evaluator)) return false;
-
-            return true;
-        }
-        public int hashCode() {
-            return evaluator.hashCode();
         }
     }
 }

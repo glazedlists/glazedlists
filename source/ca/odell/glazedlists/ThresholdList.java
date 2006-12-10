@@ -282,9 +282,9 @@ public final class ThresholdList<E> extends RangeList<E> {
      * an {@link Evaluator} with a <code>Comparator</code> to
      * be used for sorting of the <code>ThresholdList</code>.
      */
-    private static final class ThresholdComparator<E> implements Comparator<E> {
+    static final class ThresholdComparator<E> implements Comparator<E> {
 
-        /** the underlying evaluator **/
+        /** the underlying evaluator */
         private Evaluator<E> evaluator = null;
 
         /**
