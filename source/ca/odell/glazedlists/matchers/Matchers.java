@@ -173,13 +173,34 @@ public final class Matchers {
      *      elements which satisfy the <code>matcher</code>
      */
     public static <E> Collection<? super E> select(Collection<E> collection, Matcher<? super E> matcher, Collection<? super E> results) {
-        for(Iterator<E> i = collection.iterator(); i.hasNext();) {
+        for (Iterator<E> i = collection.iterator(); i.hasNext();) {
             E element = i.next();
-            if(matcher.matches(element)) {
+            if (matcher.matches(element))
                 results.add(element);
-            }
         }
 
         return results;
+    }
+
+    /**
+     * Returns a Matcher which returns a match when <strong>any</strong> of the
+     * given <code>matchers</code> reports a match.
+     *
+     * @param matchers the Collection of Matchers to combine with an "or" operator
+     * @return a Matcher that combines the <code>matchers</code> via an "or" operator
+     */
+    public static <E> Matcher<E> or(Collection<Matcher<? super E>> matchers) {
+        return new OrMatcher<E>(matchers);
+    }
+
+    /**
+     * Returns a Matcher which returns a match when <strong>all</strong> of the
+     * given <code>matchers</code> report a match.
+     *
+     * @param matchers the Collection of Matchers to combine with an "and" operator
+     * @return a Matcher that combines the <code>matchers</code> via an "and" operator
+     */
+    public static <E> Matcher<E> and(Collection<Matcher<? super E>> matchers) {
+        return new AndMatcher<E>(matchers);
     }
 }

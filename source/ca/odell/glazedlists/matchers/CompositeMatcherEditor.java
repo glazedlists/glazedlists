@@ -9,6 +9,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,8 +47,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         // prepare the initial set
         for(Iterator<MatcherEditor<E>> i = matcherEditors.iterator(); i.hasNext(); ) {
-            MatcherEditor<E> matcherEditor = (MatcherEditor<E>)i.next();
-            matcherEditorListeners.add(new DelegateMatcherEditorListener(matcherEditor));
+            matcherEditorListeners.add(new DelegateMatcherEditorListener(i.next()));
         }
 
         // handle changes to the list of matchers
@@ -78,13 +78,12 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Rebuild the CompositeMatcher modelled by this editor.
      */
     private Matcher<E> rebuildMatcher() {
-        List<Matcher<E>> matchers = new ArrayList<Matcher<E>>();
+        final Collection<Matcher<? super E>> matchers = new ArrayList<Matcher<? super E>>();
         for(Iterator<MatcherEditor<E>> i = matcherEditors.iterator(); i.hasNext(); ) {
-            MatcherEditor<E> matcherEditor = (MatcherEditor<E>)i.next();
-            matchers.add(matcherEditor.getMatcher());
+            matchers.add(i.next().getMatcher());
         }
-        if(mode == AND) return new AndMatcher<E>(matchers);
-        else if(mode == OR) return new OrMatcher<E>(matchers);
+        if(mode == AND) return Matchers.and(matchers);
+        else if(mode == OR) return Matchers.or(matchers);
         else throw new IllegalStateException();
     }
 
@@ -255,42 +254,6 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
          */
         public void stopListening() {
             source.removeMatcherEditorListener(this);
-        }
-    }
-
-    /**
-     * Models a Matcher that matches if all child elements match.
-     */
-    private static class AndMatcher<E> implements Matcher<E> {
-        private List<Matcher<E>> matchers = new ArrayList<Matcher<E>>();
-        public AndMatcher(List<Matcher<E>> matchers) {
-            this.matchers.addAll(matchers);
-        }
-        /** {@inheritDoc} */
-        public boolean matches(E item) {
-            // true only if everything matches
-            for(Iterator<Matcher<E>> i = matchers.iterator(); i.hasNext(); ) {
-                if(!i.next().matches(item)) return false;
-            }
-            return true;
-        }
-    }
-
-    /**
-     * Models a Matcher that matches if any child elements match.
-     */
-    private static class OrMatcher<E> implements Matcher<E> {
-        private List<Matcher<E>> matchers = new ArrayList<Matcher<E>>();
-        public OrMatcher(List<Matcher<E>> matchers) {
-            this.matchers.addAll(matchers);
-        }
-        /** {@inheritDoc} */
-        public boolean matches(E item) {
-            // true only if everything matches
-            for(Iterator<Matcher<E>> i = matchers.iterator(); i.hasNext(); ) {
-                if(i.next().matches(item)) return true;
-            }
-            return false;
         }
     }
 }

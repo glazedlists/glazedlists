@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-// for being a JUnit test case
 import ca.odell.glazedlists.GlazedLists;
 import junit.framework.TestCase;
 
@@ -15,19 +14,19 @@ import junit.framework.TestCase;
 public class CompositeMatcherEditorTest extends TestCase {
 
     /** combine multiple matcher editors */
-    private CompositeMatcherEditor compositeMatcherEditor;
+    private CompositeMatcherEditor<String> compositeMatcherEditor;
     
     /** some matcher editors to demo */
-    private TextMatcherEditor textMatcherEditor;
-    private TextMatcherEditor anotherTextMatcherEditor;
+    private TextMatcherEditor<String> textMatcherEditor;
+    private TextMatcherEditor<String> anotherTextMatcherEditor;
     
     /**
      * Prepare for the test.
      */
     public void setUp() {
-        compositeMatcherEditor = new CompositeMatcherEditor();
-        textMatcherEditor = new TextMatcherEditor(GlazedLists.toStringTextFilterator());
-        anotherTextMatcherEditor = new TextMatcherEditor(GlazedLists.toStringTextFilterator());
+        compositeMatcherEditor = new CompositeMatcherEditor<String>();
+        textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        anotherTextMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
     }
 
     /**
@@ -40,7 +39,7 @@ public class CompositeMatcherEditorTest extends TestCase {
     }
 
     /**
-     * Test that the {@ link CompositeMatcherEditor} matches only if both
+     * Test that the {@link CompositeMatcherEditor} matches only if both
      * matchers match in AND mode.
      */
     public void testCompositeMatcherEditorMatchesAnd() {
@@ -75,7 +74,7 @@ public class CompositeMatcherEditorTest extends TestCase {
     }
 
     /**
-     * Test that the {@ link CompositeMatcherEditor} matches only if either
+     * Test that the {@link CompositeMatcherEditor} matches only if either
      * matchers match in OR mode.
      */
     public void testCompositeMatcherEditorMatchesOr() {
@@ -116,7 +115,7 @@ public class CompositeMatcherEditorTest extends TestCase {
     }
     
     /**
-     * Test that the {@ link CompositeMatcherEditor} fires the right events in AND mode.
+     * Test that the {@link CompositeMatcherEditor} fires the right events in AND mode.
      */
     public void testCompositeMatcherEditorAndEvents() {
         SimpleMatcherEditorListener listener = new SimpleMatcherEditorListener();
@@ -150,7 +149,7 @@ public class CompositeMatcherEditorTest extends TestCase {
     }
     
     /**
-     * Test that the {@ link CompositeMatcherEditor} fires the right events in OR mode.
+     * Test that the {@link CompositeMatcherEditor} fires the right events in OR mode.
      */
     public void testCompositeMatcherEditorOrEvents() {
         SimpleMatcherEditorListener listener = new SimpleMatcherEditorListener();
