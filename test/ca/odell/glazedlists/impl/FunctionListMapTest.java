@@ -4,10 +4,7 @@
 package ca.odell.glazedlists.impl;
 
 import junit.framework.TestCase;
-import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.util.*;
@@ -683,6 +680,42 @@ public class FunctionListMapTest extends TestCase {
         assertNotSame(entry.getKey(), entry2Next.getKey());
         assertNotSame(entry.getValue(), entry2Next.getValue());
         assertFalse(entry.equals(entry2Next));
+    }
+
+    /**
+     * This testcase highlights a VERY specific use of the Map which used to
+     * produce a NullPointerException. What's happening here is that:
+     *
+     * 1. A UniqueList is the source of data for the Map
+     * 2. The UniqueList uses a Comparator that doesn't tolerate comparing null values.
+     * 3. eventMap.remove("X") relies on UniqueList.indexOf() in its implementation.
+     * 4. Since "X" is not a valid key in the Map, UniqueList.indexOf() ends up asking
+     *    the Comparator to compare a *NULL* value with some other value from the UniqueList.
+     * 5. A NullPointerException occurs because UniqueList's Comparator was not written
+     *    to expect null values, and shouldn't have had to since no null value exists in
+     *    UniqueList!
+     */
+    public void testRemoveOnMapBackedByUniqueList() {
+        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> unique = new UniqueList<String>(source, new FirstLetterComparator());
+        final Map<String, String> eventMap = GlazedLists.syncEventListToMap(unique, new FirstLetterFunction());
+
+        source.add("Bluto");
+        source.add("Popeye");
+        source.add("Olive");
+
+        assertEquals(3, eventMap.size());
+        assertTrue(eventMap.containsKey("B"));
+        assertTrue(eventMap.containsKey("P"));
+        assertTrue(eventMap.containsKey("O"));
+
+        assertNull(eventMap.remove("X"));
+    }
+
+    private static final class FirstLetterComparator implements Comparator<String> {
+        public int compare(String o1, String o2) {
+            return o1.charAt(0) - o2.charAt(0);
+        }
     }
 
     private static final class FirstLetterFunction implements FunctionList.Function<String, String> {

@@ -163,6 +163,9 @@ public class FunctionListMap<K, V> implements Map<K, V>, ListEventListener<V> {
 
     /** @inheritDoc */
     public V remove(Object key) {
+        if (!containsKey(key))
+            return null;
+
         final V value = get(key);
         valueList.remove(value);
         return value;
