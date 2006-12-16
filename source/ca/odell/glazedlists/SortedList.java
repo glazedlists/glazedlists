@@ -401,7 +401,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
     /**
      * Set the {@link Comparator} in use in this {@link EventList}. This will
-     * sort the {@link EventList} into a new order.
+     * sort the source {@link EventList} into a new order.
      *
      * <p>Performance Note: sorting will take <code>O(N * Log N)</code> time.
      *
@@ -421,7 +421,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // keep the old trees to construct the reordering
         SimpleTree previousSorted = sorted;
         // create the sorted list with a simple comparator
-        Comparator treeComparator = null;
+        final Comparator treeComparator;
         if(comparator != null) treeComparator = new ElementComparator(comparator);
         else treeComparator = new ElementRawOrderComparator();
         sorted = new SimpleTree<Element>(treeComparator);
