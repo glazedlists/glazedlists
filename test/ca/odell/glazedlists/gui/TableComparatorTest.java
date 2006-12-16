@@ -4,12 +4,11 @@
 package ca.odell.glazedlists.gui;
 
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
 
 import javax.swing.*;
@@ -107,7 +106,7 @@ public class TableComparatorTest extends TestCase {
      * EventTableModels behind the JTable.
      */
     public void guiTestTableModelStructureChanged() {
-        final EventList<String> source = GlazedLists.eventList("James", "Jodie", "Jesse");
+        final EventList<String> source = GlazedLists.eventListOf(new String[] {"James", "Jodie", "Jesse"});
         final SortedList<String> sorted = new SortedList<String>(source, null);
 
         final JTable table = new JTable();

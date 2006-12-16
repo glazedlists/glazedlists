@@ -319,16 +319,16 @@ public class EventListTest extends TestCase {
     }
 
     /**
-     * Test that the {@link GlazedLists#eventList(Object[])} factory
+     * Test that the {@link GlazedLists#eventListOf(Object[])} factory
      * method works.
      */
     public void testGlazedListsEventListUsingVarArgs() {
         // make sure they have different backing stores
-        EventList<String> eventList = GlazedLists.eventList("A", "B");
+        EventList<String> eventList = GlazedLists.eventListOf(new String[] {"A", "B"});
         assertEquals(Arrays.asList("A", "B"), eventList);
 
         // make sure null is supported
-        EventList<String> empty = GlazedLists.eventList((String[]) null);
+        EventList<String> empty = GlazedLists.eventListOf((String[]) null);
         assertEquals(Collections.EMPTY_LIST, empty);
     }
 

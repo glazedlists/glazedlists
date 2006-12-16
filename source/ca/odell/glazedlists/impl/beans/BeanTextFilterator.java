@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
-// To work with Lists
 import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.TextFilterator;
 
@@ -26,14 +25,14 @@ public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,
     /**
      * Create a BeanTextFilterator that uses the specified property names.
      */
-    public BeanTextFilterator(String[] propertyNames) {
+    public BeanTextFilterator(String... propertyNames) {
         this.propertyNames = propertyNames;
     }
 
     /**
      * Create a BeanTextFilterator that uses the specified property names.
      */
-    public BeanTextFilterator(Class<E> beanClass, String[] propertyNames) {
+    public BeanTextFilterator(Class<E> beanClass, String... propertyNames) {
         this.propertyNames = propertyNames;
         loadPropertyDescriptors(beanClass);
     }

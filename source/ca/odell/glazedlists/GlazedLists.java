@@ -253,7 +253,7 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches the given JavaBean
      * properties.
      */
-    public static <E> TextFilterator<E> textFilterator(String[] propertyNames) {
+    public static <E> TextFilterator<E> textFilterator(String... propertyNames) {
         return new BeanTextFilterator<Object,E>(propertyNames);
     }
 
@@ -261,7 +261,7 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches the given JavaBean
      * properties.
      */
-    public static <E> TextFilterator<E> textFilterator(Class<E> beanClass, String[] propertyNames) {
+    public static <E> TextFilterator<E> textFilterator(Class<E> beanClass, String... propertyNames) {
         return new BeanTextFilterator<Object,E>(beanClass, propertyNames);
     }
 
@@ -269,7 +269,7 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches the given JavaBean
      * properties.
      */
-    public static <D,E> Filterator<D,E> filterator(String[] propertyNames) {
+    public static <D,E> Filterator<D,E> filterator(String... propertyNames) {
         return new BeanTextFilterator<D,E>(propertyNames);
     }
 
@@ -277,7 +277,7 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches the given JavaBean
      * properties of the specified class.
      */
-    public static <D,E> Filterator<D,E> filterator(Class<E> beanClass, String[] propertyNames) {
+    public static <D,E> Filterator<D,E> filterator(Class<E> beanClass, String... propertyNames) {
         return new BeanTextFilterator<D,E>(beanClass, propertyNames);
     }
 
@@ -318,7 +318,7 @@ public final class GlazedLists {
     /**
      * Creates a new {@link EventList} which contains the given elements.
      */
-    public static <E> EventList<E> eventList(E... contents) {
+    public static <E> EventList<E> eventListOf(E... contents) {
         return eventList(contents == null ? Collections.EMPTY_LIST : Arrays.asList(contents));
     }
 
