@@ -107,7 +107,7 @@ public class TableComparatorTest extends TestCase {
      * EventTableModels behind the JTable.
      */
     public void guiTestTableModelStructureChanged() {
-        final EventList<String> source = GlazedLists.eventList(GlazedListsTests.delimitedStringToList("James Jodie Jesse"));
+        final EventList<String> source = GlazedLists.eventList("James", "Jodie", "Jesse");
         final SortedList<String> sorted = new SortedList<String>(source, null);
 
         final JTable table = new JTable();

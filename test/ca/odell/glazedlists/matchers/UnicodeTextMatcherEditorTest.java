@@ -91,7 +91,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
         // todo this highlights a bug in ICU4J, not Glazed Lists. We should update our
         // icu4j.jar on glazedlists.dev.java.net once this bug has been fixed:
-        // http://bugs.icu-project.org/cgi-bin/icu-bugs?findid=5420&go=Go
+        // http://bugs.icu-project.org/trac/ticket/5420
         textMatcherEditor.setFilterText(new String[0]);
         textMatcherEditor.setFilterText(new String[] {"Russland"});
         assertEquals(1, list.size());

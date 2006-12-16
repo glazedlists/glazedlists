@@ -9,7 +9,6 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,10 +77,11 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Rebuild the CompositeMatcher modelled by this editor.
      */
     private Matcher<E> rebuildMatcher() {
-        final Collection<Matcher<? super E>> matchers = new ArrayList<Matcher<? super E>>();
-        for(Iterator<MatcherEditor<E>> i = matcherEditors.iterator(); i.hasNext(); ) {
-            matchers.add(i.next().getMatcher());
+        final Matcher[] matchers = new Matcher[matcherEditors.size()];
+        for (int i = 0, n = matcherEditors.size(); i < n; i++) {
+            matchers[i] = matcherEditors.get(i).getMatcher();
         }
+
         if(mode == AND) return Matchers.and(matchers);
         else if(mode == OR) return Matchers.or(matchers);
         else throw new IllegalStateException();
@@ -102,7 +102,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
                 // when a MatcherEditor is added, listen to it
                 if(type == ListEvent.INSERT) {
-                    MatcherEditor<E> inserted = (MatcherEditor<E>)matcherEditors.get(index);
+                    MatcherEditor<E> inserted = matcherEditors.get(index);
                     matcherEditorListeners.add(new DelegateMatcherEditorListener(inserted));
                     inserts = true;
 
@@ -114,7 +114,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
                 // when a MatcherEditor is updated, update the listener
                 } else if(type == ListEvent.UPDATE) {
-                    MatcherEditor<E> updated = (MatcherEditor<E>)matcherEditors.get(index);
+                    MatcherEditor<E> updated = matcherEditors.get(index);
                     DelegateMatcherEditorListener listener = matcherEditorListeners.get(index);
                     listener.setMatcherEditor(updated);
                     inserts = true;

@@ -214,7 +214,7 @@ public class FilterListTest extends TestCase {
 	}
 
     public void testDispose() {
-        EventList<String> baseList = GlazedLists.eventList(GlazedListsTests.stringToList("ABCCBA"));
+        EventList<String> baseList = GlazedLists.eventList("A", "B", "C", "C", "B", "A");
         FilterList<String> filterList = new FilterList<String>(baseList);
 
         GlazedListsTests.ListEventCounter<String> counter = new GlazedListsTests.ListEventCounter<String>();

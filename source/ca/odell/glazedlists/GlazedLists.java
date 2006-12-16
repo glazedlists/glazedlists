@@ -316,6 +316,13 @@ public final class GlazedLists {
     // EventLists // // // // // // // // // // // // // // // // // // // // //
 
     /**
+     * Creates a new {@link EventList} which contains the given elements.
+     */
+    public static <E> EventList<E> eventList(E... contents) {
+        return eventList(contents == null ? Collections.EMPTY_LIST : Arrays.asList(contents));
+    }
+
+    /**
      * Creates a new {@link EventList} which contains the contents of the specified
      * {@link Collection}. The {@link EventList}'s order will be determined by
      * {@link Collection#iterator() contents.iterator()}.

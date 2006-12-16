@@ -11,7 +11,6 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 
@@ -42,7 +41,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 
 
 	protected void setUp() throws Exception {
-		parent_list = GlazedLists.eventList(new LinkedList(INITIAL_LIST));
+		parent_list = GlazedLists.eventList(INITIAL_LIST);
 
 		threshold_matchereditor = new ThresholdMatcherEditor();
 		threshold_list = new FilterList(parent_list, threshold_matchereditor);

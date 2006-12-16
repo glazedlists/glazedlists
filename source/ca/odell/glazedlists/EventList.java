@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
@@ -40,6 +39,7 @@ import java.util.List;
  * you {@link #add(int,Object) add()} on a {@link SortedList}, it will ignore the specified
  * index so that the element will be inserted in sorted order.
  *
+ * @see GlazedLists#eventList(Object[])
  * @see GlazedLists#eventList(Collection)
  * @see GlazedLists#readOnlyList(EventList)
  * @see GlazedLists#threadSafeList(EventList)

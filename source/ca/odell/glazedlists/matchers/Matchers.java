@@ -189,7 +189,7 @@ public final class Matchers {
      * @param matchers the Collection of Matchers to combine with an "or" operator
      * @return a Matcher that combines the <code>matchers</code> via an "or" operator
      */
-    public static <E> Matcher<E> or(Collection<Matcher<? super E>> matchers) {
+    public static <E> Matcher<E> or(Matcher<? super E>... matchers) {
         return new OrMatcher<E>(matchers);
     }
 
@@ -200,7 +200,7 @@ public final class Matchers {
      * @param matchers the Collection of Matchers to combine with an "and" operator
      * @return a Matcher that combines the <code>matchers</code> via an "and" operator
      */
-    public static <E> Matcher<E> and(Collection<Matcher<? super E>> matchers) {
+    public static <E> Matcher<E> and(Matcher<? super E>... matchers) {
         return new AndMatcher<E>(matchers);
     }
 }
