@@ -190,8 +190,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         final Comparator<? super E> sourceComparator = sortedSource.getComparator();
         if (sourceComparator != grouper.getComparator()) {
             // when the grouping comparator is changed in the source list, let
-            // the grouper know so we can rebuild our groups and short circuit
-            // the normal delegation to grouper
+            // the grouper know so we can rebuild our groups from scratch
 
             // record the impending removal of all groups before adjusting the barcode
             for (int i = 0, n = size(); i < n; i++)
