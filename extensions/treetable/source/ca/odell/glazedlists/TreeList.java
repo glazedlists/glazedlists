@@ -79,6 +79,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
     /** hack extra Comparator so we can build the nodeComparator only once. */
     private TreeList(EventList<E> source, Format<E> format, NodeComparator<E> nodeComparator, Void unusedParameterForSortFirst, ExpansionProvider<E> expansionProvider) {
+        // TODO: store a reference to FunctionList, so we can dispose() it later!
         this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), nodeComparator), format, nodeComparator, expansionProvider);
     }
 

@@ -9,18 +9,21 @@ import ca.odell.glazedlists.TreeList;
 import java.util.Map;
 import java.util.List;
 import java.util.IdentityHashMap;
+import java.util.HashMap;
 
 
 /**
  * An {@link ExpansionProvider} that uses a {@link Map} to remember
  * the expanded/collapsed state of elements.
  *
+ * TODO(jessewilson): USE WEAK REFERENCES
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class DefaultExternalExpansionProvider<E> implements ExpansionProvider<E> {
 
     /** keep track of the expanded state of each element, by its identity */
-    private Map<E,Boolean> elementsExpandedStates = new IdentityHashMap<E,Boolean>();
+    private HashMap<E,Boolean> elementsExpandedStates = new HashMap<E,Boolean>();
 
     /** the {@link ExpansionProvider} to delegate to for unknown elements */
     private ExpansionProvider<E> defaultsProvider;

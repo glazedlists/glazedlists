@@ -73,9 +73,7 @@ public class TreeListTest extends TestCase {
             return Character.isUpperCase(element.charAt(0));
         }
         public void getPath(List<String> path, String element) {
-            for(int c = 0; c < element.length(); c++) {
-                path.add(element.substring(c, c + 1));
-            }
+            path.addAll(GlazedListsTests.stringToList(element));
         }
     }
 
@@ -1394,6 +1392,27 @@ public class TreeListTest extends TestCase {
                 "E",
                 "A",
                 "AB",
+        });
+    }
+
+    public void testInsertParentWithVisibleChildGetsExpandedState() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        DefaultExternalExpansionProvider<String> expansionProvider = new DefaultExternalExpansionProvider<String>(TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), expansionProvider);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("ABC");
+        source.add("ABD");
+
+        expansionProvider.setExpanded("B", GlazedListsTests.stringToList("AB"), false);
+        source.add(1, "AB");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "AB",
+                "ABD",
         });
     }
 }
